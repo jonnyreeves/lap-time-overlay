@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lap-timer": "node --loader ts-node/esm src/lapTimer.ts",
+    "web": "node --loader ts-node/esm src/web/server.ts",
     "type-check": "tsc --noEmit",
     "test": "npm run type-check && node --loader ts-node/esm tests/laps.test.ts"
   },
