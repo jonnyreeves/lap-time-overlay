@@ -1,6 +1,6 @@
 # Lap Time Overlay
 
-Overlay karting lap and position info on top of a video, with selectable rendering modes (ffmpeg drawtext, canvas pipe, or legacy image sequence).
+Overlay karting lap and position info on top of a video using the ffmpeg drawtext pipeline.
 
 ## Prereqs
 
@@ -23,13 +23,12 @@ npm run lap-timer -- \
   --inputLapTimes work/times.txt \
   --lapFormat daytona \
   --startTimestamp 00:12:53.221 \
-  --outputFile work/out.mp4 \
-  --overlayMode ffmpeg   # or canvas-pipe | images
+  --outputFile work/out.mp4
 ```
 
 - `--startFrame` can be used instead of `--startTimestamp` (frame index).
 - `--lapFormat teamsport` needs `--driverName "Your Name"` to select the right column from the table export.
-- `--overlayMode ffmpeg` is fastest; `canvas-pipe` streams drawn frames; `images` writes temp PNGs (debug).
+- Overlay is ffmpeg-only in the web UI and CLI to keep the flow simple.
 
 ## Development
 

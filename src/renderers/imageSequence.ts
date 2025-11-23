@@ -13,9 +13,18 @@ async function generateOverlayFrames(options: {
   videoDuration: number;
   laps: RenderContext["laps"];
   startOffsetS: number;
+  style: RenderContext["style"];
 }) {
-  const { tmpDir, width, height, fps, videoDuration, laps, startOffsetS } =
-    options;
+  const {
+    tmpDir,
+    width,
+    height,
+    fps,
+    videoDuration,
+    laps,
+    startOffsetS,
+    style,
+  } = options;
 
   const totalFrames = Math.floor(videoDuration * fps);
   const drawFrame = createOverlayDrawer({
@@ -24,6 +33,7 @@ async function generateOverlayFrames(options: {
     fps,
     laps,
     startOffsetS,
+    style,
   });
 
   console.log(
@@ -118,6 +128,7 @@ export async function renderWithImageSequence(
     video: { width, height, fps, duration },
     laps,
     startOffsetS,
+    style,
   } = ctx;
 
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "lapOverlay-"));
@@ -130,9 +141,10 @@ export async function renderWithImageSequence(
       height,
       fps,
       videoDuration: duration,
-      laps,
-      startOffsetS,
-    });
+    laps,
+    startOffsetS,
+    style,
+  });
 
     await renderFinalVideo({
       inputVideo,

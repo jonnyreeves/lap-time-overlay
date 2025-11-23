@@ -5,8 +5,7 @@ import { hideBin } from "yargs/helpers";
 import { parseLapFile, totalSessionDuration } from "./laps.js";
 import { computeStartOffsetSeconds } from "./time.js";
 import { probeVideoInfo } from "./videoInfo.js";
-import { getRenderer } from "./renderers/index.js";
-import type { OverlayMode } from "./renderers/index.js";
+import { DEFAULT_OVERLAY_STYLE, getRenderer } from "./renderers/index.js";
 import type { LapFormat } from "./laps.js";
 
 async function main() {
@@ -45,13 +44,6 @@ async function main() {
       demandOption: true,
       describe: "Output video file (e.g. out.mp4)",
     })
-    .option("overlayMode", {
-      type: "string",
-      choices: ["ffmpeg", "canvas-pipe", "images"] as const,
-      default: "ffmpeg",
-      describe:
-        "Overlay renderer: ffmpeg drawtext (fast), canvas pipe (no temp files), or image sequence (debug)",
-    })
     .check((argv) => {
       if (argv.startTimestamp == null && argv.startFrame == null) {
         throw new Error("Either --startTimestamp or --startFrame is required");
@@ -72,7 +64,6 @@ async function main() {
   const startTimestampStr = argv.startTimestamp as string | undefined;
   const startFrame = argv.startFrame as number | undefined;
   const outputFile = argv.outputFile!;
-  const overlayMode = (argv.overlayMode as OverlayMode) || "ffmpeg";
 
   const laps = parseLapFile(inputLapTimes, lapFormat, driverName);
   if (!laps.length) {
@@ -107,8 +98,7 @@ async function main() {
     );
   }
 
-  const renderer = getRenderer(overlayMode);
-  console.log(`Overlay mode: ${overlayMode}`);
+  const renderer = getRenderer();
 
   await renderer({
     inputVideo,
@@ -116,6 +106,7 @@ async function main() {
     video,
     laps,
     startOffsetS,
+    style: DEFAULT_OVERLAY_STYLE,
   });
 
   console.log(`Output written to: ${outputFile}`);

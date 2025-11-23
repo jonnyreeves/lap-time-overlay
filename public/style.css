@@ -29,16 +29,24 @@ body {
 .page {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 32px 24px 60px;
+  padding: 20px 18px 48px;
 }
 
 .hero {
-  padding: 28px;
+  padding: 16px 18px;
   border-radius: 18px;
   background: linear-gradient(120deg, rgba(255, 92, 43, 0.16), rgba(41, 215, 255, 0.14)),
     var(--panel);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
+}
+
+.hero-compact .hero {
+  display: none;
+}
+
+.hero-compact .page {
+  padding-top: 12px;
 }
 
 .hero__tag {
@@ -56,13 +64,13 @@ body {
 }
 
 .hero h1 {
-  margin: 12px 0;
-  font-size: 36px;
+  margin: 8px 0;
+  font-size: 32px;
   line-height: 1.2;
 }
 
 .hero p {
-  margin: 8px 0 14px;
+  margin: 6px 0 10px;
   color: var(--muted);
   max-width: 760px;
 }
@@ -71,27 +79,21 @@ body {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  margin-top: 6px;
 }
 
 .hero__chips span {
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: 12px;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .glow {
   color: var(--accent);
   text-shadow: 0 0 24px rgba(255, 92, 43, 0.45);
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 18px;
-  margin-top: 20px;
 }
 
 .card {
@@ -211,8 +213,41 @@ body {
 .preview__player video {
   display: block;
   width: 100%;
-  max-height: 320px;
+  max-height: 512px;
+  aspect-ratio: 16 / 9;
   background: #05070d;
+}
+
+.preview__image {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #05070d;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 200px;
+}
+
+.preview__image img {
+  width: 100%;
+  display: block;
+  border-radius: 8px;
+  background: #05070d;
+  max-height: 420px;
+  object-fit: contain;
+}
+
+.preview__grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-items: end;
+}
+
+.preview__cta {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .preview__actions {
@@ -226,6 +261,21 @@ body {
 .stepper {
   display: flex;
   gap: 8px;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.step {
+  display: none;
+}
+
+.step--active {
+  display: block;
 }
 
 .btn {
@@ -260,6 +310,14 @@ body {
 .btn--ghost {
   background: rgba(255, 255, 255, 0.04);
   border: 1px dashed var(--border);
+}
+
+.step-nav {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .progress {
@@ -309,6 +367,11 @@ textarea {
   background: var(--panel-soft);
   color: var(--text);
   font-size: 15px;
+}
+
+input[type="color"] {
+  padding: 6px;
+  height: 48px;
 }
 
 textarea {
@@ -374,7 +437,7 @@ textarea {
 
 @media (max-width: 720px) {
   .hero h1 {
-    font-size: 28px;
+    font-size: 24px;
   }
 
   .upload__drop {

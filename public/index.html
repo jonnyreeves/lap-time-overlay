@@ -30,8 +30,8 @@
         </h1>
         <p>
           Upload your footage, paste lap times, pick a driver, and let ffmpeg
-          stamp a clean lap timer on top. No live preview, just a fast render
-          and a download link.
+          stamp a clean lap timer on top. Get a single-frame preview to check
+          colors, then fire off the render and download.
         </p>
         <div class="hero__chips">
           <span>4GB+ uploads handled with streaming</span>
@@ -40,148 +40,7 @@
         </div>
       </header>
 
-      <main class="grid">
-        <section class="card">
-          <div class="card__header">
-            <div class="dot"></div>
-            <div>
-              <p class="eyebrow">Step 1</p>
-              <h2>Upload video</h2>
-            </div>
-          </div>
-          <div class="upload">
-            <label for="inputVideo" class="upload__drop">
-              <div class="drop__icon">⬆</div>
-              <div>
-                <div class="drop__title">Drop your MP4 (4GB+ ok)</div>
-                <div class="drop__hint">
-                  Or click to browse. We'll stream it straight to disk.
-                </div>
-              </div>
-              <input type="file" id="inputVideo" accept="video/mp4" />
-            </label>
-            <button id="uploadBtn" class="btn">Upload video</button>
-            <div class="progress" id="uploadProgress">
-              <div class="progress__bar" id="uploadProgressBar"></div>
-              <div class="progress__text" id="uploadProgressText">
-                Waiting to upload…
-              </div>
-            </div>
-
-            <div class="preview">
-              <div class="preview__header">
-                <div>
-                  <p class="eyebrow">Mark lap 1</p>
-                  <h3>Scrub & set start frame</h3>
-                </div>
-                <span class="badge" id="videoMeta">Waiting for upload…</span>
-              </div>
-              <div class="preview__player">
-                <video id="previewVideo" controls playsinline></video>
-              </div>
-              <div class="preview__actions">
-                <div>
-                  <div class="muted" id="timeReadout">
-                    00:00.000 • frame --
-                  </div>
-                  <div class="field__hint">
-                    We use probed FPS after upload to map time → frame.
-                  </div>
-                </div>
-                <div class="stepper">
-                  <button class="btn btn--ghost" id="stepBackBtn">
-                    −1 frame
-                  </button>
-                  <button class="btn btn--ghost" id="stepForwardBtn">
-                    +1 frame
-                  </button>
-                </div>
-                <button class="btn" id="markStartBtn">Mark start here</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="card">
-          <div class="card__header">
-            <div class="dot"></div>
-            <div>
-              <p class="eyebrow">Step 2</p>
-              <h2>Lap data</h2>
-            </div>
-          </div>
-          <form id="renderForm" class="form">
-            <label class="field">
-              <span>Lap format</span>
-              <select id="lapFormat">
-                <option value="daytona">Daytona</option>
-                <option value="teamsport">TeamSport</option>
-              </select>
-            </label>
-
-            <label class="field" id="driverField">
-              <span>Driver (TeamSport)</span>
-              <select id="driverName">
-                <option value="">Pick a driver</option>
-              </select>
-              <div class="field__hint">
-                We auto-read the header row from the pasted lap times.
-              </div>
-            </label>
-
-            <label class="field">
-              <span>Lap times</span>
-              <textarea
-                id="lapText"
-                rows="8"
-                placeholder="Paste your exported lap times here"
-              ></textarea>
-              <div class="field__hint">
-                For TeamSport: include the header row so we can list drivers.
-              </div>
-            </label>
-
-            <label class="field">
-              <span>Start frame</span>
-              <input
-                type="number"
-                id="startFrame"
-                placeholder="e.g. 1530"
-                min="0"
-              />
-              <div class="field__hint">
-                First frame where lap 1 starts. We'll handle timestamps later.
-              </div>
-            </label>
-
-            <label class="field">
-              <span>Overlay engine</span>
-              <select id="overlayMode">
-                <option value="ffmpeg">FFmpeg drawtext (fast)</option>
-                <option value="canvas-pipe">Canvas pipe</option>
-                <option value="images">Image sequence</option>
-              </select>
-            </label>
-
-            <button type="submit" class="btn btn--primary" id="renderBtn">
-              Render overlay
-            </button>
-          </form>
-        </section>
-
-        <section class="card status">
-          <div class="card__header">
-            <div class="dot"></div>
-            <div>
-              <p class="eyebrow">Step 3</p>
-              <h2>Render status</h2>
-            </div>
-          </div>
-          <div id="statusBody" class="status__body">
-            <p class="muted">No job running yet.</p>
-          </div>
-        </section>
-      </main>
+      <main class="steps" id="stepsRoot"></main>
     </div>
 
     <script type="module" src="/app.js"></script>

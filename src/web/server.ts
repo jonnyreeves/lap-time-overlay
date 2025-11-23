@@ -5,8 +5,14 @@ import http from "node:http";
 import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
-import { getRenderer, type OverlayMode } from "../renderers/index.js";
-import { parseLapText, type LapFormat } from "../laps.js";
+import ffmpeg from "fluent-ffmpeg";
+import {
+  DEFAULT_OVERLAY_STYLE,
+  getRenderer,
+  type OverlayStyle,
+} from "../renderers/index.js";
+import { buildDrawtextFilterGraph } from "../renderers/ffmpegDrawtext.js";
+import { parseLapText, totalSessionDuration, type LapFormat } from "../laps.js";
 import { computeStartOffsetSeconds } from "../time.js";
 import { probeVideoInfo } from "../videoInfo.js";
 
@@ -15,9 +21,11 @@ const projectRoot = path.resolve(__dirname, "../..");
 const publicDir = path.join(projectRoot, "public");
 const uploadsDir = path.join(projectRoot, "work/uploads");
 const rendersDir = path.join(projectRoot, "work/renders");
+const previewsDir = path.join(projectRoot, "work/previews");
 
 await fs.mkdir(uploadsDir, { recursive: true });
 await fs.mkdir(rendersDir, { recursive: true });
+await fs.mkdir(previewsDir, { recursive: true });
 
 type JobStatus = "queued" | "running" | "error" | "complete";
 
@@ -49,7 +57,9 @@ interface RenderRequestBody {
   driverName?: string;
   startFrame?: number;
   startTimestamp?: string;
-  overlayMode?: OverlayMode;
+  overlayTextColor?: string;
+  overlayBoxColor?: string;
+  overlayBoxOpacity?: number;
 }
 
 const uploads = new Map<string, UploadedFile>();
@@ -70,8 +80,15 @@ const server = http.createServer(async (req, res) => {
     const uploadId = parts[2];
     return void handleUploadInfo(res, uploadId);
   }
+  if (req.method === "POST" && url.pathname === "/api/preview") {
+    return void handlePreview(req, res);
+  }
   if (req.method === "POST" && url.pathname === "/api/render") {
     return void handleRender(req, res);
+  }
+  if (req.method === "GET" && url.pathname.startsWith("/api/preview/")) {
+    const previewId = url.pathname.replace("/api/preview/", "");
+    return void handlePreviewImage(res, previewId);
   }
   if (req.method === "GET" && url.pathname.startsWith("/api/jobs/")) {
     const jobId = url.pathname.replace("/api/jobs/", "");
@@ -199,48 +216,21 @@ async function handleRender(
     return;
   }
 
-  const lapText = body.lapText?.trim();
-  const lapFormat: LapFormat =
-    body.lapFormat === "teamsport" ? "teamsport" : "daytona";
-  const driverName = body.driverName?.trim();
-  const overlayMode: OverlayMode =
-    body.overlayMode === "canvas-pipe" || body.overlayMode === "images"
-      ? body.overlayMode
-      : "ffmpeg";
-
-  if (!lapText) {
-    sendJson(res, 400, { error: "lapText is required" });
+  const parsed = parseOverlayRequest(body);
+  if ("error" in parsed) {
+    sendJson(res, 400, { error: parsed.error });
     return;
   }
-
-  if (lapFormat === "teamsport" && !driverName) {
-    sendJson(res, 400, { error: "driverName is required for teamsport format" });
-    return;
-  }
-
-  const uploadId = body.uploadId;
-  const upload = uploadId ? uploads.get(uploadId) : undefined;
-  const inputPath = upload?.path || body.inputPath;
-  if (!inputPath) {
-    sendJson(res, 400, { error: "No input video provided" });
-    return;
-  }
-
-  const startFrame =
-    body.startFrame === undefined || body.startFrame === null
-      ? undefined
-      : Number(body.startFrame);
-  const startTimestamp = body.startTimestamp?.trim();
-  if (startFrame != null && !Number.isFinite(startFrame)) {
-    sendJson(res, 400, { error: "startFrame must be a number" });
-    return;
-  }
-  if (startFrame == null && !startTimestamp) {
-    sendJson(res, 400, {
-      error: "Provide startFrame (preferred) or startTimestamp",
-    });
-    return;
-  }
+  const {
+    lapText,
+    lapFormat,
+    driverName,
+    uploadId,
+    inputPath,
+    startFrame,
+    startTimestamp,
+    style,
+  } = parsed;
 
   const jobId = randomUUID();
   const job: RenderJob = {
@@ -258,12 +248,85 @@ async function handleRender(
     driverName,
     startFrame,
     startTimestamp,
-    overlayMode,
+    style,
   }).catch((err) => {
     console.error("Render job failed:", err);
   });
 
   sendJson(res, 202, { jobId });
+}
+
+async function handlePreview(
+  req: http.IncomingMessage,
+  res: http.ServerResponse
+): Promise<void> {
+  let body: RenderRequestBody;
+  try {
+    body = (await readJsonBody(req)) as RenderRequestBody;
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message });
+    return;
+  }
+
+  const parsed = parseOverlayRequest(body);
+  if ("error" in parsed) {
+    sendJson(res, 400, { error: parsed.error });
+    return;
+  }
+
+  const {
+    lapText,
+    lapFormat,
+    driverName,
+    inputPath,
+    startFrame,
+    startTimestamp,
+    style,
+  } = parsed;
+
+  try {
+    const laps = parseLapText(lapText, lapFormat, driverName);
+    if (!laps.length) {
+      sendJson(res, 400, { error: "No laps parsed from lapTimes input" });
+      return;
+    }
+
+    const video = await probeVideoInfo(inputPath);
+    const startOffsetS = computeStartOffsetSeconds({
+      startFrame,
+      startTimestamp,
+      fps: video.fps,
+    });
+    const sessionDuration = totalSessionDuration(laps);
+    const overlayEnd = startOffsetS + sessionDuration;
+    const baseTime = startOffsetS + 0.1;
+    const earliestOverlayTime = startOffsetS + 0.01;
+    const latestOverlayTime = Math.max(earliestOverlayTime, overlayEnd - 0.02);
+    const targetWithinOverlay = Math.min(
+      Math.max(baseTime, earliestOverlayTime),
+      latestOverlayTime
+    );
+    const previewTime = Math.max(
+      0,
+      Math.min(targetWithinOverlay, Math.max(video.duration - 0.05, 0))
+    );
+
+    const previewId = randomUUID();
+    const outputPath = path.join(previewsDir, `${previewId}.png`);
+    await renderPreviewFrame({
+      inputVideo: inputPath,
+      outputFile: outputPath,
+      laps,
+      startOffsetS,
+      video,
+      style,
+      timeSeconds: previewTime,
+    });
+    sendJson(res, 200, { previewUrl: `/api/preview/${previewId}` });
+  } catch (err) {
+    console.error("Preview failed:", err);
+    sendJson(res, 500, { error: "Preview failed" });
+  }
 }
 
 async function handleJobStatus(res: http.ServerResponse, jobId: string) {
@@ -287,6 +350,31 @@ async function handleJobStatus(res: http.ServerResponse, jobId: string) {
   }
 
   sendJson(res, 200, payload);
+}
+
+async function handlePreviewImage(res: http.ServerResponse, previewId: string) {
+  if (!previewId) {
+    sendJson(res, 400, { error: "Missing preview id" });
+    return;
+  }
+
+  const filePath = path.join(previewsDir, `${previewId}.png`);
+  if (!filePath.startsWith(previewsDir)) {
+    sendJson(res, 400, { error: "Invalid path" });
+    return;
+  }
+
+  try {
+    const stats = await fs.stat(filePath);
+    res.writeHead(200, {
+      "Content-Type": "image/png",
+      "Content-Length": stats.size,
+      "Cache-Control": "no-cache",
+    });
+    createReadStream(filePath).pipe(res);
+  } catch {
+    sendJson(res, 404, { error: "Preview not found" });
+  }
 }
 
 async function handleDownload(res: http.ServerResponse, jobId: string) {
@@ -362,6 +450,121 @@ async function readJsonBody(
   return JSON.parse(text);
 }
 
+function normalizeHex(input?: string | null): string | null {
+  const str = typeof input === "string" ? input : null;
+  const match = str?.match(/^#?([0-9a-fA-F]{6})$/);
+  return match ? `#${match[1].toLowerCase()}` : null;
+}
+
+function resolveOverlayStyle(body: RenderRequestBody): OverlayStyle {
+  const textColor = normalizeHex(body.overlayTextColor);
+  const boxColor = normalizeHex(body.overlayBoxColor);
+  const opacity =
+    body.overlayBoxOpacity != null && Number.isFinite(body.overlayBoxOpacity)
+      ? Math.min(1, Math.max(0, Number(body.overlayBoxOpacity)))
+      : DEFAULT_OVERLAY_STYLE.boxOpacity;
+
+  return {
+    textColor: textColor ?? DEFAULT_OVERLAY_STYLE.textColor,
+    boxColor: boxColor ?? DEFAULT_OVERLAY_STYLE.boxColor,
+    boxOpacity: opacity,
+  };
+}
+
+function parseOverlayRequest(
+  body: RenderRequestBody
+):
+  | {
+      lapText: string;
+      lapFormat: LapFormat;
+      driverName?: string;
+      uploadId?: string;
+      inputPath: string;
+      startFrame?: number;
+      startTimestamp?: string;
+      style: OverlayStyle;
+    }
+  | { error: string } {
+  const lapText = body.lapText?.trim();
+  if (!lapText) {
+    return { error: "lapText is required" };
+  }
+
+  const lapFormat: LapFormat =
+    body.lapFormat === "teamsport" ? "teamsport" : "daytona";
+  const driverName = body.driverName?.trim();
+  if (lapFormat === "teamsport" && !driverName) {
+    return { error: "driverName is required for teamsport format" };
+  }
+
+  const uploadId = body.uploadId;
+  const upload = uploadId ? uploads.get(uploadId) : undefined;
+  const inputPath = upload?.path || body.inputPath;
+  if (!inputPath) {
+    return { error: "No input video provided" };
+  }
+
+  const startFrame =
+    body.startFrame === undefined || body.startFrame === null
+      ? undefined
+      : Number(body.startFrame);
+  const startTimestamp = body.startTimestamp?.trim();
+  if (startFrame != null && !Number.isFinite(startFrame)) {
+    return { error: "startFrame must be a number" };
+  }
+  if (startFrame == null && !startTimestamp) {
+    return {
+      error: "Provide startFrame (preferred) or startTimestamp",
+    };
+  }
+
+  return {
+    lapText,
+    lapFormat,
+    driverName,
+    uploadId,
+    inputPath,
+    startFrame,
+    startTimestamp,
+    style: resolveOverlayStyle(body),
+  };
+}
+
+async function renderPreviewFrame(options: {
+  inputVideo: string;
+  outputFile: string;
+  video: Awaited<ReturnType<typeof probeVideoInfo>>;
+  laps: ReturnType<typeof parseLapText>;
+  startOffsetS: number;
+  style: OverlayStyle;
+  timeSeconds: number;
+}) {
+  const relativeStartOffset = options.startOffsetS - options.timeSeconds;
+  const { filterGraph, outputLabel } = buildDrawtextFilterGraph({
+    inputVideo: options.inputVideo,
+    outputFile: options.outputFile,
+    video: options.video,
+    laps: options.laps,
+    startOffsetS: relativeStartOffset,
+    style: options.style,
+  });
+
+  return new Promise<void>((resolve, reject) => {
+    const cmd = ffmpeg()
+      .input(options.inputVideo)
+      .seekInput(Math.max(0, options.timeSeconds))
+      .complexFilter(filterGraph)
+      .outputOptions(["-map", `[${outputLabel}]`, "-frames:v", "1", "-q:v", "2"])
+      .output(options.outputFile);
+
+    cmd
+      .on("end", () => resolve())
+      .on("error", (err) => reject(err));
+
+    cmd.run();
+  });
+}
+
 async function startRenderJob(options: {
   job: RenderJob;
   lapText: string;
@@ -369,7 +572,7 @@ async function startRenderJob(options: {
   driverName?: string;
   startFrame?: number;
   startTimestamp?: string;
-  overlayMode: OverlayMode;
+  style: OverlayStyle;
 }) {
   const { job } = options;
   job.status = "running";
@@ -391,7 +594,7 @@ async function startRenderJob(options: {
       startTimestamp: options.startTimestamp,
       fps: video.fps,
     });
-    const renderer = getRenderer(options.overlayMode);
+    const renderer = getRenderer();
 
     const safeStem = path
       .basename(job.inputPath, path.extname(job.inputPath))
@@ -405,6 +608,7 @@ async function startRenderJob(options: {
       video,
       laps,
       startOffsetS,
+      style: options.style,
     });
 
     job.status = "complete";

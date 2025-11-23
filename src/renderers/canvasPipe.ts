@@ -11,6 +11,7 @@ export async function renderWithCanvasPipe(ctx: RenderContext): Promise<void> {
     video: { width, height, fps, duration },
     laps,
     startOffsetS,
+    style,
   } = ctx;
 
   const totalFrames = Math.floor(duration * fps);
@@ -20,6 +21,7 @@ export async function renderWithCanvasPipe(ctx: RenderContext): Promise<void> {
     fps,
     laps,
     startOffsetS,
+    style,
   });
   const overlayStream = new PassThrough();
 

@@ -1,6 +1,23 @@
 import ffmpeg from "fluent-ffmpeg";
 import { totalSessionDuration } from "../laps.js";
-import type { RenderContext } from "./types.js";
+import { DEFAULT_OVERLAY_STYLE, type RenderContext } from "./types.js";
+
+function normalizeHexColor(input: string | undefined, fallback: string): string {
+  const match = input?.match(/^#?[0-9a-fA-F]{6}$/);
+  if (!match) return fallback;
+  return `#${input!.replace("#", "").toLowerCase()}`;
+}
+
+function clampOpacity(value: number | undefined, fallback: number): number {
+  if (!Number.isFinite(value)) return fallback;
+  return Math.min(1, Math.max(0, value as number));
+}
+
+function toFfmpegColor(hex: string, alpha?: number): string {
+  const base = `0x${hex.replace("#", "")}`;
+  if (alpha == null) return base;
+  return `${base}@${alpha}`;
+}
 
 function escapeDrawtext(text: string): string {
   // Escape characters that would be interpreted as option separators in drawtext
@@ -22,12 +39,26 @@ function buildLapTimeExpr(lapStartAbs: number): string {
   return `%{eif:${minExpr}:d:2}:%{eif:${secExpr}:d:2}:%{eif:${msExpr}:d:3}`;
 }
 
-function buildDrawtextFilterGraph(ctx: RenderContext) {
+export function buildDrawtextFilterGraph(ctx: RenderContext) {
   const {
     video: { width, height },
     laps,
     startOffsetS,
+    style,
   } = ctx;
+
+  const textColor = normalizeHexColor(
+    style.textColor,
+    DEFAULT_OVERLAY_STYLE.textColor
+  );
+  const boxColor = normalizeHexColor(
+    style.boxColor,
+    DEFAULT_OVERLAY_STYLE.boxColor
+  );
+  const boxOpacity = clampOpacity(
+    style.boxOpacity,
+    DEFAULT_OVERLAY_STYLE.boxOpacity
+  );
 
   const margin = 20;
   const boxWidth = Math.floor(width * 0.45);
@@ -47,7 +78,10 @@ function buildDrawtextFilterGraph(ctx: RenderContext) {
   const nextLabel = () => `ov${idx++}`;
 
   filters.push(
-    `[${currentLabel}]drawbox=x=${boxX}:y=${boxY}:w=${boxWidth}:h=${boxHeight}:color=black@0.6:t=fill:enable='between(t,${overlayStart},${overlayEnd})'[${(currentLabel =
+    `[${currentLabel}]drawbox=x=${boxX}:y=${boxY}:w=${boxWidth}:h=${boxHeight}:color=${toFfmpegColor(
+      boxColor,
+      boxOpacity
+    )}:t=fill:enable='between(t,${overlayStart},${overlayEnd})'[${(currentLabel =
       nextLabel())}]`
   );
 
@@ -60,7 +94,7 @@ function buildDrawtextFilterGraph(ctx: RenderContext) {
     filters.push(
       `[${currentLabel}]drawtext=text='${escapeDrawtext(
         line1
-      )}':fontcolor=white:fontsize=${fontSize}:x=${boxX + 12}:y=${
+      )}':fontcolor=${toFfmpegColor(textColor)}:fontsize=${fontSize}:x=${boxX + 12}:y=${
         boxY + 10
       }:enable='${lapEnable}'[${(currentLabel = nextLabel())}]`
     );
@@ -69,7 +103,7 @@ function buildDrawtextFilterGraph(ctx: RenderContext) {
     filters.push(
       `[${currentLabel}]drawtext=text='${escapeDrawtextExpression(
         timeText
-      )}':fontcolor=white:fontsize=${fontSize}:x=${boxX + 12}:y=${
+      )}':fontcolor=${toFfmpegColor(textColor)}:fontsize=${fontSize}:x=${boxX + 12}:y=${
         boxY + 10 + fontSize + lineSpacing
       }:enable='${lapEnable}'[${(currentLabel = nextLabel())}]`
     );

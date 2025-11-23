@@ -1,0 +1,16 @@
+export const state = {
+  uploadId: null,
+  uploadName: null,
+  uploadSize: 0,
+  videoInfo: null,
+  previewUrl: null,
+  pollTimer: null,
+  uploadReady: false,
+  lapText: "",
+  lapFormat: "daytona",
+  driverName: "",
+  startFrame: null,
+  textColor: "#ffffff",
+  boxColor: "#000000",
+  lastPreviewUrl: null,
+};
