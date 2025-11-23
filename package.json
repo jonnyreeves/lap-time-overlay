@@ -4,8 +4,9 @@
   "description": "``` brew install pkg-config cairo pango libpng jpeg giflib librsvg ```",
   "main": "index.js",
   "scripts": {
-    "lap-timer": "ts-node --esm src/lapTimer.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lap-timer": "node --loader ts-node/esm src/lapTimer.ts",
+    "type-check": "tsc --noEmit",
+    "test": "npm run type-check && node --loader ts-node/esm tests/laps.test.ts"
   },
   "type": "module",
   "keywords": [],
