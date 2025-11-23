@@ -29,6 +29,15 @@ export function renderPreviewStep(root) {
         </div>
         <div class="preview__grid">
           <label class="field">
+            <span>Lap for preview</span>
+            <select id="previewLapSelect" disabled>
+              <option value="">Waiting for laps…</option>
+            </select>
+            <div class="field__hint">
+              We grab a frame near the start of this lap.
+            </div>
+          </label>
+          <label class="field">
             <span>Text color</span>
             <input type="color" id="textColor" value="#ffffff" />
           </label>
@@ -126,6 +135,7 @@ export function initPreviewStep({ els, state, router, startPolling }) {
         : Number(state.startFrame),
     overlayTextColor: state.textColor,
     overlayBoxColor: state.boxColor,
+    previewLapNumber: state.previewLapNumber,
   });
 
   const updateButtons = (pending = false) => {
@@ -138,6 +148,34 @@ export function initPreviewStep({ els, state, router, startPolling }) {
     }
   };
 
+  const updateLapOptions = (lapCount) => {
+    state.lapCount = lapCount;
+    const select = els.previewLapSelect;
+    if (!select) return;
+    select.innerHTML = "";
+    if (!lapCount || lapCount < 1) {
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "Waiting for laps…";
+      select.appendChild(opt);
+      select.disabled = true;
+      return;
+    }
+    select.disabled = false;
+    const current = Math.min(
+      lapCount,
+      Math.max(1, state.previewLapNumber || 1)
+    );
+    for (let i = 1; i <= lapCount; i++) {
+      const opt = document.createElement("option");
+      opt.value = String(i);
+      opt.textContent = `Lap ${i}`;
+      if (i === current) opt.selected = true;
+      select.appendChild(opt);
+    }
+    state.previewLapNumber = current;
+  };
+
   async function generatePreview() {
     if (!ensureReady()) return;
     updateButtons(true);
@@ -146,12 +184,22 @@ export function initPreviewStep({ els, state, router, startPolling }) {
 
     try {
       const res = await requestPreview(payloadFromState());
+      if (res.selectedLap) {
+        state.previewLapNumber = res.selectedLap;
+      }
+      if (res.lapCount != null) {
+        updateLapOptions(res.lapCount);
+      }
       if (res.previewUrl) {
         state.lastPreviewUrl = res.previewUrl;
         const cacheBust = `${res.previewUrl}?t=${Date.now()}`;
         els.previewImage.src = cacheBust;
         els.previewImage.alt = "Overlay preview frame";
-        setPreviewStatus("Preview updated");
+        setPreviewStatus(
+          res.selectedLap
+            ? `Previewing lap ${res.selectedLap}`
+            : "Preview updated"
+        );
       } else {
         setPreviewStatus("Preview response missing URL");
       }
@@ -201,6 +249,7 @@ export function initPreviewStep({ els, state, router, startPolling }) {
     else setPreviewStatus("Waiting for lap data…");
     syncColorInputs();
     updateButtons(false);
+    updateLapOptions(state.lapCount || 0);
     if (state.lastPreviewUrl && els.previewImage) {
       els.previewImage.src = `${state.lastPreviewUrl}?t=${Date.now()}`;
       els.previewImage.alt = "Overlay preview frame";
@@ -219,6 +268,13 @@ export function initPreviewStep({ els, state, router, startPolling }) {
   });
   els.boxColorInput?.addEventListener("input", () => {
     state.boxColor = els.boxColorInput.value;
+  });
+  els.previewLapSelect?.addEventListener("change", () => {
+    const n = Number(els.previewLapSelect.value);
+    if (Number.isFinite(n) && n >= 1) {
+      state.previewLapNumber = n;
+      void generatePreview();
+    }
   });
 
   els.generatePreviewBtn?.addEventListener("click", handleGeneratePreview);

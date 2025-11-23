@@ -67,6 +67,8 @@ export function initUploadStep(options) {
     state.lastPreviewUrl = null;
     state.textColor = "#ffffff";
     state.boxColor = "#000000";
+    state.lapCount = 0;
+    state.previewLapNumber = 1;
     els.lapFormatSelect.value = "daytona";
     els.driverSelect.value = "";
     els.lapTextArea.value = "";

@@ -13,4 +13,6 @@ export const state = {
   textColor: "#ffffff",
   boxColor: "#000000",
   lastPreviewUrl: null,
+  lapCount: 0,
+  previewLapNumber: 1,
 };

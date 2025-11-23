@@ -119,6 +119,8 @@ export function initLapTimesStep(options) {
     state.driverName = driverName;
     state.startFrame = Number(startFrame);
     state.lastPreviewUrl = null;
+    state.lapCount = 0;
+    state.previewLapNumber = 1;
     setStatus(
       els.statusBody,
       "Lap data saved. Tune colors in preview before rendering."

@@ -33,6 +33,7 @@ export function collectElements() {
     previewStatus: byId("previewStatus"),
     textColorInput: byId("textColor"),
     boxColorInput: byId("boxColor"),
+    previewLapSelect: byId("previewLapSelect"),
     generatePreviewBtn: byId("generatePreview"),
     renderOverlayBtn: byId("renderOverlay"),
     backToLapTimesPreview: byId("backToLapTimesPreview"),

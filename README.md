@@ -1,6 +1,6 @@
 # Lap Time Overlay
 
-Overlay karting lap and position info on top of a video using the ffmpeg drawtext pipeline.
+Overlay karting lap and position info on top of a video using the ffmpeg drawtext pipeline. Use either the CLI or the bundled web UI.
 
 ## Prereqs
 
@@ -15,7 +15,23 @@ Node 18+ is recommended.
 npm install
 ```
 
-## Usage
+## Web UI
+
+```
+npm run web
+```
+
+Then open http://localhost:3000 and walk through the steps:
+
+1. **Upload video** – drop an MP4 (streamed to disk, 4GB+ ok).
+2. **Set offsets** – scrub the preview and mark the start frame.
+3. **Lap data** – paste laps, pick format/driver (TeamSport), save.
+4. **Preview** – auto-generates a single-frame overlay just after your start; tweak text/box colors.
+5. **Transform & download** – queue the render, poll status, and download the overlaid MP4.
+
+The web UI always uses the ffmpeg renderer.
+
+## CLI Usage
 
 ```
 npm run lap-timer -- \

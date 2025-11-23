@@ -60,6 +60,7 @@ interface RenderRequestBody {
   overlayTextColor?: string;
   overlayBoxColor?: string;
   overlayBoxOpacity?: number;
+  previewLapNumber?: number;
 }
 
 const uploads = new Map<string, UploadedFile>();
@@ -290,6 +291,7 @@ async function handlePreview(
       sendJson(res, 400, { error: "No laps parsed from lapTimes input" });
       return;
     }
+    const lapCount = laps.length;
 
     const video = await probeVideoInfo(inputPath);
     const startOffsetS = computeStartOffsetSeconds({
@@ -297,19 +299,13 @@ async function handlePreview(
       startTimestamp,
       fps: video.fps,
     });
-    const sessionDuration = totalSessionDuration(laps);
-    const overlayEnd = startOffsetS + sessionDuration;
-    const baseTime = startOffsetS + 0.1;
-    const earliestOverlayTime = startOffsetS + 0.01;
-    const latestOverlayTime = Math.max(earliestOverlayTime, overlayEnd - 0.02);
-    const targetWithinOverlay = Math.min(
-      Math.max(baseTime, earliestOverlayTime),
-      latestOverlayTime
-    );
-    const previewTime = Math.max(
-      0,
-      Math.min(targetWithinOverlay, Math.max(video.duration - 0.05, 0))
-    );
+    const selectedLap = resolvePreviewLapNumber(body.previewLapNumber, lapCount);
+    const lap = laps[selectedLap - 1];
+    const lapStartAbs = startOffsetS + lap.startS;
+    let previewTime = lapStartAbs;
+    // keep within video bounds
+    previewTime = Math.min(previewTime, Math.max(video.duration - 0.05, 0));
+    previewTime = Math.max(previewTime, 0);
 
     const previewId = randomUUID();
     const outputPath = path.join(previewsDir, `${previewId}.png`);
@@ -322,7 +318,11 @@ async function handlePreview(
       style,
       timeSeconds: previewTime,
     });
-    sendJson(res, 200, { previewUrl: `/api/preview/${previewId}` });
+    sendJson(res, 200, {
+      previewUrl: `/api/preview/${previewId}`,
+      lapCount,
+      selectedLap,
+    });
   } catch (err) {
     console.error("Preview failed:", err);
     sendJson(res, 500, { error: "Preview failed" });
@@ -469,6 +469,13 @@ function resolveOverlayStyle(body: RenderRequestBody): OverlayStyle {
     boxColor: boxColor ?? DEFAULT_OVERLAY_STYLE.boxColor,
     boxOpacity: opacity,
   };
+}
+
+function resolvePreviewLapNumber(input: unknown, lapCount: number): number {
+  const n = Number(input);
+  if (!Number.isFinite(n)) return 1;
+  if (lapCount < 1) return 1;
+  return Math.min(lapCount, Math.max(1, Math.round(n)));
 }
 
 function parseOverlayRequest(
