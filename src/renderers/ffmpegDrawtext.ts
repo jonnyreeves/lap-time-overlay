@@ -13,9 +13,13 @@ function escapeDrawtextExpression(text: string): string {
 }
 
 function buildLapTimeExpr(lapStartAbs: number): string {
-  // Use pts in hms format with an offset so each lap starts at 00:00.000
-  const offset = -lapStartAbs;
-  return `%{pts:hms:${offset.toFixed(6)}}`;
+  const tExpr = `(t-${lapStartAbs.toFixed(6)})`;
+  const minExpr = `floor(${tExpr}/60)`;
+  const secExpr = `floor(mod(${tExpr},60))`;
+  const msExpr = `floor(mod(${tExpr}*1000,1000))`;
+
+  // eif fmt is x/X/d/u; width is the optional 3rd argument (no %02d style)
+  return `%{eif:${minExpr}:d:2}:%{eif:${secExpr}:d:2}:%{eif:${msExpr}:d:3}`;
 }
 
 function buildDrawtextFilterGraph(ctx: RenderContext) {
