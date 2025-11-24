@@ -64,4 +64,7 @@ initLapTimesStep({
   onLapDataReady: preview.syncFromLapData,
 });
 
-router.goTo("upload");
+const initialStep = router.getInitialStep();
+if (initialStep) {
+  router.goTo(initialStep, { replaceHistory: true });
+}
