@@ -299,35 +299,6 @@ export function renderOffsetsStep(root) {
             </div>
           </div>
 
-          <div class="alignment">
-            <div class="alignment__header">
-              <div>
-                <p class="eyebrow">Lap check</p>
-                <h3>Jump to lap start</h3>
-              </div>
-              <span class="badge" id="alignmentStatus">
-                Waiting for lap data…
-              </span>
-            </div>
-            <div class="alignment__controls">
-              <label class="field">
-                <span>Lap to preview</span>
-                <select id="alignmentLapSelect" disabled>
-                  <option value="">Add lap data first</option>
-                </select>
-                <div class="field__hint">
-                  Uses your start frame and lap data to jump the player.
-                </div>
-              </label>
-              <button class="btn" type="button" id="alignmentPreviewBtn">
-                Jump to lap start
-              </button>
-            </div>
-            <p class="field__hint alignment__hint">
-              Pick a lap to visually confirm the timing lines up using the player above.
-            </p>
-          </div>
-
           <div class="step-nav lap-setup__nav">
             <button type="button" class="btn btn--ghost" id="backToUpload">
               Back
@@ -409,9 +380,26 @@ export function renderOffsetsStep(root) {
 export function initOffsetsStep(options) {
   const { els, state, router, onLapDataReady } = options;
   let previewIsObjectUrl = false;
-  let activeSelection = { type: "session", index: -1 };
+  let activeSelection = { type: "session-start", index: -1 };
+  const getFps = () => state.videoInfo?.fps ?? FALLBACK_FPS;
+  const frameToSeconds = (frame) =>
+    Number.isFinite(frame) ? frame / getFps() : null;
+  const getVideoDuration = () => {
+    const videoDur =
+      Number.isFinite(els.previewVideo?.duration) && els.previewVideo.duration > 0
+        ? els.previewVideo.duration
+        : null;
+    if (videoDur != null) return videoDur;
+    if (Number.isFinite(state.videoInfo?.duration)) {
+      return state.videoInfo.duration;
+    }
+    return null;
+  };
   const hasSessionStart = () =>
-    Number.isFinite(state.sessionStartTime) || Number.isFinite(state.startFrame);
+    Number.isFinite(state.sessionStartTime) ||
+    Number.isFinite(state.sessionStartFrame);
+  const hasLapStart = () =>
+    Number.isFinite(state.lapStartTime) || Number.isFinite(state.startFrame);
 
   const videoControls = createVideoControls({
     video: els.previewVideo,
@@ -429,30 +417,58 @@ export function initOffsetsStep(options) {
     onMark: (frame, seconds) => handleMarkAt(frame, seconds),
   });
 
-  const setAlignmentStatus = (text) => {
-    if (els.alignmentStatus) {
-      els.alignmentStatus.textContent = text;
+  const setAlignmentStatus = () => {};
+
+  const updateMarkButtonLabel = () => {
+    if (!els.markStartBtn) return;
+    if (activeSelection.type === "session-start") {
+      els.markStartBtn.textContent = "Mark session start";
+    } else if (activeSelection.type === "session-end") {
+      els.markStartBtn.textContent = "Mark session end";
+    } else {
+      const lapNumber =
+        state.laps && state.laps[activeSelection.index]
+          ? state.laps[activeSelection.index].number
+          : activeSelection.index + 1;
+      els.markStartBtn.textContent = `Mark Lap ${lapNumber} start`;
     }
   };
 
   const hasLapData = () => (state.laps?.length ?? 0) > 0;
-  const hasStartFrame = () =>
-    state.startFrame !== null && state.startFrame !== undefined;
   const getSessionStartTime = () => {
     if (Number.isFinite(state.sessionStartTime)) return state.sessionStartTime;
-    const fps = state.videoInfo?.fps ?? FALLBACK_FPS;
+    if (
+      state.sessionStartFrame != null &&
+      Number.isFinite(state.sessionStartFrame)
+    ) {
+      return frameToSeconds(state.sessionStartFrame);
+    }
+    return null;
+  };
+  const getSessionEndTime = () => {
+    if (Number.isFinite(state.sessionEndTime)) return state.sessionEndTime;
+    if (state.sessionEndFrame != null && Number.isFinite(state.sessionEndFrame)) {
+      return frameToSeconds(state.sessionEndFrame);
+    }
+    return null;
+  };
+  const getLapStartTime = () => {
+    if (Number.isFinite(state.lapStartTime)) return state.lapStartTime;
     if (state.startFrame != null && Number.isFinite(state.startFrame)) {
-      return state.startFrame / fps;
+      return frameToSeconds(state.startFrame);
     }
     return null;
   };
 
   const setActiveSelection = (type, index = -1) => {
-    if (type === "session") {
-      activeSelection = { type: "session", index: -1 };
+    if (type === "session-start") {
+      activeSelection = { type: "session-start", index: -1 };
+    } else if (type === "session-end") {
+      activeSelection = { type: "session-end", index: -1 };
     } else {
       activeSelection = { type: "lap", index };
     }
+    updateMarkButtonLabel();
     renderLapList();
   };
 
@@ -463,82 +479,65 @@ export function initOffsetsStep(options) {
   };
 
   const updateButtons = (pending = false) => {
-    const ready = state.uploadReady && hasLapData() && hasStartFrame();
+    const ready =
+      state.uploadReady &&
+      hasLapData() &&
+      hasLapStart() &&
+      hasSessionStart();
     if (els.nextToPreview) {
       els.nextToPreview.disabled = pending || !ready;
     }
     if (els.alignmentPreviewBtn) {
-      els.alignmentPreviewBtn.disabled = pending || !ready;
-    }
-    if (!pending && ready && !state.lastPreviewUrl) {
-      setAlignmentStatus("Select a lap to jump.");
+      els.alignmentPreviewBtn.disabled = true;
     }
   };
 
   const updateLapOptions = (lapCount) => {
     const count = lapCount ?? state.lapCount ?? 0;
     state.lapCount = count;
-    const select = els.alignmentLapSelect;
-    if (!select) return;
-    select.innerHTML = "";
-    if (!count || count < 1) {
-      const opt = document.createElement("option");
-      opt.value = "";
-      opt.textContent = "Waiting for laps…";
-      select.appendChild(opt);
-      select.disabled = true;
-      return;
-    }
-    select.disabled = false;
-    const maxSelectable = count + 1; // include finish/cooldown
-    const current = Math.min(
-      maxSelectable,
-      Math.max(1, state.previewLapNumber || 1)
+    state.previewLapNumber = Math.min(
+      Math.max(1, state.previewLapNumber || 1),
+      count + (count > 0 ? 1 : 0)
     );
-    for (let i = 1; i <= count; i++) {
-      const opt = document.createElement("option");
-      opt.value = String(i);
-      opt.textContent = `Lap ${i}`;
-      if (i === current) opt.selected = true;
-      select.appendChild(opt);
-    }
-    if (count >= 1) {
-      const finishOpt = document.createElement("option");
-      finishOpt.value = String(count + 1);
-      finishOpt.textContent = "Finish / cooldown";
-      if (current === count + 1) finishOpt.selected = true;
-      select.appendChild(finishOpt);
-    }
-    state.previewLapNumber = current;
   };
 
   const renderLapList = () => {
     if (!els.lapList) return;
     const laps = state.laps || [];
     const sessionTime = getSessionStartTime();
-    const sessionActive = activeSelection.type === "session";
+    const sessionEndTime = getSessionEndTime();
+    const lapAnchor = getLapStartTime();
+    const sessionStartActive = activeSelection.type === "session-start";
+    const sessionEndActive = activeSelection.type === "session-end";
+    const sessionLabelTime = sessionTime ?? 0;
+    const sessionEndLabelTime =
+      sessionEndTime != null ? sessionEndTime : getVideoDuration();
     render(
       html`
         <div
-          class="lap-row lap-row--session ${sessionActive
+          class="lap-row lap-row--session ${sessionStartActive
           ? "lap-row--active"
           : ""}"
-          data-select="session"
+          data-select="session-start"
         >
           <div class="lap-row__fields">
             <div class="field">
               <span>Session start</span>
               <div class="badge badge--ghost">
                 ${sessionTime != null
-          ? `${formatTime(sessionTime)} (frame ${state.startFrame ?? "--"})`
+          ? `${formatTime(sessionTime)} (frame ${state.sessionStartFrame ?? "--"})`
           : "Not set"}
               </div>
             </div>
           </div>
           <div class="lap-row__meta">
-            <span class="muted">
-              Select and hit "Mark start here" on the player to set the session start.
-            </span>
+            <button
+              class="badge badge--ghost lap-row__jump"
+              type="button"
+              data-action="jump-session-start"
+            >
+              Start at ${formatTime(sessionLabelTime)}
+            </button>
           </div>
         </div>
         ${laps.length === 0
@@ -564,6 +563,7 @@ export function initOffsetsStep(options) {
                           <input
                             type="number"
                             min="1"
+                            readonly
                             data-index=${idx}
                             data-field="number"
                             value=${lap.number}
@@ -581,9 +581,17 @@ export function initOffsetsStep(options) {
                         </label>
                       </div>
                       <div class="lap-row__meta">
-                        <span class="badge badge--ghost">
-                          Starts at ${formatTime(lap.startS)}
-                        </span>
+                        <button
+                          class="badge badge--ghost lap-row__jump"
+                          type="button"
+                          data-action="jump-lap"
+                          data-index=${idx}
+                          aria-label="Jump to lap ${lap.number}"
+                        >
+                          Starts at ${lapAnchor != null
+          ? formatTime((lap.startS ?? 0) + lapAnchor)
+          : "Lap 1 start not set"}
+                        </button>
                         <button
                           class="upload__control upload__control--danger"
                           type="button"
@@ -599,13 +607,45 @@ export function initOffsetsStep(options) {
             }
           )}
             </div>`}
+        <div
+          class="lap-row lap-row--session ${sessionEndActive
+          ? "lap-row--active"
+          : ""}"
+          data-select="session-end"
+        >
+          <div class="lap-row__fields">
+            <div class="field">
+              <span>Session end</span>
+              <div class="badge badge--ghost">
+                ${sessionEndTime != null
+          ? `${formatTime(sessionEndTime)} (frame ${state.sessionEndFrame ?? "--"})`
+          : "Not set (uses video end)"}
+              </div>
+            </div>
+          </div>
+          <div class="lap-row__meta">
+            <button
+              class="badge badge--ghost lap-row__jump"
+              type="button"
+              data-action="jump-session-end"
+            >
+              ${sessionEndLabelTime != null
+          ? `Start at ${formatTime(sessionEndLabelTime)}`
+          : "Start at end"}
+            </button>
+          </div>
+        </div>
       `,
       els.lapList
     );
   };
 
   const applyLapState = (laps) => {
-    const normalized = normalizeLapList(laps || []);
+    const offset = Number(state.lapStartOffsetS) || 0;
+    const normalized = normalizeLapList(laps || []).map((lap) => ({
+      ...lap,
+      startS: lap.startS + offset,
+    }));
     state.laps = normalized;
     state.lapCount = normalized.length;
     const maxSelectable = state.lapCount + (state.lapCount > 0 ? 1 : 0);
@@ -615,20 +655,14 @@ export function initOffsetsStep(options) {
     );
     updateLapOptions();
     state.lastPreviewUrl = null;
-    if (!state.lapCount) {
-      setAlignmentStatus("Waiting for lap data…");
-    } else if (!hasStartFrame()) {
-      setAlignmentStatus("Enter a start frame to jump.");
-    } else {
-      setAlignmentStatus("Select a lap to jump.");
-    }
     if (
       activeSelection.type === "lap" &&
       (activeSelection.index < 0 || activeSelection.index >= state.lapCount)
     ) {
-      activeSelection = { type: "session", index: -1 };
+      activeSelection = { type: "session-start", index: -1 };
     }
     updateButtons();
+    updateMarkButtonLabel();
     renderLapList();
   };
 
@@ -659,15 +693,7 @@ export function initOffsetsStep(options) {
     const lap = laps[idx];
     if (!lap) return;
 
-    if (field === "number") {
-      const num = Number(target.value);
-      if (!Number.isFinite(num) || num < 1) {
-        setStatus(els.statusBody, "Lap number must be at least 1.", true);
-        target.value = lap.number;
-        return;
-      }
-      lap.number = Math.round(num);
-    } else if (field === "time") {
+    if (field === "time") {
       const parsed = parseLapDurationInput(target.value);
       if (!parsed || parsed <= 0) {
         setStatus(
@@ -688,21 +714,38 @@ export function initOffsetsStep(options) {
   const handleLapListClick = (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
-    const action = target.closest("[data-action='remove-lap']");
+    const action = target.closest("[data-action]");
     if (action) {
       const idx = Number(action.getAttribute("data-index"));
       if (!Number.isInteger(idx) || idx < 0) return;
-      const laps = state.laps ? [...state.laps] : [];
-      laps.splice(idx, 1);
-      applyLapState(laps);
-      setStatus(els.statusBody, "Removed lap entry.");
-      return;
+      if (action.getAttribute("data-action") === "remove-lap") {
+        const laps = state.laps ? [...state.laps] : [];
+        laps.splice(idx, 1);
+        applyLapState(laps);
+        setStatus(els.statusBody, "Removed lap entry.");
+        return;
+      }
+      if (action.getAttribute("data-action") === "jump-lap") {
+        const targetLap = idx + 1;
+        jumpToLapStart(targetLap);
+        return;
+      }
+      if (action.getAttribute("data-action") === "jump-session-start") {
+        jumpToTime(getSessionStartTime(), 0);
+        return;
+      }
+      if (action.getAttribute("data-action") === "jump-session-end") {
+        jumpToTime(getSessionEndTime(), getVideoDuration());
+        return;
+      }
     }
     const row = target.closest("[data-select]");
     if (!row) return;
     const type = row.getAttribute("data-select");
-    if (type === "session") {
-      setActiveSelection("session");
+    if (type === "session-start") {
+      setActiveSelection("session-start");
+    } else if (type === "session-end") {
+      setActiveSelection("session-end");
     } else if (type === "lap") {
       const idx = Number(row.getAttribute("data-index"));
       if (Number.isInteger(idx) && idx >= 0) {
@@ -720,7 +763,12 @@ export function initOffsetsStep(options) {
     els.previewVideo.src = url;
     els.previewVideo.load();
     state.startFrame = null;
-    state.sessionStartTime = null;
+    state.lapStartTime = null;
+    state.sessionStartFrame = 0;
+    state.sessionStartTime = 0;
+    state.sessionEndFrame = null;
+    state.sessionEndTime = null;
+    state.lapStartOffsetS = 0;
     videoControls.setEnabled(false);
     setAlignmentStatus("Waiting for lap data…");
     updateButtons();
@@ -752,26 +800,62 @@ export function initOffsetsStep(options) {
   }
 
   const handleMarkAt = (frame, seconds) => {
-    if (activeSelection.type === "session") {
-      state.startFrame = frame;
+    if (activeSelection.type === "session-start") {
+      state.sessionStartFrame = frame;
       state.sessionStartTime = seconds;
+      if (
+        Number.isFinite(state.sessionEndTime) &&
+        state.sessionEndTime <= seconds
+      ) {
+        state.sessionEndTime = null;
+        state.sessionEndFrame = null;
+      }
       setStatus(
         els.statusBody,
         `Session start set to frame ${frame} (t=${formatTime(seconds)})`
       );
       updateButtons();
       updateLapActionState();
-      renderLapList();
+      if (state.startFrame == null) {
+        state.startFrame = frame;
+        state.lapStartTime = seconds;
+      }
+      const hasLaps = Array.isArray(state.laps) && state.laps.length > 0;
+      if (!hasLaps) {
+        applyLapState([{ number: 1, durationS: 60, position: 0, startS: 0 }]);
+        setActiveSelection("lap", 0);
+      } else {
+        applyLapState(state.laps || []);
+      }
       return;
     }
 
-    const sessionStart = getSessionStartTime();
-    if (!Number.isFinite(sessionStart)) {
+    if (activeSelection.type === "session-end") {
+      const startTime = getSessionStartTime();
+      if (!Number.isFinite(startTime)) {
+        setStatus(
+          els.statusBody,
+          "Mark the session start before setting the session end.",
+          true
+        );
+        return;
+      }
+      if (!Number.isFinite(seconds) || seconds <= startTime) {
+        setStatus(
+          els.statusBody,
+          "Session end must be later than the session start.",
+          true
+        );
+        return;
+      }
+      state.sessionEndFrame = frame;
+      state.sessionEndTime = seconds;
       setStatus(
         els.statusBody,
-        "Set the session start before marking lap lengths.",
-        true
+        `Session end set to frame ${frame} (t=${formatTime(seconds)})`
       );
+      updateButtons();
+      renderLapList();
       return;
     }
 
@@ -786,9 +870,33 @@ export function initOffsetsStep(options) {
       return;
     }
 
-    const elapsed = seconds - sessionStart;
+    if (idx === 0) {
+      state.startFrame = frame;
+      state.lapStartTime = seconds;
+      setStatus(
+        els.statusBody,
+        `Lap 1 start set to frame ${frame} (t=${formatTime(seconds)})`
+      );
+      updateButtons();
+      updateLapActionState();
+      applyLapState(state.laps || []);
+      return;
+    }
+
+    const lapAnchor = getLapStartTime();
+    if (!Number.isFinite(lapAnchor)) {
+      setStatus(
+        els.statusBody,
+        "Set the Lap 1 start before marking lap lengths.",
+        true
+      );
+      return;
+    }
+
+    const elapsed = seconds - lapAnchor;
+    const targetIdx = Math.max(0, idx - 1);
     const prevTotal = laps
-      .slice(0, idx)
+      .slice(0, targetIdx)
       .reduce((sum, lap) => sum + (lap.durationS || 0), 0);
     const newDuration = elapsed - prevTotal;
     if (!Number.isFinite(newDuration) || newDuration <= 0) {
@@ -800,11 +908,11 @@ export function initOffsetsStep(options) {
       return;
     }
 
-    laps[idx] = { ...laps[idx], durationS: newDuration };
+    laps[targetIdx] = { ...laps[targetIdx], durationS: newDuration };
     applyLapState(laps);
     setStatus(
       els.statusBody,
-      `Lap ${laps[idx].number} set to ${formatTime(newDuration)}.`
+      `Lap ${laps[targetIdx].number} set to ${formatTime(newDuration)}.`
     );
   };
 
@@ -823,29 +931,84 @@ export function initOffsetsStep(options) {
       return false;
     }
 
-    if (state.startFrame == null) {
+    if (!hasSessionStart()) {
       setStatus(
         els.statusBody,
-        "Mark the session start (frame 0 = first frame) to align laps.",
+        "Mark the session start (frame 0 = first frame) to set where the clip begins.",
         true
       );
       return false;
     }
 
-    const parsedStart = Number(state.startFrame);
-    if (Number.isFinite(parsedStart)) {
-      state.startFrame = parsedStart;
-      if (parsedStart < 0) {
-        setStatus(
-          els.statusBody,
-          "Start frame must be 0 or greater.",
-          true
-        );
+    if (!hasLapStart()) {
+      setStatus(
+        els.statusBody,
+        "Mark the Lap 1 start (frame 0 = first frame) to align laps.",
+        true
+      );
+      return false;
+    }
+
+    const fps = getFps();
+    if (Number.isFinite(state.sessionStartFrame)) {
+      const frame = Math.max(0, Math.round(Number(state.sessionStartFrame)));
+      state.sessionStartFrame = frame;
+      state.sessionStartTime = frameToSeconds(frame);
+    } else if (Number.isFinite(state.sessionStartTime)) {
+      if (state.sessionStartTime < 0) {
+        setStatus(els.statusBody, "Session start must be 0 or greater.", true);
         return false;
       }
-      if (state.videoInfo?.fps) {
-        state.sessionStartTime = state.startFrame / state.videoInfo.fps;
-      }
+    }
+
+    if (Number.isFinite(state.startFrame)) {
+      const parsedStart = Math.max(0, Math.round(Number(state.startFrame)));
+      state.startFrame = parsedStart;
+      state.lapStartTime = frameToSeconds(parsedStart);
+    } else if (Number.isFinite(state.lapStartTime) && state.lapStartTime < 0) {
+      setStatus(els.statusBody, "Lap 1 start must be 0 or greater.", true);
+      return false;
+    }
+
+    const sessionStartTime = getSessionStartTime();
+    const lapStartTime = getLapStartTime();
+    if (!Number.isFinite(lapStartTime)) {
+      setStatus(
+        els.statusBody,
+        "Lap 1 start must be set to a valid timestamp.",
+        true
+      );
+      return false;
+    }
+    if (
+      Number.isFinite(sessionStartTime) &&
+      lapStartTime < (sessionStartTime ?? 0)
+    ) {
+      setStatus(
+        els.statusBody,
+        "Lap 1 start cannot be earlier than the session start.",
+        true
+      );
+      return false;
+    }
+
+    if (Number.isFinite(state.sessionEndFrame)) {
+      const frame = Math.max(0, Math.round(Number(state.sessionEndFrame)));
+      state.sessionEndFrame = frame;
+      state.sessionEndTime = frameToSeconds(frame);
+    }
+    const sessionEnd = getSessionEndTime();
+    if (
+      Number.isFinite(sessionEnd) &&
+      Number.isFinite(sessionStartTime) &&
+      sessionEnd <= (sessionStartTime ?? 0)
+    ) {
+      setStatus(
+        els.statusBody,
+        "Session end must be later than the session start.",
+        true
+      );
+      return false;
     }
 
     return true;
@@ -855,15 +1018,16 @@ export function initOffsetsStep(options) {
     if (!validateLapInputs()) return;
     const laps = state.laps || [];
     if (!laps.length) {
-      setAlignmentStatus("No laps parsed yet.");
       return;
     }
 
-    const fps = state.videoInfo?.fps ?? FALLBACK_FPS;
+    const fps = getFps();
     const startFrame = Number.isFinite(state.startFrame)
       ? Number(state.startFrame)
       : 0;
     const startOffset = startFrame / fps;
+    const sessionStartTime = getSessionStartTime();
+    const sessionEndTime = getSessionEndTime();
 
     const rawValue = targetLap ?? Number(els.alignmentLapSelect.value);
     const maxSelectable = laps.length + 1;
@@ -889,17 +1053,48 @@ export function initOffsetsStep(options) {
       return;
     }
     const duration = Number.isFinite(video.duration) ? video.duration : null;
-    const clampedTime = duration
-      ? Math.max(0, Math.min(targetTime, Math.max(duration - 0.05, 0)))
-      : Math.max(0, targetTime);
+    const maxByDuration =
+      duration != null ? Math.max(duration - 0.05, 0) : null;
+    let upperLimit = sessionEndTime != null ? sessionEndTime : null;
+    if (upperLimit == null) {
+      upperLimit = maxByDuration;
+    } else if (maxByDuration != null) {
+      upperLimit = Math.min(upperLimit, maxByDuration);
+    }
+    let clampedTime =
+      upperLimit != null
+        ? Math.max(0, Math.min(targetTime, upperLimit))
+        : Math.max(0, targetTime);
+    if (sessionStartTime != null) {
+      clampedTime = Math.max(sessionStartTime, clampedTime);
+    }
 
     video.currentTime = clampedTime;
     videoControls.updateTimeReadout();
-    setAlignmentStatus(
-      isFinish
-        ? `Jumped to finish/cooldown (${formatTime(clampedTime)})`
-        : `Jumped to lap ${lap.number} start (${formatTime(clampedTime)})`
-    );
+  };
+
+  const jumpToTime = (timeSeconds, fallback) => {
+    const target = Number.isFinite(timeSeconds) ? timeSeconds : fallback;
+    if (!Number.isFinite(target)) {
+      setStatus(els.statusBody, "Time not set yet.", true);
+      return;
+    }
+    const video = els.previewVideo;
+    if (!video || !video.src) {
+      setStatus(
+        els.statusBody,
+        "Load the video before jumping to a time.",
+        true
+      );
+      return;
+    }
+    const duration = Number.isFinite(video.duration) ? video.duration : null;
+    const clamped = duration
+      ? Math.max(0, Math.min(target, Math.max(duration - 0.05, 0)))
+      : Math.max(0, target);
+    video.currentTime = clamped;
+    videoControls.updateTimeReadout();
+    setAlignmentStatus(`Jumped to ${formatTime(clamped)}`);
   };
 
   const syncImportDrivers = () => {
@@ -955,7 +1150,7 @@ export function initOffsetsStep(options) {
     }
     applyLapState(parsed.laps);
     state.previewLapNumber = 1;
-    setActiveSelection("session");
+    setActiveSelection("session-start");
     closeImportModal();
     setStatus(
       els.statusBody,
@@ -1008,24 +1203,9 @@ export function initOffsetsStep(options) {
     ?.addEventListener("click", closeImportModal);
 
   window.addEventListener("laps:reset", () => {
-    setActiveSelection("session");
+    setActiveSelection("session-start");
     applyLapState([]);
     updateLapActionState();
-  });
-
-  els.alignmentPreviewBtn.addEventListener("click", (event) => {
-    event.preventDefault();
-    const targetLap = Number(els.alignmentLapSelect.value);
-    const lap = Number.isFinite(targetLap) && targetLap >= 1 ? targetLap : null;
-    jumpToLapStart(lap);
-  });
-
-  els.alignmentLapSelect.addEventListener("change", () => {
-    const value = Number(els.alignmentLapSelect.value);
-    if (Number.isFinite(value) && value >= 1) {
-      state.previewLapNumber = value;
-      jumpToLapStart(value);
-    }
   });
 
   els.lapSetupForm.addEventListener("submit", (event) => {
@@ -1096,7 +1276,8 @@ export function initOffsetsStep(options) {
   applyLapState(state.laps || []);
   updateButtons();
   updateLapActionState();
-  if (hasLapData() && hasStartFrame()) {
+  updateMarkButtonLabel();
+  if (hasLapData() && hasLapStart() && hasSessionStart()) {
     setAlignmentStatus("Select a lap to jump.");
   }
 

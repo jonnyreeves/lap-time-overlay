@@ -464,6 +464,10 @@ body {
   flex-wrap: wrap;
 }
 
+.lap-row__jump {
+  cursor: pointer;
+}
+
 .lap-row--session {
   background: rgba(41, 215, 255, 0.05);
 }

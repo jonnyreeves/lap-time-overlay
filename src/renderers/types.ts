@@ -18,6 +18,8 @@ export interface RenderContext {
   video: VideoInfo;
   laps: Lap[];
   startOffsetS: number;
+  trimStartS?: number;
+  trimEndS?: number;
   style: OverlayStyle;
   onProgress?: (percent: number) => void;
 }

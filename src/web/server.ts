@@ -14,7 +14,7 @@ import {
 import { buildDrawtextFilterGraph } from "../renderers/ffmpegDrawtext.js";
 import { normalizeLapInputs, parseLapText, type LapFormat } from "../laps.js";
 import type { Lap, LapInput } from "../lapTypes.js";
-import { computeStartOffsetSeconds } from "../time.js";
+import { computeStartOffsetSeconds, parseStartTimestamp } from "../time.js";
 import { probeVideoInfo } from "../videoInfo.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -69,6 +69,10 @@ interface RenderRequestBody {
   driverName?: string;
   startFrame?: number;
   startTimestamp?: string;
+  sessionStartFrame?: number;
+  sessionStartTimestamp?: string;
+  sessionEndFrame?: number;
+  sessionEndTimestamp?: string;
   overlayTextColor?: string;
   overlayBoxColor?: string;
   overlayBoxOpacity?: number;
@@ -376,6 +380,10 @@ async function handleRender(
     inputPath,
     startFrame,
     startTimestamp,
+    sessionStartFrame,
+    sessionStartTimestamp,
+    sessionEndFrame,
+    sessionEndTimestamp,
     style,
   } = parsed;
 
@@ -394,6 +402,10 @@ async function handleRender(
     laps,
     startFrame,
     startTimestamp,
+    sessionStartFrame,
+    sessionStartTimestamp,
+    sessionEndFrame,
+    sessionEndTimestamp,
     style,
   }).catch((err) => {
     console.error("Render job failed:", err);
@@ -425,6 +437,10 @@ async function handlePreview(
     inputPath,
     startFrame,
     startTimestamp,
+    sessionStartFrame,
+    sessionStartTimestamp,
+    sessionEndFrame,
+    sessionEndTimestamp,
     style,
   } = parsed;
 
@@ -432,11 +448,21 @@ async function handlePreview(
     const lapCount = laps.length;
 
     const video = await probeVideoInfo(inputPath);
-    const startOffsetS = computeStartOffsetSeconds({
+    const timing = resolveTimingInputs({
+      fps: video.fps,
+      duration: video.duration,
       startFrame,
       startTimestamp,
-      fps: video.fps,
+      sessionStartFrame,
+      sessionStartTimestamp,
+      sessionEndFrame,
+      sessionEndTimestamp,
     });
+    if ("error" in timing) {
+      sendJson(res, 400, { error: timing.error });
+      return;
+    }
+    const { lapStartS, sessionStartS, sessionEndS } = timing;
     const selection = resolvePreviewSelection(body.previewLapNumber, lapCount);
     const selectedLap = selection.selected;
     const isFinish = selection.isFinish;
@@ -444,12 +470,16 @@ async function handlePreview(
     const lap = laps[Math.max(0, lapIndex)];
     const sessionEnd = lap.startS + lap.durationS;
     const lapStartAbs = isFinish
-      ? startOffsetS + sessionEnd
-      : startOffsetS + lap.startS;
+      ? lapStartS + sessionEnd
+      : lapStartS + lap.startS;
     let previewTime = lapStartAbs;
+    const clipEnd = sessionEndS ?? video.duration;
     // keep within video bounds
-    previewTime = Math.min(previewTime, Math.max(video.duration - 0.05, 0));
-    previewTime = Math.max(previewTime, 0);
+    previewTime = Math.min(
+      previewTime,
+      Math.max(clipEnd - 0.05, sessionStartS)
+    );
+    previewTime = Math.max(previewTime, sessionStartS);
 
     const previewId = randomUUID();
     const outputPath = path.join(previewsDir, `${previewId}.png`);
@@ -457,7 +487,7 @@ async function handlePreview(
       inputVideo: inputPath,
       outputFile: outputPath,
       laps,
-      startOffsetS,
+      startOffsetS: lapStartS,
       video,
       style,
       timeSeconds: previewTime,
@@ -662,6 +692,10 @@ type ParsedOverlayRequest = {
   inputPath: string;
   startFrame?: number;
   startTimestamp?: string;
+  sessionStartFrame?: number;
+  sessionStartTimestamp?: string;
+  sessionEndFrame?: number;
+  sessionEndTimestamp?: string;
   style: OverlayStyle;
 };
 
@@ -688,6 +722,22 @@ function parseOverlayRequest(
       error: "Provide startFrame (preferred) or startTimestamp",
     };
   }
+  const sessionStartFrame =
+    body.sessionStartFrame === undefined || body.sessionStartFrame === null
+      ? undefined
+      : Number(body.sessionStartFrame);
+  if (sessionStartFrame != null && !Number.isFinite(sessionStartFrame)) {
+    return { error: "sessionStartFrame must be a number" };
+  }
+  const sessionEndFrame =
+    body.sessionEndFrame === undefined || body.sessionEndFrame === null
+      ? undefined
+      : Number(body.sessionEndFrame);
+  if (sessionEndFrame != null && !Number.isFinite(sessionEndFrame)) {
+    return { error: "sessionEndFrame must be a number" };
+  }
+  const sessionStartTimestamp = body.sessionStartTimestamp?.trim();
+  const sessionEndTimestamp = body.sessionEndTimestamp?.trim();
 
   let laps: Lap[] | null = null;
 
@@ -727,8 +777,126 @@ function parseOverlayRequest(
     inputPath,
     startFrame,
     startTimestamp,
+    sessionStartFrame,
+    sessionStartTimestamp,
+    sessionEndFrame,
+    sessionEndTimestamp,
     style: resolveOverlayStyle(body),
   };
+}
+
+function resolveTimeSeconds(options: {
+  frame?: number;
+  timestamp?: string;
+  fps: number;
+  defaultValue?: number;
+  label: string;
+}): { value?: number; error?: string } {
+  const { frame, timestamp, fps, defaultValue, label } = options;
+  if (frame != null) {
+    const asNum = Number(frame);
+    if (!Number.isFinite(asNum)) {
+      return { error: `${label} frame must be a number` };
+    }
+    if (!Number.isInteger(asNum)) {
+      return { error: `${label} frame must be an integer` };
+    }
+    if (!Number.isFinite(fps) || fps <= 0) {
+      return { error: `Cannot use ${label} frame without a valid fps` };
+    }
+    if (asNum < 0) {
+      return { error: `${label} frame must be >= 0` };
+    }
+    return { value: asNum / fps };
+  }
+
+  const ts = timestamp?.toString().trim();
+  if (ts) {
+    try {
+      return { value: parseStartTimestamp(ts) };
+    } catch (err) {
+      return {
+        error:
+          err instanceof Error
+            ? `Invalid ${label} timestamp: ${err.message}`
+            : `Invalid ${label} timestamp`,
+      };
+    }
+  }
+
+  return { value: defaultValue };
+}
+
+function resolveTimingInputs(options: {
+  fps: number;
+  duration: number;
+  startFrame?: number;
+  startTimestamp?: string;
+  sessionStartFrame?: number;
+  sessionStartTimestamp?: string;
+  sessionEndFrame?: number;
+  sessionEndTimestamp?: string;
+}):
+  | { error: string }
+  | { lapStartS: number; sessionStartS: number; sessionEndS?: number } {
+  const { fps, duration } = options;
+  let lapStartS: number;
+  try {
+    lapStartS = computeStartOffsetSeconds({
+      startFrame: options.startFrame,
+      startTimestamp: options.startTimestamp,
+      fps,
+    });
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Invalid lap start" };
+  }
+
+  const sessionStart = resolveTimeSeconds({
+    frame: options.sessionStartFrame,
+    timestamp: options.sessionStartTimestamp,
+    fps,
+    defaultValue: 0,
+    label: "session start",
+  });
+  if (sessionStart.error) return { error: sessionStart.error };
+  const sessionStartS = sessionStart.value ?? 0;
+  if (sessionStartS < 0) {
+    return { error: "Session start must be >= 0" };
+  }
+  if (sessionStartS > duration) {
+    return { error: "Session start must be within the video duration" };
+  }
+
+  const sessionEnd = resolveTimeSeconds({
+    frame: options.sessionEndFrame,
+    timestamp: options.sessionEndTimestamp,
+    fps,
+    defaultValue: undefined,
+    label: "session end",
+  });
+  if (sessionEnd.error) return { error: sessionEnd.error };
+  let sessionEndS = sessionEnd.value;
+  if (sessionEndS != null) {
+    if (sessionEndS <= sessionStartS) {
+      return { error: "Session end must be later than the session start" };
+    }
+    sessionEndS = Math.min(sessionEndS, duration);
+    if (sessionEndS <= sessionStartS) {
+      return { error: "Session end must be later than the session start" };
+    }
+  }
+
+  if (lapStartS < sessionStartS) {
+    return { error: "Lap 1 start must be on or after the session start" };
+  }
+  if (lapStartS > duration) {
+    return { error: "Lap 1 start must be within the video duration" };
+  }
+  if (sessionEndS != null && lapStartS >= sessionEndS) {
+    return { error: "Lap 1 start must be before the session end" };
+  }
+
+  return { lapStartS, sessionStartS, sessionEndS };
 }
 
 async function concatenateUploads(
@@ -829,6 +997,10 @@ async function startRenderJob(options: {
   laps: Lap[];
   startFrame?: number;
   startTimestamp?: string;
+  sessionStartFrame?: number;
+  sessionStartTimestamp?: string;
+  sessionEndFrame?: number;
+  sessionEndTimestamp?: string;
   style: OverlayStyle;
 }) {
   const { job } = options;
@@ -848,12 +1020,27 @@ async function startRenderJob(options: {
     }
 
     const video = await probeVideoInfo(job.inputPath);
-    const startOffsetS = computeStartOffsetSeconds({
+    const timing = resolveTimingInputs({
+      fps: video.fps,
+      duration: video.duration,
       startFrame: options.startFrame,
       startTimestamp: options.startTimestamp,
-      fps: video.fps,
+      sessionStartFrame: options.sessionStartFrame,
+      sessionStartTimestamp: options.sessionStartTimestamp,
+      sessionEndFrame: options.sessionEndFrame,
+      sessionEndTimestamp: options.sessionEndTimestamp,
     });
+    if ("error" in timing) {
+      throw new Error(timing.error);
+    }
+    const { lapStartS, sessionStartS, sessionEndS } = timing;
     const renderer = getRenderer();
+
+    const clipEnd = sessionEndS ?? video.duration;
+    const clipDuration = clipEnd - sessionStartS;
+    if (!Number.isFinite(clipDuration) || clipDuration <= 0) {
+      throw new Error("Session end must be later than the session start");
+    }
 
     const safeStem = path
       .basename(job.inputPath, path.extname(job.inputPath))
@@ -866,7 +1053,9 @@ async function startRenderJob(options: {
       outputFile: outputPath,
       video,
       laps,
-      startOffsetS,
+      startOffsetS: lapStartS - sessionStartS,
+      trimStartS: sessionStartS,
+      trimEndS: sessionEndS,
       style: options.style,
       onProgress: updateProgress,
     });

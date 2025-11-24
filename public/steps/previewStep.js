@@ -193,13 +193,18 @@ export function initPreviewStep({ els, state, router, startPolling }) {
     }
   };
 
+  const hasSessionStart = () =>
+    Number.isFinite(state.sessionStartFrame) ||
+    Number.isFinite(state.sessionStartTime);
+  const hasLapStart = () =>
+    Number.isFinite(state.startFrame) || Number.isFinite(state.lapStartTime);
   const hasLapData = () =>
     Boolean(
       state.uploadId &&
         state.laps &&
         state.laps.length > 0 &&
-        state.startFrame !== null &&
-        state.startFrame !== undefined
+        hasLapStart() &&
+        hasSessionStart()
     );
 
   const ensureReady = () => {
@@ -209,7 +214,7 @@ export function initPreviewStep({ els, state, router, startPolling }) {
       return false;
     }
     if (!hasLapData()) {
-      setPreviewStatus("Fill lap data and start offset before previewing.");
+      setPreviewStatus("Fill lap data plus session and lap starts before previewing.");
       router.goTo("offsets");
       return false;
     }
@@ -223,6 +228,20 @@ export function initPreviewStep({ els, state, router, startPolling }) {
       state.startFrame === null || state.startFrame === undefined
         ? undefined
         : Number(state.startFrame),
+    sessionStartFrame:
+      state.sessionStartFrame === null || state.sessionStartFrame === undefined
+        ? undefined
+        : Number(state.sessionStartFrame),
+    sessionStartTimestamp: Number.isFinite(state.sessionStartTime)
+      ? String(state.sessionStartTime)
+      : undefined,
+    sessionEndFrame:
+      state.sessionEndFrame === null || state.sessionEndFrame === undefined
+        ? undefined
+        : Number(state.sessionEndFrame),
+    sessionEndTimestamp: Number.isFinite(state.sessionEndTime)
+      ? String(state.sessionEndTime)
+      : undefined,
     overlayTextColor: state.textColor,
     overlayBoxColor: state.boxColor,
     overlayBoxOpacity: (state.overlayOpacityPct ?? 60) / 100,

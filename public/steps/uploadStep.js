@@ -108,8 +108,13 @@ export function initUploadStep(options) {
     state.uploadCombined = false;
     state.uploadReady = false;
     state.laps = [];
+    state.lapStartOffsetS = 0;
     state.startFrame = null;
+    state.lapStartTime = null;
+    state.sessionStartFrame = null;
     state.sessionStartTime = null;
+    state.sessionEndFrame = null;
+    state.sessionEndTime = null;
     state.lastPreviewUrl = null;
     state.textColor = "#ffffff";
     state.boxColor = "#000000";

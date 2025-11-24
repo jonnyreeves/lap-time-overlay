@@ -164,13 +164,25 @@ export async function renderWithFfmpegDrawtext(
   ctx: RenderContext
 ): Promise<void> {
   const { filterGraph, outputLabel } = buildDrawtextFilterGraph(ctx);
+  const trimStart = Math.max(0, ctx.trimStartS ?? 0);
+  const trimEnd = Number.isFinite(ctx.trimEndS as number)
+    ? (ctx.trimEndS as number)
+    : null;
+  const clipDuration =
+    trimEnd != null ? Math.max(0, trimEnd - trimStart) : null;
 
   console.log("Using ffmpeg drawtext overlay (no temp images)...");
   console.log("ffmpeg drawtext filter graph:");
   console.log(filterGraph);
   return new Promise<void>((resolve, reject) => {
-    const cmd = ffmpeg()
-      .input(ctx.inputVideo)
+    const cmd = ffmpeg().input(ctx.inputVideo);
+    if (trimStart > 0) {
+      cmd.seekInput(trimStart);
+    }
+    if (clipDuration != null) {
+      cmd.duration(clipDuration);
+    }
+    cmd
       .complexFilter(filterGraph)
       .outputOptions([
         "-map",
