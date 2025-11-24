@@ -22,6 +22,15 @@ const publicDir = path.join(projectRoot, "public");
 const uploadsDir = path.join(projectRoot, "work/uploads");
 const rendersDir = path.join(projectRoot, "work/renders");
 const previewsDir = path.join(projectRoot, "work/previews");
+const CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
+const UPLOAD_RETENTION_MS = 24 * 60 * 60 * 1000;
+const RENDER_RETENTION_MS = 24 * 60 * 60 * 1000;
+const PREVIEW_RETENTION_MS = 6 * 60 * 60 * 1000;
+const cleanupTargets = [
+  { dir: uploadsDir, maxAgeMs: UPLOAD_RETENTION_MS },
+  { dir: rendersDir, maxAgeMs: RENDER_RETENTION_MS },
+  { dir: previewsDir, maxAgeMs: PREVIEW_RETENTION_MS },
+];
 
 await fs.mkdir(uploadsDir, { recursive: true });
 await fs.mkdir(rendersDir, { recursive: true });
@@ -71,6 +80,8 @@ interface RenderRequestBody {
 
 const uploads = new Map<string, UploadedFile>();
 const jobs = new Map<string, RenderJob>();
+
+scheduleWorkDirCleanup();
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", "http://localhost");
@@ -857,6 +868,59 @@ async function startRenderJob(options: {
     job.finishedAt = Date.now();
     job.error = err instanceof Error ? err.message : "Render failed";
   }
+}
+
+function scheduleWorkDirCleanup(): void {
+  const runCleanup = () => {
+    cleanupWorkDir().catch((err) => {
+      console.error("Work dir cleanup failed:", err);
+    });
+  };
+  runCleanup();
+  const timer = setInterval(runCleanup, CLEANUP_INTERVAL_MS);
+  if (typeof timer.unref === "function") {
+    timer.unref();
+  }
+}
+
+async function cleanupWorkDir(): Promise<void> {
+  const now = Date.now();
+  const activePaths = collectActivePaths();
+
+  for (const target of cleanupTargets) {
+    try {
+      const entries = await fs.readdir(target.dir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory()) continue;
+        const filePath = path.join(target.dir, entry.name);
+        if (activePaths.has(path.resolve(filePath))) continue;
+        try {
+          const stats = await fs.stat(filePath);
+          const ageMs = now - stats.mtimeMs;
+          if (ageMs > target.maxAgeMs) {
+            await safeUnlink(filePath);
+          }
+        } catch (err) {
+          console.error(`Failed to inspect ${filePath} during cleanup`, err);
+        }
+      }
+    } catch (err) {
+      console.error(`Unable to read ${target.dir} for cleanup`, err);
+      continue;
+    }
+  }
+}
+
+function collectActivePaths(): Set<string> {
+  const active = new Set<string>();
+  for (const upload of uploads.values()) {
+    active.add(path.resolve(upload.path));
+  }
+  for (const job of jobs.values()) {
+    if (job.inputPath) active.add(path.resolve(job.inputPath));
+    if (job.outputPath) active.add(path.resolve(job.outputPath));
+  }
+  return active;
 }
 
 async function safeUnlink(p: string): Promise<void> {

@@ -31,6 +31,10 @@ Then open http://localhost:3000 and walk through the steps:
 
 The web UI always uses the ffmpeg renderer.
 
+## Work dir cleanup
+
+- Uploads and rendered/previews saved under `work/` are pruned automatically (renders/uploads after ~24h, previews after ~6h). Copy anything you want to keep somewhere else.
+
 ## CLI Usage
 
 ```
