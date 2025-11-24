@@ -10,7 +10,7 @@ export function renderTransformStep(root) {
       <div class="card__header">
         <div class="dot"></div>
         <div>
-          <p class="eyebrow">Step 5</p>
+          <p class="eyebrow">Step 4</p>
           <h2>Transform &amp; download</h2>
         </div>
       </div>
@@ -18,7 +18,7 @@ export function renderTransformStep(root) {
         <p class="muted">No job running yet.</p>
       </div>
       <div class="step-nav">
-        <button type="button" class="btn btn--ghost" id="backToLapTimes">
+        <button type="button" class="btn btn--ghost" id="backToPreview">
           Back to preview
         </button>
       </div>
@@ -59,7 +59,7 @@ export function initTransformStep({ els, state, router }) {
     }, 1500);
   }
 
-  els.backToLapTimes.addEventListener("click", (event) => {
+  els.backToPreview.addEventListener("click", (event) => {
     event.preventDefault();
     router.goTo("preview");
   });

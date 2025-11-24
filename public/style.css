@@ -385,6 +385,83 @@ body {
   border-color: rgba(41, 215, 255, 0.4);
 }
 
+.lap-setup {
+  display: grid;
+  grid-template-columns: minmax(340px, 1fr) minmax(400px, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.lap-setup__form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lap-setup__row {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  align-items: end;
+}
+
+.lap-setup__lap-text textarea {
+  min-height: 210px;
+}
+
+.lap-setup__nav {
+  margin-top: 4px;
+}
+
+.lap-setup__preview {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.alignment {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.alignment__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.alignment__controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.alignment__controls .field {
+  flex: 1 1 240px;
+}
+
+.alignment__image {
+  min-height: 140px;
+}
+
+.alignment__hint {
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .lap-setup {
+    grid-template-columns: 1fr;
+  }
+}
+
 .preview {
   display: flex;
   flex-direction: column;

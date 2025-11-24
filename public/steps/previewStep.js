@@ -11,7 +11,7 @@ export function renderPreviewStep(root) {
       <div class="card__header">
         <div class="dot"></div>
         <div>
-          <p class="eyebrow">Step 4</p>
+          <p class="eyebrow">Step 3</p>
           <h2>Preview overlay</h2>
         </div>
       </div>
@@ -111,13 +111,9 @@ export function renderPreviewStep(root) {
             <button class="btn" id="generatePreview">Generate preview</button>
           </div>
         </div>
-        <div class="step-nav">
-          <button
-            type="button"
-            class="btn btn--ghost"
-            id="backToLapTimesPreview"
-          >
-            Back
+      <div class="step-nav">
+          <button type="button" class="btn btn--ghost" id="backToSetup">
+            Back to setup
           </button>
           <button class="btn btn--primary" id="renderOverlay">
             Render overlay
@@ -213,8 +209,8 @@ export function initPreviewStep({ els, state, router, startPolling }) {
       return false;
     }
     if (!hasLapData()) {
-      setPreviewStatus("Fill lap data before previewing.");
-      router.goTo("lapTimes");
+      setPreviewStatus("Fill lap data and start offset before previewing.");
+      router.goTo("offsets");
       return false;
     }
     return true;
@@ -421,9 +417,9 @@ export function initPreviewStep({ els, state, router, startPolling }) {
   els.generatePreviewBtn?.addEventListener("click", handleGeneratePreview);
   els.renderOverlayBtn?.addEventListener("click", handleRenderOverlay);
 
-  els.backToLapTimesPreview?.addEventListener("click", (event) => {
+  els.backToSetup?.addEventListener("click", (event) => {
     event.preventDefault();
-    router.goTo("lapTimes");
+    router.goTo("offsets");
   });
 
   syncFromLapData();

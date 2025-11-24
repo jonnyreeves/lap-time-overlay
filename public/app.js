@@ -10,10 +10,6 @@ import {
   initOffsetsStep,
 } from "./steps/offsetsStep.js";
 import {
-  renderLapTimesStep,
-  initLapTimesStep,
-} from "./steps/lapTimesStep.js";
-import {
   renderPreviewStep,
   initPreviewStep,
 } from "./steps/previewStep.js";
@@ -21,11 +17,11 @@ import {
   renderTransformStep,
   initTransformStep,
 } from "./steps/transformStep.js";
+import { setStatus } from "./status.js";
 
 const stepsRoot = document.getElementById("stepsRoot");
 renderUploadStep(stepsRoot);
 renderOffsetsStep(stepsRoot);
-renderLapTimesStep(stepsRoot);
 renderPreviewStep(stepsRoot);
 renderTransformStep(stepsRoot);
 
@@ -35,19 +31,36 @@ const router = createRouter({
   steps: {
     upload: els.stepUpload,
     offsets: els.stepOffsets,
-    lapTimes: els.stepLapTimes,
     preview: els.stepPreview,
     transform: els.stepTransform,
   },
 });
 
-const offsets = initOffsetsStep({ els, state, router });
+const goToRaw = router.goTo;
+router.goTo = (name, options = {}) => {
+  if (name === "offsets" && !state.uploadReady) {
+    setStatus(
+      els.statusBody,
+      "Upload a video before setting the start offset.",
+      true
+    );
+    return goToRaw("upload", { replaceHistory: true });
+  }
+  return goToRaw(name, options);
+};
+
 const transform = initTransformStep({ els, state, router });
 const preview = initPreviewStep({
   els,
   state,
   router,
   startPolling: transform.startPolling,
+});
+const offsets = initOffsetsStep({
+  els,
+  state,
+  router,
+  onLapDataReady: preview.syncFromLapData,
 });
 initUploadStep({
   els,
@@ -56,12 +69,6 @@ initUploadStep({
   preparePreviewFromFile: offsets.preparePreviewFromFile,
   preparePreviewFromUpload: offsets.preparePreviewFromUpload,
   handleUploadInfo: offsets.handleUploadInfo,
-});
-initLapTimesStep({
-  els,
-  state,
-  router,
-  onLapDataReady: preview.syncFromLapData,
 });
 
 const initialStep = router.getInitialStep();

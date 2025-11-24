@@ -38,7 +38,7 @@ export function renderUploadStep(root) {
         </div>
         <div class="step-nav">
           <button class="btn btn--primary" id="nextToOffsets" disabled>
-            Next: Offsets
+            Next: Lap data & start
           </button>
         </div>
       </div>
@@ -136,7 +136,13 @@ export function initUploadStep(options) {
     if (els.overlayOpacityInput) els.overlayOpacityInput.value = "60";
     if (els.overlayOpacityLabel) els.overlayOpacityLabel.textContent = "60%";
     els.nextToOffsets.disabled = true;
-    els.nextToLapTimes.disabled = true;
+    if (els.nextToPreview) els.nextToPreview.disabled = true;
+    if (els.alignmentPreviewBtn) els.alignmentPreviewBtn.disabled = true;
+    if (els.alignmentLapSelect) {
+      els.alignmentLapSelect.innerHTML =
+        '<option value="">Add lap data first</option>';
+      els.alignmentLapSelect.disabled = true;
+    }
     els.uploadProgressBar.style.width = "0%";
     setChooserEnabled(true);
     els.uploadProgressText.textContent = files.length
@@ -371,7 +377,8 @@ export function initUploadStep(options) {
     }
     els.uploadBtn.disabled = true;
     els.nextToOffsets.disabled = true;
-    els.nextToLapTimes.disabled = true;
+    if (els.nextToPreview) els.nextToPreview.disabled = true;
+    if (els.alignmentPreviewBtn) els.alignmentPreviewBtn.disabled = true;
     isUploading = true;
     setChooserEnabled(false);
     state.uploadReady = false;
