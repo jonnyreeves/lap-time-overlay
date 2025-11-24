@@ -8,6 +8,8 @@ export interface OverlayStyle {
   showLapCounter: boolean;
   showPosition: boolean;
   showCurrentLapTime: boolean;
+  overlayPosition: "bottom-left" | "top-left" | "top-right" | "bottom-right";
+  boxWidthRatio: number;
 }
 
 export interface RenderContext {
@@ -26,4 +28,6 @@ export const DEFAULT_OVERLAY_STYLE: OverlayStyle = {
   showLapCounter: true,
   showPosition: true,
   showCurrentLapTime: true,
+  overlayPosition: "bottom-left",
+  boxWidthRatio: 0.45,
 };

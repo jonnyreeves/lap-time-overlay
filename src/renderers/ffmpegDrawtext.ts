@@ -65,6 +65,12 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
     style.showPosition ?? DEFAULT_OVERLAY_STYLE.showPosition;
   const showCurrentLapTime =
     style.showCurrentLapTime ?? DEFAULT_OVERLAY_STYLE.showCurrentLapTime;
+  const overlayPosition =
+    style.overlayPosition ?? DEFAULT_OVERLAY_STYLE.overlayPosition;
+  const boxWidthRatio =
+    Number.isFinite(style.boxWidthRatio) && style.boxWidthRatio > 0
+      ? Math.min(0.9, Math.max(0.15, style.boxWidthRatio))
+      : DEFAULT_OVERLAY_STYLE.boxWidthRatio;
   const hasPositionData = showPosition && laps.some((lap) => lap.position > 0);
   const hasInfoLine = showLapCounter || hasPositionData;
   const lineCount =
@@ -75,7 +81,7 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
   }
 
   const margin = 20;
-  const boxWidth = Math.floor(width * 0.45);
+  const boxWidth = Math.floor(width * boxWidthRatio);
   const fontSize = 32;
   const lineSpacing = 8;
   const paddingY = 10;
@@ -83,8 +89,15 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
     lineCount * fontSize +
     Math.max(0, lineCount - 1) * lineSpacing +
     paddingY * 2;
-  const boxX = margin;
-  const boxY = height - boxHeight - margin;
+  const boxX =
+    overlayPosition.endsWith("right") && width > margin + boxWidth
+      ? width - boxWidth - margin
+      : margin;
+  const boxY = overlayPosition.startsWith("top")
+    ? margin
+    : height - boxHeight - margin;
+  const alignRight = overlayPosition.endsWith("right");
+  const paddingX = 12;
 
   const overlayStart = startOffsetS;
   const overlayEnd = startOffsetS + totalSessionDuration(laps);
@@ -105,6 +118,9 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
   const infoLineIndex = hasInfoLine ? 0 : null;
   const timeLineIndex =
     showCurrentLapTime && lineCount > 0 ? lineCount - 1 : null;
+  const textXExpr = alignRight
+    ? `${boxX + boxWidth - paddingX}-text_w`
+    : `${boxX + paddingX}`;
 
   laps.forEach((lap) => {
     const lapStart = overlayStart + lap.startS;
@@ -123,7 +139,7 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
       filters.push(
         `[${currentLabel}]drawtext=text='${escapeDrawtext(
           infoParts.join("   ")
-        )}':fontcolor=${toFfmpegColor(textColor)}:fontsize=${fontSize}:x=${boxX + 12}:y=${y}:enable='${lapEnable}'[${(currentLabel =
+        )}':fontcolor=${toFfmpegColor(textColor)}:fontsize=${fontSize}:x=${textXExpr}:y=${y}:enable='${lapEnable}'[${(currentLabel =
           nextLabel())}]`
       );
     }
@@ -134,7 +150,7 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
       filters.push(
         `[${currentLabel}]drawtext=text='${escapeDrawtextExpression(
           timeText
-        )}':fontcolor=${toFfmpegColor(textColor)}:fontsize=${fontSize}:x=${boxX + 12}:y=${y}:enable='${lapEnable}'[${(currentLabel =
+        )}':fontcolor=${toFfmpegColor(textColor)}:fontsize=${fontSize}:x=${textXExpr}:y=${y}:enable='${lapEnable}'[${(currentLabel =
           nextLabel())}]`
       );
     }

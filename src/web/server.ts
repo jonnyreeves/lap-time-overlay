@@ -63,6 +63,8 @@ interface RenderRequestBody {
   showLapCounter?: boolean;
   showPosition?: boolean;
   showCurrentLapTime?: boolean;
+  overlayPosition?: OverlayStyle["overlayPosition"];
+  overlayWidthRatio?: number;
   previewLapNumber?: number;
 }
 
@@ -595,6 +597,10 @@ function resolveOverlayStyle(body: RenderRequestBody): OverlayStyle {
     body.overlayBoxOpacity != null && Number.isFinite(body.overlayBoxOpacity)
       ? Math.min(1, Math.max(0, Number(body.overlayBoxOpacity)))
       : DEFAULT_OVERLAY_STYLE.boxOpacity;
+  const boxWidthRatio =
+    body.overlayWidthRatio != null && Number.isFinite(body.overlayWidthRatio)
+      ? Math.min(0.9, Math.max(0.15, Number(body.overlayWidthRatio)))
+      : DEFAULT_OVERLAY_STYLE.boxWidthRatio;
   const showLapCounter =
     typeof body.showLapCounter === "boolean"
       ? body.showLapCounter
@@ -615,6 +621,14 @@ function resolveOverlayStyle(body: RenderRequestBody): OverlayStyle {
     showLapCounter,
     showPosition,
     showCurrentLapTime,
+    boxWidthRatio,
+    overlayPosition:
+      body.overlayPosition &&
+      ["bottom-left", "top-left", "top-right", "bottom-right"].includes(
+        body.overlayPosition
+      )
+        ? body.overlayPosition
+        : DEFAULT_OVERLAY_STYLE.overlayPosition,
   };
 }
 

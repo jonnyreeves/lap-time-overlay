@@ -117,6 +117,9 @@ export function initUploadStep(options) {
     state.showLapCounter = true;
     state.showPosition = true;
     state.showCurrentLapTime = true;
+    state.overlayPosition = "bottom-left";
+    state.overlayWidthPct = 45;
+    state.overlayOpacityPct = 60;
     state.lapCount = 0;
     state.previewLapNumber = 1;
     els.lapFormatSelect.value = "daytona";
@@ -127,6 +130,11 @@ export function initUploadStep(options) {
     if (els.showLapCounterInput) els.showLapCounterInput.checked = true;
     if (els.showPositionInput) els.showPositionInput.checked = true;
     if (els.showCurrentLapTimeInput) els.showCurrentLapTimeInput.checked = true;
+    if (els.overlayPositionSelect) els.overlayPositionSelect.value = "bottom-left";
+    if (els.overlayWidthInput) els.overlayWidthInput.value = "45";
+    if (els.overlayWidthLabel) els.overlayWidthLabel.textContent = "45%";
+    if (els.overlayOpacityInput) els.overlayOpacityInput.value = "60";
+    if (els.overlayOpacityLabel) els.overlayOpacityLabel.textContent = "60%";
     els.nextToOffsets.disabled = true;
     els.nextToLapTimes.disabled = true;
     els.uploadProgressBar.style.width = "0%";

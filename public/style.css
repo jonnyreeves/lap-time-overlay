@@ -600,6 +600,24 @@ textarea {
   padding: 0;
 }
 
+.field__range {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.field__range-value {
+  min-width: 48px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+input[type="range"] {
+  padding: 0;
+  height: auto;
+}
+
 .field__hint {
   color: var(--muted);
   font-size: 13px;

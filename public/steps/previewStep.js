@@ -44,7 +44,48 @@ export function renderPreviewStep(root) {
           <label class="field">
             <span>Box tint</span>
             <input type="color" id="boxColor" value="#000000" />
-            <div class="field__hint">Applied with 60% opacity.</div>
+            <div class="field__hint">Applied with chosen opacity.</div>
+          </label>
+          <label class="field">
+            <span>Overlay position</span>
+            <select id="overlayPosition">
+              <option value="bottom-left">Bottom left</option>
+              <option value="top-left">Top left</option>
+              <option value="top-right">Top right</option>
+              <option value="bottom-right">Bottom right</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Overlay opacity</span>
+            <div class="field__range">
+              <input
+                type="range"
+                id="overlayOpacity"
+                min="0"
+                max="100"
+                value="60"
+              />
+              <span id="overlayOpacityLabel" class="field__range-value">60%</span>
+            </div>
+            <div class="field__hint">
+              0% removes the tint; text stays fully opaque.
+            </div>
+          </label>
+          <label class="field">
+            <span>Overlay width</span>
+            <div class="field__range">
+              <input
+                type="range"
+                id="overlayWidth"
+                min="15"
+                max="80"
+                value="45"
+              />
+              <span id="overlayWidthLabel" class="field__range-value">45%</span>
+            </div>
+            <div class="field__hint">
+              Percentage of video width (15–80% recommended).
+            </div>
           </label>
           <div class="field">
             <span>Overlay content</span>
@@ -121,6 +162,29 @@ export function initPreviewStep({ els, state, router, startPolling }) {
     }
   };
 
+  const syncPositionInput = () => {
+    if (!els.overlayPositionSelect) return;
+    els.overlayPositionSelect.value = state.overlayPosition || "bottom-left";
+  };
+
+  const syncOpacityInput = () => {
+    if (!els.overlayOpacityInput) return;
+    const pct = Math.round(state.overlayOpacityPct ?? 60);
+    els.overlayOpacityInput.value = String(pct);
+    if (els.overlayOpacityLabel) {
+      els.overlayOpacityLabel.textContent = `${pct}%`;
+    }
+  };
+
+  const syncWidthInput = () => {
+    if (!els.overlayWidthInput) return;
+    const pct = Math.round(state.overlayWidthPct ?? 45);
+    els.overlayWidthInput.value = String(pct);
+    if (els.overlayWidthLabel) {
+      els.overlayWidthLabel.textContent = `${pct}%`;
+    }
+  };
+
   const syncContentToggles = () => {
     if (els.showLapCounterInput) {
       els.showLapCounterInput.checked = Boolean(state.showLapCounter);
@@ -167,6 +231,9 @@ export function initPreviewStep({ els, state, router, startPolling }) {
         : Number(state.startFrame),
     overlayTextColor: state.textColor,
     overlayBoxColor: state.boxColor,
+    overlayBoxOpacity: (state.overlayOpacityPct ?? 60) / 100,
+    overlayPosition: state.overlayPosition,
+    overlayWidthRatio: (state.overlayWidthPct ?? 45) / 100,
     showLapCounter: state.showLapCounter,
     showPosition: state.showPosition,
     showCurrentLapTime: state.showCurrentLapTime,
@@ -283,6 +350,9 @@ export function initPreviewStep({ els, state, router, startPolling }) {
     if (state.lapText) setPreviewStatus("Ready to preview");
     else setPreviewStatus("Waiting for lap data…");
     syncColorInputs();
+    syncPositionInput();
+    syncOpacityInput();
+    syncWidthInput();
     syncContentToggles();
     updateButtons(false);
     updateLapOptions(state.lapCount || 0);
@@ -313,6 +383,32 @@ export function initPreviewStep({ els, state, router, startPolling }) {
   });
   els.showCurrentLapTimeInput?.addEventListener("change", () => {
     state.showCurrentLapTime = Boolean(els.showCurrentLapTimeInput.checked);
+  });
+  els.overlayPositionSelect?.addEventListener("change", () => {
+    const value = els.overlayPositionSelect.value;
+    state.overlayPosition = value || "bottom-left";
+  });
+  els.overlayWidthInput?.addEventListener("input", () => {
+    const value = Number(els.overlayWidthInput.value);
+    if (Number.isFinite(value)) {
+      const clamped = Math.min(80, Math.max(15, Math.round(value)));
+      state.overlayWidthPct = clamped;
+      els.overlayWidthInput.value = String(clamped);
+      if (els.overlayWidthLabel) {
+        els.overlayWidthLabel.textContent = `${clamped}%`;
+      }
+    }
+  });
+  els.overlayOpacityInput?.addEventListener("input", () => {
+    const value = Number(els.overlayOpacityInput.value);
+    if (Number.isFinite(value)) {
+      const clamped = Math.min(100, Math.max(0, Math.round(value)));
+      state.overlayOpacityPct = clamped;
+      els.overlayOpacityInput.value = String(clamped);
+      if (els.overlayOpacityLabel) {
+        els.overlayOpacityLabel.textContent = `${clamped}%`;
+      }
+    }
   });
   els.previewLapSelect?.addEventListener("change", () => {
     const n = Number(els.previewLapSelect.value);

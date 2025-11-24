@@ -38,6 +38,12 @@ export function createOverlayDrawer(params: {
     style.showPosition ?? DEFAULT_OVERLAY_STYLE.showPosition;
   const showCurrentLapTime =
     style.showCurrentLapTime ?? DEFAULT_OVERLAY_STYLE.showCurrentLapTime;
+  const overlayPosition =
+    style.overlayPosition ?? DEFAULT_OVERLAY_STYLE.overlayPosition;
+  const boxWidthRatio =
+    Number.isFinite(style.boxWidthRatio) && style.boxWidthRatio > 0
+      ? Math.min(0.9, Math.max(0.15, style.boxWidthRatio))
+      : DEFAULT_OVERLAY_STYLE.boxWidthRatio;
   const hasPositionData = showPosition && laps.some((lap) => lap.position > 0);
   const hasInfoLine = showLapCounter || hasPositionData;
   const lineCount =
@@ -57,7 +63,7 @@ export function createOverlayDrawer(params: {
   const ctx = canvas.getContext("2d");
 
   const margin = 20;
-  const boxWidth = Math.floor(width * 0.45);
+  const boxWidth = Math.floor(width * boxWidthRatio);
   const fontSize = 32;
   const lineSpacing = 8;
   const paddingY = 10;
@@ -65,8 +71,15 @@ export function createOverlayDrawer(params: {
     lineCount * fontSize +
     Math.max(0, lineCount - 1) * lineSpacing +
     paddingY * 2;
-  const boxX = margin;
-  const boxY = height - boxHeight - margin;
+  const boxX =
+    overlayPosition.endsWith("right") && width > margin + boxWidth
+      ? width - boxWidth - margin
+      : margin;
+  const boxY = overlayPosition.startsWith("top")
+    ? margin
+    : height - boxHeight - margin;
+  const alignRight = overlayPosition.endsWith("right");
+  const paddingX = 12;
 
   const sessionTotal = totalSessionDuration(laps);
 
@@ -96,8 +109,11 @@ export function createOverlayDrawer(params: {
         ctx.fillStyle = textColor;
         ctx.font = `${fontSize}px sans-serif`;
         ctx.textBaseline = "top";
+        ctx.textAlign = alignRight ? "right" : "left";
 
-        const textX = boxX + 12;
+        const textX = alignRight
+          ? boxX + boxWidth - paddingX
+          : boxX + paddingX;
         let textY = boxY + paddingY;
 
         if (hasInfoLine && infoParts.length) {
