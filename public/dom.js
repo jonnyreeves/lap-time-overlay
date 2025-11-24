@@ -3,7 +3,9 @@ const byId = (id) => document.getElementById(id);
 export function collectElements() {
   return {
     uploadInput: byId("inputVideo"),
+    uploadDrop: byId("uploadDrop"),
     uploadBtn: byId("uploadBtn"),
+    uploadList: byId("uploadList"),
     uploadProgressBar: byId("uploadProgressBar"),
     uploadProgressText: byId("uploadProgressText"),
     lapTextArea: byId("lapText"),

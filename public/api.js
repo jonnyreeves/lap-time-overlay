@@ -28,6 +28,18 @@ export function uploadVideo(file, { onProgress }) {
   });
 }
 
+export async function combineUploads(uploadIds) {
+  const res = await fetch("/api/upload/combine", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ uploadIds }),
+  });
+  if (!res.ok) {
+    throw new Error("Combine failed");
+  }
+  return res.json();
+}
+
 export async function startRender(payload) {
   const res = await fetch("/api/render", {
     method: "POST",

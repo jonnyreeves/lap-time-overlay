@@ -53,7 +53,8 @@ initUploadStep({
   els,
   state,
   router,
-  preparePreview: offsets.preparePreview,
+  preparePreviewFromFile: offsets.preparePreviewFromFile,
+  preparePreviewFromUpload: offsets.preparePreviewFromUpload,
   handleUploadInfo: offsets.handleUploadInfo,
 });
 initLapTimesStep({

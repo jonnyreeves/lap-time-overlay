@@ -85,6 +85,7 @@ export function renderOffsetsStep(root) {
 
 export function initOffsetsStep(options) {
   const { els, state, router } = options;
+  let previewIsObjectUrl = false;
 
   const videoControls = createVideoControls({
     video: els.previewVideo,
@@ -112,16 +113,29 @@ export function initOffsetsStep(options) {
     els.nextToLapTimes.disabled = !els.startFrameInput.value.trim();
   }
 
-  function preparePreview(file) {
-    if (state.previewUrl) {
+  function setPreviewSource(url, { isObjectUrl }) {
+    if (previewIsObjectUrl && state.previewUrl) {
       URL.revokeObjectURL(state.previewUrl);
     }
-    state.previewUrl = URL.createObjectURL(file);
-    els.previewVideo.src = state.previewUrl;
+    state.previewUrl = url;
+    previewIsObjectUrl = isObjectUrl;
+    els.previewVideo.src = url;
     els.previewVideo.load();
     els.startFrameInput.value = "";
     videoControls.setEnabled(false);
     updateNextButton();
+  }
+
+  function preparePreviewFromFile(file) {
+    if (!file) return;
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewSource(objectUrl, { isObjectUrl: true });
+  }
+
+  function preparePreviewFromUpload(uploadId) {
+    if (!uploadId) return;
+    const url = `/api/upload/${encodeURIComponent(uploadId)}/file`;
+    setPreviewSource(url, { isObjectUrl: false });
   }
 
   function handleUploadInfo(info) {
@@ -182,5 +196,16 @@ export function initOffsetsStep(options) {
     }
   });
 
-  return { preparePreview, handleUploadInfo, videoControls };
+  window.addEventListener("beforeunload", () => {
+    if (previewIsObjectUrl && state.previewUrl) {
+      URL.revokeObjectURL(state.previewUrl);
+    }
+  });
+
+  return {
+    preparePreviewFromFile,
+    preparePreviewFromUpload,
+    handleUploadInfo,
+    videoControls,
+  };
 }

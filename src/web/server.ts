@@ -72,6 +72,9 @@ const server = http.createServer(async (req, res) => {
   if (req.method === "POST" && url.pathname === "/api/upload") {
     return void handleUpload(req, res, url);
   }
+  if (req.method === "POST" && url.pathname === "/api/upload/combine") {
+    return void handleCombineUploads(req, res);
+  }
   if (
     req.method === "GET" &&
     url.pathname.startsWith("/api/upload/") &&
@@ -80,6 +83,15 @@ const server = http.createServer(async (req, res) => {
     const parts = url.pathname.split("/").filter(Boolean); // api, upload, {id}, info
     const uploadId = parts[2];
     return void handleUploadInfo(res, uploadId);
+  }
+  if (
+    req.method === "GET" &&
+    url.pathname.startsWith("/api/upload/") &&
+    url.pathname.endsWith("/file")
+  ) {
+    const parts = url.pathname.split("/").filter(Boolean);
+    const uploadId = parts[2];
+    return void handleUploadFile(req, res, uploadId);
   }
   if (req.method === "POST" && url.pathname === "/api/preview") {
     return void handlePreview(req, res);
@@ -174,6 +186,59 @@ async function handleUpload(
   }
 }
 
+async function handleCombineUploads(
+  req: http.IncomingMessage,
+  res: http.ServerResponse
+): Promise<void> {
+  let body: { uploadIds?: unknown };
+  try {
+    body = (await readJsonBody(req)) as { uploadIds?: unknown };
+  } catch (err) {
+    sendJson(res, 400, { error: (err as Error).message });
+    return;
+  }
+
+  const ids = Array.isArray(body.uploadIds)
+    ? body.uploadIds.filter((id): id is string => typeof id === "string")
+    : [];
+  if (!ids.length) {
+    sendJson(res, 400, { error: "uploadIds is required" });
+    return;
+  }
+
+  const files: UploadedFile[] = [];
+  for (const id of ids) {
+    const upload = uploads.get(id as string);
+    if (!upload) {
+      sendJson(res, 404, { error: "One or more uploads not found" });
+      return;
+    }
+    files.push(upload);
+  }
+
+  if (files.length === 1) {
+    const single = files[0];
+    sendJson(res, 200, {
+      uploadId: single.id,
+      filename: single.filename,
+      size: single.size,
+    });
+    return;
+  }
+
+  try {
+    const combined = await concatenateUploads(files);
+    sendJson(res, 200, {
+      uploadId: combined.id,
+      filename: combined.filename,
+      size: combined.size,
+    });
+  } catch (err) {
+    console.error("Combine failed:", err);
+    sendJson(res, 500, { error: "Combine failed" });
+  }
+}
+
 async function handleUploadInfo(
   res: http.ServerResponse,
   uploadId?: string
@@ -202,6 +267,70 @@ async function handleUploadInfo(
   } catch (err) {
     console.error("ffprobe failed:", err);
     sendJson(res, 500, { error: "Failed to probe video" });
+  }
+}
+
+async function handleUploadFile(
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+  uploadId?: string
+): Promise<void> {
+  if (!uploadId) {
+    sendJson(res, 400, { error: "Missing upload id" });
+    return;
+  }
+  const upload = uploads.get(uploadId);
+  if (!upload) {
+    sendJson(res, 404, { error: "Upload not found" });
+    return;
+  }
+
+  try {
+    const stats = await fs.stat(upload.path);
+    const fileSize = stats.size;
+    const range = req.headers.range;
+
+    if (range) {
+      const match = /^bytes=(\d+)-(\d*)$/.exec(range);
+      if (!match) {
+        sendJson(res, 416, { error: "Invalid range" });
+        return;
+      }
+      const start = Number(match[1]);
+      const endRaw = match[2];
+      const end = endRaw ? Number(endRaw) : fileSize - 1;
+      if (
+        !Number.isFinite(start) ||
+        start < 0 ||
+        !Number.isFinite(end) ||
+        start >= fileSize
+      ) {
+        sendJson(res, 416, { error: "Invalid range" });
+        return;
+      }
+      const finalEnd = Math.min(fileSize - 1, Math.max(start, end));
+      const chunkSize = finalEnd - start + 1;
+
+      res.writeHead(206, {
+        "Content-Range": `bytes ${start}-${finalEnd}/${fileSize}`,
+        "Accept-Ranges": "bytes",
+        "Content-Length": chunkSize,
+        "Content-Type": "video/mp4",
+        "Cache-Control": "no-cache",
+      });
+      createReadStream(upload.path, { start, end: finalEnd }).pipe(res);
+      return;
+    }
+
+    res.writeHead(200, {
+      "Content-Length": fileSize,
+      "Content-Type": "video/mp4",
+      "Cache-Control": "no-cache",
+    });
+    createReadStream(upload.path).pipe(res);
+  } catch (err) {
+    console.error("Stream upload failed:", err);
+    sendJson(res, 500, { error: "Failed to stream upload" });
   }
 }
 
@@ -535,6 +664,64 @@ function parseOverlayRequest(
     startTimestamp,
     style: resolveOverlayStyle(body),
   };
+}
+
+async function concatenateUploads(
+  files: UploadedFile[]
+): Promise<UploadedFile> {
+  const concatId = randomUUID();
+  const listPath = path.join(uploadsDir, `${Date.now()}-${concatId}.txt`);
+  const firstName = files[0]?.filename ?? "combined";
+  const baseName =
+    path.basename(firstName, path.extname(firstName)).replace(/[^\w.\-]+/g, "_") ||
+    "combined";
+  const outputName = `${baseName}-combined.mp4`;
+  const outputPath = path.join(uploadsDir, `${Date.now()}-${outputName}`);
+  const listContent = files
+    .map((file) => {
+      const escaped = file.path.replace(/'/g, "''");
+      return `file '${escaped}'`;
+    })
+    .join("\n");
+  await fs.writeFile(listPath, listContent, "utf8");
+
+  try {
+    await runConcatCommand(listPath, outputPath);
+    const stats = await fs.stat(outputPath);
+    const combined: UploadedFile = {
+      id: concatId,
+      filename: outputName,
+      path: outputPath,
+      size: stats.size,
+      createdAt: Date.now(),
+    };
+    uploads.set(concatId, combined);
+    return combined;
+  } catch (err) {
+    await safeUnlink(outputPath);
+    throw err;
+  } finally {
+    await safeUnlink(listPath);
+  }
+}
+
+function runConcatCommand(
+  listPath: string,
+  outputPath: string
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const cmd = ffmpeg()
+      .input(listPath)
+      .inputOptions(["-f", "concat", "-safe", "0"])
+      .outputOptions(["-c", "copy", "-fflags", "+genpts"])
+      .output(outputPath);
+
+    cmd
+      .on("end", () => resolve())
+      .on("error", (err) => reject(err));
+
+    cmd.run();
+  });
 }
 
 async function renderPreviewFrame(options: {

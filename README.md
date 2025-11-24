@@ -23,7 +23,7 @@ npm run web
 
 Then open http://localhost:3000 and walk through the steps:
 
-1. **Upload video** – drop an MP4 (streamed to disk, 4GB+ ok).
+1. **Upload video** – select one or more MP4s in order (streamed to disk, 4GB+ ok).
 2. **Set offsets** – scrub the preview and mark the start frame.
 3. **Lap data** – paste laps, pick format/driver (TeamSport), save.
 4. **Preview** – auto-generates a single-frame overlay just after your start; tweak text/box colors.
@@ -44,6 +44,7 @@ npm run lap-timer -- \
 
 - `--startFrame` can be used instead of `--startTimestamp` (frame index).
 - `--lapFormat teamsport` needs `--driverName "Your Name"` to select the right column from the table export.
+- You can concatenate multiple sources in order with repeated `--inputVideo` flags (e.g. `--inputVideo a.mp4 --inputVideo b.mp4`).
 - Overlay is ffmpeg-only in the web UI and CLI to keep the flow simple.
 
 ## Development
