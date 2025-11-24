@@ -5,7 +5,7 @@ Overlay karting lap and position info on top of a video using the ffmpeg drawtex
 ## Prereqs
 
 ```
-brew install pkg-config cairo pango libpng jpeg giflib librsvg ffmpeg
+brew install ffmpeg
 ```
 Node 18+ is recommended.
 
