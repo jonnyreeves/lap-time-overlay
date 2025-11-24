@@ -63,8 +63,9 @@ async function renderFinalVideo(options: {
   overlayDir: string;
   fps: number;
   outputFile: string;
+  onProgress?: (percent: number) => void;
 }) {
-  const { inputVideo, overlayDir, fps, outputFile } = options;
+  const { inputVideo, overlayDir, fps, outputFile, onProgress } = options;
 
   const overlayPattern = path.join(overlayDir, "overlay_%06d.png");
 
@@ -99,10 +100,11 @@ async function renderFinalVideo(options: {
         console.log(cmdLine);
       })
       .on("progress", (progress) => {
-        if (progress.percent != null) {
-          process.stdout.write(
-            `\rRendering: ${progress.percent.toFixed(1)}%     `
-          );
+        const pct = Number(progress.percent);
+        if (Number.isFinite(pct)) {
+          const clamped = Math.min(100, Math.max(0, pct));
+          onProgress?.(clamped);
+          process.stdout.write(`\rRendering: ${clamped.toFixed(1)}%     `);
         }
       })
       .on("end", () => {
@@ -141,16 +143,17 @@ export async function renderWithImageSequence(
       height,
       fps,
       videoDuration: duration,
-    laps,
-    startOffsetS,
-    style,
-  });
+      laps,
+      startOffsetS,
+      style,
+    });
 
     await renderFinalVideo({
       inputVideo,
       overlayDir: tmpDir,
       fps,
       outputFile,
+      onProgress: ctx.onProgress,
     });
   } finally {
     try {

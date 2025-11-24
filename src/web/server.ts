@@ -42,6 +42,7 @@ interface RenderJob {
   status: JobStatus;
   startedAt?: number;
   finishedAt?: number;
+  progress?: number;
   error?: string;
   outputPath?: string;
   outputName?: string;
@@ -373,6 +374,7 @@ async function handleRender(
     status: "queued",
     uploadId,
     inputPath,
+    progress: 0,
   };
   jobs.set(jobId, job);
 
@@ -477,6 +479,7 @@ async function handleJobStatus(res: http.ServerResponse, jobId: string) {
     finishedAt: job.finishedAt,
   };
 
+  if (job.progress != null) payload.progress = job.progress;
   if (job.error) payload.error = job.error;
   if (job.outputName) payload.outputName = job.outputName;
   if (job.status === "complete") {
@@ -803,6 +806,12 @@ async function startRenderJob(options: {
   const { job } = options;
   job.status = "running";
   job.startedAt = Date.now();
+  job.progress = 0;
+
+  const updateProgress = (pct: number) => {
+    if (!Number.isFinite(pct)) return;
+    job.progress = Math.min(100, Math.max(0, Number(pct)));
+  };
 
   try {
     const laps = parseLapText(
@@ -835,12 +844,14 @@ async function startRenderJob(options: {
       laps,
       startOffsetS,
       style: options.style,
+      onProgress: updateProgress,
     });
 
     job.status = "complete";
     job.finishedAt = Date.now();
     job.outputPath = outputPath;
     job.outputName = outputName;
+    job.progress = 100;
   } catch (err) {
     job.status = "error";
     job.finishedAt = Date.now();

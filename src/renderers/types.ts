@@ -19,6 +19,7 @@ export interface RenderContext {
   laps: Lap[];
   startOffsetS: number;
   style: OverlayStyle;
+  onProgress?: (percent: number) => void;
 }
 
 export const DEFAULT_OVERLAY_STYLE: OverlayStyle = {

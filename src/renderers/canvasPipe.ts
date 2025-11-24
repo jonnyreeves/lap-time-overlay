@@ -58,10 +58,11 @@ export async function renderWithCanvasPipe(ctx: RenderContext): Promise<void> {
         console.log(cmdLine);
       })
       .on("progress", (progress) => {
-        if (progress.percent != null) {
-          process.stdout.write(
-            `\rRendering: ${progress.percent.toFixed(1)}%     `
-          );
+        const pct = Number(progress.percent);
+        if (Number.isFinite(pct)) {
+          const clamped = Math.min(100, Math.max(0, pct));
+          ctx.onProgress?.(clamped);
+          process.stdout.write(`\rRendering: ${clamped.toFixed(1)}%     `);
         }
       })
       .on("end", () => {
