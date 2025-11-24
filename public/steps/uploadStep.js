@@ -29,7 +29,7 @@ export function renderUploadStep(root) {
         </label>
         <div class="upload__list" id="uploadList">
         </div>
-        <button id="uploadBtn" class="btn">Upload files</button>
+        <button id="uploadBtn" class="btn">Combine files</button>
         <div class="progress" id="uploadProgress">
           <div class="progress__bar" id="uploadProgressBar"></div>
           <div class="progress__text" id="uploadProgressText">
@@ -60,6 +60,13 @@ export function initUploadStep(options) {
 
   let segments = [];
   let isUploading = false;
+  let modalRoot = null;
+  let modalVideo = null;
+  const clearFileInput = () => {
+    if (els.uploadInput) {
+      els.uploadInput.value = "";
+    }
+  };
 
   if (els.uploadDrop) {
     ["dragenter", "dragover", "drop"].forEach((eventName) => {
@@ -83,12 +90,22 @@ export function initUploadStep(options) {
     });
   });
 
+  const setChooserEnabled = (enabled) => {
+    if (els.uploadInput) {
+      els.uploadInput.disabled = !enabled;
+    }
+    if (els.uploadDrop) {
+      els.uploadDrop.classList.toggle("upload__drop--disabled", !enabled);
+    }
+  };
+
   function resetForFiles(files) {
     state.uploadId = null;
     state.uploadName = null;
     state.uploadSize = 0;
     state.videoInfo = null;
     state.uploadSegments = [];
+    state.uploadCombined = false;
     state.uploadReady = false;
     state.lapText = "";
     state.lapFormat = "daytona";
@@ -107,9 +124,10 @@ export function initUploadStep(options) {
     els.nextToOffsets.disabled = true;
     els.nextToLapTimes.disabled = true;
     els.uploadProgressBar.style.width = "0%";
+    setChooserEnabled(true);
     els.uploadProgressText.textContent = files.length
-      ? `Ready to upload ${files.length} file${files.length > 1 ? "s" : ""}…`
-      : "Waiting to upload…";
+      ? `Ready to combine ${files.length} file${files.length > 1 ? "s" : ""}…`
+      : "Waiting to combine…";
     els.videoMeta.textContent = "Waiting for upload…";
     setStatus(
       els.statusBody,
@@ -122,22 +140,44 @@ export function initUploadStep(options) {
     }
   }
 
+  function revokeSegmentPreviews(list = segments) {
+    list.forEach((seg) => {
+      if (seg.previewUrl) {
+        URL.revokeObjectURL(seg.previewUrl);
+      }
+    });
+  }
+
   function applyFileList(files) {
+    revokeSegmentPreviews(segments);
     segments = files.map((file) => ({
       file,
       name: file.name,
       size: file.size,
       status: "pending",
       uploadId: null,
+      previewUrl: URL.createObjectURL(file),
     }));
     resetForFiles(files);
     renderUploads();
     router.goTo("upload");
+    clearFileInput();
   }
 
   function renderUploads() {
     if (!els.uploadList) return;
     const uploading = segments.some((s) => s.status === "uploading") || isUploading;
+    if (els.uploadBtn) {
+      const noSelection = segments.length === 0;
+      const label =
+        state.uploadCombined && segments.length >= 1
+          ? "Reset"
+          : segments.length === 1
+          ? "Upload file"
+          : "Combine files";
+      els.uploadBtn.textContent = label;
+      els.uploadBtn.disabled = uploading || (!state.uploadCombined && noSelection);
+    }
     render(
       html`
         ${segments.length === 0
@@ -145,8 +185,21 @@ export function initUploadStep(options) {
           : html`
               <ol class="upload__items">
                 ${segments.map(
-            (item, idx) => html`
+                  (item, idx) => html`
                     <li class="upload__item">
+                      <div class="upload__thumb-wrap">
+                        ${item.previewUrl
+                          ? html`<video
+                              class="upload__thumb"
+                              src=${item.previewUrl}
+                              muted
+                              preload="metadata"
+                              playsinline
+                              loop
+                              data-index="${idx}"
+                            ></video>`
+                          : html`<div class="upload__thumb upload__thumb--empty"></div>`}
+                      </div>
                       <div class="upload__item-main">
                         <span class="upload__order">${idx + 1}.</span>
                         <span class="upload__name">${item.name}</span>
@@ -200,12 +253,12 @@ export function initUploadStep(options) {
           )}
               </ol>
               ${state.uploadReady
-              ? html`<p class="muted">
+                ? html`<p class="muted">
                     Combined video ready: ${state.uploadName} (${formatBytes(
-                state.uploadSize
-              )})
+                      state.uploadSize
+                    )})
                   </p>`
-              : ""}
+                : ""}
             `}
       `,
       els.uploadList
@@ -229,6 +282,7 @@ export function initUploadStep(options) {
     state.uploadId = upload.uploadId;
     state.uploadName = upload.filename;
     state.uploadSize = upload.size;
+    state.uploadCombined = true;
     state.uploadReady = true;
     renderUploads();
     preparePreviewFromUpload?.(upload.uploadId);
@@ -305,6 +359,7 @@ export function initUploadStep(options) {
     els.nextToOffsets.disabled = true;
     els.nextToLapTimes.disabled = true;
     isUploading = true;
+    setChooserEnabled(false);
     state.uploadReady = false;
     state.uploadSegments = [];
     segments = segments.map((seg) => ({
@@ -353,6 +408,9 @@ export function initUploadStep(options) {
     } finally {
       els.uploadBtn.disabled = false;
       isUploading = false;
+      if (!state.uploadCombined) {
+        setChooserEnabled(true);
+      }
     }
   }
 
@@ -369,8 +427,8 @@ export function initUploadStep(options) {
       shouldStartFresh || segments.length === 0
         ? []
         : segments
-          .map((seg) => seg.file)
-          .filter((file) => Boolean(file));
+            .map((seg) => seg.file)
+            .filter((file) => Boolean(file));
 
     const combinedFiles = [...existingFiles, ...newFiles];
     applyFileList(combinedFiles);
@@ -378,6 +436,14 @@ export function initUploadStep(options) {
 
   els.uploadBtn.addEventListener("click", async (event) => {
     event.preventDefault();
+    if (state.uploadCombined) {
+      revokeSegmentPreviews();
+      segments = [];
+      resetForFiles([]);
+      renderUploads();
+      clearFileInput();
+      return;
+    }
     await uploadAll();
   });
 
@@ -413,6 +479,72 @@ export function initUploadStep(options) {
       setStatus(els.statusBody, "Reordered segments. Re-upload to combine.");
     }
   });
+
+  els.uploadList?.addEventListener("click", (event) => {
+    const thumb = event.target.closest(".upload__thumb");
+    if (!thumb) return;
+    const idx = Number(thumb.getAttribute("data-index"));
+    if (!Number.isInteger(idx) || idx < 0 || idx >= segments.length) return;
+    const seg = segments[idx];
+    if (!seg.previewUrl) return;
+    showPreviewModal(seg.previewUrl, seg.name);
+  });
+
+  window.addEventListener("beforeunload", () => {
+    revokeSegmentPreviews();
+  });
+
+  function ensureModal() {
+    if (modalRoot) return;
+    modalRoot = document.createElement("div");
+    modalRoot.id = "segmentModal";
+    modalRoot.className = "modal hidden";
+    modalRoot.innerHTML = `
+      <div class="modal__backdrop"></div>
+      <div class="modal__dialog" role="dialog" aria-modal="true">
+        <div class="modal__header">
+          <h3 class="modal__title">Segment preview</h3>
+          <button type="button" class="modal__close" aria-label="Close preview">✕</button>
+        </div>
+        <div class="modal__body">
+          <video class="modal__video" controls playsinline></video>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modalRoot);
+    modalVideo = modalRoot.querySelector(".modal__video");
+    const closeBtn = modalRoot.querySelector(".modal__close");
+    const backdrop = modalRoot.querySelector(".modal__backdrop");
+    closeBtn?.addEventListener("click", hidePreviewModal);
+    backdrop?.addEventListener("click", hidePreviewModal);
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !modalRoot.classList.contains("hidden")) {
+        hidePreviewModal();
+      }
+    });
+  }
+
+  function showPreviewModal(url, name) {
+    ensureModal();
+    if (!modalRoot || !modalVideo) return;
+    modalVideo.src = `${url}#t=0`;
+    modalVideo.currentTime = 0;
+    modalVideo.play().catch(() => {
+      // autoplay might be blocked; ignore
+    });
+    const title = modalRoot.querySelector(".modal__title");
+    if (title) {
+      title.textContent = name ? `Preview: ${name}` : "Segment preview";
+    }
+    modalRoot.classList.remove("hidden");
+  }
+
+  function hidePreviewModal() {
+    if (!modalRoot || !modalVideo) return;
+    modalVideo.pause();
+    modalRoot.classList.add("hidden");
+    modalVideo.src = "";
+  }
 
   els.nextToOffsets.addEventListener("click", (event) => {
     event.preventDefault();

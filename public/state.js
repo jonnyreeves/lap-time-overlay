@@ -3,6 +3,7 @@ export const state = {
   uploadName: null,
   uploadSize: 0,
   uploadSegments: [],
+  uploadCombined: false,
   videoInfo: null,
   previewUrl: null,
   pollTimer: null,
