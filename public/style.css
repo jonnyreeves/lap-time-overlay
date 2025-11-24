@@ -561,7 +561,7 @@ body {
   font-weight: 600;
 }
 
-input,
+input:not([type="checkbox"]),
 select,
 textarea {
   width: 100%;
@@ -580,6 +580,24 @@ input[type="color"] {
 
 textarea {
   resize: vertical;
+}
+
+.field__choices {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field__choices label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.field__choices input[type="checkbox"] {
+  width: auto;
+  padding: 0;
 }
 
 .field__hint {

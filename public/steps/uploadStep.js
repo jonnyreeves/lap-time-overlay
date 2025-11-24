@@ -114,6 +114,9 @@ export function initUploadStep(options) {
     state.lastPreviewUrl = null;
     state.textColor = "#ffffff";
     state.boxColor = "#000000";
+    state.showLapCounter = true;
+    state.showPosition = true;
+    state.showCurrentLapTime = true;
     state.lapCount = 0;
     state.previewLapNumber = 1;
     els.lapFormatSelect.value = "daytona";
@@ -121,6 +124,9 @@ export function initUploadStep(options) {
     els.lapTextArea.value = "";
     els.driverField.style.display = "none";
     els.startFrameInput.value = "";
+    if (els.showLapCounterInput) els.showLapCounterInput.checked = true;
+    if (els.showPositionInput) els.showPositionInput.checked = true;
+    if (els.showCurrentLapTimeInput) els.showCurrentLapTimeInput.checked = true;
     els.nextToOffsets.disabled = true;
     els.nextToLapTimes.disabled = true;
     els.uploadProgressBar.style.width = "0%";

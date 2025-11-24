@@ -60,6 +60,9 @@ interface RenderRequestBody {
   overlayTextColor?: string;
   overlayBoxColor?: string;
   overlayBoxOpacity?: number;
+  showLapCounter?: boolean;
+  showPosition?: boolean;
+  showCurrentLapTime?: boolean;
   previewLapNumber?: number;
 }
 
@@ -592,11 +595,26 @@ function resolveOverlayStyle(body: RenderRequestBody): OverlayStyle {
     body.overlayBoxOpacity != null && Number.isFinite(body.overlayBoxOpacity)
       ? Math.min(1, Math.max(0, Number(body.overlayBoxOpacity)))
       : DEFAULT_OVERLAY_STYLE.boxOpacity;
+  const showLapCounter =
+    typeof body.showLapCounter === "boolean"
+      ? body.showLapCounter
+      : DEFAULT_OVERLAY_STYLE.showLapCounter;
+  const showPosition =
+    typeof body.showPosition === "boolean"
+      ? body.showPosition
+      : DEFAULT_OVERLAY_STYLE.showPosition;
+  const showCurrentLapTime =
+    typeof body.showCurrentLapTime === "boolean"
+      ? body.showCurrentLapTime
+      : DEFAULT_OVERLAY_STYLE.showCurrentLapTime;
 
   return {
     textColor: textColor ?? DEFAULT_OVERLAY_STYLE.textColor,
     boxColor: boxColor ?? DEFAULT_OVERLAY_STYLE.boxColor,
     boxOpacity: opacity,
+    showLapCounter,
+    showPosition,
+    showCurrentLapTime,
   };
 }
 

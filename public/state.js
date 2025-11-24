@@ -17,4 +17,7 @@ export const state = {
   lastPreviewUrl: null,
   lapCount: 0,
   previewLapNumber: 1,
+  showLapCounter: true,
+  showPosition: true,
+  showCurrentLapTime: true,
 };

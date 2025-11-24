@@ -46,6 +46,26 @@ export function renderPreviewStep(root) {
             <input type="color" id="boxColor" value="#000000" />
             <div class="field__hint">Applied with 60% opacity.</div>
           </label>
+          <div class="field">
+            <span>Overlay content</span>
+            <div class="field__choices">
+              <label>
+                <input type="checkbox" id="showLapCounter" checked />
+                <span>Lap counter</span>
+              </label>
+              <label>
+                <input type="checkbox" id="showPosition" checked />
+                <span>Position (when available)</span>
+              </label>
+              <label>
+                <input type="checkbox" id="showCurrentLapTime" checked />
+                <span>Current lap time</span>
+              </label>
+            </div>
+            <div class="field__hint">
+              Turn everything off to omit the overlay entirely.
+            </div>
+          </div>
           <div class="preview__cta">
             <button class="btn" id="generatePreview">Generate preview</button>
           </div>
@@ -101,6 +121,18 @@ export function initPreviewStep({ els, state, router, startPolling }) {
     }
   };
 
+  const syncContentToggles = () => {
+    if (els.showLapCounterInput) {
+      els.showLapCounterInput.checked = Boolean(state.showLapCounter);
+    }
+    if (els.showPositionInput) {
+      els.showPositionInput.checked = Boolean(state.showPosition);
+    }
+    if (els.showCurrentLapTimeInput) {
+      els.showCurrentLapTimeInput.checked = Boolean(state.showCurrentLapTime);
+    }
+  };
+
   const hasLapData = () =>
     Boolean(
       state.uploadId &&
@@ -135,6 +167,9 @@ export function initPreviewStep({ els, state, router, startPolling }) {
         : Number(state.startFrame),
     overlayTextColor: state.textColor,
     overlayBoxColor: state.boxColor,
+    showLapCounter: state.showLapCounter,
+    showPosition: state.showPosition,
+    showCurrentLapTime: state.showCurrentLapTime,
     previewLapNumber: state.previewLapNumber,
   });
 
@@ -248,6 +283,7 @@ export function initPreviewStep({ els, state, router, startPolling }) {
     if (state.lapText) setPreviewStatus("Ready to preview");
     else setPreviewStatus("Waiting for lap data…");
     syncColorInputs();
+    syncContentToggles();
     updateButtons(false);
     updateLapOptions(state.lapCount || 0);
     if (state.lastPreviewUrl && els.previewImage) {
@@ -268,6 +304,15 @@ export function initPreviewStep({ els, state, router, startPolling }) {
   });
   els.boxColorInput?.addEventListener("input", () => {
     state.boxColor = els.boxColorInput.value;
+  });
+  els.showLapCounterInput?.addEventListener("change", () => {
+    state.showLapCounter = Boolean(els.showLapCounterInput.checked);
+  });
+  els.showPositionInput?.addEventListener("change", () => {
+    state.showPosition = Boolean(els.showPositionInput.checked);
+  });
+  els.showCurrentLapTimeInput?.addEventListener("change", () => {
+    state.showCurrentLapTime = Boolean(els.showCurrentLapTimeInput.checked);
   });
   els.previewLapSelect?.addEventListener("change", () => {
     const n = Number(els.previewLapSelect.value);

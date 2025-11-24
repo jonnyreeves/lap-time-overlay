@@ -59,15 +59,32 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
     style.boxOpacity,
     DEFAULT_OVERLAY_STYLE.boxOpacity
   );
+  const showLapCounter =
+    style.showLapCounter ?? DEFAULT_OVERLAY_STYLE.showLapCounter;
+  const showPosition =
+    style.showPosition ?? DEFAULT_OVERLAY_STYLE.showPosition;
+  const showCurrentLapTime =
+    style.showCurrentLapTime ?? DEFAULT_OVERLAY_STYLE.showCurrentLapTime;
+  const hasPositionData = showPosition && laps.some((lap) => lap.position > 0);
+  const hasInfoLine = showLapCounter || hasPositionData;
+  const lineCount =
+    (hasInfoLine ? 1 : 0) + (showCurrentLapTime ? 1 : 0);
+
+  if (lineCount === 0) {
+    return { filterGraph: "[0:v]null[vout]", outputLabel: "vout" };
+  }
 
   const margin = 20;
   const boxWidth = Math.floor(width * 0.45);
-  const boxHeight = 90;
-  const boxX = margin;
-  const boxY = height - boxHeight - margin;
-
   const fontSize = 32;
   const lineSpacing = 8;
+  const paddingY = 10;
+  const boxHeight =
+    lineCount * fontSize +
+    Math.max(0, lineCount - 1) * lineSpacing +
+    paddingY * 2;
+  const boxX = margin;
+  const boxY = height - boxHeight - margin;
 
   const overlayStart = startOffsetS;
   const overlayEnd = startOffsetS + totalSessionDuration(laps);
@@ -85,28 +102,42 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
       nextLabel())}]`
   );
 
+  const infoLineIndex = hasInfoLine ? 0 : null;
+  const timeLineIndex =
+    showCurrentLapTime && lineCount > 0 ? lineCount - 1 : null;
+
   laps.forEach((lap) => {
     const lapStart = overlayStart + lap.startS;
     const lapEnd = lapStart + lap.durationS;
     const lapEnable = `between(t,${lapStart},${lapEnd})`;
-    const line1 = `Lap ${lap.number}/${laps.length}   P${lap.position}`;
+    const infoParts: string[] = [];
+    if (showLapCounter) {
+      infoParts.push(`Lap ${lap.number}/${laps.length}`);
+    }
+    if (hasPositionData && lap.position > 0) {
+      infoParts.push(`P${lap.position}`);
+    }
 
-    filters.push(
-      `[${currentLabel}]drawtext=text='${escapeDrawtext(
-        line1
-      )}':fontcolor=${toFfmpegColor(textColor)}:fontsize=${fontSize}:x=${boxX + 12}:y=${
-        boxY + 10
-      }:enable='${lapEnable}'[${(currentLabel = nextLabel())}]`
-    );
+    if (infoLineIndex !== null && infoParts.length) {
+      const y = boxY + paddingY + infoLineIndex * (fontSize + lineSpacing);
+      filters.push(
+        `[${currentLabel}]drawtext=text='${escapeDrawtext(
+          infoParts.join("   ")
+        )}':fontcolor=${toFfmpegColor(textColor)}:fontsize=${fontSize}:x=${boxX + 12}:y=${y}:enable='${lapEnable}'[${(currentLabel =
+          nextLabel())}]`
+      );
+    }
 
-    const timeText = buildLapTimeExpr(lapStart);
-    filters.push(
-      `[${currentLabel}]drawtext=text='${escapeDrawtextExpression(
-        timeText
-      )}':fontcolor=${toFfmpegColor(textColor)}:fontsize=${fontSize}:x=${boxX + 12}:y=${
-        boxY + 10 + fontSize + lineSpacing
-      }:enable='${lapEnable}'[${(currentLabel = nextLabel())}]`
-    );
+    if (timeLineIndex !== null) {
+      const timeText = buildLapTimeExpr(lapStart);
+      const y = boxY + paddingY + timeLineIndex * (fontSize + lineSpacing);
+      filters.push(
+        `[${currentLabel}]drawtext=text='${escapeDrawtextExpression(
+          timeText
+        )}':fontcolor=${toFfmpegColor(textColor)}:fontsize=${fontSize}:x=${boxX + 12}:y=${y}:enable='${lapEnable}'[${(currentLabel =
+          nextLabel())}]`
+      );
+    }
   });
 
   const outputLabel = currentLabel || "0:v";

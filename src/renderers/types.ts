@@ -5,6 +5,9 @@ export interface OverlayStyle {
   textColor: string;
   boxColor: string;
   boxOpacity: number;
+  showLapCounter: boolean;
+  showPosition: boolean;
+  showCurrentLapTime: boolean;
 }
 
 export interface RenderContext {
@@ -20,4 +23,7 @@ export const DEFAULT_OVERLAY_STYLE: OverlayStyle = {
   textColor: "#ffffff",
   boxColor: "#000000",
   boxOpacity: 0.6,
+  showLapCounter: true,
+  showPosition: true,
+  showCurrentLapTime: true,
 };

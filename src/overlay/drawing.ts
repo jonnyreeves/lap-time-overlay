@@ -32,6 +32,17 @@ export function createOverlayDrawer(params: {
     Number.isFinite(style.boxOpacity) && style.boxOpacity >= 0
       ? Math.min(1, style.boxOpacity)
       : DEFAULT_OVERLAY_STYLE.boxOpacity;
+  const showLapCounter =
+    style.showLapCounter ?? DEFAULT_OVERLAY_STYLE.showLapCounter;
+  const showPosition =
+    style.showPosition ?? DEFAULT_OVERLAY_STYLE.showPosition;
+  const showCurrentLapTime =
+    style.showCurrentLapTime ?? DEFAULT_OVERLAY_STYLE.showCurrentLapTime;
+  const hasPositionData = showPosition && laps.some((lap) => lap.position > 0);
+  const hasInfoLine = showLapCounter || hasPositionData;
+  const lineCount =
+    (hasInfoLine ? 1 : 0) + (showCurrentLapTime ? 1 : 0);
+  const hasOverlayContent = lineCount > 0;
 
   const toRgba = (hex: string, alpha: number) => {
     const match = hex.match(/^#?([0-9a-fA-F]{6})$/);
@@ -47,12 +58,15 @@ export function createOverlayDrawer(params: {
 
   const margin = 20;
   const boxWidth = Math.floor(width * 0.45);
-  const boxHeight = 90;
-  const boxX = margin;
-  const boxY = height - boxHeight - margin;
-
   const fontSize = 32;
   const lineSpacing = 8;
+  const paddingY = 10;
+  const boxHeight =
+    lineCount * fontSize +
+    Math.max(0, lineCount - 1) * lineSpacing +
+    paddingY * 2;
+  const boxX = margin;
+  const boxY = height - boxHeight - margin;
 
   const sessionTotal = totalSessionDuration(laps);
 
@@ -62,16 +76,19 @@ export function createOverlayDrawer(params: {
 
     ctx.clearRect(0, 0, width, height);
 
-    const showOverlay = sessionT >= 0 && sessionT <= sessionTotal;
+    const showOverlay = hasOverlayContent && sessionT >= 0 && sessionT <= sessionTotal;
     if (showOverlay) {
       const res = lapForSessionTime(laps, sessionT);
       if (res) {
         const { lap, lapElapsed } = res;
+        const infoParts: string[] = [];
+        if (showLapCounter) {
+          infoParts.push(`Lap ${lap.number}/${laps.length}`);
+        }
+        if (hasPositionData && lap.position > 0) {
+          infoParts.push(`P${lap.position}`);
+        }
         const lapTimeStr = formatLapTime(lapElapsed);
-        const totalLaps = laps.length;
-
-        const line1 = `Lap ${lap.number}/${totalLaps}   P${lap.position}`;
-        const line2 = lapTimeStr;
 
         ctx.fillStyle = toRgba(boxColor, boxOpacity);
         ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
@@ -81,11 +98,16 @@ export function createOverlayDrawer(params: {
         ctx.textBaseline = "top";
 
         const textX = boxX + 12;
-        let textY = boxY + 10;
+        let textY = boxY + paddingY;
 
-        ctx.fillText(line1, textX, textY);
-        textY += fontSize + lineSpacing;
-        ctx.fillText(line2, textX, textY);
+        if (hasInfoLine && infoParts.length) {
+          ctx.fillText(infoParts.join("   "), textX, textY);
+          textY += fontSize + lineSpacing;
+        }
+
+        if (showCurrentLapTime) {
+          ctx.fillText(lapTimeStr, textX, textY);
+        }
       }
     }
 
