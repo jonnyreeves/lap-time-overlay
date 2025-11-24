@@ -58,7 +58,26 @@ npm run lap-timer -- \
 ### Docker Setup
 
 ```
+## mac local dev env.
 colima start --arch x86_64
+
+## build
 docker build --platform=linux/amd64 -t lap-timer .
+
+## debug
 docker run -it --rm lap-timer sh
+
+## run locally from the root of the repo on http://localhost:3008
+docker run -it --rm \
+  -p 3008:3000 \
+  -v $(pwd)/work:/work \
+  --name lap-timer \
+  jonnyreeves83/lap-timer:latest
+
+## tag
+docker tag lap-timer jonnyreeves83/lap-timer:latest
+
+## publish
+docker push jonnyreeves83/lap-timer:latest
+
 ```
