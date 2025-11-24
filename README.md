@@ -54,3 +54,11 @@ npm run lap-timer -- \
 ## Development
 
 - Run type checks before handing back work: `npm run type-check`.
+
+### Docker Setup
+
+```
+colima start --arch x86_64
+docker build --platform=linux/amd64 -t lap-timer .
+docker run -it --rm lap-timer sh
+```

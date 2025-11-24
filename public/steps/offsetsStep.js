@@ -1,9 +1,9 @@
-import { html, render } from "../template.js";
+import { FALLBACK_FPS } from "../constants.js";
+import { extractDrivers, populateDrivers } from "../drivers.js";
 import { formatDuration, formatTime } from "../formatters.js";
 import { setStatus } from "../status.js";
+import { html, render } from "../template.js";
 import { createVideoControls } from "../videoControls.js";
-import { extractDrivers, populateDrivers } from "../drivers.js";
-import { FALLBACK_FPS } from "../constants.js";
 
 const DAYTONA_LAP_LINE_RE = /^\s*(\d+)\s+(\d+):(\d+):(\d+)\s+\[(\d+)\]\s*$/; // 01 0:57:755 [11]
 
@@ -113,16 +113,108 @@ function parseTeamsportLapText(text, driverName) {
   return addStartOffsets(laps);
 }
 
-function parseLapTextSafe(text, format, driverName) {
-  if (!text.trim()) return { laps: [] };
-  switch (format) {
-    case "daytona":
-      return { laps: parseDaytonaLapText(text) };
-    case "teamsport":
-      return { laps: parseTeamsportLapText(text, driverName) };
-    default:
-      return { error: "Unknown lap format" };
+function parseImportText(text, format, driverName) {
+  const trimmed = text.trim();
+  if (!trimmed) return { error: "Paste lap times to import." };
+  try {
+    switch (format) {
+      case "daytona":
+        return { laps: parseDaytonaLapText(trimmed) };
+      case "teamsport":
+        return { laps: parseTeamsportLapText(trimmed, driverName) };
+      default:
+        return { error: "Unknown lap format" };
+    }
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Import failed" };
   }
+}
+
+function formatLapDurationInput(seconds) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "";
+  const totalMs = Math.round(seconds * 1000);
+  const wholeSeconds = Math.floor(totalMs / 1000);
+  const ms = totalMs % 1000;
+  const s = wholeSeconds % 60;
+  const m = Math.floor(wholeSeconds / 60);
+  return `${m.toString().padStart(2, "0")}:${s
+    .toString()
+    .padStart(2, "0")}:${ms.toString().padStart(3, "0")}`;
+}
+
+function parseLapDurationInput(value) {
+  const raw = value?.trim();
+  if (!raw) return null;
+  const cleaned = raw.replace(/\s+/g, "");
+  const colonParts = cleaned.split(":");
+
+  const parseMs = (str = "") => {
+    if (str === "") return 0;
+    const asNum = Number(str);
+    if (!Number.isFinite(asNum) || asNum < 0) return null;
+    return asNum / 1000;
+  };
+
+  if (colonParts.length === 3) {
+    const [mStr, sStr, msStr] = colonParts;
+    const m = Number(mStr);
+    const s = Number(sStr);
+    const ms = parseMs(msStr);
+    if ([m, s, ms].every((n) => Number.isFinite(n)) && ms !== null) {
+      return m * 60 + s + ms;
+    }
+  }
+
+  if (colonParts.length === 2) {
+    const [mStr, secMs] = colonParts;
+    const [sStr, msStr = ""] = secMs.split(/[.:]/);
+    const m = Number(mStr);
+    const s = Number(sStr);
+    const ms = parseMs(msStr);
+    if ([m, s, ms].every((n) => Number.isFinite(n)) && ms !== null) {
+      return m * 60 + s + ms;
+    }
+  }
+
+  if (colonParts.length === 1 && cleaned.includes(".")) {
+    const [sStr, msStr = ""] = cleaned.split(".");
+    const s = Number(sStr);
+    const ms = parseMs(msStr);
+    if ([s, ms].every((n) => Number.isFinite(n)) && ms !== null) {
+      return s + ms;
+    }
+  }
+
+  return null;
+}
+
+function normalizeLapList(laps) {
+  const withIndex = (laps || []).map((lap, idx) => ({ lap, idx }));
+  const sorted = withIndex
+    .filter(
+      ({ lap }) => Number.isFinite(lap?.number) && Number(lap.number) >= 1
+    )
+    .map(({ lap, idx }) => ({
+      number: Math.round(Number(lap.number)),
+      durationS: Number(lap.durationS),
+      position: Math.max(0, Math.round(Number(lap.position || 0))),
+      startS: 0,
+      idx,
+    }))
+    .filter((lap) => Number.isFinite(lap.durationS) && lap.durationS > 0)
+    .sort((a, b) => {
+      if (a.number === b.number) return a.idx - b.idx;
+      return a.number - b.number;
+    })
+    .map(({ idx, ...lap }) => lap);
+
+  return addStartOffsets(sorted);
+}
+
+function nextLapNumber(laps = []) {
+  if (!laps.length) return 1;
+  const max = Math.max(...laps.map((lap) => lap.number || 0));
+  return Math.max(1, max + 1);
 }
 
 export function renderOffsetsStep(root) {
@@ -141,37 +233,25 @@ export function renderOffsetsStep(root) {
 
       <div class="lap-setup">
         <form id="lapSetupForm" class="form lap-setup__form">
-          <div class="lap-setup__row">
-            <label class="field">
-              <span>Lap format</span>
-              <select id="lapFormat">
-                <option value="daytona">Daytona</option>
-                <option value="teamsport">TeamSport</option>
-              </select>
-            </label>
-
-            <label class="field" id="driverField">
-              <span>Driver (TeamSport)</span>
-              <select id="driverName">
-                <option value="">Pick a driver</option>
-              </select>
-              <div class="field__hint">
-                We auto-read the header row from the pasted lap times.
+          <div class="lap-builder">
+            <div class="lap-builder__header">
+              <div>
+                <p class="eyebrow">Lap data</p>
+                <h3>Build lap times</h3>
               </div>
-            </label>
-          </div>
-
-          <label class="field lap-setup__lap-text">
-            <span>Lap times</span>
-            <textarea
-              id="lapText"
-              rows="10"
-              placeholder="Paste your exported lap times here"
-            ></textarea>
-            <div class="field__hint">
-              For TeamSport: include the header row so we can list drivers.
+              <div class="lap-builder__actions">
+                <button class="btn btn--ghost" type="button" id="importLapBtn">
+                  Import
+                </button>
+                <button class="btn" type="button" id="addLapBtn">Add lap</button>
+              </div>
             </div>
-          </label>
+            <p class="field__hint">
+              Add lap number + time (MM:SS:mmm). We auto-calc lap starts for preview.
+            </p>
+            <div class="lap-list" id="lapList">
+            </div>
+          </div>
         </form>
 
         <div class="lap-setup__preview">
@@ -179,7 +259,7 @@ export function renderOffsetsStep(root) {
             <div class="preview__header">
               <div>
                 <p class="eyebrow">Mark lap 1</p>
-                <h3>Scrub & set start frame</h3>
+                <h3>Scrub & set start</h3>
               </div>
               <span class="badge" id="videoMeta">Waiting for upload…</span>
             </div>
@@ -217,18 +297,6 @@ export function renderOffsetsStep(root) {
                 Mark start here
               </button>
             </div>
-            <label class="field">
-              <span>Start frame</span>
-              <input
-                type="number"
-                id="startFrame"
-                placeholder="e.g. 1530"
-                min="0"
-              />
-              <div class="field__hint">
-                First frame where lap 1 starts. Auto-filled from preview mark.
-              </div>
-            </label>
           </div>
 
           <div class="alignment">
@@ -275,6 +343,63 @@ export function renderOffsetsStep(root) {
           </div>
         </div>
       </div>
+
+      <div class="modal hidden" id="lapImportModal">
+        <div class="modal__backdrop"></div>
+        <div class="modal__dialog" role="dialog" aria-modal="true">
+          <div class="modal__header">
+            <h3 class="modal__title">Import lap times</h3>
+            <button
+              type="button"
+              class="modal__close"
+              id="closeLapImport"
+              aria-label="Close import"
+            >
+              ✕
+            </button>
+          </div>
+          <div class="modal__body modal__body--padded">
+            <div class="lap-import">
+              <div class="lap-import__row">
+                <label class="field">
+                  <span>Format</span>
+                  <select id="lapImportFormat">
+                    <option value="daytona">Daytona</option>
+                    <option value="teamsport">TeamSport</option>
+                  </select>
+                </label>
+                <label class="field" id="lapImportDriverField">
+                  <span>Driver (TeamSport)</span>
+                  <select id="lapImportDriver">
+                    <option value="">Pick a driver</option>
+                  </select>
+                  <div class="field__hint">
+                    We scan the pasted header row to list drivers.
+                  </div>
+                </label>
+              </div>
+
+              <label class="field lap-setup__lap-text">
+                <span>Pasted lap times</span>
+                <textarea
+                  id="lapImportText"
+                  rows="10"
+                  placeholder="Paste Daytona or TeamSport export"
+                ></textarea>
+              </label>
+
+              <div class="lap-import__actions">
+                <button class="btn btn--ghost" type="button" id="cancelLapImport">
+                  Cancel
+                </button>
+                <button class="btn btn--primary" type="button" id="applyLapImport">
+                  Use laps
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     `,
     section
   );
@@ -284,28 +409,24 @@ export function renderOffsetsStep(root) {
 export function initOffsetsStep(options) {
   const { els, state, router, onLapDataReady } = options;
   let previewIsObjectUrl = false;
+  let activeSelection = { type: "session", index: -1 };
+  const hasSessionStart = () =>
+    Number.isFinite(state.sessionStartTime) || Number.isFinite(state.startFrame);
 
   const videoControls = createVideoControls({
     video: els.previewVideo,
     timeReadout: els.timeReadout,
-    startFrameInput: els.startFrameInput,
+    startFrameInput: null,
     markButton: els.markStartBtn,
     stepBackButton: els.stepBackBtn,
     stepForwardButton: els.stepForwardBtn,
     getFps: () => state.videoInfo?.fps ?? FALLBACK_FPS,
     getDuration: () =>
       Number.isFinite(els.previewVideo.duration) &&
-      els.previewVideo.duration > 0
+        els.previewVideo.duration > 0
         ? els.previewVideo.duration
         : state.videoInfo?.duration,
-    onMark: (frame, seconds) => {
-      state.startFrame = frame;
-      setStatus(
-        els.statusBody,
-        `Start frame set to ${frame} (t=${formatTime(seconds)})`
-      );
-      updateButtons();
-    },
+    onMark: (frame, seconds) => handleMarkAt(frame, seconds),
   });
 
   const setAlignmentStatus = (text) => {
@@ -314,11 +435,35 @@ export function initOffsetsStep(options) {
     }
   };
 
-  const hasLapText = () => Boolean(els.lapTextArea?.value.trim());
-  const hasStartFrame = () => Boolean(els.startFrameInput?.value.trim());
+  const hasLapData = () => (state.laps?.length ?? 0) > 0;
+  const hasStartFrame = () =>
+    state.startFrame !== null && state.startFrame !== undefined;
+  const getSessionStartTime = () => {
+    if (Number.isFinite(state.sessionStartTime)) return state.sessionStartTime;
+    const fps = state.videoInfo?.fps ?? FALLBACK_FPS;
+    if (state.startFrame != null && Number.isFinite(state.startFrame)) {
+      return state.startFrame / fps;
+    }
+    return null;
+  };
+
+  const setActiveSelection = (type, index = -1) => {
+    if (type === "session") {
+      activeSelection = { type: "session", index: -1 };
+    } else {
+      activeSelection = { type: "lap", index };
+    }
+    renderLapList();
+  };
+
+  const updateLapActionState = () => {
+    const enabled = hasSessionStart();
+    if (els.addLapBtn) els.addLapBtn.disabled = !enabled;
+    if (els.importLapBtn) els.importLapBtn.disabled = !enabled;
+  };
 
   const updateButtons = (pending = false) => {
-    const ready = state.uploadReady && hasLapText() && hasStartFrame();
+    const ready = state.uploadReady && hasLapData() && hasStartFrame();
     if (els.nextToPreview) {
       els.nextToPreview.disabled = pending || !ready;
     }
@@ -331,11 +476,12 @@ export function initOffsetsStep(options) {
   };
 
   const updateLapOptions = (lapCount) => {
-    state.lapCount = lapCount;
+    const count = lapCount ?? state.lapCount ?? 0;
+    state.lapCount = count;
     const select = els.alignmentLapSelect;
     if (!select) return;
     select.innerHTML = "";
-    if (!lapCount || lapCount < 1) {
+    if (!count || count < 1) {
       const opt = document.createElement("option");
       opt.value = "";
       opt.textContent = "Waiting for laps…";
@@ -344,37 +490,225 @@ export function initOffsetsStep(options) {
       return;
     }
     select.disabled = false;
+    const maxSelectable = count + 1; // include finish/cooldown
     const current = Math.min(
-      lapCount,
+      maxSelectable,
       Math.max(1, state.previewLapNumber || 1)
     );
-    for (let i = 1; i <= lapCount; i++) {
+    for (let i = 1; i <= count; i++) {
       const opt = document.createElement("option");
       opt.value = String(i);
       opt.textContent = `Lap ${i}`;
       if (i === current) opt.selected = true;
       select.appendChild(opt);
     }
+    if (count >= 1) {
+      const finishOpt = document.createElement("option");
+      finishOpt.value = String(count + 1);
+      finishOpt.textContent = "Finish / cooldown";
+      if (current === count + 1) finishOpt.selected = true;
+      select.appendChild(finishOpt);
+    }
     state.previewLapNumber = current;
   };
 
-  const parseLapInputs = () =>
-    parseLapTextSafe(
-      els.lapTextArea.value,
-      els.lapFormatSelect.value,
-      els.driverSelect.value
+  const renderLapList = () => {
+    if (!els.lapList) return;
+    const laps = state.laps || [];
+    const sessionTime = getSessionStartTime();
+    const sessionActive = activeSelection.type === "session";
+    render(
+      html`
+        <div
+          class="lap-row lap-row--session ${sessionActive
+          ? "lap-row--active"
+          : ""}"
+          data-select="session"
+        >
+          <div class="lap-row__fields">
+            <div class="field">
+              <span>Session start</span>
+              <div class="badge badge--ghost">
+                ${sessionTime != null
+          ? `${formatTime(sessionTime)} (frame ${state.startFrame ?? "--"})`
+          : "Not set"}
+              </div>
+            </div>
+          </div>
+          <div class="lap-row__meta">
+            <span class="muted">
+              Select and hit "Mark start here" on the player to set the session start.
+            </span>
+          </div>
+        </div>
+        ${laps.length === 0
+          ? html`<p class="muted lap-list__empty">
+              ${hasSessionStart()
+                ? "No laps yet. Add manually or import."
+                : "No laps yet. Set the session start time before adding lap times."}
+            </p>`
+          : html`<div class="lap-rows">
+              ${laps.map(
+            (lap, idx) => {
+              const isActive =
+                activeSelection.type === "lap" && activeSelection.index === idx;
+              return html`
+                    <div
+                      class="lap-row ${isActive ? "lap-row--active" : ""}"
+                      data-select="lap"
+                      data-index=${idx}
+                    >
+                      <div class="lap-row__fields">
+                        <label class="field">
+                          <span>Lap</span>
+                          <input
+                            type="number"
+                            min="1"
+                            data-index=${idx}
+                            data-field="number"
+                            value=${lap.number}
+                          />
+                        </label>
+                        <label class="field">
+                          <span>Lap time</span>
+                          <input
+                            type="text"
+                            data-index=${idx}
+                            data-field="time"
+                            value=${formatLapDurationInput(lap.durationS)}
+                            placeholder="01:02:345"
+                          />
+                        </label>
+                      </div>
+                      <div class="lap-row__meta">
+                        <span class="badge badge--ghost">
+                          Starts at ${formatTime(lap.startS)}
+                        </span>
+                        <button
+                          class="upload__control upload__control--danger"
+                          type="button"
+                          data-action="remove-lap"
+                          data-index=${idx}
+                          aria-label="Remove lap ${lap.number}"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  `;
+            }
+          )}
+            </div>`}
+      `,
+      els.lapList
     );
+  };
 
-  const refreshLapOptions = () => {
-    const parsed = parseLapInputs();
-    if (parsed.error) {
-      state.lapCount = 0;
-      updateLapOptions(0);
-      return parsed;
+  const applyLapState = (laps) => {
+    const normalized = normalizeLapList(laps || []);
+    state.laps = normalized;
+    state.lapCount = normalized.length;
+    const maxSelectable = state.lapCount + (state.lapCount > 0 ? 1 : 0);
+    state.previewLapNumber = Math.min(
+      Math.max(1, state.previewLapNumber || 1),
+      Math.max(1, maxSelectable || 1)
+    );
+    updateLapOptions();
+    state.lastPreviewUrl = null;
+    if (!state.lapCount) {
+      setAlignmentStatus("Waiting for lap data…");
+    } else if (!hasStartFrame()) {
+      setAlignmentStatus("Enter a start frame to jump.");
+    } else {
+      setAlignmentStatus("Select a lap to jump.");
     }
-    state.lapCount = parsed.laps.length;
-    updateLapOptions(state.lapCount);
-    return parsed;
+    if (
+      activeSelection.type === "lap" &&
+      (activeSelection.index < 0 || activeSelection.index >= state.lapCount)
+    ) {
+      activeSelection = { type: "session", index: -1 };
+    }
+    updateButtons();
+    renderLapList();
+  };
+
+  const addLap = () => {
+    if (!hasSessionStart()) {
+      setStatus(
+        els.statusBody,
+        "Mark the session start before adding laps.",
+        true
+      );
+      return;
+    }
+    const laps = state.laps ? [...state.laps] : [];
+    const lapNumber = nextLapNumber(laps);
+    laps.push({ number: lapNumber, durationS: 60, position: 0, startS: 0 });
+    applyLapState(laps);
+    setStatus(els.statusBody, `Added lap ${lapNumber}. Fill in the time.`);
+    setActiveSelection("lap", laps.length - 1);
+  };
+
+  const handleLapListChange = (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    const idx = Number(target.dataset.index);
+    const field = target.dataset.field;
+    if (!Number.isInteger(idx) || idx < 0) return;
+    const laps = state.laps ? [...state.laps] : [];
+    const lap = laps[idx];
+    if (!lap) return;
+
+    if (field === "number") {
+      const num = Number(target.value);
+      if (!Number.isFinite(num) || num < 1) {
+        setStatus(els.statusBody, "Lap number must be at least 1.", true);
+        target.value = lap.number;
+        return;
+      }
+      lap.number = Math.round(num);
+    } else if (field === "time") {
+      const parsed = parseLapDurationInput(target.value);
+      if (!parsed || parsed <= 0) {
+        setStatus(
+          els.statusBody,
+          "Use MM:SS:mmm (e.g. 01:02:345) for lap times.",
+          true
+        );
+        target.value = formatLapDurationInput(lap.durationS);
+        return;
+      }
+      lap.durationS = parsed;
+    } else {
+      return;
+    }
+    applyLapState(laps);
+  };
+
+  const handleLapListClick = (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const action = target.closest("[data-action='remove-lap']");
+    if (action) {
+      const idx = Number(action.getAttribute("data-index"));
+      if (!Number.isInteger(idx) || idx < 0) return;
+      const laps = state.laps ? [...state.laps] : [];
+      laps.splice(idx, 1);
+      applyLapState(laps);
+      setStatus(els.statusBody, "Removed lap entry.");
+      return;
+    }
+    const row = target.closest("[data-select]");
+    if (!row) return;
+    const type = row.getAttribute("data-select");
+    if (type === "session") {
+      setActiveSelection("session");
+    } else if (type === "lap") {
+      const idx = Number(row.getAttribute("data-index"));
+      if (Number.isInteger(idx) && idx >= 0) {
+        setActiveSelection("lap", idx);
+      }
+    }
   };
 
   function setPreviewSource(url, { isObjectUrl }) {
@@ -385,11 +719,12 @@ export function initOffsetsStep(options) {
     previewIsObjectUrl = isObjectUrl;
     els.previewVideo.src = url;
     els.previewVideo.load();
-    els.startFrameInput.value = "";
     state.startFrame = null;
+    state.sessionStartTime = null;
     videoControls.setEnabled(false);
     setAlignmentStatus("Waiting for lap data…");
     updateButtons();
+    updateLapActionState();
   }
 
   function preparePreviewFromFile(file) {
@@ -416,25 +751,61 @@ export function initOffsetsStep(options) {
     updateButtons();
   }
 
-  function handleLapFormatChange() {
-    const format = els.lapFormatSelect.value;
-    els.driverField.style.display = format === "teamsport" ? "flex" : "none";
-    if (format !== "teamsport") {
-      els.driverSelect.value = "";
-    } else {
-      const drivers = extractDrivers(els.lapTextArea.value);
-      populateDrivers(els.driverSelect, drivers);
+  const handleMarkAt = (frame, seconds) => {
+    if (activeSelection.type === "session") {
+      state.startFrame = frame;
+      state.sessionStartTime = seconds;
+      setStatus(
+        els.statusBody,
+        `Session start set to frame ${frame} (t=${formatTime(seconds)})`
+      );
+      updateButtons();
+      updateLapActionState();
+      renderLapList();
+      return;
     }
-  }
 
-  const syncLapInputsToState = () => {
-    state.lapText = els.lapTextArea.value.trim();
-    state.lapFormat = els.lapFormatSelect.value;
-    state.driverName = els.driverSelect.value;
-    const startFrameValue = els.startFrameInput.value.trim();
-    const parsedStart = Number(startFrameValue);
-    state.startFrame =
-      startFrameValue && Number.isFinite(parsedStart) ? parsedStart : null;
+    const sessionStart = getSessionStartTime();
+    if (!Number.isFinite(sessionStart)) {
+      setStatus(
+        els.statusBody,
+        "Set the session start before marking lap lengths.",
+        true
+      );
+      return;
+    }
+
+    const idx = activeSelection.index;
+    const laps = state.laps ? [...state.laps] : [];
+    if (!laps[idx]) {
+      setStatus(
+        els.statusBody,
+        "Select a valid lap before marking its length.",
+        true
+      );
+      return;
+    }
+
+    const elapsed = seconds - sessionStart;
+    const prevTotal = laps
+      .slice(0, idx)
+      .reduce((sum, lap) => sum + (lap.durationS || 0), 0);
+    const newDuration = elapsed - prevTotal;
+    if (!Number.isFinite(newDuration) || newDuration <= 0) {
+      setStatus(
+        els.statusBody,
+        "Mark later than the previous lap to set a positive duration.",
+        true
+      );
+      return;
+    }
+
+    laps[idx] = { ...laps[idx], durationS: newDuration };
+    applyLapState(laps);
+    setStatus(
+      els.statusBody,
+      `Lap ${laps[idx].number} set to ${formatTime(newDuration)}.`
+    );
   };
 
   const validateLapInputs = () => {
@@ -447,37 +818,34 @@ export function initOffsetsStep(options) {
       return false;
     }
 
-    const lapText = els.lapTextArea.value.trim();
-    if (!lapText) {
-      setStatus(els.statusBody, "Paste your lap times first.", true);
+    if (!hasLapData()) {
+      setStatus(els.statusBody, "Add at least one lap first.", true);
       return false;
     }
 
-    const lapFormat = els.lapFormatSelect.value;
-    const driverName = els.driverSelect.value;
-    if (lapFormat === "teamsport" && !driverName) {
-      setStatus(els.statusBody, "Pick a driver for TeamSport laps.", true);
-      return false;
-    }
-
-    const startFrame = els.startFrameInput.value.trim();
-    if (!startFrame) {
+    if (state.startFrame == null) {
       setStatus(
         els.statusBody,
-        "Enter a start frame (0 = first frame) to align laps.",
+        "Mark the session start (frame 0 = first frame) to align laps.",
         true
       );
       return false;
     }
 
-    const parsedStart = Number(startFrame);
-    if (!Number.isFinite(parsedStart) || parsedStart < 0) {
-      setStatus(
-        els.statusBody,
-        "Start frame must be 0 or greater.",
-        true
-      );
-      return false;
+    const parsedStart = Number(state.startFrame);
+    if (Number.isFinite(parsedStart)) {
+      state.startFrame = parsedStart;
+      if (parsedStart < 0) {
+        setStatus(
+          els.statusBody,
+          "Start frame must be 0 or greater.",
+          true
+        );
+        return false;
+      }
+      if (state.videoInfo?.fps) {
+        state.sessionStartTime = state.startFrame / state.videoInfo.fps;
+      }
     }
 
     return true;
@@ -485,30 +853,32 @@ export function initOffsetsStep(options) {
 
   const jumpToLapStart = (targetLap) => {
     if (!validateLapInputs()) return;
-    syncLapInputsToState();
-    const parsed = refreshLapOptions();
-    if (parsed?.error) {
-      setStatus(els.statusBody, parsed.error, true);
-      setAlignmentStatus("Fix lap data to jump.");
-      return;
-    }
-    const laps = parsed?.laps || [];
+    const laps = state.laps || [];
     if (!laps.length) {
       setAlignmentStatus("No laps parsed yet.");
       return;
     }
 
     const fps = state.videoInfo?.fps ?? FALLBACK_FPS;
-    const startFrame = Number(els.startFrameInput.value.trim() || "0");
+    const startFrame = Number.isFinite(state.startFrame)
+      ? Number(state.startFrame)
+      : 0;
     const startOffset = startFrame / fps;
 
-    let lapNumber = targetLap ?? Number(els.alignmentLapSelect.value);
-    if (!Number.isFinite(lapNumber) || lapNumber < 1) lapNumber = 1;
-    lapNumber = Math.min(lapNumber, laps.length);
+    const rawValue = targetLap ?? Number(els.alignmentLapSelect.value);
+    const maxSelectable = laps.length + 1;
+    let lapNumber = Number.isFinite(rawValue) ? Number(rawValue) : 1;
+    if (lapNumber < 1) lapNumber = 1;
+    lapNumber = Math.min(lapNumber, maxSelectable);
     state.previewLapNumber = lapNumber;
 
-    const lap = laps[lapNumber - 1];
-    const targetTime = startOffset + lap.startS;
+    const isFinish = lapNumber === maxSelectable && laps.length >= 1;
+    const lapIndex = Math.min(lapNumber, laps.length) - 1;
+    const lap = laps[Math.max(0, lapIndex)];
+    const sessionEnd = lap.startS + lap.durationS;
+    const targetTime = isFinish
+      ? startOffset + sessionEnd
+      : startOffset + lap.startS;
     const video = els.previewVideo;
     if (!video || !video.src) {
       setStatus(
@@ -526,45 +896,121 @@ export function initOffsetsStep(options) {
     video.currentTime = clampedTime;
     videoControls.updateTimeReadout();
     setAlignmentStatus(
-      `Jumped to lap ${lap.number} start (${formatTime(clampedTime)})`
+      isFinish
+        ? `Jumped to finish/cooldown (${formatTime(clampedTime)})`
+        : `Jumped to lap ${lap.number} start (${formatTime(clampedTime)})`
     );
   };
 
-  els.lapFormatSelect.addEventListener("change", () => {
-    handleLapFormatChange();
-    state.lastPreviewUrl = null;
-    state.previewLapNumber = 1;
-    refreshLapOptions();
-    setAlignmentStatus("Waiting for lap data…");
-  });
+  const syncImportDrivers = () => {
+    if (els.lapImportFormat?.value !== "teamsport") return;
+    const drivers = extractDrivers(els.lapImportText?.value || "");
+    populateDrivers(els.lapImportDriverSelect, drivers);
+  };
 
-  els.lapTextArea.addEventListener("input", () => {
-    if (els.lapFormatSelect.value === "teamsport") {
-      const drivers = extractDrivers(els.lapTextArea.value);
-      populateDrivers(els.driverSelect, drivers);
+  const handleImportFormatChange = () => {
+    const format = els.lapImportFormat?.value || "daytona";
+    if (els.lapImportDriverField) {
+      els.lapImportDriverField.style.display =
+        format === "teamsport" ? "flex" : "none";
     }
-    state.lastPreviewUrl = null;
+    if (format !== "teamsport" && els.lapImportDriverSelect) {
+      els.lapImportDriverSelect.value = "";
+    } else if (format === "teamsport") {
+      syncImportDrivers();
+    }
+  };
+
+  const openImportModal = () => {
+    if (!els.lapImportModal) return;
+    els.lapImportModal.classList.remove("hidden");
+    handleImportFormatChange();
+    syncImportDrivers();
+  };
+
+  const closeImportModal = () => {
+    if (!els.lapImportModal) return;
+    els.lapImportModal.classList.add("hidden");
+  };
+
+  const applyImport = () => {
+    if (!hasSessionStart()) {
+      setStatus(
+        els.statusBody,
+        "Mark the session start before importing lap times.",
+        true
+      );
+      return;
+    }
+    const format = els.lapImportFormat?.value || "daytona";
+    const driver = els.lapImportDriverSelect?.value || "";
+    const parsed = parseImportText(
+      els.lapImportText?.value || "",
+      format,
+      driver
+    );
+    if (parsed.error) {
+      setStatus(els.statusBody, parsed.error, true);
+      return;
+    }
+    applyLapState(parsed.laps);
     state.previewLapNumber = 1;
-    refreshLapOptions();
-    setAlignmentStatus("Waiting for lap data…");
-    updateButtons();
+    setActiveSelection("session");
+    closeImportModal();
+    setStatus(
+      els.statusBody,
+      `Imported ${parsed.laps.length} lap${parsed.laps.length === 1 ? "" : "s"} from ${format === "teamsport" ? "TeamSport" : "Daytona"}.`
+    );
+  };
+
+  els.addLapBtn?.addEventListener("click", (event) => {
+    event.preventDefault();
+    addLap();
   });
 
-  els.driverSelect.addEventListener("change", () => {
-    state.lastPreviewUrl = null;
-    state.previewLapNumber = 1;
-    refreshLapOptions();
-    setAlignmentStatus("Waiting for lap data…");
-    updateButtons();
+  els.importLapBtn?.addEventListener("click", (event) => {
+    event.preventDefault();
+    if (!hasSessionStart()) {
+      setStatus(
+        els.statusBody,
+        "Mark the session start before importing lap times.",
+        true
+      );
+      return;
+    }
+    openImportModal();
   });
 
-  els.startFrameInput.addEventListener("input", () => {
-    const value = els.startFrameInput.value.trim();
-    const parsed = Number(value);
-    state.startFrame =
-      value && Number.isFinite(parsed) ? parsed : null;
-    state.lastPreviewUrl = null;
-    updateButtons();
+  els.lapList?.addEventListener("change", handleLapListChange);
+  els.lapList?.addEventListener("blur", handleLapListChange, true);
+  els.lapList?.addEventListener("click", handleLapListClick);
+
+  els.lapImportFormat?.addEventListener("change", handleImportFormatChange);
+  els.lapImportText?.addEventListener("input", () => {
+    if (els.lapImportFormat?.value === "teamsport") {
+      syncImportDrivers();
+    }
+  });
+  els.applyLapImport?.addEventListener("click", (event) => {
+    event.preventDefault();
+    applyImport();
+  });
+  els.cancelLapImport?.addEventListener("click", (event) => {
+    event.preventDefault();
+    closeImportModal();
+  });
+  els.closeLapImport?.addEventListener("click", (event) => {
+    event.preventDefault();
+    closeImportModal();
+  });
+  els.lapImportModal
+    ?.querySelector(".modal__backdrop")
+    ?.addEventListener("click", closeImportModal);
+
+  window.addEventListener("laps:reset", () => {
+    setActiveSelection("session");
+    applyLapState([]);
+    updateLapActionState();
   });
 
   els.alignmentPreviewBtn.addEventListener("click", (event) => {
@@ -585,7 +1031,6 @@ export function initOffsetsStep(options) {
   els.lapSetupForm.addEventListener("submit", (event) => {
     event.preventDefault();
     if (!validateLapInputs()) return;
-    syncLapInputsToState();
     state.lastPreviewUrl = null;
     if (!state.previewLapNumber || state.previewLapNumber < 1) {
       state.previewLapNumber = 1;
@@ -604,6 +1049,14 @@ export function initOffsetsStep(options) {
   });
 
   window.addEventListener("keydown", (event) => {
+    if (
+      els.lapImportModal &&
+      !els.lapImportModal.classList.contains("hidden") &&
+      event.key === "Escape"
+    ) {
+      closeImportModal();
+      return;
+    }
     if (router.currentStep() !== "offsets") return;
     const target = event.target;
     const path = event.composedPath();
@@ -639,10 +1092,11 @@ export function initOffsetsStep(options) {
     }
   });
 
-  handleLapFormatChange();
-  refreshLapOptions();
+  handleImportFormatChange();
+  applyLapState(state.laps || []);
   updateButtons();
-  if (hasLapText() && hasStartFrame()) {
+  updateLapActionState();
+  if (hasLapData() && hasStartFrame()) {
     setAlignmentStatus("Select a lap to jump.");
   }
 

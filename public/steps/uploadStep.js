@@ -107,10 +107,9 @@ export function initUploadStep(options) {
     state.uploadSegments = [];
     state.uploadCombined = false;
     state.uploadReady = false;
-    state.lapText = "";
-    state.lapFormat = "daytona";
-    state.driverName = "";
+    state.laps = [];
     state.startFrame = null;
+    state.sessionStartTime = null;
     state.lastPreviewUrl = null;
     state.textColor = "#ffffff";
     state.boxColor = "#000000";
@@ -122,11 +121,9 @@ export function initUploadStep(options) {
     state.overlayOpacityPct = 60;
     state.lapCount = 0;
     state.previewLapNumber = 1;
-    els.lapFormatSelect.value = "daytona";
-    els.driverSelect.value = "";
-    els.lapTextArea.value = "";
-    els.driverField.style.display = "none";
-    els.startFrameInput.value = "";
+    if (els.addLapBtn) els.addLapBtn.disabled = true;
+    if (els.importLapBtn) els.importLapBtn.disabled = true;
+    window.dispatchEvent(new CustomEvent("laps:reset"));
     if (els.showLapCounterInput) els.showLapCounterInput.checked = true;
     if (els.showPositionInput) els.showPositionInput.checked = true;
     if (els.showCurrentLapTimeInput) els.showCurrentLapTimeInput.checked = true;
@@ -142,6 +139,9 @@ export function initUploadStep(options) {
       els.alignmentLapSelect.innerHTML =
         '<option value="">Add lap data first</option>';
       els.alignmentLapSelect.disabled = true;
+    }
+    if (els.alignmentStatus) {
+      els.alignmentStatus.textContent = "Waiting for lap data…";
     }
     els.uploadProgressBar.style.width = "0%";
     setChooserEnabled(true);

@@ -322,6 +322,10 @@ body {
   background: rgba(255, 255, 255, 0.02);
 }
 
+.modal__body--padded {
+  padding: 12px;
+}
+
 .modal__video {
   width: 100%;
   max-height: 70vh;
@@ -398,6 +402,81 @@ body {
   gap: 14px;
 }
 
+.lap-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.lap-builder__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lap-builder__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.lap-list {
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.lap-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lap-row {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.lap-row__fields {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.lap-row__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lap-row--session {
+  background: rgba(41, 215, 255, 0.05);
+}
+
+.lap-row--active {
+  border-color: rgba(255, 92, 43, 0.6);
+  box-shadow: 0 0 0 1px rgba(255, 92, 43, 0.35);
+}
+
+.lap-list__empty {
+  margin: 6px 0 0;
+}
+
 .lap-setup__row {
   display: grid;
   gap: 10px;
@@ -454,6 +533,25 @@ body {
 
 .alignment__hint {
   margin: 0;
+}
+
+.lap-import {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lap-import__row {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  align-items: end;
+}
+
+.lap-import__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 @media (max-width: 900px) {
@@ -720,6 +818,12 @@ input[type="range"] {
   color: var(--accent-2);
   font-weight: 700;
   font-size: 13px;
+}
+
+.badge--ghost {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
 .status__line {

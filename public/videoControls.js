@@ -58,7 +58,9 @@ export function createVideoControls(options) {
   markButton.addEventListener("click", (event) => {
     event.preventDefault();
     const frame = currentFrame();
-    startFrameInput.value = frame;
+    if (startFrameInput) {
+      startFrameInput.value = frame;
+    }
     onMark?.(frame, video.currentTime || 0);
   });
 

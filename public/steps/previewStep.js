@@ -196,8 +196,8 @@ export function initPreviewStep({ els, state, router, startPolling }) {
   const hasLapData = () =>
     Boolean(
       state.uploadId &&
-        state.lapText &&
-        state.lapText.trim() &&
+        state.laps &&
+        state.laps.length > 0 &&
         state.startFrame !== null &&
         state.startFrame !== undefined
     );
@@ -218,9 +218,7 @@ export function initPreviewStep({ els, state, router, startPolling }) {
 
   const payloadFromState = () => ({
     uploadId: state.uploadId,
-    lapText: state.lapText,
-    lapFormat: state.lapFormat,
-    driverName: state.driverName,
+    laps: state.laps || [],
     startFrame:
       state.startFrame === null || state.startFrame === undefined
         ? undefined
@@ -247,11 +245,12 @@ export function initPreviewStep({ els, state, router, startPolling }) {
   };
 
   const updateLapOptions = (lapCount) => {
-    state.lapCount = lapCount;
+    const count = lapCount ?? state.lapCount ?? 0;
+    state.lapCount = count;
     const select = els.previewLapSelect;
     if (!select) return;
     select.innerHTML = "";
-    if (!lapCount || lapCount < 1) {
+    if (!count || count < 1) {
       const opt = document.createElement("option");
       opt.value = "";
       opt.textContent = "Waiting for laps…";
@@ -260,16 +259,24 @@ export function initPreviewStep({ els, state, router, startPolling }) {
       return;
     }
     select.disabled = false;
+    const maxSelectable = count + 1;
     const current = Math.min(
-      lapCount,
+      maxSelectable,
       Math.max(1, state.previewLapNumber || 1)
     );
-    for (let i = 1; i <= lapCount; i++) {
+    for (let i = 1; i <= count; i++) {
       const opt = document.createElement("option");
       opt.value = String(i);
       opt.textContent = `Lap ${i}`;
       if (i === current) opt.selected = true;
       select.appendChild(opt);
+    }
+    if (count >= 1) {
+      const finishOpt = document.createElement("option");
+      finishOpt.value = String(count + 1);
+      finishOpt.textContent = "Finish / cooldown";
+      if (current === count + 1) finishOpt.selected = true;
+      select.appendChild(finishOpt);
     }
     state.previewLapNumber = current;
   };
@@ -343,7 +350,7 @@ export function initPreviewStep({ els, state, router, startPolling }) {
   }
 
   const syncFromLapData = () => {
-    if (state.lapText) setPreviewStatus("Ready to preview");
+    if (state.laps && state.laps.length) setPreviewStatus("Ready to preview");
     else setPreviewStatus("Waiting for lap data…");
     syncColorInputs();
     syncPositionInput();
@@ -351,7 +358,7 @@ export function initPreviewStep({ els, state, router, startPolling }) {
     syncWidthInput();
     syncContentToggles();
     updateButtons(false);
-    updateLapOptions(state.lapCount || 0);
+    updateLapOptions(state.lapCount || state.laps?.length || 0);
     if (state.lastPreviewUrl && els.previewImage) {
       els.previewImage.src = `${state.lastPreviewUrl}?t=${Date.now()}`;
       els.previewImage.alt = "Overlay preview frame";

@@ -12,7 +12,8 @@ import {
   type OverlayStyle,
 } from "../renderers/index.js";
 import { buildDrawtextFilterGraph } from "../renderers/ffmpegDrawtext.js";
-import { parseLapText, totalSessionDuration, type LapFormat } from "../laps.js";
+import { normalizeLapInputs, parseLapText, type LapFormat } from "../laps.js";
+import type { Lap, LapInput } from "../lapTypes.js";
 import { computeStartOffsetSeconds } from "../time.js";
 import { probeVideoInfo } from "../videoInfo.js";
 
@@ -62,6 +63,7 @@ interface RenderJob {
 interface RenderRequestBody {
   uploadId?: string;
   inputPath?: string;
+  laps?: LapInput[];
   lapText?: string;
   lapFormat?: LapFormat;
   driverName?: string;
@@ -369,9 +371,7 @@ async function handleRender(
     return;
   }
   const {
-    lapText,
-    lapFormat,
-    driverName,
+    laps,
     uploadId,
     inputPath,
     startFrame,
@@ -391,9 +391,7 @@ async function handleRender(
 
   startRenderJob({
     job,
-    lapText,
-    lapFormat,
-    driverName,
+    laps,
     startFrame,
     startTimestamp,
     style,
@@ -423,9 +421,7 @@ async function handlePreview(
   }
 
   const {
-    lapText,
-    lapFormat,
-    driverName,
+    laps,
     inputPath,
     startFrame,
     startTimestamp,
@@ -433,11 +429,6 @@ async function handlePreview(
   } = parsed;
 
   try {
-    const laps = parseLapText(lapText, lapFormat, driverName);
-    if (!laps.length) {
-      sendJson(res, 400, { error: "No laps parsed from lapTimes input" });
-      return;
-    }
     const lapCount = laps.length;
 
     const video = await probeVideoInfo(inputPath);
@@ -446,9 +437,15 @@ async function handlePreview(
       startTimestamp,
       fps: video.fps,
     });
-    const selectedLap = resolvePreviewLapNumber(body.previewLapNumber, lapCount);
-    const lap = laps[selectedLap - 1];
-    const lapStartAbs = startOffsetS + lap.startS;
+    const selection = resolvePreviewSelection(body.previewLapNumber, lapCount);
+    const selectedLap = selection.selected;
+    const isFinish = selection.isFinish;
+    const lapIndex = Math.min(selectedLap, lapCount) - 1;
+    const lap = laps[Math.max(0, lapIndex)];
+    const sessionEnd = lap.startS + lap.durationS;
+    const lapStartAbs = isFinish
+      ? startOffsetS + sessionEnd
+      : startOffsetS + lap.startS;
     let previewTime = lapStartAbs;
     // keep within video bounds
     previewTime = Math.min(previewTime, Math.max(video.duration - 0.05, 0));
@@ -646,39 +643,31 @@ function resolveOverlayStyle(body: RenderRequestBody): OverlayStyle {
   };
 }
 
-function resolvePreviewLapNumber(input: unknown, lapCount: number): number {
+function resolvePreviewSelection(
+  input: unknown,
+  lapCount: number
+): { selected: number; isFinish: boolean } {
+  const maxSelectable = lapCount + (lapCount > 0 ? 1 : 0);
   const n = Number(input);
-  if (!Number.isFinite(n)) return 1;
-  if (lapCount < 1) return 1;
-  return Math.min(lapCount, Math.max(1, Math.round(n)));
+  if (!Number.isFinite(n) || maxSelectable < 1) {
+    return { selected: 1, isFinish: false };
+  }
+  const clamped = Math.min(maxSelectable, Math.max(1, Math.round(n)));
+  return { selected: clamped, isFinish: clamped === maxSelectable && lapCount > 0 };
 }
+
+type ParsedOverlayRequest = {
+  laps: Lap[];
+  uploadId?: string;
+  inputPath: string;
+  startFrame?: number;
+  startTimestamp?: string;
+  style: OverlayStyle;
+};
 
 function parseOverlayRequest(
   body: RenderRequestBody
-):
-  | {
-      lapText: string;
-      lapFormat: LapFormat;
-      driverName?: string;
-      uploadId?: string;
-      inputPath: string;
-      startFrame?: number;
-      startTimestamp?: string;
-      style: OverlayStyle;
-    }
-  | { error: string } {
-  const lapText = body.lapText?.trim();
-  if (!lapText) {
-    return { error: "lapText is required" };
-  }
-
-  const lapFormat: LapFormat =
-    body.lapFormat === "teamsport" ? "teamsport" : "daytona";
-  const driverName = body.driverName?.trim();
-  if (lapFormat === "teamsport" && !driverName) {
-    return { error: "driverName is required for teamsport format" };
-  }
-
+): ParsedOverlayRequest | { error: string } {
   const uploadId = body.uploadId;
   const upload = uploadId ? uploads.get(uploadId) : undefined;
   const inputPath = upload?.path || body.inputPath;
@@ -700,10 +689,40 @@ function parseOverlayRequest(
     };
   }
 
+  let laps: Lap[] | null = null;
+
+  if (Array.isArray(body.laps)) {
+    try {
+      laps = normalizeLapInputs(body.laps);
+    } catch (err) {
+      return { error: (err as Error).message };
+    }
+  } else {
+    const lapText = body.lapText?.trim();
+    if (!lapText) {
+      return { error: "Lap data is required" };
+    }
+
+    const lapFormat: LapFormat =
+      body.lapFormat === "teamsport" ? "teamsport" : "daytona";
+    const driverName = body.driverName?.trim();
+    if (lapFormat === "teamsport" && !driverName) {
+      return { error: "driverName is required for teamsport format" };
+    }
+
+    try {
+      laps = parseLapText(lapText, lapFormat, driverName);
+    } catch (err) {
+      return { error: (err as Error).message };
+    }
+  }
+
+  if (!laps?.length) {
+    return { error: "At least one lap is required" };
+  }
+
   return {
-    lapText,
-    lapFormat,
-    driverName,
+    laps,
     uploadId,
     inputPath,
     startFrame,
@@ -774,7 +793,7 @@ async function renderPreviewFrame(options: {
   inputVideo: string;
   outputFile: string;
   video: Awaited<ReturnType<typeof probeVideoInfo>>;
-  laps: ReturnType<typeof parseLapText>;
+  laps: Lap[];
   startOffsetS: number;
   style: OverlayStyle;
   timeSeconds: number;
@@ -807,9 +826,7 @@ async function renderPreviewFrame(options: {
 
 async function startRenderJob(options: {
   job: RenderJob;
-  lapText: string;
-  lapFormat: LapFormat;
-  driverName?: string;
+  laps: Lap[];
   startFrame?: number;
   startTimestamp?: string;
   style: OverlayStyle;
@@ -825,13 +842,9 @@ async function startRenderJob(options: {
   };
 
   try {
-    const laps = parseLapText(
-      options.lapText,
-      options.lapFormat,
-      options.driverName
-    );
+    const laps = options.laps;
     if (!laps.length) {
-      throw new Error("No laps parsed from lapTimes input");
+      throw new Error("No laps provided");
     }
 
     const video = await probeVideoInfo(job.inputPath);

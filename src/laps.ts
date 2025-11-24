@@ -1,4 +1,4 @@
-import type { Lap } from "./lapTypes.js";
+import type { Lap, LapInput } from "./lapTypes.js";
 import { parseDaytonaLapFile, parseDaytonaLapText } from "./lapFormats/daytona.js";
 import {
   parseTeamsportLapFile,
@@ -76,6 +76,49 @@ export function lapForSessionTime(
   }
 
   return { lap: current, lapElapsed };
+}
+
+export function normalizeLapInputs(inputs: LapInput[] | null | undefined): Lap[] {
+  if (!inputs) return [];
+  const withIndex = inputs.map((lap, idx) => ({ lap, idx }));
+  const normalized = withIndex.map(({ lap, idx }) => {
+    const lapNumber = Number(lap?.number);
+    const position =
+      lap?.position == null ? 0 : Math.max(0, Math.round(Number(lap.position)));
+    const durationMsRaw = lap?.durationMs;
+    const durationSRaw = lap?.durationS;
+    const durationMs = durationMsRaw == null ? Number.NaN : Number(durationMsRaw);
+    const durationS = durationSRaw == null ? Number.NaN : Number(durationSRaw);
+    const durationSeconds = Number.isFinite(durationMs)
+      ? durationMs / 1000
+      : durationS;
+    if (!Number.isFinite(lapNumber) || lapNumber < 1) {
+      throw new Error(`Lap number must be >= 1 (row ${idx + 1})`);
+    }
+    if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) {
+      throw new Error(`Lap ${lapNumber} needs a positive duration`);
+    }
+    return {
+      number: Math.round(lapNumber),
+      durationS: durationSeconds as number,
+      position,
+      startS: 0,
+      idx,
+    };
+  });
+
+  normalized.sort((a, b) => {
+    if (a.number === b.number) return a.idx - b.idx;
+    return a.number - b.number;
+  });
+
+  let cumulative = 0;
+  normalized.forEach((lap) => {
+    lap.startS = cumulative;
+    cumulative += lap.durationS;
+  });
+
+  return normalized.map(({ idx, ...lap }) => lap);
 }
 
 export type { Lap } from "./lapTypes.js";
