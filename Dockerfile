@@ -11,5 +11,6 @@ RUN npm install
 
 COPY . .
 
-CMD ["npm", "run", "web"]
+EXPOSE 3000
 
+CMD ["npm", "run", "web"]
