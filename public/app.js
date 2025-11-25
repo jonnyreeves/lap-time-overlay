@@ -54,7 +54,7 @@ const preview = initPreviewStep({
   els,
   state,
   router,
-  startPolling: transform.startPolling,
+  syncTransform: transform.syncFromState,
 });
 const offsets = initOffsetsStep({
   els,

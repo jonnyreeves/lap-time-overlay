@@ -5,6 +5,7 @@ export interface VideoInfo {
   height: number;
   fps: number;
   duration: number;
+  hasAudio: boolean;
 }
 
 export function ffprobeAsync(filePath: string): Promise<ffmpeg.FfprobeData> {
@@ -45,5 +46,7 @@ export async function probeVideoInfo(inputVideo: string): Promise<VideoInfo> {
     throw new Error("Unable to determine video duration");
   }
 
-  return { width, height, fps, duration };
+  const hasAudio = meta.streams.some((s) => s.codec_type === "audio");
+
+  return { width, height, fps, duration, hasAudio };
 }

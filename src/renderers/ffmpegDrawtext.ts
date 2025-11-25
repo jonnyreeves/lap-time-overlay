@@ -1,6 +1,11 @@
 import ffmpeg from "fluent-ffmpeg";
 import { totalSessionDuration } from "../laps.js";
-import { DEFAULT_OVERLAY_STYLE, type RenderContext } from "./types.js";
+import {
+  DEFAULT_OVERLAY_STYLE,
+  type CompareAudioMode,
+  type CompareRenderContext,
+  type RenderContext,
+} from "./types.js";
 
 function normalizeHexColor(input: string | undefined, fallback: string): string {
   const match = input?.match(/^#?[0-9a-fA-F]{6}$/);
@@ -46,6 +51,8 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
     startOffsetS,
     style,
   } = ctx;
+  const baseLabel = ctx.inputLabel || "0:v";
+  const labelPrefix = ctx.labelPrefix || "ov";
 
   const textColor = normalizeHexColor(
     style.textColor,
@@ -77,7 +84,8 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
     (hasInfoLine ? 1 : 0) + (showCurrentLapTime ? 1 : 0);
 
   if (lineCount === 0) {
-    return { filterGraph: "[0:v]null[vout]", outputLabel: "vout" };
+    const nullLabel = `${labelPrefix}out`;
+    return { filterGraph: `[${baseLabel}]null[${nullLabel}]`, outputLabel: nullLabel };
   }
 
   const margin = 20;
@@ -103,9 +111,9 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
   const overlayEnd = startOffsetS + totalSessionDuration(laps);
 
   const filters: string[] = [];
-  let currentLabel = "0:v";
+  let currentLabel = baseLabel;
   let idx = 0;
-  const nextLabel = () => `ov${idx++}`;
+  const nextLabel = () => `${labelPrefix}${idx++}`;
 
   filters.push(
     `[${currentLabel}]drawbox=x=${boxX}:y=${boxY}:w=${boxWidth}:h=${boxHeight}:color=${toFfmpegColor(
@@ -215,6 +223,172 @@ export async function renderWithFfmpegDrawtext(
       })
       .on("end", () => {
         console.log("\nffmpeg render complete.");
+        resolve();
+      })
+      .on("error", (err, stdout, stderr) => {
+        console.error("ffmpeg error:", err.message);
+        console.error(stderr);
+        reject(err);
+      });
+
+    cmd.run();
+  });
+}
+
+export async function renderSideBySideCompare(
+  ctx: CompareRenderContext
+): Promise<void> {
+  const { video } = ctx;
+  const lapAStart = Math.max(0, ctx.lapA.startTime);
+  const lapBStart = Math.max(0, ctx.lapB.startTime);
+  const lapAEnd = Math.min(video.duration, lapAStart + ctx.lapA.lap.durationS);
+  const lapBEnd = Math.min(video.duration, lapBStart + ctx.lapB.lap.durationS);
+  const lapADuration = lapAEnd - lapAStart;
+  const lapBDuration = lapBEnd - lapBStart;
+
+  if (!Number.isFinite(lapADuration) || lapADuration <= 0) {
+    throw new Error("Left lap timing is invalid for comparison.");
+  }
+  if (!Number.isFinite(lapBDuration) || lapBDuration <= 0) {
+    throw new Error("Right lap timing is invalid for comparison.");
+  }
+
+  const targetDuration = Math.max(lapADuration, lapBDuration);
+  const padA = Math.max(0, targetDuration - lapADuration);
+  const padB = Math.max(0, targetDuration - lapBDuration);
+
+  const leftLap = { ...ctx.lapA.lap, startS: 0, durationS: lapADuration };
+  const rightLap = { ...ctx.lapB.lap, startS: 0, durationS: lapBDuration };
+
+  const leftGraph = buildDrawtextFilterGraph({
+    inputVideo: ctx.inputVideo,
+    outputFile: ctx.outputFile,
+    video: ctx.video,
+    laps: [leftLap],
+    startOffsetS: 0,
+    style: { ...ctx.style, overlayPosition: "bottom-left" },
+    inputLabel: "lv0",
+    labelPrefix: "la",
+    trimStartS: 0,
+  });
+
+  const rightGraph = buildDrawtextFilterGraph({
+    inputVideo: ctx.inputVideo,
+    outputFile: ctx.outputFile,
+    video: ctx.video,
+    laps: [rightLap],
+    startOffsetS: 0,
+    style: { ...ctx.style, overlayPosition: "bottom-right" },
+    inputLabel: "rv0",
+    labelPrefix: "rb",
+    trimStartS: 0,
+  });
+
+  const filters: string[] = [];
+  filters.push(
+    `[0:v]trim=start=${lapAStart.toFixed(
+      6
+    )}:end=${lapAEnd.toFixed(6)},setpts=PTS-STARTPTS[lv0]`
+  );
+  filters.push(
+    `[0:v]trim=start=${lapBStart.toFixed(
+      6
+    )}:end=${lapBEnd.toFixed(6)},setpts=PTS-STARTPTS[rv0]`
+  );
+
+  filters.push(leftGraph.filterGraph);
+  filters.push(rightGraph.filterGraph);
+
+  filters.push(
+    `[${leftGraph.outputLabel}]tpad=stop_mode=clone:stop_duration=${padA.toFixed(
+      6
+    )}[lvpad]`
+  );
+  filters.push(
+    `[${rightGraph.outputLabel}]tpad=stop_mode=clone:stop_duration=${padB.toFixed(
+      6
+    )}[rvpad]`
+  );
+
+  filters.push(`[lvpad]scale=iw/2:ih[lvs]`);
+  filters.push(`[rvpad]scale=iw/2:ih[rvs]`);
+  filters.push(`[lvs][rvs]hstack=inputs=2[vout]`);
+
+  const hasAudio = video.hasAudio;
+  const audioMode: CompareAudioMode = hasAudio
+    ? ctx.audioMode
+    : "mute";
+  let audioOutLabel: string | null = null;
+
+  if (audioMode !== "mute" && hasAudio) {
+    filters.push(
+      `[0:a]atrim=start=${lapAStart.toFixed(
+        6
+      )}:end=${lapAEnd.toFixed(6)},asetpts=PTS-STARTPTS[laa0]`
+    );
+    filters.push(
+      `[0:a]atrim=start=${lapBStart.toFixed(
+        6
+      )}:end=${lapBEnd.toFixed(6)},asetpts=PTS-STARTPTS[rba0]`
+    );
+    filters.push(`[laa0]apad=pad_dur=${padA.toFixed(6)}[laa]`);
+    filters.push(`[rba0]apad=pad_dur=${padB.toFixed(6)}[rba]`);
+
+    if (audioMode === "mix") {
+      filters.push(
+        `[laa][rba]amix=inputs=2:normalize=0:dropout_transition=0[aout]`
+      );
+      audioOutLabel = "aout";
+    } else if (audioMode === "left") {
+      filters.push(`[laa]anull[aout]`);
+      audioOutLabel = "aout";
+    } else if (audioMode === "right") {
+      filters.push(`[rba]anull[aout]`);
+      audioOutLabel = "aout";
+    }
+  }
+
+  const filterGraph = filters.join(";");
+
+  console.log("Using ffmpeg side-by-side comparison graph:");
+  console.log(filterGraph);
+
+  return new Promise<void>((resolve, reject) => {
+    const cmd = ffmpeg().input(ctx.inputVideo).complexFilter(filterGraph);
+    cmd.outputOptions([
+      "-map",
+      "[vout]",
+      "-c:v",
+      "libx264",
+      "-preset",
+      "medium",
+      "-crf",
+      "18",
+    ]);
+
+    if (audioOutLabel) {
+      cmd.outputOptions(["-map", `[${audioOutLabel}]`, "-c:a", "aac", "-b:a", "192k"]);
+    } else {
+      cmd.outputOptions(["-an"]);
+    }
+
+    cmd.output(ctx.outputFile);
+
+    cmd
+      .on("start", (cmdLine) => {
+        console.log("ffmpeg command:");
+        console.log(cmdLine);
+      })
+      .on("progress", (progress) => {
+        const pct = Number(progress.percent);
+        if (Number.isFinite(pct)) {
+          const clamped = Math.min(100, Math.max(0, pct));
+          ctx.onProgress?.(clamped);
+          process.stdout.write(`\rRendering: ${clamped.toFixed(1)}%     `);
+        }
+      })
+      .on("end", () => {
+        console.log("\nffmpeg compare render complete.");
         resolve();
       })
       .on("error", (err, stdout, stderr) => {

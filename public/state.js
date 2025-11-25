@@ -27,4 +27,8 @@ export const state = {
   showLapCounter: true,
   showPosition: true,
   showCurrentLapTime: true,
+  exportMode: "single",
+  compareLapA: null,
+  compareLapB: null,
+  compareAudio: "mix",
 };

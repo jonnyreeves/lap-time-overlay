@@ -1,5 +1,5 @@
 import { html, render } from "../template.js";
-import { requestPreview, startRender } from "../api.js";
+import { requestPreview } from "../api.js";
 import { setStatus } from "../status.js";
 
 export function renderPreviewStep(root) {
@@ -126,7 +126,7 @@ export function renderPreviewStep(root) {
   root.appendChild(section);
 }
 
-export function initPreviewStep({ els, state, router, startPolling }) {
+export function initPreviewStep({ els, state, router, syncTransform }) {
   const clearPreviewImage = () => {
     if (els.previewImage) {
       els.previewImage.src = "";
@@ -340,32 +340,15 @@ export function initPreviewStep({ els, state, router, startPolling }) {
     await generatePreview();
   }
 
-  async function handleRenderOverlay(event) {
+  function handleRenderOverlay(event) {
     event.preventDefault();
     if (!ensureReady()) return;
-    updateButtons(true);
-    setPreviewStatus("Queuing render…");
-    setStatus(els.statusBody, "Starting render…");
-
-    try {
-      const job = await startRender(payloadFromState());
-      setStatus(
-        els.statusBody,
-        `Render queued (#${job.jobId}). Polling for updates…`
-      );
-      router.goTo("transform");
-      startPolling(job.jobId);
-    } catch (err) {
-      console.error(err);
-      setPreviewStatus("Render request failed.");
-      setStatus(
-        els.statusBody,
-        "Render request failed. Check inputs and try again.",
-        true
-      );
-    } finally {
-      updateButtons(false);
-    }
+    syncTransform?.();
+    setStatus(
+      els.statusBody,
+      "Pick your export mode below, then start the render."
+    );
+    router.goTo("transform");
   }
 
   const syncFromLapData = () => {
@@ -389,6 +372,7 @@ export function initPreviewStep({ els, state, router, startPolling }) {
     } else {
       clearPreviewImage();
     }
+    syncTransform?.();
   };
 
   els.textColorInput?.addEventListener("input", () => {

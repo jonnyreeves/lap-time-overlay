@@ -22,6 +22,8 @@ export interface RenderContext {
   trimEndS?: number;
   style: OverlayStyle;
   onProgress?: (percent: number) => void;
+  inputLabel?: string;
+  labelPrefix?: string;
 }
 
 export const DEFAULT_OVERLAY_STYLE: OverlayStyle = {
@@ -34,3 +36,21 @@ export const DEFAULT_OVERLAY_STYLE: OverlayStyle = {
   overlayPosition: "bottom-left",
   boxWidthRatio: 0.45,
 };
+
+export type CompareAudioMode = "mix" | "left" | "right" | "mute";
+
+export interface CompareLapSelection {
+  lap: Lap;
+  startTime: number;
+}
+
+export interface CompareRenderContext {
+  inputVideo: string;
+  outputFile: string;
+  video: VideoInfo;
+  lapA: CompareLapSelection;
+  lapB: CompareLapSelection;
+  style: OverlayStyle;
+  audioMode: CompareAudioMode;
+  onProgress?: (percent: number) => void;
+}

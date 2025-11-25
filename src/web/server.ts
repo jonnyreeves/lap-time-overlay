@@ -9,7 +9,9 @@ import ffmpeg from "fluent-ffmpeg";
 import {
   DEFAULT_OVERLAY_STYLE,
   getRenderer,
+  renderSideBySideCompare,
   type OverlayStyle,
+  type CompareAudioMode,
 } from "../renderers/index.js";
 import { buildDrawtextFilterGraph } from "../renderers/ffmpegDrawtext.js";
 import { normalizeLapInputs, parseLapText, type LapFormat } from "../laps.js";
@@ -58,6 +60,8 @@ interface RenderJob {
   outputName?: string;
   uploadId?: string;
   inputPath: string;
+  mode?: "single" | "compare";
+  compareInfo?: { lapA: number; lapB: number; audioMode: CompareAudioMode };
 }
 
 interface RenderRequestBody {
@@ -82,6 +86,10 @@ interface RenderRequestBody {
   overlayPosition?: OverlayStyle["overlayPosition"];
   overlayWidthRatio?: number;
   previewLapNumber?: number;
+  exportMode?: "single" | "compare";
+  compareLapA?: number;
+  compareLapB?: number;
+  compareAudio?: CompareAudioMode;
 }
 
 const uploads = new Map<string, UploadedFile>();
@@ -369,7 +377,7 @@ async function handleRender(
     return;
   }
 
-  const parsed = parseOverlayRequest(body);
+  const parsed = parseRenderRequest(body);
   if ("error" in parsed) {
     sendJson(res, 400, { error: parsed.error });
     return;
@@ -385,6 +393,8 @@ async function handleRender(
     sessionEndFrame,
     sessionEndTimestamp,
     style,
+    exportMode,
+    compare,
   } = parsed;
 
   const jobId = randomUUID();
@@ -393,23 +403,50 @@ async function handleRender(
     status: "queued",
     uploadId,
     inputPath,
+    mode: exportMode,
     progress: 0,
+    compareInfo: compare
+      ? {
+          lapA: compare.lapA.number,
+          lapB: compare.lapB.number,
+          audioMode: compare.audioMode,
+        }
+      : undefined,
   };
   jobs.set(jobId, job);
 
-  startRenderJob({
-    job,
-    laps,
-    startFrame,
-    startTimestamp,
-    sessionStartFrame,
-    sessionStartTimestamp,
-    sessionEndFrame,
-    sessionEndTimestamp,
-    style,
-  }).catch((err) => {
-    console.error("Render job failed:", err);
-  });
+  if (exportMode === "compare" && compare) {
+    startCompareJob({
+      job,
+      laps,
+      lapA: compare.lapA,
+      lapB: compare.lapB,
+      startFrame,
+      startTimestamp,
+      sessionStartFrame,
+      sessionStartTimestamp,
+      sessionEndFrame,
+      sessionEndTimestamp,
+      style,
+      audioMode: compare.audioMode,
+    }).catch((err) => {
+      console.error("Compare render job failed:", err);
+    });
+  } else {
+    startRenderJob({
+      job,
+      laps,
+      startFrame,
+      startTimestamp,
+      sessionStartFrame,
+      sessionStartTimestamp,
+      sessionEndFrame,
+      sessionEndTimestamp,
+      style,
+    }).catch((err) => {
+      console.error("Render job failed:", err);
+    });
+  }
 
   sendJson(res, 202, { jobId });
 }
@@ -699,6 +736,15 @@ type ParsedOverlayRequest = {
   style: OverlayStyle;
 };
 
+type ParsedRenderRequest = ParsedOverlayRequest & {
+  exportMode: "single" | "compare";
+  compare?: {
+    lapA: Lap;
+    lapB: Lap;
+    audioMode: CompareAudioMode;
+  };
+};
+
 function parseOverlayRequest(
   body: RenderRequestBody
 ): ParsedOverlayRequest | { error: string } {
@@ -783,6 +829,48 @@ function parseOverlayRequest(
     sessionEndTimestamp,
     style: resolveOverlayStyle(body),
   };
+}
+
+function parseRenderRequest(
+  body: RenderRequestBody
+): ParsedRenderRequest | { error: string } {
+  const exportMode: "single" | "compare" =
+    body.exportMode === "compare" ? "compare" : "single";
+  const base = parseOverlayRequest(body);
+  if ("error" in base) return base;
+
+  if (exportMode === "compare") {
+    if (!base.laps || base.laps.length < 2) {
+      return { error: "Need at least two laps to run a comparison" };
+    }
+    const lapA = Number(body.compareLapA);
+    const lapB = Number(body.compareLapB);
+    if (!Number.isFinite(lapA) || !Number.isFinite(lapB)) {
+      return { error: "compareLapA and compareLapB are required for compare mode" };
+    }
+    if (lapA === lapB) {
+      return { error: "Pick two different laps for comparison" };
+    }
+    const lapAData = base.laps.find((lap) => lap.number === lapA);
+    const lapBData = base.laps.find((lap) => lap.number === lapB);
+    if (!lapAData || !lapBData) {
+      return { error: "Selected compare laps were not found in lap data" };
+    }
+    const audioMode: CompareAudioMode =
+      body.compareAudio === "left" ||
+      body.compareAudio === "right" ||
+      body.compareAudio === "mute"
+        ? body.compareAudio
+        : "mix";
+
+    return {
+      ...base,
+      exportMode,
+      compare: { lapA: lapAData, lapB: lapBData, audioMode },
+    };
+  }
+
+  return { ...base, exportMode };
 }
 
 function resolveTimeSeconds(options: {
@@ -990,6 +1078,91 @@ async function renderPreviewFrame(options: {
 
     cmd.run();
   });
+}
+
+async function startCompareJob(options: {
+  job: RenderJob;
+  laps: Lap[];
+  lapA: Lap;
+  lapB: Lap;
+  startFrame?: number;
+  startTimestamp?: string;
+  sessionStartFrame?: number;
+  sessionStartTimestamp?: string;
+  sessionEndFrame?: number;
+  sessionEndTimestamp?: string;
+  style: OverlayStyle;
+  audioMode: CompareAudioMode;
+}) {
+  const { job } = options;
+  job.status = "running";
+  job.startedAt = Date.now();
+  job.progress = 0;
+
+  const updateProgress = (pct: number) => {
+    if (!Number.isFinite(pct)) return;
+    job.progress = Math.min(100, Math.max(0, Number(pct)));
+  };
+
+  try {
+    const video = await probeVideoInfo(job.inputPath);
+    const timing = resolveTimingInputs({
+      fps: video.fps,
+      duration: video.duration,
+      startFrame: options.startFrame,
+      startTimestamp: options.startTimestamp,
+      sessionStartFrame: options.sessionStartFrame,
+      sessionStartTimestamp: options.sessionStartTimestamp,
+      sessionEndFrame: options.sessionEndFrame,
+      sessionEndTimestamp: options.sessionEndTimestamp,
+    });
+    if ("error" in timing) {
+      throw new Error(timing.error);
+    }
+    const { lapStartS, sessionStartS, sessionEndS } = timing;
+    const clipEnd = sessionEndS ?? video.duration;
+
+    const lapAStart = lapStartS + options.lapA.startS;
+    const lapBStart = lapStartS + options.lapB.startS;
+    const lapAEnd = Math.min(clipEnd, lapAStart + options.lapA.durationS);
+    const lapBEnd = Math.min(clipEnd, lapBStart + options.lapB.durationS);
+    const lapADuration = lapAEnd - lapAStart;
+    const lapBDuration = lapBEnd - lapBStart;
+
+    if (!Number.isFinite(lapADuration) || lapADuration <= 0) {
+      throw new Error("Left lap timing is invalid.");
+    }
+    if (!Number.isFinite(lapBDuration) || lapBDuration <= 0) {
+      throw new Error("Right lap timing is invalid.");
+    }
+
+    const safeStem = path
+      .basename(job.inputPath, path.extname(job.inputPath))
+      .replace(/[^\w.\-]+/g, "_");
+    const outputName = `${safeStem}-compare-lap${options.lapA.number}-vs-lap${options.lapB.number}.mp4`;
+    const outputPath = path.join(rendersDir, outputName);
+
+    await renderSideBySideCompare({
+      inputVideo: job.inputPath,
+      outputFile: outputPath,
+      video,
+      lapA: { lap: { ...options.lapA, durationS: lapADuration }, startTime: lapAStart },
+      lapB: { lap: { ...options.lapB, durationS: lapBDuration }, startTime: lapBStart },
+      style: options.style,
+      audioMode: options.audioMode,
+      onProgress: updateProgress,
+    });
+
+    job.status = "complete";
+    job.finishedAt = Date.now();
+    job.outputPath = outputPath;
+    job.outputName = outputName;
+    job.progress = 100;
+  } catch (err) {
+    job.status = "error";
+    job.finishedAt = Date.now();
+    job.error = err instanceof Error ? err.message : "Render failed";
+  }
 }
 
 async function startRenderJob(options: {

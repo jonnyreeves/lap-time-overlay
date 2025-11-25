@@ -124,6 +124,10 @@ export function initUploadStep(options) {
     state.overlayPosition = "bottom-left";
     state.overlayWidthPct = 45;
     state.overlayOpacityPct = 60;
+    state.exportMode = "single";
+    state.compareLapA = null;
+    state.compareLapB = null;
+    state.compareAudio = "mix";
     state.lapCount = 0;
     state.previewLapNumber = 1;
     if (els.addLapBtn) els.addLapBtn.disabled = true;

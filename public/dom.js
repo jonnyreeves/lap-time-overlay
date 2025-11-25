@@ -54,5 +54,15 @@ export function collectElements() {
     previewLapSelect: byId("previewLapSelect"),
     generatePreviewBtn: byId("generatePreview"),
     renderOverlayBtn: byId("renderOverlay"),
+    exportModeSingle: byId("exportModeSingle"),
+    exportModeCompare: byId("exportModeCompare"),
+    compareFields: byId("compareFields"),
+    compareLapASelect: byId("compareLapA"),
+    compareLapBSelect: byId("compareLapB"),
+    compareAudioMix: byId("compareAudioMix"),
+    compareAudioLeft: byId("compareAudioLeft"),
+    compareAudioRight: byId("compareAudioRight"),
+    compareAudioMute: byId("compareAudioMute"),
+    startExportBtn: byId("startExport"),
   };
 }
