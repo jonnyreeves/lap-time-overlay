@@ -46,7 +46,13 @@ export function parseTeamsportLapText(
     const timeStr = rowCells[driverIndex + 1];
     if (!timeStr) continue;
     const durationS = parseStartTimestamp(timeStr);
-    laps.push({ number: lapNum, durationS, position: 0, startS: 0 });
+    laps.push({
+      number: lapNum,
+      durationS,
+      position: 0,
+      positionChanges: [],
+      startS: 0,
+    });
   }
 
   return addStartOffsets(laps);

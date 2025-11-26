@@ -1,5 +1,5 @@
 import ffmpeg from "fluent-ffmpeg";
-import { totalSessionDuration } from "../laps.js";
+import { totalSessionDuration, type Lap } from "../laps.js";
 import { DEFAULT_OVERLAY_STYLE, type RenderContext } from "./types.js";
 
 function normalizeHexColor(input: string | undefined, fallback: string): string {
@@ -39,6 +39,140 @@ function buildLapTimeExpr(lapStartAbs: number): string {
   return `%{eif:${minExpr}:d:2}:%{eif:${secExpr}:d:2}:%{eif:${msExpr}:d:3}`;
 }
 
+type PositionSegment = { start: number; end: number; position: number };
+type TextSegment = { start: number; end: number; text: string };
+
+function buildPositionTimeline(
+  lap: Lap,
+  lapStartAbs: number,
+  carryPosition: number
+): { segments: PositionSegment[]; lastPosition: number } {
+  const lapDuration = lap.durationS;
+  const raw = (lap.positionChanges || []).map((change, idx) => ({
+    atS: Number(change?.atS),
+    position: Math.max(
+      0,
+      Math.round(Number(change?.position ?? lap.position ?? 0))
+    ),
+    idx,
+  }));
+
+  const normalized = raw
+    .filter(
+      ({ atS }) =>
+        Number.isFinite(atS) && (atS as number) >= 0 && (atS as number) <= lapDuration
+    )
+    .sort((a, b) => {
+      if (a.atS === b.atS) return a.idx - b.idx;
+      return (a.atS as number) - (b.atS as number);
+    });
+
+  const fallbackPosition = Math.max(
+    0,
+    Math.round(Number.isFinite(lap.position) ? (lap.position as number) : 0)
+  );
+  const startPosition = carryPosition > 0 ? carryPosition : fallbackPosition;
+
+  let withFallback = normalized;
+  if (withFallback.length === 0 && startPosition > 0) {
+    withFallback = [
+      {
+        atS: 0,
+        position: startPosition,
+        idx: -1,
+      },
+    ];
+  }
+
+  if (
+    withFallback.length > 0 &&
+    (withFallback[0]?.atS as number) > 0
+  ) {
+    const initialPosition =
+      carryPosition > 0
+        ? carryPosition
+        : Math.max(0, Math.round(withFallback[0]?.position ?? startPosition));
+    withFallback = [
+      { atS: 0, position: initialPosition, idx: -2 },
+      ...withFallback,
+    ];
+  }
+
+  const segments: PositionSegment[] = [];
+  for (let i = 0; i < withFallback.length; i++) {
+    const current = withFallback[i];
+    const next = withFallback[i + 1];
+    const segStart = lapStartAbs + (current.atS as number);
+    const segEndWithinLap =
+      next != null
+        ? Math.max(current.atS as number, Math.min(next.atS as number, lapDuration))
+        : lapDuration;
+    const segEnd = lapStartAbs + Math.min(lapDuration, segEndWithinLap);
+    if (segEnd > segStart) {
+      segments.push({
+        start: segStart,
+        end: segEnd,
+        position: current.position,
+      });
+    }
+  }
+
+  const lastPosition =
+    segments.length > 0
+      ? segments[segments.length - 1].position
+      : startPosition > 0
+      ? startPosition
+      : carryPosition;
+
+  return { segments, lastPosition };
+}
+
+function mergeTextSegments(segments: TextSegment[]): TextSegment[] {
+  if (!segments.length) return segments;
+  const merged: TextSegment[] = [];
+  for (const seg of segments) {
+    const prev = merged[merged.length - 1];
+    if (prev && Math.abs(prev.end - seg.start) < 1e-6 && prev.text === seg.text) {
+      prev.end = seg.end;
+    } else {
+      merged.push({ ...seg });
+    }
+  }
+  return merged;
+}
+
+function buildInfoSegments(options: {
+  lap: Lap;
+  lapCount: number;
+  lapStart: number;
+  showLapCounter: boolean;
+  showPosition: boolean;
+  positionSegments: PositionSegment[];
+}): TextSegment[] {
+  const { lap, lapCount, lapStart, showLapCounter, showPosition, positionSegments } =
+    options;
+  const lapEnd = lapStart + lap.durationS;
+  const baseSegments =
+    showPosition && positionSegments.length > 0
+      ? positionSegments
+      : [{ start: lapStart, end: lapEnd, position: 0 }];
+
+  const infoSegments = baseSegments
+    .map((seg) => {
+      const parts: string[] = [];
+      if (showLapCounter) {
+        parts.push(`Lap ${lap.number}/${lapCount}`);
+      }
+      if (showPosition && seg.position > 0) {
+        parts.push(`P${seg.position}`);
+      }
+      return { start: seg.start, end: seg.end, text: parts.join("   ") };
+    })
+    .filter((seg) => seg.text);
+
+  return mergeTextSegments(infoSegments);
+}
+
 export function buildDrawtextFilterGraph(ctx: RenderContext) {
   const {
     video: { width, height },
@@ -71,7 +205,16 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
     Number.isFinite(style.boxWidthRatio) && style.boxWidthRatio > 0
       ? Math.min(0.9, Math.max(0.15, style.boxWidthRatio))
       : DEFAULT_OVERLAY_STYLE.boxWidthRatio;
-  const hasPositionData = showPosition && laps.some((lap) => lap.position > 0);
+  let carryPosition = 0;
+  const lapTimelines = laps.map((lap) => {
+    const lapStart = startOffsetS + lap.startS;
+    const timeline = buildPositionTimeline(lap, lapStart, carryPosition);
+    const hasPosition = timeline.segments.some((seg) => seg.position > 0);
+    carryPosition = timeline.lastPosition;
+    return { lap, lapStart, timeline, hasPosition };
+  });
+  const hasPositionData =
+    showPosition && lapTimelines.some((item) => item.hasPosition);
   const hasInfoLine = showLapCounter || hasPositionData;
   const lineCount =
     (hasInfoLine ? 1 : 0) + (showCurrentLapTime ? 1 : 0);
@@ -125,26 +268,32 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
     ? `${boxX + boxWidth - paddingX}-text_w`
     : `${boxX + paddingX}`;
 
-  laps.forEach((lap) => {
-    const lapStart = overlayStart + lap.startS;
-    const lapEnd = lapStart + lap.durationS;
-    const lapEnable = `between(t,${lapStart},${lapEnd})`;
-    const infoParts: string[] = [];
-    if (showLapCounter) {
-      infoParts.push(`Lap ${lap.number}/${laps.length}`);
-    }
-    if (hasPositionData && lap.position > 0) {
-      infoParts.push(`P${lap.position}`);
-    }
+  lapTimelines.forEach(({ lap, lapStart, timeline }) => {
+    const lapEnable = `between(t,${lapStart},${lapStart + lap.durationS})`;
+    const infoSegments =
+      infoLineIndex !== null
+        ? buildInfoSegments({
+            lap,
+            lapCount: laps.length,
+            lapStart,
+            showLapCounter,
+            showPosition,
+            positionSegments: timeline.segments,
+          })
+        : [];
 
-    if (infoLineIndex !== null && infoParts.length) {
+    if (infoLineIndex !== null && infoSegments.length) {
       const y = boxY + paddingY + infoLineIndex * (fontSize + lineSpacing);
-      filters.push(
-        `[${currentLabel}]drawtext=text='${escapeDrawtext(
-          infoParts.join("   ")
-        )}':fontcolor=${toFfmpegColor(textColor)}:fontsize=${fontSize}:x=${textXExpr}:y=${y}:enable='${lapEnable}'[${(currentLabel =
-          nextLabel())}]`
-      );
+      infoSegments.forEach((segment) => {
+        filters.push(
+          `[${currentLabel}]drawtext=text='${escapeDrawtext(
+            segment.text
+          )}':fontcolor=${toFfmpegColor(
+            textColor
+          )}:fontsize=${fontSize}:x=${textXExpr}:y=${y}:enable='between(t,${segment.start},${segment.end})'[${(currentLabel =
+            nextLabel())}]`
+        );
+      });
     }
 
     if (timeLineIndex !== null) {

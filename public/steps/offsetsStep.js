@@ -64,7 +64,13 @@ function parseDaytonaLapText(text) {
     const pos = parseInt(m[5], 10);
 
     const durationS = mm * 60 + ss + ms / 1000;
-    laps.push({ number: lapNum, durationS, position: pos, startS: 0 });
+    laps.push({
+      number: lapNum,
+      durationS,
+      position: pos,
+      positionChanges: [{ atS: 0, position: pos }],
+      startS: 0,
+    });
   }
 
   return addStartOffsets(laps);
@@ -107,7 +113,13 @@ function parseTeamsportLapText(text, driverName) {
     const timeStr = rowCells[driverIndex + 1];
     if (!timeStr) continue;
     const durationS = parseStartTimestamp(timeStr);
-    laps.push({ number: lapNum, durationS, position: 0, startS: 0 });
+    laps.push({
+      number: lapNum,
+      durationS,
+      position: 0,
+      positionChanges: [],
+      startS: 0,
+    });
   }
 
   return addStartOffsets(laps);
@@ -188,19 +200,87 @@ function parseLapDurationInput(value) {
   return null;
 }
 
+function normalizePositionChanges(changes, durationS, fallbackPosition = 0) {
+  if (!Number.isFinite(durationS) || durationS <= 0) return [];
+  const parsed = (changes || []).map((change, idx) => {
+    const atS = Number(change?.atS);
+    const position = Math.max(
+      0,
+      Math.round(Number(change?.position ?? fallbackPosition ?? 0))
+    );
+    return { atS, position, idx };
+  });
+
+  const filtered = parsed
+    .filter(
+      ({ atS }) =>
+        Number.isFinite(atS) && atS >= 0 && atS <= durationS
+    )
+    .sort((a, b) => {
+      if (a.atS === b.atS) return a.idx - b.idx;
+      return a.atS - b.atS;
+    });
+
+  const hasFallback =
+    filtered.length === 0 &&
+    Number.isFinite(fallbackPosition) &&
+    Number(fallbackPosition) > 0;
+  const withFallback = hasFallback
+    ? [
+        {
+          atS: 0,
+          position: Math.max(0, Math.round(Number(fallbackPosition))),
+          idx: -1,
+        },
+      ]
+    : filtered;
+  const withZero =
+    withFallback.length > 0 && (withFallback[0]?.atS ?? 0) > 0
+      ? [{ atS: 0, position: 0, idx: -2 }, ...withFallback]
+      : withFallback;
+
+  const normalized = [];
+  for (const change of withZero) {
+    const prev = normalized[normalized.length - 1];
+    if (
+      !prev ||
+      Math.abs(prev.atS - change.atS) > 1e-9 ||
+      prev.position !== change.position
+    ) {
+      normalized.push({ atS: change.atS, position: change.position });
+    }
+  }
+
+  return normalized;
+}
+
 function normalizeLapList(laps) {
   const withIndex = (laps || []).map((lap, idx) => ({ lap, idx }));
   const sorted = withIndex
     .filter(
       ({ lap }) => Number.isFinite(lap?.number) && Number(lap.number) >= 1
     )
-    .map(({ lap, idx }) => ({
-      number: Math.round(Number(lap.number)),
-      durationS: Number(lap.durationS),
-      position: Math.max(0, Math.round(Number(lap.position || 0))),
-      startS: 0,
-      idx,
-    }))
+    .map(({ lap, idx }) => {
+      const durationS = Number(lap.durationS);
+      const rawPosition = Math.max(0, Math.round(Number(lap.position || 0)));
+      const positionChanges = normalizePositionChanges(
+        lap.positionChanges,
+        durationS,
+        rawPosition
+      );
+      const position =
+        positionChanges.find((change) => change.position > 0)?.position ??
+        positionChanges[0]?.position ??
+        rawPosition;
+      return {
+        number: Math.round(Number(lap.number)),
+        durationS,
+        position,
+        positionChanges,
+        startS: 0,
+        idx,
+      };
+    })
     .filter((lap) => Number.isFinite(lap.durationS) && lap.durationS > 0)
     .sort((a, b) => {
       if (a.number === b.number) return a.idx - b.idx;
@@ -295,6 +375,14 @@ export function renderOffsetsStep(root) {
               </div>
               <button class="btn" type="button" id="markStartBtn">
                 Mark start here
+              </button>
+              <button
+                class="btn btn--ghost"
+                type="button"
+                id="addPositionChangeBtn"
+                title="Add position change at current time"
+              >
+                Add position change
               </button>
             </div>
           </div>
@@ -434,6 +522,24 @@ export function initOffsetsStep(options) {
     }
   };
 
+  const updatePositionButton = () => {
+    if (!els.addPositionChangeBtn) return;
+    const isLap = activeSelection.type === "lap";
+    const lap =
+      isLap && Number.isInteger(activeSelection.index)
+        ? state.laps?.[activeSelection.index]
+        : null;
+    els.addPositionChangeBtn.textContent = lap
+      ? `Add position change (Lap ${lap.number})`
+      : "Add position change";
+    const videoReady =
+      Boolean(els.previewVideo?.src) &&
+      !Number.isNaN(Number(els.previewVideo?.currentTime));
+    const enabled =
+      Boolean(lap) && hasLapData() && hasLapStart() && hasSessionStart() && videoReady;
+    els.addPositionChangeBtn.disabled = !enabled;
+  };
+
   const hasLapData = () => (state.laps?.length ?? 0) > 0;
   const getSessionStartTime = () => {
     if (Number.isFinite(state.sessionStartTime)) return state.sessionStartTime;
@@ -470,12 +576,14 @@ export function initOffsetsStep(options) {
     }
     updateMarkButtonLabel();
     renderLapList();
+    updatePositionButton();
   };
 
   const updateLapActionState = () => {
     const enabled = hasSessionStart();
     if (els.addLapBtn) els.addLapBtn.disabled = !enabled;
     if (els.importLapBtn) els.importLapBtn.disabled = !enabled;
+    updatePositionButton();
   };
 
   const updateButtons = (pending = false) => {
@@ -490,6 +598,7 @@ export function initOffsetsStep(options) {
     if (els.alignmentPreviewBtn) {
       els.alignmentPreviewBtn.disabled = true;
     }
+    updatePositionButton();
   };
 
   const updateLapOptions = (lapCount) => {
@@ -579,6 +688,64 @@ export function initOffsetsStep(options) {
                             placeholder="01:02:345"
                           />
                         </label>
+                      </div>
+                      <div class="lap-row__positions">
+                        <div class="lap-row__positions-header">
+                          <span class="muted">Position changes</span>
+                          <button
+                            class="btn btn--ghost lap-row__positions-add"
+                            type="button"
+                            data-action="add-position"
+                            data-index=${idx}
+                          >
+                            Add change
+                          </button>
+                        </div>
+                        ${lap.positionChanges?.length
+          ? html`<div class="position-list">
+                              ${lap.positionChanges.map(
+            (change, changeIdx) => html`
+                                  <div class="position-row">
+                                    <label class="field position-row__field">
+                                      <span>Time in lap</span>
+                                      <input
+                                        type="text"
+                                        data-index=${idx}
+                                        data-position-index=${changeIdx}
+                                        data-field="position-time"
+                                        value=${formatLapDurationInput(change.atS)}
+                                        placeholder="00:00.000"
+                                      />
+                                    </label>
+                                    <label class="field position-row__field">
+                                      <span>Position</span>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        step="1"
+                                        data-index=${idx}
+                                        data-position-index=${changeIdx}
+                                        data-field="position-value"
+                                        value=${change.position}
+                                      />
+                                    </label>
+                                    <button
+                                      class="upload__control upload__control--danger position-row__remove"
+                                      type="button"
+                                      data-action="remove-position"
+                                      data-index=${idx}
+                                      data-position-index=${changeIdx}
+                                      aria-label="Remove position change"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                `
+          )}
+                            </div>`
+          : html`<p class="muted lap-row__positions-empty">
+                            No position changes yet.
+                          </p>`}
                       </div>
                       <div class="lap-row__meta">
                         <button
@@ -677,7 +844,13 @@ export function initOffsetsStep(options) {
     }
     const laps = state.laps ? [...state.laps] : [];
     const lapNumber = nextLapNumber(laps);
-    laps.push({ number: lapNumber, durationS: 60, position: 0, startS: 0 });
+    laps.push({
+      number: lapNumber,
+      durationS: 60,
+      position: 0,
+      positionChanges: [],
+      startS: 0,
+    });
     applyLapState(laps);
     setStatus(els.statusBody, `Added lap ${lapNumber}. Fill in the time.`);
     setActiveSelection("lap", laps.length - 1);
@@ -692,6 +865,46 @@ export function initOffsetsStep(options) {
     const laps = state.laps ? [...state.laps] : [];
     const lap = laps[idx];
     if (!lap) return;
+
+    if (field === "position-time" || field === "position-value") {
+      const changeIdx = Number(target.dataset.positionIndex);
+      if (!Number.isInteger(changeIdx) || changeIdx < 0) return;
+      const change = Array.isArray(lap.positionChanges)
+        ? lap.positionChanges[changeIdx]
+        : null;
+      if (!change) return;
+      if (field === "position-time") {
+        const parsed = parseLapDurationInput(target.value);
+        if (
+          !Number.isFinite(parsed) ||
+          parsed < 0 ||
+          parsed > (lap.durationS ?? 0)
+        ) {
+          setStatus(
+            els.statusBody,
+            "Position change time must be within the lap.",
+            true
+          );
+          target.value = formatLapDurationInput(change.atS);
+          return;
+        }
+        change.atS = parsed;
+      } else {
+        const parsedPos = Number(target.value);
+        if (!Number.isFinite(parsedPos) || parsedPos < 0) {
+          setStatus(
+            els.statusBody,
+            "Positions must be zero or a positive whole number.",
+            true
+          );
+          target.value = String(change.position);
+          return;
+        }
+        change.position = Math.round(parsedPos);
+      }
+      applyLapState(laps);
+      return;
+    }
 
     if (field === "time") {
       const parsed = parseLapDurationInput(target.value);
@@ -718,23 +931,61 @@ export function initOffsetsStep(options) {
     if (action) {
       const idx = Number(action.getAttribute("data-index"));
       if (!Number.isInteger(idx) || idx < 0) return;
-      if (action.getAttribute("data-action") === "remove-lap") {
+      const actionType = action.getAttribute("data-action");
+      if (actionType === "remove-lap") {
         const laps = state.laps ? [...state.laps] : [];
         laps.splice(idx, 1);
         applyLapState(laps);
         setStatus(els.statusBody, "Removed lap entry.");
         return;
       }
-      if (action.getAttribute("data-action") === "jump-lap") {
+      if (actionType === "add-position") {
+        const laps = state.laps ? [...state.laps] : [];
+        const lap = laps[idx];
+        if (!lap) return;
+        const changes = Array.isArray(lap.positionChanges)
+          ? [...lap.positionChanges]
+          : [];
+        const lastChange = changes[changes.length - 1];
+        const defaultTimeBase =
+          changes.length === 0 ? 0 : Math.max(0, (lastChange?.atS ?? 0) + 1);
+        const defaultTime = Math.min(lap.durationS ?? 0, defaultTimeBase);
+        const defaultPos =
+          lastChange?.position ??
+          (Number.isFinite(lap.position) ? Math.max(0, Math.round(lap.position)) : 0);
+        lap.positionChanges = [...changes, { atS: defaultTime, position: defaultPos }];
+        laps[idx] = lap;
+        applyLapState(laps);
+        setStatus(els.statusBody, `Added position change on lap ${lap.number}.`);
+        return;
+      }
+      if (actionType === "remove-position") {
+        const changeIdx = Number(action.getAttribute("data-position-index"));
+        if (!Number.isInteger(changeIdx) || changeIdx < 0) return;
+        const laps = state.laps ? [...state.laps] : [];
+        const lap = laps[idx];
+        if (!lap?.positionChanges) return;
+        lap.positionChanges = lap.positionChanges.filter(
+          (_change, i) => i !== changeIdx
+        );
+        if (lap.positionChanges.length === 0) {
+          lap.position = 0;
+        }
+        laps[idx] = lap;
+        applyLapState(laps);
+        setStatus(els.statusBody, "Removed position change.");
+        return;
+      }
+      if (actionType === "jump-lap") {
         const targetLap = idx + 1;
         jumpToLapStart(targetLap);
         return;
       }
-      if (action.getAttribute("data-action") === "jump-session-start") {
+      if (actionType === "jump-session-start") {
         jumpToTime(getSessionStartTime(), 0);
         return;
       }
-      if (action.getAttribute("data-action") === "jump-session-end") {
+      if (actionType === "jump-session-end") {
         jumpToTime(getSessionEndTime(), getVideoDuration());
         return;
       }
@@ -773,6 +1024,7 @@ export function initOffsetsStep(options) {
     setAlignmentStatus("Waiting for lap data…");
     updateButtons();
     updateLapActionState();
+    updatePositionButton();
   }
 
   function preparePreviewFromFile(file) {
@@ -797,6 +1049,7 @@ export function initOffsetsStep(options) {
     videoControls.setEnabled(true);
     videoControls.updateTimeReadout();
     updateButtons();
+    updatePositionButton();
   }
 
   const handleMarkAt = (frame, seconds) => {
@@ -822,7 +1075,15 @@ export function initOffsetsStep(options) {
       }
       const hasLaps = Array.isArray(state.laps) && state.laps.length > 0;
       if (!hasLaps) {
-        applyLapState([{ number: 1, durationS: 60, position: 0, startS: 0 }]);
+        applyLapState([
+          {
+            number: 1,
+            durationS: 60,
+            position: 0,
+            positionChanges: [],
+            startS: 0,
+          },
+        ]);
         setActiveSelection("lap", 0);
       } else {
         applyLapState(state.laps || []);
@@ -913,6 +1174,54 @@ export function initOffsetsStep(options) {
     setStatus(
       els.statusBody,
       `Lap ${laps[targetIdx].number} set to ${formatTime(newDuration)}.`
+    );
+  };
+
+  const addPositionChangeAtCurrentTime = () => {
+    if (activeSelection.type !== "lap") {
+      setStatus(els.statusBody, "Select a lap to add a position change.", true);
+      return;
+    }
+    const video = els.previewVideo;
+    if (!video || !video.src) {
+      setStatus(els.statusBody, "Load the video before adding position changes.", true);
+      return;
+    }
+    const lapAnchor = getLapStartTime();
+    if (!Number.isFinite(lapAnchor)) {
+      setStatus(
+        els.statusBody,
+        "Mark Lap 1 start before adding position changes.",
+        true
+      );
+      return;
+    }
+    const laps = state.laps ? [...state.laps] : [];
+    const lap = laps[activeSelection.index];
+    if (!lap) {
+      setStatus(els.statusBody, "Select a valid lap first.", true);
+      return;
+    }
+    const currentTime = Number(video.currentTime);
+    if (!Number.isFinite(currentTime)) {
+      setStatus(els.statusBody, "Cannot read current video time.", true);
+      return;
+    }
+    const lapStartAbs = lapAnchor + (lap.startS ?? 0);
+    const elapsed = currentTime - lapStartAbs;
+    const clampedElapsed = Math.max(0, Math.min(elapsed, lap.durationS ?? 0));
+    const changes = Array.isArray(lap.positionChanges)
+      ? [...lap.positionChanges]
+      : [];
+    const lastPosition =
+      changes[changes.length - 1]?.position ??
+      (Number.isFinite(lap.position) ? Math.max(0, Math.round(lap.position)) : 0);
+    changes.push({ atS: clampedElapsed, position: lastPosition });
+    laps[activeSelection.index] = { ...lap, positionChanges: changes };
+    applyLapState(laps);
+    setStatus(
+      els.statusBody,
+      `Added position change at ${formatTime(clampedElapsed)} on lap ${lap.number}.`
     );
   };
 
@@ -1157,6 +1466,11 @@ export function initOffsetsStep(options) {
       `Imported ${parsed.laps.length} lap${parsed.laps.length === 1 ? "" : "s"} from ${format === "teamsport" ? "TeamSport" : "Daytona"}.`
     );
   };
+
+  els.addPositionChangeBtn?.addEventListener("click", (event) => {
+    event.preventDefault();
+    addPositionChangeAtCurrentTime();
+  });
 
   els.addLapBtn?.addEventListener("click", (event) => {
     event.preventDefault();

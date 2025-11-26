@@ -468,6 +468,50 @@ body {
   cursor: pointer;
 }
 
+.lap-row__positions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px dashed var(--border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.lap-row__positions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lap-row__positions-add {
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+.position-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.position-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.position-row__remove {
+  align-self: center;
+}
+
+.lap-row__positions-empty {
+  margin: 0;
+}
+
 .lap-row--session {
   background: rgba(41, 215, 255, 0.05);
 }

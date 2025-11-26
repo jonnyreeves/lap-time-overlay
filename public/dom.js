@@ -23,6 +23,7 @@ export function collectElements() {
     statusBody: byId("statusBody"),
     previewVideo: byId("previewVideo"),
     markStartBtn: byId("markStartBtn"),
+    addPositionChangeBtn: byId("addPositionChangeBtn"),
     stepBackBtn: byId("stepBackBtn"),
     stepForwardBtn: byId("stepForwardBtn"),
     videoMeta: byId("videoMeta"),

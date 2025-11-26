@@ -26,11 +26,13 @@ function testDaytona() {
   assert.strictEqual(laps[0].number, 1);
   almostEqual(laps[0].durationS, 57.755);
   assert.strictEqual(laps[0].position, 11);
+  assert.deepStrictEqual(laps[0].positionChanges, [{ atS: 0, position: 11 }]);
   almostEqual(laps[0].startS, 0);
 
   assert.strictEqual(laps[1].number, 2);
   almostEqual(laps[1].durationS, 58.123);
   assert.strictEqual(laps[1].position, 10);
+  assert.deepStrictEqual(laps[1].positionChanges, [{ atS: 0, position: 10 }]);
   almostEqual(laps[1].startS, 57.755);
 }
 
@@ -62,6 +64,7 @@ function testTeamsport() {
   almostEqual(laps[1].startS, 68.917);
   almostEqual(laps[2].startS, 68.917 + 49.379);
   assert.strictEqual(laps[0].position, 0);
+  assert.deepStrictEqual(laps[0].positionChanges, []);
 }
 
 function testTeamsportMissingDriver() {

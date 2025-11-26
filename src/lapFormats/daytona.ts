@@ -25,7 +25,13 @@ export function parseDaytonaLapText(text: string): Lap[] {
     const pos = parseInt(m[5], 10);
 
     const durationS = mm * 60 + ss + ms / 1000;
-    laps.push({ number: lapNum, durationS, position: pos, startS: 0 });
+    laps.push({
+      number: lapNum,
+      durationS,
+      position: pos,
+      positionChanges: [{ atS: 0, position: pos }],
+      startS: 0,
+    });
   }
 
   return addStartOffsets(laps);
