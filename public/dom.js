@@ -42,6 +42,7 @@ export function collectElements() {
     previewImage: byId("previewImage"),
     previewStatus: byId("previewStatus"),
     textColorInput: byId("textColor"),
+    textSizeInput: byId("textSize"),
     boxColorInput: byId("boxColor"),
     overlayPositionSelect: byId("overlayPosition"),
     overlayWidthInput: byId("overlayWidth"),

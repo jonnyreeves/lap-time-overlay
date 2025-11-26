@@ -17,6 +17,7 @@ export const state = {
   sessionEndFrame: null,
   sessionEndTime: null,
   textColor: "#ffffff",
+  textSize: 32,
   boxColor: "#000000",
   overlayPosition: "bottom-left",
   overlayWidthPct: 45,

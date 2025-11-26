@@ -1,6 +1,8 @@
-import { html, render } from "../template.js";
 import { requestPreview, startRender } from "../api.js";
 import { setStatus } from "../status.js";
+import { html, render } from "../template.js";
+
+const TEXT_SIZE_OPTIONS = [16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 64];
 
 export function renderPreviewStep(root) {
   const section = document.createElement("section");
@@ -21,97 +23,127 @@ export function renderPreviewStep(root) {
             <p class="eyebrow">Single frame</p>
             <h3>Check colors after your start</h3>
           </div>
-          <span class="badge" id="previewStatus">Waiting for lap data…</span>
+          <div class="preview__header-controls">
+            <label class="field preview__lap-select">
+              <span>Lap for preview</span>
+              <select id="previewLapSelect" disabled>
+                <option value="">Waiting for laps…</option>
+              </select>
+            </label>
+            <button class="btn preview__update" id="generatePreview">
+              <span class="btn__icon" aria-hidden="true">&#8635;</span>
+              <span>Update preview</span>
+            </button>
+          </div>
         </div>
         <div class="preview__image">
           <img id="previewImage" alt="Overlay preview" />
-          <p class="field__hint">Generated just after the start frame.</p>
         </div>
         <div class="preview__grid">
-          <label class="field">
-            <span>Lap for preview</span>
-            <select id="previewLapSelect" disabled>
-              <option value="">Waiting for laps…</option>
-            </select>
-            <div class="field__hint">
-              We grab a frame near the start of this lap.
-            </div>
-          </label>
-          <label class="field">
-            <span>Text color</span>
-            <input type="color" id="textColor" value="#ffffff" />
-          </label>
-          <label class="field">
-            <span>Box tint</span>
-            <input type="color" id="boxColor" value="#000000" />
-            <div class="field__hint">Applied with chosen opacity.</div>
-          </label>
-          <label class="field">
-            <span>Overlay position</span>
-            <select id="overlayPosition">
-              <option value="bottom-left">Bottom left</option>
-              <option value="top-left">Top left</option>
-              <option value="top-right">Top right</option>
-              <option value="bottom-right">Bottom right</option>
-            </select>
-          </label>
-          <label class="field">
-            <span>Overlay opacity</span>
-            <div class="field__range">
-              <input
-                type="range"
-                id="overlayOpacity"
-                min="0"
-                max="100"
-                value="60"
-              />
-              <span id="overlayOpacityLabel" class="field__range-value">60%</span>
-            </div>
-            <div class="field__hint">
-              0% removes the tint; text stays fully opaque.
-            </div>
-          </label>
-          <label class="field">
-            <span>Overlay width</span>
-            <div class="field__range">
-              <input
-                type="range"
-                id="overlayWidth"
-                min="15"
-                max="80"
-                value="45"
-              />
-              <span id="overlayWidthLabel" class="field__range-value">45%</span>
-            </div>
-            <div class="field__hint">
-              Percentage of video width (15–80% recommended).
-            </div>
-          </label>
-          <div class="field">
-            <span>Overlay content</span>
-            <div class="field__choices">
-              <label>
-                <input type="checkbox" id="showLapCounter" checked />
-                <span>Lap counter</span>
+          <div class="preview__group">
+            <p class="eyebrow">Overlay tint</p>
+            <div class="preview__group-body">
+              <label class="field">
+                <span>Overlay tint</span>
+                <input type="color" id="boxColor" value="#000000" />
+                <div class="field__hint">Applied with chosen opacity.</div>
               </label>
-              <label>
-                <input type="checkbox" id="showPosition" checked />
-                <span>Position (when available)</span>
+              <label class="field">
+                <span>Overlay opacity</span>
+                <div class="field__range">
+                  <input
+                    type="range"
+                    id="overlayOpacity"
+                    min="0"
+                    max="100"
+                    value="60"
+                  />
+                  <span id="overlayOpacityLabel" class="field__range-value">60%</span>
+                </div>
+                <div class="field__hint">
+                  0% removes the tint; text stays fully opaque.
+                </div>
               </label>
-              <label>
-                <input type="checkbox" id="showCurrentLapTime" checked />
-                <span>Current lap time</span>
+              <label class="field">
+                <span>Overlay width</span>
+                <div class="field__range">
+                  <input
+                    type="range"
+                    id="overlayWidth"
+                    min="15"
+                    max="80"
+                    value="45"
+                  />
+                  <span id="overlayWidthLabel" class="field__range-value">45%</span>
+                </div>
+                <div class="field__hint">
+                  Percentage of video width.
+                </div>
               </label>
-            </div>
-            <div class="field__hint">
-              Turn everything off to omit the overlay entirely.
             </div>
           </div>
-          <div class="preview__cta">
-            <button class="btn" id="generatePreview">Generate preview</button>
+          <div class="preview__group">
+            <p class="eyebrow">Overlay position & content</p>
+            <div class="preview__group-body">
+              <label class="field">
+                <span>Overlay position</span>
+                <select id="overlayPosition">
+                  <option value="bottom-left">Bottom left</option>
+                  <option value="top-left">Top left</option>
+                  <option value="top-right">Top right</option>
+                  <option value="bottom-right">Bottom right</option>
+                </select>
+              </label>
+              <div class="field">
+                <span>Overlay content</span>
+                <div class="field__choices">
+                  <label>
+                    <input type="checkbox" id="showLapCounter" checked />
+                    <span>Lap counter</span>
+                  </label>
+                  <label>
+                    <input type="checkbox" id="showPosition" checked />
+                    <span>Position (when available)</span>
+                  </label>
+                  <label>
+                    <input type="checkbox" id="showCurrentLapTime" checked />
+                    <span>Current lap time</span>
+                  </label>
+                </div>
+                <div class="field__hint">
+                  Turn everything off to omit the overlay entirely.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="preview__group">
+            <p class="eyebrow">Text color</p>
+            <div class="preview__group-body">
+              <label class="field">
+                <span>Text color</span>
+                <input type="color" id="textColor" value="#ffffff" />
+              </label>
+              <label class="field">
+                <span>Text size</span>
+                <select id="textSize">
+                  <option value="16">16px</option>
+                  <option value="18">18px</option>
+                  <option value="20">20px</option>
+                  <option value="24">24px</option>
+                  <option value="28">28px</option>
+                  <option value="32">32px</option>
+                  <option value="36">36px</option>
+                  <option value="40">40px</option>
+                  <option value="48">48px</option>
+                  <option value="56">56px</option>
+                  <option value="64">64px</option>
+                </select>
+                <div class="field__hint">Applies to lap info and timer.</div>
+              </label>
+            </div>
           </div>
         </div>
-      <div class="step-nav">
+        <div class="step-nav">
           <button type="button" class="btn btn--ghost" id="backToSetup">
             Back to setup
           </button>
@@ -181,6 +213,27 @@ export function initPreviewStep({ els, state, router, startPolling }) {
     }
   };
 
+  const getNearestTextSize = (size) => {
+    const target = Number.isFinite(size) ? Math.round(size) : 32;
+    let nearest = TEXT_SIZE_OPTIONS[0];
+    let smallestDiff = Math.abs(target - nearest);
+    for (const option of TEXT_SIZE_OPTIONS) {
+      const diff = Math.abs(option - target);
+      if (diff < smallestDiff) {
+        smallestDiff = diff;
+        nearest = option;
+      }
+    }
+    return nearest;
+  };
+
+  const syncTextSizeInput = () => {
+    if (!els.textSizeInput) return;
+    const nearest = getNearestTextSize(state.textSize ?? 32);
+    els.textSizeInput.value = String(nearest);
+    state.textSize = nearest;
+  };
+
   const syncContentToggles = () => {
     if (els.showLapCounterInput) {
       els.showLapCounterInput.checked = Boolean(state.showLapCounter);
@@ -201,10 +254,10 @@ export function initPreviewStep({ els, state, router, startPolling }) {
   const hasLapData = () =>
     Boolean(
       state.uploadId &&
-        state.laps &&
-        state.laps.length > 0 &&
-        hasLapStart() &&
-        hasSessionStart()
+      state.laps &&
+      state.laps.length > 0 &&
+      hasLapStart() &&
+      hasSessionStart()
     );
 
   const ensureReady = () => {
@@ -243,6 +296,9 @@ export function initPreviewStep({ els, state, router, startPolling }) {
       ? String(state.sessionEndTime)
       : undefined,
     overlayTextColor: state.textColor,
+    overlayTextSize: Number.isFinite(state.textSize)
+      ? Number(state.textSize)
+      : undefined,
     overlayBoxColor: state.boxColor,
     overlayBoxOpacity: (state.overlayOpacityPct ?? 60) / 100,
     overlayPosition: state.overlayPosition,
@@ -375,6 +431,7 @@ export function initPreviewStep({ els, state, router, startPolling }) {
     syncPositionInput();
     syncOpacityInput();
     syncWidthInput();
+    syncTextSizeInput();
     syncContentToggles();
     updateButtons(false);
     updateLapOptions(state.lapCount || state.laps?.length || 0);
@@ -420,6 +477,11 @@ export function initPreviewStep({ els, state, router, startPolling }) {
         els.overlayWidthLabel.textContent = `${clamped}%`;
       }
     }
+  });
+  els.textSizeInput?.addEventListener("change", () => {
+    const nearest = getNearestTextSize(Number(els.textSizeInput.value));
+    state.textSize = nearest;
+    els.textSizeInput.value = String(nearest);
   });
   els.overlayOpacityInput?.addEventListener("input", () => {
     const value = Number(els.overlayOpacityInput.value);

@@ -74,6 +74,7 @@ interface RenderRequestBody {
   sessionEndFrame?: number;
   sessionEndTimestamp?: string;
   overlayTextColor?: string;
+  overlayTextSize?: number;
   overlayBoxColor?: string;
   overlayBoxOpacity?: number;
   showLapCounter?: boolean;
@@ -638,6 +639,10 @@ function resolveOverlayStyle(body: RenderRequestBody): OverlayStyle {
     body.overlayBoxOpacity != null && Number.isFinite(body.overlayBoxOpacity)
       ? Math.min(1, Math.max(0, Number(body.overlayBoxOpacity)))
       : DEFAULT_OVERLAY_STYLE.boxOpacity;
+  const textSize =
+    body.overlayTextSize != null && Number.isFinite(body.overlayTextSize)
+      ? Math.min(64, Math.max(16, Number(body.overlayTextSize)))
+      : DEFAULT_OVERLAY_STYLE.textSize;
   const boxWidthRatio =
     body.overlayWidthRatio != null && Number.isFinite(body.overlayWidthRatio)
       ? Math.min(0.9, Math.max(0.15, Number(body.overlayWidthRatio)))
@@ -657,6 +662,7 @@ function resolveOverlayStyle(body: RenderRequestBody): OverlayStyle {
 
   return {
     textColor: textColor ?? DEFAULT_OVERLAY_STYLE.textColor,
+    textSize,
     boxColor: boxColor ?? DEFAULT_OVERLAY_STYLE.boxColor,
     boxOpacity: opacity,
     showLapCounter,

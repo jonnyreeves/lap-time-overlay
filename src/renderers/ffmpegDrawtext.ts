@@ -82,7 +82,10 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
 
   const margin = 20;
   const boxWidth = Math.floor(width * boxWidthRatio);
-  const fontSize = 32;
+  const fontSize =
+    Number.isFinite(style.textSize) && style.textSize > 0
+      ? Math.min(64, Math.max(16, Math.round(style.textSize)))
+      : DEFAULT_OVERLAY_STYLE.textSize;
   const lineSpacing = 8;
   const paddingY = 10;
   const boxHeight =

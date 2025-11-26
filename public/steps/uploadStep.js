@@ -117,6 +117,7 @@ export function initUploadStep(options) {
     state.sessionEndTime = null;
     state.lastPreviewUrl = null;
     state.textColor = "#ffffff";
+    state.textSize = 32;
     state.boxColor = "#000000";
     state.showLapCounter = true;
     state.showPosition = true;
@@ -137,6 +138,7 @@ export function initUploadStep(options) {
     if (els.overlayWidthLabel) els.overlayWidthLabel.textContent = "45%";
     if (els.overlayOpacityInput) els.overlayOpacityInput.value = "60";
     if (els.overlayOpacityLabel) els.overlayOpacityLabel.textContent = "60%";
+    if (els.textSizeInput) els.textSizeInput.value = "32";
     els.nextToOffsets.disabled = true;
     if (els.nextToPreview) els.nextToPreview.disabled = true;
     if (els.alignmentPreviewBtn) els.alignmentPreviewBtn.disabled = true;
