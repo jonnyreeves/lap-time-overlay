@@ -11,6 +11,11 @@ RUN npm install
 
 COPY . .
 
+# Ensure runtime work directories exist for uploads/renders/previews
+RUN mkdir -p work/uploads work/renders work/previews database
+
+VOLUME ["/app/work", "/app/database"]
+
 EXPOSE 3000
 
 CMD ["npm", "run", "web"]

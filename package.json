@@ -4,10 +4,14 @@
   "description": "Overlay lap info with ffmpeg drawtext.",
   "main": "index.js",
   "scripts": {
-    "lap-timer": "node --import ./register-ts-node.js src/lapTimer.ts",
     "web": "node --import ./register-ts-node.js src/web/server.ts",
+    "web:build": "esbuild src/web/client/index.tsx --bundle --sourcemap --outfile=public/app.js --format=esm --target=es2020 --jsx=automatic --define:process.env.NODE_ENV=\\\"development\\\"",
+    "web:watch": "npm run web:build -- --watch",
+    "db:migrate": "node --import ./register-ts-node.js src/db/migrate.ts",
     "type-check": "tsc --noEmit",
-    "test": "npm run type-check && node --import ./register-ts-node.js tests/laps.test.ts"
+    "test": "npm run type-check && vitest run --exclude **/overlay.integration.test.ts",
+    "test:integration": "npm run type-check && vitest run tests/ffmpeg/overlay.integration.test.ts",
+    "test:update-overlay-fixture": "UPDATE_OVERLAY_FIXTURE=1 npm run test:integration"
   },
   "type": "module",
   "keywords": [],
@@ -16,12 +20,29 @@
   "dependencies": {
     "@types/node": "^24.10.1",
     "@types/yargs": "^17.0.35",
+    "better-sqlite3": "^9.4.0",
     "fluent-ffmpeg": "^2.1.3",
+    "graphql": "^16.9.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-relay": "^16.1.0",
+    "relay-runtime": "^16.1.0",
     "yargs": "^18.0.0"
   },
   "devDependencies": {
     "@types/fluent-ffmpeg": "^2.1.28",
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@types/react-relay": "^18.2.1",
+    "@types/relay-runtime": "^19.0.3",
+    "@types/pixelmatch": "^5.2.6",
+    "@types/pngjs": "^6.0.5",
+    "esbuild": "^0.24.0",
+    "pixelmatch": "^5.3.0",
+    "pngjs": "^7.0.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^1.6.0"
   }
 }

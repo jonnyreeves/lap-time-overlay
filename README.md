@@ -1,6 +1,6 @@
 # Lap Time Overlay
 
-Overlay karting lap and position info on top of a video using the ffmpeg drawtext pipeline. Use either the CLI or the bundled web UI.
+Overlay karting lap and position info on top of a video using the ffmpeg drawtext pipeline. Use the bundled web UI.
 
 ## Prereqs
 
@@ -35,21 +35,11 @@ The web UI always uses the ffmpeg renderer.
 
 - Uploads and rendered/previews saved under `work/` are pruned automatically (renders/uploads after ~24h, previews after ~6h). Copy anything you want to keep somewhere else.
 
-## CLI Usage
+## Database
 
-```
-npm run lap-timer -- \
-  --inputVideo "work/video.mp4" \
-  --inputLapTimes work/times.txt \
-  --lapFormat daytona \
-  --startTimestamp 00:12:53.221 \
-  --outputFile work/out.mp4
-```
-
-- `--startFrame` can be used instead of `--startTimestamp` (frame index).
-- `--lapFormat teamsport` needs `--driverName "Your Name"` to select the right column from the table export.
-- You can concatenate multiple sources in order with repeated `--inputVideo` flags (e.g. `--inputVideo a.mp4 --inputVideo b.mp4`).
-- Overlay is ffmpeg-only in the web UI and CLI to keep the flow simple.
+- SQLite database lives at `/app/database/app.sqlite` by default (set `DB_PATH` to override). The folder is exposed as a Docker volume.
+- Default PRAGMAs: `journal_mode=WAL`, `synchronous=NORMAL`, `foreign_keys=ON`. Override with `DB_PRAGMAS="journal_mode=WAL,synchronous=FULL"` if needed.
+- Migrations run automatically on server start (`npm run db:migrate` to run manually). No schema is defined yet.
 
 ## Development
 
@@ -70,7 +60,7 @@ docker run -it --rm lap-timer sh
 ## run locally from the root of the repo on http://localhost:3008
 docker run -it --rm \
   -p 3008:3000 \
-  -v $(pwd)/work:/work \
+  -v $(pwd)/work:/app/work \
   --name lap-timer \
   jonnyreeves83/lap-timer:latest
 
