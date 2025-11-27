@@ -7,11 +7,11 @@ var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
+var __copyProps = (to, from2, except, desc) => {
+  if (from2 && typeof from2 === "object" || typeof from2 === "function") {
+    for (let key of __getOwnPropNames(from2))
       if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+        __defProp(to, key, { get: () => from2[key], enumerable: !(desc = __getOwnPropDesc(from2, key)) || desc.enumerable });
   }
   return to;
 };
@@ -232,25 +232,25 @@ var require_react_development = __commonJS({
             warnNoop(publicInstance, "setState");
           }
         };
-        var assign = Object.assign;
+        var assign2 = Object.assign;
         var emptyObject = {};
         {
           Object.freeze(emptyObject);
         }
-        function Component(props, context, updater) {
+        function Component2(props, context, updater) {
           this.props = props;
           this.context = context;
           this.refs = emptyObject;
           this.updater = updater || ReactNoopUpdateQueue;
         }
-        Component.prototype.isReactComponent = {};
-        Component.prototype.setState = function(partialState, callback) {
+        Component2.prototype.isReactComponent = {};
+        Component2.prototype.setState = function(partialState, callback) {
           if (typeof partialState !== "object" && typeof partialState !== "function" && partialState != null) {
             throw new Error("setState(...): takes an object of state variables to update or a function which returns an object of state variables.");
           }
           this.updater.enqueueSetState(this, partialState, callback, "setState");
         };
-        Component.prototype.forceUpdate = function(callback) {
+        Component2.prototype.forceUpdate = function(callback) {
           this.updater.enqueueForceUpdate(this, callback, "forceUpdate");
         };
         {
@@ -259,7 +259,7 @@ var require_react_development = __commonJS({
             replaceState: ["replaceState", "Refactor your code to use setState instead (see https://github.com/facebook/react/issues/3236)."]
           };
           var defineDeprecationWarning = function(methodName, info) {
-            Object.defineProperty(Component.prototype, methodName, {
+            Object.defineProperty(Component2.prototype, methodName, {
               get: function() {
                 warn("%s(...) is deprecated in plain JavaScript React classes. %s", info[0], info[1]);
                 return void 0;
@@ -274,7 +274,7 @@ var require_react_development = __commonJS({
         }
         function ComponentDummy() {
         }
-        ComponentDummy.prototype = Component.prototype;
+        ComponentDummy.prototype = Component2.prototype;
         function PureComponent(props, context, updater) {
           this.props = props;
           this.context = context;
@@ -283,7 +283,7 @@ var require_react_development = __commonJS({
         }
         var pureComponentPrototype = PureComponent.prototype = new ComponentDummy();
         pureComponentPrototype.constructor = PureComponent;
-        assign(pureComponentPrototype, Component.prototype);
+        assign2(pureComponentPrototype, Component2.prototype);
         pureComponentPrototype.isPureReactComponent = true;
         function createRef() {
           var refObject = {
@@ -509,7 +509,7 @@ var require_react_development = __commonJS({
           }
           return element;
         };
-        function createElement(type, config, children) {
+        function createElement5(type, config, children) {
           var propName;
           var props = {};
           var key = null;
@@ -582,7 +582,7 @@ var require_react_development = __commonJS({
             throw new Error("React.cloneElement(...): The argument must be a React element, but you passed " + element + ".");
           }
           var propName;
-          var props = assign({}, element.props);
+          var props = assign2({}, element.props);
           var key = element.key;
           var ref = element.ref;
           var self = element._self;
@@ -625,7 +625,7 @@ var require_react_development = __commonJS({
           }
           return ReactElement(element.type, key, ref, self, source, owner, props);
         }
-        function isValidElement(object) {
+        function isValidElement2(object) {
           return typeof object === "object" && object !== null && object.$$typeof === REACT_ELEMENT_TYPE;
         }
         var SEPARATOR = ".";
@@ -636,8 +636,8 @@ var require_react_development = __commonJS({
             "=": "=0",
             ":": "=2"
           };
-          var escapedString = key.replace(escapeRegex, function(match) {
-            return escaperLookup[match];
+          var escapedString = key.replace(escapeRegex, function(match2) {
+            return escaperLookup[match2];
           });
           return "$" + escapedString;
         }
@@ -690,7 +690,7 @@ var require_react_development = __commonJS({
                 return c;
               });
             } else if (mappedChild != null) {
-              if (isValidElement(mappedChild)) {
+              if (isValidElement2(mappedChild)) {
                 {
                   if (mappedChild.key && (!_child || _child.key !== mappedChild.key)) {
                     checkKeyStringCoercion(mappedChild.key);
@@ -778,12 +778,12 @@ var require_react_development = __commonJS({
           }) || [];
         }
         function onlyChild(children) {
-          if (!isValidElement(children)) {
+          if (!isValidElement2(children)) {
             throw new Error("React.Children.only expected to receive a single React element child.");
           }
           return children;
         }
-        function createContext(defaultValue) {
+        function createContext4(defaultValue) {
           var context = {
             $$typeof: REACT_CONTEXT_TYPE,
             // As a workaround to support multiple concurrent renderers, we categorize
@@ -970,7 +970,7 @@ var require_react_development = __commonJS({
           }
           return lazyType;
         }
-        function forwardRef(render) {
+        function forwardRef4(render) {
           {
             if (render != null && render.$$typeof === REACT_MEMO_TYPE) {
               error("forwardRef requires a render function but received a `memo` component. Instead of forwardRef(memo(...)), use memo(forwardRef(...)).");
@@ -1031,7 +1031,7 @@ var require_react_development = __commonJS({
           }
           return false;
         }
-        function memo(type, compare) {
+        function memo2(type, compare) {
           {
             if (!isValidElementType(type)) {
               error("memo: The first argument must be a component. Instead received: %s", type === null ? "null" : typeof type);
@@ -1069,7 +1069,7 @@ var require_react_development = __commonJS({
           }
           return dispatcher;
         }
-        function useContext(Context) {
+        function useContext6(Context) {
           var dispatcher = resolveDispatcher();
           {
             if (Context._context !== void 0) {
@@ -1083,7 +1083,7 @@ var require_react_development = __commonJS({
           }
           return dispatcher.useContext(Context);
         }
-        function useState(initialState) {
+        function useState5(initialState) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useState(initialState);
         }
@@ -1091,27 +1091,27 @@ var require_react_development = __commonJS({
           var dispatcher = resolveDispatcher();
           return dispatcher.useReducer(reducer, initialArg, init);
         }
-        function useRef(initialValue) {
+        function useRef4(initialValue) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useRef(initialValue);
         }
-        function useEffect(create, deps) {
+        function useEffect4(create, deps) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useEffect(create, deps);
         }
-        function useInsertionEffect(create, deps) {
+        function useInsertionEffect3(create, deps) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useInsertionEffect(create, deps);
         }
-        function useLayoutEffect(create, deps) {
+        function useLayoutEffect4(create, deps) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useLayoutEffect(create, deps);
         }
-        function useCallback(callback, deps) {
+        function useCallback3(callback, deps) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useCallback(callback, deps);
         }
-        function useMemo(create, deps) {
+        function useMemo3(create, deps) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useMemo(create, deps);
         }
@@ -1191,25 +1191,25 @@ var require_react_development = __commonJS({
                 writable: true
               };
               Object.defineProperties(console, {
-                log: assign({}, props, {
+                log: assign2({}, props, {
                   value: prevLog
                 }),
-                info: assign({}, props, {
+                info: assign2({}, props, {
                   value: prevInfo
                 }),
-                warn: assign({}, props, {
+                warn: assign2({}, props, {
                   value: prevWarn
                 }),
-                error: assign({}, props, {
+                error: assign2({}, props, {
                   value: prevError
                 }),
-                group: assign({}, props, {
+                group: assign2({}, props, {
                   value: prevGroup
                 }),
-                groupCollapsed: assign({}, props, {
+                groupCollapsed: assign2({}, props, {
                   value: prevGroupCollapsed
                 }),
-                groupEnd: assign({}, props, {
+                groupEnd: assign2({}, props, {
                   value: prevGroupEnd
                 })
               });
@@ -1220,18 +1220,18 @@ var require_react_development = __commonJS({
           }
         }
         var ReactCurrentDispatcher$1 = ReactSharedInternals.ReactCurrentDispatcher;
-        var prefix;
+        var prefix2;
         function describeBuiltInComponentFrame(name, source, ownerFn) {
           {
-            if (prefix === void 0) {
+            if (prefix2 === void 0) {
               try {
                 throw Error();
               } catch (x) {
-                var match = x.stack.trim().match(/\n( *(at )?)/);
-                prefix = match && match[1] || "";
+                var match2 = x.stack.trim().match(/\n( *(at )?)/);
+                prefix2 = match2 && match2[1] || "";
               }
             }
-            return "\n" + prefix + name;
+            return "\n" + prefix2 + name;
           }
         }
         var reentry = false;
@@ -1348,8 +1348,8 @@ var require_react_development = __commonJS({
             return describeNativeComponentFrame(fn, false);
           }
         }
-        function shouldConstruct(Component2) {
-          var prototype = Component2.prototype;
+        function shouldConstruct(Component3) {
+          var prototype = Component3.prototype;
           return !!(prototype && prototype.isReactComponent);
         }
         function describeUnknownElementTypeFrameInDEV(type, source, ownerFn) {
@@ -1502,29 +1502,29 @@ var require_react_development = __commonJS({
             setCurrentlyValidatingElement$1(null);
           }
         }
-        function validateChildKeys(node2, parentType) {
-          if (typeof node2 !== "object") {
+        function validateChildKeys(node6, parentType) {
+          if (typeof node6 !== "object") {
             return;
           }
-          if (isArray(node2)) {
-            for (var i = 0; i < node2.length; i++) {
-              var child = node2[i];
-              if (isValidElement(child)) {
+          if (isArray(node6)) {
+            for (var i = 0; i < node6.length; i++) {
+              var child = node6[i];
+              if (isValidElement2(child)) {
                 validateExplicitKey(child, parentType);
               }
             }
-          } else if (isValidElement(node2)) {
-            if (node2._store) {
-              node2._store.validated = true;
+          } else if (isValidElement2(node6)) {
+            if (node6._store) {
+              node6._store.validated = true;
             }
-          } else if (node2) {
-            var iteratorFn = getIteratorFn(node2);
+          } else if (node6) {
+            var iteratorFn = getIteratorFn(node6);
             if (typeof iteratorFn === "function") {
-              if (iteratorFn !== node2.entries) {
-                var iterator = iteratorFn.call(node2);
+              if (iteratorFn !== node6.entries) {
+                var iterator = iteratorFn.call(node6);
                 var step;
                 while (!(step = iterator.next()).done) {
-                  if (isValidElement(step.value)) {
+                  if (isValidElement2(step.value)) {
                     validateExplicitKey(step.value, parentType);
                   }
                 }
@@ -1608,7 +1608,7 @@ var require_react_development = __commonJS({
               error("React.createElement: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: %s.%s", typeString, info);
             }
           }
-          var element = createElement.apply(this, arguments);
+          var element = createElement5.apply(this, arguments);
           if (element == null) {
             return element;
           }
@@ -1847,15 +1847,15 @@ var require_react_development = __commonJS({
         var createElement$1 = createElementWithValidation;
         var cloneElement$1 = cloneElementWithValidation;
         var createFactory = createFactoryWithValidation;
-        var Children = {
+        var Children2 = {
           map: mapChildren,
           forEach: forEachChildren,
           count: countChildren,
           toArray,
           only: onlyChild
         };
-        exports.Children = Children;
-        exports.Component = Component;
+        exports.Children = Children2;
+        exports.Component = Component2;
         exports.Fragment = REACT_FRAGMENT_TYPE;
         exports.Profiler = REACT_PROFILER_TYPE;
         exports.PureComponent = PureComponent;
@@ -1864,29 +1864,29 @@ var require_react_development = __commonJS({
         exports.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = ReactSharedInternals;
         exports.act = act;
         exports.cloneElement = cloneElement$1;
-        exports.createContext = createContext;
+        exports.createContext = createContext4;
         exports.createElement = createElement$1;
         exports.createFactory = createFactory;
         exports.createRef = createRef;
-        exports.forwardRef = forwardRef;
-        exports.isValidElement = isValidElement;
+        exports.forwardRef = forwardRef4;
+        exports.isValidElement = isValidElement2;
         exports.lazy = lazy;
-        exports.memo = memo;
+        exports.memo = memo2;
         exports.startTransition = startTransition;
         exports.unstable_act = act;
-        exports.useCallback = useCallback;
-        exports.useContext = useContext;
+        exports.useCallback = useCallback3;
+        exports.useContext = useContext6;
         exports.useDebugValue = useDebugValue;
         exports.useDeferredValue = useDeferredValue;
-        exports.useEffect = useEffect;
+        exports.useEffect = useEffect4;
         exports.useId = useId;
         exports.useImperativeHandle = useImperativeHandle;
-        exports.useInsertionEffect = useInsertionEffect;
-        exports.useLayoutEffect = useLayoutEffect;
-        exports.useMemo = useMemo;
+        exports.useInsertionEffect = useInsertionEffect3;
+        exports.useLayoutEffect = useLayoutEffect4;
+        exports.useMemo = useMemo3;
         exports.useReducer = useReducer;
-        exports.useRef = useRef;
-        exports.useState = useState;
+        exports.useRef = useRef4;
+        exports.useState = useState5;
         exports.useSyncExternalStore = useSyncExternalStore;
         exports.useTransition = useTransition;
         exports.version = ReactVersion;
@@ -1910,6 +1910,261 @@ var require_react = __commonJS({
   }
 });
 
+// node_modules/hoist-non-react-statics/node_modules/react-is/cjs/react-is.development.js
+var require_react_is_development = __commonJS({
+  "node_modules/hoist-non-react-statics/node_modules/react-is/cjs/react-is.development.js"(exports) {
+    "use strict";
+    if (true) {
+      (function() {
+        "use strict";
+        var hasSymbol = typeof Symbol === "function" && Symbol.for;
+        var REACT_ELEMENT_TYPE = hasSymbol ? Symbol.for("react.element") : 60103;
+        var REACT_PORTAL_TYPE = hasSymbol ? Symbol.for("react.portal") : 60106;
+        var REACT_FRAGMENT_TYPE = hasSymbol ? Symbol.for("react.fragment") : 60107;
+        var REACT_STRICT_MODE_TYPE = hasSymbol ? Symbol.for("react.strict_mode") : 60108;
+        var REACT_PROFILER_TYPE = hasSymbol ? Symbol.for("react.profiler") : 60114;
+        var REACT_PROVIDER_TYPE = hasSymbol ? Symbol.for("react.provider") : 60109;
+        var REACT_CONTEXT_TYPE = hasSymbol ? Symbol.for("react.context") : 60110;
+        var REACT_ASYNC_MODE_TYPE = hasSymbol ? Symbol.for("react.async_mode") : 60111;
+        var REACT_CONCURRENT_MODE_TYPE = hasSymbol ? Symbol.for("react.concurrent_mode") : 60111;
+        var REACT_FORWARD_REF_TYPE = hasSymbol ? Symbol.for("react.forward_ref") : 60112;
+        var REACT_SUSPENSE_TYPE = hasSymbol ? Symbol.for("react.suspense") : 60113;
+        var REACT_SUSPENSE_LIST_TYPE = hasSymbol ? Symbol.for("react.suspense_list") : 60120;
+        var REACT_MEMO_TYPE = hasSymbol ? Symbol.for("react.memo") : 60115;
+        var REACT_LAZY_TYPE = hasSymbol ? Symbol.for("react.lazy") : 60116;
+        var REACT_BLOCK_TYPE = hasSymbol ? Symbol.for("react.block") : 60121;
+        var REACT_FUNDAMENTAL_TYPE = hasSymbol ? Symbol.for("react.fundamental") : 60117;
+        var REACT_RESPONDER_TYPE = hasSymbol ? Symbol.for("react.responder") : 60118;
+        var REACT_SCOPE_TYPE = hasSymbol ? Symbol.for("react.scope") : 60119;
+        function isValidElementType(type) {
+          return typeof type === "string" || typeof type === "function" || // Note: its typeof might be other than 'symbol' or 'number' if it's a polyfill.
+          type === REACT_FRAGMENT_TYPE || type === REACT_CONCURRENT_MODE_TYPE || type === REACT_PROFILER_TYPE || type === REACT_STRICT_MODE_TYPE || type === REACT_SUSPENSE_TYPE || type === REACT_SUSPENSE_LIST_TYPE || typeof type === "object" && type !== null && (type.$$typeof === REACT_LAZY_TYPE || type.$$typeof === REACT_MEMO_TYPE || type.$$typeof === REACT_PROVIDER_TYPE || type.$$typeof === REACT_CONTEXT_TYPE || type.$$typeof === REACT_FORWARD_REF_TYPE || type.$$typeof === REACT_FUNDAMENTAL_TYPE || type.$$typeof === REACT_RESPONDER_TYPE || type.$$typeof === REACT_SCOPE_TYPE || type.$$typeof === REACT_BLOCK_TYPE);
+        }
+        function typeOf(object) {
+          if (typeof object === "object" && object !== null) {
+            var $$typeof = object.$$typeof;
+            switch ($$typeof) {
+              case REACT_ELEMENT_TYPE:
+                var type = object.type;
+                switch (type) {
+                  case REACT_ASYNC_MODE_TYPE:
+                  case REACT_CONCURRENT_MODE_TYPE:
+                  case REACT_FRAGMENT_TYPE:
+                  case REACT_PROFILER_TYPE:
+                  case REACT_STRICT_MODE_TYPE:
+                  case REACT_SUSPENSE_TYPE:
+                    return type;
+                  default:
+                    var $$typeofType = type && type.$$typeof;
+                    switch ($$typeofType) {
+                      case REACT_CONTEXT_TYPE:
+                      case REACT_FORWARD_REF_TYPE:
+                      case REACT_LAZY_TYPE:
+                      case REACT_MEMO_TYPE:
+                      case REACT_PROVIDER_TYPE:
+                        return $$typeofType;
+                      default:
+                        return $$typeof;
+                    }
+                }
+              case REACT_PORTAL_TYPE:
+                return $$typeof;
+            }
+          }
+          return void 0;
+        }
+        var AsyncMode = REACT_ASYNC_MODE_TYPE;
+        var ConcurrentMode = REACT_CONCURRENT_MODE_TYPE;
+        var ContextConsumer = REACT_CONTEXT_TYPE;
+        var ContextProvider = REACT_PROVIDER_TYPE;
+        var Element = REACT_ELEMENT_TYPE;
+        var ForwardRef = REACT_FORWARD_REF_TYPE;
+        var Fragment7 = REACT_FRAGMENT_TYPE;
+        var Lazy = REACT_LAZY_TYPE;
+        var Memo = REACT_MEMO_TYPE;
+        var Portal = REACT_PORTAL_TYPE;
+        var Profiler = REACT_PROFILER_TYPE;
+        var StrictMode = REACT_STRICT_MODE_TYPE;
+        var Suspense2 = REACT_SUSPENSE_TYPE;
+        var hasWarnedAboutDeprecatedIsAsyncMode = false;
+        function isAsyncMode(object) {
+          {
+            if (!hasWarnedAboutDeprecatedIsAsyncMode) {
+              hasWarnedAboutDeprecatedIsAsyncMode = true;
+              console["warn"]("The ReactIs.isAsyncMode() alias has been deprecated, and will be removed in React 17+. Update your code to use ReactIs.isConcurrentMode() instead. It has the exact same API.");
+            }
+          }
+          return isConcurrentMode(object) || typeOf(object) === REACT_ASYNC_MODE_TYPE;
+        }
+        function isConcurrentMode(object) {
+          return typeOf(object) === REACT_CONCURRENT_MODE_TYPE;
+        }
+        function isContextConsumer(object) {
+          return typeOf(object) === REACT_CONTEXT_TYPE;
+        }
+        function isContextProvider(object) {
+          return typeOf(object) === REACT_PROVIDER_TYPE;
+        }
+        function isElement(object) {
+          return typeof object === "object" && object !== null && object.$$typeof === REACT_ELEMENT_TYPE;
+        }
+        function isForwardRef(object) {
+          return typeOf(object) === REACT_FORWARD_REF_TYPE;
+        }
+        function isFragment(object) {
+          return typeOf(object) === REACT_FRAGMENT_TYPE;
+        }
+        function isLazy(object) {
+          return typeOf(object) === REACT_LAZY_TYPE;
+        }
+        function isMemo(object) {
+          return typeOf(object) === REACT_MEMO_TYPE;
+        }
+        function isPortal(object) {
+          return typeOf(object) === REACT_PORTAL_TYPE;
+        }
+        function isProfiler(object) {
+          return typeOf(object) === REACT_PROFILER_TYPE;
+        }
+        function isStrictMode(object) {
+          return typeOf(object) === REACT_STRICT_MODE_TYPE;
+        }
+        function isSuspense(object) {
+          return typeOf(object) === REACT_SUSPENSE_TYPE;
+        }
+        exports.AsyncMode = AsyncMode;
+        exports.ConcurrentMode = ConcurrentMode;
+        exports.ContextConsumer = ContextConsumer;
+        exports.ContextProvider = ContextProvider;
+        exports.Element = Element;
+        exports.ForwardRef = ForwardRef;
+        exports.Fragment = Fragment7;
+        exports.Lazy = Lazy;
+        exports.Memo = Memo;
+        exports.Portal = Portal;
+        exports.Profiler = Profiler;
+        exports.StrictMode = StrictMode;
+        exports.Suspense = Suspense2;
+        exports.isAsyncMode = isAsyncMode;
+        exports.isConcurrentMode = isConcurrentMode;
+        exports.isContextConsumer = isContextConsumer;
+        exports.isContextProvider = isContextProvider;
+        exports.isElement = isElement;
+        exports.isForwardRef = isForwardRef;
+        exports.isFragment = isFragment;
+        exports.isLazy = isLazy;
+        exports.isMemo = isMemo;
+        exports.isPortal = isPortal;
+        exports.isProfiler = isProfiler;
+        exports.isStrictMode = isStrictMode;
+        exports.isSuspense = isSuspense;
+        exports.isValidElementType = isValidElementType;
+        exports.typeOf = typeOf;
+      })();
+    }
+  }
+});
+
+// node_modules/hoist-non-react-statics/node_modules/react-is/index.js
+var require_react_is = __commonJS({
+  "node_modules/hoist-non-react-statics/node_modules/react-is/index.js"(exports, module) {
+    "use strict";
+    if (false) {
+      module.exports = null;
+    } else {
+      module.exports = require_react_is_development();
+    }
+  }
+});
+
+// node_modules/hoist-non-react-statics/dist/hoist-non-react-statics.cjs.js
+var require_hoist_non_react_statics_cjs = __commonJS({
+  "node_modules/hoist-non-react-statics/dist/hoist-non-react-statics.cjs.js"(exports, module) {
+    "use strict";
+    var reactIs = require_react_is();
+    var REACT_STATICS = {
+      childContextTypes: true,
+      contextType: true,
+      contextTypes: true,
+      defaultProps: true,
+      displayName: true,
+      getDefaultProps: true,
+      getDerivedStateFromError: true,
+      getDerivedStateFromProps: true,
+      mixins: true,
+      propTypes: true,
+      type: true
+    };
+    var KNOWN_STATICS = {
+      name: true,
+      length: true,
+      prototype: true,
+      caller: true,
+      callee: true,
+      arguments: true,
+      arity: true
+    };
+    var FORWARD_REF_STATICS = {
+      "$$typeof": true,
+      render: true,
+      defaultProps: true,
+      displayName: true,
+      propTypes: true
+    };
+    var MEMO_STATICS = {
+      "$$typeof": true,
+      compare: true,
+      defaultProps: true,
+      displayName: true,
+      propTypes: true,
+      type: true
+    };
+    var TYPE_STATICS = {};
+    TYPE_STATICS[reactIs.ForwardRef] = FORWARD_REF_STATICS;
+    TYPE_STATICS[reactIs.Memo] = MEMO_STATICS;
+    function getStatics(component) {
+      if (reactIs.isMemo(component)) {
+        return MEMO_STATICS;
+      }
+      return TYPE_STATICS[component["$$typeof"]] || REACT_STATICS;
+    }
+    var defineProperty = Object.defineProperty;
+    var getOwnPropertyNames = Object.getOwnPropertyNames;
+    var getOwnPropertySymbols = Object.getOwnPropertySymbols;
+    var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+    var getPrototypeOf = Object.getPrototypeOf;
+    var objectPrototype = Object.prototype;
+    function hoistNonReactStatics(targetComponent, sourceComponent, blacklist) {
+      if (typeof sourceComponent !== "string") {
+        if (objectPrototype) {
+          var inheritedComponent = getPrototypeOf(sourceComponent);
+          if (inheritedComponent && inheritedComponent !== objectPrototype) {
+            hoistNonReactStatics(targetComponent, inheritedComponent, blacklist);
+          }
+        }
+        var keys = getOwnPropertyNames(sourceComponent);
+        if (getOwnPropertySymbols) {
+          keys = keys.concat(getOwnPropertySymbols(sourceComponent));
+        }
+        var targetStatics = getStatics(targetComponent);
+        var sourceStatics = getStatics(sourceComponent);
+        for (var i = 0; i < keys.length; ++i) {
+          var key = keys[i];
+          if (!KNOWN_STATICS[key] && !(blacklist && blacklist[key]) && !(sourceStatics && sourceStatics[key]) && !(targetStatics && targetStatics[key])) {
+            var descriptor = getOwnPropertyDescriptor(sourceComponent, key);
+            try {
+              defineProperty(targetComponent, key, descriptor);
+            } catch (e) {
+            }
+          }
+        }
+      }
+      return targetComponent;
+    }
+    module.exports = hoistNonReactStatics;
+  }
+});
+
 // node_modules/scheduler/cjs/scheduler.development.js
 var require_scheduler_development = __commonJS({
   "node_modules/scheduler/cjs/scheduler.development.js"(exports) {
@@ -1923,12 +2178,12 @@ var require_scheduler_development = __commonJS({
         var enableSchedulerDebugging = false;
         var enableProfiling = false;
         var frameYieldMs = 5;
-        function push(heap, node2) {
+        function push(heap, node6) {
           var index = heap.length;
-          heap.push(node2);
-          siftUp(heap, node2, index);
+          heap.push(node6);
+          siftUp(heap, node6, index);
         }
-        function peek(heap) {
+        function peek2(heap) {
           return heap.length === 0 ? null : heap[0];
         }
         function pop(heap) {
@@ -1943,13 +2198,13 @@ var require_scheduler_development = __commonJS({
           }
           return first;
         }
-        function siftUp(heap, node2, i) {
+        function siftUp(heap, node6, i) {
           var index = i;
           while (index > 0) {
             var parentIndex = index - 1 >>> 1;
             var parent = heap[parentIndex];
-            if (compare(parent, node2) > 0) {
-              heap[parentIndex] = node2;
+            if (compare(parent, node6) > 0) {
+              heap[parentIndex] = node6;
               heap[index] = parent;
               index = parentIndex;
             } else {
@@ -1957,28 +2212,28 @@ var require_scheduler_development = __commonJS({
             }
           }
         }
-        function siftDown(heap, node2, i) {
+        function siftDown(heap, node6, i) {
           var index = i;
-          var length = heap.length;
-          var halfLength = length >>> 1;
+          var length2 = heap.length;
+          var halfLength = length2 >>> 1;
           while (index < halfLength) {
             var leftIndex = (index + 1) * 2 - 1;
             var left = heap[leftIndex];
             var rightIndex = leftIndex + 1;
             var right = heap[rightIndex];
-            if (compare(left, node2) < 0) {
-              if (rightIndex < length && compare(right, left) < 0) {
+            if (compare(left, node6) < 0) {
+              if (rightIndex < length2 && compare(right, left) < 0) {
                 heap[index] = right;
-                heap[rightIndex] = node2;
+                heap[rightIndex] = node6;
                 index = rightIndex;
               } else {
                 heap[index] = left;
-                heap[leftIndex] = node2;
+                heap[leftIndex] = node6;
                 index = leftIndex;
               }
-            } else if (rightIndex < length && compare(right, node2) < 0) {
+            } else if (rightIndex < length2 && compare(right, node6) < 0) {
               heap[index] = right;
-              heap[rightIndex] = node2;
+              heap[rightIndex] = node6;
               index = rightIndex;
             } else {
               return;
@@ -2028,7 +2283,7 @@ var require_scheduler_development = __commonJS({
         var localSetImmediate = typeof setImmediate !== "undefined" ? setImmediate : null;
         var isInputPending = typeof navigator !== "undefined" && navigator.scheduling !== void 0 && navigator.scheduling.isInputPending !== void 0 ? navigator.scheduling.isInputPending.bind(navigator.scheduling) : null;
         function advanceTimers(currentTime) {
-          var timer = peek(timerQueue);
+          var timer = peek2(timerQueue);
           while (timer !== null) {
             if (timer.callback === null) {
               pop(timerQueue);
@@ -2039,18 +2294,18 @@ var require_scheduler_development = __commonJS({
             } else {
               return;
             }
-            timer = peek(timerQueue);
+            timer = peek2(timerQueue);
           }
         }
         function handleTimeout(currentTime) {
           isHostTimeoutScheduled = false;
           advanceTimers(currentTime);
           if (!isHostCallbackScheduled) {
-            if (peek(taskQueue) !== null) {
+            if (peek2(taskQueue) !== null) {
               isHostCallbackScheduled = true;
               requestHostCallback(flushWork);
             } else {
-              var firstTimer = peek(timerQueue);
+              var firstTimer = peek2(timerQueue);
               if (firstTimer !== null) {
                 requestHostTimeout(handleTimeout, firstTimer.startTime - currentTime);
               }
@@ -2089,7 +2344,7 @@ var require_scheduler_development = __commonJS({
         function workLoop(hasTimeRemaining, initialTime2) {
           var currentTime = initialTime2;
           advanceTimers(currentTime);
-          currentTask = peek(taskQueue);
+          currentTask = peek2(taskQueue);
           while (currentTask !== null && !enableSchedulerDebugging) {
             if (currentTask.expirationTime > currentTime && (!hasTimeRemaining || shouldYieldToHost())) {
               break;
@@ -2104,7 +2359,7 @@ var require_scheduler_development = __commonJS({
               if (typeof continuationCallback === "function") {
                 currentTask.callback = continuationCallback;
               } else {
-                if (currentTask === peek(taskQueue)) {
+                if (currentTask === peek2(taskQueue)) {
                   pop(taskQueue);
                 }
               }
@@ -2112,12 +2367,12 @@ var require_scheduler_development = __commonJS({
             } else {
               pop(taskQueue);
             }
-            currentTask = peek(taskQueue);
+            currentTask = peek2(taskQueue);
           }
           if (currentTask !== null) {
             return true;
           } else {
-            var firstTimer = peek(timerQueue);
+            var firstTimer = peek2(timerQueue);
             if (firstTimer !== null) {
               requestHostTimeout(handleTimeout, firstTimer.startTime - currentTime);
             }
@@ -2219,7 +2474,7 @@ var require_scheduler_development = __commonJS({
           if (startTime2 > currentTime) {
             newTask.sortIndex = startTime2;
             push(timerQueue, newTask);
-            if (peek(taskQueue) === null && newTask === peek(timerQueue)) {
+            if (peek2(taskQueue) === null && newTask === peek2(timerQueue)) {
               if (isHostTimeoutScheduled) {
                 cancelHostTimeout();
               } else {
@@ -2246,7 +2501,7 @@ var require_scheduler_development = __commonJS({
           }
         }
         function unstable_getFirstCallbackNode() {
-          return peek(taskQueue);
+          return peek2(taskQueue);
         }
         function unstable_cancelCallback(task) {
           task.callback = null;
@@ -2382,9 +2637,9 @@ var require_react_dom_development = __commonJS({
         if (typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ !== "undefined" && typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart === "function") {
           __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(new Error());
         }
-        var React2 = require_react();
+        var React7 = require_react();
         var Scheduler = require_scheduler();
-        var ReactSharedInternals = React2.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+        var ReactSharedInternals = React7.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
         var suppressWarning = false;
         function setSuppressWarning(newSuppressWarning) {
           {
@@ -2433,7 +2688,7 @@ var require_react_dom_development = __commonJS({
         var HostPortal = 4;
         var HostComponent = 5;
         var HostText = 6;
-        var Fragment = 7;
+        var Fragment7 = 7;
         var Mode = 8;
         var ContextConsumer = 9;
         var ContextProvider = 10;
@@ -2614,8 +2869,8 @@ var require_react_dom_development = __commonJS({
               if (propertyInfo !== null) {
                 return !propertyInfo.acceptsBooleans;
               } else {
-                var prefix2 = name.toLowerCase().slice(0, 5);
-                return prefix2 !== "data-" && prefix2 !== "aria-";
+                var prefix3 = name.toLowerCase().slice(0, 5);
+                return prefix3 !== "data-" && prefix3 !== "aria-";
               }
             }
             default:
@@ -2861,8 +3116,8 @@ var require_react_dom_development = __commonJS({
           );
         });
         var CAMELIZE = /[\-\:]([a-z])/g;
-        var capitalize = function(token) {
-          return token[1].toUpperCase();
+        var capitalize = function(token2) {
+          return token2[1].toUpperCase();
         };
         [
           "accent-height",
@@ -3053,11 +3308,11 @@ var require_react_dom_development = __commonJS({
             }
           }
         }
-        function getValueForProperty(node2, name, expected, propertyInfo) {
+        function getValueForProperty(node6, name, expected, propertyInfo) {
           {
             if (propertyInfo.mustUseProperty) {
               var propertyName = propertyInfo.propertyName;
-              return node2[propertyName];
+              return node6[propertyName];
             } else {
               {
                 checkAttributeStringCoercion(expected, name);
@@ -3068,8 +3323,8 @@ var require_react_dom_development = __commonJS({
               var attributeName = propertyInfo.attributeName;
               var stringValue = null;
               if (propertyInfo.type === OVERLOADED_BOOLEAN) {
-                if (node2.hasAttribute(attributeName)) {
-                  var value = node2.getAttribute(attributeName);
+                if (node6.hasAttribute(attributeName)) {
+                  var value = node6.getAttribute(attributeName);
                   if (value === "") {
                     return true;
                   }
@@ -3081,14 +3336,14 @@ var require_react_dom_development = __commonJS({
                   }
                   return value;
                 }
-              } else if (node2.hasAttribute(attributeName)) {
+              } else if (node6.hasAttribute(attributeName)) {
                 if (shouldRemoveAttribute(name, expected, propertyInfo, false)) {
-                  return node2.getAttribute(attributeName);
+                  return node6.getAttribute(attributeName);
                 }
                 if (propertyInfo.type === BOOLEAN) {
                   return expected;
                 }
-                stringValue = node2.getAttribute(attributeName);
+                stringValue = node6.getAttribute(attributeName);
               }
               if (shouldRemoveAttribute(name, expected, propertyInfo, false)) {
                 return stringValue === null ? expected : stringValue;
@@ -3100,15 +3355,15 @@ var require_react_dom_development = __commonJS({
             }
           }
         }
-        function getValueForAttribute(node2, name, expected, isCustomComponentTag) {
+        function getValueForAttribute(node6, name, expected, isCustomComponentTag) {
           {
             if (!isAttributeNameSafe(name)) {
               return;
             }
-            if (!node2.hasAttribute(name)) {
+            if (!node6.hasAttribute(name)) {
               return expected === void 0 ? void 0 : null;
             }
-            var value = node2.getAttribute(name);
+            var value = node6.getAttribute(name);
             {
               checkAttributeStringCoercion(expected, name);
             }
@@ -3118,7 +3373,7 @@ var require_react_dom_development = __commonJS({
             return value;
           }
         }
-        function setValueForProperty(node2, name, value, isCustomComponentTag) {
+        function setValueForProperty(node6, name, value, isCustomComponentTag) {
           var propertyInfo = getPropertyInfo(name);
           if (shouldIgnoreAttribute(name, propertyInfo, isCustomComponentTag)) {
             return;
@@ -3130,12 +3385,12 @@ var require_react_dom_development = __commonJS({
             if (isAttributeNameSafe(name)) {
               var _attributeName = name;
               if (value === null) {
-                node2.removeAttribute(_attributeName);
+                node6.removeAttribute(_attributeName);
               } else {
                 {
                   checkAttributeStringCoercion(value, name);
                 }
-                node2.setAttribute(_attributeName, "" + value);
+                node6.setAttribute(_attributeName, "" + value);
               }
             }
             return;
@@ -3145,15 +3400,15 @@ var require_react_dom_development = __commonJS({
             var propertyName = propertyInfo.propertyName;
             if (value === null) {
               var type = propertyInfo.type;
-              node2[propertyName] = type === BOOLEAN ? false : "";
+              node6[propertyName] = type === BOOLEAN ? false : "";
             } else {
-              node2[propertyName] = value;
+              node6[propertyName] = value;
             }
             return;
           }
           var attributeName = propertyInfo.attributeName, attributeNamespace = propertyInfo.attributeNamespace;
           if (value === null) {
-            node2.removeAttribute(attributeName);
+            node6.removeAttribute(attributeName);
           } else {
             var _type = propertyInfo.type;
             var attributeValue;
@@ -3171,9 +3426,9 @@ var require_react_dom_development = __commonJS({
               }
             }
             if (attributeNamespace) {
-              node2.setAttributeNS(attributeNamespace, attributeName, attributeValue);
+              node6.setAttributeNS(attributeNamespace, attributeName, attributeValue);
             } else {
-              node2.setAttribute(attributeName, attributeValue);
+              node6.setAttribute(attributeName, attributeValue);
             }
           }
         }
@@ -3207,7 +3462,7 @@ var require_react_dom_development = __commonJS({
           }
           return null;
         }
-        var assign = Object.assign;
+        var assign2 = Object.assign;
         var disabledDepth = 0;
         var prevLog;
         var prevInfo;
@@ -3258,25 +3513,25 @@ var require_react_dom_development = __commonJS({
                 writable: true
               };
               Object.defineProperties(console, {
-                log: assign({}, props, {
+                log: assign2({}, props, {
                   value: prevLog
                 }),
-                info: assign({}, props, {
+                info: assign2({}, props, {
                   value: prevInfo
                 }),
-                warn: assign({}, props, {
+                warn: assign2({}, props, {
                   value: prevWarn
                 }),
-                error: assign({}, props, {
+                error: assign2({}, props, {
                   value: prevError
                 }),
-                group: assign({}, props, {
+                group: assign2({}, props, {
                   value: prevGroup
                 }),
-                groupCollapsed: assign({}, props, {
+                groupCollapsed: assign2({}, props, {
                   value: prevGroupCollapsed
                 }),
-                groupEnd: assign({}, props, {
+                groupEnd: assign2({}, props, {
                   value: prevGroupEnd
                 })
               });
@@ -3287,18 +3542,18 @@ var require_react_dom_development = __commonJS({
           }
         }
         var ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher;
-        var prefix;
+        var prefix2;
         function describeBuiltInComponentFrame(name, source, ownerFn) {
           {
-            if (prefix === void 0) {
+            if (prefix2 === void 0) {
               try {
                 throw Error();
               } catch (x) {
-                var match = x.stack.trim().match(/\n( *(at )?)/);
-                prefix = match && match[1] || "";
+                var match2 = x.stack.trim().match(/\n( *(at )?)/);
+                prefix2 = match2 && match2[1] || "";
               }
             }
-            return "\n" + prefix + name;
+            return "\n" + prefix2 + name;
           }
         }
         var reentry = false;
@@ -3420,8 +3675,8 @@ var require_react_dom_development = __commonJS({
             return describeNativeComponentFrame(fn, false);
           }
         }
-        function shouldConstruct(Component) {
-          var prototype = Component.prototype;
+        function shouldConstruct(Component2) {
+          var prototype = Component2.prototype;
           return !!(prototype && prototype.isReactComponent);
         }
         function describeUnknownElementTypeFrameInDEV(type, source, ownerFn) {
@@ -3488,11 +3743,11 @@ var require_react_dom_development = __commonJS({
         function getStackByFiberInDevAndProd(workInProgress2) {
           try {
             var info = "";
-            var node2 = workInProgress2;
+            var node6 = workInProgress2;
             do {
-              info += describeFiber(node2);
-              node2 = node2.return;
-            } while (node2);
+              info += describeFiber(node6);
+              node6 = node6.return;
+            } while (node6);
             return info;
           } catch (x) {
             return "\nError generating stack: " + x.message + "\n" + x.stack;
@@ -3590,7 +3845,7 @@ var require_react_dom_development = __commonJS({
               return "DehydratedFragment";
             case ForwardRef:
               return getWrappedName$1(type, type.render, "ForwardRef");
-            case Fragment:
+            case Fragment7:
               return "Fragment";
             case HostComponent:
               return type;
@@ -3726,36 +3981,36 @@ var require_react_dom_development = __commonJS({
           var nodeName = elem.nodeName;
           return nodeName && nodeName.toLowerCase() === "input" && (type === "checkbox" || type === "radio");
         }
-        function getTracker(node2) {
-          return node2._valueTracker;
+        function getTracker(node6) {
+          return node6._valueTracker;
         }
-        function detachTracker(node2) {
-          node2._valueTracker = null;
+        function detachTracker(node6) {
+          node6._valueTracker = null;
         }
-        function getValueFromNode(node2) {
+        function getValueFromNode(node6) {
           var value = "";
-          if (!node2) {
+          if (!node6) {
             return value;
           }
-          if (isCheckable(node2)) {
-            value = node2.checked ? "true" : "false";
+          if (isCheckable(node6)) {
+            value = node6.checked ? "true" : "false";
           } else {
-            value = node2.value;
+            value = node6.value;
           }
           return value;
         }
-        function trackValueOnNode(node2) {
-          var valueField = isCheckable(node2) ? "checked" : "value";
-          var descriptor = Object.getOwnPropertyDescriptor(node2.constructor.prototype, valueField);
+        function trackValueOnNode(node6) {
+          var valueField = isCheckable(node6) ? "checked" : "value";
+          var descriptor = Object.getOwnPropertyDescriptor(node6.constructor.prototype, valueField);
           {
-            checkFormFieldValueStringCoercion(node2[valueField]);
+            checkFormFieldValueStringCoercion(node6[valueField]);
           }
-          var currentValue = "" + node2[valueField];
-          if (node2.hasOwnProperty(valueField) || typeof descriptor === "undefined" || typeof descriptor.get !== "function" || typeof descriptor.set !== "function") {
+          var currentValue = "" + node6[valueField];
+          if (node6.hasOwnProperty(valueField) || typeof descriptor === "undefined" || typeof descriptor.get !== "function" || typeof descriptor.set !== "function") {
             return;
           }
           var get2 = descriptor.get, set2 = descriptor.set;
-          Object.defineProperty(node2, valueField, {
+          Object.defineProperty(node6, valueField, {
             configurable: true,
             get: function() {
               return get2.call(this);
@@ -3768,7 +4023,7 @@ var require_react_dom_development = __commonJS({
               set2.call(this, value);
             }
           });
-          Object.defineProperty(node2, valueField, {
+          Object.defineProperty(node6, valueField, {
             enumerable: descriptor.enumerable
           });
           var tracker = {
@@ -3782,28 +4037,28 @@ var require_react_dom_development = __commonJS({
               currentValue = "" + value;
             },
             stopTracking: function() {
-              detachTracker(node2);
-              delete node2[valueField];
+              detachTracker(node6);
+              delete node6[valueField];
             }
           };
           return tracker;
         }
-        function track(node2) {
-          if (getTracker(node2)) {
+        function track(node6) {
+          if (getTracker(node6)) {
             return;
           }
-          node2._valueTracker = trackValueOnNode(node2);
+          node6._valueTracker = trackValueOnNode(node6);
         }
-        function updateValueIfChanged(node2) {
-          if (!node2) {
+        function updateValueIfChanged(node6) {
+          if (!node6) {
             return false;
           }
-          var tracker = getTracker(node2);
+          var tracker = getTracker(node6);
           if (!tracker) {
             return true;
           }
           var lastValue = tracker.getValue();
-          var nextValue = getValueFromNode(node2);
+          var nextValue = getValueFromNode(node6);
           if (nextValue !== lastValue) {
             tracker.setValue(nextValue);
             return true;
@@ -3830,13 +4085,13 @@ var require_react_dom_development = __commonJS({
           return usesChecked ? props.checked != null : props.value != null;
         }
         function getHostProps(element, props) {
-          var node2 = element;
+          var node6 = element;
           var checked = props.checked;
-          var hostProps = assign({}, props, {
+          var hostProps = assign2({}, props, {
             defaultChecked: void 0,
             defaultValue: void 0,
             value: void 0,
-            checked: checked != null ? checked : node2._wrapperState.initialChecked
+            checked: checked != null ? checked : node6._wrapperState.initialChecked
           });
           return hostProps;
         }
@@ -3852,30 +4107,30 @@ var require_react_dom_development = __commonJS({
               didWarnValueDefaultValue = true;
             }
           }
-          var node2 = element;
+          var node6 = element;
           var defaultValue = props.defaultValue == null ? "" : props.defaultValue;
-          node2._wrapperState = {
+          node6._wrapperState = {
             initialChecked: props.checked != null ? props.checked : props.defaultChecked,
             initialValue: getToStringValue(props.value != null ? props.value : defaultValue),
             controlled: isControlled(props)
           };
         }
         function updateChecked(element, props) {
-          var node2 = element;
+          var node6 = element;
           var checked = props.checked;
           if (checked != null) {
-            setValueForProperty(node2, "checked", checked, false);
+            setValueForProperty(node6, "checked", checked, false);
           }
         }
         function updateWrapper(element, props) {
-          var node2 = element;
+          var node6 = element;
           {
             var controlled = isControlled(props);
-            if (!node2._wrapperState.controlled && controlled && !didWarnUncontrolledToControlled) {
+            if (!node6._wrapperState.controlled && controlled && !didWarnUncontrolledToControlled) {
               error("A component is changing an uncontrolled input to be controlled. This is likely caused by the value changing from undefined to a defined value, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info: https://reactjs.org/link/controlled-components");
               didWarnUncontrolledToControlled = true;
             }
-            if (node2._wrapperState.controlled && !controlled && !didWarnControlledToUncontrolled) {
+            if (node6._wrapperState.controlled && !controlled && !didWarnControlledToUncontrolled) {
               error("A component is changing a controlled input to be uncontrolled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info: https://reactjs.org/link/controlled-components");
               didWarnControlledToUncontrolled = true;
             }
@@ -3885,67 +4140,67 @@ var require_react_dom_development = __commonJS({
           var type = props.type;
           if (value != null) {
             if (type === "number") {
-              if (value === 0 && node2.value === "" || // We explicitly want to coerce to number here if possible.
+              if (value === 0 && node6.value === "" || // We explicitly want to coerce to number here if possible.
               // eslint-disable-next-line
-              node2.value != value) {
-                node2.value = toString(value);
+              node6.value != value) {
+                node6.value = toString(value);
               }
-            } else if (node2.value !== toString(value)) {
-              node2.value = toString(value);
+            } else if (node6.value !== toString(value)) {
+              node6.value = toString(value);
             }
           } else if (type === "submit" || type === "reset") {
-            node2.removeAttribute("value");
+            node6.removeAttribute("value");
             return;
           }
           {
             if (props.hasOwnProperty("value")) {
-              setDefaultValue(node2, props.type, value);
+              setDefaultValue(node6, props.type, value);
             } else if (props.hasOwnProperty("defaultValue")) {
-              setDefaultValue(node2, props.type, getToStringValue(props.defaultValue));
+              setDefaultValue(node6, props.type, getToStringValue(props.defaultValue));
             }
           }
           {
             if (props.checked == null && props.defaultChecked != null) {
-              node2.defaultChecked = !!props.defaultChecked;
+              node6.defaultChecked = !!props.defaultChecked;
             }
           }
         }
         function postMountWrapper(element, props, isHydrating2) {
-          var node2 = element;
+          var node6 = element;
           if (props.hasOwnProperty("value") || props.hasOwnProperty("defaultValue")) {
             var type = props.type;
             var isButton = type === "submit" || type === "reset";
             if (isButton && (props.value === void 0 || props.value === null)) {
               return;
             }
-            var initialValue = toString(node2._wrapperState.initialValue);
+            var initialValue = toString(node6._wrapperState.initialValue);
             if (!isHydrating2) {
               {
-                if (initialValue !== node2.value) {
-                  node2.value = initialValue;
+                if (initialValue !== node6.value) {
+                  node6.value = initialValue;
                 }
               }
             }
             {
-              node2.defaultValue = initialValue;
+              node6.defaultValue = initialValue;
             }
           }
-          var name = node2.name;
+          var name = node6.name;
           if (name !== "") {
-            node2.name = "";
+            node6.name = "";
           }
           {
-            node2.defaultChecked = !node2.defaultChecked;
-            node2.defaultChecked = !!node2._wrapperState.initialChecked;
+            node6.defaultChecked = !node6.defaultChecked;
+            node6.defaultChecked = !!node6._wrapperState.initialChecked;
           }
           if (name !== "") {
-            node2.name = name;
+            node6.name = name;
           }
         }
         function restoreControlledState(element, props) {
-          var node2 = element;
-          updateWrapper(node2, props);
-          updateNamedCousins(node2, props);
+          var node6 = element;
+          updateWrapper(node6, props);
+          updateNamedCousins(node6, props);
         }
         function updateNamedCousins(rootNode, props) {
           var name = props.name;
@@ -3972,15 +4227,15 @@ var require_react_dom_development = __commonJS({
             }
           }
         }
-        function setDefaultValue(node2, type, value) {
+        function setDefaultValue(node6, type, value) {
           if (
             // Focused number inputs synchronize on blur. See ChangeEventPlugin.js
-            type !== "number" || getActiveElement(node2.ownerDocument) !== node2
+            type !== "number" || getActiveElement(node6.ownerDocument) !== node6
           ) {
             if (value == null) {
-              node2.defaultValue = toString(node2._wrapperState.initialValue);
-            } else if (node2.defaultValue !== toString(value)) {
-              node2.defaultValue = toString(value);
+              node6.defaultValue = toString(node6._wrapperState.initialValue);
+            } else if (node6.defaultValue !== toString(value)) {
+              node6.defaultValue = toString(value);
             }
           }
         }
@@ -3991,7 +4246,7 @@ var require_react_dom_development = __commonJS({
           {
             if (props.value == null) {
               if (typeof props.children === "object" && props.children !== null) {
-                React2.Children.forEach(props.children, function(child) {
+                React7.Children.forEach(props.children, function(child) {
                   if (child == null) {
                     return;
                   }
@@ -4054,8 +4309,8 @@ var require_react_dom_development = __commonJS({
             }
           }
         }
-        function updateOptions(node2, multiple, propValue, setDefaultSelected) {
-          var options2 = node2.options;
+        function updateOptions(node6, multiple, propValue, setDefaultSelected) {
+          var options2 = node6.options;
           if (multiple) {
             var selectedValues = propValue;
             var selectedValue = {};
@@ -4092,16 +4347,16 @@ var require_react_dom_development = __commonJS({
           }
         }
         function getHostProps$1(element, props) {
-          return assign({}, props, {
+          return assign2({}, props, {
             value: void 0
           });
         }
         function initWrapperState$1(element, props) {
-          var node2 = element;
+          var node6 = element;
           {
             checkSelectPropTypes(props);
           }
-          node2._wrapperState = {
+          node6._wrapperState = {
             wasMultiple: !!props.multiple
           };
           {
@@ -4112,52 +4367,52 @@ var require_react_dom_development = __commonJS({
           }
         }
         function postMountWrapper$2(element, props) {
-          var node2 = element;
-          node2.multiple = !!props.multiple;
+          var node6 = element;
+          node6.multiple = !!props.multiple;
           var value = props.value;
           if (value != null) {
-            updateOptions(node2, !!props.multiple, value, false);
+            updateOptions(node6, !!props.multiple, value, false);
           } else if (props.defaultValue != null) {
-            updateOptions(node2, !!props.multiple, props.defaultValue, true);
+            updateOptions(node6, !!props.multiple, props.defaultValue, true);
           }
         }
         function postUpdateWrapper(element, props) {
-          var node2 = element;
-          var wasMultiple = node2._wrapperState.wasMultiple;
-          node2._wrapperState.wasMultiple = !!props.multiple;
+          var node6 = element;
+          var wasMultiple = node6._wrapperState.wasMultiple;
+          node6._wrapperState.wasMultiple = !!props.multiple;
           var value = props.value;
           if (value != null) {
-            updateOptions(node2, !!props.multiple, value, false);
+            updateOptions(node6, !!props.multiple, value, false);
           } else if (wasMultiple !== !!props.multiple) {
             if (props.defaultValue != null) {
-              updateOptions(node2, !!props.multiple, props.defaultValue, true);
+              updateOptions(node6, !!props.multiple, props.defaultValue, true);
             } else {
-              updateOptions(node2, !!props.multiple, props.multiple ? [] : "", false);
+              updateOptions(node6, !!props.multiple, props.multiple ? [] : "", false);
             }
           }
         }
         function restoreControlledState$1(element, props) {
-          var node2 = element;
+          var node6 = element;
           var value = props.value;
           if (value != null) {
-            updateOptions(node2, !!props.multiple, value, false);
+            updateOptions(node6, !!props.multiple, value, false);
           }
         }
         var didWarnValDefaultVal = false;
         function getHostProps$2(element, props) {
-          var node2 = element;
+          var node6 = element;
           if (props.dangerouslySetInnerHTML != null) {
             throw new Error("`dangerouslySetInnerHTML` does not make sense on <textarea>.");
           }
-          var hostProps = assign({}, props, {
+          var hostProps = assign2({}, props, {
             value: void 0,
             defaultValue: void 0,
-            children: toString(node2._wrapperState.initialValue)
+            children: toString(node6._wrapperState.initialValue)
           });
           return hostProps;
         }
         function initWrapperState$2(element, props) {
-          var node2 = element;
+          var node6 = element;
           {
             checkControlledValueProps("textarea", props);
             if (props.value !== void 0 && props.defaultValue !== void 0 && !didWarnValDefaultVal) {
@@ -4190,33 +4445,33 @@ var require_react_dom_development = __commonJS({
             }
             initialValue = defaultValue;
           }
-          node2._wrapperState = {
+          node6._wrapperState = {
             initialValue: getToStringValue(initialValue)
           };
         }
         function updateWrapper$1(element, props) {
-          var node2 = element;
+          var node6 = element;
           var value = getToStringValue(props.value);
           var defaultValue = getToStringValue(props.defaultValue);
           if (value != null) {
             var newValue = toString(value);
-            if (newValue !== node2.value) {
-              node2.value = newValue;
+            if (newValue !== node6.value) {
+              node6.value = newValue;
             }
-            if (props.defaultValue == null && node2.defaultValue !== newValue) {
-              node2.defaultValue = newValue;
+            if (props.defaultValue == null && node6.defaultValue !== newValue) {
+              node6.defaultValue = newValue;
             }
           }
           if (defaultValue != null) {
-            node2.defaultValue = toString(defaultValue);
+            node6.defaultValue = toString(defaultValue);
           }
         }
         function postMountWrapper$3(element, props) {
-          var node2 = element;
-          var textContent = node2.textContent;
-          if (textContent === node2._wrapperState.initialValue) {
+          var node6 = element;
+          var textContent = node6.textContent;
+          if (textContent === node6._wrapperState.initialValue) {
             if (textContent !== "" && textContent !== null) {
-              node2.value = textContent;
+              node6.value = textContent;
             }
           }
         }
@@ -4257,37 +4512,37 @@ var require_react_dom_development = __commonJS({
           }
         };
         var reusableSVGContainer;
-        var setInnerHTML = createMicrosoftUnsafeLocalFunction(function(node2, html) {
-          if (node2.namespaceURI === SVG_NAMESPACE) {
-            if (!("innerHTML" in node2)) {
+        var setInnerHTML = createMicrosoftUnsafeLocalFunction(function(node6, html) {
+          if (node6.namespaceURI === SVG_NAMESPACE) {
+            if (!("innerHTML" in node6)) {
               reusableSVGContainer = reusableSVGContainer || document.createElement("div");
               reusableSVGContainer.innerHTML = "<svg>" + html.valueOf().toString() + "</svg>";
               var svgNode = reusableSVGContainer.firstChild;
-              while (node2.firstChild) {
-                node2.removeChild(node2.firstChild);
+              while (node6.firstChild) {
+                node6.removeChild(node6.firstChild);
               }
               while (svgNode.firstChild) {
-                node2.appendChild(svgNode.firstChild);
+                node6.appendChild(svgNode.firstChild);
               }
               return;
             }
           }
-          node2.innerHTML = html;
+          node6.innerHTML = html;
         });
         var ELEMENT_NODE = 1;
         var TEXT_NODE = 3;
         var COMMENT_NODE = 8;
         var DOCUMENT_NODE = 9;
         var DOCUMENT_FRAGMENT_NODE = 11;
-        var setTextContent = function(node2, text) {
+        var setTextContent = function(node6, text) {
           if (text) {
-            var firstChild = node2.firstChild;
-            if (firstChild && firstChild === node2.lastChild && firstChild.nodeType === TEXT_NODE) {
+            var firstChild = node6.firstChild;
+            if (firstChild && firstChild === node6.lastChild && firstChild.nodeType === TEXT_NODE) {
               firstChild.nodeValue = text;
               return;
             }
           }
-          node2.textContent = text;
+          node6.textContent = text;
         };
         var shorthandToLonghand = {
           animation: ["animationDelay", "animationDirection", "animationDuration", "animationFillMode", "animationIterationCount", "animationName", "animationPlayState", "animationTimingFunction"],
@@ -4384,21 +4639,21 @@ var require_react_dom_development = __commonJS({
           strokeOpacity: true,
           strokeWidth: true
         };
-        function prefixKey(prefix2, key) {
-          return prefix2 + key.charAt(0).toUpperCase() + key.substring(1);
+        function prefixKey(prefix3, key) {
+          return prefix3 + key.charAt(0).toUpperCase() + key.substring(1);
         }
         var prefixes = ["Webkit", "ms", "Moz", "O"];
         Object.keys(isUnitlessNumber).forEach(function(prop) {
-          prefixes.forEach(function(prefix2) {
-            isUnitlessNumber[prefixKey(prefix2, prop)] = isUnitlessNumber[prop];
+          prefixes.forEach(function(prefix3) {
+            isUnitlessNumber[prefixKey(prefix3, prop)] = isUnitlessNumber[prop];
           });
         });
-        function dangerousStyleValue(name, value, isCustomProperty) {
+        function dangerousStyleValue(name, value, isCustomProperty3) {
           var isEmpty = value == null || typeof value === "boolean" || value === "";
           if (isEmpty) {
             return "";
           }
-          if (!isCustomProperty && typeof value === "number" && value !== 0 && !(isUnitlessNumber.hasOwnProperty(name) && isUnitlessNumber[name])) {
+          if (!isCustomProperty3 && typeof value === "number" && value !== 0 && !(isUnitlessNumber.hasOwnProperty(name) && isUnitlessNumber[name])) {
             return value + "px";
           }
           {
@@ -4423,8 +4678,8 @@ var require_react_dom_development = __commonJS({
           var warnedForNaNValue = false;
           var warnedForInfinityValue = false;
           var camelize = function(string) {
-            return string.replace(hyphenPattern, function(_, character) {
-              return character.toUpperCase();
+            return string.replace(hyphenPattern, function(_, character2) {
+              return character2.toUpperCase();
             });
           };
           var warnHyphenatedStyleName = function(name) {
@@ -4490,39 +4745,39 @@ var require_react_dom_development = __commonJS({
         function createDangerousStringForStyles(styles) {
           {
             var serialized = "";
-            var delimiter = "";
+            var delimiter2 = "";
             for (var styleName in styles) {
               if (!styles.hasOwnProperty(styleName)) {
                 continue;
               }
               var styleValue = styles[styleName];
               if (styleValue != null) {
-                var isCustomProperty = styleName.indexOf("--") === 0;
-                serialized += delimiter + (isCustomProperty ? styleName : hyphenateStyleName(styleName)) + ":";
-                serialized += dangerousStyleValue(styleName, styleValue, isCustomProperty);
-                delimiter = ";";
+                var isCustomProperty3 = styleName.indexOf("--") === 0;
+                serialized += delimiter2 + (isCustomProperty3 ? styleName : hyphenateStyleName(styleName)) + ":";
+                serialized += dangerousStyleValue(styleName, styleValue, isCustomProperty3);
+                delimiter2 = ";";
               }
             }
             return serialized || null;
           }
         }
-        function setValueForStyles(node2, styles) {
-          var style2 = node2.style;
+        function setValueForStyles(node6, styles) {
+          var style2 = node6.style;
           for (var styleName in styles) {
             if (!styles.hasOwnProperty(styleName)) {
               continue;
             }
-            var isCustomProperty = styleName.indexOf("--") === 0;
+            var isCustomProperty3 = styleName.indexOf("--") === 0;
             {
-              if (!isCustomProperty) {
+              if (!isCustomProperty3) {
                 warnValidStyle$1(styleName, styles[styleName]);
               }
             }
-            var styleValue = dangerousStyleValue(styleName, styles[styleName], isCustomProperty);
+            var styleValue = dangerousStyleValue(styleName, styles[styleName], isCustomProperty3);
             if (styleName === "float") {
               styleName = "cssFloat";
             }
-            if (isCustomProperty) {
+            if (isCustomProperty3) {
               style2.setProperty(styleName, styleValue);
             } else {
               style2[styleName] = styleValue;
@@ -4582,7 +4837,7 @@ var require_react_dom_development = __commonJS({
           wbr: true
           // NOTE: menuitem's close tag should be omitted, but that causes problems.
         };
-        var voidElementTags = assign({
+        var voidElementTags = assign2({
           menuitem: true
         }, omittedCloseTags);
         var HTML = "__html";
@@ -5471,13 +5726,13 @@ var require_react_dom_development = __commonJS({
         var batchedUpdatesImpl = function(fn, bookkeeping) {
           return fn(bookkeeping);
         };
-        var flushSyncImpl = function() {
+        var flushSyncImpl2 = function() {
         };
         var isInsideEventHandler = false;
         function finishEventHandler() {
           var controlledComponentsHavePendingUpdates = needsStateRestore();
           if (controlledComponentsHavePendingUpdates) {
-            flushSyncImpl();
+            flushSyncImpl2();
             restoreStateIfNeeded();
           }
         }
@@ -5495,7 +5750,7 @@ var require_react_dom_development = __commonJS({
         }
         function setBatchingImplementation(_batchedUpdatesImpl, _discreteUpdatesImpl, _flushSyncImpl) {
           batchedUpdatesImpl = _batchedUpdatesImpl;
-          flushSyncImpl = _flushSyncImpl;
+          flushSyncImpl2 = _flushSyncImpl;
         }
         function isInteractive(tag) {
           return tag === "button" || tag === "input" || tag === "select" || tag === "textarea";
@@ -5795,23 +6050,23 @@ var require_react_dom_development = __commonJS({
         var StaticMask = LayoutStatic | PassiveStatic | RefStatic;
         var ReactCurrentOwner = ReactSharedInternals.ReactCurrentOwner;
         function getNearestMountedFiber(fiber) {
-          var node2 = fiber;
+          var node6 = fiber;
           var nearestMounted = fiber;
           if (!fiber.alternate) {
-            var nextNode = node2;
+            var nextNode = node6;
             do {
-              node2 = nextNode;
-              if ((node2.flags & (Placement | Hydrating)) !== NoFlags) {
-                nearestMounted = node2.return;
+              node6 = nextNode;
+              if ((node6.flags & (Placement | Hydrating)) !== NoFlags) {
+                nearestMounted = node6.return;
               }
-              nextNode = node2.return;
+              nextNode = node6.return;
             } while (nextNode);
           } else {
-            while (node2.return) {
-              node2 = node2.return;
+            while (node6.return) {
+              node6 = node6.return;
             }
           }
-          if (node2.tag === HostRoot) {
+          if (node6.tag === HostRoot) {
             return nearestMounted;
           }
           return null;
@@ -5962,15 +6217,15 @@ var require_react_dom_development = __commonJS({
           var currentParent = findCurrentFiberUsingSlowPath(parent);
           return currentParent !== null ? findCurrentHostFiberImpl(currentParent) : null;
         }
-        function findCurrentHostFiberImpl(node2) {
-          if (node2.tag === HostComponent || node2.tag === HostText) {
-            return node2;
+        function findCurrentHostFiberImpl(node6) {
+          if (node6.tag === HostComponent || node6.tag === HostText) {
+            return node6;
           }
-          var child = node2.child;
+          var child = node6.child;
           while (child !== null) {
-            var match = findCurrentHostFiberImpl(child);
-            if (match !== null) {
-              return match;
+            var match2 = findCurrentHostFiberImpl(child);
+            if (match2 !== null) {
+              return match2;
             }
             child = child.sibling;
           }
@@ -5980,16 +6235,16 @@ var require_react_dom_development = __commonJS({
           var currentParent = findCurrentFiberUsingSlowPath(parent);
           return currentParent !== null ? findCurrentHostFiberWithNoPortalsImpl(currentParent) : null;
         }
-        function findCurrentHostFiberWithNoPortalsImpl(node2) {
-          if (node2.tag === HostComponent || node2.tag === HostText) {
-            return node2;
+        function findCurrentHostFiberWithNoPortalsImpl(node6) {
+          if (node6.tag === HostComponent || node6.tag === HostText) {
+            return node6;
           }
-          var child = node2.child;
+          var child = node6.child;
           while (child !== null) {
             if (child.tag !== HostPortal) {
-              var match = findCurrentHostFiberWithNoPortalsImpl(child);
-              if (match !== null) {
-                return match;
+              var match2 = findCurrentHostFiberWithNoPortalsImpl(child);
+              if (match2 !== null) {
+                return match2;
               }
             }
             child = child.sibling;
@@ -6030,7 +6285,7 @@ var require_react_dom_development = __commonJS({
           }
           try {
             if (enableSchedulingProfiler) {
-              internals = assign({}, internals, {
+              internals = assign2({}, internals, {
                 getLaneLabelMap,
                 injectProfilingHooks
               });
@@ -7669,7 +7924,7 @@ var require_react_dom_development = __commonJS({
             this.isPropagationStopped = functionThatReturnsFalse;
             return this;
           }
-          assign(SyntheticBaseEvent.prototype, {
+          assign2(SyntheticBaseEvent.prototype, {
             preventDefault: function() {
               this.defaultPrevented = true;
               var event = this.nativeEvent;
@@ -7722,7 +7977,7 @@ var require_react_dom_development = __commonJS({
           isTrusted: 0
         };
         var SyntheticEvent = createSyntheticEvent(EventInterface);
-        var UIEventInterface = assign({}, EventInterface, {
+        var UIEventInterface = assign2({}, EventInterface, {
           view: 0,
           detail: 0
         });
@@ -7742,7 +7997,7 @@ var require_react_dom_development = __commonJS({
             lastMouseEvent = event;
           }
         }
-        var MouseEventInterface = assign({}, UIEventInterface, {
+        var MouseEventInterface = assign2({}, UIEventInterface, {
           screenX: 0,
           screenY: 0,
           clientX: 0,
@@ -7775,27 +8030,27 @@ var require_react_dom_development = __commonJS({
           }
         });
         var SyntheticMouseEvent = createSyntheticEvent(MouseEventInterface);
-        var DragEventInterface = assign({}, MouseEventInterface, {
+        var DragEventInterface = assign2({}, MouseEventInterface, {
           dataTransfer: 0
         });
         var SyntheticDragEvent = createSyntheticEvent(DragEventInterface);
-        var FocusEventInterface = assign({}, UIEventInterface, {
+        var FocusEventInterface = assign2({}, UIEventInterface, {
           relatedTarget: 0
         });
         var SyntheticFocusEvent = createSyntheticEvent(FocusEventInterface);
-        var AnimationEventInterface = assign({}, EventInterface, {
+        var AnimationEventInterface = assign2({}, EventInterface, {
           animationName: 0,
           elapsedTime: 0,
           pseudoElement: 0
         });
         var SyntheticAnimationEvent = createSyntheticEvent(AnimationEventInterface);
-        var ClipboardEventInterface = assign({}, EventInterface, {
+        var ClipboardEventInterface = assign2({}, EventInterface, {
           clipboardData: function(event) {
             return "clipboardData" in event ? event.clipboardData : window.clipboardData;
           }
         });
         var SyntheticClipboardEvent = createSyntheticEvent(ClipboardEventInterface);
-        var CompositionEventInterface = assign({}, EventInterface, {
+        var CompositionEventInterface = assign2({}, EventInterface, {
           data: 0
         });
         var SyntheticCompositionEvent = createSyntheticEvent(CompositionEventInterface);
@@ -7886,7 +8141,7 @@ var require_react_dom_development = __commonJS({
         function getEventModifierState(nativeEvent) {
           return modifierStateGetter;
         }
-        var KeyboardEventInterface = assign({}, UIEventInterface, {
+        var KeyboardEventInterface = assign2({}, UIEventInterface, {
           key: getEventKey,
           code: 0,
           location: 0,
@@ -7921,7 +8176,7 @@ var require_react_dom_development = __commonJS({
           }
         });
         var SyntheticKeyboardEvent = createSyntheticEvent(KeyboardEventInterface);
-        var PointerEventInterface = assign({}, MouseEventInterface, {
+        var PointerEventInterface = assign2({}, MouseEventInterface, {
           pointerId: 0,
           width: 0,
           height: 0,
@@ -7934,7 +8189,7 @@ var require_react_dom_development = __commonJS({
           isPrimary: 0
         });
         var SyntheticPointerEvent = createSyntheticEvent(PointerEventInterface);
-        var TouchEventInterface = assign({}, UIEventInterface, {
+        var TouchEventInterface = assign2({}, UIEventInterface, {
           touches: 0,
           targetTouches: 0,
           changedTouches: 0,
@@ -7945,13 +8200,13 @@ var require_react_dom_development = __commonJS({
           getModifierState: getEventModifierState
         });
         var SyntheticTouchEvent = createSyntheticEvent(TouchEventInterface);
-        var TransitionEventInterface = assign({}, EventInterface, {
+        var TransitionEventInterface = assign2({}, EventInterface, {
           propertyName: 0,
           elapsedTime: 0,
           pseudoElement: 0
         });
         var SyntheticTransitionEvent = createSyntheticEvent(TransitionEventInterface);
-        var WheelEventInterface = assign({}, MouseEventInterface, {
+        var WheelEventInterface = assign2({}, MouseEventInterface, {
           deltaX: function(event) {
             return "deltaX" in event ? event.deltaX : (
               // Fallback to `wheelDeltaX` for Webkit and normalize (right is positive).
@@ -8280,13 +8535,13 @@ var require_react_dom_development = __commonJS({
             return getInstIfValueChanged(targetInst);
           }
         }
-        function handleControlledInputBlur(node2) {
-          var state = node2._wrapperState;
-          if (!state || !state.controlled || node2.type !== "number") {
+        function handleControlledInputBlur(node6) {
+          var state = node6._wrapperState;
+          if (!state || !state.controlled || node6.type !== "number") {
             return;
           }
           {
-            setDefaultValue(node2, "number", node2.value);
+            setDefaultValue(node6, "number", node6.value);
           }
         }
         function extractEvents$1(dispatchQueue, domEventName, targetInst, nativeEvent, nativeEventTarget, eventSystemFlags, targetContainer) {
@@ -8349,11 +8604,11 @@ var require_react_dom_development = __commonJS({
               win = window;
             }
           }
-          var from;
+          var from2;
           var to;
           if (isOutEvent) {
             var _related = nativeEvent.relatedTarget || nativeEvent.toElement;
-            from = targetInst;
+            from2 = targetInst;
             to = _related ? getClosestInstanceFromNode(_related) : null;
             if (to !== null) {
               var nearestMounted = getNearestMountedFiber(to);
@@ -8362,10 +8617,10 @@ var require_react_dom_development = __commonJS({
               }
             }
           } else {
-            from = null;
+            from2 = null;
             to = targetInst;
           }
-          if (from === to) {
+          if (from2 === to) {
             return;
           }
           var SyntheticEventCtor = SyntheticMouseEvent;
@@ -8378,9 +8633,9 @@ var require_react_dom_development = __commonJS({
             enterEventType = "onPointerEnter";
             eventTypePrefix = "pointer";
           }
-          var fromNode = from == null ? win : getNodeFromInstance(from);
+          var fromNode = from2 == null ? win : getNodeFromInstance(from2);
           var toNode = to == null ? win : getNodeFromInstance(to);
-          var leave = new SyntheticEventCtor(leaveEventType, eventTypePrefix + "leave", from, nativeEvent, nativeEventTarget);
+          var leave = new SyntheticEventCtor(leaveEventType, eventTypePrefix + "leave", from2, nativeEvent, nativeEventTarget);
           leave.target = fromNode;
           leave.relatedTarget = toNode;
           var enter = null;
@@ -8391,7 +8646,7 @@ var require_react_dom_development = __commonJS({
             enterEvent.relatedTarget = fromNode;
             enter = enterEvent;
           }
-          accumulateEnterLeaveTwoPhaseListeners(dispatchQueue, leave, enter, from, to);
+          accumulateEnterLeaveTwoPhaseListeners(dispatchQueue, leave, enter, from2, to);
         }
         function is(x, y) {
           return x === y && (x !== 0 || 1 / x === 1 / y) || x !== x && y !== y;
@@ -8417,36 +8672,36 @@ var require_react_dom_development = __commonJS({
           }
           return true;
         }
-        function getLeafNode(node2) {
-          while (node2 && node2.firstChild) {
-            node2 = node2.firstChild;
+        function getLeafNode(node6) {
+          while (node6 && node6.firstChild) {
+            node6 = node6.firstChild;
           }
-          return node2;
+          return node6;
         }
-        function getSiblingNode(node2) {
-          while (node2) {
-            if (node2.nextSibling) {
-              return node2.nextSibling;
+        function getSiblingNode(node6) {
+          while (node6) {
+            if (node6.nextSibling) {
+              return node6.nextSibling;
             }
-            node2 = node2.parentNode;
+            node6 = node6.parentNode;
           }
         }
         function getNodeForCharacterOffset(root2, offset) {
-          var node2 = getLeafNode(root2);
+          var node6 = getLeafNode(root2);
           var nodeStart = 0;
           var nodeEnd = 0;
-          while (node2) {
-            if (node2.nodeType === TEXT_NODE) {
-              nodeEnd = nodeStart + node2.textContent.length;
+          while (node6) {
+            if (node6.nodeType === TEXT_NODE) {
+              nodeEnd = nodeStart + node6.textContent.length;
               if (nodeStart <= offset && nodeEnd >= offset) {
                 return {
-                  node: node2,
+                  node: node6,
                   offset: offset - nodeStart
                 };
               }
               nodeStart = nodeEnd;
             }
-            node2 = getLeafNode(getSiblingNode(node2));
+            node6 = getLeafNode(getSiblingNode(node6));
           }
         }
         function getOffsets(outerNode) {
@@ -8466,48 +8721,48 @@ var require_react_dom_development = __commonJS({
           return getModernOffsetsFromPoints(outerNode, anchorNode, anchorOffset, focusNode, focusOffset);
         }
         function getModernOffsetsFromPoints(outerNode, anchorNode, anchorOffset, focusNode, focusOffset) {
-          var length = 0;
+          var length2 = 0;
           var start = -1;
           var end = -1;
           var indexWithinAnchor = 0;
           var indexWithinFocus = 0;
-          var node2 = outerNode;
+          var node6 = outerNode;
           var parentNode = null;
           outer: while (true) {
-            var next = null;
+            var next2 = null;
             while (true) {
-              if (node2 === anchorNode && (anchorOffset === 0 || node2.nodeType === TEXT_NODE)) {
-                start = length + anchorOffset;
+              if (node6 === anchorNode && (anchorOffset === 0 || node6.nodeType === TEXT_NODE)) {
+                start = length2 + anchorOffset;
               }
-              if (node2 === focusNode && (focusOffset === 0 || node2.nodeType === TEXT_NODE)) {
-                end = length + focusOffset;
+              if (node6 === focusNode && (focusOffset === 0 || node6.nodeType === TEXT_NODE)) {
+                end = length2 + focusOffset;
               }
-              if (node2.nodeType === TEXT_NODE) {
-                length += node2.nodeValue.length;
+              if (node6.nodeType === TEXT_NODE) {
+                length2 += node6.nodeValue.length;
               }
-              if ((next = node2.firstChild) === null) {
+              if ((next2 = node6.firstChild) === null) {
                 break;
               }
-              parentNode = node2;
-              node2 = next;
+              parentNode = node6;
+              node6 = next2;
             }
             while (true) {
-              if (node2 === outerNode) {
+              if (node6 === outerNode) {
                 break outer;
               }
               if (parentNode === anchorNode && ++indexWithinAnchor === anchorOffset) {
-                start = length;
+                start = length2;
               }
               if (parentNode === focusNode && ++indexWithinFocus === focusOffset) {
-                end = length;
+                end = length2;
               }
-              if ((next = node2.nextSibling) !== null) {
+              if ((next2 = node6.nextSibling) !== null) {
                 break;
               }
-              node2 = parentNode;
-              parentNode = node2.parentNode;
+              node6 = parentNode;
+              parentNode = node6.parentNode;
             }
-            node2 = next;
+            node6 = next2;
           }
           if (start === -1 || end === -1) {
             return null;
@@ -8517,23 +8772,23 @@ var require_react_dom_development = __commonJS({
             end
           };
         }
-        function setOffsets(node2, offsets) {
-          var doc = node2.ownerDocument || document;
+        function setOffsets(node6, offsets) {
+          var doc = node6.ownerDocument || document;
           var win = doc && doc.defaultView || window;
           if (!win.getSelection) {
             return;
           }
           var selection = win.getSelection();
-          var length = node2.textContent.length;
-          var start = Math.min(offsets.start, length);
-          var end = offsets.end === void 0 ? start : Math.min(offsets.end, length);
+          var length2 = node6.textContent.length;
+          var start = Math.min(offsets.start, length2);
+          var end = offsets.end === void 0 ? start : Math.min(offsets.end, length2);
           if (!selection.extend && start > end) {
             var temp = end;
             end = start;
             start = temp;
           }
-          var startMarker = getNodeForCharacterOffset(node2, start);
-          var endMarker = getNodeForCharacterOffset(node2, end);
+          var startMarker = getNodeForCharacterOffset(node6, start);
+          var endMarker = getNodeForCharacterOffset(node6, end);
           if (startMarker && endMarker) {
             if (selection.rangeCount === 1 && selection.anchorNode === startMarker.node && selection.anchorOffset === startMarker.offset && selection.focusNode === endMarker.node && selection.focusOffset === endMarker.offset) {
               return;
@@ -8550,8 +8805,8 @@ var require_react_dom_development = __commonJS({
             }
           }
         }
-        function isTextNode(node2) {
-          return node2 && node2.nodeType === TEXT_NODE;
+        function isTextNode(node6) {
+          return node6 && node6.nodeType === TEXT_NODE;
         }
         function containsNode(outerNode, innerNode) {
           if (!outerNode || !innerNode) {
@@ -8570,8 +8825,8 @@ var require_react_dom_development = __commonJS({
             return false;
           }
         }
-        function isInDocument(node2) {
-          return node2 && node2.ownerDocument && containsNode(node2.ownerDocument.documentElement, node2);
+        function isInDocument(node6) {
+          return node6 && node6.ownerDocument && containsNode(node6.ownerDocument.documentElement, node6);
         }
         function isSameOriginFrame(iframe) {
           try {
@@ -8669,14 +8924,14 @@ var require_react_dom_development = __commonJS({
         var activeElementInst$1 = null;
         var lastSelection = null;
         var mouseDown = false;
-        function getSelection$1(node2) {
-          if ("selectionStart" in node2 && hasSelectionCapabilities(node2)) {
+        function getSelection$1(node6) {
+          if ("selectionStart" in node6 && hasSelectionCapabilities(node6)) {
             return {
-              start: node2.selectionStart,
-              end: node2.selectionEnd
+              start: node6.selectionStart,
+              end: node6.selectionEnd
             };
           } else {
-            var win = node2.ownerDocument && node2.ownerDocument.defaultView || window;
+            var win = node6.ownerDocument && node6.ownerDocument.defaultView || window;
             var selection = win.getSelection();
             return {
               anchorNode: selection.anchorNode,
@@ -9066,19 +9321,19 @@ var require_react_dom_development = __commonJS({
           if ((eventSystemFlags & IS_EVENT_HANDLE_NON_MANAGED_NODE) === 0 && (eventSystemFlags & IS_NON_DELEGATED) === 0) {
             var targetContainerNode = targetContainer;
             if (targetInst !== null) {
-              var node2 = targetInst;
+              var node6 = targetInst;
               mainLoop: while (true) {
-                if (node2 === null) {
+                if (node6 === null) {
                   return;
                 }
-                var nodeTag = node2.tag;
+                var nodeTag = node6.tag;
                 if (nodeTag === HostRoot || nodeTag === HostPortal) {
-                  var container2 = node2.stateNode.containerInfo;
+                  var container2 = node6.stateNode.containerInfo;
                   if (isMatchingRootContainer(container2, targetContainerNode)) {
                     break;
                   }
                   if (nodeTag === HostPortal) {
-                    var grandNode = node2.return;
+                    var grandNode = node6.return;
                     while (grandNode !== null) {
                       var grandTag = grandNode.tag;
                       if (grandTag === HostRoot || grandTag === HostPortal) {
@@ -9097,13 +9352,13 @@ var require_react_dom_development = __commonJS({
                     }
                     var parentTag = parentNode.tag;
                     if (parentTag === HostComponent || parentTag === HostText) {
-                      node2 = ancestorInst = parentNode;
+                      node6 = ancestorInst = parentNode;
                       continue mainLoop;
                     }
                     container2 = container2.parentNode;
                   }
                 }
-                node2 = node2.return;
+                node6 = node6.return;
               }
             }
           }
@@ -9239,10 +9494,10 @@ var require_react_dom_development = __commonJS({
             });
           }
         }
-        function accumulateEnterLeaveTwoPhaseListeners(dispatchQueue, leaveEvent, enterEvent, from, to) {
-          var common = from && to ? getLowestCommonAncestor(from, to) : null;
-          if (from !== null) {
-            accumulateEnterLeaveListenersForEvent(dispatchQueue, leaveEvent, from, common, false);
+        function accumulateEnterLeaveTwoPhaseListeners(dispatchQueue, leaveEvent, enterEvent, from2, to) {
+          var common = from2 && to ? getLowestCommonAncestor(from2, to) : null;
+          if (from2 !== null) {
+            accumulateEnterLeaveListenersForEvent(dispatchQueue, leaveEvent, from2, common, false);
           }
           if (to !== null && enterEvent !== null) {
             accumulateEnterLeaveListenersForEvent(dispatchQueue, enterEvent, to, common, true);
@@ -9354,8 +9609,8 @@ var require_react_dom_development = __commonJS({
         }
         function noop() {
         }
-        function trapClickOnNonInteractiveElement(node2) {
-          node2.onclick = noop;
+        function trapClickOnNonInteractiveElement(node6) {
+          node6.onclick = noop;
         }
         function setInitialDOMProperties(tag, domElement, rootContainerElement, nextProps, isCustomComponentTag) {
           for (var propKey in nextProps) {
@@ -9415,7 +9670,7 @@ var require_react_dom_development = __commonJS({
             }
           }
         }
-        function createElement(type, props, rootContainerElement, parentNamespace) {
+        function createElement5(type, props, rootContainerElement, parentNamespace) {
           var isCustomComponentTag;
           var ownerDocument = getOwnerDocumentFromRootContainer(rootContainerElement);
           var domElement;
@@ -9442,11 +9697,11 @@ var require_react_dom_development = __commonJS({
             } else {
               domElement = ownerDocument.createElement(type);
               if (type === "select") {
-                var node2 = domElement;
+                var node6 = domElement;
                 if (props.multiple) {
-                  node2.multiple = true;
+                  node6.multiple = true;
                 } else if (props.size) {
-                  node2.size = props.size;
+                  node6.size = props.size;
                 }
               }
             }
@@ -10000,7 +10255,7 @@ var require_react_dom_development = __commonJS({
             dlItemTagAutoclosing: null
           };
           updatedAncestorInfo = function(oldInfo, tag) {
-            var ancestorInfo = assign({}, oldInfo || emptyAncestorInfo);
+            var ancestorInfo = assign2({}, oldInfo || emptyAncestorInfo);
             var info = {
               tag
             };
@@ -10285,7 +10540,7 @@ var require_react_dom_development = __commonJS({
             }
             parentNamespace = hostContextDev.namespace;
           }
-          var domElement = createElement(type, props, rootContainerInstance, parentNamespace);
+          var domElement = createElement5(type, props, rootContainerInstance, parentNamespace);
           precacheFiberNode(internalInstanceHandle, domElement);
           updateFiberProps(domElement, props);
           return domElement;
@@ -10415,11 +10670,11 @@ var require_react_dom_development = __commonJS({
           }
         }
         function clearSuspenseBoundary(parentInstance, suspenseInstance) {
-          var node2 = suspenseInstance;
+          var node6 = suspenseInstance;
           var depth = 0;
           do {
-            var nextNode = node2.nextSibling;
-            parentInstance.removeChild(node2);
+            var nextNode = node6.nextSibling;
+            parentInstance.removeChild(node6);
             if (nextNode && nextNode.nodeType === COMMENT_NODE) {
               var data = nextNode.data;
               if (data === SUSPENSE_END_DATA) {
@@ -10434,8 +10689,8 @@ var require_react_dom_development = __commonJS({
                 depth++;
               }
             }
-            node2 = nextNode;
-          } while (node2);
+            node6 = nextNode;
+          } while (node6);
           retryIfBlockedOn(suspenseInstance);
         }
         function clearSuspenseBoundaryFromContainer(container2, suspenseInstance) {
@@ -10521,14 +10776,14 @@ var require_react_dom_development = __commonJS({
         function registerSuspenseInstanceRetry(instance, callback) {
           instance._reactRetry = callback;
         }
-        function getNextHydratable(node2) {
-          for (; node2 != null; node2 = node2.nextSibling) {
-            var nodeType = node2.nodeType;
+        function getNextHydratable(node6) {
+          for (; node6 != null; node6 = node6.nextSibling) {
+            var nodeType = node6.nodeType;
             if (nodeType === ELEMENT_NODE || nodeType === TEXT_NODE) {
               break;
             }
             if (nodeType === COMMENT_NODE) {
-              var nodeData = node2.data;
+              var nodeData = node6.data;
               if (nodeData === SUSPENSE_START_DATA || nodeData === SUSPENSE_FALLBACK_START_DATA || nodeData === SUSPENSE_PENDING_START_DATA) {
                 break;
               }
@@ -10537,7 +10792,7 @@ var require_react_dom_development = __commonJS({
               }
             }
           }
-          return node2;
+          return node6;
         }
         function getNextHydratableSibling(instance) {
           return getNextHydratable(instance.nextSibling);
@@ -10571,14 +10826,14 @@ var require_react_dom_development = __commonJS({
           precacheFiberNode(internalInstanceHandle, suspenseInstance);
         }
         function getNextHydratableInstanceAfterSuspenseInstance(suspenseInstance) {
-          var node2 = suspenseInstance.nextSibling;
+          var node6 = suspenseInstance.nextSibling;
           var depth = 0;
-          while (node2) {
-            if (node2.nodeType === COMMENT_NODE) {
-              var data = node2.data;
+          while (node6) {
+            if (node6.nodeType === COMMENT_NODE) {
+              var data = node6.data;
               if (data === SUSPENSE_END_DATA) {
                 if (depth === 0) {
-                  return getNextHydratableSibling(node2);
+                  return getNextHydratableSibling(node6);
                 } else {
                   depth--;
                 }
@@ -10586,19 +10841,19 @@ var require_react_dom_development = __commonJS({
                 depth++;
               }
             }
-            node2 = node2.nextSibling;
+            node6 = node6.nextSibling;
           }
           return null;
         }
         function getParentSuspenseInstance(targetInstance) {
-          var node2 = targetInstance.previousSibling;
+          var node6 = targetInstance.previousSibling;
           var depth = 0;
-          while (node2) {
-            if (node2.nodeType === COMMENT_NODE) {
-              var data = node2.data;
+          while (node6) {
+            if (node6.nodeType === COMMENT_NODE) {
+              var data = node6.data;
               if (data === SUSPENSE_START_DATA || data === SUSPENSE_FALLBACK_START_DATA || data === SUSPENSE_PENDING_START_DATA) {
                 if (depth === 0) {
-                  return node2;
+                  return node6;
                 } else {
                   depth--;
                 }
@@ -10606,7 +10861,7 @@ var require_react_dom_development = __commonJS({
                 depth++;
               }
             }
-            node2 = node2.previousSibling;
+            node6 = node6.previousSibling;
           }
           return null;
         }
@@ -10715,24 +10970,24 @@ var require_react_dom_development = __commonJS({
         var internalEventHandlersKey = "__reactEvents$" + randomKey;
         var internalEventHandlerListenersKey = "__reactListeners$" + randomKey;
         var internalEventHandlesSetKey = "__reactHandles$" + randomKey;
-        function detachDeletedInstance(node2) {
-          delete node2[internalInstanceKey];
-          delete node2[internalPropsKey];
-          delete node2[internalEventHandlersKey];
-          delete node2[internalEventHandlerListenersKey];
-          delete node2[internalEventHandlesSetKey];
+        function detachDeletedInstance(node6) {
+          delete node6[internalInstanceKey];
+          delete node6[internalPropsKey];
+          delete node6[internalEventHandlersKey];
+          delete node6[internalEventHandlerListenersKey];
+          delete node6[internalEventHandlesSetKey];
         }
-        function precacheFiberNode(hostInst, node2) {
-          node2[internalInstanceKey] = hostInst;
+        function precacheFiberNode(hostInst, node6) {
+          node6[internalInstanceKey] = hostInst;
         }
-        function markContainerAsRoot(hostRoot, node2) {
-          node2[internalContainerInstanceKey] = hostRoot;
+        function markContainerAsRoot(hostRoot, node6) {
+          node6[internalContainerInstanceKey] = hostRoot;
         }
-        function unmarkContainerAsRoot(node2) {
-          node2[internalContainerInstanceKey] = null;
+        function unmarkContainerAsRoot(node6) {
+          node6[internalContainerInstanceKey] = null;
         }
-        function isContainerMarkedAsRoot(node2) {
-          return !!node2[internalContainerInstanceKey];
+        function isContainerMarkedAsRoot(node6) {
+          return !!node6[internalContainerInstanceKey];
         }
         function getClosestInstanceFromNode(targetNode) {
           var targetInst = targetNode[internalInstanceKey];
@@ -10761,8 +11016,8 @@ var require_react_dom_development = __commonJS({
           }
           return null;
         }
-        function getInstanceFromNode(node2) {
-          var inst = node2[internalInstanceKey] || node2[internalContainerInstanceKey];
+        function getInstanceFromNode(node6) {
+          var inst = node6[internalInstanceKey] || node6[internalContainerInstanceKey];
           if (inst) {
             if (inst.tag === HostComponent || inst.tag === HostText || inst.tag === SuspenseComponent || inst.tag === HostRoot) {
               return inst;
@@ -10778,16 +11033,16 @@ var require_react_dom_development = __commonJS({
           }
           throw new Error("getNodeFromInstance: Invalid argument.");
         }
-        function getFiberCurrentPropsFromNode(node2) {
-          return node2[internalPropsKey] || null;
+        function getFiberCurrentPropsFromNode(node6) {
+          return node6[internalPropsKey] || null;
         }
-        function updateFiberProps(node2, props) {
-          node2[internalPropsKey] = props;
+        function updateFiberProps(node6, props) {
+          node6[internalPropsKey] = props;
         }
-        function getEventListenerSet(node2) {
-          var elementListenerSet = node2[internalEventHandlersKey];
+        function getEventListenerSet(node6) {
+          var elementListenerSet = node6[internalEventHandlersKey];
           if (elementListenerSet === void 0) {
-            elementListenerSet = node2[internalEventHandlersKey] = /* @__PURE__ */ new Set();
+            elementListenerSet = node6[internalEventHandlersKey] = /* @__PURE__ */ new Set();
           }
           return elementListenerSet;
         }
@@ -10846,7 +11101,7 @@ var require_react_dom_development = __commonJS({
             current: defaultValue
           };
         }
-        function pop(cursor, fiber) {
+        function pop(cursor2, fiber) {
           if (index < 0) {
             {
               error("Unexpected pop.");
@@ -10858,20 +11113,20 @@ var require_react_dom_development = __commonJS({
               error("Unexpected Fiber popped.");
             }
           }
-          cursor.current = valueStack[index];
+          cursor2.current = valueStack[index];
           valueStack[index] = null;
           {
             fiberStack[index] = null;
           }
           index--;
         }
-        function push(cursor, value, fiber) {
+        function push(cursor2, value, fiber) {
           index++;
-          valueStack[index] = cursor.current;
+          valueStack[index] = cursor2.current;
           {
             fiberStack[index] = fiber;
           }
-          cursor.current = value;
+          cursor2.current = value;
         }
         var warnedAboutMissingGetChildContext;
         {
@@ -10884,9 +11139,9 @@ var require_react_dom_development = __commonJS({
         var contextStackCursor = createCursor(emptyContextObject);
         var didPerformWorkStackCursor = createCursor(false);
         var previousContext = emptyContextObject;
-        function getUnmaskedContext(workInProgress2, Component, didPushOwnContextIfProvider) {
+        function getUnmaskedContext(workInProgress2, Component2, didPushOwnContextIfProvider) {
           {
-            if (didPushOwnContextIfProvider && isContextProvider(Component)) {
+            if (didPushOwnContextIfProvider && isContextProvider(Component2)) {
               return previousContext;
             }
             return contextStackCursor.current;
@@ -10980,7 +11235,7 @@ var require_react_dom_development = __commonJS({
               var name = getComponentNameFromFiber(fiber) || "Unknown";
               checkPropTypes(childContextTypes, childContext, "child context", name);
             }
-            return assign({}, parentContext, childContext);
+            return assign2({}, parentContext, childContext);
           }
         }
         function pushContextProvider(workInProgress2) {
@@ -11017,21 +11272,21 @@ var require_react_dom_development = __commonJS({
             if (!isFiberMounted(fiber) || fiber.tag !== ClassComponent) {
               throw new Error("Expected subtree parent to be a mounted class component. This error is likely caused by a bug in React. Please file an issue.");
             }
-            var node2 = fiber;
+            var node6 = fiber;
             do {
-              switch (node2.tag) {
+              switch (node6.tag) {
                 case HostRoot:
-                  return node2.stateNode.context;
+                  return node6.stateNode.context;
                 case ClassComponent: {
-                  var Component = node2.type;
-                  if (isContextProvider(Component)) {
-                    return node2.stateNode.__reactInternalMemoizedMergedChildContext;
+                  var Component2 = node6.type;
+                  if (isContextProvider(Component2)) {
+                    return node6.stateNode.__reactInternalMemoizedMergedChildContext;
                   }
                   break;
                 }
               }
-              node2 = node2.return;
-            } while (node2 !== null);
+              node6 = node6.return;
+            } while (node6 !== null);
             throw new Error("Found unexpected detached subtree parent. This error is likely caused by a bug in React. Please file an issue.");
           }
         }
@@ -11127,8 +11382,8 @@ var require_react_dom_development = __commonJS({
           var baseLength = getBitLength(baseIdWithLeadingBit) - 1;
           var baseId = baseIdWithLeadingBit & ~(1 << baseLength);
           var slot = index2 + 1;
-          var length = getBitLength(totalChildren) + baseLength;
-          if (length > 30) {
+          var length2 = getBitLength(totalChildren) + baseLength;
+          if (length2 > 30) {
             var numberOfOverflowBits = baseLength - baseLength % 5;
             var newOverflowBits = (1 << numberOfOverflowBits) - 1;
             var newOverflow = (baseId & newOverflowBits).toString(32);
@@ -11144,7 +11399,7 @@ var require_react_dom_development = __commonJS({
             var newBits = slot << baseLength;
             var _id = newBits | baseId;
             var _overflow = baseOverflow;
-            treeContextId = 1 << length | _id;
+            treeContextId = 1 << length2 | _id;
             treeContextOverflow = _overflow;
           }
         }
@@ -11613,12 +11868,12 @@ var require_react_dom_development = __commonJS({
         {
           var findStrictRoot = function(fiber) {
             var maybeStrictRoot = null;
-            var node2 = fiber;
-            while (node2 !== null) {
-              if (node2.mode & StrictLegacyMode) {
-                maybeStrictRoot = node2;
+            var node6 = fiber;
+            while (node6 !== null) {
+              if (node6.mode & StrictLegacyMode) {
+                maybeStrictRoot = node6;
               }
-              node2 = node2.return;
+              node6 = node6.return;
             }
             return maybeStrictRoot;
           };
@@ -12019,7 +12274,7 @@ var require_react_dom_development = __commonJS({
             }
           }
           function updateFragment2(returnFiber, current2, fragment, lanes, key) {
-            if (current2 === null || current2.tag !== Fragment) {
+            if (current2 === null || current2.tag !== Fragment7) {
               var created = createFiberFromFragment(fragment, returnFiber.mode, lanes, key);
               created.return = returnFiber;
               return created;
@@ -12422,7 +12677,7 @@ var require_react_dom_development = __commonJS({
               if (child.key === key) {
                 var elementType = element.type;
                 if (elementType === REACT_FRAGMENT_TYPE) {
-                  if (child.tag === Fragment) {
+                  if (child.tag === Fragment7) {
                     deleteRemainingChildren(returnFiber, child.sibling);
                     var existing = useFiber(child, element.props.children);
                     existing.return = returnFiber;
@@ -12603,24 +12858,24 @@ var require_react_dom_development = __commonJS({
           }
         }
         function scheduleContextWorkOnParentPath(parent, renderLanes2, propagationRoot) {
-          var node2 = parent;
-          while (node2 !== null) {
-            var alternate = node2.alternate;
-            if (!isSubsetOfLanes(node2.childLanes, renderLanes2)) {
-              node2.childLanes = mergeLanes(node2.childLanes, renderLanes2);
+          var node6 = parent;
+          while (node6 !== null) {
+            var alternate = node6.alternate;
+            if (!isSubsetOfLanes(node6.childLanes, renderLanes2)) {
+              node6.childLanes = mergeLanes(node6.childLanes, renderLanes2);
               if (alternate !== null) {
                 alternate.childLanes = mergeLanes(alternate.childLanes, renderLanes2);
               }
             } else if (alternate !== null && !isSubsetOfLanes(alternate.childLanes, renderLanes2)) {
               alternate.childLanes = mergeLanes(alternate.childLanes, renderLanes2);
             }
-            if (node2 === propagationRoot) {
+            if (node6 === propagationRoot) {
               break;
             }
-            node2 = node2.return;
+            node6 = node6.return;
           }
           {
-            if (node2 !== propagationRoot) {
+            if (node6 !== propagationRoot) {
               error("Expected to find the propagation root when scheduling context work. This error is likely caused by a bug in React. Please file an issue.");
             }
           }
@@ -12834,7 +13089,7 @@ var require_react_dom_development = __commonJS({
               warnAboutUpdateOnNotYetMountedFiberInDEV(sourceFiber);
             }
           }
-          var node2 = sourceFiber;
+          var node6 = sourceFiber;
           var parent = sourceFiber.return;
           while (parent !== null) {
             parent.childLanes = mergeLanes(parent.childLanes, lane);
@@ -12848,11 +13103,11 @@ var require_react_dom_development = __commonJS({
                 }
               }
             }
-            node2 = parent;
+            node6 = parent;
             parent = parent.return;
           }
-          if (node2.tag === HostRoot) {
-            var root2 = node2.stateNode;
+          if (node6.tag === HostRoot) {
+            var root2 = node6.stateNode;
             return root2;
           } else {
             return null;
@@ -13057,7 +13312,7 @@ var require_react_dom_development = __commonJS({
               if (partialState === null || partialState === void 0) {
                 return prevState;
               }
-              return assign({}, prevState, partialState);
+              return assign2({}, prevState, partialState);
             }
             case ForceUpdate: {
               hasForceUpdate = true;
@@ -13305,39 +13560,39 @@ var require_react_dom_development = __commonJS({
           }
         }
         function findFirstSuspended(row) {
-          var node2 = row;
-          while (node2 !== null) {
-            if (node2.tag === SuspenseComponent) {
-              var state = node2.memoizedState;
+          var node6 = row;
+          while (node6 !== null) {
+            if (node6.tag === SuspenseComponent) {
+              var state = node6.memoizedState;
               if (state !== null) {
                 var dehydrated = state.dehydrated;
                 if (dehydrated === null || isSuspenseInstancePending(dehydrated) || isSuspenseInstanceFallback(dehydrated)) {
-                  return node2;
+                  return node6;
                 }
               }
-            } else if (node2.tag === SuspenseListComponent && // revealOrder undefined can't be trusted because it don't
+            } else if (node6.tag === SuspenseListComponent && // revealOrder undefined can't be trusted because it don't
             // keep track of whether it suspended or not.
-            node2.memoizedProps.revealOrder !== void 0) {
-              var didSuspend = (node2.flags & DidCapture) !== NoFlags;
+            node6.memoizedProps.revealOrder !== void 0) {
+              var didSuspend = (node6.flags & DidCapture) !== NoFlags;
               if (didSuspend) {
-                return node2;
+                return node6;
               }
-            } else if (node2.child !== null) {
-              node2.child.return = node2;
-              node2 = node2.child;
+            } else if (node6.child !== null) {
+              node6.child.return = node6;
+              node6 = node6.child;
               continue;
             }
-            if (node2 === row) {
+            if (node6 === row) {
               return null;
             }
-            while (node2.sibling === null) {
-              if (node2.return === null || node2.return === row) {
+            while (node6.sibling === null) {
+              if (node6.return === null || node6.return === row) {
                 return null;
               }
-              node2 = node2.return;
+              node6 = node6.return;
             }
-            node2.sibling.return = node2.return;
-            node2 = node2.sibling;
+            node6.sibling.return = node6.return;
+            node6 = node6.sibling;
           }
           return null;
         }
@@ -13349,7 +13604,7 @@ var require_react_dom_development = __commonJS({
           /* */
           1
         );
-        var Insertion = (
+        var Insertion3 = (
           /*  */
           2
         );
@@ -13478,7 +13733,7 @@ var require_react_dom_development = __commonJS({
           }
           return true;
         }
-        function renderWithHooks(current2, workInProgress2, Component, props, secondArg, nextRenderLanes) {
+        function renderWithHooks(current2, workInProgress2, Component2, props, secondArg, nextRenderLanes) {
           renderLanes = nextRenderLanes;
           currentlyRenderingFiber$1 = workInProgress2;
           {
@@ -13498,7 +13753,7 @@ var require_react_dom_development = __commonJS({
               ReactCurrentDispatcher$1.current = HooksDispatcherOnMountInDEV;
             }
           }
-          var children = Component(props, secondArg);
+          var children = Component2(props, secondArg);
           if (didScheduleRenderPhaseUpdateDuringThisPass) {
             var numberOfReRenders = 0;
             do {
@@ -13518,7 +13773,7 @@ var require_react_dom_development = __commonJS({
                 hookTypesUpdateIndexDev = -1;
               }
               ReactCurrentDispatcher$1.current = HooksDispatcherOnRerenderInDEV;
-              children = Component(props, secondArg);
+              children = Component2(props, secondArg);
             } while (didScheduleRenderPhaseUpdateDuringThisPass);
           }
           ReactCurrentDispatcher$1.current = ContextOnlyDispatcher;
@@ -14052,10 +14307,10 @@ var require_react_dom_development = __commonJS({
           return updateEffectImpl(Passive, Passive$1, create, deps);
         }
         function mountInsertionEffect(create, deps) {
-          return mountEffectImpl(Update, Insertion, create, deps);
+          return mountEffectImpl(Update, Insertion3, create, deps);
         }
         function updateInsertionEffect(create, deps) {
-          return updateEffectImpl(Update, Insertion, create, deps);
+          return updateEffectImpl(Update, Insertion3, create, deps);
         }
         function mountLayoutEffect(create, deps) {
           var fiberFlags = Update;
@@ -15317,10 +15572,10 @@ var require_react_dom_development = __commonJS({
             child = child.sibling;
           }
         }
-        function resolveDefaultProps(Component, baseProps) {
-          if (Component && Component.defaultProps) {
-            var props = assign({}, baseProps);
-            var defaultProps = Component.defaultProps;
+        function resolveDefaultProps(Component2, baseProps) {
+          if (Component2 && Component2.defaultProps) {
+            var props = assign2({}, baseProps);
+            var defaultProps = Component2.defaultProps;
             for (var propName in defaultProps) {
               if (props[propName] === void 0) {
                 props[propName] = defaultProps[propName];
@@ -15394,7 +15649,7 @@ var require_react_dom_development = __commonJS({
             }
             warnOnUndefinedDerivedState(ctor, partialState);
           }
-          var memoizedState = partialState === null || partialState === void 0 ? prevState : assign({}, prevState, partialState);
+          var memoizedState = partialState === null || partialState === void 0 ? prevState : assign2({}, prevState, partialState);
           workInProgress2.memoizedState = memoizedState;
           if (workInProgress2.lanes === NoLanes) {
             var updateQueue = workInProgress2.updateQueue;
@@ -16098,13 +16353,13 @@ var require_react_dom_development = __commonJS({
           }
         }
         function getNearestSuspenseBoundaryToCapture(returnFiber) {
-          var node2 = returnFiber;
+          var node6 = returnFiber;
           do {
-            if (node2.tag === SuspenseComponent && shouldCaptureSuspense(node2)) {
-              return node2;
+            if (node6.tag === SuspenseComponent && shouldCaptureSuspense(node6)) {
+              return node6;
             }
-            node2 = node2.return;
-          } while (node2 !== null);
+            node6 = node6.return;
+          } while (node6 !== null);
           return null;
         }
         function markSuspenseBoundaryShouldCapture(suspenseBoundary, returnFiber, sourceFiber, root2, rootRenderLanes) {
@@ -16249,22 +16504,22 @@ var require_react_dom_development = __commonJS({
           workInProgress2.child = reconcileChildFibers(workInProgress2, current2.child, null, renderLanes2);
           workInProgress2.child = reconcileChildFibers(workInProgress2, null, nextChildren, renderLanes2);
         }
-        function updateForwardRef(current2, workInProgress2, Component, nextProps, renderLanes2) {
+        function updateForwardRef(current2, workInProgress2, Component2, nextProps, renderLanes2) {
           {
             if (workInProgress2.type !== workInProgress2.elementType) {
-              var innerPropTypes = Component.propTypes;
+              var innerPropTypes = Component2.propTypes;
               if (innerPropTypes) {
                 checkPropTypes(
                   innerPropTypes,
                   nextProps,
                   // Resolved props
                   "prop",
-                  getComponentNameFromType(Component)
+                  getComponentNameFromType(Component2)
                 );
               }
             }
           }
-          var render2 = Component.render;
+          var render2 = Component2.render;
           var ref = workInProgress2.ref;
           var nextChildren;
           var hasId;
@@ -16302,11 +16557,11 @@ var require_react_dom_development = __commonJS({
           reconcileChildren(current2, workInProgress2, nextChildren, renderLanes2);
           return workInProgress2.child;
         }
-        function updateMemoComponent(current2, workInProgress2, Component, nextProps, renderLanes2) {
+        function updateMemoComponent(current2, workInProgress2, Component2, nextProps, renderLanes2) {
           if (current2 === null) {
-            var type = Component.type;
-            if (isSimpleFunctionComponent(type) && Component.compare === null && // SimpleMemoComponent codepath doesn't resolve outer props either.
-            Component.defaultProps === void 0) {
+            var type = Component2.type;
+            if (isSimpleFunctionComponent(type) && Component2.compare === null && // SimpleMemoComponent codepath doesn't resolve outer props either.
+            Component2.defaultProps === void 0) {
               var resolvedType = type;
               {
                 resolvedType = resolveFunctionForHotReloading(type);
@@ -16329,7 +16584,7 @@ var require_react_dom_development = __commonJS({
                   getComponentNameFromType(type)
                 );
               }
-              if (Component.defaultProps !== void 0) {
+              if (Component2.defaultProps !== void 0) {
                 var componentName = getComponentNameFromType(type) || "Unknown";
                 if (!didWarnAboutDefaultPropsOnFunctionComponent[componentName]) {
                   error("%s: Support for defaultProps will be removed from memo components in a future major release. Use JavaScript default parameters instead.", componentName);
@@ -16337,14 +16592,14 @@ var require_react_dom_development = __commonJS({
                 }
               }
             }
-            var child = createFiberFromTypeAndProps(Component.type, null, nextProps, workInProgress2, workInProgress2.mode, renderLanes2);
+            var child = createFiberFromTypeAndProps(Component2.type, null, nextProps, workInProgress2, workInProgress2.mode, renderLanes2);
             child.ref = workInProgress2.ref;
             child.return = workInProgress2;
             workInProgress2.child = child;
             return child;
           }
           {
-            var _type = Component.type;
+            var _type = Component2.type;
             var _innerPropTypes = _type.propTypes;
             if (_innerPropTypes) {
               checkPropTypes(
@@ -16360,7 +16615,7 @@ var require_react_dom_development = __commonJS({
           var hasScheduledUpdateOrContext = checkScheduledUpdateOrContext(current2, renderLanes2);
           if (!hasScheduledUpdateOrContext) {
             var prevProps = currentChild.memoizedProps;
-            var compare = Component.compare;
+            var compare = Component2.compare;
             compare = compare !== null ? compare : shallowEqual;
             if (compare(prevProps, nextProps) && current2.ref === workInProgress2.ref) {
               return bailoutOnAlreadyFinishedWork(current2, workInProgress2, renderLanes2);
@@ -16373,7 +16628,7 @@ var require_react_dom_development = __commonJS({
           workInProgress2.child = newChild;
           return newChild;
         }
-        function updateSimpleMemoComponent(current2, workInProgress2, Component, nextProps, renderLanes2) {
+        function updateSimpleMemoComponent(current2, workInProgress2, Component2, nextProps, renderLanes2) {
           {
             if (workInProgress2.type !== workInProgress2.elementType) {
               var outerMemoType = workInProgress2.elementType;
@@ -16413,7 +16668,7 @@ var require_react_dom_development = __commonJS({
               }
             }
           }
-          return updateFunctionComponent(current2, workInProgress2, Component, nextProps, renderLanes2);
+          return updateFunctionComponent(current2, workInProgress2, Component2, nextProps, renderLanes2);
         }
         function updateOffscreenComponent(current2, workInProgress2, renderLanes2) {
           var nextProps = workInProgress2.pendingProps;
@@ -16503,24 +16758,24 @@ var require_react_dom_development = __commonJS({
             }
           }
         }
-        function updateFunctionComponent(current2, workInProgress2, Component, nextProps, renderLanes2) {
+        function updateFunctionComponent(current2, workInProgress2, Component2, nextProps, renderLanes2) {
           {
             if (workInProgress2.type !== workInProgress2.elementType) {
-              var innerPropTypes = Component.propTypes;
+              var innerPropTypes = Component2.propTypes;
               if (innerPropTypes) {
                 checkPropTypes(
                   innerPropTypes,
                   nextProps,
                   // Resolved props
                   "prop",
-                  getComponentNameFromType(Component)
+                  getComponentNameFromType(Component2)
                 );
               }
             }
           }
           var context;
           {
-            var unmaskedContext = getUnmaskedContext(workInProgress2, Component, true);
+            var unmaskedContext = getUnmaskedContext(workInProgress2, Component2, true);
             context = getMaskedContext(workInProgress2, unmaskedContext);
           }
           var nextChildren;
@@ -16532,12 +16787,12 @@ var require_react_dom_development = __commonJS({
           {
             ReactCurrentOwner$1.current = workInProgress2;
             setIsRendering(true);
-            nextChildren = renderWithHooks(current2, workInProgress2, Component, nextProps, context, renderLanes2);
+            nextChildren = renderWithHooks(current2, workInProgress2, Component2, nextProps, context, renderLanes2);
             hasId = checkDidRenderIdHook();
             if (workInProgress2.mode & StrictLegacyMode) {
               setIsStrictModeForDevtools(true);
               try {
-                nextChildren = renderWithHooks(current2, workInProgress2, Component, nextProps, context, renderLanes2);
+                nextChildren = renderWithHooks(current2, workInProgress2, Component2, nextProps, context, renderLanes2);
                 hasId = checkDidRenderIdHook();
               } finally {
                 setIsStrictModeForDevtools(false);
@@ -16559,7 +16814,7 @@ var require_react_dom_development = __commonJS({
           reconcileChildren(current2, workInProgress2, nextChildren, renderLanes2);
           return workInProgress2.child;
         }
-        function updateClassComponent(current2, workInProgress2, Component, nextProps, renderLanes2) {
+        function updateClassComponent(current2, workInProgress2, Component2, nextProps, renderLanes2) {
           {
             switch (shouldError(workInProgress2)) {
               case false: {
@@ -16582,20 +16837,20 @@ var require_react_dom_development = __commonJS({
               }
             }
             if (workInProgress2.type !== workInProgress2.elementType) {
-              var innerPropTypes = Component.propTypes;
+              var innerPropTypes = Component2.propTypes;
               if (innerPropTypes) {
                 checkPropTypes(
                   innerPropTypes,
                   nextProps,
                   // Resolved props
                   "prop",
-                  getComponentNameFromType(Component)
+                  getComponentNameFromType(Component2)
                 );
               }
             }
           }
           var hasContext;
-          if (isContextProvider(Component)) {
+          if (isContextProvider(Component2)) {
             hasContext = true;
             pushContextProvider(workInProgress2);
           } else {
@@ -16606,15 +16861,15 @@ var require_react_dom_development = __commonJS({
           var shouldUpdate;
           if (instance === null) {
             resetSuspendedCurrentOnMountInLegacyMode(current2, workInProgress2);
-            constructClassInstance(workInProgress2, Component, nextProps);
-            mountClassInstance(workInProgress2, Component, nextProps, renderLanes2);
+            constructClassInstance(workInProgress2, Component2, nextProps);
+            mountClassInstance(workInProgress2, Component2, nextProps, renderLanes2);
             shouldUpdate = true;
           } else if (current2 === null) {
-            shouldUpdate = resumeMountClassInstance(workInProgress2, Component, nextProps, renderLanes2);
+            shouldUpdate = resumeMountClassInstance(workInProgress2, Component2, nextProps, renderLanes2);
           } else {
-            shouldUpdate = updateClassInstance(current2, workInProgress2, Component, nextProps, renderLanes2);
+            shouldUpdate = updateClassInstance(current2, workInProgress2, Component2, nextProps, renderLanes2);
           }
-          var nextUnitOfWork = finishClassComponent(current2, workInProgress2, Component, shouldUpdate, hasContext, renderLanes2);
+          var nextUnitOfWork = finishClassComponent(current2, workInProgress2, Component2, shouldUpdate, hasContext, renderLanes2);
           {
             var inst = workInProgress2.stateNode;
             if (shouldUpdate && inst.props !== nextProps) {
@@ -16626,19 +16881,19 @@ var require_react_dom_development = __commonJS({
           }
           return nextUnitOfWork;
         }
-        function finishClassComponent(current2, workInProgress2, Component, shouldUpdate, hasContext, renderLanes2) {
+        function finishClassComponent(current2, workInProgress2, Component2, shouldUpdate, hasContext, renderLanes2) {
           markRef(current2, workInProgress2);
           var didCaptureError = (workInProgress2.flags & DidCapture) !== NoFlags;
           if (!shouldUpdate && !didCaptureError) {
             if (hasContext) {
-              invalidateContextProvider(workInProgress2, Component, false);
+              invalidateContextProvider(workInProgress2, Component2, false);
             }
             return bailoutOnAlreadyFinishedWork(current2, workInProgress2, renderLanes2);
           }
           var instance = workInProgress2.stateNode;
           ReactCurrentOwner$1.current = workInProgress2;
           var nextChildren;
-          if (didCaptureError && typeof Component.getDerivedStateFromError !== "function") {
+          if (didCaptureError && typeof Component2.getDerivedStateFromError !== "function") {
             nextChildren = null;
             {
               stopProfilerTimerIfRunning();
@@ -16672,7 +16927,7 @@ var require_react_dom_development = __commonJS({
           }
           workInProgress2.memoizedState = instance.state;
           if (hasContext) {
-            invalidateContextProvider(workInProgress2, Component, true);
+            invalidateContextProvider(workInProgress2, Component2, true);
           }
           return workInProgress2.child;
         }
@@ -16719,10 +16974,10 @@ var require_react_dom_development = __commonJS({
               enterHydrationState(workInProgress2);
               var child = mountChildFibers(workInProgress2, null, nextChildren, renderLanes2);
               workInProgress2.child = child;
-              var node2 = child;
-              while (node2) {
-                node2.flags = node2.flags & ~Placement | Hydrating;
-                node2 = node2.sibling;
+              var node6 = child;
+              while (node6) {
+                node6.flags = node6.flags & ~Placement | Hydrating;
+                node6 = node6.sibling;
               }
             }
           } else {
@@ -16772,45 +17027,45 @@ var require_react_dom_development = __commonJS({
           var lazyComponent = elementType;
           var payload = lazyComponent._payload;
           var init = lazyComponent._init;
-          var Component = init(payload);
-          workInProgress2.type = Component;
-          var resolvedTag = workInProgress2.tag = resolveLazyComponentTag(Component);
-          var resolvedProps = resolveDefaultProps(Component, props);
+          var Component2 = init(payload);
+          workInProgress2.type = Component2;
+          var resolvedTag = workInProgress2.tag = resolveLazyComponentTag(Component2);
+          var resolvedProps = resolveDefaultProps(Component2, props);
           var child;
           switch (resolvedTag) {
             case FunctionComponent: {
               {
-                validateFunctionComponentInDev(workInProgress2, Component);
-                workInProgress2.type = Component = resolveFunctionForHotReloading(Component);
+                validateFunctionComponentInDev(workInProgress2, Component2);
+                workInProgress2.type = Component2 = resolveFunctionForHotReloading(Component2);
               }
-              child = updateFunctionComponent(null, workInProgress2, Component, resolvedProps, renderLanes2);
+              child = updateFunctionComponent(null, workInProgress2, Component2, resolvedProps, renderLanes2);
               return child;
             }
             case ClassComponent: {
               {
-                workInProgress2.type = Component = resolveClassForHotReloading(Component);
+                workInProgress2.type = Component2 = resolveClassForHotReloading(Component2);
               }
-              child = updateClassComponent(null, workInProgress2, Component, resolvedProps, renderLanes2);
+              child = updateClassComponent(null, workInProgress2, Component2, resolvedProps, renderLanes2);
               return child;
             }
             case ForwardRef: {
               {
-                workInProgress2.type = Component = resolveForwardRefForHotReloading(Component);
+                workInProgress2.type = Component2 = resolveForwardRefForHotReloading(Component2);
               }
-              child = updateForwardRef(null, workInProgress2, Component, resolvedProps, renderLanes2);
+              child = updateForwardRef(null, workInProgress2, Component2, resolvedProps, renderLanes2);
               return child;
             }
             case MemoComponent: {
               {
                 if (workInProgress2.type !== workInProgress2.elementType) {
-                  var outerPropTypes = Component.propTypes;
+                  var outerPropTypes = Component2.propTypes;
                   if (outerPropTypes) {
                     checkPropTypes(
                       outerPropTypes,
                       resolvedProps,
                       // Resolved for outer only
                       "prop",
-                      getComponentNameFromType(Component)
+                      getComponentNameFromType(Component2)
                     );
                   }
                 }
@@ -16818,8 +17073,8 @@ var require_react_dom_development = __commonJS({
               child = updateMemoComponent(
                 null,
                 workInProgress2,
-                Component,
-                resolveDefaultProps(Component.type, resolvedProps),
+                Component2,
+                resolveDefaultProps(Component2.type, resolvedProps),
                 // The inner type can have defaults too
                 renderLanes2
               );
@@ -16828,33 +17083,33 @@ var require_react_dom_development = __commonJS({
           }
           var hint = "";
           {
-            if (Component !== null && typeof Component === "object" && Component.$$typeof === REACT_LAZY_TYPE) {
+            if (Component2 !== null && typeof Component2 === "object" && Component2.$$typeof === REACT_LAZY_TYPE) {
               hint = " Did you wrap a component in React.lazy() more than once?";
             }
           }
-          throw new Error("Element type is invalid. Received a promise that resolves to: " + Component + ". " + ("Lazy element type must resolve to a class or function." + hint));
+          throw new Error("Element type is invalid. Received a promise that resolves to: " + Component2 + ". " + ("Lazy element type must resolve to a class or function." + hint));
         }
-        function mountIncompleteClassComponent(_current, workInProgress2, Component, nextProps, renderLanes2) {
+        function mountIncompleteClassComponent(_current, workInProgress2, Component2, nextProps, renderLanes2) {
           resetSuspendedCurrentOnMountInLegacyMode(_current, workInProgress2);
           workInProgress2.tag = ClassComponent;
           var hasContext;
-          if (isContextProvider(Component)) {
+          if (isContextProvider(Component2)) {
             hasContext = true;
             pushContextProvider(workInProgress2);
           } else {
             hasContext = false;
           }
           prepareToReadContext(workInProgress2, renderLanes2);
-          constructClassInstance(workInProgress2, Component, nextProps);
-          mountClassInstance(workInProgress2, Component, nextProps, renderLanes2);
-          return finishClassComponent(null, workInProgress2, Component, true, hasContext, renderLanes2);
+          constructClassInstance(workInProgress2, Component2, nextProps);
+          mountClassInstance(workInProgress2, Component2, nextProps, renderLanes2);
+          return finishClassComponent(null, workInProgress2, Component2, true, hasContext, renderLanes2);
         }
-        function mountIndeterminateComponent(_current, workInProgress2, Component, renderLanes2) {
+        function mountIndeterminateComponent(_current, workInProgress2, Component2, renderLanes2) {
           resetSuspendedCurrentOnMountInLegacyMode(_current, workInProgress2);
           var props = workInProgress2.pendingProps;
           var context;
           {
-            var unmaskedContext = getUnmaskedContext(workInProgress2, Component, false);
+            var unmaskedContext = getUnmaskedContext(workInProgress2, Component2, false);
             context = getMaskedContext(workInProgress2, unmaskedContext);
           }
           prepareToReadContext(workInProgress2, renderLanes2);
@@ -16864,8 +17119,8 @@ var require_react_dom_development = __commonJS({
             markComponentRenderStarted(workInProgress2);
           }
           {
-            if (Component.prototype && typeof Component.prototype.render === "function") {
-              var componentName = getComponentNameFromType(Component) || "Unknown";
+            if (Component2.prototype && typeof Component2.prototype.render === "function") {
+              var componentName = getComponentNameFromType(Component2) || "Unknown";
               if (!didWarnAboutBadClass[componentName]) {
                 error("The <%s /> component appears to have a render method, but doesn't extend React.Component. This is likely to cause errors. Change %s to extend React.Component instead.", componentName, componentName);
                 didWarnAboutBadClass[componentName] = true;
@@ -16876,7 +17131,7 @@ var require_react_dom_development = __commonJS({
             }
             setIsRendering(true);
             ReactCurrentOwner$1.current = workInProgress2;
-            value = renderWithHooks(null, workInProgress2, Component, props, context, renderLanes2);
+            value = renderWithHooks(null, workInProgress2, Component2, props, context, renderLanes2);
             hasId = checkDidRenderIdHook();
             setIsRendering(false);
           }
@@ -16886,7 +17141,7 @@ var require_react_dom_development = __commonJS({
           workInProgress2.flags |= PerformedWork;
           {
             if (typeof value === "object" && value !== null && typeof value.render === "function" && value.$$typeof === void 0) {
-              var _componentName = getComponentNameFromType(Component) || "Unknown";
+              var _componentName = getComponentNameFromType(Component2) || "Unknown";
               if (!didWarnAboutModulePatternComponent[_componentName]) {
                 error("The <%s /> component appears to be a function component that returns a class instance. Change %s to a class that extends React.Component instead. If you can't use a class try assigning the prototype on the function as a workaround. `%s.prototype = React.Component.prototype`. Don't use an arrow function since it cannot be called with `new` by React.", _componentName, _componentName, _componentName);
                 didWarnAboutModulePatternComponent[_componentName] = true;
@@ -16899,7 +17154,7 @@ var require_react_dom_development = __commonJS({
             typeof value === "object" && value !== null && typeof value.render === "function" && value.$$typeof === void 0
           ) {
             {
-              var _componentName2 = getComponentNameFromType(Component) || "Unknown";
+              var _componentName2 = getComponentNameFromType(Component2) || "Unknown";
               if (!didWarnAboutModulePatternComponent[_componentName2]) {
                 error("The <%s /> component appears to be a function component that returns a class instance. Change %s to a class that extends React.Component instead. If you can't use a class try assigning the prototype on the function as a workaround. `%s.prototype = React.Component.prototype`. Don't use an arrow function since it cannot be called with `new` by React.", _componentName2, _componentName2, _componentName2);
                 didWarnAboutModulePatternComponent[_componentName2] = true;
@@ -16909,7 +17164,7 @@ var require_react_dom_development = __commonJS({
             workInProgress2.memoizedState = null;
             workInProgress2.updateQueue = null;
             var hasContext = false;
-            if (isContextProvider(Component)) {
+            if (isContextProvider(Component2)) {
               hasContext = true;
               pushContextProvider(workInProgress2);
             } else {
@@ -16918,15 +17173,15 @@ var require_react_dom_development = __commonJS({
             workInProgress2.memoizedState = value.state !== null && value.state !== void 0 ? value.state : null;
             initializeUpdateQueue(workInProgress2);
             adoptClassInstance(workInProgress2, value);
-            mountClassInstance(workInProgress2, Component, props, renderLanes2);
-            return finishClassComponent(null, workInProgress2, Component, true, hasContext, renderLanes2);
+            mountClassInstance(workInProgress2, Component2, props, renderLanes2);
+            return finishClassComponent(null, workInProgress2, Component2, true, hasContext, renderLanes2);
           } else {
             workInProgress2.tag = FunctionComponent;
             {
               if (workInProgress2.mode & StrictLegacyMode) {
                 setIsStrictModeForDevtools(true);
                 try {
-                  value = renderWithHooks(null, workInProgress2, Component, props, context, renderLanes2);
+                  value = renderWithHooks(null, workInProgress2, Component2, props, context, renderLanes2);
                   hasId = checkDidRenderIdHook();
                 } finally {
                   setIsStrictModeForDevtools(false);
@@ -16938,16 +17193,16 @@ var require_react_dom_development = __commonJS({
             }
             reconcileChildren(null, workInProgress2, value, renderLanes2);
             {
-              validateFunctionComponentInDev(workInProgress2, Component);
+              validateFunctionComponentInDev(workInProgress2, Component2);
             }
             return workInProgress2.child;
           }
         }
-        function validateFunctionComponentInDev(workInProgress2, Component) {
+        function validateFunctionComponentInDev(workInProgress2, Component2) {
           {
-            if (Component) {
-              if (Component.childContextTypes) {
-                error("%s(...): childContextTypes cannot be defined on a function component.", Component.displayName || Component.name || "Component");
+            if (Component2) {
+              if (Component2.childContextTypes) {
+                error("%s(...): childContextTypes cannot be defined on a function component.", Component2.displayName || Component2.name || "Component");
               }
             }
             if (workInProgress2.ref !== null) {
@@ -16966,22 +17221,22 @@ var require_react_dom_development = __commonJS({
                 error("Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?%s", info);
               }
             }
-            if (Component.defaultProps !== void 0) {
-              var componentName = getComponentNameFromType(Component) || "Unknown";
+            if (Component2.defaultProps !== void 0) {
+              var componentName = getComponentNameFromType(Component2) || "Unknown";
               if (!didWarnAboutDefaultPropsOnFunctionComponent[componentName]) {
                 error("%s: Support for defaultProps will be removed from function components in a future major release. Use JavaScript default parameters instead.", componentName);
                 didWarnAboutDefaultPropsOnFunctionComponent[componentName] = true;
               }
             }
-            if (typeof Component.getDerivedStateFromProps === "function") {
-              var _componentName3 = getComponentNameFromType(Component) || "Unknown";
+            if (typeof Component2.getDerivedStateFromProps === "function") {
+              var _componentName3 = getComponentNameFromType(Component2) || "Unknown";
               if (!didWarnAboutGetDerivedStateOnFunctionComponent[_componentName3]) {
                 error("%s: Function components do not support getDerivedStateFromProps.", _componentName3);
                 didWarnAboutGetDerivedStateOnFunctionComponent[_componentName3] = true;
               }
             }
-            if (typeof Component.contextType === "object" && Component.contextType !== null) {
-              var _componentName4 = getComponentNameFromType(Component) || "Unknown";
+            if (typeof Component2.contextType === "object" && Component2.contextType !== null) {
+              var _componentName4 = getComponentNameFromType(Component2) || "Unknown";
               if (!didWarnAboutContextTypeOnFunctionComponent[_componentName4]) {
                 error("%s: Function components do not support contextType.", _componentName4);
                 didWarnAboutContextTypeOnFunctionComponent[_componentName4] = true;
@@ -17339,31 +17594,31 @@ var require_react_dom_development = __commonJS({
           scheduleContextWorkOnParentPath(fiber.return, renderLanes2, propagationRoot);
         }
         function propagateSuspenseContextChange(workInProgress2, firstChild, renderLanes2) {
-          var node2 = firstChild;
-          while (node2 !== null) {
-            if (node2.tag === SuspenseComponent) {
-              var state = node2.memoizedState;
+          var node6 = firstChild;
+          while (node6 !== null) {
+            if (node6.tag === SuspenseComponent) {
+              var state = node6.memoizedState;
               if (state !== null) {
-                scheduleSuspenseWorkOnFiber(node2, renderLanes2, workInProgress2);
+                scheduleSuspenseWorkOnFiber(node6, renderLanes2, workInProgress2);
               }
-            } else if (node2.tag === SuspenseListComponent) {
-              scheduleSuspenseWorkOnFiber(node2, renderLanes2, workInProgress2);
-            } else if (node2.child !== null) {
-              node2.child.return = node2;
-              node2 = node2.child;
+            } else if (node6.tag === SuspenseListComponent) {
+              scheduleSuspenseWorkOnFiber(node6, renderLanes2, workInProgress2);
+            } else if (node6.child !== null) {
+              node6.child.return = node6;
+              node6 = node6.child;
               continue;
             }
-            if (node2 === workInProgress2) {
+            if (node6 === workInProgress2) {
               return;
             }
-            while (node2.sibling === null) {
-              if (node2.return === null || node2.return === workInProgress2) {
+            while (node6.sibling === null) {
+              if (node6.return === null || node6.return === workInProgress2) {
                 return;
               }
-              node2 = node2.return;
+              node6 = node6.return;
             }
-            node2.sibling.return = node2.return;
-            node2 = node2.sibling;
+            node6.sibling.return = node6.return;
+            node6 = node6.sibling;
           }
         }
         function findLastContentRow(firstChild) {
@@ -17743,8 +17998,8 @@ var require_react_dom_development = __commonJS({
               pushHostContext(workInProgress2);
               break;
             case ClassComponent: {
-              var Component = workInProgress2.type;
-              if (isContextProvider(Component)) {
+              var Component2 = workInProgress2.type;
+              if (isContextProvider(Component2)) {
                 pushContextProvider(workInProgress2);
               }
               break;
@@ -17871,10 +18126,10 @@ var require_react_dom_development = __commonJS({
               return mountLazyComponent(current2, workInProgress2, elementType, renderLanes2);
             }
             case FunctionComponent: {
-              var Component = workInProgress2.type;
+              var Component2 = workInProgress2.type;
               var unresolvedProps = workInProgress2.pendingProps;
-              var resolvedProps = workInProgress2.elementType === Component ? unresolvedProps : resolveDefaultProps(Component, unresolvedProps);
-              return updateFunctionComponent(current2, workInProgress2, Component, resolvedProps, renderLanes2);
+              var resolvedProps = workInProgress2.elementType === Component2 ? unresolvedProps : resolveDefaultProps(Component2, unresolvedProps);
+              return updateFunctionComponent(current2, workInProgress2, Component2, resolvedProps, renderLanes2);
             }
             case ClassComponent: {
               var _Component = workInProgress2.type;
@@ -17898,7 +18153,7 @@ var require_react_dom_development = __commonJS({
               var _resolvedProps2 = workInProgress2.elementType === type ? _unresolvedProps2 : resolveDefaultProps(type, _unresolvedProps2);
               return updateForwardRef(current2, workInProgress2, type, _resolvedProps2, renderLanes2);
             }
-            case Fragment:
+            case Fragment7:
               return updateFragment(current2, workInProgress2, renderLanes2);
             case Mode:
               return updateMode(current2, workInProgress2, renderLanes2);
@@ -17965,27 +18220,27 @@ var require_react_dom_development = __commonJS({
         var updateHostText$1;
         {
           appendAllChildren = function(parent, workInProgress2, needsVisibilityToggle, isHidden) {
-            var node2 = workInProgress2.child;
-            while (node2 !== null) {
-              if (node2.tag === HostComponent || node2.tag === HostText) {
-                appendInitialChild(parent, node2.stateNode);
-              } else if (node2.tag === HostPortal) ;
-              else if (node2.child !== null) {
-                node2.child.return = node2;
-                node2 = node2.child;
+            var node6 = workInProgress2.child;
+            while (node6 !== null) {
+              if (node6.tag === HostComponent || node6.tag === HostText) {
+                appendInitialChild(parent, node6.stateNode);
+              } else if (node6.tag === HostPortal) ;
+              else if (node6.child !== null) {
+                node6.child.return = node6;
+                node6 = node6.child;
                 continue;
               }
-              if (node2 === workInProgress2) {
+              if (node6 === workInProgress2) {
                 return;
               }
-              while (node2.sibling === null) {
-                if (node2.return === null || node2.return === workInProgress2) {
+              while (node6.sibling === null) {
+                if (node6.return === null || node6.return === workInProgress2) {
                   return;
                 }
-                node2 = node2.return;
+                node6 = node6.return;
               }
-              node2.sibling.return = node2.return;
-              node2 = node2.sibling;
+              node6.sibling.return = node6.return;
+              node6 = node6.sibling;
             }
           };
           updateHostContainer = function(current2, workInProgress2) {
@@ -18170,7 +18425,7 @@ var require_react_dom_development = __commonJS({
             case SimpleMemoComponent:
             case FunctionComponent:
             case ForwardRef:
-            case Fragment:
+            case Fragment7:
             case Mode:
             case Profiler:
             case ContextConsumer:
@@ -18178,8 +18433,8 @@ var require_react_dom_development = __commonJS({
               bubbleProperties(workInProgress2);
               return null;
             case ClassComponent: {
-              var Component = workInProgress2.type;
-              if (isContextProvider(Component)) {
+              var Component2 = workInProgress2.type;
+              if (isContextProvider(Component2)) {
                 popContext(workInProgress2);
               }
               bubbleProperties(workInProgress2);
@@ -18437,11 +18692,11 @@ var require_react_dom_development = __commonJS({
                 }
               }
               if (renderState.tail !== null) {
-                var next = renderState.tail;
-                renderState.rendering = next;
-                renderState.tail = next.sibling;
+                var next2 = renderState.tail;
+                renderState.rendering = next2;
+                renderState.tail = next2.sibling;
                 renderState.renderingStartTime = now();
-                next.sibling = null;
+                next2.sibling = null;
                 var suspenseContext = suspenseStackCursor.current;
                 if (didSuspendAlready) {
                   suspenseContext = setShallowSuspenseContext(suspenseContext, ForceSuspenseFallback);
@@ -18449,7 +18704,7 @@ var require_react_dom_development = __commonJS({
                   suspenseContext = setDefaultShallowSuspenseContext(suspenseContext);
                 }
                 pushSuspenseContext(workInProgress2, suspenseContext);
-                return next;
+                return next2;
               }
               bubbleProperties(workInProgress2);
               return null;
@@ -18497,8 +18752,8 @@ var require_react_dom_development = __commonJS({
           popTreeContext(workInProgress2);
           switch (workInProgress2.tag) {
             case ClassComponent: {
-              var Component = workInProgress2.type;
-              if (isContextProvider(Component)) {
+              var Component2 = workInProgress2.type;
+              if (isContextProvider(Component2)) {
                 popContext(workInProgress2);
               }
               var flags = workInProgress2.flags;
@@ -18821,13 +19076,13 @@ var require_react_dom_development = __commonJS({
                     }
                   }
                   {
-                    if ((flags & Insertion) !== NoFlags$1) {
+                    if ((flags & Insertion3) !== NoFlags$1) {
                       setIsRunningInsertionEffect(true);
                     }
                   }
                   safelyCallDestroy(finishedWork, nearestMountedAncestor, destroy);
                   {
-                    if ((flags & Insertion) !== NoFlags$1) {
+                    if ((flags & Insertion3) !== NoFlags$1) {
                       setIsRunningInsertionEffect(false);
                     }
                   }
@@ -18861,13 +19116,13 @@ var require_react_dom_development = __commonJS({
                 }
                 var create = effect.create;
                 {
-                  if ((flags & Insertion) !== NoFlags$1) {
+                  if ((flags & Insertion3) !== NoFlags$1) {
                     setIsRunningInsertionEffect(true);
                   }
                 }
                 effect.destroy = create();
                 {
-                  if ((flags & Insertion) !== NoFlags$1) {
+                  if ((flags & Insertion3) !== NoFlags$1) {
                     setIsRunningInsertionEffect(false);
                   }
                 }
@@ -18884,7 +19139,7 @@ var require_react_dom_development = __commonJS({
                     var hookName = void 0;
                     if ((effect.tag & Layout) !== NoFlags) {
                       hookName = "useLayoutEffect";
-                    } else if ((effect.tag & Insertion) !== NoFlags) {
+                    } else if ((effect.tag & Insertion3) !== NoFlags) {
                       hookName = "useInsertionEffect";
                     } else {
                       hookName = "useEffect";
@@ -19123,33 +19378,33 @@ var require_react_dom_development = __commonJS({
             }
           }
         }
-        function reappearLayoutEffectsOnFiber(node2) {
-          switch (node2.tag) {
+        function reappearLayoutEffectsOnFiber(node6) {
+          switch (node6.tag) {
             case FunctionComponent:
             case ForwardRef:
             case SimpleMemoComponent: {
-              if (node2.mode & ProfileMode) {
+              if (node6.mode & ProfileMode) {
                 try {
                   startLayoutEffectTimer();
-                  safelyCallCommitHookLayoutEffectListMount(node2, node2.return);
+                  safelyCallCommitHookLayoutEffectListMount(node6, node6.return);
                 } finally {
-                  recordLayoutEffectDuration(node2);
+                  recordLayoutEffectDuration(node6);
                 }
               } else {
-                safelyCallCommitHookLayoutEffectListMount(node2, node2.return);
+                safelyCallCommitHookLayoutEffectListMount(node6, node6.return);
               }
               break;
             }
             case ClassComponent: {
-              var instance = node2.stateNode;
+              var instance = node6.stateNode;
               if (typeof instance.componentDidMount === "function") {
-                safelyCallComponentDidMount(node2, node2.return, instance);
+                safelyCallComponentDidMount(node6, node6.return, instance);
               }
-              safelyAttachRef(node2, node2.return);
+              safelyAttachRef(node6, node6.return);
               break;
             }
             case HostComponent: {
-              safelyAttachRef(node2, node2.return);
+              safelyAttachRef(node6, node6.return);
               break;
             }
           }
@@ -19157,58 +19412,58 @@ var require_react_dom_development = __commonJS({
         function hideOrUnhideAllChildren(finishedWork, isHidden) {
           var hostSubtreeRoot = null;
           {
-            var node2 = finishedWork;
+            var node6 = finishedWork;
             while (true) {
-              if (node2.tag === HostComponent) {
+              if (node6.tag === HostComponent) {
                 if (hostSubtreeRoot === null) {
-                  hostSubtreeRoot = node2;
+                  hostSubtreeRoot = node6;
                   try {
-                    var instance = node2.stateNode;
+                    var instance = node6.stateNode;
                     if (isHidden) {
                       hideInstance(instance);
                     } else {
-                      unhideInstance(node2.stateNode, node2.memoizedProps);
+                      unhideInstance(node6.stateNode, node6.memoizedProps);
                     }
                   } catch (error2) {
                     captureCommitPhaseError(finishedWork, finishedWork.return, error2);
                   }
                 }
-              } else if (node2.tag === HostText) {
+              } else if (node6.tag === HostText) {
                 if (hostSubtreeRoot === null) {
                   try {
-                    var _instance3 = node2.stateNode;
+                    var _instance3 = node6.stateNode;
                     if (isHidden) {
                       hideTextInstance(_instance3);
                     } else {
-                      unhideTextInstance(_instance3, node2.memoizedProps);
+                      unhideTextInstance(_instance3, node6.memoizedProps);
                     }
                   } catch (error2) {
                     captureCommitPhaseError(finishedWork, finishedWork.return, error2);
                   }
                 }
-              } else if ((node2.tag === OffscreenComponent || node2.tag === LegacyHiddenComponent) && node2.memoizedState !== null && node2 !== finishedWork) ;
-              else if (node2.child !== null) {
-                node2.child.return = node2;
-                node2 = node2.child;
+              } else if ((node6.tag === OffscreenComponent || node6.tag === LegacyHiddenComponent) && node6.memoizedState !== null && node6 !== finishedWork) ;
+              else if (node6.child !== null) {
+                node6.child.return = node6;
+                node6 = node6.child;
                 continue;
               }
-              if (node2 === finishedWork) {
+              if (node6 === finishedWork) {
                 return;
               }
-              while (node2.sibling === null) {
-                if (node2.return === null || node2.return === finishedWork) {
+              while (node6.sibling === null) {
+                if (node6.return === null || node6.return === finishedWork) {
                   return;
                 }
-                if (hostSubtreeRoot === node2) {
+                if (hostSubtreeRoot === node6) {
                   hostSubtreeRoot = null;
                 }
-                node2 = node2.return;
+                node6 = node6.return;
               }
-              if (hostSubtreeRoot === node2) {
+              if (hostSubtreeRoot === node6) {
                 hostSubtreeRoot = null;
               }
-              node2.sibling.return = node2.return;
-              node2 = node2.sibling;
+              node6.sibling.return = node6.return;
+              node6 = node6.sibling;
             }
           }
         }
@@ -19303,29 +19558,29 @@ var require_react_dom_development = __commonJS({
           return fiber.tag === HostComponent || fiber.tag === HostRoot || fiber.tag === HostPortal;
         }
         function getHostSibling(fiber) {
-          var node2 = fiber;
+          var node6 = fiber;
           siblings: while (true) {
-            while (node2.sibling === null) {
-              if (node2.return === null || isHostParent(node2.return)) {
+            while (node6.sibling === null) {
+              if (node6.return === null || isHostParent(node6.return)) {
                 return null;
               }
-              node2 = node2.return;
+              node6 = node6.return;
             }
-            node2.sibling.return = node2.return;
-            node2 = node2.sibling;
-            while (node2.tag !== HostComponent && node2.tag !== HostText && node2.tag !== DehydratedFragment) {
-              if (node2.flags & Placement) {
+            node6.sibling.return = node6.return;
+            node6 = node6.sibling;
+            while (node6.tag !== HostComponent && node6.tag !== HostText && node6.tag !== DehydratedFragment) {
+              if (node6.flags & Placement) {
                 continue siblings;
               }
-              if (node2.child === null || node2.tag === HostPortal) {
+              if (node6.child === null || node6.tag === HostPortal) {
                 continue siblings;
               } else {
-                node2.child.return = node2;
-                node2 = node2.child;
+                node6.child.return = node6;
+                node6 = node6.child;
               }
             }
-            if (!(node2.flags & Placement)) {
-              return node2.stateNode;
+            if (!(node6.flags & Placement)) {
+              return node6.stateNode;
             }
           }
         }
@@ -19354,11 +19609,11 @@ var require_react_dom_development = __commonJS({
               throw new Error("Invalid host parent fiber. This error is likely caused by a bug in React. Please file an issue.");
           }
         }
-        function insertOrAppendPlacementNodeIntoContainer(node2, before, parent) {
-          var tag = node2.tag;
+        function insertOrAppendPlacementNodeIntoContainer(node6, before, parent) {
+          var tag = node6.tag;
           var isHost = tag === HostComponent || tag === HostText;
           if (isHost) {
-            var stateNode = node2.stateNode;
+            var stateNode = node6.stateNode;
             if (before) {
               insertInContainerBefore(parent, stateNode, before);
             } else {
@@ -19366,7 +19621,7 @@ var require_react_dom_development = __commonJS({
             }
           } else if (tag === HostPortal) ;
           else {
-            var child = node2.child;
+            var child = node6.child;
             if (child !== null) {
               insertOrAppendPlacementNodeIntoContainer(child, before, parent);
               var sibling = child.sibling;
@@ -19377,11 +19632,11 @@ var require_react_dom_development = __commonJS({
             }
           }
         }
-        function insertOrAppendPlacementNode(node2, before, parent) {
-          var tag = node2.tag;
+        function insertOrAppendPlacementNode(node6, before, parent) {
+          var tag = node6.tag;
           var isHost = tag === HostComponent || tag === HostText;
           if (isHost) {
-            var stateNode = node2.stateNode;
+            var stateNode = node6.stateNode;
             if (before) {
               insertBefore(parent, stateNode, before);
             } else {
@@ -19389,7 +19644,7 @@ var require_react_dom_development = __commonJS({
             }
           } else if (tag === HostPortal) ;
           else {
-            var child = node2.child;
+            var child = node6.child;
             if (child !== null) {
               insertOrAppendPlacementNode(child, before, parent);
               var sibling = child.sibling;
@@ -19506,7 +19761,7 @@ var require_react_dom_development = __commonJS({
                     do {
                       var _effect = effect, destroy = _effect.destroy, tag = _effect.tag;
                       if (destroy !== void 0) {
-                        if ((tag & Insertion) !== NoFlags$1) {
+                        if ((tag & Insertion3) !== NoFlags$1) {
                           safelyCallDestroy(deletedFiber, nearestMountedAncestor, destroy);
                         } else if ((tag & Layout) !== NoFlags$1) {
                           {
@@ -19655,8 +19910,8 @@ var require_react_dom_development = __commonJS({
               commitReconciliationEffects(finishedWork);
               if (flags & Update) {
                 try {
-                  commitHookEffectListUnmount(Insertion | HasEffect, finishedWork, finishedWork.return);
-                  commitHookEffectListMount(Insertion | HasEffect, finishedWork);
+                  commitHookEffectListUnmount(Insertion3 | HasEffect, finishedWork, finishedWork.return);
+                  commitHookEffectListMount(Insertion3 | HasEffect, finishedWork);
                 } catch (error2) {
                   captureCommitPhaseError(finishedWork, finishedWork.return, error2);
                 }
@@ -20769,10 +21024,10 @@ var require_react_dom_development = __commonJS({
           }
         }
         function isRenderConsistentWithExternalStores(finishedWork) {
-          var node2 = finishedWork;
+          var node6 = finishedWork;
           while (true) {
-            if (node2.flags & StoreConsistency) {
-              var updateQueue = node2.updateQueue;
+            if (node6.flags & StoreConsistency) {
+              var updateQueue = node6.updateQueue;
               if (updateQueue !== null) {
                 var checks = updateQueue.stores;
                 if (checks !== null) {
@@ -20791,23 +21046,23 @@ var require_react_dom_development = __commonJS({
                 }
               }
             }
-            var child = node2.child;
-            if (node2.subtreeFlags & StoreConsistency && child !== null) {
-              child.return = node2;
-              node2 = child;
+            var child = node6.child;
+            if (node6.subtreeFlags & StoreConsistency && child !== null) {
+              child.return = node6;
+              node6 = child;
               continue;
             }
-            if (node2 === finishedWork) {
+            if (node6 === finishedWork) {
               return true;
             }
-            while (node2.sibling === null) {
-              if (node2.return === null || node2.return === finishedWork) {
+            while (node6.sibling === null) {
+              if (node6.return === null || node6.return === finishedWork) {
                 return true;
               }
-              node2 = node2.return;
+              node6 = node6.return;
             }
-            node2.sibling.return = node2.return;
-            node2 = node2.sibling;
+            node6.sibling.return = node6.return;
+            node6 = node6.sibling;
           }
           return true;
         }
@@ -21150,20 +21405,20 @@ var require_react_dom_development = __commonJS({
         function performUnitOfWork(unitOfWork) {
           var current2 = unitOfWork.alternate;
           setCurrentFiber(unitOfWork);
-          var next;
+          var next2;
           if ((unitOfWork.mode & ProfileMode) !== NoMode) {
             startProfilerTimer(unitOfWork);
-            next = beginWork$1(current2, unitOfWork, subtreeRenderLanes);
+            next2 = beginWork$1(current2, unitOfWork, subtreeRenderLanes);
             stopProfilerTimerIfRunningAndRecordDelta(unitOfWork, true);
           } else {
-            next = beginWork$1(current2, unitOfWork, subtreeRenderLanes);
+            next2 = beginWork$1(current2, unitOfWork, subtreeRenderLanes);
           }
           resetCurrentFiber();
           unitOfWork.memoizedProps = unitOfWork.pendingProps;
-          if (next === null) {
+          if (next2 === null) {
             completeUnitOfWork(unitOfWork);
           } else {
-            workInProgress = next;
+            workInProgress = next2;
           }
           ReactCurrentOwner$2.current = null;
         }
@@ -21174,17 +21429,17 @@ var require_react_dom_development = __commonJS({
             var returnFiber = completedWork.return;
             if ((completedWork.flags & Incomplete) === NoFlags) {
               setCurrentFiber(completedWork);
-              var next = void 0;
+              var next2 = void 0;
               if ((completedWork.mode & ProfileMode) === NoMode) {
-                next = completeWork(current2, completedWork, subtreeRenderLanes);
+                next2 = completeWork(current2, completedWork, subtreeRenderLanes);
               } else {
                 startProfilerTimer(completedWork);
-                next = completeWork(current2, completedWork, subtreeRenderLanes);
+                next2 = completeWork(current2, completedWork, subtreeRenderLanes);
                 stopProfilerTimerIfRunningAndRecordDelta(completedWork, false);
               }
               resetCurrentFiber();
-              if (next !== null) {
-                workInProgress = next;
+              if (next2 !== null) {
+                workInProgress = next2;
                 return;
               }
             } else {
@@ -22078,50 +22333,50 @@ var require_react_dom_development = __commonJS({
             if (foundHostInstances) {
               return;
             }
-            var node2 = fiber;
+            var node6 = fiber;
             while (true) {
-              switch (node2.tag) {
+              switch (node6.tag) {
                 case HostComponent:
-                  hostInstances.add(node2.stateNode);
+                  hostInstances.add(node6.stateNode);
                   return;
                 case HostPortal:
-                  hostInstances.add(node2.stateNode.containerInfo);
+                  hostInstances.add(node6.stateNode.containerInfo);
                   return;
                 case HostRoot:
-                  hostInstances.add(node2.stateNode.containerInfo);
+                  hostInstances.add(node6.stateNode.containerInfo);
                   return;
               }
-              if (node2.return === null) {
+              if (node6.return === null) {
                 throw new Error("Expected to reach root first.");
               }
-              node2 = node2.return;
+              node6 = node6.return;
             }
           }
         }
         function findChildHostInstancesForFiberShallowly(fiber, hostInstances) {
           {
-            var node2 = fiber;
+            var node6 = fiber;
             var foundHostInstances = false;
             while (true) {
-              if (node2.tag === HostComponent) {
+              if (node6.tag === HostComponent) {
                 foundHostInstances = true;
-                hostInstances.add(node2.stateNode);
-              } else if (node2.child !== null) {
-                node2.child.return = node2;
-                node2 = node2.child;
+                hostInstances.add(node6.stateNode);
+              } else if (node6.child !== null) {
+                node6.child.return = node6;
+                node6 = node6.child;
                 continue;
               }
-              if (node2 === fiber) {
+              if (node6 === fiber) {
                 return foundHostInstances;
               }
-              while (node2.sibling === null) {
-                if (node2.return === null || node2.return === fiber) {
+              while (node6.sibling === null) {
+                if (node6.return === null || node6.return === fiber) {
                   return foundHostInstances;
                 }
-                node2 = node2.return;
+                node6 = node6.return;
               }
-              node2.sibling.return = node2.return;
-              node2 = node2.sibling;
+              node6.sibling.return = node6.return;
+              node6 = node6.sibling;
             }
           }
           return false;
@@ -22183,18 +22438,18 @@ var require_react_dom_development = __commonJS({
         var createFiber = function(tag, pendingProps, key, mode) {
           return new FiberNode(tag, pendingProps, key, mode);
         };
-        function shouldConstruct$1(Component) {
-          var prototype = Component.prototype;
+        function shouldConstruct$1(Component2) {
+          var prototype = Component2.prototype;
           return !!(prototype && prototype.isReactComponent);
         }
         function isSimpleFunctionComponent(type) {
           return typeof type === "function" && !shouldConstruct$1(type) && type.defaultProps === void 0;
         }
-        function resolveLazyComponentTag(Component) {
-          if (typeof Component === "function") {
-            return shouldConstruct$1(Component) ? ClassComponent : FunctionComponent;
-          } else if (Component !== void 0 && Component !== null) {
-            var $$typeof = Component.$$typeof;
+        function resolveLazyComponentTag(Component2) {
+          if (typeof Component2 === "function") {
+            return shouldConstruct$1(Component2) ? ClassComponent : FunctionComponent;
+          } else if (Component2 !== void 0 && Component2 !== null) {
+            var $$typeof = Component2.$$typeof;
             if ($$typeof === REACT_FORWARD_REF_TYPE) {
               return ForwardRef;
             }
@@ -22431,7 +22686,7 @@ var require_react_dom_development = __commonJS({
           return fiber;
         }
         function createFiberFromFragment(elements, mode, lanes, key) {
-          var fiber = createFiber(Fragment, elements, key, mode);
+          var fiber = createFiber(Fragment7, elements, key, mode);
           fiber.lanes = lanes;
           return fiber;
         }
@@ -22635,9 +22890,9 @@ var require_react_dom_development = __commonJS({
           var fiber = get(parentComponent);
           var parentContext = findCurrentUnmaskedContext(fiber);
           if (fiber.tag === ClassComponent) {
-            var Component = fiber.type;
-            if (isContextProvider(Component)) {
-              return processChildContext(fiber, Component, parentContext);
+            var Component2 = fiber.type;
+            if (isContextProvider(Component2)) {
+              return processChildContext(fiber, Component2, parentContext);
             }
           }
           return parentContext;
@@ -22845,7 +23100,7 @@ var require_react_dom_development = __commonJS({
         {
           var copyWithDeleteImpl = function(obj, path, index2) {
             var key = path[index2];
-            var updated = isArray(obj) ? obj.slice() : assign({}, obj);
+            var updated = isArray(obj) ? obj.slice() : assign2({}, obj);
             if (index2 + 1 === path.length) {
               if (isArray(updated)) {
                 updated.splice(key, 1);
@@ -22862,7 +23117,7 @@ var require_react_dom_development = __commonJS({
           };
           var copyWithRenameImpl = function(obj, oldPath, newPath, index2) {
             var oldKey = oldPath[index2];
-            var updated = isArray(obj) ? obj.slice() : assign({}, obj);
+            var updated = isArray(obj) ? obj.slice() : assign2({}, obj);
             if (index2 + 1 === oldPath.length) {
               var newKey = newPath[index2];
               updated[newKey] = updated[oldKey];
@@ -22901,7 +23156,7 @@ var require_react_dom_development = __commonJS({
               return value;
             }
             var key = path[index2];
-            var updated = isArray(obj) ? obj.slice() : assign({}, obj);
+            var updated = isArray(obj) ? obj.slice() : assign2({}, obj);
             updated[key] = copyWithSetImpl(obj[key], path, index2 + 1, value);
             return updated;
           };
@@ -22922,7 +23177,7 @@ var require_react_dom_development = __commonJS({
               var newState = copyWithSet(hook.memoizedState, path, value);
               hook.memoizedState = newState;
               hook.baseState = newState;
-              fiber.memoizedProps = assign({}, fiber.memoizedProps);
+              fiber.memoizedProps = assign2({}, fiber.memoizedProps);
               var root2 = enqueueConcurrentRenderForLane(fiber, SyncLane);
               if (root2 !== null) {
                 scheduleUpdateOnFiber(root2, fiber, SyncLane, NoTimestamp);
@@ -22935,7 +23190,7 @@ var require_react_dom_development = __commonJS({
               var newState = copyWithDelete(hook.memoizedState, path);
               hook.memoizedState = newState;
               hook.baseState = newState;
-              fiber.memoizedProps = assign({}, fiber.memoizedProps);
+              fiber.memoizedProps = assign2({}, fiber.memoizedProps);
               var root2 = enqueueConcurrentRenderForLane(fiber, SyncLane);
               if (root2 !== null) {
                 scheduleUpdateOnFiber(root2, fiber, SyncLane, NoTimestamp);
@@ -22948,7 +23203,7 @@ var require_react_dom_development = __commonJS({
               var newState = copyWithRename(hook.memoizedState, oldPath, newPath);
               hook.memoizedState = newState;
               hook.baseState = newState;
-              fiber.memoizedProps = assign({}, fiber.memoizedProps);
+              fiber.memoizedProps = assign2({}, fiber.memoizedProps);
               var root2 = enqueueConcurrentRenderForLane(fiber, SyncLane);
               if (root2 !== null) {
                 scheduleUpdateOnFiber(root2, fiber, SyncLane, NoTimestamp);
@@ -23185,11 +23440,11 @@ var require_react_dom_development = __commonJS({
           }
           return new ReactDOMHydrationRoot(root2);
         }
-        function isValidContainer(node2) {
-          return !!(node2 && (node2.nodeType === ELEMENT_NODE || node2.nodeType === DOCUMENT_NODE || node2.nodeType === DOCUMENT_FRAGMENT_NODE || !disableCommentsAsDOMContainers));
+        function isValidContainer(node6) {
+          return !!(node6 && (node6.nodeType === ELEMENT_NODE || node6.nodeType === DOCUMENT_NODE || node6.nodeType === DOCUMENT_FRAGMENT_NODE || !disableCommentsAsDOMContainers));
         }
-        function isValidContainerLegacy(node2) {
-          return !!(node2 && (node2.nodeType === ELEMENT_NODE || node2.nodeType === DOCUMENT_NODE || node2.nodeType === DOCUMENT_FRAGMENT_NODE || node2.nodeType === COMMENT_NODE && node2.nodeValue === " react-mount-point-unstable "));
+        function isValidContainerLegacy(node6) {
+          return !!(node6 && (node6.nodeType === ELEMENT_NODE || node6.nodeType === DOCUMENT_NODE || node6.nodeType === DOCUMENT_FRAGMENT_NODE || node6.nodeType === COMMENT_NODE && node6.nodeValue === " react-mount-point-unstable "));
         }
         function warnIfReactDOMContainerInDEV(container2) {
           {
@@ -23791,7 +24046,7 @@ var require_RelayDefaultHandleKey = __commonJS({
 var require_browser = __commonJS({
   "node_modules/invariant/browser.js"(exports, module) {
     "use strict";
-    var invariant = function(condition, format, a, b, c, d, e, f) {
+    var invariant2 = function(condition, format, a, b, c, d, e, f) {
       if (true) {
         if (format === void 0) {
           throw new Error("invariant requires an error message argument");
@@ -23817,7 +24072,7 @@ var require_browser = __commonJS({
         throw error;
       }
     };
-    module.exports = invariant;
+    module.exports = invariant2;
   }
 });
 
@@ -23827,12 +24082,12 @@ var require_getRelayHandleKey = __commonJS({
     "use strict";
     var _require = require_RelayDefaultHandleKey();
     var DEFAULT_HANDLE_KEY = _require.DEFAULT_HANDLE_KEY;
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function getRelayHandleKey(handleName, key, fieldName) {
       if (key && key !== DEFAULT_HANDLE_KEY) {
         return "__".concat(key, "_").concat(handleName);
       }
-      !(fieldName != null) ? true ? invariant(false, "getRelayHandleKey: Expected either `fieldName` or `key` in `handle` to be provided") : invariant(false) : void 0;
+      !(fieldName != null) ? true ? invariant2(false, "getRelayHandleKey: Expected either `fieldName` or `key` in `handle` to be provided") : invariant2(false) : void 0;
       return "__".concat(fieldName, "_").concat(handleName);
     }
     module.exports = getRelayHandleKey;
@@ -23915,7 +24170,7 @@ var require_RelayStoreUtils = __commonJS({
     var getRelayHandleKey = require_getRelayHandleKey();
     var RelayConcreteNode = require_RelayConcreteNode();
     var stableCopy = require_stableCopy();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var VARIABLE = RelayConcreteNode.VARIABLE;
     var LITERAL = RelayConcreteNode.LITERAL;
     var OBJECT_VALUE = RelayConcreteNode.OBJECT_VALUE;
@@ -24015,7 +24270,7 @@ var require_RelayStoreUtils = __commonJS({
       return values.length === 0 ? name : name + "(".concat(values.join(","), ")");
     }
     function getStableVariableValue(name, variables) {
-      !variables.hasOwnProperty(name) ? true ? invariant(false, "getVariableValue(): Undefined variable `%s`.", name) : invariant(false) : void 0;
+      !variables.hasOwnProperty(name) ? true ? invariant2(false, "getVariableValue(): Undefined variable `%s`.", name) : invariant2(false) : void 0;
       return stableCopy(variables[name]);
     }
     function getModuleComponentKey(documentName) {
@@ -24142,7 +24397,7 @@ var require_warning = __commonJS({
       } catch (x) {
       }
     }
-    var warning = true ? function(condition, format) {
+    var warning2 = true ? function(condition, format) {
       if (format === void 0) {
         throw new Error("`warning(condition, format, ...args)` requires a warning message argument");
       }
@@ -24153,7 +24408,7 @@ var require_warning = __commonJS({
         printWarning.apply(void 0, [format].concat(args));
       }
     } : emptyFunction;
-    module.exports = warning;
+    module.exports = warning2;
   }
 });
 
@@ -24167,8 +24422,8 @@ var require_ConnectionHandler = __commonJS({
     var getStableStorageKey = _require2.getStableStorageKey;
     var getRelayHandleKey = require_getRelayHandleKey();
     var ConnectionInterface = require_ConnectionInterface();
-    var invariant = require_browser();
-    var warning = require_warning();
+    var invariant2 = require_browser();
+    var warning2 = require_warning();
     var CONNECTION = "connection";
     var NEXT_EDGE_INDEX = "__connection_next_edge_index";
     function update(store, payload) {
@@ -24242,7 +24497,7 @@ var require_ConnectionHandler = __commonJS({
               mergeEdges(prevEdges, nextEdges, nodeIDs);
               mergeEdges(_serverEdges, nextEdges, nodeIDs);
             } else {
-              true ? warning(false, "Relay: Unexpected after cursor `%s`, edges must be fetched from the end of the list (`%s`).", args.after, clientPageInfo && clientPageInfo.getValue(END_CURSOR)) : void 0;
+              true ? warning2(false, "Relay: Unexpected after cursor `%s`, edges must be fetched from the end of the list (`%s`).", args.after, clientPageInfo && clientPageInfo.getValue(END_CURSOR)) : void 0;
               return;
             }
           } else if (args.before != null) {
@@ -24251,7 +24506,7 @@ var require_ConnectionHandler = __commonJS({
               mergeEdges(_serverEdges, nextEdges, _nodeIDs);
               mergeEdges(prevEdges, nextEdges, _nodeIDs);
             } else {
-              true ? warning(false, "Relay: Unexpected before cursor `%s`, edges must be fetched from the beginning of the list (`%s`).", args.before, clientPageInfo && clientPageInfo.getValue(START_CURSOR)) : void 0;
+              true ? warning2(false, "Relay: Unexpected before cursor `%s`, edges must be fetched from the beginning of the list (`%s`).", args.before, clientPageInfo && clientPageInfo.getValue(START_CURSOR)) : void 0;
               return;
             }
           } else {
@@ -24293,7 +24548,7 @@ var require_ConnectionHandler = __commonJS({
       var storageKey = getStableStorageKey(handleKey, filters);
       return generateClientID(recordID, storageKey);
     }
-    function insertEdgeAfter(record, newEdge, cursor) {
+    function insertEdgeAfter(record, newEdge, cursor2) {
       var _ConnectionInterface$2 = ConnectionInterface.get(), CURSOR = _ConnectionInterface$2.CURSOR, EDGES = _ConnectionInterface$2.EDGES;
       var edges = record.getLinkedRecords(EDGES);
       if (!edges) {
@@ -24301,7 +24556,7 @@ var require_ConnectionHandler = __commonJS({
         return;
       }
       var nextEdges;
-      if (cursor == null) {
+      if (cursor2 == null) {
         nextEdges = edges.concat(newEdge);
       } else {
         nextEdges = [];
@@ -24313,7 +24568,7 @@ var require_ConnectionHandler = __commonJS({
             continue;
           }
           var edgeCursor = edge.getValue(CURSOR);
-          if (cursor === edgeCursor) {
+          if (cursor2 === edgeCursor) {
             nextEdges.push(newEdge);
             foundCursor = true;
           }
@@ -24324,20 +24579,20 @@ var require_ConnectionHandler = __commonJS({
       }
       record.setLinkedRecords(nextEdges, EDGES);
     }
-    function createEdge(store, record, node2, edgeType) {
+    function createEdge(store, record, node6, edgeType) {
       var _ConnectionInterface$3 = ConnectionInterface.get(), NODE = _ConnectionInterface$3.NODE;
-      var edgeID = generateClientID(record.getDataID(), node2.getDataID());
+      var edgeID = generateClientID(record.getDataID(), node6.getDataID());
       var edge = store.get(edgeID);
       if (!edge) {
         edge = store.create(edgeID, edgeType);
       }
-      edge.setLinkedRecord(node2, NODE);
+      edge.setLinkedRecord(node6, NODE);
       if (edge.getValue("cursor") == null) {
         edge.setValue(null, "cursor");
       }
       return edge;
     }
-    function insertEdgeBefore(record, newEdge, cursor) {
+    function insertEdgeBefore(record, newEdge, cursor2) {
       var _ConnectionInterface$4 = ConnectionInterface.get(), CURSOR = _ConnectionInterface$4.CURSOR, EDGES = _ConnectionInterface$4.EDGES;
       var edges = record.getLinkedRecords(EDGES);
       if (!edges) {
@@ -24345,7 +24600,7 @@ var require_ConnectionHandler = __commonJS({
         return;
       }
       var nextEdges;
-      if (cursor == null) {
+      if (cursor2 == null) {
         nextEdges = [newEdge].concat(edges);
       } else {
         nextEdges = [];
@@ -24354,7 +24609,7 @@ var require_ConnectionHandler = __commonJS({
           var edge = edges[ii];
           if (edge != null) {
             var edgeCursor = edge.getValue(CURSOR);
-            if (cursor === edgeCursor) {
+            if (cursor2 === edgeCursor) {
               nextEdges.push(newEdge);
               foundCursor = true;
             }
@@ -24376,8 +24631,8 @@ var require_ConnectionHandler = __commonJS({
       var nextEdges;
       for (var ii = 0; ii < edges.length; ii++) {
         var edge = edges[ii];
-        var node2 = edge && edge.getLinkedRecord(NODE);
-        if (node2 != null && node2.getDataID() === nodeID) {
+        var node6 = edge && edge.getLinkedRecord(NODE);
+        if (node6 != null && node6.getDataID() === nodeID) {
           if (nextEdges === void 0) {
             nextEdges = edges.slice(0, ii);
           }
@@ -24395,7 +24650,7 @@ var require_ConnectionHandler = __commonJS({
       }
       var _ConnectionInterface$6 = ConnectionInterface.get(), EDGES = _ConnectionInterface$6.EDGES;
       var edgeIndex = connection.getValue(NEXT_EDGE_INDEX);
-      !(typeof edgeIndex === "number") ? true ? invariant(false, "ConnectionHandler: Expected %s to be a number, got `%s`.", NEXT_EDGE_INDEX, edgeIndex) : invariant(false) : void 0;
+      !(typeof edgeIndex === "number") ? true ? invariant2(false, "ConnectionHandler: Expected %s to be a number, got `%s`.", NEXT_EDGE_INDEX, edgeIndex) : invariant2(false) : void 0;
       var edgeID = generateClientID(connection.getDataID(), EDGES, edgeIndex);
       var connectionEdge = store.create(edgeID, edge.getType());
       connectionEdge.copyFieldsFrom(edge);
@@ -24412,8 +24667,8 @@ var require_ConnectionHandler = __commonJS({
         if (!edge) {
           continue;
         }
-        var node2 = edge.getLinkedRecord(NODE);
-        var nodeID = node2 && node2.getDataID();
+        var node6 = edge.getLinkedRecord(NODE);
+        var nodeID = node6 && node6.getDataID();
         if (nodeID) {
           if (nodeIDs.has(nodeID)) {
             continue;
@@ -24498,8 +24753,8 @@ var require_MutationHandlers = __commonJS({
     var _createForOfIteratorHelper2 = _interopRequireDefault(require_createForOfIteratorHelper());
     var ConnectionHandler = require_ConnectionHandler();
     var ConnectionInterface = require_ConnectionInterface();
-    var invariant = require_browser();
-    var warning = require_warning();
+    var invariant2 = require_browser();
+    var warning2 = require_warning();
     var DeleteRecordHandler = {
       update: function update(store, payload) {
         var record = store.get(payload.dataID);
@@ -24524,7 +24779,7 @@ var require_MutationHandlers = __commonJS({
           return;
         }
         var connections = payload.handleArgs.connections;
-        !(connections != null) ? true ? invariant(false, "MutationHandlers: Expected connection IDs to be specified.") : invariant(false) : void 0;
+        !(connections != null) ? true ? invariant2(false, "MutationHandlers: Expected connection IDs to be specified.") : invariant2(false) : void 0;
         var idOrIds = record.getValue(payload.fieldKey);
         var idList = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
         idList.forEach(function(id) {
@@ -24535,7 +24790,7 @@ var require_MutationHandlers = __commonJS({
                 var connectionID = _step.value;
                 var connection = store.get(connectionID);
                 if (connection == null) {
-                  true ? warning(false, "[Relay] The connection with id `%s` doesn't exist.", connectionID) : void 0;
+                  true ? warning2(false, "[Relay] The connection with id `%s` doesn't exist.", connectionID) : void 0;
                   continue;
                 }
                 ConnectionHandler.deleteNode(connection, id);
@@ -24569,7 +24824,7 @@ var require_MutationHandlers = __commonJS({
           return;
         }
         var connections = payload.handleArgs.connections;
-        !(connections != null) ? true ? invariant(false, "MutationHandlers: Expected connection IDs to be specified.") : invariant(false) : void 0;
+        !(connections != null) ? true ? invariant2(false, "MutationHandlers: Expected connection IDs to be specified.") : invariant2(false) : void 0;
         var singleServerEdge, serverEdges;
         try {
           singleServerEdge = record.getLinkedRecord(payload.fieldKey);
@@ -24582,7 +24837,7 @@ var require_MutationHandlers = __commonJS({
           }
         }
         if (singleServerEdge == null && serverEdges == null) {
-          true ? warning(false, "MutationHandlers: Expected the server edge to be non-null.") : void 0;
+          true ? warning2(false, "MutationHandlers: Expected the server edge to be non-null.") : void 0;
           return;
         }
         var _ConnectionInterface$ = ConnectionInterface.get(), NODE = _ConnectionInterface$.NODE, EDGES = _ConnectionInterface$.EDGES;
@@ -24605,7 +24860,7 @@ var require_MutationHandlers = __commonJS({
                 var connectionID = _step3.value;
                 var connection = store.get(connectionID);
                 if (connection == null) {
-                  true ? warning(false, "[Relay] The connection with id `%s` doesn't exist.", connectionID) : void 0;
+                  true ? warning2(false, "[Relay] The connection with id `%s` doesn't exist.", connectionID) : void 0;
                   continue;
                 }
                 var nodeAlreadyExistsInConnection = (_connection$getLinked = connection.getLinkedRecords(EDGES)) === null || _connection$getLinked === void 0 ? void 0 : _connection$getLinked.some(function(edge) {
@@ -24616,7 +24871,7 @@ var require_MutationHandlers = __commonJS({
                   continue;
                 }
                 var clientEdge = ConnectionHandler.buildConnectionEdge(store, connection, serverEdge);
-                !(clientEdge != null) ? true ? invariant(false, "MutationHandlers: Failed to build the edge.") : invariant(false) : void 0;
+                !(clientEdge != null) ? true ? invariant2(false, "MutationHandlers: Failed to build the edge.") : invariant2(false) : void 0;
                 insertFn(connection, clientEdge);
               }
             } catch (err) {
@@ -24645,8 +24900,8 @@ var require_MutationHandlers = __commonJS({
           return;
         }
         var _payload$handleArgs = payload.handleArgs, connections = _payload$handleArgs.connections, edgeTypeName = _payload$handleArgs.edgeTypeName;
-        !(connections != null) ? true ? invariant(false, "MutationHandlers: Expected connection IDs to be specified.") : invariant(false) : void 0;
-        !(edgeTypeName != null) ? true ? invariant(false, "MutationHandlers: Expected edge typename to be specified.") : invariant(false) : void 0;
+        !(connections != null) ? true ? invariant2(false, "MutationHandlers: Expected connection IDs to be specified.") : invariant2(false) : void 0;
+        !(edgeTypeName != null) ? true ? invariant2(false, "MutationHandlers: Expected edge typename to be specified.") : invariant2(false) : void 0;
         var singleServerNode;
         var serverNodes;
         try {
@@ -24660,7 +24915,7 @@ var require_MutationHandlers = __commonJS({
           }
         }
         if (singleServerNode == null && serverNodes == null) {
-          true ? warning(false, "MutationHandlers: Expected target node to exist.") : void 0;
+          true ? warning2(false, "MutationHandlers: Expected target node to exist.") : void 0;
           return;
         }
         var _ConnectionInterface$2 = ConnectionInterface.get(), NODE = _ConnectionInterface$2.NODE, EDGES = _ConnectionInterface$2.EDGES;
@@ -24679,7 +24934,7 @@ var require_MutationHandlers = __commonJS({
                 var connectionID = _step5.value;
                 var connection = store.get(connectionID);
                 if (connection == null) {
-                  true ? warning(false, "[Relay] The connection with id `%s` doesn't exist.", connectionID) : void 0;
+                  true ? warning2(false, "[Relay] The connection with id `%s` doesn't exist.", connectionID) : void 0;
                   continue;
                 }
                 var nodeAlreadyExistsInConnection = (_connection$getLinked2 = connection.getLinkedRecords(EDGES)) === null || _connection$getLinked2 === void 0 ? void 0 : _connection$getLinked2.some(function(edge) {
@@ -24690,7 +24945,7 @@ var require_MutationHandlers = __commonJS({
                   continue;
                 }
                 var clientEdge = ConnectionHandler.createEdge(store, connection, serverNode, edgeTypeName);
-                !(clientEdge != null) ? true ? invariant(false, "MutationHandlers: Failed to build the edge.") : invariant(false) : void 0;
+                !(clientEdge != null) ? true ? invariant2(false, "MutationHandlers: Failed to build the edge.") : invariant2(false) : void 0;
                 insertFn(connection, clientEdge);
               }
             } catch (err) {
@@ -24728,7 +24983,7 @@ var require_RelayDefaultHandlerProvider = __commonJS({
     "use strict";
     var ConnectionHandler = require_ConnectionHandler();
     var MutationHandlers = require_MutationHandlers();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function RelayDefaultHandlerProvider(handle) {
       switch (handle) {
         case "connection":
@@ -24746,7 +25001,7 @@ var require_RelayDefaultHandlerProvider = __commonJS({
         case "prependNode":
           return MutationHandlers.PrependNodeHandler;
       }
-      true ? true ? invariant(false, "RelayDefaultHandlerProvider: No handler provided for `%s`.", handle) : invariant(false) : void 0;
+      true ? true ? invariant2(false, "RelayDefaultHandlerProvider: No handler provided for `%s`.", handle) : invariant2(false) : void 0;
     }
     module.exports = RelayDefaultHandlerProvider;
   }
@@ -24757,40 +25012,40 @@ var require_GraphQLTag = __commonJS({
   "node_modules/relay-runtime/lib/query/GraphQLTag.js"(exports, module) {
     "use strict";
     var RelayConcreteNode = require_RelayConcreteNode();
-    var invariant = require_browser();
-    var warning = require_warning();
+    var invariant2 = require_browser();
+    var warning2 = require_warning();
     function graphql(strings) {
-      true ? true ? invariant(false, "graphql: Unexpected invocation at runtime. Either the Babel transform was not set up, or it failed to identify this call site. Make sure it is being used verbatim as `graphql`. Note also that there cannot be a space between graphql and the backtick that follows.") : invariant(false) : void 0;
+      true ? true ? invariant2(false, "graphql: Unexpected invocation at runtime. Either the Babel transform was not set up, or it failed to identify this call site. Make sure it is being used verbatim as `graphql`. Note also that there cannot be a space between graphql and the backtick that follows.") : invariant2(false) : void 0;
     }
     function getNode(taggedNode) {
-      var node2 = taggedNode;
-      if (typeof node2 === "function") {
-        node2 = node2();
-        true ? warning(false, "RelayGraphQLTag: node `%s` unexpectedly wrapped in a function.", node2.kind === "Fragment" ? node2.name : node2.operation.name) : void 0;
-      } else if (node2["default"]) {
-        node2 = node2["default"];
+      var node6 = taggedNode;
+      if (typeof node6 === "function") {
+        node6 = node6();
+        true ? warning2(false, "RelayGraphQLTag: node `%s` unexpectedly wrapped in a function.", node6.kind === "Fragment" ? node6.name : node6.operation.name) : void 0;
+      } else if (node6["default"]) {
+        node6 = node6["default"];
       }
-      return node2;
+      return node6;
     }
-    function isFragment(node2) {
-      var fragment = getNode(node2);
+    function isFragment(node6) {
+      var fragment = getNode(node6);
       return typeof fragment === "object" && fragment !== null && fragment.kind === RelayConcreteNode.FRAGMENT;
     }
-    function isRequest(node2) {
-      var request = getNode(node2);
+    function isRequest(node6) {
+      var request = getNode(node6);
       return typeof request === "object" && request !== null && request.kind === RelayConcreteNode.REQUEST;
     }
-    function isUpdatableQuery(node2) {
-      var updatableQuery = getNode(node2);
+    function isUpdatableQuery(node6) {
+      var updatableQuery = getNode(node6);
       return typeof updatableQuery === "object" && updatableQuery !== null && updatableQuery.kind === RelayConcreteNode.UPDATABLE_QUERY;
     }
-    function isInlineDataFragment(node2) {
-      var fragment = getNode(node2);
+    function isInlineDataFragment(node6) {
+      var fragment = getNode(node6);
       return typeof fragment === "object" && fragment !== null && fragment.kind === RelayConcreteNode.INLINE_DATA_FRAGMENT;
     }
     function getFragment(taggedNode) {
       var fragment = getNode(taggedNode);
-      !isFragment(fragment) ? true ? invariant(false, "GraphQLTag: Expected a fragment, got `%s`.", JSON.stringify(fragment)) : invariant(false) : void 0;
+      !isFragment(fragment) ? true ? invariant2(false, "GraphQLTag: Expected a fragment, got `%s`.", JSON.stringify(fragment)) : invariant2(false) : void 0;
       return fragment;
     }
     function getPaginationFragment(taggedNode) {
@@ -24814,17 +25069,17 @@ var require_GraphQLTag = __commonJS({
     }
     function getRequest(taggedNode) {
       var request = getNode(taggedNode);
-      !isRequest(request) ? true ? invariant(false, "GraphQLTag: Expected a request, got `%s`.", JSON.stringify(request)) : invariant(false) : void 0;
+      !isRequest(request) ? true ? invariant2(false, "GraphQLTag: Expected a request, got `%s`.", JSON.stringify(request)) : invariant2(false) : void 0;
       return request;
     }
     function getUpdatableQuery(taggedNode) {
       var updatableQuery = getNode(taggedNode);
-      !isUpdatableQuery(updatableQuery) ? true ? invariant(false, "GraphQLTag: Expected a request, got `%s`.", JSON.stringify(updatableQuery)) : invariant(false) : void 0;
+      !isUpdatableQuery(updatableQuery) ? true ? invariant2(false, "GraphQLTag: Expected a request, got `%s`.", JSON.stringify(updatableQuery)) : invariant2(false) : void 0;
       return updatableQuery;
     }
     function getInlineDataFragment(taggedNode) {
       var fragment = getNode(taggedNode);
-      !isInlineDataFragment(fragment) ? true ? invariant(false, "GraphQLTag: Expected an inline data fragment, got `%s`.", JSON.stringify(fragment)) : invariant(false) : void 0;
+      !isInlineDataFragment(fragment) ? true ? invariant2(false, "GraphQLTag: Expected an inline data fragment, got `%s`.", JSON.stringify(fragment)) : invariant2(false) : void 0;
       return fragment;
     }
     module.exports = {
@@ -24884,10 +25139,10 @@ var require_getRequestIdentifier = __commonJS({
   "node_modules/relay-runtime/lib/util/getRequestIdentifier.js"(exports, module) {
     "use strict";
     var stableCopy = require_stableCopy();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function getRequestIdentifier(parameters, variables) {
       var requestID = parameters.cacheID != null ? parameters.cacheID : parameters.id;
-      !(requestID != null) ? true ? invariant(false, "getRequestIdentifier: Expected request `%s` to have either a valid `id` or `cacheID` property", parameters.name) : invariant(false) : void 0;
+      !(requestID != null) ? true ? invariant2(false, "getRequestIdentifier: Expected request `%s` to have either a valid `id` or `cacheID` property", parameters.name) : invariant2(false) : void 0;
       return requestID + JSON.stringify(stableCopy(variables));
     }
     module.exports = getRequestIdentifier;
@@ -24993,7 +25248,7 @@ var require_RelayConcreteVariables = __commonJS({
     var _objectSpread2 = _interopRequireDefault(require_objectSpread2());
     var _require = require_RelayStoreUtils();
     var getArgumentValues = _require.getArgumentValues;
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function getFragmentVariables(fragment, rootVariables, argumentVariables) {
       if (fragment.argumentDefinitions == null) {
         return argumentVariables;
@@ -25017,7 +25272,7 @@ var require_RelayConcreteVariables = __commonJS({
             break;
           default:
             definition;
-            true ? true ? invariant(false, "RelayConcreteVariables: Unexpected node kind `%s` in fragment `%s`.", definition.kind, fragment.name) : invariant(false) : void 0;
+            true ? true ? invariant2(false, "RelayConcreteVariables: Unexpected node kind `%s` in fragment `%s`.", definition.kind, fragment.name) : invariant2(false) : void 0;
         }
       });
       return variables || argumentVariables;
@@ -25101,10 +25356,10 @@ var require_areEqual = __commonJS({
         case "[object RegExp]":
           return a.source == b.source && a.global == b.global && a.multiline == b.multiline && a.ignoreCase == b.ignoreCase;
       }
-      var length = aStack.length;
-      while (length--) {
-        if (aStack[length] == a) {
-          return bStack[length] == b;
+      var length2 = aStack.length;
+      while (length2--) {
+        if (aStack[length2] == a) {
+          return bStack[length2] == b;
         }
       }
       aStack.push(a);
@@ -25159,10 +25414,10 @@ var require_RelayModernSelector = __commonJS({
     var FRAGMENTS_KEY = _require2.FRAGMENTS_KEY;
     var ID_KEY = _require2.ID_KEY;
     var areEqual = require_areEqual();
-    var invariant = require_browser();
-    var warning = require_warning();
+    var invariant2 = require_browser();
+    var warning2 = require_warning();
     function getSingularSelector(fragment, item) {
-      !(typeof item === "object" && item !== null && !Array.isArray(item)) ? true ? invariant(false, "RelayModernSelector: Expected value for fragment `%s` to be an object, got `%s`.", fragment.name, JSON.stringify(item)) : invariant(false) : void 0;
+      !(typeof item === "object" && item !== null && !Array.isArray(item)) ? true ? invariant2(false, "RelayModernSelector: Expected value for fragment `%s` to be an object, got `%s`.", fragment.name, JSON.stringify(item)) : invariant2(false) : void 0;
       var dataID = item[ID_KEY];
       var fragments = item[FRAGMENTS_KEY];
       var mixedOwner = item[FRAGMENT_OWNER_KEY];
@@ -25180,7 +25435,7 @@ var require_RelayModernSelector = __commonJS({
         if (stringifiedItem.length > 499) {
           stringifiedItem = stringifiedItem.substr(0, 498) + "\u2026";
         }
-        true ? warning(false, "RelayModernSelector: Expected object to contain data for fragment `%s`, got `%s`. Make sure that the parent operation/fragment included fragment `...%s` without `@relay(mask: false)`.", fragment.name, stringifiedItem, fragment.name) : void 0;
+        true ? warning2(false, "RelayModernSelector: Expected object to contain data for fragment `%s`, got `%s`. Make sure that the parent operation/fragment included fragment `...%s` without `@relay(mask: false)`.", fragment.name, stringifiedItem, fragment.name) : void 0;
       }
       return null;
     }
@@ -25206,10 +25461,10 @@ var require_RelayModernSelector = __commonJS({
       if (item == null) {
         return item;
       } else if (fragment.metadata && fragment.metadata.plural === true) {
-        !Array.isArray(item) ? true ? invariant(false, "RelayModernSelector: Expected value for fragment `%s` to be an array, got `%s`. Remove `@relay(plural: true)` from fragment `%s` to allow the prop to be an object.", fragment.name, JSON.stringify(item), fragment.name) : invariant(false) : void 0;
+        !Array.isArray(item) ? true ? invariant2(false, "RelayModernSelector: Expected value for fragment `%s` to be an array, got `%s`. Remove `@relay(plural: true)` from fragment `%s` to allow the prop to be an object.", fragment.name, JSON.stringify(item), fragment.name) : invariant2(false) : void 0;
         return getPluralSelector(fragment, item);
       } else {
-        !!Array.isArray(item) ? true ? invariant(false, "RelayModernSelector: Expected value for fragment `%s` to be an object, got `%s`. Add `@relay(plural: true)` to fragment `%s` to allow the prop to be an array of items.", fragment.name, JSON.stringify(item), fragment.name) : invariant(false) : void 0;
+        !!Array.isArray(item) ? true ? invariant2(false, "RelayModernSelector: Expected value for fragment `%s` to be an object, got `%s`. Add `@relay(plural: true)` to fragment `%s` to allow the prop to be an array of items.", fragment.name, JSON.stringify(item), fragment.name) : invariant2(false) : void 0;
         return getSingularSelector(fragment, item);
       }
     }
@@ -25239,10 +25494,10 @@ var require_RelayModernSelector = __commonJS({
       if (item == null) {
         return item;
       } else if (fragment.metadata && fragment.metadata.plural === true) {
-        !Array.isArray(item) ? true ? invariant(false, "RelayModernSelector: Expected value for fragment `%s` to be an array, got `%s`. Remove `@relay(plural: true)` from fragment `%s` to allow the prop to be an object.", fragment.name, JSON.stringify(item), fragment.name) : invariant(false) : void 0;
+        !Array.isArray(item) ? true ? invariant2(false, "RelayModernSelector: Expected value for fragment `%s` to be an array, got `%s`. Remove `@relay(plural: true)` from fragment `%s` to allow the prop to be an object.", fragment.name, JSON.stringify(item), fragment.name) : invariant2(false) : void 0;
         return getDataIDs(fragment, item);
       } else {
-        !!Array.isArray(item) ? true ? invariant(false, "RelayModernFragmentSpecResolver: Expected value for fragment `%s` to be an object, got `%s`. Add `@relay(plural: true)` to fragment `%s` to allow the prop to be an array of items.", fragment.name, JSON.stringify(item), fragment.name) : invariant(false) : void 0;
+        !!Array.isArray(item) ? true ? invariant2(false, "RelayModernFragmentSpecResolver: Expected value for fragment `%s` to be an object, got `%s`. Add `@relay(plural: true)` to fragment `%s` to allow the prop to be an array of items.", fragment.name, JSON.stringify(item), fragment.name) : invariant2(false) : void 0;
         return getDataID(fragment, item);
       }
     }
@@ -25258,12 +25513,12 @@ var require_RelayModernSelector = __commonJS({
       return ids;
     }
     function getDataID(fragment, item) {
-      !(typeof item === "object" && item !== null && !Array.isArray(item)) ? true ? invariant(false, "RelayModernSelector: Expected value for fragment `%s` to be an object, got `%s`.", fragment.name, JSON.stringify(item)) : invariant(false) : void 0;
+      !(typeof item === "object" && item !== null && !Array.isArray(item)) ? true ? invariant2(false, "RelayModernSelector: Expected value for fragment `%s` to be an object, got `%s`.", fragment.name, JSON.stringify(item)) : invariant2(false) : void 0;
       var dataID = item[ID_KEY];
       if (typeof dataID === "string") {
         return dataID;
       }
-      true ? warning(false, "RelayModernSelector: Expected object to contain data for fragment `%s`, got `%s`. Make sure that the parent operation/fragment included fragment `...%s` without `@relay(mask: false)`, or `null` is passed as the fragment reference for `%s` if it's conditonally included and the condition isn't met.", fragment.name, JSON.stringify(item), fragment.name, fragment.name) : void 0;
+      true ? warning2(false, "RelayModernSelector: Expected object to contain data for fragment `%s`, got `%s`. Make sure that the parent operation/fragment included fragment `...%s` without `@relay(mask: false)`, or `null` is passed as the fragment reference for `%s` if it's conditonally included and the condition isn't met.", fragment.name, JSON.stringify(item), fragment.name, fragment.name) : void 0;
       return null;
     }
     function getVariablesFromObject(fragments, object) {
@@ -25283,10 +25538,10 @@ var require_RelayModernSelector = __commonJS({
       if (item == null) {
         return {};
       } else if (((_fragment$metadata = fragment.metadata) === null || _fragment$metadata === void 0 ? void 0 : _fragment$metadata.plural) === true) {
-        !Array.isArray(item) ? true ? invariant(false, "RelayModernSelector: Expected value for fragment `%s` to be an array, got `%s`. Remove `@relay(plural: true)` from fragment `%s` to allow the prop to be an object.", fragment.name, JSON.stringify(item), fragment.name) : invariant(false) : void 0;
+        !Array.isArray(item) ? true ? invariant2(false, "RelayModernSelector: Expected value for fragment `%s` to be an array, got `%s`. Remove `@relay(plural: true)` from fragment `%s` to allow the prop to be an object.", fragment.name, JSON.stringify(item), fragment.name) : invariant2(false) : void 0;
         return getVariablesFromPluralFragment(fragment, item);
       } else {
-        !!Array.isArray(item) ? true ? invariant(false, "RelayModernFragmentSpecResolver: Expected value for fragment `%s` to be an object, got `%s`. Add `@relay(plural: true)` to fragment `%s` to allow the prop to be an array of items.", fragment.name, JSON.stringify(item), fragment.name) : invariant(false) : void 0;
+        !!Array.isArray(item) ? true ? invariant2(false, "RelayModernFragmentSpecResolver: Expected value for fragment `%s` to be an object, got `%s`. Add `@relay(plural: true)` to fragment `%s` to allow the prop to be an array of items.", fragment.name, JSON.stringify(item), fragment.name) : invariant2(false) : void 0;
         return getVariablesFromSingularFragment(fragment, item) || {};
       }
     }
@@ -25369,10 +25624,10 @@ var require_RelayModernSelector = __commonJS({
         owner: request
       };
     }
-    function createNormalizationSelector(node2, dataID, variables) {
+    function createNormalizationSelector(node6, dataID, variables) {
       return {
         dataID,
-        node: node2,
+        node: node6,
         variables
       };
     }
@@ -25452,7 +25707,7 @@ var require_RelayDeclarativeMutationConfig = __commonJS({
     var _interopRequireDefault = require_interopRequireDefault()["default"];
     var _createForOfIteratorHelper2 = _interopRequireDefault(require_createForOfIteratorHelper());
     var ConnectionHandler = require_ConnectionHandler();
-    var warning = require_warning();
+    var warning2 = require_warning();
     var MutationTypes = Object.freeze({
       RANGE_ADD: "RANGE_ADD",
       RANGE_DELETE: "RANGE_DELETE",
@@ -25526,7 +25781,7 @@ var require_RelayDeclarativeMutationConfig = __commonJS({
     function rangeAdd(config, request) {
       var parentID = config.parentID, connectionInfo = config.connectionInfo, edgeName = config.edgeName;
       if (!parentID) {
-        true ? warning(false, "RelayDeclarativeMutationConfig: For mutation config RANGE_ADD to work you must include a parentID") : void 0;
+        true ? warning2(false, "RelayDeclarativeMutationConfig: For mutation config RANGE_ADD to work you must include a parentID") : void 0;
         return null;
       }
       var rootField = getRootField(request);
@@ -25566,7 +25821,7 @@ var require_RelayDeclarativeMutationConfig = __commonJS({
                 ConnectionHandler.insertEdgeBefore(connection, clientEdge);
                 break;
               default:
-                true ? warning(false, "RelayDeclarativeMutationConfig: RANGE_ADD range behavior `%s` will not work as expected in RelayModern, supported range behaviors are 'append', 'prepend'.", info.rangeBehavior) : void 0;
+                true ? warning2(false, "RelayDeclarativeMutationConfig: RANGE_ADD range behavior `%s` will not work as expected in RelayModern, supported range behaviors are 'append', 'prepend'.", info.rangeBehavior) : void 0;
                 break;
             }
           }
@@ -25580,7 +25835,7 @@ var require_RelayDeclarativeMutationConfig = __commonJS({
     function rangeDelete(config, request) {
       var parentID = config.parentID, connectionKeys = config.connectionKeys, pathToConnection = config.pathToConnection, deletedIDFieldName = config.deletedIDFieldName;
       if (!parentID) {
-        true ? warning(false, "RelayDeclarativeMutationConfig: For mutation config RANGE_DELETE to work you must include a parentID") : void 0;
+        true ? warning2(false, "RelayDeclarativeMutationConfig: For mutation config RANGE_DELETE to work you must include a parentID") : void 0;
         return null;
       }
       var rootField = getRootField(request);
@@ -25632,13 +25887,13 @@ var require_RelayDeclarativeMutationConfig = __commonJS({
       };
     }
     function deleteNode(parentID, connectionKeys, pathToConnection, store, deleteIDs) {
-      true ? warning(connectionKeys != null, "RelayDeclarativeMutationConfig: RANGE_DELETE must provide a connectionKeys") : void 0;
+      true ? warning2(connectionKeys != null, "RelayDeclarativeMutationConfig: RANGE_DELETE must provide a connectionKeys") : void 0;
       var parent = store.get(parentID);
       if (!parent) {
         return;
       }
       if (pathToConnection.length < 2) {
-        true ? warning(false, "RelayDeclarativeMutationConfig: RANGE_DELETE pathToConnection must include at least parent and connection") : void 0;
+        true ? warning2(false, "RelayDeclarativeMutationConfig: RANGE_DELETE pathToConnection must include at least parent and connection") : void 0;
         return;
       }
       var recordProxy = parent;
@@ -25648,7 +25903,7 @@ var require_RelayDeclarativeMutationConfig = __commonJS({
         }
       }
       if (!connectionKeys || !recordProxy) {
-        true ? warning(false, "RelayDeclarativeMutationConfig: RANGE_DELETE pathToConnection is incorrect. Unable to find connection with parentID: %s and path: %s", parentID, pathToConnection.toString()) : void 0;
+        true ? warning2(false, "RelayDeclarativeMutationConfig: RANGE_DELETE pathToConnection is incorrect. Unable to find connection with parentID: %s and path: %s", parentID, pathToConnection.toString()) : void 0;
         return;
       }
       var _iterator3 = (0, _createForOfIteratorHelper2["default"])(connectionKeys), _step3;
@@ -25695,9 +25950,9 @@ var require_applyOptimisticMutation = __commonJS({
     var _require2 = require_RelayModernOperationDescriptor();
     var createOperationDescriptor = _require2.createOperationDescriptor;
     var RelayDeclarativeMutationConfig = require_RelayDeclarativeMutationConfig();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function applyOptimisticMutation(environment2, config) {
-      !isRelayModernEnvironment(environment2) ? true ? invariant(false, "commitMutation: expected `environment` to be an instance of `RelayModernEnvironment`.") : invariant(false) : void 0;
+      !isRelayModernEnvironment(environment2) ? true ? invariant2(false, "commitMutation: expected `environment` to be an instance of `RelayModernEnvironment`.") : invariant2(false) : void 0;
       var mutation = getRequest(config.mutation);
       if (mutation.params.operationKind !== "mutation") {
         throw new Error("commitMutation: Expected mutation operation");
@@ -25754,7 +26009,7 @@ var require_validateMutation = __commonJS({
     var SCALAR_HANDLE = _require.SCALAR_HANDLE;
     var STREAM = _require.STREAM;
     var TYPE_DISCRIMINATOR = _require.TYPE_DISCRIMINATOR;
-    var warning = require_warning();
+    var warning2 = require_warning();
     var hasOwnProperty = Object.prototype.hasOwnProperty;
     var validateMutation = function validateMutation2() {
     };
@@ -25783,8 +26038,8 @@ var require_validateMutation = __commonJS({
         };
         validateSelections(optimisticResponse, mutation.operation.selections, context);
         validateOptimisticResponse(optimisticResponse, context);
-        true ? warning(context.missingDiff.ROOT == null, "Expected `optimisticResponse` to match structure of server response for mutation `%s`, please define fields for all of\n%s", operationName, JSON.stringify(context.missingDiff.ROOT, null, 2)) : void 0;
-        true ? warning(context.extraDiff.ROOT == null, "Expected `optimisticResponse` to match structure of server response for mutation `%s`, please remove all fields of\n%s", operationName, JSON.stringify(context.extraDiff.ROOT, null, 2)) : void 0;
+        true ? warning2(context.missingDiff.ROOT == null, "Expected `optimisticResponse` to match structure of server response for mutation `%s`, please define fields for all of\n%s", operationName, JSON.stringify(context.missingDiff.ROOT, null, 2)) : void 0;
+        true ? warning2(context.extraDiff.ROOT == null, "Expected `optimisticResponse` to match structure of server response for mutation `%s`, please remove all fields of\n%s", operationName, JSON.stringify(context.extraDiff.ROOT, null, 2)) : void 0;
       };
       validateSelections = function validateSelections2(optimisticResponse, selections, context) {
         selections.forEach(function(selection) {
@@ -25943,10 +26198,10 @@ var require_commitMutation = __commonJS({
     var createOperationDescriptor = _require3.createOperationDescriptor;
     var RelayDeclarativeMutationConfig = require_RelayDeclarativeMutationConfig();
     var validateMutation = require_validateMutation();
-    var invariant = require_browser();
-    var warning = require_warning();
+    var invariant2 = require_browser();
+    var warning2 = require_warning();
     function commitMutation(environment2, config) {
-      !isRelayModernEnvironment(environment2) ? true ? invariant(false, "commitMutation: expected `environment` to be an instance of `RelayModernEnvironment`.") : invariant(false) : void 0;
+      !isRelayModernEnvironment(environment2) ? true ? invariant2(false, "commitMutation: expected `environment` to be an instance of `RelayModernEnvironment`.") : invariant2(false) : void 0;
       var mutation = getRequest(config.mutation);
       if (mutation.params.operationKind !== "mutation") {
         throw new Error("commitMutation: Expected mutation operation");
@@ -25959,7 +26214,7 @@ var require_commitMutation = __commonJS({
       var operation = createOperationDescriptor(mutation, variables, cacheConfig, generateUniqueClientID());
       if (typeof optimisticResponse === "function") {
         optimisticResponse = optimisticResponse();
-        true ? warning(false, "commitMutation: Expected `optimisticResponse` to be an object, received a function.") : void 0;
+        true ? warning2(false, "commitMutation: Expected `optimisticResponse` to be an object, received a function.") : void 0;
       }
       if (true) {
         if (optimisticResponse instanceof Object) {
@@ -25979,7 +26234,7 @@ var require_commitMutation = __commonJS({
         updater,
         uploadables
       }).subscribe({
-        next: function next(payload) {
+        next: function next2(payload) {
           var _config$onNext;
           if (Array.isArray(payload)) {
             payload.forEach(function(item) {
@@ -26017,7 +26272,7 @@ var require_withProvidedVariables = __commonJS({
   "node_modules/relay-runtime/lib/util/withProvidedVariables.js"(exports, module) {
     "use strict";
     var areEqual = require_areEqual();
-    var warning = require_warning();
+    var warning2 = require_warning();
     var WEAKMAP_SUPPORTED = typeof WeakMap === "function";
     var debugCache = WEAKMAP_SUPPORTED ? /* @__PURE__ */ new WeakMap() : /* @__PURE__ */ new Map();
     function withProvidedVariables(userSuppliedVariables, providedVariables) {
@@ -26033,7 +26288,7 @@ var require_withProvidedVariables = __commonJS({
           } else {
             var cachedResult = debugCache.get(providerFunction);
             if (true) {
-              true ? warning(areEqual(providerResult, cachedResult), "Relay: Expected function `%s` for provider `%s` to be a pure function, but got conflicting return values `%s` and `%s`", providerFunction.name, varName, providerResult, cachedResult) : void 0;
+              true ? warning2(areEqual(providerResult, cachedResult), "Relay: Expected function `%s` for provider `%s` to be a pure function, but got conflicting return values `%s` and `%s`", providerFunction.name, varName, providerResult, cachedResult) : void 0;
             }
             operationVariables[varName] = cachedResult;
           }
@@ -26082,7 +26337,7 @@ var require_RelayObservable = __commonJS({
       RelayObservable2.onUnhandledError = function onUnhandledError(callback) {
         hostReportError = callback;
       };
-      RelayObservable2.from = function from(obj) {
+      RelayObservable2.from = function from2(obj) {
         return isObservable(obj) ? fromObservable(obj) : isPromise(obj) ? fromPromise(obj) : fromValue(obj);
       };
       var _proto = RelayObservable2.prototype;
@@ -26116,7 +26371,7 @@ var require_RelayObservable = __commonJS({
           };
         });
       };
-      _proto.concat = function concat(next) {
+      _proto.concat = function concat(next2) {
         var _this2 = this;
         return RelayObservable2.create(function(sink) {
           var current;
@@ -26127,7 +26382,7 @@ var require_RelayObservable = __commonJS({
             next: sink.next,
             error: sink.error,
             complete: function complete() {
-              current = next.subscribe(sink);
+              current = next2.subscribe(sink);
             }
           });
           return function() {
@@ -26173,7 +26428,7 @@ var require_RelayObservable = __commonJS({
           var hasValue = false;
           var current;
           current = _this5.subscribe({
-            next: function next(value) {
+            next: function next2(value) {
               hasValue = true;
               sink.next(value);
             },
@@ -26205,7 +26460,7 @@ var require_RelayObservable = __commonJS({
           var subscription = _this6.subscribe({
             complete: sink.complete,
             error: sink.error,
-            next: function next(value) {
+            next: function next2(value) {
               try {
                 var mapValue = fn(value);
                 sink.next(mapValue);
@@ -26235,7 +26490,7 @@ var require_RelayObservable = __commonJS({
           }
           _this7.subscribe({
             start,
-            next: function next(value) {
+            next: function next2(value) {
               try {
                 if (!sink.closed) {
                   RelayObservable2.from(fn(value)).subscribe({
@@ -26291,7 +26546,7 @@ var require_RelayObservable = __commonJS({
         return new Promise(function(resolve, reject) {
           var resolved = false;
           _this9.subscribe({
-            next: function next(val) {
+            next: function next2(val) {
               if (!resolved) {
                 resolved = true;
                 resolve(val);
@@ -26373,7 +26628,7 @@ var require_RelayObservable = __commonJS({
         return subscription;
       }
       var sink = withClosed({
-        next: function next(value) {
+        next: function next2(value) {
           if (!closed && observer.next) {
             try {
               observer.next(value);
@@ -26474,19 +26729,19 @@ var require_RelayNetwork = __commonJS({
     var withProvidedVariables = require_withProvidedVariables();
     var _require = require_ConvertToExecuteFunction();
     var convertFetch = _require.convertFetch;
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function create(fetchFn, subscribe) {
       var observeFetch = convertFetch(fetchFn);
       function execute(request, variables, cacheConfig, uploadables, logRequestInfo) {
         var operationVariables = withProvidedVariables(variables, request.providedVariables);
         if (request.operationKind === "subscription") {
-          !subscribe ? true ? invariant(false, "RelayNetwork: This network layer does not support Subscriptions. To use Subscriptions, provide a custom network layer.") : invariant(false) : void 0;
-          !!uploadables ? true ? invariant(false, "RelayNetwork: Cannot provide uploadables while subscribing.") : invariant(false) : void 0;
+          !subscribe ? true ? invariant2(false, "RelayNetwork: This network layer does not support Subscriptions. To use Subscriptions, provide a custom network layer.") : invariant2(false) : void 0;
+          !!uploadables ? true ? invariant2(false, "RelayNetwork: Cannot provide uploadables while subscribing.") : invariant2(false) : void 0;
           return subscribe(request, operationVariables, cacheConfig);
         }
         var pollInterval = cacheConfig.poll;
         if (pollInterval != null) {
-          !!uploadables ? true ? invariant(false, "RelayNetwork: Cannot provide uploadables while polling.") : invariant(false) : void 0;
+          !!uploadables ? true ? invariant2(false, "RelayNetwork: Cannot provide uploadables while polling.") : invariant2(false) : void 0;
           return observeFetch(request, operationVariables, {
             force: true
           }).poll(pollInterval);
@@ -26510,12 +26765,12 @@ var require_RelayQueryResponseCache = __commonJS({
     var _interopRequireDefault = require_interopRequireDefault()["default"];
     var _objectSpread2 = _interopRequireDefault(require_objectSpread2());
     var stableCopy = require_stableCopy();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var RelayQueryResponseCache = /* @__PURE__ */ function() {
       function RelayQueryResponseCache2(_ref) {
         var size = _ref.size, ttl = _ref.ttl;
-        !(size > 0) ? true ? invariant(false, "RelayQueryResponseCache: Expected the max cache size to be > 0, got `%s`.", size) : invariant(false) : void 0;
-        !(ttl > 0) ? true ? invariant(false, "RelayQueryResponseCache: Expected the max ttl to be > 0, got `%s`.", ttl) : invariant(false) : void 0;
+        !(size > 0) ? true ? invariant2(false, "RelayQueryResponseCache: Expected the max cache size to be > 0, got `%s`.", size) : invariant2(false) : void 0;
+        !(ttl > 0) ? true ? invariant2(false, "RelayQueryResponseCache: Expected the max ttl to be > 0, got `%s`.", ttl) : invariant2(false) : void 0;
         this._responses = /* @__PURE__ */ new Map();
         this._size = size;
         this._ttl = ttl;
@@ -26584,7 +26839,7 @@ var require_RelayQueryResponseCache = __commonJS({
 // node_modules/@babel/runtime/helpers/objectWithoutPropertiesLoose.js
 var require_objectWithoutPropertiesLoose = __commonJS({
   "node_modules/@babel/runtime/helpers/objectWithoutPropertiesLoose.js"(exports, module) {
-    function _objectWithoutPropertiesLoose(r, e) {
+    function _objectWithoutPropertiesLoose2(r, e) {
       if (null == r) return {};
       var t = {};
       for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
@@ -26593,7 +26848,7 @@ var require_objectWithoutPropertiesLoose = __commonJS({
       }
       return t;
     }
-    module.exports = _objectWithoutPropertiesLoose, module.exports.__esModule = true, module.exports["default"] = module.exports;
+    module.exports = _objectWithoutPropertiesLoose2, module.exports.__esModule = true, module.exports["default"] = module.exports;
   }
 });
 
@@ -26723,7 +26978,7 @@ var require_RelayErrorTrie = __commonJS({
     var _inheritsLoose2 = _interopRequireDefault(require_inheritsLoose());
     var _wrapNativeSuper2 = _interopRequireDefault(require_wrapNativeSuper());
     var _toConsumableArray2 = _interopRequireDefault(require_toConsumableArray());
-    var _excluded = ["path", "locations"];
+    var _excluded4 = ["path", "locations"];
     var RelayFeatureFlags = require_RelayFeatureFlags();
     var SELF = Symbol("$SELF");
     var RelayFieldError = /* @__PURE__ */ function(_Error) {
@@ -26750,15 +27005,15 @@ var require_RelayErrorTrie = __commonJS({
       var _iterator = (0, _createForOfIteratorHelper2["default"])(errors), _step;
       try {
         ERRORS: for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-          var _step$value = _step.value, path = _step$value.path, _ = _step$value.locations, error = (0, _objectWithoutPropertiesLoose2["default"])(_step$value, _excluded);
+          var _step$value = _step.value, path = _step$value.path, _ = _step$value.locations, error = (0, _objectWithoutPropertiesLoose2["default"])(_step$value, _excluded4);
           if (path == null) {
             continue;
           }
-          var length = path.length;
-          if (length === 0) {
+          var length2 = path.length;
+          if (length2 === 0) {
             continue;
           }
-          var lastIndex = length - 1;
+          var lastIndex = length2 - 1;
           var currentTrie = trie;
           for (var index = 0; index < lastIndex; index++) {
             var key = path[index];
@@ -26946,7 +27201,7 @@ var require_RelayReplaySubject = __commonJS({
     var _createForOfIteratorHelper2 = _interopRequireDefault(require_createForOfIteratorHelper());
     var _defineProperty2 = _interopRequireDefault(require_defineProperty());
     var RelayObservable = require_RelayObservable();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var RelayReplaySubject = /* @__PURE__ */ function() {
       function RelayReplaySubject2() {
         var _this = this;
@@ -26974,7 +27229,7 @@ var require_RelayReplaySubject = __commonJS({
                 break;
               default:
                 event.kind;
-                true ? true ? invariant(false, "RelayReplaySubject: Unknown event kind `%s`.", event.kind) : invariant(false) : void 0;
+                true ? true ? invariant2(false, "RelayReplaySubject: Unknown event kind `%s`.", event.kind) : invariant2(false) : void 0;
             }
           }
           return function() {
@@ -27008,7 +27263,7 @@ var require_RelayReplaySubject = __commonJS({
           return sink.error(_error);
         });
       };
-      _proto.next = function next(data) {
+      _proto.next = function next2(data) {
         if (this._complete === true) {
           return;
         }
@@ -27054,7 +27309,7 @@ var require_fetchQueryInternal = __commonJS({
     "use strict";
     var Observable = require_RelayObservable();
     var RelayReplaySubject = require_RelayReplaySubject();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var WEAKMAP_SUPPORTED = typeof WeakMap === "function";
     var requestCachesByEnvironment = WEAKMAP_SUPPORTED ? /* @__PURE__ */ new WeakMap() : /* @__PURE__ */ new Map();
     function fetchQuery(environment2, operation) {
@@ -27064,47 +27319,47 @@ var require_fetchQueryInternal = __commonJS({
         });
       });
     }
-    function fetchQueryDeduped(environment2, identifier, fetchFn) {
+    function fetchQueryDeduped(environment2, identifier2, fetchFn) {
       return Observable.create(function(sink) {
         var requestCache = getRequestCache(environment2);
-        var cachedRequest = requestCache.get(identifier);
+        var cachedRequest = requestCache.get(identifier2);
         if (!cachedRequest) {
           fetchFn()["finally"](function() {
-            return requestCache["delete"](identifier);
+            return requestCache["delete"](identifier2);
           }).subscribe({
             start: function start(subscription) {
               cachedRequest = {
-                identifier,
+                identifier: identifier2,
                 subject: new RelayReplaySubject(),
                 subjectForInFlightStatus: new RelayReplaySubject(),
                 subscription,
                 promise: null
               };
-              requestCache.set(identifier, cachedRequest);
+              requestCache.set(identifier2, cachedRequest);
             },
-            next: function next(response) {
-              var cachedReq = getCachedRequest(requestCache, identifier);
+            next: function next2(response) {
+              var cachedReq = getCachedRequest(requestCache, identifier2);
               cachedReq.subject.next(response);
               cachedReq.subjectForInFlightStatus.next(response);
             },
             error: function error(_error) {
-              var cachedReq = getCachedRequest(requestCache, identifier);
+              var cachedReq = getCachedRequest(requestCache, identifier2);
               cachedReq.subject.error(_error);
               cachedReq.subjectForInFlightStatus.error(_error);
             },
             complete: function complete() {
-              var cachedReq = getCachedRequest(requestCache, identifier);
+              var cachedReq = getCachedRequest(requestCache, identifier2);
               cachedReq.subject.complete();
               cachedReq.subjectForInFlightStatus.complete();
             },
             unsubscribe: function unsubscribe(subscription) {
-              var cachedReq = getCachedRequest(requestCache, identifier);
+              var cachedReq = getCachedRequest(requestCache, identifier2);
               cachedReq.subject.unsubscribe();
               cachedReq.subjectForInFlightStatus.unsubscribe();
             }
           });
         }
-        !(cachedRequest != null) ? true ? invariant(false, "[fetchQueryInternal] fetchQueryDeduped: Expected `start` to be called synchronously") : invariant(false) : void 0;
+        !(cachedRequest != null) ? true ? invariant2(false, "[fetchQueryInternal] fetchQueryDeduped: Expected `start` to be called synchronously") : invariant2(false) : void 0;
         return getObservableForCachedRequest(requestCache, cachedRequest).subscribe(sink);
       });
     }
@@ -27128,7 +27383,7 @@ var require_fetchQueryInternal = __commonJS({
       return Observable.create(function(sink) {
         var subscription = cachedRequest.subjectForInFlightStatus.subscribe({
           error: sink.error,
-          next: function next(response) {
+          next: function next2(response) {
             if (!environment2.isRequestActive(cachedRequest.identifier)) {
               sink.complete();
               return;
@@ -27157,7 +27412,7 @@ var require_fetchQueryInternal = __commonJS({
         getActiveStatusObservableForCachedRequest(environment2, requestCache, cachedRequest).subscribe({
           complete: resolve,
           error: reject,
-          next: function next(response) {
+          next: function next2(response) {
             if (resolveOnNext) {
               resolve(response);
             }
@@ -27187,9 +27442,9 @@ var require_fetchQueryInternal = __commonJS({
       requestCachesByEnvironment.set(environment2, requestCache);
       return requestCache;
     }
-    function getCachedRequest(requestCache, identifier) {
-      var cached = requestCache.get(identifier);
-      !(cached != null) ? true ? invariant(false, "[fetchQueryInternal] getCachedRequest: Expected request to be cached") : invariant(false) : void 0;
+    function getCachedRequest(requestCache, identifier2) {
+      var cached = requestCache.get(identifier2);
+      !(cached != null) ? true ? invariant2(false, "[fetchQueryInternal] getCachedRequest: Expected request to be cached") : invariant2(false) : void 0;
       return cached;
     }
     module.exports = {
@@ -27214,11 +27469,11 @@ var require_fetchQuery = __commonJS({
     var fetchQueryInternal = require_fetchQueryInternal();
     var _require2 = require_GraphQLTag();
     var getRequest = _require2.getRequest;
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function fetchQuery(environment2, query, variables, options) {
       var _options$fetchPolicy;
       var queryNode = getRequest(query);
-      !(queryNode.params.operationKind === "query") ? true ? invariant(false, "fetchQuery: Expected query operation") : invariant(false) : void 0;
+      !(queryNode.params.operationKind === "query") ? true ? invariant2(false, "fetchQuery: Expected query operation") : invariant2(false) : void 0;
       var networkCacheConfig = (0, _objectSpread2["default"])({
         force: true
       }, options === null || options === void 0 ? void 0 : options.networkCacheConfig);
@@ -27446,8 +27701,8 @@ var require_RelayModernFragmentSpecResolver = __commonJS({
     var createReaderSelector = _require2.createReaderSelector;
     var getSelectorsFromObject = _require2.getSelectorsFromObject;
     var areEqual = require_areEqual();
-    var invariant = require_browser();
-    var warning = require_warning();
+    var invariant2 = require_browser();
+    var warning2 = require_warning();
     var RelayModernFragmentSpecResolver = /* @__PURE__ */ function() {
       function RelayModernFragmentSpecResolver2(context, fragments, props, callback, rootIsQueryRenderer) {
         var _this = this;
@@ -27526,14 +27781,14 @@ var require_RelayModernFragmentSpecResolver = __commonJS({
               if (resolver == null) {
                 resolver = new SelectorListResolver(this._context.environment, this._rootIsQueryRenderer, ownedSelector, this._callback != null, this._onChange);
               } else {
-                !(resolver instanceof SelectorListResolver) ? true ? invariant(false, "RelayModernFragmentSpecResolver: Expected prop `%s` to always be an array.", key) : invariant(false) : void 0;
+                !(resolver instanceof SelectorListResolver) ? true ? invariant2(false, "RelayModernFragmentSpecResolver: Expected prop `%s` to always be an array.", key) : invariant2(false) : void 0;
                 resolver.setSelector(ownedSelector);
               }
             } else {
               if (resolver == null) {
                 resolver = new SelectorResolver(this._context.environment, this._rootIsQueryRenderer, ownedSelector, this._callback != null, this._onChange);
               } else {
-                !(resolver instanceof SelectorResolver) ? true ? invariant(false, "RelayModernFragmentSpecResolver: Expected prop `%s` to always be an object.", key) : invariant(false) : void 0;
+                !(resolver instanceof SelectorResolver) ? true ? invariant2(false, "RelayModernFragmentSpecResolver: Expected prop `%s` to always be an object.", key) : invariant2(false) : void 0;
                 resolver.setSelector(ownedSelector);
               }
             }
@@ -27598,11 +27853,11 @@ var require_RelayModernFragmentSpecResolver = __commonJS({
           var promise = pendingOperationsResult === null || pendingOperationsResult === void 0 ? void 0 : pendingOperationsResult.promise;
           if (promise != null) {
             if (this._rootIsQueryRenderer) {
-              true ? warning(false, "Relay: Relay Container for fragment `%s` has missing data and would suspend. When using features such as @defer or @module, use `useFragment` instead of a Relay Container.", this._selector.node.name) : void 0;
+              true ? warning2(false, "Relay: Relay Container for fragment `%s` has missing data and would suspend. When using features such as @defer or @module, use `useFragment` instead of a Relay Container.", this._selector.node.name) : void 0;
             } else {
               var _pendingOperationsRes;
               var pendingOperations = (_pendingOperationsRes = pendingOperationsResult === null || pendingOperationsResult === void 0 ? void 0 : pendingOperationsResult.pendingOperations) !== null && _pendingOperationsRes !== void 0 ? _pendingOperationsRes : [];
-              true ? warning(false, "Relay: Relay Container for fragment `%s` suspended. When using features such as @defer or @module, use `useFragment` instead of a Relay Container.", this._selector.node.name) : void 0;
+              true ? warning2(false, "Relay: Relay Container for fragment `%s` suspended. When using features such as @defer or @module, use `useFragment` instead of a Relay Container.", this._selector.node.name) : void 0;
               this._environment.__log({
                 name: "suspense.fragment",
                 data: this._data,
@@ -27718,13 +27973,13 @@ var require_createFragmentSpecResolver = __commonJS({
   "node_modules/relay-runtime/lib/store/createFragmentSpecResolver.js"(exports, module) {
     "use strict";
     var RelayModernFragmentSpecResolver = require_RelayModernFragmentSpecResolver();
-    var warning = require_warning();
+    var warning2 = require_warning();
     function createFragmentSpecResolver(context, containerName, fragments, props, rootIsQueryRenderer, callback) {
       if (true) {
         var fragmentNames = Object.keys(fragments);
         fragmentNames.forEach(function(fragmentName) {
           var propValue = props[fragmentName];
-          true ? warning(propValue !== void 0, "createFragmentSpecResolver: Expected prop `%s` to be supplied to `%s`, but got `undefined`. Pass an explicit `null` if this is intentional.", fragmentName, containerName) : void 0;
+          true ? warning2(propValue !== void 0, "createFragmentSpecResolver: Expected prop `%s` to be supplied to `%s`, but got `undefined`. Pass an explicit `null` if this is intentional.", fragmentName, containerName) : void 0;
         });
       }
       return new RelayModernFragmentSpecResolver(context, fragments, props, callback, rootIsQueryRenderer);
@@ -27737,7 +27992,7 @@ var require_createFragmentSpecResolver = __commonJS({
 var require_createRelayContext = __commonJS({
   "node_modules/relay-runtime/lib/store/createRelayContext.js"(exports, module) {
     "use strict";
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var relayContext;
     var firstReact;
     function createRelayContext(react) {
@@ -27748,7 +28003,7 @@ var require_createRelayContext = __commonJS({
         }
         firstReact = react;
       }
-      !(react === firstReact) ? true ? invariant(false, "[createRelayContext]: You are passing a different instance of React", react.version) : invariant(false) : void 0;
+      !(react === firstReact) ? true ? invariant2(false, "[createRelayContext]: You are passing a different instance of React", react.version) : invariant2(false) : void 0;
       return relayContext;
     }
     module.exports = createRelayContext;
@@ -27801,8 +28056,8 @@ var require_RelayModernRecord = __commonJS({
     var ROOT_ID = _require3.ROOT_ID;
     var TYPENAME_KEY = _require3.TYPENAME_KEY;
     var areEqual = require_areEqual();
-    var invariant = require_browser();
-    var warning = require_warning();
+    var invariant2 = require_browser();
+    var warning2 = require_warning();
     function clone(record) {
       return (0, _objectSpread2["default"])({}, record);
     }
@@ -27821,8 +28076,8 @@ var require_RelayModernRecord = __commonJS({
       record[TYPENAME_KEY] = typeName;
       return record;
     }
-    function fromObject(json) {
-      return json;
+    function fromObject(json2) {
+      return json2;
     }
     function getDataID(record) {
       return record[ID_KEY];
@@ -27845,7 +28100,7 @@ var require_RelayModernRecord = __commonJS({
     function getValue(record, storageKey) {
       var value = record[storageKey];
       if (value && typeof value === "object") {
-        !(!value.hasOwnProperty(REF_KEY) && !value.hasOwnProperty(REFS_KEY)) ? true ? invariant(false, "RelayModernRecord.getValue(): Expected a scalar (non-link) value for `%s.%s` but found %s.", record[ID_KEY], storageKey, value.hasOwnProperty(REF_KEY) ? "a linked record" : "plural linked records") : invariant(false) : void 0;
+        !(!value.hasOwnProperty(REF_KEY) && !value.hasOwnProperty(REFS_KEY)) ? true ? invariant2(false, "RelayModernRecord.getValue(): Expected a scalar (non-link) value for `%s.%s` but found %s.", record[ID_KEY], storageKey, value.hasOwnProperty(REF_KEY) ? "a linked record" : "plural linked records") : invariant2(false) : void 0;
       }
       return value;
     }
@@ -27858,7 +28113,7 @@ var require_RelayModernRecord = __commonJS({
         return maybeLink;
       }
       var link = maybeLink;
-      !(typeof link === "object" && link && typeof link[REF_KEY] === "string") ? true ? invariant(false, "RelayModernRecord.getLinkedRecordID(): Expected `%s.%s` to be a linked ID, was `%s`.%s", record[ID_KEY], storageKey, JSON.stringify(link), typeof link === "object" && link[REFS_KEY] !== void 0 ? " It appears to be a plural linked record: did you mean to call getLinkedRecords() instead of getLinkedRecord()?" : "") : invariant(false) : void 0;
+      !(typeof link === "object" && link && typeof link[REF_KEY] === "string") ? true ? invariant2(false, "RelayModernRecord.getLinkedRecordID(): Expected `%s.%s` to be a linked ID, was `%s`.%s", record[ID_KEY], storageKey, JSON.stringify(link), typeof link === "object" && link[REFS_KEY] !== void 0 ? " It appears to be a plural linked record: did you mean to call getLinkedRecords() instead of getLinkedRecord()?" : "") : invariant2(false) : void 0;
       return link[REF_KEY];
     }
     function hasLinkedRecordID(record, storageKey) {
@@ -27874,7 +28129,7 @@ var require_RelayModernRecord = __commonJS({
       if (links == null) {
         return links;
       }
-      !(typeof links === "object" && Array.isArray(links[REFS_KEY])) ? true ? invariant(false, "RelayModernRecord.getLinkedRecordIDs(): Expected `%s.%s` to contain an array of linked IDs, got `%s`.%s", record[ID_KEY], storageKey, JSON.stringify(links), typeof links === "object" && links[REF_KEY] !== void 0 ? " It appears to be a singular linked record: did you mean to call getLinkedRecord() instead of getLinkedRecords()?" : "") : invariant(false) : void 0;
+      !(typeof links === "object" && Array.isArray(links[REFS_KEY])) ? true ? invariant2(false, "RelayModernRecord.getLinkedRecordIDs(): Expected `%s.%s` to contain an array of linked IDs, got `%s`.%s", record[ID_KEY], storageKey, JSON.stringify(links), typeof links === "object" && links[REF_KEY] !== void 0 ? " It appears to be a singular linked record: did you mean to call getLinkedRecord() instead of getLinkedRecords()?" : "") : invariant2(false) : void 0;
       return links[REFS_KEY];
     }
     function hasLinkedRecordIDs(record, storageKey) {
@@ -27902,10 +28157,10 @@ var require_RelayModernRecord = __commonJS({
         var _getType, _getType2;
         var prevID = getDataID(prevRecord);
         var nextID = getDataID(nextRecord);
-        true ? warning(prevID === nextID, "RelayModernRecord: Invalid record update, expected both versions of the record to have the same id, got `%s` and `%s`.", prevID, nextID) : void 0;
+        true ? warning2(prevID === nextID, "RelayModernRecord: Invalid record update, expected both versions of the record to have the same id, got `%s` and `%s`.", prevID, nextID) : void 0;
         var prevType = (_getType = getType(prevRecord)) !== null && _getType !== void 0 ? _getType : null;
         var nextType = (_getType2 = getType(nextRecord)) !== null && _getType2 !== void 0 ? _getType2 : null;
-        true ? warning(isClientID(nextID) && nextID !== ROOT_ID || prevType === nextType, "RelayModernRecord: Invalid record update, expected both versions of record `%s` to have the same `%s` but got conflicting types `%s` and `%s`. The GraphQL server likely violated the globally unique id requirement by returning the same id for different objects.", prevID, TYPENAME_KEY, prevType, nextType) : void 0;
+        true ? warning2(isClientID(nextID) && nextID !== ROOT_ID || prevType === nextType, "RelayModernRecord: Invalid record update, expected both versions of record `%s` to have the same `%s` but got conflicting types `%s` and `%s`. The GraphQL server likely violated the globally unique id requirement by returning the same id for different objects.", prevID, TYPENAME_KEY, prevType, nextType) : void 0;
       }
       var prevErrorsByKey = prevRecord[ERRORS_KEY];
       var nextErrorsByKey = nextRecord[ERRORS_KEY];
@@ -27947,10 +28202,10 @@ var require_RelayModernRecord = __commonJS({
         var _getType3, _getType4;
         var prevID = getDataID(record1);
         var nextID = getDataID(record2);
-        true ? warning(prevID === nextID, "RelayModernRecord: Invalid record merge, expected both versions of the record to have the same id, got `%s` and `%s`.", prevID, nextID) : void 0;
+        true ? warning2(prevID === nextID, "RelayModernRecord: Invalid record merge, expected both versions of the record to have the same id, got `%s` and `%s`.", prevID, nextID) : void 0;
         var prevType = (_getType3 = getType(record1)) !== null && _getType3 !== void 0 ? _getType3 : null;
         var nextType = (_getType4 = getType(record2)) !== null && _getType4 !== void 0 ? _getType4 : null;
-        true ? warning(isClientID(nextID) && nextID !== ROOT_ID || prevType === nextType, "RelayModernRecord: Invalid record merge, expected both versions of record `%s` to have the same `%s` but got conflicting types `%s` and `%s`. The GraphQL server likely violated the globally unique id requirement by returning the same id for different objects.", prevID, TYPENAME_KEY, prevType, nextType) : void 0;
+        true ? warning2(isClientID(nextID) && nextID !== ROOT_ID || prevType === nextType, "RelayModernRecord: Invalid record merge, expected both versions of record `%s` to have the same `%s` but got conflicting types `%s` and `%s`. The GraphQL server likely violated the globally unique id requirement by returning the same id for different objects.", prevID, TYPENAME_KEY, prevType, nextType) : void 0;
       }
       if (ERRORS_KEY in record1 || ERRORS_KEY in record2) {
         var errors1 = record1[ERRORS_KEY], fields1 = (0, _objectWithoutPropertiesLoose2["default"])(record1, [ERRORS_KEY].map(_toPropertyKey2["default"]));
@@ -27983,7 +28238,7 @@ var require_RelayModernRecord = __commonJS({
     }
     function setErrors(record, storageKey, errors) {
       if (true) {
-        true ? warning(storageKey in record, "RelayModernRecord: Invalid error update, `%s` should not be undefined.", storageKey) : void 0;
+        true ? warning2(storageKey in record, "RelayModernRecord: Invalid error update, `%s` should not be undefined.", storageKey) : void 0;
       }
       var errorsByStorageKey = record[ERRORS_KEY];
       if (errors != null && errors.length > 0) {
@@ -28007,12 +28262,12 @@ var require_RelayModernRecord = __commonJS({
       if (true) {
         var prevID = getDataID(record);
         if (storageKey === ID_KEY) {
-          true ? warning(prevID === value, "RelayModernRecord: Invalid field update, expected both versions of the record to have the same id, got `%s` and `%s`.", prevID, value) : void 0;
+          true ? warning2(prevID === value, "RelayModernRecord: Invalid field update, expected both versions of the record to have the same id, got `%s` and `%s`.", prevID, value) : void 0;
         } else if (storageKey === TYPENAME_KEY) {
           var _getType5;
           var prevType = (_getType5 = getType(record)) !== null && _getType5 !== void 0 ? _getType5 : null;
           var nextType = value !== null && value !== void 0 ? value : null;
-          true ? warning(isClientID(getDataID(record)) && getDataID(record) !== ROOT_ID || prevType === nextType, "RelayModernRecord: Invalid field update, expected both versions of record `%s` to have the same `%s` but got conflicting types `%s` and `%s`. The GraphQL server likely violated the globally unique id requirement by returning the same id for different objects.", prevID, TYPENAME_KEY, prevType, nextType) : void 0;
+          true ? warning2(isClientID(getDataID(record)) && getDataID(record) !== ROOT_ID || prevType === nextType, "RelayModernRecord: Invalid field update, expected both versions of record `%s` to have the same `%s` but got conflicting types `%s` and `%s`. The GraphQL server likely violated the globally unique id requirement by returning the same id for different objects.", prevID, TYPENAME_KEY, prevType, nextType) : void 0;
         }
       }
       record[storageKey] = value;
@@ -28038,7 +28293,7 @@ var require_RelayModernRecord = __commonJS({
       if (link == null) {
         return link;
       }
-      !(typeof link === "object" && typeof link[REF_KEY] === "string" && link[ACTOR_IDENTIFIER_KEY] != null) ? true ? invariant(false, "RelayModernRecord.getActorLinkedRecordID(): Expected `%s.%s` to be an actor specific linked ID, was `%s`.", record[ID_KEY], storageKey, JSON.stringify(link)) : invariant(false) : void 0;
+      !(typeof link === "object" && typeof link[REF_KEY] === "string" && link[ACTOR_IDENTIFIER_KEY] != null) ? true ? invariant2(false, "RelayModernRecord.getActorLinkedRecordID(): Expected `%s.%s` to be an actor specific linked ID, was `%s`.", record[ID_KEY], storageKey, JSON.stringify(link)) : invariant2(false) : void 0;
       return [link[ACTOR_IDENTIFIER_KEY], link[REF_KEY]];
     }
     function getResolverLinkedRecordID(record, typeName) {
@@ -28049,7 +28304,7 @@ var require_RelayModernRecord = __commonJS({
       if (typeof id === "object") {
         id = id.id;
       }
-      !(typeof id === "string") ? true ? invariant(false, "RelayModernRecord.getResolverLinkedRecordID(): Expected value to be a linked ID, was `%s`.", JSON.stringify(id)) : invariant(false) : void 0;
+      !(typeof id === "string") ? true ? invariant2(false, "RelayModernRecord.getResolverLinkedRecordID(): Expected value to be a linked ID, was `%s`.", JSON.stringify(id)) : invariant2(false) : void 0;
       return generateClientObjectClientID(typeName, id);
     }
     function getResolverLinkedRecordIDs(record, typeName) {
@@ -28057,7 +28312,7 @@ var require_RelayModernRecord = __commonJS({
       if (resolverValue == null || isSuspenseSentinel(resolverValue)) {
         return null;
       }
-      !Array.isArray(resolverValue) ? true ? invariant(false, "RelayModernRecord.getResolverLinkedRecordIDs(): Expected value to be an array of linked IDs, was `%s`.", JSON.stringify(resolverValue)) : invariant(false) : void 0;
+      !Array.isArray(resolverValue) ? true ? invariant2(false, "RelayModernRecord.getResolverLinkedRecordIDs(): Expected value to be an array of linked IDs, was `%s`.", JSON.stringify(resolverValue)) : invariant2(false) : void 0;
       return resolverValue.map(function(id) {
         if (id == null) {
           return null;
@@ -28065,7 +28320,7 @@ var require_RelayModernRecord = __commonJS({
         if (typeof id === "object") {
           id = id.id;
         }
-        !(typeof id === "string") ? true ? invariant(false, "RelayModernRecord.getResolverLinkedRecordIDs(): Expected item within resolver linked field to be a DataID, was `%s`.", JSON.stringify(id)) : invariant(false) : void 0;
+        !(typeof id === "string") ? true ? invariant2(false, "RelayModernRecord.getResolverLinkedRecordIDs(): Expected item within resolver linked field to be a DataID, was `%s`.", JSON.stringify(id)) : invariant2(false) : void 0;
         return generateClientObjectClientID(typeName, id);
       });
     }
@@ -28199,10 +28454,10 @@ var require_RelayRecordSource = __commonJS({
 var require_ActorIdentifier = __commonJS({
   "node_modules/relay-runtime/lib/multi-actor-environment/ActorIdentifier.js"(exports, module) {
     "use strict";
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var INTERNAL_ACTOR_IDENTIFIER_DO_NOT_USE = "INTERNAL_ACTOR_IDENTIFIER_DO_NOT_USE";
     function assertInternalActorIdentifier(actorIdentifier) {
-      !(actorIdentifier === INTERNAL_ACTOR_IDENTIFIER_DO_NOT_USE) ? true ? invariant(false, 'Expected to use only internal version of the `actorIdentifier`. "%s" was provided.', actorIdentifier) : invariant(false) : void 0;
+      !(actorIdentifier === INTERNAL_ACTOR_IDENTIFIER_DO_NOT_USE) ? true ? invariant2(false, 'Expected to use only internal version of the `actorIdentifier`. "%s" was provided.', actorIdentifier) : invariant2(false) : void 0;
     }
     module.exports = {
       assertInternalActorIdentifier,
@@ -28308,12 +28563,12 @@ var require_RelayResponseNormalizer = __commonJS({
     var TYPE_SCHEMA_TYPE = _require8.TYPE_SCHEMA_TYPE;
     var generateTypeID = _require8.generateTypeID;
     var areEqual = require_areEqual();
-    var invariant = require_browser();
-    var warning = require_warning();
+    var invariant2 = require_browser();
+    var warning2 = require_warning();
     function normalize(recordSource, selector, response, options, errors) {
-      var dataID = selector.dataID, node2 = selector.node, variables = selector.variables;
+      var dataID = selector.dataID, node6 = selector.node, variables = selector.variables;
       var normalizer = new RelayResponseNormalizer(recordSource, variables, options);
-      return normalizer.normalizeResponse(node2, dataID, response, errors);
+      return normalizer.normalizeResponse(node6, dataID, response, errors);
     }
     var RelayResponseNormalizer = /* @__PURE__ */ function() {
       function RelayResponseNormalizer2(recordSource, variables, options) {
@@ -28331,12 +28586,12 @@ var require_RelayResponseNormalizer = __commonJS({
         this._shouldProcessClientComponents = options.shouldProcessClientComponents;
       }
       var _proto = RelayResponseNormalizer2.prototype;
-      _proto.normalizeResponse = function normalizeResponse(node2, dataID, data, errors) {
+      _proto.normalizeResponse = function normalizeResponse(node6, dataID, data, errors) {
         var record = this._recordSource.get(dataID);
-        !record ? true ? invariant(false, "RelayResponseNormalizer(): Expected root record `%s` to exist.", dataID) : invariant(false) : void 0;
-        this._assignClientAbstractTypes(node2);
+        !record ? true ? invariant2(false, "RelayResponseNormalizer(): Expected root record `%s` to exist.", dataID) : invariant2(false) : void 0;
+        this._assignClientAbstractTypes(node6);
         this._errorTrie = buildErrorTrie(errors);
-        this._traverseSelections(node2, record, data);
+        this._traverseSelections(node6, record, data);
         return {
           errors,
           fieldPayloads: this._handleFieldPayloads,
@@ -28346,8 +28601,8 @@ var require_RelayResponseNormalizer = __commonJS({
           isFinal: false
         };
       };
-      _proto._assignClientAbstractTypes = function _assignClientAbstractTypes(node2) {
-        var clientAbstractTypes = node2.clientAbstractTypes;
+      _proto._assignClientAbstractTypes = function _assignClientAbstractTypes(node6) {
+        var clientAbstractTypes = node6.clientAbstractTypes;
         if (clientAbstractTypes != null) {
           for (var _i = 0, _Object$keys = Object.keys(clientAbstractTypes); _i < _Object$keys.length; _i++) {
             var abstractType = _Object$keys[_i];
@@ -28372,17 +28627,17 @@ var require_RelayResponseNormalizer = __commonJS({
         }
       };
       _proto._getVariableValue = function _getVariableValue(name) {
-        !this._variables.hasOwnProperty(name) ? true ? invariant(false, "RelayResponseNormalizer(): Undefined variable `%s`.", name) : invariant(false) : void 0;
+        !this._variables.hasOwnProperty(name) ? true ? invariant2(false, "RelayResponseNormalizer(): Undefined variable `%s`.", name) : invariant2(false) : void 0;
         return this._variables[name];
       };
       _proto._getRecordType = function _getRecordType(data) {
         var typeName = data[TYPENAME_KEY];
-        !(typeName != null) ? true ? invariant(false, "RelayResponseNormalizer(): Expected a typename for record `%s`.", JSON.stringify(data, null, 2)) : invariant(false) : void 0;
+        !(typeName != null) ? true ? invariant2(false, "RelayResponseNormalizer(): Expected a typename for record `%s`.", JSON.stringify(data, null, 2)) : invariant2(false) : void 0;
         return typeName;
       };
-      _proto._traverseSelections = function _traverseSelections(node2, record, data) {
-        for (var i = 0; i < node2.selections.length; i++) {
-          var selection = node2.selections[i];
+      _proto._traverseSelections = function _traverseSelections(node6, record, data) {
+        for (var i = 0; i < node6.selections.length; i++) {
+          var selection = node6.selections[i];
           switch (selection.kind) {
             case SCALAR_FIELD:
             case LINKED_FIELD:
@@ -28486,7 +28741,7 @@ var require_RelayResponseNormalizer = __commonJS({
               break;
             default:
               selection;
-              true ? true ? invariant(false, "RelayResponseNormalizer(): Unexpected ast kind `%s`.", selection.kind) : invariant(false) : void 0;
+              true ? true ? invariant2(false, "RelayResponseNormalizer(): Unexpected ast kind `%s`.", selection.kind) : invariant2(false) : void 0;
           }
         }
       };
@@ -28495,20 +28750,20 @@ var require_RelayResponseNormalizer = __commonJS({
           this._traverseSelections(resolver.fragment, record, data);
         }
       };
-      _proto._normalizeDefer = function _normalizeDefer(defer, record, data) {
-        var isDeferred = defer["if"] === null || this._getVariableValue(defer["if"]);
+      _proto._normalizeDefer = function _normalizeDefer(defer2, record, data) {
+        var isDeferred = defer2["if"] === null || this._getVariableValue(defer2["if"]);
         if (true) {
-          true ? warning(typeof isDeferred === "boolean", "RelayResponseNormalizer: Expected value for @defer `if` argument to be a boolean, got `%s`.", isDeferred) : void 0;
+          true ? warning2(typeof isDeferred === "boolean", "RelayResponseNormalizer: Expected value for @defer `if` argument to be a boolean, got `%s`.", isDeferred) : void 0;
         }
         if (isDeferred === false) {
-          this._traverseSelections(defer, record, data);
+          this._traverseSelections(defer2, record, data);
         } else {
           this._incrementalPlaceholders.push({
             kind: "defer",
             data,
-            label: defer.label,
+            label: defer2.label,
             path: (0, _toConsumableArray2["default"])(this._path),
-            selector: createNormalizationSelector(defer, RelayModernRecord.getDataID(record), this._variables),
+            selector: createNormalizationSelector(defer2, RelayModernRecord.getDataID(record), this._variables),
             typeName: RelayModernRecord.getType(record),
             actorIdentifier: this._actorIdentifier
           });
@@ -28518,7 +28773,7 @@ var require_RelayResponseNormalizer = __commonJS({
         this._traverseSelections(stream, record, data);
         var isStreamed = stream["if"] === null || this._getVariableValue(stream["if"]);
         if (true) {
-          true ? warning(typeof isStreamed === "boolean", "RelayResponseNormalizer: Expected value for @stream `if` argument to be a boolean, got `%s`.", isStreamed) : void 0;
+          true ? warning2(typeof isStreamed === "boolean", "RelayResponseNormalizer: Expected value for @stream `if` argument to be a boolean, got `%s`.", isStreamed) : void 0;
         }
         if (isStreamed === true) {
           this._incrementalPlaceholders.push({
@@ -28533,7 +28788,7 @@ var require_RelayResponseNormalizer = __commonJS({
         }
       };
       _proto._normalizeModuleImport = function _normalizeModuleImport(moduleImport, record, data) {
-        !(typeof data === "object" && data) ? true ? invariant(false, "RelayResponseNormalizer: Expected data for @module to be an object.") : invariant(false) : void 0;
+        !(typeof data === "object" && data) ? true ? invariant2(false, "RelayResponseNormalizer: Expected data for @module to be an object.") : invariant2(false) : void 0;
         var typeName = RelayModernRecord.getType(record);
         var componentKey = getModuleComponentKey(moduleImport.documentName);
         var componentReference = moduleImport.componentModuleProvider || data[componentKey];
@@ -28556,7 +28811,7 @@ var require_RelayResponseNormalizer = __commonJS({
         }
       };
       _proto._normalizeField = function _normalizeField(selection, record, data) {
-        !(typeof data === "object" && data) ? true ? invariant(false, "writeField(): Expected data for field `%s` to be an object.", selection.name) : invariant(false) : void 0;
+        !(typeof data === "object" && data) ? true ? invariant2(false, "writeField(): Expected data for field `%s` to be an object.", selection.name) : invariant2(false) : void 0;
         var responseKey = selection.alias || selection.name;
         var storageKey = getStorageKey(selection, this._variables);
         var fieldValue = data[responseKey];
@@ -28567,7 +28822,7 @@ var require_RelayResponseNormalizer = __commonJS({
               return;
             } else if (!this._treatMissingFieldsAsNull) {
               if (true) {
-                true ? warning(false, "RelayResponseNormalizer: Payload did not contain a value for field `%s: %s`. Check that you are parsing with the same query that was used to fetch the payload.", responseKey, storageKey) : void 0;
+                true ? warning2(false, "RelayResponseNormalizer: Payload did not contain a value for field `%s: %s`. Check that you are parsing with the same query that was used to fetch the payload.", responseKey, storageKey) : void 0;
               }
               return;
             }
@@ -28605,13 +28860,13 @@ var require_RelayResponseNormalizer = __commonJS({
           this._path.pop();
         } else {
           selection;
-          true ? true ? invariant(false, "RelayResponseNormalizer(): Unexpected ast kind `%s` during normalization.", selection.kind) : invariant(false) : void 0;
+          true ? true ? invariant2(false, "RelayResponseNormalizer(): Unexpected ast kind `%s` during normalization.", selection.kind) : invariant2(false) : void 0;
         }
       };
       _proto._normalizeActorChange = function _normalizeActorChange(selection, record, data) {
         var _field$concreteType;
         var field = selection.linkedField;
-        !(typeof data === "object" && data) ? true ? invariant(false, "_normalizeActorChange(): Expected data for field `%s` to be an object.", field.name) : invariant(false) : void 0;
+        !(typeof data === "object" && data) ? true ? invariant2(false, "_normalizeActorChange(): Expected data for field `%s` to be an object.", field.name) : invariant2(false) : void 0;
         var responseKey = field.alias || field.name;
         var storageKey = getStorageKey(field, this._variables);
         var fieldValue = data[responseKey];
@@ -28622,7 +28877,7 @@ var require_RelayResponseNormalizer = __commonJS({
               return;
             } else if (!this._treatMissingFieldsAsNull) {
               if (true) {
-                true ? warning(false, "RelayResponseNormalizer: Payload did not contain a value for field `%s: %s`. Check that you are parsing with the same query that was used to fetch the payload.", responseKey, storageKey) : void 0;
+                true ? warning2(false, "RelayResponseNormalizer: Payload did not contain a value for field `%s: %s`. Check that you are parsing with the same query that was used to fetch the payload.", responseKey, storageKey) : void 0;
               }
               return;
             }
@@ -28633,14 +28888,14 @@ var require_RelayResponseNormalizer = __commonJS({
         var actorIdentifier = getActorIdentifierFromPayload(fieldValue);
         if (actorIdentifier == null) {
           if (true) {
-            true ? warning(false, "RelayResponseNormalizer: Payload did not contain a value for field `%s`. Check that you are parsing with the same query that was used to fetch the payload. Payload is `%s`.", ACTOR_IDENTIFIER_FIELD_NAME, JSON.stringify(fieldValue, null, 2)) : void 0;
+            true ? warning2(false, "RelayResponseNormalizer: Payload did not contain a value for field `%s`. Check that you are parsing with the same query that was used to fetch the payload. Payload is `%s`.", ACTOR_IDENTIFIER_FIELD_NAME, JSON.stringify(fieldValue, null, 2)) : void 0;
           }
           RelayModernRecord.setValue(record, storageKey, null);
           return;
         }
         var typeName = (_field$concreteType = field.concreteType) !== null && _field$concreteType !== void 0 ? _field$concreteType : this._getRecordType(fieldValue);
         var nextID = this._getDataId(fieldValue, typeName) || RelayModernRecord.getLinkedRecordID(record, storageKey) || generateClientID(RelayModernRecord.getDataID(record), storageKey);
-        !(typeof nextID === "string") ? true ? invariant(false, "RelayResponseNormalizer: Expected id on field `%s` to be a string.", storageKey) : invariant(false) : void 0;
+        !(typeof nextID === "string") ? true ? invariant2(false, "RelayResponseNormalizer: Expected id on field `%s` to be a string.", storageKey) : invariant2(false) : void 0;
         RelayModernRecord.setActorLinkedRecordID(record, storageKey, actorIdentifier, nextID);
         this._followupPayloads.push({
           kind: "ActorPayload",
@@ -28655,9 +28910,9 @@ var require_RelayResponseNormalizer = __commonJS({
       };
       _proto._normalizeLink = function _normalizeLink(field, record, storageKey, fieldValue) {
         var _field$concreteType2;
-        !(typeof fieldValue === "object" && fieldValue) ? true ? invariant(false, "RelayResponseNormalizer: Expected data for field `%s` to be an object.", storageKey) : invariant(false) : void 0;
+        !(typeof fieldValue === "object" && fieldValue) ? true ? invariant2(false, "RelayResponseNormalizer: Expected data for field `%s` to be an object.", storageKey) : invariant2(false) : void 0;
         var nextID = this._getDataId(fieldValue, (_field$concreteType2 = field.concreteType) !== null && _field$concreteType2 !== void 0 ? _field$concreteType2 : this._getRecordType(fieldValue)) || RelayModernRecord.getLinkedRecordID(record, storageKey) || generateClientID(RelayModernRecord.getDataID(record), storageKey);
-        !(typeof nextID === "string") ? true ? invariant(false, "RelayResponseNormalizer: Expected id on field `%s` to be a string.", storageKey) : invariant(false) : void 0;
+        !(typeof nextID === "string") ? true ? invariant2(false, "RelayResponseNormalizer: Expected id on field `%s` to be a string.", storageKey) : invariant2(false) : void 0;
         if (true) {
           this._validateConflictingLinkedFieldsWithIdenticalId(RelayModernRecord.getLinkedRecordID(record, storageKey), nextID, storageKey);
         }
@@ -28674,7 +28929,7 @@ var require_RelayResponseNormalizer = __commonJS({
       };
       _proto._normalizePluralLink = function _normalizePluralLink(field, record, storageKey, fieldValue) {
         var _this = this;
-        !Array.isArray(fieldValue) ? true ? invariant(false, "RelayResponseNormalizer: Expected data for field `%s` to be an array of objects.", storageKey) : invariant(false) : void 0;
+        !Array.isArray(fieldValue) ? true ? invariant2(false, "RelayResponseNormalizer: Expected data for field `%s` to be an array of objects.", storageKey) : invariant2(false) : void 0;
         var prevIDs = RelayModernRecord.getLinkedRecordIDs(record, storageKey);
         var nextIDs = [];
         fieldValue.forEach(function(item, nextIndex) {
@@ -28686,9 +28941,9 @@ var require_RelayResponseNormalizer = __commonJS({
           _this._path.push(String(nextIndex));
           var oldErrorTrie = _this._errorTrie;
           _this._errorTrie = oldErrorTrie == null ? null : getNestedErrorTrieByKey(oldErrorTrie, nextIndex);
-          !(typeof item === "object") ? true ? invariant(false, "RelayResponseNormalizer: Expected elements for field `%s` to be objects.", storageKey) : invariant(false) : void 0;
+          !(typeof item === "object") ? true ? invariant2(false, "RelayResponseNormalizer: Expected elements for field `%s` to be objects.", storageKey) : invariant2(false) : void 0;
           var nextID = _this._getDataId(item, (_field$concreteType3 = field.concreteType) !== null && _field$concreteType3 !== void 0 ? _field$concreteType3 : _this._getRecordType(item)) || prevIDs && prevIDs[nextIndex] || generateClientID(RelayModernRecord.getDataID(record), storageKey, nextIndex);
-          !(typeof nextID === "string") ? true ? invariant(false, "RelayResponseNormalizer: Expected id of elements of field `%s` to be strings.", storageKey) : invariant(false) : void 0;
+          !(typeof nextID === "string") ? true ? invariant2(false, "RelayResponseNormalizer: Expected id of elements of field `%s` to be strings.", storageKey) : invariant2(false) : void 0;
           nextIDs.push(nextID);
           var nextRecord = _this._recordSource.get(nextID);
           if (!nextRecord) {
@@ -28713,18 +28968,18 @@ var require_RelayResponseNormalizer = __commonJS({
         var _field$concreteType4;
         var typeName = (_field$concreteType4 = field.concreteType) !== null && _field$concreteType4 !== void 0 ? _field$concreteType4 : this._getRecordType(payload);
         var dataID = RelayModernRecord.getDataID(record);
-        true ? warning(isClientID(dataID) && dataID !== ROOT_ID || RelayModernRecord.getType(record) === typeName, "RelayResponseNormalizer: Invalid record `%s`. Expected %s to be consistent, but the record was assigned conflicting types `%s` and `%s`. The GraphQL server likely violated the globally unique id requirement by returning the same id for different objects.", dataID, TYPENAME_KEY, RelayModernRecord.getType(record), typeName) : void 0;
+        true ? warning2(isClientID(dataID) && dataID !== ROOT_ID || RelayModernRecord.getType(record) === typeName, "RelayResponseNormalizer: Invalid record `%s`. Expected %s to be consistent, but the record was assigned conflicting types `%s` and `%s`. The GraphQL server likely violated the globally unique id requirement by returning the same id for different objects.", dataID, TYPENAME_KEY, RelayModernRecord.getType(record), typeName) : void 0;
       };
       _proto._validateConflictingFieldsWithIdenticalId = function _validateConflictingFieldsWithIdenticalId(record, storageKey, fieldValue) {
         if (true) {
           var dataID = RelayModernRecord.getDataID(record);
           var previousValue = RelayModernRecord.getValue(record, storageKey);
-          true ? warning(storageKey === TYPENAME_KEY || previousValue === void 0 || areEqual(previousValue, fieldValue), "RelayResponseNormalizer: Invalid record. The record contains two instances of the same id: `%s` with conflicting field, %s and its values: %s and %s. If two fields are different but share the same id, one field will overwrite the other.", dataID, storageKey, previousValue, fieldValue) : void 0;
+          true ? warning2(storageKey === TYPENAME_KEY || previousValue === void 0 || areEqual(previousValue, fieldValue), "RelayResponseNormalizer: Invalid record. The record contains two instances of the same id: `%s` with conflicting field, %s and its values: %s and %s. If two fields are different but share the same id, one field will overwrite the other.", dataID, storageKey, previousValue, fieldValue) : void 0;
         }
       };
       _proto._validateConflictingLinkedFieldsWithIdenticalId = function _validateConflictingLinkedFieldsWithIdenticalId(prevID, nextID, storageKey) {
         if (true) {
-          true ? warning(prevID === void 0 || prevID === nextID, "RelayResponseNormalizer: Invalid record. The record contains references to the conflicting field, %s and its id values: %s and %s. We need to make sure that the record the field points to remains consistent or one field will overwrite the other.", storageKey, prevID, nextID) : void 0;
+          true ? warning2(prevID === void 0 || prevID === nextID, "RelayResponseNormalizer: Invalid record. The record contains references to the conflicting field, %s and its id values: %s and %s. We need to make sure that the record the field points to remains consistent or one field will overwrite the other.", storageKey, prevID, nextID) : void 0;
         }
       };
       return RelayResponseNormalizer2;
@@ -28767,16 +29022,16 @@ var require_readInlineData = __commonJS({
     var getInlineDataFragment = _require.getInlineDataFragment;
     var _require2 = require_RelayStoreUtils();
     var FRAGMENTS_KEY = _require2.FRAGMENTS_KEY;
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function readInlineData(fragment, fragmentRef) {
       var _fragmentRef$FRAGMENT;
       var inlineDataFragment = getInlineDataFragment(fragment);
       if (fragmentRef == null) {
         return fragmentRef;
       }
-      !(typeof fragmentRef === "object") ? true ? invariant(false, "readInlineData(): Expected an object, got `%s`.", typeof fragmentRef) : invariant(false) : void 0;
+      !(typeof fragmentRef === "object") ? true ? invariant2(false, "readInlineData(): Expected an object, got `%s`.", typeof fragmentRef) : invariant2(false) : void 0;
       var inlineData = (_fragmentRef$FRAGMENT = fragmentRef[FRAGMENTS_KEY]) === null || _fragmentRef$FRAGMENT === void 0 ? void 0 : _fragmentRef$FRAGMENT[inlineDataFragment.name];
-      !(inlineData != null) ? true ? invariant(false, "readInlineData(): Expected fragment `%s` to be spread in the parent fragment.", inlineDataFragment.name) : invariant(false) : void 0;
+      !(inlineData != null) ? true ? invariant2(false, "readInlineData(): Expected fragment `%s` to be spread in the parent fragment.", inlineDataFragment.name) : invariant2(false) : void 0;
       return inlineData;
     }
     module.exports = readInlineData;
@@ -28814,7 +29069,7 @@ var require_wrapNetworkWithLogObserver = __commonJS({
                 cacheConfig
               });
             },
-            next: function next(response) {
+            next: function next2(response) {
               env.__log({
                 name: "network.next",
                 networkRequestId,
@@ -28862,7 +29117,7 @@ var require_RelayOperationTracker = __commonJS({
     "use strict";
     var _interopRequireDefault = require_interopRequireDefault()["default"];
     var _createForOfIteratorHelper2 = _interopRequireDefault(require_createForOfIteratorHelper());
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var RelayOperationTracker = /* @__PURE__ */ function() {
       function RelayOperationTracker2() {
         this._ownersToPendingOperations = /* @__PURE__ */ new Map();
@@ -28992,7 +29247,7 @@ var require_RelayOperationTracker = __commonJS({
         var promise = new Promise(function(r) {
           resolve = r;
         });
-        !(resolve != null) ? true ? invariant(false, "RelayOperationTracker: Expected resolver to be defined. If youare seeing this, it is likely a bug in Relay.") : invariant(false) : void 0;
+        !(resolve != null) ? true ? invariant2(false, "RelayOperationTracker: Expected resolver to be defined. If youare seeing this, it is likely a bug in Relay.") : invariant2(false) : void 0;
         var pendingOperations = Array.from(pendingOperationsForOwner.values());
         this._ownersToPendingPromise.set(ownerIdentifier, {
           promise,
@@ -29079,13 +29334,13 @@ var require_getOperation = __commonJS({
     var _require = require_RelayConcreteNode();
     var REQUEST = _require.REQUEST;
     var SPLIT_OPERATION = _require.SPLIT_OPERATION;
-    function getOperation(node2) {
-      switch (node2.kind) {
+    function getOperation(node6) {
+      switch (node6.kind) {
         case REQUEST:
-          return node2.operation;
+          return node6.operation;
         case SPLIT_OPERATION:
         default:
-          return node2;
+          return node6;
       }
     }
     module.exports = getOperation;
@@ -29187,8 +29442,8 @@ var require_OperationExecutor = __commonJS({
     var ROOT_TYPE = _require4.ROOT_TYPE;
     var TYPENAME_KEY = _require4.TYPENAME_KEY;
     var getStorageKey = _require4.getStorageKey;
-    var invariant = require_browser();
-    var warning = require_warning();
+    var invariant2 = require_browser();
+    var warning2 = require_warning();
     function execute(config) {
       return new Executor(config);
     }
@@ -29234,7 +29489,7 @@ var require_OperationExecutor = __commonJS({
           error: function error(_error2) {
             return _this._error(_error2);
           },
-          next: function next(response) {
+          next: function next2(response) {
             try {
               _this._next(id, response);
             } catch (error) {
@@ -29311,7 +29566,7 @@ var require_OperationExecutor = __commonJS({
           }
           default:
             this._state;
-            true ? true ? invariant(false, "OperationExecutor: invalid executor state.") : invariant(false) : void 0;
+            true ? true ? invariant2(false, "OperationExecutor: invalid executor state.") : invariant2(false) : void 0;
         }
         this._operationExecutions.set(this._operation.request.identifier, activeState);
       };
@@ -29420,14 +29675,14 @@ var require_OperationExecutor = __commonJS({
             var _responsePart$extensi;
             return ((_responsePart$extensi = responsePart.extensions) === null || _responsePart$extensi === void 0 ? void 0 : _responsePart$extensi.isOptimistic) === true;
           })) {
-            true ? true ? invariant(false, "OperationExecutor: Optimistic responses cannot be batched.") : invariant(false) : void 0;
+            true ? true ? invariant2(false, "OperationExecutor: Optimistic responses cannot be batched.") : invariant2(false) : void 0;
           }
           return false;
         }
         var response = responses[0];
         var isOptimistic = ((_response$extensions = response.extensions) === null || _response$extensions === void 0 ? void 0 : _response$extensions.isOptimistic) === true;
         if (isOptimistic && this._state !== "started") {
-          true ? true ? invariant(false, "OperationExecutor: optimistic payload received after server payload.") : invariant(false) : void 0;
+          true ? true ? invariant2(false, "OperationExecutor: optimistic payload received after server payload.") : invariant2(false) : void 0;
         }
         if (isOptimistic) {
           this._processOptimisticResponse(response, null, this._treatMissingFieldsAsNull);
@@ -29498,7 +29753,7 @@ var require_OperationExecutor = __commonJS({
       };
       _proto._processOptimisticResponse = function _processOptimisticResponse(response, updater, treatMissingFieldsAsNull) {
         var _this6 = this;
-        !(this._optimisticUpdates === null) ? true ? invariant(false, "OperationExecutor: environment.execute: only support one optimistic response per execute.") : invariant(false) : void 0;
+        !(this._optimisticUpdates === null) ? true ? invariant2(false, "OperationExecutor: environment.execute: only support one optimistic response per execute.") : invariant2(false) : void 0;
         if (response == null && updater == null) {
           return;
         }
@@ -29560,11 +29815,11 @@ var require_OperationExecutor = __commonJS({
                   }
                   break;
                 case "ActorPayload":
-                  true ? warning(false, "OperationExecutor: Unexpected optimistic ActorPayload. These updates are not supported.") : void 0;
+                  true ? warning2(false, "OperationExecutor: Unexpected optimistic ActorPayload. These updates are not supported.") : void 0;
                   break;
                 default:
                   followupPayload;
-                  true ? true ? invariant(false, "OperationExecutor: Unexpected followup kind `%s`. when processing optimistic updates.", followupPayload.kind) : invariant(false) : void 0;
+                  true ? true ? invariant2(false, "OperationExecutor: Unexpected followup kind `%s`. when processing optimistic updates.", followupPayload.kind) : invariant2(false) : void 0;
               }
             }
           } catch (err) {
@@ -29616,7 +29871,7 @@ var require_OperationExecutor = __commonJS({
             return _this7._getPublishQueueAndSaveActor().applyUpdate(update);
           });
           if (_this7._optimisticUpdates == null) {
-            true ? warning(false, "OperationExecutor: Unexpected ModuleImport optimistic update in operation %s." + _this7._operation.request.node.params.name) : void 0;
+            true ? warning2(false, "OperationExecutor: Unexpected ModuleImport optimistic update in operation %s." + _this7._operation.request.node.params.name) : void 0;
           } else {
             var _this$_optimisticUpda;
             (_this$_optimisticUpda = _this7._optimisticUpdates).push.apply(_this$_optimisticUpda, (0, _toConsumableArray2["default"])(moduleImportOptimisticUpdates));
@@ -29678,7 +29933,7 @@ var require_OperationExecutor = __commonJS({
               _this9._actorIdentifier = prevActorIdentifier;
             });
             if (_this9._isClientPayload || _this9._state === "loading_final") {
-              true ? warning(_this9._isClientPayload, "RelayModernEnvironment: Operation `%s` contains @defer/@stream directives but was executed in non-streaming mode. See https://fburl.com/relay-incremental-delivery-non-streaming-warning.", _this9._operation.request.node.params.name) : void 0;
+              true ? warning2(_this9._isClientPayload, "RelayModernEnvironment: Operation `%s` contains @defer/@stream directives but was executed in non-streaming mode. See https://fburl.com/relay-incremental-delivery-non-streaming-warning.", _this9._operation.request.node.params.name) : void 0;
               var relayPayloads = [];
               incrementalPlaceholders.forEach(function(placeholder) {
                 if (placeholder.kind === "defer") {
@@ -29707,9 +29962,9 @@ var require_OperationExecutor = __commonJS({
         switch (followupPayload.kind) {
           case "ModuleImportPayload":
             var operationLoader = this._expectOperationLoader();
-            var node2 = operationLoader.get(followupPayload.operationReference);
-            if (node2 != null) {
-              this._processFollowupPayloadWithNormalizationNode(followupPayload, getOperation(node2));
+            var node6 = operationLoader.get(followupPayload.operationReference);
+            if (node6 != null) {
+              this._processFollowupPayloadWithNormalizationNode(followupPayload, getOperation(node6));
             } else {
               var id = this._nextSubscriptionId++;
               this._pendingModulePayloadsCount++;
@@ -29723,7 +29978,7 @@ var require_OperationExecutor = __commonJS({
               RelayObservable.create(function(sink) {
                 var cancellationToken;
                 var subscription = networkObservable.subscribe({
-                  next: function next(loadedNode) {
+                  next: function next2(loadedNode) {
                     if (loadedNode != null) {
                       var publishModuleImportPayload = function publishModuleImportPayload2() {
                         try {
@@ -29790,7 +30045,7 @@ var require_OperationExecutor = __commonJS({
             break;
           default:
             followupPayload;
-            true ? true ? invariant(false, "OperationExecutor: Unexpected followup kind `%s`.", followupPayload.kind) : invariant(false) : void 0;
+            true ? true ? invariant2(false, "OperationExecutor: Unexpected followup kind `%s`.", followupPayload.kind) : invariant2(false) : void 0;
         }
       };
       _proto._processFollowupPayloadWithNormalizationNode = function _processFollowupPayloadWithNormalizationNode(followupPayload, normalizationNode) {
@@ -29824,14 +30079,14 @@ var require_OperationExecutor = __commonJS({
           parentID = placeholder.selector.dataID;
         } else {
           placeholder;
-          true ? true ? invariant(false, "OperationExecutor: Unsupported incremental placeholder kind `%s`.", placeholder.kind) : invariant(false) : void 0;
+          true ? true ? invariant2(false, "OperationExecutor: Unsupported incremental placeholder kind `%s`.", placeholder.kind) : invariant2(false) : void 0;
         }
         var parentRecord = relayPayload.source.get(parentID);
         var parentPayloads = ((_relayPayload$fieldPa = relayPayload.fieldPayloads) !== null && _relayPayload$fieldPa !== void 0 ? _relayPayload$fieldPa : []).filter(function(fieldPayload) {
           var fieldID = generateClientID(fieldPayload.dataID, fieldPayload.fieldKey);
           return fieldPayload.dataID === parentID || fieldID === parentID;
         });
-        !(parentRecord != null) ? true ? invariant(false, "OperationExecutor: Expected record `%s` to exist.", parentID) : invariant(false) : void 0;
+        !(parentRecord != null) ? true ? invariant2(false, "OperationExecutor: Expected record `%s` to exist.", parentID) : invariant2(false) : void 0;
         var nextParentRecord;
         var nextParentPayloads;
         var previousParentEntry = this._source.get(parentID);
@@ -29883,7 +30138,7 @@ var require_OperationExecutor = __commonJS({
               return;
             }
             var placeholder = resultForPath.placeholder;
-            !(placeholder.kind === "defer") ? true ? invariant(false, "OperationExecutor: Expected data for path `%s` for label `%s` to be data for @defer, was `@%s`.", pathKey, label, placeholder.kind) : invariant(false) : void 0;
+            !(placeholder.kind === "defer") ? true ? invariant2(false, "OperationExecutor: Expected data for path `%s` for label `%s` to be data for @defer, was `@%s`.", pathKey, label, placeholder.kind) : invariant2(false) : void 0;
             relayPayloads.push(_this11._processDeferResponse(label, path, placeholder, response));
           } else {
             var _pathKey = path.slice(0, -2).map(String).join(".");
@@ -29900,7 +30155,7 @@ var require_OperationExecutor = __commonJS({
               return;
             }
             var _placeholder = _resultForPath.placeholder;
-            !(_placeholder.kind === "stream") ? true ? invariant(false, "OperationExecutor: Expected data for path `%s` for label `%s` to be data for @stream, was `@%s`.", _pathKey, label, _placeholder.kind) : invariant(false) : void 0;
+            !(_placeholder.kind === "stream") ? true ? invariant2(false, "OperationExecutor: Expected data for path `%s` for label `%s` to be data for @stream, was `@%s`.", _pathKey, label, _placeholder.kind) : invariant2(false) : void 0;
             relayPayloads.push(_this11._processStreamResponse(label, path, _placeholder, response));
           }
         });
@@ -29920,7 +30175,7 @@ var require_OperationExecutor = __commonJS({
         });
         this._getPublishQueueAndSaveActor().commitPayload(this._operation, relayPayload);
         var parentEntry = this._source.get(parentID);
-        !(parentEntry != null) ? true ? invariant(false, "OperationExecutor: Expected the parent record `%s` for @defer data to exist.", parentID) : invariant(false) : void 0;
+        !(parentEntry != null) ? true ? invariant2(false, "OperationExecutor: Expected the parent record `%s` for @defer data to exist.", parentID) : invariant2(false) : void 0;
         var fieldPayloads = parentEntry.fieldPayloads;
         if (fieldPayloads.length !== 0) {
           var _response$extensions2;
@@ -29938,11 +30193,11 @@ var require_OperationExecutor = __commonJS({
         return relayPayload;
       };
       _proto._processStreamResponse = function _processStreamResponse(label, path, placeholder, response) {
-        var parentID = placeholder.parentID, node2 = placeholder.node, variables = placeholder.variables, actorIdentifier = placeholder.actorIdentifier;
+        var parentID = placeholder.parentID, node6 = placeholder.node, variables = placeholder.variables, actorIdentifier = placeholder.actorIdentifier;
         var prevActorIdentifier = this._actorIdentifier;
         this._actorIdentifier = actorIdentifier !== null && actorIdentifier !== void 0 ? actorIdentifier : this._actorIdentifier;
-        var field = node2.selections[0];
-        !(field != null && field.kind === "LinkedField" && field.plural === true) ? true ? invariant(false, "OperationExecutor: Expected @stream to be used on a plural field.") : invariant(false) : void 0;
+        var field = node6.selections[0];
+        !(field != null && field.kind === "LinkedField" && field.plural === true) ? true ? invariant2(false, "OperationExecutor: Expected @stream to be used on a plural field.") : invariant2(false) : void 0;
         var _this$_normalizeStrea = this._normalizeStreamItem(response, parentID, field, variables, path, placeholder.path), fieldPayloads = _this$_normalizeStrea.fieldPayloads, itemID = _this$_normalizeStrea.itemID, itemIndex = _this$_normalizeStrea.itemIndex, prevIDs = _this$_normalizeStrea.prevIDs, relayPayload = _this$_normalizeStrea.relayPayload, storageKey = _this$_normalizeStrea.storageKey;
         this._getPublishQueueAndSaveActor().commitPayload(this._operation, relayPayload, function(store) {
           var currentParentRecord = store.get(parentID);
@@ -29979,21 +30234,21 @@ var require_OperationExecutor = __commonJS({
       _proto._normalizeStreamItem = function _normalizeStreamItem(response, parentID, field, variables, path, normalizationPath) {
         var _field$alias, _field$concreteType, _ref, _this$_getDataID;
         var data = response.data;
-        !(typeof data === "object") ? true ? invariant(false, "OperationExecutor: Expected the GraphQL @stream payload `data` value to be an object.") : invariant(false) : void 0;
+        !(typeof data === "object") ? true ? invariant2(false, "OperationExecutor: Expected the GraphQL @stream payload `data` value to be an object.") : invariant2(false) : void 0;
         var responseKey = (_field$alias = field.alias) !== null && _field$alias !== void 0 ? _field$alias : field.name;
         var storageKey = getStorageKey(field, variables);
         var parentEntry = this._source.get(parentID);
-        !(parentEntry != null) ? true ? invariant(false, "OperationExecutor: Expected the parent record `%s` for @stream data to exist.", parentID) : invariant(false) : void 0;
+        !(parentEntry != null) ? true ? invariant2(false, "OperationExecutor: Expected the parent record `%s` for @stream data to exist.", parentID) : invariant2(false) : void 0;
         var parentRecord = parentEntry.record, fieldPayloads = parentEntry.fieldPayloads;
         var prevIDs = RelayModernRecord.getLinkedRecordIDs(parentRecord, storageKey);
-        !(prevIDs != null) ? true ? invariant(false, "OperationExecutor: Expected record `%s` to have fetched field `%s` with @stream.", parentID, field.name) : invariant(false) : void 0;
+        !(prevIDs != null) ? true ? invariant2(false, "OperationExecutor: Expected record `%s` to have fetched field `%s` with @stream.", parentID, field.name) : invariant2(false) : void 0;
         var finalPathEntry = path[path.length - 1];
         var itemIndex = parseInt(finalPathEntry, 10);
-        !(itemIndex === finalPathEntry && itemIndex >= 0) ? true ? invariant(false, "OperationExecutor: Expected path for @stream to end in a positive integer index, got `%s`", finalPathEntry) : invariant(false) : void 0;
+        !(itemIndex === finalPathEntry && itemIndex >= 0) ? true ? invariant2(false, "OperationExecutor: Expected path for @stream to end in a positive integer index, got `%s`", finalPathEntry) : invariant2(false) : void 0;
         var typeName = (_field$concreteType = field.concreteType) !== null && _field$concreteType !== void 0 ? _field$concreteType : data[TYPENAME_KEY];
-        !(typeof typeName === "string") ? true ? invariant(false, "OperationExecutor: Expected @stream field `%s` to have a __typename.", field.name) : invariant(false) : void 0;
+        !(typeof typeName === "string") ? true ? invariant2(false, "OperationExecutor: Expected @stream field `%s` to have a __typename.", field.name) : invariant2(false) : void 0;
         var itemID = (_ref = (_this$_getDataID = this._getDataID(data, typeName)) !== null && _this$_getDataID !== void 0 ? _this$_getDataID : prevIDs === null || prevIDs === void 0 ? void 0 : prevIDs[itemIndex]) !== null && _ref !== void 0 ? _ref : generateClientID(parentID, storageKey, itemIndex);
-        !(typeof itemID === "string") ? true ? invariant(false, "OperationExecutor: Expected id of elements of field `%s` to be strings.", storageKey) : invariant(false) : void 0;
+        !(typeof itemID === "string") ? true ? invariant2(false, "OperationExecutor: Expected id of elements of field `%s` to be strings.", storageKey) : invariant2(false) : void 0;
         var selector = createNormalizationSelector(field, itemID, variables);
         var nextParentRecord = RelayModernRecord.clone(parentRecord);
         var nextIDs = (0, _toConsumableArray2["default"])(prevIDs);
@@ -30111,7 +30366,7 @@ var require_OperationExecutor = __commonJS({
       };
       _proto._expectOperationLoader = function _expectOperationLoader() {
         var operationLoader = this._operationLoader;
-        !operationLoader ? true ? invariant(false, "OperationExecutor: Expected an operationLoader to be configured when using `@match`.") : invariant(false) : void 0;
+        !operationLoader ? true ? invariant2(false, "OperationExecutor: Expected an operationLoader to be configured when using `@match`.") : invariant2(false) : void 0;
         return operationLoader;
       };
       return Executor2;
@@ -30123,7 +30378,7 @@ var require_OperationExecutor = __commonJS({
         if (response.path != null || response.label != null) {
           var label = response.label, path = response.path;
           if (label == null || path == null) {
-            true ? true ? invariant(false, "OperationExecutor: invalid incremental payload, expected `path` and `label` to either both be null/undefined, or `path` to be an `Array<string | number>` and `label` to be a `string`.") : invariant(false) : void 0;
+            true ? true ? invariant2(false, "OperationExecutor: invalid incremental payload, expected `path` and `label` to either both be null/undefined, or `path` to be an `Array<string | number>` and `label` to be a `string`.") : invariant2(false) : void 0;
           }
           incrementalResponses.push({
             label,
@@ -30143,7 +30398,7 @@ var require_OperationExecutor = __commonJS({
     function validateOptimisticResponsePayload(payload) {
       var incrementalPlaceholders = payload.incrementalPlaceholders;
       if (incrementalPlaceholders != null && incrementalPlaceholders.length !== 0) {
-        true ? true ? invariant(false, "OperationExecutor: optimistic responses cannot be returned for operations that use incremental data delivery (@defer, @stream, and @stream_connection).") : invariant(false) : void 0;
+        true ? true ? invariant2(false, "OperationExecutor: optimistic responses cannot be returned for operations that use incremental data delivery (@defer, @stream, and @stream_connection).") : invariant2(false) : void 0;
       }
     }
     module.exports = {
@@ -30159,7 +30414,7 @@ var require_RelayRecordSourceMutator = __commonJS({
     var RelayModernRecord = require_RelayModernRecord();
     var _require = require_RelayRecordState();
     var EXISTENT = _require.EXISTENT;
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var RelayRecordSourceMutator = /* @__PURE__ */ function() {
       function RelayRecordSourceMutator2(base, sink) {
         this.__sources = [sink, base];
@@ -30201,7 +30456,7 @@ var require_RelayRecordSourceMutator = __commonJS({
         var sinkRecord = this._sink.get(dataID);
         if (!sinkRecord) {
           var baseRecord = this._base.get(dataID);
-          !baseRecord ? true ? invariant(false, "RelayRecordSourceMutator: Cannot modify non-existent record `%s`.", dataID) : invariant(false) : void 0;
+          !baseRecord ? true ? invariant2(false, "RelayRecordSourceMutator: Cannot modify non-existent record `%s`.", dataID) : invariant2(false) : void 0;
           sinkRecord = RelayModernRecord.create(dataID, RelayModernRecord.getType(baseRecord));
           this._sink.set(dataID, sinkRecord);
         }
@@ -30210,7 +30465,7 @@ var require_RelayRecordSourceMutator = __commonJS({
       _proto.copyFields = function copyFields(sourceID, sinkID) {
         var sinkSource = this._sink.get(sourceID);
         var baseSource = this._base.get(sourceID);
-        !(sinkSource || baseSource) ? true ? invariant(false, "RelayRecordSourceMutator#copyFields(): Cannot copy fields from non-existent record `%s`.", sourceID) : invariant(false) : void 0;
+        !(sinkSource || baseSource) ? true ? invariant2(false, "RelayRecordSourceMutator#copyFields(): Cannot copy fields from non-existent record `%s`.", sourceID) : invariant2(false) : void 0;
         var sink = this._getSinkRecord(sinkID);
         if (baseSource) {
           RelayModernRecord.copyFields(baseSource, sink);
@@ -30224,7 +30479,7 @@ var require_RelayRecordSourceMutator = __commonJS({
         RelayModernRecord.copyFields(record, sink);
       };
       _proto.create = function create(dataID, typeName) {
-        !(this._base.getStatus(dataID) !== EXISTENT && this._sink.getStatus(dataID) !== EXISTENT) ? true ? invariant(false, "RelayRecordSourceMutator#create(): Cannot create a record with id `%s`, this record already exists.", dataID) : invariant(false) : void 0;
+        !(this._base.getStatus(dataID) !== EXISTENT && this._sink.getStatus(dataID) !== EXISTENT) ? true ? invariant2(false, "RelayRecordSourceMutator#create(): Cannot create a record with id `%s`, this record already exists.", dataID) : invariant2(false) : void 0;
         var record = RelayModernRecord.create(dataID, typeName);
         this._sink.set(dataID, record);
       };
@@ -30582,13 +30837,13 @@ var require_readUpdatableFragment = __commonJS({
     var ID_KEY = _require3.ID_KEY;
     var _require4 = require_createUpdatableProxy();
     var createUpdatableProxy = _require4.createUpdatableProxy;
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function readUpdatableFragment(fragment, fragmentReference, proxy, missingFieldHandlers) {
       var updatableFragment = getFragment(fragment);
       var fragmentVariables = getVariablesFromFragment(updatableFragment, fragmentReference);
       var id = fragmentReference[ID_KEY];
       var fragmentRoot = proxy.get(id);
-      !(fragmentRoot != null) ? true ? invariant(false, "No record with ".concat(id, " was found. This likely indicates a problem with Relay.")) : invariant(false) : void 0;
+      !(fragmentRoot != null) ? true ? invariant2(false, "No record with ".concat(id, " was found. This likely indicates a problem with Relay.")) : invariant2(false) : void 0;
       return {
         updatableData: createUpdatableProxy(fragmentRoot, fragmentVariables, updatableFragment.selections, proxy, missingFieldHandlers)
       };
@@ -30627,7 +30882,7 @@ var require_RelayRecordProxy = __commonJS({
     var generateClientID = _require.generateClientID;
     var _require2 = require_RelayStoreUtils();
     var getStableStorageKey = _require2.getStableStorageKey;
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var RelayRecordProxy = /* @__PURE__ */ function() {
       function RelayRecordProxy2(source, mutator, dataID) {
         this._dataID = dataID;
@@ -30643,7 +30898,7 @@ var require_RelayRecordProxy = __commonJS({
       };
       _proto.getType = function getType() {
         var type = this._mutator.getType(this._dataID);
-        !(type != null) ? true ? invariant(false, "RelayRecordProxy: Cannot get the type of deleted record `%s`.", this._dataID) : invariant(false) : void 0;
+        !(type != null) ? true ? invariant2(false, "RelayRecordProxy: Cannot get the type of deleted record `%s`.", this._dataID) : invariant2(false) : void 0;
         return type;
       };
       _proto.getValue = function getValue(name, args) {
@@ -30651,7 +30906,7 @@ var require_RelayRecordProxy = __commonJS({
         return this._mutator.getValue(this._dataID, storageKey);
       };
       _proto.setValue = function setValue(value, name, args) {
-        !isValidLeafValue(value) ? true ? invariant(false, "RelayRecordProxy#setValue(): Expected a scalar or array of scalars, got `%s`.", JSON.stringify(value)) : invariant(false) : void 0;
+        !isValidLeafValue(value) ? true ? invariant2(false, "RelayRecordProxy#setValue(): Expected a scalar or array of scalars, got `%s`.", JSON.stringify(value)) : invariant2(false) : void 0;
         return this.setValue__UNSAFE(value, name, args);
       };
       _proto.setValue__UNSAFE = function setValue__UNSAFE(value, name, args) {
@@ -30665,7 +30920,7 @@ var require_RelayRecordProxy = __commonJS({
         return linkedID != null ? this._source.get(linkedID) : linkedID;
       };
       _proto.setLinkedRecord = function setLinkedRecord(record, name, args) {
-        !(record instanceof RelayRecordProxy2) ? true ? invariant(false, "RelayRecordProxy#setLinkedRecord(): Expected a record, got `%s`.", record) : invariant(false) : void 0;
+        !(record instanceof RelayRecordProxy2) ? true ? invariant2(false, "RelayRecordProxy#setLinkedRecord(): Expected a record, got `%s`.", record) : invariant2(false) : void 0;
         var storageKey = getStableStorageKey(name, args);
         var linkedID = record.getDataID();
         this._mutator.setLinkedRecordID(this._dataID, storageKey, linkedID);
@@ -30694,7 +30949,7 @@ var require_RelayRecordProxy = __commonJS({
         });
       };
       _proto.setLinkedRecords = function setLinkedRecords(records, name, args) {
-        !Array.isArray(records) ? true ? invariant(false, "RelayRecordProxy#setLinkedRecords(): Expected records to be an array, got `%s`.", records) : invariant(false) : void 0;
+        !Array.isArray(records) ? true ? invariant2(false, "RelayRecordProxy#setLinkedRecords(): Expected records to be an array, got `%s`.", records) : invariant2(false) : void 0;
         var storageKey = getStableStorageKey(name, args);
         var linkedIDs = records.map(function(record) {
           return record && record.getDataID();
@@ -30730,7 +30985,7 @@ var require_RelayRecordSourceProxy = __commonJS({
     var _require4 = require_readUpdatableQuery();
     var _readUpdatableQuery = _require4.readUpdatableQuery;
     var RelayRecordProxy = require_RelayRecordProxy();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var RelayRecordSourceProxy = /* @__PURE__ */ function() {
       function RelayRecordSourceProxy2(mutator, getDataID, handlerProvider, missingFieldHandlers) {
         this.__mutator = mutator;
@@ -30762,7 +31017,7 @@ var require_RelayRecordSourceProxy = __commonJS({
         if (fieldPayloads && fieldPayloads.length) {
           fieldPayloads.forEach(function(fieldPayload) {
             var handler = _this._handlerProvider && _this._handlerProvider(fieldPayload.handle);
-            !handler ? true ? invariant(false, "RelayModernEnvironment: Expected a handler to be provided for handle `%s`.", fieldPayload.handle) : invariant(false) : void 0;
+            !handler ? true ? invariant2(false, "RelayModernEnvironment: Expected a handler to be provided for handle `%s`.", fieldPayload.handle) : invariant2(false) : void 0;
             handler.update(_this, fieldPayload);
           });
         }
@@ -30771,11 +31026,11 @@ var require_RelayRecordSourceProxy = __commonJS({
         this.__mutator.create(dataID, typeName);
         delete this._proxies[dataID];
         var record = this.get(dataID);
-        !record ? true ? invariant(false, "RelayRecordSourceProxy#create(): Expected the created record to exist.") : invariant(false) : void 0;
+        !record ? true ? invariant2(false, "RelayRecordSourceProxy#create(): Expected the created record to exist.") : invariant2(false) : void 0;
         return record;
       };
       _proto["delete"] = function _delete(dataID) {
-        !(dataID !== ROOT_ID) ? true ? invariant(false, "RelayRecordSourceProxy#delete(): Cannot delete the root record.") : invariant(false) : void 0;
+        !(dataID !== ROOT_ID) ? true ? invariant2(false, "RelayRecordSourceProxy#delete(): Cannot delete the root record.") : invariant2(false) : void 0;
         delete this._proxies[dataID];
         this.__mutator["delete"](dataID);
       };
@@ -30795,7 +31050,7 @@ var require_RelayRecordSourceProxy = __commonJS({
         if (!root) {
           root = this.create(ROOT_ID, ROOT_TYPE);
         }
-        !(root && root.getType() === ROOT_TYPE) ? true ? invariant(false, "RelayRecordSourceProxy#getRoot(): Expected the source to contain a root record, %s.", root == null ? "no root record found" : "found a root record of type `".concat(root.getType(), "`")) : invariant(false) : void 0;
+        !(root && root.getType() === ROOT_TYPE) ? true ? invariant2(false, "RelayRecordSourceProxy#getRoot(): Expected the source to contain a root record, %s.", root == null ? "no root record found" : "found a root record of type `".concat(root.getType(), "`")) : invariant2(false) : void 0;
         return root;
       };
       _proto.invalidateStore = function invalidateStore() {
@@ -30833,7 +31088,7 @@ var require_RelayRecordSourceSelectorProxy = __commonJS({
     var _readUpdatableFragment = _require2.readUpdatableFragment;
     var _require3 = require_readUpdatableQuery();
     var _readUpdatableQuery = _require3.readUpdatableQuery;
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var RelayRecordSourceSelectorProxy = /* @__PURE__ */ function() {
       function RelayRecordSourceSelectorProxy2(mutator, recordSource, readSelector, missingFieldHandlers) {
         this.__mutator = mutator;
@@ -30868,8 +31123,8 @@ var require_RelayRecordSourceSelectorProxy = __commonJS({
         if (field && field.kind === "RequiredField") {
           field = field.field;
         }
-        !(field && field.kind === "LinkedField") ? true ? invariant(false, "RelayRecordSourceSelectorProxy#getRootField(): Cannot find root field `%s`, no such field is defined on GraphQL document `%s`.", fieldName, selector.node.name) : invariant(false) : void 0;
-        !(field.plural === plural) ? true ? invariant(false, "RelayRecordSourceSelectorProxy#getRootField(): Expected root field `%s` to be %s.", fieldName, plural ? "plural" : "singular") : invariant(false) : void 0;
+        !(field && field.kind === "LinkedField") ? true ? invariant2(false, "RelayRecordSourceSelectorProxy#getRootField(): Cannot find root field `%s`, no such field is defined on GraphQL document `%s`.", fieldName, selector.node.name) : invariant2(false) : void 0;
+        !(field.plural === plural) ? true ? invariant2(false, "RelayRecordSourceSelectorProxy#getRootField(): Expected root field `%s` to be %s.", fieldName, plural ? "plural" : "singular") : invariant2(false) : void 0;
         return field;
       };
       _proto.getRootField = function getRootField(fieldName) {
@@ -30929,32 +31184,32 @@ var require_ResolverCache = __commonJS({
     var RELAY_RESOLVER_SNAPSHOT_KEY = _require3.RELAY_RESOLVER_SNAPSHOT_KEY;
     var RELAY_RESOLVER_VALUE_KEY = _require3.RELAY_RESOLVER_VALUE_KEY;
     var getStorageKey = _require3.getStorageKey;
-    var invariant = require_browser();
-    var warning = require_warning();
+    var invariant2 = require_browser();
+    var warning2 = require_warning();
     var emptySet = /* @__PURE__ */ new Set();
     var NoopResolverCache = /* @__PURE__ */ function() {
       function NoopResolverCache2() {
       }
       var _proto = NoopResolverCache2.prototype;
       _proto.readFromCacheOrEvaluate = function readFromCacheOrEvaluate(recordID, field, variables, evaluate, getDataForResolverFragment) {
-        !(field.kind !== RELAY_LIVE_RESOLVER) ? true ? invariant(false, "This store does not support Live Resolvers") : invariant(false) : void 0;
+        !(field.kind !== RELAY_LIVE_RESOLVER) ? true ? invariant2(false, "This store does not support Live Resolvers") : invariant2(false) : void 0;
         var _evaluate = evaluate(), resolverResult = _evaluate.resolverResult, snapshot = _evaluate.snapshot, error = _evaluate.error;
         return [resolverResult, void 0, error, snapshot, void 0, void 0];
       };
       _proto.invalidateDataIDs = function invalidateDataIDs(updatedDataIDs) {
       };
       _proto.ensureClientRecord = function ensureClientRecord(id, typeName) {
-        true ? true ? invariant(false, "Client Edges to Client Objects are not supported in this version of Relay Store") : invariant(false) : void 0;
+        true ? true ? invariant2(false, "Client Edges to Client Objects are not supported in this version of Relay Store") : invariant2(false) : void 0;
       };
       _proto.notifyUpdatedSubscribers = function notifyUpdatedSubscribers(updatedDataIDs) {
       };
       return NoopResolverCache2;
     }();
-    function addDependencyEdge(edges, from, to) {
-      var set = edges.get(from);
+    function addDependencyEdge(edges, from2, to) {
+      var set = edges.get(from2);
       if (!set) {
         set = /* @__PURE__ */ new Set();
-        edges.set(from, set);
+        edges.set(from2, set);
       }
       set.add(to);
     }
@@ -30968,7 +31223,7 @@ var require_ResolverCache = __commonJS({
       _proto2.readFromCacheOrEvaluate = function readFromCacheOrEvaluate(recordID, field, variables, evaluate, getDataForResolverFragment) {
         var recordSource = this._getRecordSource();
         var record = recordSource.get(recordID);
-        !(record != null) ? true ? invariant(false, "We expect record to exist in the store.") : invariant(false) : void 0;
+        !(record != null) ? true ? invariant2(false, "We expect record to exist in the store.") : invariant2(false) : void 0;
         var storageKey = getStorageKey(field, variables);
         var linkedID = RelayModernRecord.getLinkedRecordID(record, storageKey);
         var linkedRecord = linkedID == null ? null : recordSource.get(linkedID);
@@ -30985,7 +31240,7 @@ var require_ResolverCache = __commonJS({
           RelayModernRecord.setValue(linkedRecord, RELAY_RESOLVER_ERROR_KEY, evaluationResult.error);
           recordSource.set(linkedID, linkedRecord);
           var currentRecord = recordSource.get(recordID);
-          !(currentRecord != null) ? true ? invariant(false, "Expected the parent record to still be in the record source.") : invariant(false) : void 0;
+          !(currentRecord != null) ? true ? invariant2(false, "Expected the parent record to still be in the record source.") : invariant2(false) : void 0;
           var nextRecord = RelayModernRecord.clone(currentRecord);
           RelayModernRecord.setLinkedRecordID(nextRecord, storageKey, linkedID);
           recordSource.set(recordID, nextRecord);
@@ -31056,7 +31311,7 @@ var require_ResolverCache = __commonJS({
       _proto2._markInvalidatedResolverRecord = function _markInvalidatedResolverRecord(dataID, recordSource, updatedDataIDs) {
         var record = recordSource.get(dataID);
         if (!record) {
-          true ? warning(false, "Expected a resolver record with ID %s, but it was missing.", dataID) : void 0;
+          true ? warning2(false, "Expected a resolver record with ID %s, but it was missing.", dataID) : void 0;
           return;
         }
         var nextRecord = RelayModernRecord.clone(record);
@@ -31071,7 +31326,7 @@ var require_ResolverCache = __commonJS({
         var originalInputs = snapshot === null || snapshot === void 0 ? void 0 : snapshot.data;
         var readerSelector = snapshot === null || snapshot === void 0 ? void 0 : snapshot.selector;
         if (originalInputs == null || readerSelector == null) {
-          true ? warning(false, "Expected previous inputs and reader selector on resolver record with ID %s, but they were missing.", RelayModernRecord.getDataID(record)) : void 0;
+          true ? warning2(false, "Expected previous inputs and reader selector on resolver record with ID %s, but they were missing.", RelayModernRecord.getDataID(record)) : void 0;
           return true;
         }
         var _getDataForResolverFr = getDataForResolverFragment(readerSelector), latestValues = _getDataForResolverFr.data;
@@ -31082,10 +31337,10 @@ var require_ResolverCache = __commonJS({
         return false;
       };
       _proto2.ensureClientRecord = function ensureClientRecord(id, typename) {
-        true ? true ? invariant(false, "Client Edges to Client Objects are not supported in this version of Relay Store") : invariant(false) : void 0;
+        true ? true ? invariant2(false, "Client Edges to Client Objects are not supported in this version of Relay Store") : invariant2(false) : void 0;
       };
       _proto2.notifyUpdatedSubscribers = function notifyUpdatedSubscribers(updatedDataIDs) {
-        true ? true ? invariant(false, "Processing @outputType records is not supported in this version of Relay Store") : invariant(false) : void 0;
+        true ? true ? invariant2(false, "Processing @outputType records is not supported in this version of Relay Store") : invariant2(false) : void 0;
       };
       return RecordResolverCache2;
     }();
@@ -31104,7 +31359,7 @@ var require_ResolverFragments = __commonJS({
     var getFragment = _require.getFragment;
     var _require2 = require_RelayModernSelector();
     var getSelector = _require2.getSelector;
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var contextStack = [];
     function withResolverContext(context, cb) {
       contextStack.push(context);
@@ -31121,8 +31376,8 @@ var require_ResolverFragments = __commonJS({
       var context = contextStack[contextStack.length - 1];
       var fragmentNode = getFragment(fragmentInput);
       var fragmentSelector = getSelector(fragmentNode, fragmentKey);
-      !(fragmentSelector != null) ? true ? invariant(false, "Expected a selector for the fragment of the resolver ".concat(fragmentNode.name, ", but got null.")) : invariant(false) : void 0;
-      !(fragmentSelector.kind === "SingularReaderSelector") ? true ? invariant(false, "Expected a singular reader selector for the fragment of the resolver ".concat(fragmentNode.name, ", but it was plural.")) : invariant(false) : void 0;
+      !(fragmentSelector != null) ? true ? invariant2(false, "Expected a selector for the fragment of the resolver ".concat(fragmentNode.name, ", but got null.")) : invariant2(false) : void 0;
+      !(fragmentSelector.kind === "SingularReaderSelector") ? true ? invariant2(false, "Expected a singular reader selector for the fragment of the resolver ".concat(fragmentNode.name, ", but it was plural.")) : invariant2(false) : void 0;
       var _context$getDataForRe = context.getDataForResolverFragment(fragmentSelector, fragmentKey), data = _context$getDataForRe.data, isMissingData = _context$getDataForRe.isMissingData;
       if (isMissingData) {
         throw RESOLVER_FRAGMENT_MISSING_DATA_SENTINEL;
@@ -31188,7 +31443,7 @@ var require_RelayReader = __commonJS({
     var withResolverContext = _require5.withResolverContext;
     var _require6 = require_TypeID();
     var generateTypeID = _require6.generateTypeID;
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function read(recordSource, selector, resolverCache) {
       var reader = new RelayReader(recordSource, selector, resolverCache !== null && resolverCache !== void 0 ? resolverCache : new NoopResolverCache());
       return reader.read();
@@ -31215,13 +31470,13 @@ var require_RelayReader = __commonJS({
       }
       var _proto = RelayReader2.prototype;
       _proto.read = function read2() {
-        var _this$_selector = this._selector, node2 = _this$_selector.node, dataID = _this$_selector.dataID, isWithinUnmatchedTypeRefinement = _this$_selector.isWithinUnmatchedTypeRefinement;
-        var abstractKey = node2.abstractKey;
+        var _this$_selector = this._selector, node6 = _this$_selector.node, dataID = _this$_selector.dataID, isWithinUnmatchedTypeRefinement = _this$_selector.isWithinUnmatchedTypeRefinement;
+        var abstractKey = node6.abstractKey;
         var record = this._recordSource.get(dataID);
         var isDataExpectedToBePresent = !isWithinUnmatchedTypeRefinement;
         if (isDataExpectedToBePresent && abstractKey == null && record != null) {
           var recordType = RelayModernRecord.getType(record);
-          if (recordType !== node2.type && dataID !== ROOT_ID) {
+          if (recordType !== node6.type && dataID !== ROOT_ID) {
             isDataExpectedToBePresent = false;
           }
         }
@@ -31234,7 +31489,7 @@ var require_RelayReader = __commonJS({
           }
         }
         this._isWithinUnmatchedTypeRefinement = !isDataExpectedToBePresent;
-        var data = this._traverse(node2, dataID, null);
+        var data = this._traverse(node6, dataID, null);
         if (this._updatedDataIDs.size > 0) {
           this._resolverCache.notifyUpdatedSubscribers(this._updatedDataIDs);
           this._updatedDataIDs.clear();
@@ -31292,7 +31547,7 @@ var require_RelayReader = __commonJS({
           }
         }
       };
-      _proto._traverse = function _traverse(node2, dataID, prevData) {
+      _proto._traverse = function _traverse(node6, dataID, prevData) {
         var record = this._recordSource.get(dataID);
         this._seenRecords.add(dataID);
         if (record == null) {
@@ -31302,11 +31557,11 @@ var require_RelayReader = __commonJS({
           return record;
         }
         var data = prevData || {};
-        var hadRequiredData = this._traverseSelections(node2.selections, record, data);
+        var hadRequiredData = this._traverseSelections(node6.selections, record, data);
         return hadRequiredData ? data : null;
       };
       _proto._getVariableValue = function _getVariableValue(name) {
-        !this._variables.hasOwnProperty(name) ? true ? invariant(false, "RelayReader(): Undefined variable `%s`.", name) : invariant(false) : void 0;
+        !this._variables.hasOwnProperty(name) ? true ? invariant2(false, "RelayReader(): Undefined variable `%s`.", name) : invariant2(false) : void 0;
         return this._variables[name];
       };
       _proto._maybeReportUnexpectedNull = function _maybeReportUnexpectedNull(fieldPath, action) {
@@ -31453,7 +31708,7 @@ var require_RelayReader = __commonJS({
               break;
             default:
               selection;
-              true ? true ? invariant(false, "RelayReader(): Unexpected ast kind `%s`.", selection.kind) : invariant(false) : void 0;
+              true ? true ? invariant2(false, "RelayReader(): Unexpected ast kind `%s`.", selection.kind) : invariant2(false) : void 0;
           }
         }
         return true;
@@ -31486,7 +31741,7 @@ var require_RelayReader = __commonJS({
             return this._readClientEdge(selection.field, record, data);
           default:
             selection.field.kind;
-            true ? true ? invariant(false, "RelayReader(): Unexpected ast kind `%s`.", selection.kind) : invariant(false) : void 0;
+            true ? true ? invariant2(false, "RelayReader(): Unexpected ast kind `%s`.", selection.kind) : invariant2(false) : void 0;
         }
       };
       _proto._readResolverField = function _readResolverField(field, record, data) {
@@ -31627,7 +31882,7 @@ var require_RelayReader = __commonJS({
         var _this2 = this;
         var _backingField$alias;
         var backingField = field.backingField;
-        !(backingField.kind !== "ClientExtension") ? true ? invariant(false, "Client extension client edges are not yet implemented.") : invariant(false) : void 0;
+        !(backingField.kind !== "ClientExtension") ? true ? invariant2(false, "Client extension client edges are not yet implemented.") : invariant2(false) : void 0;
         var applicationName = (_backingField$alias = backingField.alias) !== null && _backingField$alias !== void 0 ? _backingField$alias : backingField.name;
         var backingFieldData = {};
         this._traverseSelections([backingField], record, backingFieldData);
@@ -31664,7 +31919,7 @@ var require_RelayReader = __commonJS({
             }
             this._clientEdgeTraversalPath.push(traversalPathSegment);
             var prevData = data[applicationName];
-            !(prevData == null || typeof prevData === "object") ? true ? invariant(false, "RelayReader(): Expected data for field `%s` on record `%s` to be an object, got `%s`.", applicationName, RelayModernRecord.getDataID(record), prevData) : invariant(false) : void 0;
+            !(prevData == null || typeof prevData === "object") ? true ? invariant2(false, "RelayReader(): Expected data for field `%s` on record `%s` to be an object, got `%s`.", applicationName, RelayModernRecord.getDataID(record), prevData) : invariant2(false) : void 0;
             var edgeValue = this._traverse(field.linkedField, storeID, prevData);
             this._clientEdgeTraversalPath.pop();
             data[applicationName] = edgeValue;
@@ -31701,7 +31956,7 @@ var require_RelayReader = __commonJS({
           return linkedID;
         }
         var prevData = data[applicationName];
-        !(prevData == null || typeof prevData === "object") ? true ? invariant(false, "RelayReader(): Expected data for field `%s` on record `%s` to be an object, got `%s`.", applicationName, RelayModernRecord.getDataID(record), prevData) : invariant(false) : void 0;
+        !(prevData == null || typeof prevData === "object") ? true ? invariant2(false, "RelayReader(): Expected data for field `%s` on record `%s` to be an object, got `%s`.", applicationName, RelayModernRecord.getDataID(record), prevData) : invariant2(false) : void 0;
         var value = this._traverse(field, linkedID, prevData);
         data[applicationName] = value;
         return value;
@@ -31751,7 +32006,7 @@ var require_RelayReader = __commonJS({
           return linkedIDs;
         }
         var prevData = data[applicationName];
-        !(prevData == null || Array.isArray(prevData)) ? true ? invariant(false, "RelayReader(): Expected data for field `%s` on record `%s` to be an array, got `%s`.", applicationName, RelayModernRecord.getDataID(record), prevData) : invariant(false) : void 0;
+        !(prevData == null || Array.isArray(prevData)) ? true ? invariant2(false, "RelayReader(): Expected data for field `%s` on record `%s` to be an array, got `%s`.", applicationName, RelayModernRecord.getDataID(record), prevData) : invariant2(false) : void 0;
         var linkedArray = prevData || [];
         linkedIDs.forEach(function(linkedID, nextIndex) {
           if (linkedID == null) {
@@ -31762,7 +32017,7 @@ var require_RelayReader = __commonJS({
             return;
           }
           var prevItem = linkedArray[nextIndex];
-          !(prevItem == null || typeof prevItem === "object") ? true ? invariant(false, "RelayReader(): Expected data for field `%s` on record `%s` to be an object, got `%s`.", applicationName, RelayModernRecord.getDataID(record), prevItem) : invariant(false) : void 0;
+          !(prevItem == null || typeof prevItem === "object") ? true ? invariant2(false, "RelayReader(): Expected data for field `%s` on record `%s` to be an object, got `%s`.", applicationName, RelayModernRecord.getDataID(record), prevItem) : invariant2(false) : void 0;
           linkedArray[nextIndex] = _this3._traverse(field, linkedID, prevItem);
         });
         data[applicationName] = linkedArray;
@@ -31839,7 +32094,7 @@ var require_RelayReader = __commonJS({
         if (fragmentPointers == null) {
           fragmentPointers = data[FRAGMENTS_KEY] = {};
         }
-        !(typeof fragmentPointers === "object" && fragmentPointers != null) ? true ? invariant(false, "RelayReader: Expected fragment spread data to be an object, got `%s`.", fragmentPointers) : invariant(false) : void 0;
+        !(typeof fragmentPointers === "object" && fragmentPointers != null) ? true ? invariant2(false, "RelayReader: Expected fragment spread data to be an object, got `%s`.", fragmentPointers) : invariant2(false) : void 0;
         if (data[ID_KEY] == null) {
           data[ID_KEY] = RelayModernRecord.getDataID(record);
         }
@@ -31856,7 +32111,7 @@ var require_RelayReader = __commonJS({
         if (fragmentPointers == null) {
           fragmentPointers = data[FRAGMENTS_KEY] = {};
         }
-        !(typeof fragmentPointers === "object" && fragmentPointers != null) ? true ? invariant(false, "RelayReader: Expected fragment spread data to be an object, got `%s`.", fragmentPointers) : invariant(false) : void 0;
+        !(typeof fragmentPointers === "object" && fragmentPointers != null) ? true ? invariant2(false, "RelayReader: Expected fragment spread data to be an object, got `%s`.", fragmentPointers) : invariant2(false) : void 0;
         if (data[ID_KEY] == null) {
           data[ID_KEY] = RelayModernRecord.getDataID(record);
         }
@@ -31919,7 +32174,7 @@ var require_RelayReader = __commonJS({
     }
     function assertValidClientEdgeResolverResponse(field, clientEdgeResolverResponse) {
       if (field.linkedField.plural) {
-        !Array.isArray(clientEdgeResolverResponse) ? true ? invariant(false, "Expected plural Client Edge Relay Resolver to return an array containing IDs or objects with shape {id}.") : invariant(false) : void 0;
+        !Array.isArray(clientEdgeResolverResponse) ? true ? invariant2(false, "Expected plural Client Edge Relay Resolver to return an array containing IDs or objects with shape {id}.") : invariant2(false) : void 0;
         return {
           kind: "PluralConcrete",
           ids: clientEdgeResolverResponse.map(function(response) {
@@ -31937,7 +32192,7 @@ var require_RelayReader = __commonJS({
       if (field.kind === CLIENT_EDGE_TO_CLIENT_OBJECT) {
         if (field.backingField.normalizationInfo == null) {
           var concreteType = field.concreteType;
-          !(concreteType != null) ? true ? invariant(false, "Expected at least one of backingField.normalizationInfo or field.concreteType to be non-null. This indicates a bug in Relay.") : invariant(false) : void 0;
+          !(concreteType != null) ? true ? invariant2(false, "Expected at least one of backingField.normalizationInfo or field.concreteType to be non-null. This indicates a bug in Relay.") : invariant2(false) : void 0;
           return [resolverCache.ensureClientRecord(clientEdgeResolverResponse, concreteType), null];
         } else {
           return [clientEdgeResolverResponse, null];
@@ -31953,7 +32208,7 @@ var require_RelayReader = __commonJS({
       if (field.kind === CLIENT_EDGE_TO_CLIENT_OBJECT) {
         if (field.backingField.normalizationInfo == null) {
           var concreteType = field.concreteType;
-          !(concreteType != null) ? true ? invariant(false, "Expected at least one of backingField.normalizationInfo or field.concreteType to be non-null. This indicates a bug in Relay.") : invariant(false) : void 0;
+          !(concreteType != null) ? true ? invariant2(false, "Expected at least one of backingField.normalizationInfo or field.concreteType to be non-null. This indicates a bug in Relay.") : invariant2(false) : void 0;
           return clientEdgeResolverResponse.map(function(id) {
             return resolverCache.ensureClientRecord(id, concreteType);
           });
@@ -31961,7 +32216,7 @@ var require_RelayReader = __commonJS({
           return clientEdgeResolverResponse;
         }
       } else {
-        true ? true ? invariant(false, "Unexpected Client Edge to plural server type. This should be prevented by the compiler.") : invariant(false) : void 0;
+        true ? true ? invariant2(false, "Unexpected Client Edge to plural server type. This should be prevented by the compiler.") : invariant2(false) : void 0;
       }
     }
     function extractIdFromResponse(individualResponse, errorMessage) {
@@ -31970,7 +32225,7 @@ var require_RelayReader = __commonJS({
       } else if (typeof individualResponse === "object" && individualResponse != null && typeof individualResponse.id === "string") {
         return individualResponse.id;
       }
-      true ? true ? invariant(false, errorMessage) : invariant(false) : void 0;
+      true ? true ? invariant2(false, errorMessage) : invariant2(false) : void 0;
     }
     module.exports = {
       read
@@ -31989,8 +32244,8 @@ var require_RelayPublishQueue = __commonJS({
     var RelayRecordSourceSelectorProxy = require_RelayRecordSourceSelectorProxy();
     var RelayReader = require_RelayReader();
     var RelayRecordSource = require_RelayRecordSource();
-    var invariant = require_browser();
-    var warning = require_warning();
+    var invariant2 = require_browser();
+    var warning2 = require_warning();
     var _global = typeof global !== "undefined" ? global : typeof window !== "undefined" ? window : void 0;
     var applyWithGuard = (_global$ErrorUtils$ap = _global === null || _global === void 0 ? void 0 : (_global$ErrorUtils = _global.ErrorUtils) === null || _global$ErrorUtils === void 0 ? void 0 : _global$ErrorUtils.applyWithGuard) !== null && _global$ErrorUtils$ap !== void 0 ? _global$ErrorUtils$ap : function(callback, context, args, onError, name) {
       return callback.apply(context, args);
@@ -32010,7 +32265,7 @@ var require_RelayPublishQueue = __commonJS({
       }
       var _proto = RelayPublishQueue2.prototype;
       _proto.applyUpdate = function applyUpdate(updater) {
-        !(!this._appliedOptimisticUpdates.has(updater) && !this._pendingOptimisticUpdates.has(updater)) ? true ? invariant(false, "RelayPublishQueue: Cannot apply the same update function more than once concurrently.") : invariant(false) : void 0;
+        !(!this._appliedOptimisticUpdates.has(updater) && !this._pendingOptimisticUpdates.has(updater)) ? true ? invariant2(false, "RelayPublishQueue: Cannot apply the same update function more than once concurrently.") : invariant2(false) : void 0;
         this._pendingOptimisticUpdates.add(updater);
       };
       _proto.revertUpdate = function revertUpdate(updater) {
@@ -32053,8 +32308,8 @@ var require_RelayPublishQueue = __commonJS({
         var runWillClearGcHold = this._appliedOptimisticUpdates === 0 && !!this._gcHold;
         var runIsANoop = !this._pendingBackupRebase && this._pendingOptimisticUpdates.size === 0 && !runWillClearGcHold;
         if (true) {
-          true ? warning(!runIsANoop, "RelayPublishQueue.run was called, but the call would have been a noop.") : void 0;
-          true ? warning(this._isRunning !== true, "A store update was detected within another store update. Please make sure new store updates aren't being executed within an updater function for a different update.") : void 0;
+          true ? warning2(!runIsANoop, "RelayPublishQueue.run was called, but the call would have been a noop.") : void 0;
+          true ? warning2(this._isRunning !== true, "A store update was detected within another store update. Please make sure new store updates aren't being executed within an updater function for a different update.") : void 0;
           this._isRunning = true;
         }
         if (runIsANoop) {
@@ -32102,13 +32357,13 @@ var require_RelayPublishQueue = __commonJS({
         if (fieldPayloads && fieldPayloads.length) {
           fieldPayloads.forEach(function(fieldPayload) {
             var handler = _this._handlerProvider && _this._handlerProvider(fieldPayload.handle);
-            !handler ? true ? invariant(false, "RelayModernEnvironment: Expected a handler to be provided for handle `%s`.", fieldPayload.handle) : invariant(false) : void 0;
+            !handler ? true ? invariant2(false, "RelayModernEnvironment: Expected a handler to be provided for handle `%s`.", fieldPayload.handle) : invariant2(false) : void 0;
             handler.update(recordSourceProxy, fieldPayload);
           });
         }
         if (updater) {
           var selector = operation.fragment;
-          !(selector != null) ? true ? invariant(false, "RelayModernEnvironment: Expected a selector to be provided with updater function.") : invariant(false) : void 0;
+          !(selector != null) ? true ? invariant2(false, "RelayModernEnvironment: Expected a selector to be provided with updater function.") : invariant2(false) : void 0;
           var recordSourceSelectorProxy = new RelayRecordSourceSelectorProxy(mutator, recordSourceProxy, selector, this._missingFieldHandlers);
           var selectorData = lookupSelector(source, selector);
           updater(recordSourceSelectorProxy, selectorData);
@@ -32350,7 +32605,7 @@ var require_RelayModernEnvironment = __commonJS({
     var OperationExecutor = require_OperationExecutor();
     var RelayPublishQueue = require_RelayPublishQueue();
     var RelayRecordSource = require_RelayRecordSource();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var RelayModernEnvironment = /* @__PURE__ */ function() {
       function RelayModernEnvironment2(config) {
         var _this = this;
@@ -32360,7 +32615,7 @@ var require_RelayModernEnvironment = __commonJS({
         var operationLoader = config.operationLoader;
         if (true) {
           if (operationLoader != null) {
-            !(typeof operationLoader === "object" && typeof operationLoader.get === "function" && typeof operationLoader.load === "function") ? true ? invariant(false, "RelayModernEnvironment: Expected `operationLoader` to be an object with get() and load() functions, got `%s`.", operationLoader) : invariant(false) : void 0;
+            !(typeof operationLoader === "object" && typeof operationLoader.get === "function" && typeof operationLoader.load === "function") ? true ? invariant2(false, "RelayModernEnvironment: Expected `operationLoader` to be an object with get() and load() functions, got `%s`.", operationLoader) : invariant2(false) : void 0;
           }
         }
         this.__log = (_config$log = config.log) !== null && _config$log !== void 0 ? _config$log : emptyFunction;
@@ -32668,12 +32923,12 @@ var require_cloneRelayHandleSourceField = __commonJS({
     var _require2 = require_RelayStoreUtils();
     var getHandleStorageKey = _require2.getHandleStorageKey;
     var areEqual = require_areEqual();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function cloneRelayHandleSourceField(handleField, selections, variables) {
       var sourceField = selections.find(function(source) {
         return source.kind === LINKED_FIELD && source.name === handleField.name && source.alias === handleField.alias && areEqual(source.args, handleField.args);
       });
-      !(sourceField && sourceField.kind === LINKED_FIELD) ? true ? invariant(false, "cloneRelayHandleSourceField: Expected a corresponding source field for handle `%s`.", handleField.handle) : invariant(false) : void 0;
+      !(sourceField && sourceField.kind === LINKED_FIELD) ? true ? invariant2(false, "cloneRelayHandleSourceField: Expected a corresponding source field for handle `%s`.", handleField.handle) : invariant2(false) : void 0;
       var handleKey = getHandleStorageKey(handleField, variables);
       return {
         kind: "LinkedField",
@@ -32699,12 +32954,12 @@ var require_cloneRelayScalarHandleSourceField = __commonJS({
     var _require2 = require_RelayStoreUtils();
     var getHandleStorageKey = _require2.getHandleStorageKey;
     var areEqual = require_areEqual();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function cloneRelayScalarHandleSourceField(handleField, selections, variables) {
       var sourceField = selections.find(function(source) {
         return source.kind === SCALAR_FIELD && source.name === handleField.name && source.alias === handleField.alias && areEqual(source.args, handleField.args);
       });
-      !(sourceField && sourceField.kind === SCALAR_FIELD) ? true ? invariant(false, "cloneRelayScalarHandleSourceField: Expected a corresponding source field for handle `%s`.", handleField.handle) : invariant(false) : void 0;
+      !(sourceField && sourceField.kind === SCALAR_FIELD) ? true ? invariant2(false, "cloneRelayScalarHandleSourceField: Expected a corresponding source field for handle `%s`.", handleField.handle) : invariant2(false) : void 0;
       var handleKey = getHandleStorageKey(handleField, variables);
       return {
         kind: "ScalarField",
@@ -32742,7 +32997,7 @@ var require_DataChecker = __commonJS({
     var _require4 = require_TypeID();
     var TYPE_SCHEMA_TYPE = _require4.TYPE_SCHEMA_TYPE;
     var generateTypeID = _require4.generateTypeID;
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var ACTOR_CHANGE = RelayConcreteNode.ACTOR_CHANGE;
     var CONDITION = RelayConcreteNode.CONDITION;
     var CLIENT_COMPONENT = RelayConcreteNode.CLIENT_COMPONENT;
@@ -32764,9 +33019,9 @@ var require_DataChecker = __commonJS({
     var getStorageKey = RelayStoreUtils.getStorageKey;
     var getArgumentValues = RelayStoreUtils.getArgumentValues;
     function check(getSourceForActor, getTargetForActor, defaultActorIdentifier, selector, handlers, operationLoader, getDataID, shouldProcessClientComponents) {
-      var dataID = selector.dataID, node2 = selector.node, variables = selector.variables;
+      var dataID = selector.dataID, node6 = selector.node, variables = selector.variables;
       var checker = new DataChecker(getSourceForActor, getTargetForActor, defaultActorIdentifier, variables, handlers, operationLoader, getDataID, shouldProcessClientComponents);
-      return checker.check(node2, dataID);
+      return checker.check(node6, dataID);
     }
     var DataChecker = /* @__PURE__ */ function() {
       function DataChecker2(getSourceForActor, getTargetForActor, defaultActorIdentifier, variables, handlers, operationLoader, getDataID, shouldProcessClientComponents) {
@@ -32797,9 +33052,9 @@ var require_DataChecker = __commonJS({
         }
         return tuple;
       };
-      _proto.check = function check2(node2, dataID) {
-        this._assignClientAbstractTypes(node2);
-        this._traverse(node2, dataID);
+      _proto.check = function check2(node6, dataID) {
+        this._assignClientAbstractTypes(node6);
+        this._traverse(node6, dataID);
         return this._recordWasMissing === true ? {
           status: "missing",
           mostRecentlyInvalidatedAt: this._mostRecentlyInvalidatedAt
@@ -32809,7 +33064,7 @@ var require_DataChecker = __commonJS({
         };
       };
       _proto._getVariableValue = function _getVariableValue(name) {
-        !this._variables.hasOwnProperty(name) ? true ? invariant(false, "RelayAsyncLoader(): Undefined variable `%s`.", name) : invariant(false) : void 0;
+        !this._variables.hasOwnProperty(name) ? true ? invariant2(false, "RelayAsyncLoader(): Undefined variable `%s`.", name) : invariant2(false) : void 0;
         return this._variables[name];
       };
       _proto._handleMissing = function _handleMissing() {
@@ -32886,7 +33141,7 @@ var require_DataChecker = __commonJS({
         }
         this._handleMissing();
       };
-      _proto._traverse = function _traverse(node2, dataID) {
+      _proto._traverse = function _traverse(node6, dataID) {
         var status = this._mutator.getStatus(dataID);
         if (status === UNKNOWN) {
           this._handleMissing();
@@ -32897,7 +33152,7 @@ var require_DataChecker = __commonJS({
           if (invalidatedAt != null) {
             this._mostRecentlyInvalidatedAt = this._mostRecentlyInvalidatedAt != null ? Math.max(this._mostRecentlyInvalidatedAt, invalidatedAt) : invalidatedAt;
           }
-          this._traverseSelections(node2.selections, dataID);
+          this._traverseSelections(node6.selections, dataID);
         }
       };
       _proto._traverseSelections = function _traverseSelections(selections, dataID) {
@@ -32932,7 +33187,7 @@ var require_DataChecker = __commonJS({
                 }
               } else {
                 var _recordType = _this2._mutator.getType(dataID);
-                !(_recordType != null) ? true ? invariant(false, "DataChecker: Expected record `%s` to have a known type", dataID) : invariant(false) : void 0;
+                !(_recordType != null) ? true ? invariant2(false, "DataChecker: Expected record `%s` to have a known type", dataID) : invariant2(false) : void 0;
                 var _typeID = generateTypeID(_recordType);
                 var _implementsInterface = _this2._mutator.getValue(_typeID, _abstractKey);
                 if (_implementsInterface === true) {
@@ -32978,7 +33233,7 @@ var require_DataChecker = __commonJS({
             case TYPE_DISCRIMINATOR:
               var abstractKey = selection.abstractKey;
               var recordType = _this2._mutator.getType(dataID);
-              !(recordType != null) ? true ? invariant(false, "DataChecker: Expected record `%s` to have a known type", dataID) : invariant(false) : void 0;
+              !(recordType != null) ? true ? invariant2(false, "DataChecker: Expected record `%s` to have a known type", dataID) : invariant2(false) : void 0;
               var typeID = generateTypeID(recordType);
               var implementsInterface = _this2._mutator.getValue(typeID, abstractKey);
               if (implementsInterface == null) {
@@ -33002,7 +33257,7 @@ var require_DataChecker = __commonJS({
               break;
             default:
               selection;
-              true ? true ? invariant(false, "RelayAsyncLoader(): Unexpected ast kind `%s`.", selection.kind) : invariant(false) : void 0;
+              true ? true ? invariant2(false, "RelayAsyncLoader(): Unexpected ast kind `%s`.", selection.kind) : invariant2(false) : void 0;
           }
         });
       };
@@ -33013,7 +33268,7 @@ var require_DataChecker = __commonJS({
       };
       _proto._checkModuleImport = function _checkModuleImport(moduleImport, dataID) {
         var operationLoader = this._operationLoader;
-        !(operationLoader !== null) ? true ? invariant(false, "DataChecker: Expected an operationLoader to be configured when using `@module`.") : invariant(false) : void 0;
+        !(operationLoader !== null) ? true ? invariant2(false, "DataChecker: Expected an operationLoader to be configured when using `@module`.") : invariant2(false) : void 0;
         var operationKey = getModuleOperationKey(moduleImport.documentName);
         var operationReference = this._mutator.getValue(dataID, operationKey);
         if (operationReference == null) {
@@ -33102,8 +33357,8 @@ var require_DataChecker = __commonJS({
           this._recordSourceProxy = prevRecordSourceProxy;
         }
       };
-      _proto._assignClientAbstractTypes = function _assignClientAbstractTypes(node2) {
-        var clientAbstractTypes = node2.clientAbstractTypes;
+      _proto._assignClientAbstractTypes = function _assignClientAbstractTypes(node6) {
+        var clientAbstractTypes = node6.clientAbstractTypes;
         if (clientAbstractTypes != null) {
           for (var _i = 0, _Object$keys = Object.keys(clientAbstractTypes); _i < _Object$keys.length; _i++) {
             var abstractType = _Object$keys[_i];
@@ -33143,7 +33398,7 @@ var require_RelayOptimisticRecordSource = __commonJS({
     var _objectSpread2 = _interopRequireDefault(require_objectSpread2());
     var RelayModernRecord = require_RelayModernRecord();
     var RelayRecordSource = require_RelayRecordSource();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var UNPUBLISH_RECORD_SENTINEL = RelayModernRecord.fromObject(Object.freeze({
       __UNPUBLISH_RECORD_SENTINEL: true
     }));
@@ -33224,7 +33479,7 @@ var require_RelayOptimisticRecordSource = __commonJS({
       return new RelayOptimisticRecordSource(base);
     }
     function getOptimisticRecordIDs(source) {
-      !(source instanceof RelayOptimisticRecordSource) ? true ? invariant(false, "getOptimisticRecordIDs: Instance of RelayOptimisticRecordSource is expected") : invariant(false) : void 0;
+      !(source instanceof RelayOptimisticRecordSource) ? true ? invariant2(false, "getOptimisticRecordIDs: Instance of RelayOptimisticRecordSource is expected") : invariant2(false) : void 0;
       return source.getOptimisticRecordIDs();
     }
     module.exports = {
@@ -33241,13 +33496,13 @@ var require_getOutputTypeRecordIDs = __commonJS({
     var RelayModernRecord = require_RelayModernRecord();
     var _require = require_RelayStoreUtils();
     var RELAY_RESOLVER_OUTPUT_TYPE_RECORD_IDS = _require.RELAY_RESOLVER_OUTPUT_TYPE_RECORD_IDS;
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function getOutputTypeRecordIDs(record) {
       var maybeOutputTypeRecordIDs = RelayModernRecord.getValue(record, RELAY_RESOLVER_OUTPUT_TYPE_RECORD_IDS);
       if (maybeOutputTypeRecordIDs == null) {
         return null;
       }
-      !(maybeOutputTypeRecordIDs instanceof Set) ? true ? invariant(false, "getOutputTypeRecordIDs: Expected the `%s` field on record `%s` to be of type Set. Instead, it is a %s.", RELAY_RESOLVER_OUTPUT_TYPE_RECORD_IDS, typeof maybeOutputTypeRecordIDs) : invariant(false) : void 0;
+      !(maybeOutputTypeRecordIDs instanceof Set) ? true ? invariant2(false, "getOutputTypeRecordIDs: Expected the `%s` field on record `%s` to be of type Set. Instead, it is a %s.", RELAY_RESOLVER_OUTPUT_TYPE_RECORD_IDS, typeof maybeOutputTypeRecordIDs) : invariant2(false) : void 0;
       return maybeOutputTypeRecordIDs;
     }
     module.exports = getOutputTypeRecordIDs;
@@ -33270,7 +33525,7 @@ var require_RelayReferenceMarker = __commonJS({
     var RelayStoreUtils = require_RelayStoreUtils();
     var _require2 = require_TypeID();
     var generateTypeID = _require2.generateTypeID;
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var ACTOR_CHANGE = RelayConcreteNode.ACTOR_CHANGE;
     var CONDITION = RelayConcreteNode.CONDITION;
     var CLIENT_COMPONENT = RelayConcreteNode.CLIENT_COMPONENT;
@@ -33291,9 +33546,9 @@ var require_RelayReferenceMarker = __commonJS({
     var getStorageKey = RelayStoreUtils.getStorageKey;
     var getModuleOperationKey = RelayStoreUtils.getModuleOperationKey;
     function mark(recordSource, selector, references, operationLoader, shouldProcessClientComponents) {
-      var dataID = selector.dataID, node2 = selector.node, variables = selector.variables;
+      var dataID = selector.dataID, node6 = selector.node, variables = selector.variables;
       var marker = new RelayReferenceMarker(recordSource, variables, references, operationLoader, shouldProcessClientComponents);
-      marker.mark(node2, dataID);
+      marker.mark(node6, dataID);
     }
     var RelayReferenceMarker = /* @__PURE__ */ function() {
       function RelayReferenceMarker2(recordSource, variables, references, operationLoader, shouldProcessClientComponents) {
@@ -33305,22 +33560,22 @@ var require_RelayReferenceMarker = __commonJS({
         this._shouldProcessClientComponents = shouldProcessClientComponents;
       }
       var _proto = RelayReferenceMarker2.prototype;
-      _proto.mark = function mark2(node2, dataID) {
-        if (node2.kind === "Operation" || node2.kind === "SplitOperation") {
-          this._operationName = node2.name;
+      _proto.mark = function mark2(node6, dataID) {
+        if (node6.kind === "Operation" || node6.kind === "SplitOperation") {
+          this._operationName = node6.name;
         }
-        this._traverse(node2, dataID);
+        this._traverse(node6, dataID);
       };
-      _proto._traverse = function _traverse(node2, dataID) {
+      _proto._traverse = function _traverse(node6, dataID) {
         this._references.add(dataID);
         var record = this._recordSource.get(dataID);
         if (record == null) {
           return;
         }
-        this._traverseSelections(node2.selections, record);
+        this._traverseSelections(node6.selections, record);
       };
       _proto._getVariableValue = function _getVariableValue(name) {
-        !this._variables.hasOwnProperty(name) ? true ? invariant(false, "RelayReferenceMarker(): Undefined variable `%s`.", name) : invariant(false) : void 0;
+        !this._variables.hasOwnProperty(name) ? true ? invariant2(false, "RelayReferenceMarker(): Undefined variable `%s`.", name) : invariant2(false) : void 0;
         return this._variables[name];
       };
       _proto._traverseSelections = function _traverseSelections(selections, record) {
@@ -33406,7 +33661,7 @@ var require_RelayReferenceMarker = __commonJS({
               break;
             default:
               selection;
-              true ? true ? invariant(false, "RelayReferenceMarker: Unknown AST node `%s`.", selection) : invariant(false) : void 0;
+              true ? true ? invariant2(false, "RelayReferenceMarker: Unknown AST node `%s`.", selection) : invariant2(false) : void 0;
           }
         });
       };
@@ -33480,7 +33735,7 @@ var require_RelayReferenceMarker = __commonJS({
       _proto._traverseModuleImport = function _traverseModuleImport(moduleImport, record) {
         var _this$_operationName;
         var operationLoader = this._operationLoader;
-        !(operationLoader !== null) ? true ? invariant(false, "RelayReferenceMarker: Expected an operationLoader to be configured when using `@module`. Could not load fragment `%s` in operation `%s`.", moduleImport.fragmentName, (_this$_operationName = this._operationName) !== null && _this$_operationName !== void 0 ? _this$_operationName : "(unknown)") : invariant(false) : void 0;
+        !(operationLoader !== null) ? true ? invariant2(false, "RelayReferenceMarker: Expected an operationLoader to be configured when using `@module`. Could not load fragment `%s` in operation `%s`.", moduleImport.fragmentName, (_this$_operationName = this._operationName) !== null && _this$_operationName !== void 0 ? _this$_operationName : "(unknown)") : invariant2(false) : void 0;
         var operationKey = getModuleOperationKey(moduleImport.documentName);
         var operationReference = RelayModernRecord.getValue(record, operationKey);
         if (operationReference == null) {
@@ -33531,13 +33786,13 @@ var require_hasOverlappingIDs = __commonJS({
     var ITERATOR_KEY = Symbol.iterator;
     function hasOverlappingIDs(seenRecords, updatedRecordIDs) {
       var iterator = seenRecords[ITERATOR_KEY]();
-      var next = iterator.next();
-      while (!next.done) {
-        var key = next.value;
+      var next2 = iterator.next();
+      while (!next2.done) {
+        var key = next2.value;
         if (updatedRecordIDs.has(key)) {
           return true;
         }
-        next = iterator.next();
+        next2 = iterator.next();
       }
       return false;
     }
@@ -33556,13 +33811,13 @@ var require_hasSignificantOverlappingIDs = __commonJS({
     var ITERATOR_KEY = Symbol.iterator;
     function hasSignificantOverlappingIDs(seenRecords, updatedRecordIDs) {
       var iterator = seenRecords[ITERATOR_KEY]();
-      var next = iterator.next();
-      while (!next.done) {
-        var key = next.value;
+      var next2 = iterator.next();
+      while (!next2.done) {
+        var key = next2.value;
         if (updatedRecordIDs.has(key) && key !== ROOT_ID && key !== VIEWER_ID) {
           return true;
         }
-        next = iterator.next();
+        next2 = iterator.next();
       }
       return false;
     }
@@ -33723,7 +33978,7 @@ var require_RelayModernStore = __commonJS({
     var ROOT_TYPE = _require2.ROOT_TYPE;
     var _require3 = require_ResolverCache();
     var RecordResolverCache = _require3.RecordResolverCache;
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var DEFAULT_RELEASE_BUFFER_SIZE = 10;
     var RelayModernStore = /* @__PURE__ */ function() {
       function RelayModernStore2(source, options) {
@@ -34023,7 +34278,7 @@ var require_RelayModernStore = __commonJS({
         callback();
       };
       _proto.snapshot = function snapshot() {
-        !(this._optimisticSource == null) ? true ? invariant(false, "RelayModernStore: Unexpected call to snapshot() while a previous snapshot exists.") : invariant(false) : void 0;
+        !(this._optimisticSource == null) ? true ? invariant2(false, "RelayModernStore: Unexpected call to snapshot() while a previous snapshot exists.") : invariant2(false) : void 0;
         var log = this.__log;
         if (log != null) {
           log({
@@ -34038,7 +34293,7 @@ var require_RelayModernStore = __commonJS({
         this._optimisticSource = RelayOptimisticRecordSource.create(this.getSource());
       };
       _proto.restore = function restore() {
-        !(this._optimisticSource != null) ? true ? invariant(false, "RelayModernStore: Unexpected call to restore(), expected a snapshot to exist (make sure to call snapshot()).") : invariant(false) : void 0;
+        !(this._optimisticSource != null) ? true ? invariant2(false, "RelayModernStore: Unexpected call to restore(), expected a snapshot to exist (make sure to call snapshot()).") : invariant2(false) : void 0;
         var log = this.__log;
         if (log != null) {
           log({
@@ -34213,7 +34468,7 @@ var require_requestSubscription = __commonJS({
     var createOperationDescriptor = _require2.createOperationDescriptor;
     var _require3 = require_RelayModernSelector();
     var createReaderSelector = _require3.createReaderSelector;
-    var warning = require_warning();
+    var warning2 = require_warning();
     function requestSubscription(environment2, config) {
       var subscription = getRequest(config.subscription);
       if (subscription.params.operationKind !== "subscription") {
@@ -34221,13 +34476,13 @@ var require_requestSubscription = __commonJS({
       }
       var configs = config.configs, onCompleted = config.onCompleted, onError = config.onError, onNext = config.onNext, variables = config.variables, cacheConfig = config.cacheConfig;
       var operation = createOperationDescriptor(subscription, variables, cacheConfig);
-      true ? warning(!(config.updater && configs), "requestSubscription: Expected only one of `updater` and `configs` to be provided") : void 0;
+      true ? warning2(!(config.updater && configs), "requestSubscription: Expected only one of `updater` and `configs` to be provided") : void 0;
       var _ref = configs ? RelayDeclarativeMutationConfig.convert(configs, subscription, null, config.updater) : config, updater = _ref.updater;
       var sub = environment2.executeSubscription({
         operation,
         updater
       }).subscribe({
-        next: function next(responses) {
+        next: function next2(responses) {
           if (onNext != null) {
             var selector = operation.fragment;
             var nextID;
@@ -34331,19 +34586,19 @@ var require_getFragmentIdentifier = __commonJS({
 var require_getRefetchMetadata = __commonJS({
   "node_modules/relay-runtime/lib/util/getRefetchMetadata.js"(exports, module) {
     "use strict";
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function getRefetchMetadata(fragmentNode, componentDisplayName) {
       var _fragmentNode$metadat, _fragmentNode$metadat2;
-      !(((_fragmentNode$metadat = fragmentNode.metadata) === null || _fragmentNode$metadat === void 0 ? void 0 : _fragmentNode$metadat.plural) !== true) ? true ? invariant(false, "Relay: getRefetchMetadata(): Expected fragment `%s` not to be plural when using `%s`. Remove `@relay(plural: true)` from fragment `%s` in order to use it with `%s`.", fragmentNode.name, componentDisplayName, fragmentNode.name, componentDisplayName) : invariant(false) : void 0;
+      !(((_fragmentNode$metadat = fragmentNode.metadata) === null || _fragmentNode$metadat === void 0 ? void 0 : _fragmentNode$metadat.plural) !== true) ? true ? invariant2(false, "Relay: getRefetchMetadata(): Expected fragment `%s` not to be plural when using `%s`. Remove `@relay(plural: true)` from fragment `%s` in order to use it with `%s`.", fragmentNode.name, componentDisplayName, fragmentNode.name, componentDisplayName) : invariant2(false) : void 0;
       var refetchMetadata = (_fragmentNode$metadat2 = fragmentNode.metadata) === null || _fragmentNode$metadat2 === void 0 ? void 0 : _fragmentNode$metadat2.refetch;
-      !(refetchMetadata != null) ? true ? invariant(false, "Relay: getRefetchMetadata(): Expected fragment `%s` to be refetchable when using `%s`. Did you forget to add a @refetchable directive to the fragment?", componentDisplayName, fragmentNode.name) : invariant(false) : void 0;
+      !(refetchMetadata != null) ? true ? invariant2(false, "Relay: getRefetchMetadata(): Expected fragment `%s` to be refetchable when using `%s`. Did you forget to add a @refetchable directive to the fragment?", componentDisplayName, fragmentNode.name) : invariant2(false) : void 0;
       var refetchableRequest = refetchMetadata.operation["default"] ? refetchMetadata.operation["default"] : refetchMetadata.operation;
       var fragmentRefPathInResponse = refetchMetadata.fragmentPathInResult;
-      !(typeof refetchableRequest !== "string") ? true ? invariant(false, "Relay: getRefetchMetadata(): Expected refetch query to be an operation and not a string when using `%s`. If you're seeing this, this is likely a bug in Relay.", componentDisplayName) : invariant(false) : void 0;
+      !(typeof refetchableRequest !== "string") ? true ? invariant2(false, "Relay: getRefetchMetadata(): Expected refetch query to be an operation and not a string when using `%s`. If you're seeing this, this is likely a bug in Relay.", componentDisplayName) : invariant2(false) : void 0;
       var identifierInfo = refetchMetadata.identifierInfo;
       if (identifierInfo != null) {
-        !(identifierInfo.identifierField == null || typeof identifierInfo.identifierField === "string") ? true ? invariant(false, "Relay: getRefetchMetadata(): Expected `identifierField` to be a string.") : invariant(false) : void 0;
-        !(identifierInfo.identifierQueryVariableName == null || typeof identifierInfo.identifierQueryVariableName === "string") ? true ? invariant(false, "Relay: getRefetchMetadata(): Expected `identifierQueryVariableName` to be a string.") : invariant(false) : void 0;
+        !(identifierInfo.identifierField == null || typeof identifierInfo.identifierField === "string") ? true ? invariant2(false, "Relay: getRefetchMetadata(): Expected `identifierField` to be a string.") : invariant2(false) : void 0;
+        !(identifierInfo.identifierQueryVariableName == null || typeof identifierInfo.identifierQueryVariableName === "string") ? true ? invariant2(false, "Relay: getRefetchMetadata(): Expected `identifierQueryVariableName` to be a string.") : invariant2(false) : void 0;
       }
       return {
         fragmentRefPathInResponse,
@@ -34361,17 +34616,17 @@ var require_getPaginationMetadata = __commonJS({
   "node_modules/relay-runtime/lib/util/getPaginationMetadata.js"(exports, module) {
     "use strict";
     var getRefetchMetadata = require_getRefetchMetadata();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function getPaginationMetadata(fragmentNode, componentDisplayName) {
       var _fragmentNode$metadat, _fragmentNode$metadat2;
       var _getRefetchMetadata = getRefetchMetadata(fragmentNode, componentDisplayName), paginationRequest = _getRefetchMetadata.refetchableRequest, refetchMetadata = _getRefetchMetadata.refetchMetadata;
       var paginationMetadata = refetchMetadata.connection;
-      !(paginationMetadata != null) ? true ? invariant(false, "Relay: getPaginationMetadata(): Expected fragment `%s` to include a connection when using `%s`. Did you forget to add a @connection directive to the connection field in the fragment?", componentDisplayName, fragmentNode.name) : invariant(false) : void 0;
+      !(paginationMetadata != null) ? true ? invariant2(false, "Relay: getPaginationMetadata(): Expected fragment `%s` to include a connection when using `%s`. Did you forget to add a @connection directive to the connection field in the fragment?", componentDisplayName, fragmentNode.name) : invariant2(false) : void 0;
       var connectionPathInFragmentData = paginationMetadata.path;
       var connectionMetadata = ((_fragmentNode$metadat = (_fragmentNode$metadat2 = fragmentNode.metadata) === null || _fragmentNode$metadat2 === void 0 ? void 0 : _fragmentNode$metadat2.connection) !== null && _fragmentNode$metadat !== void 0 ? _fragmentNode$metadat : [])[0];
-      !(connectionMetadata != null) ? true ? invariant(false, "Relay: getPaginationMetadata(): Expected fragment `%s` to include a connection when using `%s`. Did you forget to add a @connection directive to the connection field in the fragment?", componentDisplayName, fragmentNode.name) : invariant(false) : void 0;
+      !(connectionMetadata != null) ? true ? invariant2(false, "Relay: getPaginationMetadata(): Expected fragment `%s` to include a connection when using `%s`. Did you forget to add a @connection directive to the connection field in the fragment?", componentDisplayName, fragmentNode.name) : invariant2(false) : void 0;
       var identifierInfo = refetchMetadata.identifierInfo;
-      !((identifierInfo === null || identifierInfo === void 0 ? void 0 : identifierInfo.identifierField) == null || typeof identifierInfo.identifierField === "string") ? true ? invariant(false, "Relay: getRefetchMetadata(): Expected `identifierField` to be a string.") : invariant(false) : void 0;
+      !((identifierInfo === null || identifierInfo === void 0 ? void 0 : identifierInfo.identifierField) == null || typeof identifierInfo.identifierField === "string") ? true ? invariant2(false, "Relay: getRefetchMetadata(): Expected `identifierField` to be a string.") : invariant2(false) : void 0;
       return {
         connectionPathInFragmentData,
         identifierField: identifierInfo === null || identifierInfo === void 0 ? void 0 : identifierInfo.identifierField,
@@ -34391,17 +34646,17 @@ var require_getPaginationVariables = __commonJS({
     var _interopRequireDefault = require_interopRequireDefault()["default"];
     var _defineProperty2 = _interopRequireDefault(require_defineProperty());
     var _objectSpread4 = _interopRequireDefault(require_objectSpread2());
-    var invariant = require_browser();
-    var warning = require_warning();
-    function getPaginationVariables(direction, count, cursor, baseVariables, extraVariables, paginationMetadata) {
+    var invariant2 = require_browser();
+    var warning2 = require_warning();
+    function getPaginationVariables(direction, count, cursor2, baseVariables, extraVariables, paginationMetadata) {
       var _objectSpread3;
       var backwardMetadata = paginationMetadata.backward, forwardMetadata = paginationMetadata.forward;
       if (direction === "backward") {
         var _objectSpread2;
-        !(backwardMetadata != null && backwardMetadata.count != null && backwardMetadata.cursor != null) ? true ? invariant(false, "Relay: Expected backward pagination metadata to be available. If you're seeing this, this is likely a bug in Relay.") : invariant(false) : void 0;
-        true ? warning(!extraVariables.hasOwnProperty(backwardMetadata.cursor), "Relay: `UNSTABLE_extraVariables` provided by caller should not contain cursor variable `%s`. This variable is automatically determined by Relay.", backwardMetadata.cursor) : void 0;
-        true ? warning(!extraVariables.hasOwnProperty(backwardMetadata.count), "Relay: `UNSTABLE_extraVariables` provided by caller should not contain count variable `%s`. This variable is automatically determined by Relay.", backwardMetadata.count) : void 0;
-        var _paginationVariables = (0, _objectSpread4["default"])((0, _objectSpread4["default"])((0, _objectSpread4["default"])({}, baseVariables), extraVariables), {}, (_objectSpread2 = {}, (0, _defineProperty2["default"])(_objectSpread2, backwardMetadata.cursor, cursor), (0, _defineProperty2["default"])(_objectSpread2, backwardMetadata.count, count), _objectSpread2));
+        !(backwardMetadata != null && backwardMetadata.count != null && backwardMetadata.cursor != null) ? true ? invariant2(false, "Relay: Expected backward pagination metadata to be available. If you're seeing this, this is likely a bug in Relay.") : invariant2(false) : void 0;
+        true ? warning2(!extraVariables.hasOwnProperty(backwardMetadata.cursor), "Relay: `UNSTABLE_extraVariables` provided by caller should not contain cursor variable `%s`. This variable is automatically determined by Relay.", backwardMetadata.cursor) : void 0;
+        true ? warning2(!extraVariables.hasOwnProperty(backwardMetadata.count), "Relay: `UNSTABLE_extraVariables` provided by caller should not contain count variable `%s`. This variable is automatically determined by Relay.", backwardMetadata.count) : void 0;
+        var _paginationVariables = (0, _objectSpread4["default"])((0, _objectSpread4["default"])((0, _objectSpread4["default"])({}, baseVariables), extraVariables), {}, (_objectSpread2 = {}, (0, _defineProperty2["default"])(_objectSpread2, backwardMetadata.cursor, cursor2), (0, _defineProperty2["default"])(_objectSpread2, backwardMetadata.count, count), _objectSpread2));
         if (forwardMetadata && forwardMetadata.cursor) {
           _paginationVariables[forwardMetadata.cursor] = null;
         }
@@ -34410,10 +34665,10 @@ var require_getPaginationVariables = __commonJS({
         }
         return _paginationVariables;
       }
-      !(forwardMetadata != null && forwardMetadata.count != null && forwardMetadata.cursor != null) ? true ? invariant(false, "Relay: Expected forward pagination metadata to be available. If you're seeing this, this is likely a bug in Relay.") : invariant(false) : void 0;
-      true ? warning(!extraVariables.hasOwnProperty(forwardMetadata.cursor), "Relay: `UNSTABLE_extraVariables` provided by caller should not contain cursor variable `%s`. This variable is automatically determined by Relay.", forwardMetadata.cursor) : void 0;
-      true ? warning(!extraVariables.hasOwnProperty(forwardMetadata.count), "Relay: `UNSTABLE_extraVariables` provided by caller should not contain count variable `%s`. This variable is automatically determined by Relay.", forwardMetadata.count) : void 0;
-      var paginationVariables = (0, _objectSpread4["default"])((0, _objectSpread4["default"])((0, _objectSpread4["default"])({}, baseVariables), extraVariables), {}, (_objectSpread3 = {}, (0, _defineProperty2["default"])(_objectSpread3, forwardMetadata.cursor, cursor), (0, _defineProperty2["default"])(_objectSpread3, forwardMetadata.count, count), _objectSpread3));
+      !(forwardMetadata != null && forwardMetadata.count != null && forwardMetadata.cursor != null) ? true ? invariant2(false, "Relay: Expected forward pagination metadata to be available. If you're seeing this, this is likely a bug in Relay.") : invariant2(false) : void 0;
+      true ? warning2(!extraVariables.hasOwnProperty(forwardMetadata.cursor), "Relay: `UNSTABLE_extraVariables` provided by caller should not contain cursor variable `%s`. This variable is automatically determined by Relay.", forwardMetadata.cursor) : void 0;
+      true ? warning2(!extraVariables.hasOwnProperty(forwardMetadata.count), "Relay: `UNSTABLE_extraVariables` provided by caller should not contain count variable `%s`. This variable is automatically determined by Relay.", forwardMetadata.count) : void 0;
+      var paginationVariables = (0, _objectSpread4["default"])((0, _objectSpread4["default"])((0, _objectSpread4["default"])({}, baseVariables), extraVariables), {}, (_objectSpread3 = {}, (0, _defineProperty2["default"])(_objectSpread3, forwardMetadata.cursor, cursor2), (0, _defineProperty2["default"])(_objectSpread3, forwardMetadata.count, count), _objectSpread3));
       if (backwardMetadata && backwardMetadata.cursor) {
         paginationVariables[backwardMetadata.cursor] = null;
       }
@@ -34432,7 +34687,7 @@ var require_getValueAtPath = __commonJS({
     "use strict";
     var _interopRequireDefault = require_interopRequireDefault()["default"];
     var _createForOfIteratorHelper2 = _interopRequireDefault(require_createForOfIteratorHelper());
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function getValueAtPath(data, path) {
       var result = data;
       var _iterator = (0, _createForOfIteratorHelper2["default"])(path), _step;
@@ -34443,10 +34698,10 @@ var require_getValueAtPath = __commonJS({
             return null;
           }
           if (typeof key === "number") {
-            !Array.isArray(result) ? true ? invariant(false, "Relay: Expected an array when extracting value at path. If you're seeing this, this is likely a bug in Relay.") : invariant(false) : void 0;
+            !Array.isArray(result) ? true ? invariant2(false, "Relay: Expected an array when extracting value at path. If you're seeing this, this is likely a bug in Relay.") : invariant2(false) : void 0;
             result = result[key];
           } else {
-            !(typeof result === "object" && !Array.isArray(result)) ? true ? invariant(false, "Relay: Expected an object when extracting value at path. If you're seeing this, this is likely a bug in Relay.") : invariant(false) : void 0;
+            !(typeof result === "object" && !Array.isArray(result)) ? true ? invariant2(false, "Relay: Expected an object when extracting value at path. If you're seeing this, this is likely a bug in Relay.") : invariant2(false) : void 0;
             result = result[key];
           }
         }
@@ -34707,10 +34962,10 @@ var require_relay_runtime = __commonJS({
 var require_ReactRelayContext = __commonJS({
   "node_modules/react-relay/lib/ReactRelayContext.js"(exports, module) {
     "use strict";
-    var React2 = require_react();
+    var React7 = require_react();
     var _require = require_relay_runtime();
     var createRelayContext = _require.__internal.createRelayContext;
-    module.exports = createRelayContext(React2);
+    module.exports = createRelayContext(React7);
   }
 });
 
@@ -34728,16 +34983,16 @@ var require_assertThisInitialized = __commonJS({
 // node_modules/@babel/runtime/helpers/extends.js
 var require_extends = __commonJS({
   "node_modules/@babel/runtime/helpers/extends.js"(exports, module) {
-    function _extends() {
-      return module.exports = _extends = Object.assign ? Object.assign.bind() : function(n) {
+    function _extends5() {
+      return module.exports = _extends5 = Object.assign ? Object.assign.bind() : function(n) {
         for (var e = 1; e < arguments.length; e++) {
           var t = arguments[e];
           for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]);
         }
         return n;
-      }, module.exports.__esModule = true, module.exports["default"] = module.exports, _extends.apply(null, arguments);
+      }, module.exports.__esModule = true, module.exports["default"] = module.exports, _extends5.apply(null, arguments);
     }
-    module.exports = _extends, module.exports.__esModule = true, module.exports["default"] = module.exports;
+    module.exports = _extends5, module.exports.__esModule = true, module.exports["default"] = module.exports;
   }
 });
 
@@ -34745,13 +35000,13 @@ var require_extends = __commonJS({
 var require_assertFragmentMap = __commonJS({
   "node_modules/react-relay/lib/assertFragmentMap.js"(exports, module) {
     "use strict";
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function assertFragmentMap(componentName, fragmentSpec) {
-      !(fragmentSpec && typeof fragmentSpec === "object") ? true ? invariant(false, "Could not create Relay Container for `%s`. Expected a set of GraphQL fragments, got `%s` instead.", componentName, fragmentSpec) : invariant(false) : void 0;
+      !(fragmentSpec && typeof fragmentSpec === "object") ? true ? invariant2(false, "Could not create Relay Container for `%s`. Expected a set of GraphQL fragments, got `%s` instead.", componentName, fragmentSpec) : invariant2(false) : void 0;
       for (var key in fragmentSpec) {
         if (fragmentSpec.hasOwnProperty(key)) {
           var fragment = fragmentSpec[key];
-          !(fragment && (typeof fragment === "object" || typeof fragment === "function")) ? true ? invariant(false, "Could not create Relay Container for `%s`. The value of fragment `%s` was expected to be a fragment, got `%s` instead.", componentName, key, fragment) : invariant(false) : void 0;
+          !(fragment && (typeof fragment === "object" || typeof fragment === "function")) ? true ? invariant2(false, "Could not create Relay Container for `%s`. The value of fragment `%s` was expected to be a fragment, got `%s` instead.", componentName, key, fragment) : invariant2(false) : void 0;
         }
       }
     }
@@ -34766,8 +35021,8 @@ var require_ReactRelayContainerUtils = __commonJS({
     function getComponentName(component) {
       return component.displayName || component.name || "Component";
     }
-    function getContainerName(Component) {
-      return "Relay(" + getComponentName(Component) + ")";
+    function getContainerName(Component2) {
+      return "Relay(" + getComponentName(Component2) + ")";
     }
     module.exports = {
       getComponentName,
@@ -34780,8 +35035,8 @@ var require_ReactRelayContainerUtils = __commonJS({
 var require_ReactRelayQueryRendererContext = __commonJS({
   "node_modules/react-relay/lib/ReactRelayQueryRendererContext.js"(exports, module) {
     "use strict";
-    var React2 = require_react();
-    module.exports = React2.createContext({
+    var React7 = require_react();
+    module.exports = React7.createContext({
       rootIsQueryRenderer: false
     });
   }
@@ -34792,18 +35047,18 @@ var require_buildReactRelayContainer = __commonJS({
   "node_modules/react-relay/lib/buildReactRelayContainer.js"(exports, module) {
     "use strict";
     var _interopRequireDefault = require_interopRequireDefault()["default"];
-    var _extends2 = _interopRequireDefault(require_extends());
+    var _extends22 = _interopRequireDefault(require_extends());
     var assertFragmentMap = require_assertFragmentMap();
     var _require = require_ReactRelayContainerUtils();
     var getComponentName = _require.getComponentName;
     var getContainerName = _require.getContainerName;
     var ReactRelayContext = require_ReactRelayContext();
     var ReactRelayQueryRendererContext = require_ReactRelayQueryRendererContext();
-    var invariant = require_browser();
-    var React2 = require_react();
+    var invariant2 = require_browser();
+    var React7 = require_react();
     var _require2 = require_relay_runtime();
     var getFragment = _require2.getFragment;
-    var useContext = React2.useContext;
+    var useContext6 = React7.useContext;
     function buildReactRelayContainer(ComponentClass, fragmentSpec, createContainerWithFragments) {
       var containerName = getContainerName(ComponentClass);
       assertFragmentMap(getComponentName(ComponentClass), fragmentSpec);
@@ -34813,19 +35068,19 @@ var require_buildReactRelayContainer = __commonJS({
       }
       var Container = createContainerWithFragments(ComponentClass, fragments);
       Container.displayName = containerName;
-      function forwardRef(props, ref) {
+      function forwardRef4(props, ref) {
         var _queryRendererContext;
-        var context = useContext(ReactRelayContext);
-        !(context != null) ? true ? invariant(false, "`%s` tried to render a context that was not valid this means that `%s` was rendered outside of a query renderer.", containerName, containerName) : invariant(false) : void 0;
-        var queryRendererContext = useContext(ReactRelayQueryRendererContext);
-        return /* @__PURE__ */ React2.createElement(Container, (0, _extends2["default"])({}, props, {
+        var context = useContext6(ReactRelayContext);
+        !(context != null) ? true ? invariant2(false, "`%s` tried to render a context that was not valid this means that `%s` was rendered outside of a query renderer.", containerName, containerName) : invariant2(false) : void 0;
+        var queryRendererContext = useContext6(ReactRelayQueryRendererContext);
+        return /* @__PURE__ */ React7.createElement(Container, (0, _extends22["default"])({}, props, {
           __relayContext: context,
           __rootIsQueryRenderer: (_queryRendererContext = queryRendererContext === null || queryRendererContext === void 0 ? void 0 : queryRendererContext.rootIsQueryRenderer) !== null && _queryRendererContext !== void 0 ? _queryRendererContext : false,
           componentRef: props.componentRef || ref
         }));
       }
-      forwardRef.displayName = containerName;
-      var ForwardContainer = React2.forwardRef(forwardRef);
+      forwardRef4.displayName = containerName;
+      var ForwardContainer = React7.forwardRef(forwardRef4);
       if (true) {
         ForwardContainer.__ComponentClass = ComponentClass;
         ForwardContainer.displayName = containerName;
@@ -34852,9 +35107,9 @@ var require_RelayContext = __commonJS({
   "node_modules/react-relay/lib/RelayContext.js"(exports, module) {
     "use strict";
     var isRelayEnvironment = require_isRelayEnvironment();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     function assertRelayContext(relay) {
-      !isRelayContext(relay) ? true ? invariant(false, "RelayContext: Expected `context.relay` to be an object conforming to the `RelayContext` interface, got `%s`.", relay) : invariant(false) : void 0;
+      !isRelayContext(relay) ? true ? invariant2(false, "RelayContext: Expected `context.relay` to be an object conforming to the `RelayContext` interface, got `%s`.", relay) : invariant2(false) : void 0;
       return relay;
     }
     function isRelayContext(context) {
@@ -34877,21 +35132,21 @@ var require_ReactRelayFragmentContainer = __commonJS({
     var _assertThisInitialized2 = _interopRequireDefault(require_assertThisInitialized());
     var _inheritsLoose2 = _interopRequireDefault(require_inheritsLoose());
     var _defineProperty2 = _interopRequireDefault(require_defineProperty());
-    var _excluded = ["componentRef", "__relayContext", "__rootIsQueryRenderer"];
+    var _excluded4 = ["componentRef", "__relayContext", "__rootIsQueryRenderer"];
     var buildReactRelayContainer = require_buildReactRelayContainer();
     var _require = require_ReactRelayContainerUtils();
     var getContainerName = _require.getContainerName;
     var _require2 = require_RelayContext();
     var assertRelayContext = _require2.assertRelayContext;
     var areEqual = require_areEqual();
-    var React2 = require_react();
+    var React7 = require_react();
     var _require3 = require_relay_runtime();
     var createFragmentSpecResolver = _require3.createFragmentSpecResolver;
     var getDataIDsFromObject = _require3.getDataIDsFromObject;
     var isScalarAndEqual = _require3.isScalarAndEqual;
-    function createContainerWithFragments(Component, fragments) {
+    function createContainerWithFragments(Component2, fragments) {
       var _class;
-      var containerName = getContainerName(Component);
+      var containerName = getContainerName(Component2);
       return _class = /* @__PURE__ */ function(_React$Component) {
         (0, _inheritsLoose2["default"])(_class2, _React$Component);
         function _class2(props) {
@@ -35003,22 +35258,22 @@ var require_ReactRelayFragmentContainer = __commonJS({
           }
         };
         _proto.render = function render() {
-          var _this$props = this.props, componentRef = _this$props.componentRef, __relayContext = _this$props.__relayContext, __rootIsQueryRenderer = _this$props.__rootIsQueryRenderer, props = (0, _objectWithoutPropertiesLoose2["default"])(_this$props, _excluded);
-          return React2.createElement(Component, (0, _objectSpread2["default"])((0, _objectSpread2["default"])((0, _objectSpread2["default"])({}, props), this.state.data), {}, {
+          var _this$props = this.props, componentRef = _this$props.componentRef, __relayContext = _this$props.__relayContext, __rootIsQueryRenderer = _this$props.__rootIsQueryRenderer, props = (0, _objectWithoutPropertiesLoose2["default"])(_this$props, _excluded4);
+          return React7.createElement(Component2, (0, _objectSpread2["default"])((0, _objectSpread2["default"])((0, _objectSpread2["default"])({}, props), this.state.data), {}, {
             ref: componentRef,
             relay: this.state.relayProp
           }));
         };
         return _class2;
-      }(React2.Component), (0, _defineProperty2["default"])(_class, "displayName", containerName), _class;
+      }(React7.Component), (0, _defineProperty2["default"])(_class, "displayName", containerName), _class;
     }
     function getRelayProp(environment2) {
       return {
         environment: environment2
       };
     }
-    function createContainer(Component, fragmentSpec) {
-      return buildReactRelayContainer(Component, fragmentSpec, createContainerWithFragments);
+    function createContainer(Component2, fragmentSpec) {
+      return buildReactRelayContainer(Component2, fragmentSpec, createContainerWithFragments);
     }
     module.exports = {
       createContainer
@@ -35033,20 +35288,20 @@ var require_ReactRelayLocalQueryRenderer = __commonJS({
     var ReactRelayContext = require_ReactRelayContext();
     var ReactRelayQueryRendererContext = require_ReactRelayQueryRendererContext();
     var areEqual = require_areEqual();
-    var React2 = require_react();
+    var React7 = require_react();
     var _require = require_relay_runtime();
     var createOperationDescriptor = _require.createOperationDescriptor;
     var deepFreeze = _require.deepFreeze;
     var getRequest = _require.getRequest;
-    var useLayoutEffect = React2.useLayoutEffect;
-    var useState = React2.useState;
-    var useRef = React2.useRef;
-    var useMemo = React2.useMemo;
+    var useLayoutEffect4 = React7.useLayoutEffect;
+    var useState5 = React7.useState;
+    var useRef4 = React7.useRef;
+    var useMemo3 = React7.useMemo;
     var queryRendererContext = {
       rootIsQueryRenderer: true
     };
     function useDeepCompare(value) {
-      var latestValue = React2.useRef(value);
+      var latestValue = React7.useRef(value);
       if (!areEqual(latestValue.current, value)) {
         if (true) {
           deepFreeze(value);
@@ -35058,19 +35313,19 @@ var require_ReactRelayLocalQueryRenderer = __commonJS({
     function ReactRelayLocalQueryRenderer(props) {
       var environment2 = props.environment, query = props.query, variables = props.variables, render = props.render;
       var latestVariables = useDeepCompare(variables);
-      var operation = useMemo(function() {
+      var operation = useMemo3(function() {
         var request = getRequest(query);
         return createOperationDescriptor(request, latestVariables);
       }, [query, latestVariables]);
-      var relayContext = useMemo(function() {
+      var relayContext = useMemo3(function() {
         return {
           environment: environment2
         };
       }, [environment2]);
-      var dataRef = useRef(null);
-      var _useState = useState(null), forceUpdate = _useState[1];
-      var cleanupFnRef = useRef(null);
-      var snapshot = useMemo(function() {
+      var dataRef = useRef4(null);
+      var _useState = useState5(null), forceUpdate = _useState[1];
+      var cleanupFnRef = useRef4(null);
+      var snapshot = useMemo3(function() {
         environment2.check(operation);
         var res = environment2.lookup(operation.fragment);
         dataRef.current = res.data;
@@ -35094,15 +35349,15 @@ var require_ReactRelayLocalQueryRenderer = __commonJS({
         cleanupFnRef.current = nextCleanupFn;
         return res;
       }, [environment2, operation]);
-      useLayoutEffect(function() {
+      useLayoutEffect4(function() {
         var cleanupFn = cleanupFnRef.current;
         return function() {
           cleanupFn && cleanupFn();
         };
       }, [snapshot]);
-      return /* @__PURE__ */ React2.createElement(ReactRelayContext.Provider, {
+      return /* @__PURE__ */ React7.createElement(ReactRelayContext.Provider, {
         value: relayContext
-      }, /* @__PURE__ */ React2.createElement(ReactRelayQueryRendererContext.Provider, {
+      }, /* @__PURE__ */ React7.createElement(ReactRelayQueryRendererContext.Provider, {
         value: queryRendererContext
       }, render({
         props: dataRef.current
@@ -35142,7 +35397,7 @@ var require_ReactRelayQueryFetcher = __commonJS({
     "use strict";
     var _interopRequireDefault = require_interopRequireDefault()["default"];
     var _defineProperty2 = _interopRequireDefault(require_defineProperty());
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var _require = require_relay_runtime();
     var fetchQuery = _require.__internal.fetchQuery;
     var createOperationDescriptor = _require.createOperationDescriptor;
@@ -35219,7 +35474,7 @@ var require_ReactRelayQueryFetcher = __commonJS({
         });
       };
       _proto.setOnDataChange = function setOnDataChange(onDataChange) {
-        !this._fetchOptions ? true ? invariant(false, "ReactRelayQueryFetcher: `setOnDataChange` should have been called after having called `fetch`") : invariant(false) : void 0;
+        !this._fetchOptions ? true ? invariant2(false, "ReactRelayQueryFetcher: `setOnDataChange` should have been called after having called `fetch`") : invariant2(false) : void 0;
         if (typeof onDataChange === "function") {
           this._fetchOptions.onDataChangeCallbacks = this._fetchOptions.onDataChangeCallbacks || [];
           this._fetchOptions.onDataChangeCallbacks.push(onDataChange);
@@ -35258,7 +35513,7 @@ var require_ReactRelayQueryFetcher = __commonJS({
         })["finally"](function() {
           _this2._pendingRequest = null;
         }).subscribe({
-          next: function next() {
+          next: function next2() {
             _this2._didFetchFinish = true;
             _this2._error = null;
             _this2._onQueryDataAvailable({
@@ -35295,7 +35550,7 @@ var require_ReactRelayQueryFetcher = __commonJS({
         return this._snapshot;
       };
       _proto.retry = function retry(cacheConfigOverride) {
-        !this._fetchOptions ? true ? invariant(false, "ReactRelayQueryFetcher: `retry` should be called after having called `fetch`") : invariant(false) : void 0;
+        !this._fetchOptions ? true ? invariant2(false, "ReactRelayQueryFetcher: `retry` should be called after having called `fetch`") : invariant2(false) : void 0;
         return this.fetch({
           environment: this._fetchOptions.environment,
           operation: this._fetchOptions.operation,
@@ -35335,7 +35590,7 @@ var require_ReactRelayQueryFetcher = __commonJS({
       _proto._onQueryDataAvailable = function _onQueryDataAvailable(_ref2) {
         var _this3 = this;
         var notifyFirstResult = _ref2.notifyFirstResult;
-        !this._fetchOptions ? true ? invariant(false, "ReactRelayQueryFetcher: `_onQueryDataAvailable` should have been called after having called `fetch`") : invariant(false) : void 0;
+        !this._fetchOptions ? true ? invariant2(false, "ReactRelayQueryFetcher: `_onQueryDataAvailable` should have been called after having called `fetch`") : invariant2(false) : void 0;
         var _this$_fetchOptions = this._fetchOptions, environment2 = _this$_fetchOptions.environment, onDataChangeCallbacks = _this$_fetchOptions.onDataChangeCallbacks, operation = _this$_fetchOptions.operation;
         if (this._snapshot) {
           return;
@@ -35373,15 +35628,15 @@ var require_ReactRelayPaginationContainer = __commonJS({
   "node_modules/react-relay/lib/ReactRelayPaginationContainer.js"(exports, module) {
     "use strict";
     var _interopRequireDefault = require_interopRequireDefault()["default"];
-    var _extends2 = _interopRequireDefault(require_extends());
+    var _extends22 = _interopRequireDefault(require_extends());
     var _objectWithoutPropertiesLoose2 = _interopRequireDefault(require_objectWithoutPropertiesLoose());
     var _assertThisInitialized2 = _interopRequireDefault(require_assertThisInitialized());
     var _inheritsLoose2 = _interopRequireDefault(require_inheritsLoose());
     var _defineProperty2 = _interopRequireDefault(require_defineProperty());
     var _objectSpread3 = _interopRequireDefault(require_objectSpread2());
-    var _excluded = ["componentRef"];
-    var _excluded2 = ["componentRef", "__relayContext", "__rootIsQueryRenderer"];
-    var _excluded3 = ["componentRef", "__relayContext", "__rootIsQueryRenderer"];
+    var _excluded4 = ["componentRef"];
+    var _excluded22 = ["componentRef", "__relayContext", "__rootIsQueryRenderer"];
+    var _excluded32 = ["componentRef", "__relayContext", "__rootIsQueryRenderer"];
     var buildReactRelayContainer = require_buildReactRelayContainer();
     var getRootVariablesForFragments = require_getRootVariablesForFragments();
     var _require = require_ReactRelayContainerUtils();
@@ -35392,8 +35647,8 @@ var require_ReactRelayPaginationContainer = __commonJS({
     var _require2 = require_RelayContext();
     var assertRelayContext = _require2.assertRelayContext;
     var areEqual = require_areEqual();
-    var invariant = require_browser();
-    var React2 = require_react();
+    var invariant2 = require_browser();
+    var React7 = require_react();
     var _require3 = require_relay_runtime();
     var ConnectionInterface = _require3.ConnectionInterface;
     var Observable = _require3.Observable;
@@ -35404,11 +35659,11 @@ var require_ReactRelayPaginationContainer = __commonJS({
     var getRequest = _require3.getRequest;
     var getVariablesFromObject = _require3.getVariablesFromObject;
     var isScalarAndEqual = _require3.isScalarAndEqual;
-    var warning = require_warning();
+    var warning2 = require_warning();
     var FORWARD = "forward";
     function createGetConnectionFromProps(metadata) {
       var path = metadata.path;
-      !path ? true ? invariant(false, "ReactRelayPaginationContainer: Unable to synthesize a getConnectionFromProps function.") : invariant(false) : void 0;
+      !path ? true ? invariant2(false, "ReactRelayPaginationContainer: Unable to synthesize a getConnectionFromProps function.") : invariant2(false) : void 0;
       return function(props) {
         var data = props[metadata.fragmentName];
         for (var i = 0; i < path.length; i++) {
@@ -35422,7 +35677,7 @@ var require_ReactRelayPaginationContainer = __commonJS({
     }
     function createGetFragmentVariables(metadata) {
       var countVariable = metadata.count;
-      !countVariable ? true ? invariant(false, "ReactRelayPaginationContainer: Unable to synthesize a getFragmentVariables function.") : invariant(false) : void 0;
+      !countVariable ? true ? invariant2(false, "ReactRelayPaginationContainer: Unable to synthesize a getFragmentVariables function.") : invariant2(false) : void 0;
       return function(prevVars, totalCount) {
         return (0, _objectSpread3["default"])((0, _objectSpread3["default"])({}, prevVars), {}, (0, _defineProperty2["default"])({}, countVariable, totalCount));
       };
@@ -35437,14 +35692,14 @@ var require_ReactRelayPaginationContainer = __commonJS({
           isRelayModern = true;
         }
         if (connectionMetadata) {
-          !(connectionMetadata.length === 1) ? true ? invariant(false, "ReactRelayPaginationContainer: Only a single @connection is supported, `%s` has %s.", fragmentName, connectionMetadata.length) : invariant(false) : void 0;
-          !!foundConnectionMetadata ? true ? invariant(false, "ReactRelayPaginationContainer: Only a single fragment with @connection is supported.") : invariant(false) : void 0;
+          !(connectionMetadata.length === 1) ? true ? invariant2(false, "ReactRelayPaginationContainer: Only a single @connection is supported, `%s` has %s.", fragmentName, connectionMetadata.length) : invariant2(false) : void 0;
+          !!foundConnectionMetadata ? true ? invariant2(false, "ReactRelayPaginationContainer: Only a single fragment with @connection is supported.") : invariant2(false) : void 0;
           foundConnectionMetadata = (0, _objectSpread3["default"])((0, _objectSpread3["default"])({}, connectionMetadata[0]), {}, {
             fragmentName
           });
         }
       }
-      !(!isRelayModern || foundConnectionMetadata !== null) ? true ? invariant(false, "ReactRelayPaginationContainer: A @connection directive must be present.") : invariant(false) : void 0;
+      !(!isRelayModern || foundConnectionMetadata !== null) ? true ? invariant2(false, "ReactRelayPaginationContainer: A @connection directive must be present.") : invariant2(false) : void 0;
       return foundConnectionMetadata || {};
     }
     function toObserver(observerOrCallback) {
@@ -35456,14 +35711,14 @@ var require_ReactRelayPaginationContainer = __commonJS({
         }
       } : observerOrCallback || {};
     }
-    function createContainerWithFragments(Component, fragments, connectionConfig) {
+    function createContainerWithFragments(Component2, fragments, connectionConfig) {
       var _class;
-      var componentName = getComponentName(Component);
-      var containerName = getContainerName(Component);
+      var componentName = getComponentName(Component2);
+      var containerName = getContainerName(Component2);
       var metadata = findConnectionMetadata(fragments);
       var getConnectionFromProps = connectionConfig.getConnectionFromProps || createGetConnectionFromProps(metadata);
       var direction = connectionConfig.direction || metadata.direction;
-      !direction ? true ? invariant(false, "ReactRelayPaginationContainer: Unable to infer direction of the connection, possibly because both first and last are provided.") : invariant(false) : void 0;
+      !direction ? true ? invariant2(false, "ReactRelayPaginationContainer: Unable to infer direction of the connection, possibly because both first and last are provided.") : invariant2(false) : void 0;
       var getFragmentVariables = connectionConfig.getFragmentVariables || createGetFragmentVariables(metadata);
       return _class = /* @__PURE__ */ function(_React$Component) {
         (0, _inheritsLoose2["default"])(_class2, _React$Component);
@@ -35522,11 +35777,11 @@ var require_ReactRelayPaginationContainer = __commonJS({
               return _this._refetchConnection(totalCount, observerOrCallback);
             }
             var _ConnectionInterface$ = ConnectionInterface.get(), END_CURSOR = _ConnectionInterface$.END_CURSOR, START_CURSOR = _ConnectionInterface$.START_CURSOR;
-            var cursor = connectionData.cursor;
-            true ? warning(cursor != null && cursor !== "", "ReactRelayPaginationContainer: Cannot `loadMore` without valid `%s` (got `%s`)", direction === FORWARD ? END_CURSOR : START_CURSOR, cursor) : void 0;
+            var cursor2 = connectionData.cursor;
+            true ? warning2(cursor2 != null && cursor2 !== "", "ReactRelayPaginationContainer: Cannot `loadMore` without valid `%s` (got `%s`)", direction === FORWARD ? END_CURSOR : START_CURSOR, cursor2) : void 0;
             var paginatingVariables = {
               count: pageSize,
-              cursor,
+              cursor: cursor2,
               totalCount
             };
             var fetch2 = _this._fetchPage(paginatingVariables, observer, options);
@@ -35657,29 +35912,29 @@ var require_ReactRelayPaginationContainer = __commonJS({
           }
         };
         _proto._getConnectionData = function _getConnectionData() {
-          var _this$props = this.props, _ = _this$props.componentRef, restProps = (0, _objectWithoutPropertiesLoose2["default"])(_this$props, _excluded);
+          var _this$props = this.props, _ = _this$props.componentRef, restProps = (0, _objectWithoutPropertiesLoose2["default"])(_this$props, _excluded4);
           var props = (0, _objectSpread3["default"])((0, _objectSpread3["default"])({}, restProps), this.state.data);
           var connectionData = getConnectionFromProps(props);
           if (connectionData == null) {
             return null;
           }
           var _ConnectionInterface$2 = ConnectionInterface.get(), EDGES = _ConnectionInterface$2.EDGES, PAGE_INFO = _ConnectionInterface$2.PAGE_INFO, HAS_NEXT_PAGE = _ConnectionInterface$2.HAS_NEXT_PAGE, HAS_PREV_PAGE = _ConnectionInterface$2.HAS_PREV_PAGE, END_CURSOR = _ConnectionInterface$2.END_CURSOR, START_CURSOR = _ConnectionInterface$2.START_CURSOR;
-          !(typeof connectionData === "object") ? true ? invariant(false, "ReactRelayPaginationContainer: Expected `getConnectionFromProps()` in `%s`to return `null` or a plain object with %s and %s properties, got `%s`.", componentName, EDGES, PAGE_INFO, connectionData) : invariant(false) : void 0;
+          !(typeof connectionData === "object") ? true ? invariant2(false, "ReactRelayPaginationContainer: Expected `getConnectionFromProps()` in `%s`to return `null` or a plain object with %s and %s properties, got `%s`.", componentName, EDGES, PAGE_INFO, connectionData) : invariant2(false) : void 0;
           var edges = connectionData[EDGES];
           var pageInfo = connectionData[PAGE_INFO];
           if (edges == null || pageInfo == null) {
             return null;
           }
-          !Array.isArray(edges) ? true ? invariant(false, "ReactRelayPaginationContainer: Expected `getConnectionFromProps()` in `%s`to return an object with %s: Array, got `%s`.", componentName, EDGES, edges) : invariant(false) : void 0;
-          !(typeof pageInfo === "object") ? true ? invariant(false, "ReactRelayPaginationContainer: Expected `getConnectionFromProps()` in `%s`to return an object with %s: Object, got `%s`.", componentName, PAGE_INFO, pageInfo) : invariant(false) : void 0;
+          !Array.isArray(edges) ? true ? invariant2(false, "ReactRelayPaginationContainer: Expected `getConnectionFromProps()` in `%s`to return an object with %s: Array, got `%s`.", componentName, EDGES, edges) : invariant2(false) : void 0;
+          !(typeof pageInfo === "object") ? true ? invariant2(false, "ReactRelayPaginationContainer: Expected `getConnectionFromProps()` in `%s`to return an object with %s: Object, got `%s`.", componentName, PAGE_INFO, pageInfo) : invariant2(false) : void 0;
           var hasMore = direction === FORWARD ? pageInfo[HAS_NEXT_PAGE] : pageInfo[HAS_PREV_PAGE];
-          var cursor = direction === FORWARD ? pageInfo[END_CURSOR] : pageInfo[START_CURSOR];
-          if (typeof hasMore !== "boolean" || edges.length !== 0 && typeof cursor === "undefined") {
-            true ? warning(false, "ReactRelayPaginationContainer: Cannot paginate without %s fields in `%s`. Be sure to fetch %s (got `%s`) and %s (got `%s`).", PAGE_INFO, componentName, direction === FORWARD ? HAS_NEXT_PAGE : HAS_PREV_PAGE, hasMore, direction === FORWARD ? END_CURSOR : START_CURSOR, cursor) : void 0;
+          var cursor2 = direction === FORWARD ? pageInfo[END_CURSOR] : pageInfo[START_CURSOR];
+          if (typeof hasMore !== "boolean" || edges.length !== 0 && typeof cursor2 === "undefined") {
+            true ? warning2(false, "ReactRelayPaginationContainer: Cannot paginate without %s fields in `%s`. Be sure to fetch %s (got `%s`) and %s (got `%s`).", PAGE_INFO, componentName, direction === FORWARD ? HAS_NEXT_PAGE : HAS_PREV_PAGE, hasMore, direction === FORWARD ? END_CURSOR : START_CURSOR, cursor2) : void 0;
             return null;
           }
           return {
-            cursor,
+            cursor: cursor2,
             edgeCount: edges.length,
             hasMore
           };
@@ -35692,7 +35947,7 @@ var require_ReactRelayPaginationContainer = __commonJS({
         };
         _proto._canFetchPage = function _canFetchPage(method) {
           if (this._isUnmounted) {
-            true ? warning(false, "ReactRelayPaginationContainer: Unexpected call of `%s` on unmounted container `%s`. It looks like some instances of your container still trying to fetch data but they already unmounted. Please make sure you clear all timers, intervals, async calls, etc that may trigger `%s` call.", method, containerName, method) : void 0;
+            true ? warning2(false, "ReactRelayPaginationContainer: Unexpected call of `%s` on unmounted container `%s`. It looks like some instances of your container still trying to fetch data but they already unmounted. Please make sure you clear all timers, intervals, async calls, etc that may trigger `%s` call.", method, containerName, method) : void 0;
             return false;
           }
           return true;
@@ -35700,7 +35955,7 @@ var require_ReactRelayPaginationContainer = __commonJS({
         _proto._fetchPage = function _fetchPage(paginatingVariables, observer, options) {
           var _this3 = this;
           var _assertRelayContext = assertRelayContext(this.props.__relayContext), environment2 = _assertRelayContext.environment;
-          var _this$props2 = this.props, _ = _this$props2.componentRef, __relayContext = _this$props2.__relayContext, __rootIsQueryRenderer = _this$props2.__rootIsQueryRenderer, restProps = (0, _objectWithoutPropertiesLoose2["default"])(_this$props2, _excluded2);
+          var _this$props2 = this.props, _ = _this$props2.componentRef, __relayContext = _this$props2.__relayContext, __rootIsQueryRenderer = _this$props2.__rootIsQueryRenderer, restProps = (0, _objectWithoutPropertiesLoose2["default"])(_this$props2, _excluded22);
           var props = (0, _objectSpread3["default"])((0, _objectSpread3["default"])({}, restProps), this.state.data);
           var fragmentVariables;
           var rootVariables = getRootVariablesForFragments(fragments, restProps);
@@ -35710,7 +35965,7 @@ var require_ReactRelayPaginationContainer = __commonJS({
             count: paginatingVariables.count,
             cursor: paginatingVariables.cursor
           }, fragmentVariables);
-          !(typeof fetchVariables === "object" && fetchVariables !== null) ? true ? invariant(false, "ReactRelayPaginationContainer: Expected `getVariables()` to return an object, got `%s` in `%s`.", fetchVariables, componentName) : invariant(false) : void 0;
+          !(typeof fetchVariables === "object" && fetchVariables !== null) ? true ? invariant2(false, "ReactRelayPaginationContainer: Expected `getVariables()` to return an object, got `%s` in `%s`.", fetchVariables, componentName) : invariant2(false) : void 0;
           fetchVariables = (0, _objectSpread3["default"])((0, _objectSpread3["default"])({}, fetchVariables), this._refetchVariables);
           fragmentVariables = (0, _objectSpread3["default"])((0, _objectSpread3["default"])({}, fetchVariables), fragmentVariables);
           var cacheConfig = options ? {
@@ -35781,19 +36036,19 @@ var require_ReactRelayPaginationContainer = __commonJS({
           }
         };
         _proto.render = function render() {
-          var _this$props3 = this.props, componentRef = _this$props3.componentRef, __relayContext = _this$props3.__relayContext, __rootIsQueryRenderer = _this$props3.__rootIsQueryRenderer, props = (0, _objectWithoutPropertiesLoose2["default"])(_this$props3, _excluded3);
-          return /* @__PURE__ */ React2.createElement(ReactRelayContext.Provider, {
+          var _this$props3 = this.props, componentRef = _this$props3.componentRef, __relayContext = _this$props3.__relayContext, __rootIsQueryRenderer = _this$props3.__rootIsQueryRenderer, props = (0, _objectWithoutPropertiesLoose2["default"])(_this$props3, _excluded32);
+          return /* @__PURE__ */ React7.createElement(ReactRelayContext.Provider, {
             value: this.state.contextForChildren
-          }, /* @__PURE__ */ React2.createElement(Component, (0, _extends2["default"])({}, props, this.state.data, {
+          }, /* @__PURE__ */ React7.createElement(Component2, (0, _extends22["default"])({}, props, this.state.data, {
             ref: componentRef,
             relay: this.state.relayProp
           })));
         };
         return _class2;
-      }(React2.Component), (0, _defineProperty2["default"])(_class, "displayName", containerName), _class;
+      }(React7.Component), (0, _defineProperty2["default"])(_class, "displayName", containerName), _class;
     }
-    function createContainer(Component, fragmentSpec, connectionConfig) {
-      return buildReactRelayContainer(Component, fragmentSpec, function(ComponentClass, fragments) {
+    function createContainer(Component2, fragmentSpec, connectionConfig) {
+      return buildReactRelayContainer(Component2, fragmentSpec, function(ComponentClass, fragments) {
         return createContainerWithFragments(ComponentClass, fragments, connectionConfig);
       });
     }
@@ -35816,7 +36071,7 @@ var require_ReactRelayQueryRenderer = __commonJS({
     var ReactRelayQueryFetcher = require_ReactRelayQueryFetcher();
     var ReactRelayQueryRendererContext = require_ReactRelayQueryRendererContext();
     var areEqual = require_areEqual();
-    var React2 = require_react();
+    var React7 = require_react();
     var _require = require_relay_runtime();
     var createOperationDescriptor = _require.createOperationDescriptor;
     var deepFreeze = _require.deepFreeze;
@@ -35936,14 +36191,14 @@ var require_ReactRelayQueryRenderer = __commonJS({
         if (true) {
           deepFreeze(renderProps);
         }
-        return /* @__PURE__ */ React2.createElement(ReactRelayContext.Provider, {
+        return /* @__PURE__ */ React7.createElement(ReactRelayContext.Provider, {
           value: relayContext
-        }, /* @__PURE__ */ React2.createElement(ReactRelayQueryRendererContext.Provider, {
+        }, /* @__PURE__ */ React7.createElement(ReactRelayQueryRendererContext.Provider, {
           value: queryRendererContext
         }, this.props.render(renderProps)));
       };
       return ReactRelayQueryRenderer2;
-    }(React2.Component);
+    }(React7.Component);
     function getLoadingRenderProps() {
       return {
         error: null,
@@ -36088,13 +36343,13 @@ var require_ReactRelayRefetchContainer = __commonJS({
   "node_modules/react-relay/lib/ReactRelayRefetchContainer.js"(exports, module) {
     "use strict";
     var _interopRequireDefault = require_interopRequireDefault()["default"];
-    var _extends2 = _interopRequireDefault(require_extends());
+    var _extends22 = _interopRequireDefault(require_extends());
     var _objectWithoutPropertiesLoose2 = _interopRequireDefault(require_objectWithoutPropertiesLoose());
     var _objectSpread2 = _interopRequireDefault(require_objectSpread2());
     var _assertThisInitialized2 = _interopRequireDefault(require_assertThisInitialized());
     var _inheritsLoose2 = _interopRequireDefault(require_inheritsLoose());
     var _defineProperty2 = _interopRequireDefault(require_defineProperty());
-    var _excluded = ["componentRef", "__relayContext", "__rootIsQueryRenderer"];
+    var _excluded4 = ["componentRef", "__relayContext", "__rootIsQueryRenderer"];
     var buildReactRelayContainer = require_buildReactRelayContainer();
     var getRootVariablesForFragments = require_getRootVariablesForFragments();
     var _require = require_ReactRelayContainerUtils();
@@ -36104,7 +36359,7 @@ var require_ReactRelayRefetchContainer = __commonJS({
     var _require2 = require_RelayContext();
     var assertRelayContext = _require2.assertRelayContext;
     var areEqual = require_areEqual();
-    var React2 = require_react();
+    var React7 = require_react();
     var _require3 = require_relay_runtime();
     var Observable = _require3.Observable;
     var createFragmentSpecResolver = _require3.createFragmentSpecResolver;
@@ -36113,10 +36368,10 @@ var require_ReactRelayRefetchContainer = __commonJS({
     var getRequest = _require3.getRequest;
     var getVariablesFromObject = _require3.getVariablesFromObject;
     var isScalarAndEqual = _require3.isScalarAndEqual;
-    var warning = require_warning();
-    function createContainerWithFragments(Component, fragments, taggedNode) {
+    var warning2 = require_warning();
+    function createContainerWithFragments(Component2, fragments, taggedNode) {
       var _class;
-      var containerName = getContainerName(Component);
+      var containerName = getContainerName(Component2);
       return _class = /* @__PURE__ */ function(_React$Component) {
         (0, _inheritsLoose2["default"])(_class2, _React$Component);
         function _class2(props) {
@@ -36132,7 +36387,7 @@ var require_ReactRelayRefetchContainer = __commonJS({
           });
           (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "_refetch", function(refetchVariables, renderVariables, observerOrCallback, options) {
             if (_this._isUnmounted) {
-              true ? warning(false, "ReactRelayRefetchContainer: Unexpected call of `refetch` on unmounted container `%s`. It looks like some instances of your container still trying to refetch the data but they already unmounted. Please make sure you clear all timers, intervals, async calls, etc that may trigger `refetch`.", containerName) : void 0;
+              true ? warning2(false, "ReactRelayRefetchContainer: Unexpected call of `refetch` on unmounted container `%s`. It looks like some instances of your container still trying to refetch the data but they already unmounted. Please make sure you clear all timers, intervals, async calls, etc that may trigger `refetch`.", containerName) : void 0;
               return {
                 dispose: function dispose() {
                 }
@@ -36330,17 +36585,17 @@ var require_ReactRelayRefetchContainer = __commonJS({
           return this._queryFetcher;
         };
         _proto.render = function render() {
-          var _this$props = this.props, componentRef = _this$props.componentRef, __relayContext = _this$props.__relayContext, __rootIsQueryRenderer = _this$props.__rootIsQueryRenderer, props = (0, _objectWithoutPropertiesLoose2["default"])(_this$props, _excluded);
+          var _this$props = this.props, componentRef = _this$props.componentRef, __relayContext = _this$props.__relayContext, __rootIsQueryRenderer = _this$props.__rootIsQueryRenderer, props = (0, _objectWithoutPropertiesLoose2["default"])(_this$props, _excluded4);
           var _this$state3 = this.state, relayProp = _this$state3.relayProp, contextForChildren = _this$state3.contextForChildren;
-          return /* @__PURE__ */ React2.createElement(ReactRelayContext.Provider, {
+          return /* @__PURE__ */ React7.createElement(ReactRelayContext.Provider, {
             value: contextForChildren
-          }, /* @__PURE__ */ React2.createElement(Component, (0, _extends2["default"])({}, props, this.state.data, {
+          }, /* @__PURE__ */ React7.createElement(Component2, (0, _extends22["default"])({}, props, this.state.data, {
             ref: componentRef,
             relay: relayProp
           })));
         };
         return _class2;
-      }(React2.Component), (0, _defineProperty2["default"])(_class, "displayName", containerName), _class;
+      }(React7.Component), (0, _defineProperty2["default"])(_class, "displayName", containerName), _class;
     }
     function getRelayProp(environment2, refetch) {
       return {
@@ -36348,8 +36603,8 @@ var require_ReactRelayRefetchContainer = __commonJS({
         refetch
       };
     }
-    function createContainer(Component, fragmentSpec, taggedNode) {
-      return buildReactRelayContainer(Component, fragmentSpec, function(ComponentClass, fragments) {
+    function createContainer(Component2, fragmentSpec, taggedNode) {
+      return buildReactRelayContainer(Component2, fragmentSpec, function(ComponentClass, fragments) {
         return createContainerWithFragments(ComponentClass, fragments, taggedNode);
       });
     }
@@ -36363,8 +36618,8 @@ var require_ReactRelayRefetchContainer = __commonJS({
 var require_ProfilerContext = __commonJS({
   "node_modules/react-relay/lib/relay-hooks/ProfilerContext.js"(exports, module) {
     "use strict";
-    var React2 = require_react();
-    var ProfilerContext = React2.createContext({
+    var React7 = require_react();
+    var ProfilerContext = React7.createContext({
       wrapPrepareQueryResource: function wrapPrepareQueryResource(cb) {
         return cb();
       }
@@ -36378,15 +36633,15 @@ var require_useRelayEnvironment = __commonJS({
   "node_modules/react-relay/lib/relay-hooks/useRelayEnvironment.js"(exports, module) {
     "use strict";
     var ReactRelayContext = require_ReactRelayContext();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var _require = require_react();
-    var useContext = _require.useContext;
-    function useRelayEnvironment() {
-      var context = useContext(ReactRelayContext);
-      !(context != null) ? true ? invariant(false, "useRelayEnvironment: Expected to have found a Relay environment provided by a `RelayEnvironmentProvider` component. This usually means that useRelayEnvironment was used in a component that is not a descendant of a `RelayEnvironmentProvider`. Please make sure a `RelayEnvironmentProvider` has been rendered somewhere as a parent or ancestor of your component.") : invariant(false) : void 0;
+    var useContext6 = _require.useContext;
+    function useRelayEnvironment2() {
+      var context = useContext6(ReactRelayContext);
+      !(context != null) ? true ? invariant2(false, "useRelayEnvironment: Expected to have found a Relay environment provided by a `RelayEnvironmentProvider` component. This usually means that useRelayEnvironment was used in a component that is not a descendant of a `RelayEnvironmentProvider`. Please make sure a `RelayEnvironmentProvider` has been rendered somewhere as a parent or ancestor of your component.") : invariant2(false) : void 0;
       return context.environment;
     }
-    module.exports = useRelayEnvironment;
+    module.exports = useRelayEnvironment2;
   }
 });
 
@@ -36395,27 +36650,27 @@ var require_EntryPointContainer_react = __commonJS({
   "node_modules/react-relay/lib/relay-hooks/EntryPointContainer.react.js"(exports, module) {
     "use strict";
     var ProfilerContext = require_ProfilerContext();
-    var useRelayEnvironment = require_useRelayEnvironment();
-    var React2 = require_react();
+    var useRelayEnvironment2 = require_useRelayEnvironment();
+    var React7 = require_react();
     var _require = require_react();
-    var useContext = _require.useContext;
-    var useEffect = _require.useEffect;
-    var warning = require_warning();
+    var useContext6 = _require.useContext;
+    var useEffect4 = _require.useEffect;
+    var warning2 = require_warning();
     function EntryPointContainer(_ref) {
       var entryPointReference = _ref.entryPointReference, props = _ref.props;
-      true ? warning(entryPointReference.isDisposed === false, "<EntryPointContainer>: Expected entryPointReference to not be disposed yet. This is because disposing the entrypoint marks it for future garbage collection, and as such may no longer be present in the Relay store. In the future, this will become a hard error.") : void 0;
+      true ? warning2(entryPointReference.isDisposed === false, "<EntryPointContainer>: Expected entryPointReference to not be disposed yet. This is because disposing the entrypoint marks it for future garbage collection, and as such may no longer be present in the Relay store. In the future, this will become a hard error.") : void 0;
       var getComponent = entryPointReference.getComponent, queries = entryPointReference.queries, entryPoints = entryPointReference.entryPoints, extraProps = entryPointReference.extraProps, rootModuleID = entryPointReference.rootModuleID;
-      var Component = getComponent();
-      var profilerContext = useContext(ProfilerContext);
-      var environment2 = useRelayEnvironment();
-      useEffect(function() {
+      var Component2 = getComponent();
+      var profilerContext = useContext6(ProfilerContext);
+      var environment2 = useRelayEnvironment2();
+      useEffect4(function() {
         environment2.__log({
           name: "entrypoint.root.consume",
           profilerContext,
           rootModuleID
         });
       }, [environment2, profilerContext, rootModuleID]);
-      return /* @__PURE__ */ React2.createElement(Component, {
+      return /* @__PURE__ */ React7.createElement(Component2, {
         entryPoints,
         extraProps,
         props,
@@ -36432,8 +36687,8 @@ var require_loadQuery = __commonJS({
     "use strict";
     var _interopRequireDefault = require_interopRequireDefault()["default"];
     var _objectSpread2 = _interopRequireDefault(require_objectSpread2());
-    var invariant = require_browser();
-    var React2 = require_react();
+    var invariant2 = require_browser();
+    var React7 = require_react();
     var _require = require_relay_runtime();
     var fetchQueryDeduped = _require.__internal.fetchQueryDeduped;
     var Observable = _require.Observable;
@@ -36443,19 +36698,19 @@ var require_loadQuery = __commonJS({
     var createOperationDescriptor = _require.createOperationDescriptor;
     var getRequest = _require.getRequest;
     var getRequestIdentifier = _require.getRequestIdentifier;
-    var warning = require_warning();
+    var warning2 = require_warning();
     var RenderDispatcher = null;
     var fetchKey = 100001;
     function useTrackLoadQueryInRender() {
       if (RenderDispatcher === null) {
         var _React$__SECRET_INTER, _React$__SECRET_INTER2;
-        RenderDispatcher = (_React$__SECRET_INTER = React2.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED) === null || _React$__SECRET_INTER === void 0 ? void 0 : (_React$__SECRET_INTER2 = _React$__SECRET_INTER.ReactCurrentDispatcher) === null || _React$__SECRET_INTER2 === void 0 ? void 0 : _React$__SECRET_INTER2.current;
+        RenderDispatcher = (_React$__SECRET_INTER = React7.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED) === null || _React$__SECRET_INTER === void 0 ? void 0 : (_React$__SECRET_INTER2 = _React$__SECRET_INTER.ReactCurrentDispatcher) === null || _React$__SECRET_INTER2 === void 0 ? void 0 : _React$__SECRET_INTER2.current;
       }
     }
     function loadQuery(environment2, preloadableRequest, variables, options, environmentProviderOptions) {
       var _React$__SECRET_INTER3, _React$__SECRET_INTER4, _options$__nameForWar, _options$fetchPolicy;
-      var CurrentDispatcher = (_React$__SECRET_INTER3 = React2.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED) === null || _React$__SECRET_INTER3 === void 0 ? void 0 : (_React$__SECRET_INTER4 = _React$__SECRET_INTER3.ReactCurrentDispatcher) === null || _React$__SECRET_INTER4 === void 0 ? void 0 : _React$__SECRET_INTER4.current;
-      true ? warning(RenderDispatcher == null || CurrentDispatcher !== RenderDispatcher, "Relay: `%s` should not be called inside a React render function.", (_options$__nameForWar = options === null || options === void 0 ? void 0 : options.__nameForWarning) !== null && _options$__nameForWar !== void 0 ? _options$__nameForWar : "loadQuery") : void 0;
+      var CurrentDispatcher = (_React$__SECRET_INTER3 = React7.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED) === null || _React$__SECRET_INTER3 === void 0 ? void 0 : (_React$__SECRET_INTER4 = _React$__SECRET_INTER3.ReactCurrentDispatcher) === null || _React$__SECRET_INTER4 === void 0 ? void 0 : _React$__SECRET_INTER4.current;
+      true ? warning2(RenderDispatcher == null || CurrentDispatcher !== RenderDispatcher, "Relay: `%s` should not be called inside a React render function.", (_options$__nameForWar = options === null || options === void 0 ? void 0 : options.__nameForWarning) !== null && _options$__nameForWar !== void 0 ? _options$__nameForWar : "loadQuery") : void 0;
       fetchKey++;
       var fetchPolicy = (_options$fetchPolicy = options === null || options === void 0 ? void 0 : options.fetchPolicy) !== null && _options$fetchPolicy !== void 0 ? _options$fetchPolicy : "store-or-network";
       var networkCacheConfig = (0, _objectSpread2["default"])((0, _objectSpread2["default"])({}, options === null || options === void 0 ? void 0 : options.networkCacheConfig), {}, {
@@ -36482,8 +36737,8 @@ var require_loadQuery = __commonJS({
         var observable;
         var subject = new ReplaySubject();
         if (RelayFeatureFlags.ENABLE_LOAD_QUERY_REQUEST_DEDUPING === true) {
-          var identifier = "raw-network-request-" + getRequestIdentifier(params2, variables);
-          observable = fetchQueryDeduped(environment2, identifier, function() {
+          var identifier2 = "raw-network-request-" + getRequestIdentifier(params2, variables);
+          observable = fetchQueryDeduped(environment2, identifier2, function() {
             var network2 = environment2.getNetwork();
             return network2.execute(params2, variables, networkCacheConfig);
           });
@@ -36496,7 +36751,7 @@ var require_loadQuery = __commonJS({
             networkError = err;
             subject.error(err);
           },
-          next: function next(data) {
+          next: function next2(data) {
             subject.next(data);
           },
           complete: function complete() {
@@ -36521,7 +36776,7 @@ var require_loadQuery = __commonJS({
           error: function error(err) {
             executionSubject.error(err);
           },
-          next: function next(data) {
+          next: function next2(data) {
             executionSubject.next(data);
           },
           complete: function complete() {
@@ -36553,7 +36808,7 @@ var require_loadQuery = __commonJS({
         params = preloadableConcreteRequest.params;
         var _params = params;
         queryId = _params.id;
-        !(queryId !== null) ? true ? invariant(false, "Relay: `loadQuery` requires that preloadable query `%s` has a persisted query id", params.name) : invariant(false) : void 0;
+        !(queryId !== null) ? true ? invariant2(false, "Relay: `loadQuery` requires that preloadable query `%s` has a persisted query id", params.name) : invariant2(false) : void 0;
         var _module = PreloadableQueryRegistry.get(queryId);
         if (_module != null) {
           checkAvailabilityAndExecute(_module);
@@ -36722,17 +36977,17 @@ var require_RelayEnvironmentProvider = __commonJS({
   "node_modules/react-relay/lib/relay-hooks/RelayEnvironmentProvider.js"(exports, module) {
     "use strict";
     var ReactRelayContext = require_ReactRelayContext();
-    var React2 = require_react();
-    var useMemo = React2.useMemo;
+    var React7 = require_react();
+    var useMemo3 = React7.useMemo;
     function RelayEnvironmentProvider2(props) {
       var children = props.children, environment2 = props.environment, getEnvironmentForActor = props.getEnvironmentForActor;
-      var context = useMemo(function() {
+      var context = useMemo3(function() {
         return {
           environment: environment2,
           getEnvironmentForActor
         };
       }, [environment2, getEnvironmentForActor]);
-      return /* @__PURE__ */ React2.createElement(ReactRelayContext.Provider, {
+      return /* @__PURE__ */ React7.createElement(ReactRelayContext.Provider, {
         value: context
       }, children);
     }
@@ -36744,10 +36999,10 @@ var require_RelayEnvironmentProvider = __commonJS({
 var require_HooksImplementation = __commonJS({
   "node_modules/react-relay/lib/relay-hooks/HooksImplementation.js"(exports, module) {
     "use strict";
-    var warning = require_warning();
+    var warning2 = require_warning();
     var implementation = null;
     function inject(impl) {
-      true ? warning(implementation === null, "Relay HooksImplementation was injected twice.") : void 0;
+      true ? warning2(implementation === null, "Relay HooksImplementation was injected twice.") : void 0;
       implementation = impl;
     }
     function get() {
@@ -36765,9 +37020,9 @@ var require_useUnsafeRef_DEPRECATED = __commonJS({
   "node_modules/react-relay/lib/relay-hooks/useUnsafeRef_DEPRECATED.js"(exports, module) {
     "use strict";
     var _require = require_react();
-    var useMemo = _require.useMemo;
+    var useMemo3 = _require.useMemo;
     function useUnsafeRef_DEPRECATED(init) {
-      return useMemo(function() {
+      return useMemo3(function() {
         return {
           current: init
         };
@@ -36781,11 +37036,11 @@ var require_useUnsafeRef_DEPRECATED = __commonJS({
 var require_LRUCache = __commonJS({
   "node_modules/react-relay/lib/relay-hooks/LRUCache.js"(exports, module) {
     "use strict";
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var LRUCache = /* @__PURE__ */ function() {
       function LRUCache2(capacity) {
         this._capacity = capacity;
-        !(this._capacity > 0) ? true ? invariant(false, "LRUCache: Unable to create instance of cache with zero or negative capacity.") : invariant(false) : void 0;
+        !(this._capacity > 0) ? true ? invariant2(false, "LRUCache: Unable to create instance of cache with zero or negative capacity.") : invariant2(false) : void 0;
         this._map = /* @__PURE__ */ new Map();
       }
       var _proto = LRUCache2.prototype;
@@ -36839,7 +37094,7 @@ var require_SuspenseResource = __commonJS({
     "use strict";
     var _interopRequireDefault = require_interopRequireDefault()["default"];
     var _defineProperty2 = _interopRequireDefault(require_defineProperty());
-    var warning = require_warning();
+    var warning2 = require_warning();
     var TEMPORARY_RETAIN_DURATION_MS = 5 * 60 * 1e3;
     var SuspenseResource = /* @__PURE__ */ function() {
       function SuspenseResource2(retain) {
@@ -36860,7 +37115,7 @@ var require_SuspenseResource = __commonJS({
                   _this._retainDisposable.dispose();
                   _this._retainDisposable = null;
                 } else {
-                  true ? warning(false, "Relay: Expected disposable to release query to be defined.If you're seeing this, this is likely a bug in Relay.") : void 0;
+                  true ? warning2(false, "Relay: Expected disposable to release query to be defined.If you're seeing this, this is likely a bug in Relay.") : void 0;
                 }
               }
             }
@@ -36923,10 +37178,10 @@ var require_QueryResource = __commonJS({
     var _defineProperty2 = _interopRequireDefault(require_defineProperty());
     var LRUCache = require_LRUCache();
     var SuspenseResource = require_SuspenseResource();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var _require = require_relay_runtime();
     var isPromise = _require.isPromise;
-    var warning = require_warning();
+    var warning2 = require_warning();
     var CACHE_CAPACITY = 1e3;
     var DEFAULT_FETCH_POLICY = "store-or-network";
     var DEFAULT_LIVE_FETCH_POLICY = "store-and-network";
@@ -37148,7 +37403,7 @@ var require_QueryResource = __commonJS({
                 observerStart(subscriptionWithConditionalCancelation);
               }
             },
-            next: function next() {
+            next: function next2() {
               var cacheEntry2 = _this2._getOrCreateCacheEntry(cacheIdentifier, operation, queryAvailability, _queryResult, networkSubscription);
               cacheEntry2.processedPayloadsCount += 1;
               cacheEntry2.setValue(_queryResult);
@@ -37164,7 +37419,7 @@ var require_QueryResource = __commonJS({
               if (cacheEntry2.processedPayloadsCount === 0) {
                 cacheEntry2.setValue(_error);
               } else {
-                true ? warning(false, "QueryResource: An incremental payload for query `%s` returned an error: `%s`.", operation.fragment.node.name, String(_error.message)) : void 0;
+                true ? warning2(false, "QueryResource: An incremental payload for query `%s` returned an error: `%s`.", operation.fragment.node.name, String(_error.message)) : void 0;
               }
               resolveNetworkPromise();
               networkSubscription = null;
@@ -37198,7 +37453,7 @@ var require_QueryResource = __commonJS({
           observerComplete && observerComplete();
         }
         var cacheEntry = this._cache.get(cacheIdentifier);
-        !(cacheEntry != null) ? true ? invariant(false, "Relay: Expected to have cached a result when attempting to fetch query.If you're seeing this, this is likely a bug in Relay.") : invariant(false) : void 0;
+        !(cacheEntry != null) ? true ? invariant2(false, "Relay: Expected to have cached a result when attempting to fetch query.If you're seeing this, this is likely a bug in Relay.") : invariant2(false) : void 0;
         environment2.__log({
           name: "queryresource.fetch",
           resourceID: cacheEntry.id,
@@ -37246,7 +37501,7 @@ var require_FragmentResource = __commonJS({
     var _require = require_QueryResource();
     var getQueryResourceForEnvironment = _require.getQueryResourceForEnvironment;
     var SuspenseResource = require_SuspenseResource();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var _require2 = require_relay_runtime();
     var _require2$__internal = _require2.__internal;
     var fetchQuery = _require2$__internal.fetchQuery;
@@ -37391,7 +37646,7 @@ var require_FragmentResource = __commonJS({
         }
         var storeEpoch = environment2.getStore().getEpoch();
         if ((fragmentNode === null || fragmentNode === void 0 ? void 0 : (_fragmentNode$metadat = fragmentNode.metadata) === null || _fragmentNode$metadat === void 0 ? void 0 : _fragmentNode$metadat.plural) === true) {
-          !Array.isArray(fragmentRef) ? true ? invariant(false, "Relay: Expected fragment pointer%s for fragment `%s` to be an array, instead got `%s`. Remove `@relay(plural: true)` from fragment `%s` to allow the prop to be an object.", fragmentKey != null ? " for key `".concat(fragmentKey, "`") : "", fragmentNode.name, typeof fragmentRef, fragmentNode.name) : invariant(false) : void 0;
+          !Array.isArray(fragmentRef) ? true ? invariant2(false, "Relay: Expected fragment pointer%s for fragment `%s` to be an array, instead got `%s`. Remove `@relay(plural: true)` from fragment `%s` to allow the prop to be an object.", fragmentKey != null ? " for key `".concat(fragmentKey, "`") : "", fragmentNode.name, typeof fragmentRef, fragmentNode.name) : invariant2(false) : void 0;
           if (fragmentRef.length === 0) {
             return {
               cacheKey: fragmentIdentifier,
@@ -37432,7 +37687,7 @@ var require_FragmentResource = __commonJS({
           }
         }
         var fragmentSelector = getSelector(fragmentNode, fragmentRef);
-        !(fragmentSelector != null) ? true ? invariant(false, "Relay: Expected to receive an object where `...%s` was spread, but the fragment reference was not found`. This is most likely the result of:\n- Forgetting to spread `%s` in `%s`'s parent's fragment.\n- Conditionally fetching `%s` but unconditionally passing %s prop to `%s`. If the parent fragment only fetches the fragment conditionally - with e.g. `@include`, `@skip`, or inside a `... on SomeType { }` spread  - then the fragment reference will not exist. In this case, pass `null` if the conditions for evaluating the fragment are not met (e.g. if the `@include(if)` value is false.)", fragmentNode.name, fragmentNode.name, componentDisplayName, fragmentNode.name, fragmentKey == null ? "a fragment reference" : "the `".concat(fragmentKey, "`"), componentDisplayName) : invariant(false) : void 0;
+        !(fragmentSelector != null) ? true ? invariant2(false, "Relay: Expected to receive an object where `...%s` was spread, but the fragment reference was not found`. This is most likely the result of:\n- Forgetting to spread `%s` in `%s`'s parent's fragment.\n- Conditionally fetching `%s` but unconditionally passing %s prop to `%s`. If the parent fragment only fetches the fragment conditionally - with e.g. `@include`, `@skip`, or inside a `... on SomeType { }` spread  - then the fragment reference will not exist. In this case, pass `null` if the conditions for evaluating the fragment are not met (e.g. if the `@include(if)` value is false.)", fragmentNode.name, fragmentNode.name, componentDisplayName, fragmentNode.name, fragmentKey == null ? "a fragment reference" : "the `".concat(fragmentKey, "`"), componentDisplayName) : invariant2(false) : void 0;
         var fragmentResult = null;
         var snapshot = null;
         if (RelayFeatureFlags.ENABLE_RELAY_OPERATION_TRACKER_SUSPENSE && cachedValue != null && cachedValue.kind === "missing") {
@@ -37467,7 +37722,7 @@ var require_FragmentResource = __commonJS({
               (_clientEdgeRequests = clientEdgeRequests) === null || _clientEdgeRequests === void 0 ? void 0 : _clientEdgeRequests.push(requestDescriptor);
             });
           });
-          !(this._clientEdgeQueryResultsCache != null) ? true ? invariant(false, "Client edge query result cache should exist when ENABLE_CLIENT_EDGES is on.") : invariant(false) : void 0;
+          !(this._clientEdgeQueryResultsCache != null) ? true ? invariant2(false, "Client edge query result cache should exist when ENABLE_CLIENT_EDGES is on.") : invariant2(false) : void 0;
           this._clientEdgeQueryResultsCache.recordQueryResults(fragmentIdentifier, queryResults);
         }
         var clientEdgePromises = [];
@@ -37575,7 +37830,7 @@ var require_FragmentResource = __commonJS({
         }
         var disposables = [];
         if (Array.isArray(renderedSnapshot)) {
-          !Array.isArray(currentSnapshot) ? true ? invariant(false, "Relay: Expected snapshots to be plural. If you're seeing this, this is likely a bug in Relay.") : invariant(false) : void 0;
+          !Array.isArray(currentSnapshot) ? true ? invariant2(false, "Relay: Expected snapshots to be plural. If you're seeing this, this is likely a bug in Relay.") : invariant2(false) : void 0;
           currentSnapshot.forEach(function(snapshot, idx) {
             disposables.push(environment2.subscribe(snapshot, function(latestSnapshot) {
               var storeEpoch = environment2.getStore().getEpoch();
@@ -37584,7 +37839,7 @@ var require_FragmentResource = __commonJS({
             }));
           });
         } else {
-          !(currentSnapshot != null && !Array.isArray(currentSnapshot)) ? true ? invariant(false, "Relay: Expected snapshot to be singular. If you're seeing this, this is likely a bug in Relay.") : invariant(false) : void 0;
+          !(currentSnapshot != null && !Array.isArray(currentSnapshot)) ? true ? invariant2(false, "Relay: Expected snapshot to be singular. If you're seeing this, this is likely a bug in Relay.") : invariant2(false) : void 0;
           disposables.push(environment2.subscribe(currentSnapshot, function(latestSnapshot) {
             var storeEpoch = environment2.getStore().getEpoch();
             var result = getFragmentResult(cacheKey, latestSnapshot, storeEpoch);
@@ -37774,7 +38029,7 @@ var require_FragmentResource = __commonJS({
       return FragmentResourceImpl2;
     }();
     function reportInvalidCachedData(nodeName) {
-      true ? true ? invariant(false, "Relay: Expected to find cached data for plural fragment `%s` when receiving a subscription. If you're seeing this, this is likely a bug in Relay.", nodeName) : invariant(false) : void 0;
+      true ? true ? invariant2(false, "Relay: Expected to find cached data for plural fragment `%s` when receiving a subscription. If you're seeing this, this is likely a bug in Relay.", nodeName) : invariant2(false) : void 0;
     }
     function createFragmentResource(environment2) {
       return new FragmentResourceImpl(environment2);
@@ -37800,22 +38055,22 @@ var require_FragmentResource = __commonJS({
 var require_useFragmentNode = __commonJS({
   "node_modules/react-relay/lib/relay-hooks/legacy/useFragmentNode.js"(exports, module) {
     "use strict";
-    var useRelayEnvironment = require_useRelayEnvironment();
+    var useRelayEnvironment2 = require_useRelayEnvironment();
     var useUnsafeRef_DEPRECATED = require_useUnsafeRef_DEPRECATED();
     var _require = require_FragmentResource();
     var getFragmentResourceForEnvironment = _require.getFragmentResourceForEnvironment;
     var _require2 = require_react();
-    var useEffect = _require2.useEffect;
-    var useState = _require2.useState;
+    var useEffect4 = _require2.useEffect;
+    var useState5 = _require2.useState;
     var _require3 = require_relay_runtime();
     var RelayFeatureFlags = _require3.RelayFeatureFlags;
     var getFragmentIdentifier = _require3.getFragmentIdentifier;
-    var warning = require_warning();
+    var warning2 = require_warning();
     function useFragmentNode(fragmentNode, fragmentRef, componentDisplayName) {
-      var environment2 = useRelayEnvironment();
+      var environment2 = useRelayEnvironment2();
       var FragmentResource = getFragmentResourceForEnvironment(environment2);
       var isMountedRef = useUnsafeRef_DEPRECATED(false);
-      var _useState = useState(0), forceUpdate = _useState[1];
+      var _useState = useState5(0), forceUpdate = _useState[1];
       var fragmentIdentifier = getFragmentIdentifier(fragmentNode, fragmentRef);
       var fragmentResult = FragmentResource.readWithIdentifier(fragmentNode, fragmentRef, fragmentIdentifier, componentDisplayName);
       var isListeningForUpdatesRef = useUnsafeRef_DEPRECATED(true);
@@ -37837,7 +38092,7 @@ var require_useFragmentNode = __commonJS({
           return count + 1;
         });
       }
-      useEffect(function() {
+      useEffect4(function() {
         isMountedRef.current = true;
         var disposable = FragmentResource.subscribe(fragmentResult, handleDataUpdate);
         return function() {
@@ -37849,7 +38104,7 @@ var require_useFragmentNode = __commonJS({
         if (fragmentRef != null && (fragmentResult.data === void 0 || Array.isArray(fragmentResult.data) && fragmentResult.data.length > 0 && fragmentResult.data.every(function(data) {
           return data === void 0;
         }))) {
-          true ? warning(false, "Relay: Expected to have been able to read non-null data for fragment `%s` declared in `%s`, since fragment reference was non-null. Make sure that that `%s`'s parent isn't holding on to and/or passing a fragment reference for data that has been deleted.", fragmentNode.name, componentDisplayName, componentDisplayName) : void 0;
+          true ? warning2(false, "Relay: Expected to have been able to read non-null data for fragment `%s` declared in `%s`, since fragment reference was non-null. Make sure that that `%s`'s parent isn't holding on to and/or passing a fragment reference for data that has been deleted.", fragmentNode.name, componentDisplayName, componentDisplayName) : void 0;
         }
       }
       return {
@@ -37868,27 +38123,27 @@ var require_useFetchTrackingRef = __commonJS({
     "use strict";
     var useUnsafeRef_DEPRECATED = require_useUnsafeRef_DEPRECATED();
     var _require = require_react();
-    var useCallback = _require.useCallback;
-    var useEffect = _require.useEffect;
+    var useCallback3 = _require.useCallback;
+    var useEffect4 = _require.useEffect;
     function useFetchTrackingRef() {
       var subscriptionRef = useUnsafeRef_DEPRECATED(null);
       var isFetchingRef = useUnsafeRef_DEPRECATED(false);
-      var disposeFetch = useCallback(function() {
+      var disposeFetch = useCallback3(function() {
         if (subscriptionRef.current != null) {
           subscriptionRef.current.unsubscribe();
           subscriptionRef.current = null;
         }
         isFetchingRef.current = false;
       }, []);
-      var startFetch = useCallback(function(subscription) {
+      var startFetch = useCallback3(function(subscription) {
         subscriptionRef.current = subscription;
         isFetchingRef.current = true;
       }, []);
-      var completeFetch = useCallback(function() {
+      var completeFetch = useCallback3(function() {
         subscriptionRef.current = null;
         isFetchingRef.current = false;
       }, []);
-      useEffect(function() {
+      useEffect4(function() {
         return disposeFetch;
       }, [disposeFetch]);
       return {
@@ -37913,18 +38168,18 @@ var require_useLazyLoadQueryNode = __commonJS({
     var getQueryCacheIdentifier = _require.getQueryCacheIdentifier;
     var getQueryResourceForEnvironment = _require.getQueryResourceForEnvironment;
     var useFetchTrackingRef = require_useFetchTrackingRef();
-    var useRelayEnvironment = require_useRelayEnvironment();
-    var React2 = require_react();
-    var useContext = React2.useContext;
-    var useEffect = React2.useEffect;
-    var useState = React2.useState;
-    var useRef = React2.useRef;
+    var useRelayEnvironment2 = require_useRelayEnvironment();
+    var React7 = require_react();
+    var useContext6 = React7.useContext;
+    var useEffect4 = React7.useEffect;
+    var useState5 = React7.useState;
+    var useRef4 = React7.useRef;
     function useLazyLoadQueryNode(_ref) {
       var query = _ref.query, componentDisplayName = _ref.componentDisplayName, fetchObservable = _ref.fetchObservable, fetchPolicy = _ref.fetchPolicy, fetchKey = _ref.fetchKey, renderPolicy = _ref.renderPolicy;
-      var environment2 = useRelayEnvironment();
-      var profilerContext = useContext(ProfilerContext);
+      var environment2 = useRelayEnvironment2();
+      var profilerContext = useContext6(ProfilerContext);
       var QueryResource = getQueryResourceForEnvironment(environment2);
-      var _useState = useState(0), forceUpdateKey = _useState[0], forceUpdate = _useState[1];
+      var _useState = useState5(0), forceUpdateKey = _useState[0], forceUpdate = _useState[1];
       var _useFetchTrackingRef = useFetchTrackingRef(), startFetch = _useFetchTrackingRef.startFetch, completeFetch = _useFetchTrackingRef.completeFetch;
       var cacheBreaker = "".concat(forceUpdateKey, "-").concat(fetchKey !== null && fetchKey !== void 0 ? fetchKey : "");
       var cacheIdentifier = getQueryCacheIdentifier(environment2, query, fetchPolicy, renderPolicy, cacheBreaker);
@@ -37935,13 +38190,13 @@ var require_useLazyLoadQueryNode = __commonJS({
           error: completeFetch
         }, profilerContext);
       });
-      var maybeHiddenOrFastRefresh = useRef(false);
-      useEffect(function() {
+      var maybeHiddenOrFastRefresh = useRef4(false);
+      useEffect4(function() {
         return function() {
           maybeHiddenOrFastRefresh.current = true;
         };
       }, []);
-      useEffect(function() {
+      useEffect4(function() {
         if (maybeHiddenOrFastRefresh.current === true) {
           maybeHiddenOrFastRefresh.current = false;
           forceUpdate(function(n) {
@@ -37954,7 +38209,7 @@ var require_useLazyLoadQueryNode = __commonJS({
           disposable.dispose();
         };
       }, [environment2, cacheIdentifier]);
-      useEffect(function() {
+      useEffect4(function() {
         QueryResource.releaseTemporaryRetain(preparedQueryResult);
       });
       var fragmentNode = preparedQueryResult.fragmentNode, fragmentRef = preparedQueryResult.fragmentRef;
@@ -37980,9 +38235,9 @@ var require_useMemoVariables = __commonJS({
     "use strict";
     var areEqual = require_areEqual();
     var _require = require_react();
-    var useState = _require.useState;
+    var useState5 = _require.useState;
     function useMemoVariables(variables) {
-      var _useState = useState(variables), mirroredVariables = _useState[0], setMirroredVariables = _useState[1];
+      var _useState = useState5(variables), mirroredVariables = _useState[0], setMirroredVariables = _useState[1];
       if (areEqual(variables, mirroredVariables)) {
         return mirroredVariables;
       } else {
@@ -37999,15 +38254,15 @@ var require_useMemoOperationDescriptor = __commonJS({
   "node_modules/react-relay/lib/relay-hooks/useMemoOperationDescriptor.js"(exports, module) {
     "use strict";
     var useMemoVariables = require_useMemoVariables();
-    var React2 = require_react();
+    var React7 = require_react();
     var _require = require_relay_runtime();
     var createOperationDescriptor = _require.createOperationDescriptor;
     var getRequest = _require.getRequest;
-    var useMemo = React2.useMemo;
+    var useMemo3 = React7.useMemo;
     function useMemoOperationDescriptor(gqlQuery, variables, cacheConfig) {
       var memoVariables = useMemoVariables(variables);
       var memoCacheConfig = useMemoVariables(cacheConfig || {});
-      return useMemo(function() {
+      return useMemo3(function() {
         return createOperationDescriptor(getRequest(gqlQuery), memoVariables, memoCacheConfig);
       }, [gqlQuery, memoVariables, memoCacheConfig]);
     }
@@ -38023,12 +38278,12 @@ var require_useLazyLoadQuery = __commonJS({
     var useTrackLoadQueryInRender = _require.useTrackLoadQueryInRender;
     var useLazyLoadQueryNode = require_useLazyLoadQueryNode();
     var useMemoOperationDescriptor = require_useMemoOperationDescriptor();
-    var useRelayEnvironment = require_useRelayEnvironment();
+    var useRelayEnvironment2 = require_useRelayEnvironment();
     var _require2 = require_relay_runtime();
     var fetchQuery = _require2.__internal.fetchQuery;
     function useLazyLoadQuery2(gqlQuery, variables, options) {
       useTrackLoadQueryInRender();
-      var environment2 = useRelayEnvironment();
+      var environment2 = useRelayEnvironment2();
       var query = useMemoOperationDescriptor(gqlQuery, variables, options && options.networkCacheConfig ? options.networkCacheConfig : {
         force: true
       });
@@ -38068,11 +38323,11 @@ var require_useIsMountedRef = __commonJS({
   "node_modules/react-relay/lib/relay-hooks/useIsMountedRef.js"(exports, module) {
     "use strict";
     var _require = require_react();
-    var useEffect = _require.useEffect;
-    var useRef = _require.useRef;
+    var useEffect4 = _require.useEffect;
+    var useRef4 = _require.useRef;
     function useIsMountedRef() {
-      var isMountedRef = useRef(true);
-      useEffect(function() {
+      var isMountedRef = useRef4(true);
+      useEffect4(function() {
         isMountedRef.current = true;
         return function() {
           isMountedRef.current = false;
@@ -38095,10 +38350,10 @@ var require_useEntryPointLoader = __commonJS({
     var useTrackLoadQueryInRender = _require.useTrackLoadQueryInRender;
     var useIsMountedRef = require_useIsMountedRef();
     var _require2 = require_react();
-    var useCallback = _require2.useCallback;
-    var useEffect = _require2.useEffect;
-    var useRef = _require2.useRef;
-    var useState = _require2.useState;
+    var useCallback3 = _require2.useCallback;
+    var useEffect4 = _require2.useEffect;
+    var useRef4 = _require2.useRef;
+    var useState5 = _require2.useState;
     var initialNullEntryPointReferenceState = {
       kind: "NullEntryPointReference"
     };
@@ -38108,10 +38363,10 @@ var require_useEntryPointLoader = __commonJS({
       var initialEntryPointReferenceInternal = (_options$TEST_ONLY__i = options === null || options === void 0 ? void 0 : (_options$TEST_ONLY__i2 = options.TEST_ONLY__initialEntryPointData) === null || _options$TEST_ONLY__i2 === void 0 ? void 0 : _options$TEST_ONLY__i2.entryPointReference) !== null && _options$TEST_ONLY__i !== void 0 ? _options$TEST_ONLY__i : initialNullEntryPointReferenceState;
       var initialEntryPointParamsInternal = (_options$TEST_ONLY__i3 = options === null || options === void 0 ? void 0 : (_options$TEST_ONLY__i4 = options.TEST_ONLY__initialEntryPointData) === null || _options$TEST_ONLY__i4 === void 0 ? void 0 : _options$TEST_ONLY__i4.entryPointParams) !== null && _options$TEST_ONLY__i3 !== void 0 ? _options$TEST_ONLY__i3 : null;
       var isMountedRef = useIsMountedRef();
-      var undisposedEntryPointReferencesRef = useRef(/* @__PURE__ */ new Set([initialEntryPointReferenceInternal]));
-      var _useState = useState(initialEntryPointReferenceInternal), entryPointReference = _useState[0], setEntryPointReference = _useState[1];
-      var _useState2 = useState(initialEntryPointParamsInternal), entryPointParams = _useState2[0], setEntryPointParams = _useState2[1];
-      var disposeEntryPoint = useCallback(function() {
+      var undisposedEntryPointReferencesRef = useRef4(/* @__PURE__ */ new Set([initialEntryPointReferenceInternal]));
+      var _useState = useState5(initialEntryPointReferenceInternal), entryPointReference = _useState[0], setEntryPointReference = _useState[1];
+      var _useState2 = useState5(initialEntryPointParamsInternal), entryPointParams = _useState2[0], setEntryPointParams = _useState2[1];
+      var disposeEntryPoint = useCallback3(function() {
         if (isMountedRef.current) {
           var nullEntryPointReference = {
             kind: "NullEntryPointReference"
@@ -38120,7 +38375,7 @@ var require_useEntryPointLoader = __commonJS({
           setEntryPointReference(nullEntryPointReference);
         }
       }, [setEntryPointReference, isMountedRef]);
-      var entryPointLoaderCallback = useCallback(function(params) {
+      var entryPointLoaderCallback = useCallback3(function(params) {
         if (isMountedRef.current) {
           var updatedEntryPointReference = loadEntryPoint(environmentProvider, entryPoint, params);
           undisposedEntryPointReferencesRef.current.add(updatedEntryPointReference);
@@ -38128,13 +38383,13 @@ var require_useEntryPointLoader = __commonJS({
           setEntryPointParams(params);
         }
       }, [environmentProvider, entryPoint, setEntryPointReference, isMountedRef]);
-      var maybeHiddenOrFastRefresh = useRef(false);
-      useEffect(function() {
+      var maybeHiddenOrFastRefresh = useRef4(false);
+      useEffect4(function() {
         return function() {
           maybeHiddenOrFastRefresh.current = true;
         };
       }, []);
-      useEffect(function() {
+      useEffect4(function() {
         if (maybeHiddenOrFastRefresh.current === true) {
           maybeHiddenOrFastRefresh.current = false;
           if (entryPointReference.kind !== "NullEntryPointReference" && entryPointParams != null) {
@@ -38163,7 +38418,7 @@ var require_useEntryPointLoader = __commonJS({
           }
         }
       }, [entryPointReference, entryPointParams, entryPointLoaderCallback, isMountedRef]);
-      useEffect(function() {
+      useEffect4(function() {
         return function disposeAllRemainingEntryPointReferences() {
           var _iterator2 = (0, _createForOfIteratorHelper2["default"])(undisposedEntryPointReferencesRef.current), _step2;
           try {
@@ -38191,11 +38446,11 @@ var require_useStaticFragmentNodeWarning = __commonJS({
   "node_modules/react-relay/lib/relay-hooks/useStaticFragmentNodeWarning.js"(exports, module) {
     "use strict";
     var useUnsafeRef_DEPRECATED = require_useUnsafeRef_DEPRECATED();
-    var warning = require_warning();
+    var warning2 = require_warning();
     function useStaticFragmentNodeWarning(fragmentNode, warningContext) {
       if (true) {
         var initialPropRef = useUnsafeRef_DEPRECATED(fragmentNode.name);
-        true ? warning(initialPropRef.current === fragmentNode.name, "Relay: The %s has to remain the same over the lifetime of a component. Changing it is not supported and will result in unexpected behavior.", warningContext) : void 0;
+        true ? warning2(initialPropRef.current === fragmentNode.name, "Relay: The %s has to remain the same over the lifetime of a component. Changing it is not supported and will result in unexpected behavior.", warningContext) : void 0;
       }
     }
     module.exports = useStaticFragmentNodeWarning;
@@ -38247,23 +38502,23 @@ var require_useMutation = __commonJS({
     var _interopRequireDefault = require_interopRequireDefault()["default"];
     var _objectSpread2 = _interopRequireDefault(require_objectSpread2());
     var useIsMountedRef = require_useIsMountedRef();
-    var useRelayEnvironment = require_useRelayEnvironment();
-    var React2 = require_react();
+    var useRelayEnvironment2 = require_useRelayEnvironment();
+    var React7 = require_react();
     var _require = require_relay_runtime();
     var defaultCommitMutation = _require.commitMutation;
-    var useState = React2.useState;
-    var useEffect = React2.useEffect;
-    var useRef = React2.useRef;
-    var useCallback = React2.useCallback;
-    function useMutation(mutation) {
+    var useState5 = React7.useState;
+    var useEffect4 = React7.useEffect;
+    var useRef4 = React7.useRef;
+    var useCallback3 = React7.useCallback;
+    function useMutation3(mutation) {
       var commitMutationFn = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : defaultCommitMutation;
-      var environment2 = useRelayEnvironment();
+      var environment2 = useRelayEnvironment2();
       var isMountedRef = useIsMountedRef();
-      var environmentRef = useRef(environment2);
-      var mutationRef = useRef(mutation);
-      var inFlightMutationsRef = useRef(/* @__PURE__ */ new Set());
-      var _useState = useState(false), isMutationInFlight = _useState[0], setMutationInFlight = _useState[1];
-      var cleanup = useCallback(function(disposable) {
+      var environmentRef = useRef4(environment2);
+      var mutationRef = useRef4(mutation);
+      var inFlightMutationsRef = useRef4(/* @__PURE__ */ new Set());
+      var _useState = useState5(false), isMutationInFlight = _useState[0], setMutationInFlight = _useState[1];
+      var cleanup = useCallback3(function(disposable) {
         if (environmentRef.current === environment2 && mutationRef.current === mutation) {
           inFlightMutationsRef.current["delete"](disposable);
           if (isMountedRef.current) {
@@ -38271,7 +38526,7 @@ var require_useMutation = __commonJS({
           }
         }
       }, [environment2, isMountedRef, mutation]);
-      useEffect(function() {
+      useEffect4(function() {
         if (environmentRef.current !== environment2 || mutationRef.current !== mutation) {
           inFlightMutationsRef.current = /* @__PURE__ */ new Set();
           if (isMountedRef.current) {
@@ -38281,7 +38536,7 @@ var require_useMutation = __commonJS({
           mutationRef.current = mutation;
         }
       }, [environment2, isMountedRef, mutation]);
-      var commit = useCallback(function(config) {
+      var commit = useCallback3(function(config) {
         if (isMountedRef.current) {
           setMutationInFlight(true);
         }
@@ -38312,7 +38567,7 @@ var require_useMutation = __commonJS({
       }, [cleanup, commitMutationFn, environment2, isMountedRef, mutation]);
       return [commit, isMutationInFlight];
     }
-    module.exports = useMutation;
+    module.exports = useMutation3;
   }
 });
 
@@ -38326,12 +38581,12 @@ var require_useQueryLoader = __commonJS({
     var loadQuery = _require.loadQuery;
     var useTrackLoadQueryInRender = _require.useTrackLoadQueryInRender;
     var useIsMountedRef = require_useIsMountedRef();
-    var useRelayEnvironment = require_useRelayEnvironment();
+    var useRelayEnvironment2 = require_useRelayEnvironment();
     var _require2 = require_react();
-    var useCallback = _require2.useCallback;
-    var useEffect = _require2.useEffect;
-    var useRef = _require2.useRef;
-    var useState = _require2.useState;
+    var useCallback3 = _require2.useCallback;
+    var useEffect4 = _require2.useEffect;
+    var useRef4 = _require2.useRef;
+    var useState5 = _require2.useState;
     var _require3 = require_relay_runtime();
     var getRequest = _require3.getRequest;
     var initialNullQueryReferenceState = {
@@ -38346,14 +38601,14 @@ var require_useQueryLoader = __commonJS({
     }
     function useQueryLoader(preloadableRequest, initialQueryReference) {
       var initialQueryReferenceInternal = initialQueryReference !== null && initialQueryReference !== void 0 ? initialQueryReference : initialNullQueryReferenceState;
-      var environment2 = useRelayEnvironment();
+      var environment2 = useRelayEnvironment2();
       useTrackLoadQueryInRender();
       var isMountedRef = useIsMountedRef();
-      var undisposedQueryReferencesRef = useRef(/* @__PURE__ */ new Set([initialQueryReferenceInternal]));
-      var _useState = useState(function() {
+      var undisposedQueryReferencesRef = useRef4(/* @__PURE__ */ new Set([initialQueryReferenceInternal]));
+      var _useState = useState5(function() {
         return initialQueryReferenceInternal;
       }), queryReference = _useState[0], setQueryReference = _useState[1];
-      var _useState2 = useState(function() {
+      var _useState2 = useState5(function() {
         return initialQueryReferenceInternal;
       }), previousInitialQueryReference = _useState2[0], setPreviousInitialQueryReference = _useState2[1];
       if (initialQueryReferenceInternal !== previousInitialQueryReference) {
@@ -38361,13 +38616,13 @@ var require_useQueryLoader = __commonJS({
         setPreviousInitialQueryReference(initialQueryReferenceInternal);
         setQueryReference(initialQueryReferenceInternal);
       }
-      var disposeQuery = useCallback(function() {
+      var disposeQuery = useCallback3(function() {
         if (isMountedRef.current) {
           undisposedQueryReferencesRef.current.add(initialNullQueryReferenceState);
           setQueryReference(initialNullQueryReferenceState);
         }
       }, [isMountedRef]);
-      var queryLoaderCallback = useCallback(function(variables, options) {
+      var queryLoaderCallback = useCallback3(function(variables, options) {
         var mergedOptions = options != null && options.hasOwnProperty("__environment") ? {
           fetchPolicy: options.fetchPolicy,
           networkCacheConfig: options.networkCacheConfig,
@@ -38380,13 +38635,13 @@ var require_useQueryLoader = __commonJS({
           setQueryReference(updatedQueryReference);
         }
       }, [environment2, preloadableRequest, setQueryReference, isMountedRef]);
-      var maybeHiddenOrFastRefresh = useRef(false);
-      useEffect(function() {
+      var maybeHiddenOrFastRefresh = useRef4(false);
+      useEffect4(function() {
         return function() {
           maybeHiddenOrFastRefresh.current = true;
         };
       }, []);
-      useEffect(function() {
+      useEffect4(function() {
         if (maybeHiddenOrFastRefresh.current === true) {
           maybeHiddenOrFastRefresh.current = false;
           if (queryReference.kind !== "NullQueryReference") {
@@ -38422,7 +38677,7 @@ var require_useQueryLoader = __commonJS({
           }
         }
       }, [queryReference, isMountedRef, queryLoaderCallback, preloadableRequest]);
-      useEffect(function() {
+      useEffect4(function() {
         return function disposeAllRemainingQueryReferences() {
           var _iterator2 = (0, _createForOfIteratorHelper2["default"])(undisposedQueryReferencesRef.current), _step2;
           try {
@@ -38460,14 +38715,14 @@ var require_useRefetchableFragmentNode = __commonJS({
     var getQueryResourceForEnvironment = _require.getQueryResourceForEnvironment;
     var useIsMountedRef = require_useIsMountedRef();
     var useQueryLoader = require_useQueryLoader();
-    var useRelayEnvironment = require_useRelayEnvironment();
+    var useRelayEnvironment2 = require_useRelayEnvironment();
     var _require2 = require_FragmentResource();
     var getFragmentResourceForEnvironment = _require2.getFragmentResourceForEnvironment;
     var useFragmentNode = require_useFragmentNode();
-    var invariant = require_browser();
+    var invariant2 = require_browser();
     var _require3 = require_react();
-    var useCallback = _require3.useCallback;
-    var useContext = _require3.useContext;
+    var useCallback3 = _require3.useCallback;
+    var useContext6 = _require3.useContext;
     var useReducer = _require3.useReducer;
     var _require4 = require_relay_runtime();
     var fetchQuery = _require4.__internal.fetchQuery;
@@ -38476,7 +38731,7 @@ var require_useRefetchableFragmentNode = __commonJS({
     var getRefetchMetadata = _require4.getRefetchMetadata;
     var getSelector = _require4.getSelector;
     var getValueAtPath = _require4.getValueAtPath;
-    var warning = require_warning();
+    var warning2 = require_warning();
     function reducer(state, action) {
       switch (action.type) {
         case "refetch": {
@@ -38507,7 +38762,7 @@ var require_useRefetchableFragmentNode = __commonJS({
       }
     }
     function useRefetchableFragmentNode(fragmentNode, parentFragmentRef, componentDisplayName) {
-      var parentEnvironment = useRelayEnvironment();
+      var parentEnvironment = useRelayEnvironment2();
       var _getRefetchMetadata = getRefetchMetadata(fragmentNode, componentDisplayName), refetchableRequest = _getRefetchMetadata.refetchableRequest, fragmentRefPathInResponse = _getRefetchMetadata.fragmentRefPathInResponse;
       var fragmentIdentifier = getFragmentIdentifier(fragmentNode, parentFragmentRef);
       var _useReducer = useReducer(reducer, {
@@ -38523,7 +38778,7 @@ var require_useRefetchableFragmentNode = __commonJS({
       var environment2 = refetchEnvironment !== null && refetchEnvironment !== void 0 ? refetchEnvironment : parentEnvironment;
       var QueryResource = getQueryResourceForEnvironment(environment2);
       var FragmentResource = getFragmentResourceForEnvironment(environment2);
-      var profilerContext = useContext(ProfilerContext);
+      var profilerContext = useContext6(ProfilerContext);
       var shouldReset = environment2 !== mirroredEnvironment || fragmentIdentifier !== mirroredFragmentIdentifier;
       var _useQueryLoader = useQueryLoader(refetchableRequest), queryRef = _useQueryLoader[0], loadQuery = _useQueryLoader[1], disposeQuery = _useQueryLoader[2];
       var fragmentRef = parentFragmentRef;
@@ -38556,7 +38811,7 @@ var require_useRefetchableFragmentNode = __commonJS({
           }, queryRef.fetchKey, profilerContext);
         });
         var queryData = FragmentResource.read(queryResult.fragmentNode, queryResult.fragmentRef, componentDisplayName).data;
-        !(queryData != null) ? true ? invariant(false, "Relay: Expected to be able to read refetch query response. If you're seeing this, this is likely a bug in Relay.") : invariant(false) : void 0;
+        !(queryData != null) ? true ? invariant2(false, "Relay: Expected to be able to read refetch query response. If you're seeing this, this is likely a bug in Relay.") : invariant2(false) : void 0;
         var refetchedFragmentRef = getValueAtPath(queryData, fragmentRefPathInResponse);
         fragmentRef = refetchedFragmentRef;
         if (true) {
@@ -38576,16 +38831,16 @@ var require_useRefetchableFragmentNode = __commonJS({
     function useRefetchFunction(componentDisplayName, dispatch, disposeQuery, fragmentData, fragmentIdentifier, fragmentNode, fragmentRefPathInResponse, identifierInfo, loadQuery, parentFragmentRef, refetchableRequest) {
       var isMountedRef = useIsMountedRef();
       var identifierValue = (identifierInfo === null || identifierInfo === void 0 ? void 0 : identifierInfo.identifierField) != null && fragmentData != null && typeof fragmentData === "object" ? fragmentData[identifierInfo.identifierField] : null;
-      return useCallback(function(providedRefetchVariables, options) {
+      return useCallback3(function(providedRefetchVariables, options) {
         if (isMountedRef.current !== true) {
-          true ? warning(false, "Relay: Unexpected call to `refetch` on unmounted component for fragment `%s` in `%s`. It looks like some instances of your component are still trying to fetch data but they already unmounted. Please make sure you clear all timers, intervals, async calls, etc that may trigger a fetch.", fragmentNode.name, componentDisplayName) : void 0;
+          true ? warning2(false, "Relay: Unexpected call to `refetch` on unmounted component for fragment `%s` in `%s`. It looks like some instances of your component are still trying to fetch data but they already unmounted. Please make sure you clear all timers, intervals, async calls, etc that may trigger a fetch.", fragmentNode.name, componentDisplayName) : void 0;
           return {
             dispose: function dispose() {
             }
           };
         }
         if (parentFragmentRef == null) {
-          true ? warning(false, "Relay: Unexpected call to `refetch` while using a null fragment ref for fragment `%s` in `%s`. When calling `refetch`, we expect initial fragment data to be non-null. Please make sure you're passing a valid fragment ref to `%s` before calling `refetch`, or make sure you pass all required variables to `refetch`.", fragmentNode.name, componentDisplayName, componentDisplayName) : void 0;
+          true ? warning2(false, "Relay: Unexpected call to `refetch` while using a null fragment ref for fragment `%s` in `%s`. When calling `refetch`, we expect initial fragment data to be non-null. Please make sure you're passing a valid fragment ref to `%s` before calling `refetch`, or make sure you pass all required variables to `refetch`.", fragmentNode.name, componentDisplayName, componentDisplayName) : void 0;
         }
         var refetchEnvironment = options === null || options === void 0 ? void 0 : options.__environment;
         var fetchPolicy = options === null || options === void 0 ? void 0 : options.fetchPolicy;
@@ -38608,7 +38863,7 @@ var require_useRefetchableFragmentNode = __commonJS({
         var refetchVariables = (0, _objectSpread2["default"])((0, _objectSpread2["default"])((0, _objectSpread2["default"])({}, parentVariables), fragmentVariables), providedRefetchVariables);
         if (identifierInfo != null && !providedRefetchVariables.hasOwnProperty(identifierInfo.identifierQueryVariableName)) {
           if (typeof identifierValue !== "string") {
-            true ? warning(false, "Relay: Expected result to have a string  `%s` in order to refetch, got `%s`.", identifierInfo.identifierField, identifierValue) : void 0;
+            true ? warning2(false, "Relay: Expected result to have a string  `%s` in order to refetch, got `%s`.", identifierInfo.identifierField, identifierValue) : void 0;
           }
           refetchVariables[identifierInfo.identifierQueryVariableName] = identifierValue;
         }
@@ -38662,7 +38917,7 @@ var require_useRefetchableFragmentNode = __commonJS({
           var record = recordSource.get(previousIDAndType.id);
           var typename = record && Record.getType(record);
           if (typename !== previousIDAndType.typename) {
-            true ? warning(false, "Relay: Call to `refetch` returned data with a different __typename: was `%s`, now `%s`, on `%s` in `%s`. Please make sure the server correctly implementsunique id requirement.", previousIDAndType.typename, typename, fragmentNode.name, componentDisplayName) : void 0;
+            true ? warning2(false, "Relay: Call to `refetch` returned data with a different __typename: was `%s`, now `%s`, on `%s` in `%s`. Please make sure the server correctly implementsunique id requirement.", previousIDAndType.typename, typename, fragmentNode.name, componentDisplayName) : void 0;
           }
         },
         checkSameIDAfterRefetch: function checkSameIDAfterRefetch(previousIDAndTypename, refetchedFragmentRef, fragmentNode, componentDisplayName) {
@@ -38672,7 +38927,7 @@ var require_useRefetchableFragmentNode = __commonJS({
           var _require7 = require_relay_runtime(), ID_KEY = _require7.ID_KEY;
           var resultID = refetchedFragmentRef[ID_KEY];
           if (resultID != null && resultID !== previousIDAndTypename.id) {
-            true ? warning(false, "Relay: Call to `refetch` returned a different id, expected `%s`, got `%s`, on `%s` in `%s`. Please make sure the server correctly implements unique id requirement.", resultID, previousIDAndTypename.id, fragmentNode.name, componentDisplayName) : void 0;
+            true ? warning2(false, "Relay: Call to `refetch` returned a different id, expected `%s`, got `%s`, on `%s` in `%s`. Please make sure the server correctly implements unique id requirement.", resultID, previousIDAndTypename.id, fragmentNode.name, componentDisplayName) : void 0;
           }
         }
       };
@@ -38685,27 +38940,27 @@ var require_useRefetchableFragmentNode = __commonJS({
 var require_useIsOperationNodeActive = __commonJS({
   "node_modules/react-relay/lib/relay-hooks/useIsOperationNodeActive.js"(exports, module) {
     "use strict";
-    var useRelayEnvironment = require_useRelayEnvironment();
-    var invariant = require_browser();
-    var React2 = require_react();
+    var useRelayEnvironment2 = require_useRelayEnvironment();
+    var invariant2 = require_browser();
+    var React7 = require_react();
     var _require = require_relay_runtime();
     var getObservableForActiveRequest = _require.__internal.getObservableForActiveRequest;
     var getSelector = _require.getSelector;
-    var useEffect = React2.useEffect;
-    var useState = React2.useState;
-    var useMemo = React2.useMemo;
+    var useEffect4 = React7.useEffect;
+    var useState5 = React7.useState;
+    var useMemo3 = React7.useMemo;
     function useIsOperationNodeActive(fragmentNode, fragmentRef) {
-      var environment2 = useRelayEnvironment();
-      var observable = useMemo(function() {
+      var environment2 = useRelayEnvironment2();
+      var observable = useMemo3(function() {
         var selector = getSelector(fragmentNode, fragmentRef);
         if (selector == null) {
           return null;
         }
-        !(selector.kind === "SingularReaderSelector") ? true ? invariant(false, "useIsOperationNodeActive: Plural fragments are not supported.") : invariant(false) : void 0;
+        !(selector.kind === "SingularReaderSelector") ? true ? invariant2(false, "useIsOperationNodeActive: Plural fragments are not supported.") : invariant2(false) : void 0;
         return getObservableForActiveRequest(environment2, selector.owner);
       }, [environment2, fragmentNode, fragmentRef]);
-      var _useState = useState(observable != null), isActive = _useState[0], setIsActive = _useState[1];
-      useEffect(function() {
+      var _useState = useState5(observable != null), isActive = _useState[0], setIsActive = _useState[1];
+      useEffect4(function() {
         var subscription;
         setIsActive(observable != null);
         if (observable != null) {
@@ -38738,12 +38993,12 @@ var require_useLoadMoreFunction = __commonJS({
     var useFetchTrackingRef = require_useFetchTrackingRef();
     var useIsMountedRef = require_useIsMountedRef();
     var useIsOperationNodeActive = require_useIsOperationNodeActive();
-    var useRelayEnvironment = require_useRelayEnvironment();
-    var invariant = require_browser();
+    var useRelayEnvironment2 = require_useRelayEnvironment();
+    var invariant2 = require_browser();
     var _require = require_react();
-    var useCallback = _require.useCallback;
-    var useEffect = _require.useEffect;
-    var useState = _require.useState;
+    var useCallback3 = _require.useCallback;
+    var useEffect4 = _require.useEffect;
+    var useState5 = _require.useState;
     var _require2 = require_relay_runtime();
     var fetchQuery = _require2.__internal.fetchQuery;
     var ConnectionInterface = _require2.ConnectionInterface;
@@ -38752,16 +39007,16 @@ var require_useLoadMoreFunction = __commonJS({
     var getRefetchMetadata = _require2.getRefetchMetadata;
     var getSelector = _require2.getSelector;
     var getValueAtPath = _require2.getValueAtPath;
-    var warning = require_warning();
+    var warning2 = require_warning();
     function useLoadMoreFunction(args) {
       var direction = args.direction, fragmentNode = args.fragmentNode, fragmentRef = args.fragmentRef, fragmentIdentifier = args.fragmentIdentifier, fragmentData = args.fragmentData, connectionPathInFragmentData = args.connectionPathInFragmentData, paginationRequest = args.paginationRequest, paginationMetadata = args.paginationMetadata, componentDisplayName = args.componentDisplayName, observer = args.observer, onReset = args.onReset;
-      var environment2 = useRelayEnvironment();
+      var environment2 = useRelayEnvironment2();
       var _useFetchTrackingRef = useFetchTrackingRef(), isFetchingRef = _useFetchTrackingRef.isFetchingRef, startFetch = _useFetchTrackingRef.startFetch, disposeFetch = _useFetchTrackingRef.disposeFetch, completeFetch = _useFetchTrackingRef.completeFetch;
       var _getRefetchMetadata = getRefetchMetadata(fragmentNode, componentDisplayName), identifierInfo = _getRefetchMetadata.identifierInfo;
       var identifierValue = (identifierInfo === null || identifierInfo === void 0 ? void 0 : identifierInfo.identifierField) != null && fragmentData != null && typeof fragmentData === "object" ? fragmentData[identifierInfo.identifierField] : null;
       var isMountedRef = useIsMountedRef();
-      var _useState = useState(environment2), mirroredEnvironment = _useState[0], setMirroredEnvironment = _useState[1];
-      var _useState2 = useState(fragmentIdentifier), mirroredFragmentIdentifier = _useState2[0], setMirroredFragmentIdentifier = _useState2[1];
+      var _useState = useState5(environment2), mirroredEnvironment = _useState[0], setMirroredEnvironment = _useState[1];
+      var _useState2 = useState5(fragmentIdentifier), mirroredFragmentIdentifier = _useState2[0], setMirroredFragmentIdentifier = _useState2[1];
       var isParentQueryActive = useIsOperationNodeActive(fragmentNode, fragmentRef);
       var shouldReset = environment2 !== mirroredEnvironment || fragmentIdentifier !== mirroredFragmentIdentifier;
       if (shouldReset) {
@@ -38770,16 +39025,16 @@ var require_useLoadMoreFunction = __commonJS({
         setMirroredEnvironment(environment2);
         setMirroredFragmentIdentifier(fragmentIdentifier);
       }
-      var _getConnectionState = getConnectionState(direction, fragmentNode, fragmentData, connectionPathInFragmentData), cursor = _getConnectionState.cursor, hasMore = _getConnectionState.hasMore;
-      useEffect(function() {
+      var _getConnectionState = getConnectionState(direction, fragmentNode, fragmentData, connectionPathInFragmentData), cursor2 = _getConnectionState.cursor, hasMore = _getConnectionState.hasMore;
+      useEffect4(function() {
         return function() {
           disposeFetch();
         };
       }, [disposeFetch]);
-      var loadMore = useCallback(function(count, options) {
+      var loadMore = useCallback3(function(count, options) {
         var onComplete = options === null || options === void 0 ? void 0 : options.onComplete;
         if (isMountedRef.current !== true) {
-          true ? warning(false, "Relay: Unexpected fetch on unmounted component for fragment `%s` in `%s`. It looks like some instances of your component are still trying to fetch data but they already unmounted. Please make sure you clear all timers, intervals, async calls, etc that may trigger a fetch.", fragmentNode.name, componentDisplayName) : void 0;
+          true ? warning2(false, "Relay: Unexpected fetch on unmounted component for fragment `%s` in `%s`. It looks like some instances of your component are still trying to fetch data but they already unmounted. Please make sure you clear all timers, intervals, async calls, etc that may trigger a fetch.", fragmentNode.name, componentDisplayName) : void 0;
           return {
             dispose: function dispose() {
             }
@@ -38788,7 +39043,7 @@ var require_useLoadMoreFunction = __commonJS({
         var fragmentSelector = getSelector(fragmentNode, fragmentRef);
         if (isFetchingRef.current === true || fragmentData == null || isParentQueryActive) {
           if (fragmentSelector == null) {
-            true ? warning(false, "Relay: Unexpected fetch while using a null fragment ref for fragment `%s` in `%s`. When fetching more items, we expect initial fragment data to be non-null. Please make sure you're passing a valid fragment ref to `%s` before paginating.", fragmentNode.name, componentDisplayName, componentDisplayName) : void 0;
+            true ? warning2(false, "Relay: Unexpected fetch while using a null fragment ref for fragment `%s` in `%s`. When fetching more items, we expect initial fragment data to be non-null. Please make sure you're passing a valid fragment ref to `%s` before paginating.", fragmentNode.name, componentDisplayName, componentDisplayName) : void 0;
           }
           if (onComplete) {
             onComplete(null);
@@ -38798,15 +39053,15 @@ var require_useLoadMoreFunction = __commonJS({
             }
           };
         }
-        !(fragmentSelector != null && fragmentSelector.kind !== "PluralReaderSelector") ? true ? invariant(false, "Relay: Expected to be able to find a non-plural fragment owner for fragment `%s` when using `%s`. If you're seeing this, this is likely a bug in Relay.", fragmentNode.name, componentDisplayName) : invariant(false) : void 0;
+        !(fragmentSelector != null && fragmentSelector.kind !== "PluralReaderSelector") ? true ? invariant2(false, "Relay: Expected to be able to find a non-plural fragment owner for fragment `%s` when using `%s`. If you're seeing this, this is likely a bug in Relay.", fragmentNode.name, componentDisplayName) : invariant2(false) : void 0;
         var parentVariables = fragmentSelector.owner.variables;
         var fragmentVariables = fragmentSelector.variables;
         var extraVariables = options === null || options === void 0 ? void 0 : options.UNSTABLE_extraVariables;
         var baseVariables = (0, _objectSpread2["default"])((0, _objectSpread2["default"])({}, parentVariables), fragmentVariables);
-        var paginationVariables = getPaginationVariables(direction, count, cursor, baseVariables, (0, _objectSpread2["default"])({}, extraVariables), paginationMetadata);
+        var paginationVariables = getPaginationVariables(direction, count, cursor2, baseVariables, (0, _objectSpread2["default"])({}, extraVariables), paginationMetadata);
         if (identifierInfo != null) {
           if (typeof identifierValue !== "string") {
-            true ? warning(false, "Relay: Expected result to have a string  `%s` in order to refetch, got `%s`.", identifierInfo.identifierField, identifierValue) : void 0;
+            true ? warning2(false, "Relay: Expected result to have a string  `%s` in order to refetch, got `%s`.", identifierInfo.identifierField, identifierValue) : void 0;
           }
           paginationVariables[identifierInfo.identifierQueryVariableName] = identifierValue;
         }
@@ -38832,7 +39087,7 @@ var require_useLoadMoreFunction = __commonJS({
         return {
           dispose: disposeFetch
         };
-      }, [environment2, identifierValue, direction, cursor, startFetch, disposeFetch, completeFetch, isFetchingRef, isParentQueryActive, fragmentData, fragmentNode.name, fragmentRef, componentDisplayName]);
+      }, [environment2, identifierValue, direction, cursor2, startFetch, disposeFetch, completeFetch, isFetchingRef, isParentQueryActive, fragmentData, fragmentNode.name, fragmentRef, componentDisplayName]);
       return [loadMore, hasMore, disposeFetch];
     }
     function getConnectionState(direction, fragmentNode, fragmentData, connectionPathInFragmentData) {
@@ -38845,7 +39100,7 @@ var require_useLoadMoreFunction = __commonJS({
           hasMore: false
         };
       }
-      !(typeof connection === "object") ? true ? invariant(false, "Relay: Expected connection in fragment `%s` to have been `null`, or a plain object with %s and %s properties. Instead got `%s`.", fragmentNode.name, EDGES, PAGE_INFO, connection) : invariant(false) : void 0;
+      !(typeof connection === "object") ? true ? invariant2(false, "Relay: Expected connection in fragment `%s` to have been `null`, or a plain object with %s and %s properties. Instead got `%s`.", fragmentNode.name, EDGES, PAGE_INFO, connection) : invariant2(false) : void 0;
       var edges = connection[EDGES];
       var pageInfo = connection[PAGE_INFO];
       if (edges == null || pageInfo == null) {
@@ -38854,18 +39109,18 @@ var require_useLoadMoreFunction = __commonJS({
           hasMore: false
         };
       }
-      !Array.isArray(edges) ? true ? invariant(false, "Relay: Expected connection in fragment `%s` to have a plural `%s` field. Instead got `%s`.", fragmentNode.name, EDGES, edges) : invariant(false) : void 0;
-      !(typeof pageInfo === "object") ? true ? invariant(false, "Relay: Expected connection in fragment `%s` to have a `%s` field. Instead got `%s`.", fragmentNode.name, PAGE_INFO, pageInfo) : invariant(false) : void 0;
-      var cursor = direction === "forward" ? (_pageInfo$END_CURSOR = pageInfo[END_CURSOR]) !== null && _pageInfo$END_CURSOR !== void 0 ? _pageInfo$END_CURSOR : null : (_pageInfo$START_CURSO = pageInfo[START_CURSOR]) !== null && _pageInfo$START_CURSO !== void 0 ? _pageInfo$START_CURSO : null;
-      !(cursor === null || typeof cursor === "string") ? true ? invariant(false, "Relay: Expected page info for connection in fragment `%s` to have a valid `%s`. Instead got `%s`.", fragmentNode.name, START_CURSOR, cursor) : invariant(false) : void 0;
+      !Array.isArray(edges) ? true ? invariant2(false, "Relay: Expected connection in fragment `%s` to have a plural `%s` field. Instead got `%s`.", fragmentNode.name, EDGES, edges) : invariant2(false) : void 0;
+      !(typeof pageInfo === "object") ? true ? invariant2(false, "Relay: Expected connection in fragment `%s` to have a `%s` field. Instead got `%s`.", fragmentNode.name, PAGE_INFO, pageInfo) : invariant2(false) : void 0;
+      var cursor2 = direction === "forward" ? (_pageInfo$END_CURSOR = pageInfo[END_CURSOR]) !== null && _pageInfo$END_CURSOR !== void 0 ? _pageInfo$END_CURSOR : null : (_pageInfo$START_CURSO = pageInfo[START_CURSOR]) !== null && _pageInfo$START_CURSO !== void 0 ? _pageInfo$START_CURSO : null;
+      !(cursor2 === null || typeof cursor2 === "string") ? true ? invariant2(false, "Relay: Expected page info for connection in fragment `%s` to have a valid `%s`. Instead got `%s`.", fragmentNode.name, START_CURSOR, cursor2) : invariant2(false) : void 0;
       var hasMore;
       if (direction === "forward") {
-        hasMore = cursor != null && pageInfo[HAS_NEXT_PAGE] === true;
+        hasMore = cursor2 != null && pageInfo[HAS_NEXT_PAGE] === true;
       } else {
-        hasMore = cursor != null && pageInfo[HAS_PREV_PAGE] === true;
+        hasMore = cursor2 != null && pageInfo[HAS_PREV_PAGE] === true;
       }
       return {
-        cursor,
+        cursor: cursor2,
         hasMore
       };
     }
@@ -38884,9 +39139,9 @@ var require_usePaginationFragment = __commonJS({
     var useLoadMoreFunction = require_useLoadMoreFunction();
     var useStaticFragmentNodeWarning = require_useStaticFragmentNodeWarning();
     var _require = require_react();
-    var useCallback = _require.useCallback;
+    var useCallback3 = _require.useCallback;
     var useDebugValue = _require.useDebugValue;
-    var useState = _require.useState;
+    var useState5 = _require.useState;
     var _require2 = require_relay_runtime();
     var getFragment = _require2.getFragment;
     var getFragmentIdentifier = _require2.getFragmentIdentifier;
@@ -38920,7 +39175,7 @@ var require_usePaginationFragment = __commonJS({
         paginationMetadata,
         paginationRequest
       }), loadNext = _useLoadMore2[0], hasNext = _useLoadMore2[1], isLoadingNext = _useLoadMore2[2], disposeFetchNext = _useLoadMore2[3];
-      var refetchPagination = useCallback(function(variables, options) {
+      var refetchPagination = useCallback3(function(variables, options) {
         disposeFetchNext();
         disposeFetchPrevious();
         return refetch(variables, (0, _objectSpread2["default"])((0, _objectSpread2["default"])({}, options), {}, {
@@ -38949,7 +39204,7 @@ var require_usePaginationFragment = __commonJS({
       };
     }
     function useLoadMore(args) {
-      var _useState = useState(false), isLoadingMore = _useState[0], setIsLoadingMore = _useState[1];
+      var _useState = useState5(false), isLoadingMore = _useState[0], setIsLoadingMore = _useState[1];
       var observer = {
         start: function start() {
           return setIsLoadingMore(true);
@@ -38990,23 +39245,23 @@ var require_usePreloadedQuery = __commonJS({
     var useTrackLoadQueryInRender = _require.useTrackLoadQueryInRender;
     var useLazyLoadQueryNode = require_useLazyLoadQueryNode();
     var useMemoOperationDescriptor = require_useMemoOperationDescriptor();
-    var useRelayEnvironment = require_useRelayEnvironment();
-    var invariant = require_browser();
+    var useRelayEnvironment2 = require_useRelayEnvironment();
+    var invariant2 = require_browser();
     var _require2 = require_react();
     var useDebugValue = _require2.useDebugValue;
     var _require3 = require_relay_runtime();
     var _require3$__internal = _require3.__internal;
     var fetchQueryDeduped = _require3$__internal.fetchQueryDeduped;
     var fetchQuery = _require3$__internal.fetchQuery;
-    var warning = require_warning();
+    var warning2 = require_warning();
     function usePreloadedQuery(gqlQuery, preloadedQuery, options) {
       useTrackLoadQueryInRender();
-      var environment2 = useRelayEnvironment();
+      var environment2 = useRelayEnvironment2();
       var fetchKey = preloadedQuery.fetchKey, fetchPolicy = preloadedQuery.fetchPolicy, source = preloadedQuery.source, variables = preloadedQuery.variables, networkCacheConfig = preloadedQuery.networkCacheConfig;
       var operation = useMemoOperationDescriptor(gqlQuery, variables, networkCacheConfig);
       var useLazyLoadQueryNodeParams;
       if (preloadedQuery.kind === "PreloadedQuery_DEPRECATED") {
-        !(operation.request.node.params.name === preloadedQuery.name) ? true ? invariant(false, "usePreloadedQuery(): Expected data to be prefetched for query `%s`, got prefetch results for query `%s`.", operation.request.node.params.name, preloadedQuery.name) : invariant(false) : void 0;
+        !(operation.request.node.params.name === preloadedQuery.name) ? true ? invariant2(false, "usePreloadedQuery(): Expected data to be prefetched for query `%s`, got prefetch results for query `%s`.", operation.request.node.params.name, preloadedQuery.name) : invariant2(false) : void 0;
         useLazyLoadQueryNodeParams = {
           componentDisplayName: "usePreloadedQuery()",
           fetchKey,
@@ -39027,13 +39282,13 @@ var require_usePreloadedQuery = __commonJS({
           renderPolicy: options === null || options === void 0 ? void 0 : options.UNSTABLE_renderPolicy
         };
       } else {
-        true ? warning(preloadedQuery.isDisposed === false, "usePreloadedQuery(): Expected preloadedQuery to not be disposed yet. This is because disposing the query marks it for future garbage collection, and as such query results may no longer be present in the Relay store. In the future, this will become a hard error.") : void 0;
+        true ? warning2(preloadedQuery.isDisposed === false, "usePreloadedQuery(): Expected preloadedQuery to not be disposed yet. This is because disposing the query marks it for future garbage collection, and as such query results may no longer be present in the Relay store. In the future, this will become a hard error.") : void 0;
         var fallbackFetchObservable = fetchQuery(environment2, operation);
         var fetchObservable;
         if (source != null && environment2 === preloadedQuery.environment) {
           fetchObservable = source.ifEmpty(fallbackFetchObservable);
         } else if (environment2 !== preloadedQuery.environment) {
-          true ? warning(false, "usePreloadedQuery(): usePreloadedQuery was passed a preloaded query that was created with a different environment than the one that is currently in context. In the future, this will become a hard error.") : void 0;
+          true ? warning2(false, "usePreloadedQuery(): usePreloadedQuery was passed a preloaded query that was created with a different environment than the one that is currently in context. In the future, this will become a hard error.") : void 0;
           fetchObservable = fallbackFetchObservable;
         } else {
           fetchObservable = fallbackFetchObservable;
@@ -39103,15 +39358,15 @@ var require_useRefetchableFragment = __commonJS({
 var require_useSubscribeToInvalidationState = __commonJS({
   "node_modules/react-relay/lib/relay-hooks/useSubscribeToInvalidationState.js"(exports, module) {
     "use strict";
-    var useRelayEnvironment = require_useRelayEnvironment();
+    var useRelayEnvironment2 = require_useRelayEnvironment();
     var _require = require_react();
-    var useEffect = _require.useEffect;
-    var useRef = _require.useRef;
+    var useEffect4 = _require.useEffect;
+    var useRef4 = _require.useRef;
     function useSubscribeToInvalidationState(dataIDs, callback) {
-      var environment2 = useRelayEnvironment();
-      var disposableRef = useRef(null);
+      var environment2 = useRelayEnvironment2();
+      var disposableRef = useRef4(null);
       var stableDataIDs = Array.from(dataIDs).sort().join("");
-      useEffect(function() {
+      useEffect4(function() {
         var store = environment2.getStore();
         var invalidationState = store.lookupInvalidationState(dataIDs);
         var disposable = store.subscribeToInvalidationState(invalidationState, callback);
@@ -39136,15 +39391,15 @@ var require_useSubscribeToInvalidationState = __commonJS({
 var require_useSubscription = __commonJS({
   "node_modules/react-relay/lib/relay-hooks/useSubscription.js"(exports, module) {
     "use strict";
-    var useRelayEnvironment = require_useRelayEnvironment();
+    var useRelayEnvironment2 = require_useRelayEnvironment();
     var _require = require_react();
-    var useEffect = _require.useEffect;
+    var useEffect4 = _require.useEffect;
     var _require2 = require_relay_runtime();
     var requestSubscription = _require2.requestSubscription;
     function useSubscription(config, requestSubscriptionFn) {
       var actualRequestSubscription = requestSubscriptionFn !== null && requestSubscriptionFn !== void 0 ? requestSubscriptionFn : requestSubscription;
-      var environment2 = useRelayEnvironment();
-      useEffect(function() {
+      var environment2 = useRelayEnvironment2();
+      useEffect4(function() {
         var _actualRequestSubscri = actualRequestSubscription(environment2, config), dispose = _actualRequestSubscri.dispose;
         return dispose;
       }, [environment2, config, actualRequestSubscription]);
@@ -39173,12 +39428,12 @@ var require_lib2 = __commonJS({
     var useEntryPointLoader = require_useEntryPointLoader();
     var useFragment = require_useFragment();
     var useLazyLoadQuery2 = require_useLazyLoadQuery();
-    var useMutation = require_useMutation();
+    var useMutation3 = require_useMutation();
     var usePaginationFragment = require_usePaginationFragment();
     var usePreloadedQuery = require_usePreloadedQuery();
     var useQueryLoader = require_useQueryLoader();
     var useRefetchableFragment = require_useRefetchableFragment();
-    var useRelayEnvironment = require_useRelayEnvironment();
+    var useRelayEnvironment2 = require_useRelayEnvironment();
     var useSubscribeToInvalidationState = require_useSubscribeToInvalidationState();
     var useSubscription = require_useSubscription();
     var RelayRuntime = require_relay_runtime();
@@ -39210,11 +39465,11 @@ var require_lib2 = __commonJS({
       useLazyLoadQuery: useLazyLoadQuery2,
       useEntryPointLoader,
       useQueryLoader,
-      useMutation,
+      useMutation: useMutation3,
       usePaginationFragment,
       usePreloadedQuery,
       useRefetchableFragment,
-      useRelayEnvironment,
+      useRelayEnvironment: useRelayEnvironment2,
       useSubscribeToInvalidationState,
       useSubscription
     };
@@ -39235,7 +39490,7 @@ var require_react_jsx_runtime_development = __commonJS({
     if (true) {
       (function() {
         "use strict";
-        var React2 = require_react();
+        var React7 = require_react();
         var REACT_ELEMENT_TYPE = Symbol.for("react.element");
         var REACT_PORTAL_TYPE = Symbol.for("react.portal");
         var REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
@@ -39261,7 +39516,7 @@ var require_react_jsx_runtime_development = __commonJS({
           }
           return null;
         }
-        var ReactSharedInternals = React2.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+        var ReactSharedInternals = React7.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
         function error(format) {
           {
             {
@@ -39384,7 +39639,7 @@ var require_react_jsx_runtime_development = __commonJS({
           }
           return null;
         }
-        var assign = Object.assign;
+        var assign2 = Object.assign;
         var disabledDepth = 0;
         var prevLog;
         var prevInfo;
@@ -39435,25 +39690,25 @@ var require_react_jsx_runtime_development = __commonJS({
                 writable: true
               };
               Object.defineProperties(console, {
-                log: assign({}, props, {
+                log: assign2({}, props, {
                   value: prevLog
                 }),
-                info: assign({}, props, {
+                info: assign2({}, props, {
                   value: prevInfo
                 }),
-                warn: assign({}, props, {
+                warn: assign2({}, props, {
                   value: prevWarn
                 }),
-                error: assign({}, props, {
+                error: assign2({}, props, {
                   value: prevError
                 }),
-                group: assign({}, props, {
+                group: assign2({}, props, {
                   value: prevGroup
                 }),
-                groupCollapsed: assign({}, props, {
+                groupCollapsed: assign2({}, props, {
                   value: prevGroupCollapsed
                 }),
-                groupEnd: assign({}, props, {
+                groupEnd: assign2({}, props, {
                   value: prevGroupEnd
                 })
               });
@@ -39464,18 +39719,18 @@ var require_react_jsx_runtime_development = __commonJS({
           }
         }
         var ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher;
-        var prefix;
+        var prefix2;
         function describeBuiltInComponentFrame(name, source, ownerFn) {
           {
-            if (prefix === void 0) {
+            if (prefix2 === void 0) {
               try {
                 throw Error();
               } catch (x) {
-                var match = x.stack.trim().match(/\n( *(at )?)/);
-                prefix = match && match[1] || "";
+                var match2 = x.stack.trim().match(/\n( *(at )?)/);
+                prefix2 = match2 && match2[1] || "";
               }
             }
-            return "\n" + prefix + name;
+            return "\n" + prefix2 + name;
           }
         }
         var reentry = false;
@@ -39592,8 +39847,8 @@ var require_react_jsx_runtime_development = __commonJS({
             return describeNativeComponentFrame(fn, false);
           }
         }
-        function shouldConstruct(Component) {
-          var prototype = Component.prototype;
+        function shouldConstruct(Component2) {
+          var prototype = Component2.prototype;
           return !!(prototype && prototype.isReactComponent);
         }
         function describeUnknownElementTypeFrameInDEV(type, source, ownerFn) {
@@ -39889,7 +40144,7 @@ var require_react_jsx_runtime_development = __commonJS({
         {
           propTypesMisspellWarningShown = false;
         }
-        function isValidElement(object) {
+        function isValidElement2(object) {
           {
             return typeof object === "object" && object !== null && object.$$typeof === REACT_ELEMENT_TYPE;
           }
@@ -39948,30 +40203,30 @@ var require_react_jsx_runtime_development = __commonJS({
             setCurrentlyValidatingElement$1(null);
           }
         }
-        function validateChildKeys(node2, parentType) {
+        function validateChildKeys(node6, parentType) {
           {
-            if (typeof node2 !== "object") {
+            if (typeof node6 !== "object") {
               return;
             }
-            if (isArray(node2)) {
-              for (var i = 0; i < node2.length; i++) {
-                var child = node2[i];
-                if (isValidElement(child)) {
+            if (isArray(node6)) {
+              for (var i = 0; i < node6.length; i++) {
+                var child = node6[i];
+                if (isValidElement2(child)) {
                   validateExplicitKey(child, parentType);
                 }
               }
-            } else if (isValidElement(node2)) {
-              if (node2._store) {
-                node2._store.validated = true;
+            } else if (isValidElement2(node6)) {
+              if (node6._store) {
+                node6._store.validated = true;
               }
-            } else if (node2) {
-              var iteratorFn = getIteratorFn(node2);
+            } else if (node6) {
+              var iteratorFn = getIteratorFn(node6);
               if (typeof iteratorFn === "function") {
-                if (iteratorFn !== node2.entries) {
-                  var iterator = iteratorFn.call(node2);
+                if (iteratorFn !== node6.entries) {
+                  var iterator = iteratorFn.call(node6);
                   var step;
                   while (!(step = iterator.next()).done) {
-                    if (isValidElement(step.value)) {
+                    if (isValidElement2(step.value)) {
                       validateExplicitKey(step.value, parentType);
                     }
                   }
@@ -40111,11 +40366,11 @@ var require_react_jsx_runtime_development = __commonJS({
             return jsxWithValidation(type, props, key, false);
           }
         }
-        var jsx3 = jsxWithValidationDynamic;
-        var jsxs2 = jsxWithValidationStatic;
+        var jsx6 = jsxWithValidationDynamic;
+        var jsxs4 = jsxWithValidationStatic;
         exports.Fragment = REACT_FRAGMENT_TYPE;
-        exports.jsx = jsx3;
-        exports.jsxs = jsxs2;
+        exports.jsx = jsx6;
+        exports.jsxs = jsxs4;
       })();
     }
   }
@@ -40133,28 +40388,6879 @@ var require_jsx_runtime = __commonJS({
   }
 });
 
-// src/web/client/index.tsx
-var import_react = __toESM(require_react(), 1);
-var import_client = __toESM(require_client(), 1);
-var import_react_relay2 = __toESM(require_react_relay(), 1);
+// node_modules/@emotion/react/dist/emotion-element-f0de968e.browser.esm.js
+var React2 = __toESM(require_react());
+var import_react = __toESM(require_react());
 
-// src/web/client/App.tsx
+// node_modules/@emotion/sheet/dist/emotion-sheet.esm.js
+var isDevelopment = false;
+function sheetForTag(tag) {
+  if (tag.sheet) {
+    return tag.sheet;
+  }
+  for (var i = 0; i < document.styleSheets.length; i++) {
+    if (document.styleSheets[i].ownerNode === tag) {
+      return document.styleSheets[i];
+    }
+  }
+  return void 0;
+}
+function createStyleElement(options) {
+  var tag = document.createElement("style");
+  tag.setAttribute("data-emotion", options.key);
+  if (options.nonce !== void 0) {
+    tag.setAttribute("nonce", options.nonce);
+  }
+  tag.appendChild(document.createTextNode(""));
+  tag.setAttribute("data-s", "");
+  return tag;
+}
+var StyleSheet = /* @__PURE__ */ function() {
+  function StyleSheet2(options) {
+    var _this = this;
+    this._insertTag = function(tag) {
+      var before;
+      if (_this.tags.length === 0) {
+        if (_this.insertionPoint) {
+          before = _this.insertionPoint.nextSibling;
+        } else if (_this.prepend) {
+          before = _this.container.firstChild;
+        } else {
+          before = _this.before;
+        }
+      } else {
+        before = _this.tags[_this.tags.length - 1].nextSibling;
+      }
+      _this.container.insertBefore(tag, before);
+      _this.tags.push(tag);
+    };
+    this.isSpeedy = options.speedy === void 0 ? !isDevelopment : options.speedy;
+    this.tags = [];
+    this.ctr = 0;
+    this.nonce = options.nonce;
+    this.key = options.key;
+    this.container = options.container;
+    this.prepend = options.prepend;
+    this.insertionPoint = options.insertionPoint;
+    this.before = null;
+  }
+  var _proto = StyleSheet2.prototype;
+  _proto.hydrate = function hydrate(nodes) {
+    nodes.forEach(this._insertTag);
+  };
+  _proto.insert = function insert(rule) {
+    if (this.ctr % (this.isSpeedy ? 65e3 : 1) === 0) {
+      this._insertTag(createStyleElement(this));
+    }
+    var tag = this.tags[this.tags.length - 1];
+    if (this.isSpeedy) {
+      var sheet = sheetForTag(tag);
+      try {
+        sheet.insertRule(rule, sheet.cssRules.length);
+      } catch (e) {
+      }
+    } else {
+      tag.appendChild(document.createTextNode(rule));
+    }
+    this.ctr++;
+  };
+  _proto.flush = function flush() {
+    this.tags.forEach(function(tag) {
+      var _tag$parentNode;
+      return (_tag$parentNode = tag.parentNode) == null ? void 0 : _tag$parentNode.removeChild(tag);
+    });
+    this.tags = [];
+    this.ctr = 0;
+  };
+  return StyleSheet2;
+}();
+
+// node_modules/stylis/src/Enum.js
+var MS = "-ms-";
+var MOZ = "-moz-";
+var WEBKIT = "-webkit-";
+var COMMENT = "comm";
+var RULESET = "rule";
+var DECLARATION = "decl";
+var IMPORT = "@import";
+var KEYFRAMES = "@keyframes";
+var LAYER = "@layer";
+
+// node_modules/stylis/src/Utility.js
+var abs = Math.abs;
+var from = String.fromCharCode;
+var assign = Object.assign;
+function hash(value, length2) {
+  return charat(value, 0) ^ 45 ? (((length2 << 2 ^ charat(value, 0)) << 2 ^ charat(value, 1)) << 2 ^ charat(value, 2)) << 2 ^ charat(value, 3) : 0;
+}
+function trim(value) {
+  return value.trim();
+}
+function match(value, pattern) {
+  return (value = pattern.exec(value)) ? value[0] : value;
+}
+function replace(value, pattern, replacement) {
+  return value.replace(pattern, replacement);
+}
+function indexof(value, search) {
+  return value.indexOf(search);
+}
+function charat(value, index) {
+  return value.charCodeAt(index) | 0;
+}
+function substr(value, begin, end) {
+  return value.slice(begin, end);
+}
+function strlen(value) {
+  return value.length;
+}
+function sizeof(value) {
+  return value.length;
+}
+function append(value, array) {
+  return array.push(value), value;
+}
+function combine(array, callback) {
+  return array.map(callback).join("");
+}
+
+// node_modules/stylis/src/Tokenizer.js
+var line = 1;
+var column = 1;
+var length = 0;
+var position = 0;
+var character = 0;
+var characters = "";
+function node(value, root, parent, type, props, children, length2) {
+  return { value, root, parent, type, props, children, line, column, length: length2, return: "" };
+}
+function copy(root, props) {
+  return assign(node("", null, null, "", null, null, 0), root, { length: -root.length }, props);
+}
+function char() {
+  return character;
+}
+function prev() {
+  character = position > 0 ? charat(characters, --position) : 0;
+  if (column--, character === 10)
+    column = 1, line--;
+  return character;
+}
+function next() {
+  character = position < length ? charat(characters, position++) : 0;
+  if (column++, character === 10)
+    column = 1, line++;
+  return character;
+}
+function peek() {
+  return charat(characters, position);
+}
+function caret() {
+  return position;
+}
+function slice(begin, end) {
+  return substr(characters, begin, end);
+}
+function token(type) {
+  switch (type) {
+    // \0 \t \n \r \s whitespace token
+    case 0:
+    case 9:
+    case 10:
+    case 13:
+    case 32:
+      return 5;
+    // ! + , / > @ ~ isolate token
+    case 33:
+    case 43:
+    case 44:
+    case 47:
+    case 62:
+    case 64:
+    case 126:
+    // ; { } breakpoint token
+    case 59:
+    case 123:
+    case 125:
+      return 4;
+    // : accompanied token
+    case 58:
+      return 3;
+    // " ' ( [ opening delimit token
+    case 34:
+    case 39:
+    case 40:
+    case 91:
+      return 2;
+    // ) ] closing delimit token
+    case 41:
+    case 93:
+      return 1;
+  }
+  return 0;
+}
+function alloc(value) {
+  return line = column = 1, length = strlen(characters = value), position = 0, [];
+}
+function dealloc(value) {
+  return characters = "", value;
+}
+function delimit(type) {
+  return trim(slice(position - 1, delimiter(type === 91 ? type + 2 : type === 40 ? type + 1 : type)));
+}
+function whitespace(type) {
+  while (character = peek())
+    if (character < 33)
+      next();
+    else
+      break;
+  return token(type) > 2 || token(character) > 3 ? "" : " ";
+}
+function escaping(index, count) {
+  while (--count && next())
+    if (character < 48 || character > 102 || character > 57 && character < 65 || character > 70 && character < 97)
+      break;
+  return slice(index, caret() + (count < 6 && peek() == 32 && next() == 32));
+}
+function delimiter(type) {
+  while (next())
+    switch (character) {
+      // ] ) " '
+      case type:
+        return position;
+      // " '
+      case 34:
+      case 39:
+        if (type !== 34 && type !== 39)
+          delimiter(character);
+        break;
+      // (
+      case 40:
+        if (type === 41)
+          delimiter(type);
+        break;
+      // \
+      case 92:
+        next();
+        break;
+    }
+  return position;
+}
+function commenter(type, index) {
+  while (next())
+    if (type + character === 47 + 10)
+      break;
+    else if (type + character === 42 + 42 && peek() === 47)
+      break;
+  return "/*" + slice(index, position - 1) + "*" + from(type === 47 ? type : next());
+}
+function identifier(index) {
+  while (!token(peek()))
+    next();
+  return slice(index, position);
+}
+
+// node_modules/stylis/src/Parser.js
+function compile(value) {
+  return dealloc(parse("", null, null, null, [""], value = alloc(value), 0, [0], value));
+}
+function parse(value, root, parent, rule, rules, rulesets, pseudo, points, declarations) {
+  var index = 0;
+  var offset = 0;
+  var length2 = pseudo;
+  var atrule = 0;
+  var property = 0;
+  var previous = 0;
+  var variable = 1;
+  var scanning = 1;
+  var ampersand = 1;
+  var character2 = 0;
+  var type = "";
+  var props = rules;
+  var children = rulesets;
+  var reference = rule;
+  var characters2 = type;
+  while (scanning)
+    switch (previous = character2, character2 = next()) {
+      // (
+      case 40:
+        if (previous != 108 && charat(characters2, length2 - 1) == 58) {
+          if (indexof(characters2 += replace(delimit(character2), "&", "&\f"), "&\f") != -1)
+            ampersand = -1;
+          break;
+        }
+      // " ' [
+      case 34:
+      case 39:
+      case 91:
+        characters2 += delimit(character2);
+        break;
+      // \t \n \r \s
+      case 9:
+      case 10:
+      case 13:
+      case 32:
+        characters2 += whitespace(previous);
+        break;
+      // \
+      case 92:
+        characters2 += escaping(caret() - 1, 7);
+        continue;
+      // /
+      case 47:
+        switch (peek()) {
+          case 42:
+          case 47:
+            append(comment(commenter(next(), caret()), root, parent), declarations);
+            break;
+          default:
+            characters2 += "/";
+        }
+        break;
+      // {
+      case 123 * variable:
+        points[index++] = strlen(characters2) * ampersand;
+      // } ; \0
+      case 125 * variable:
+      case 59:
+      case 0:
+        switch (character2) {
+          // \0 }
+          case 0:
+          case 125:
+            scanning = 0;
+          // ;
+          case 59 + offset:
+            if (ampersand == -1) characters2 = replace(characters2, /\f/g, "");
+            if (property > 0 && strlen(characters2) - length2)
+              append(property > 32 ? declaration(characters2 + ";", rule, parent, length2 - 1) : declaration(replace(characters2, " ", "") + ";", rule, parent, length2 - 2), declarations);
+            break;
+          // @ ;
+          case 59:
+            characters2 += ";";
+          // { rule/at-rule
+          default:
+            append(reference = ruleset(characters2, root, parent, index, offset, rules, points, type, props = [], children = [], length2), rulesets);
+            if (character2 === 123)
+              if (offset === 0)
+                parse(characters2, root, reference, reference, props, rulesets, length2, points, children);
+              else
+                switch (atrule === 99 && charat(characters2, 3) === 110 ? 100 : atrule) {
+                  // d l m s
+                  case 100:
+                  case 108:
+                  case 109:
+                  case 115:
+                    parse(value, reference, reference, rule && append(ruleset(value, reference, reference, 0, 0, rules, points, type, rules, props = [], length2), children), rules, children, length2, points, rule ? props : children);
+                    break;
+                  default:
+                    parse(characters2, reference, reference, reference, [""], children, 0, points, children);
+                }
+        }
+        index = offset = property = 0, variable = ampersand = 1, type = characters2 = "", length2 = pseudo;
+        break;
+      // :
+      case 58:
+        length2 = 1 + strlen(characters2), property = previous;
+      default:
+        if (variable < 1) {
+          if (character2 == 123)
+            --variable;
+          else if (character2 == 125 && variable++ == 0 && prev() == 125)
+            continue;
+        }
+        switch (characters2 += from(character2), character2 * variable) {
+          // &
+          case 38:
+            ampersand = offset > 0 ? 1 : (characters2 += "\f", -1);
+            break;
+          // ,
+          case 44:
+            points[index++] = (strlen(characters2) - 1) * ampersand, ampersand = 1;
+            break;
+          // @
+          case 64:
+            if (peek() === 45)
+              characters2 += delimit(next());
+            atrule = peek(), offset = length2 = strlen(type = characters2 += identifier(caret())), character2++;
+            break;
+          // -
+          case 45:
+            if (previous === 45 && strlen(characters2) == 2)
+              variable = 0;
+        }
+    }
+  return rulesets;
+}
+function ruleset(value, root, parent, index, offset, rules, points, type, props, children, length2) {
+  var post = offset - 1;
+  var rule = offset === 0 ? rules : [""];
+  var size = sizeof(rule);
+  for (var i = 0, j = 0, k = 0; i < index; ++i)
+    for (var x = 0, y = substr(value, post + 1, post = abs(j = points[i])), z = value; x < size; ++x)
+      if (z = trim(j > 0 ? rule[x] + " " + y : replace(y, /&\f/g, rule[x])))
+        props[k++] = z;
+  return node(value, root, parent, offset === 0 ? RULESET : type, props, children, length2);
+}
+function comment(value, root, parent) {
+  return node(value, root, parent, COMMENT, from(char()), substr(value, 2, -2), 0);
+}
+function declaration(value, root, parent, length2) {
+  return node(value, root, parent, DECLARATION, substr(value, 0, length2), substr(value, length2 + 1, -1), length2);
+}
+
+// node_modules/stylis/src/Serializer.js
+function serialize(children, callback) {
+  var output = "";
+  var length2 = sizeof(children);
+  for (var i = 0; i < length2; i++)
+    output += callback(children[i], i, children, callback) || "";
+  return output;
+}
+function stringify(element, index, children, callback) {
+  switch (element.type) {
+    case LAYER:
+      if (element.children.length) break;
+    case IMPORT:
+    case DECLARATION:
+      return element.return = element.return || element.value;
+    case COMMENT:
+      return "";
+    case KEYFRAMES:
+      return element.return = element.value + "{" + serialize(element.children, callback) + "}";
+    case RULESET:
+      element.value = element.props.join(",");
+  }
+  return strlen(children = serialize(element.children, callback)) ? element.return = element.value + "{" + children + "}" : "";
+}
+
+// node_modules/stylis/src/Middleware.js
+function middleware(collection) {
+  var length2 = sizeof(collection);
+  return function(element, index, children, callback) {
+    var output = "";
+    for (var i = 0; i < length2; i++)
+      output += collection[i](element, index, children, callback) || "";
+    return output;
+  };
+}
+function rulesheet(callback) {
+  return function(element) {
+    if (!element.root) {
+      if (element = element.return)
+        callback(element);
+    }
+  };
+}
+
+// node_modules/@emotion/memoize/dist/emotion-memoize.esm.js
+function memoize(fn) {
+  var cache = /* @__PURE__ */ Object.create(null);
+  return function(arg) {
+    if (cache[arg] === void 0) cache[arg] = fn(arg);
+    return cache[arg];
+  };
+}
+
+// node_modules/@emotion/cache/dist/emotion-cache.browser.esm.js
+var identifierWithPointTracking = function identifierWithPointTracking2(begin, points, index) {
+  var previous = 0;
+  var character2 = 0;
+  while (true) {
+    previous = character2;
+    character2 = peek();
+    if (previous === 38 && character2 === 12) {
+      points[index] = 1;
+    }
+    if (token(character2)) {
+      break;
+    }
+    next();
+  }
+  return slice(begin, position);
+};
+var toRules = function toRules2(parsed, points) {
+  var index = -1;
+  var character2 = 44;
+  do {
+    switch (token(character2)) {
+      case 0:
+        if (character2 === 38 && peek() === 12) {
+          points[index] = 1;
+        }
+        parsed[index] += identifierWithPointTracking(position - 1, points, index);
+        break;
+      case 2:
+        parsed[index] += delimit(character2);
+        break;
+      case 4:
+        if (character2 === 44) {
+          parsed[++index] = peek() === 58 ? "&\f" : "";
+          points[index] = parsed[index].length;
+          break;
+        }
+      // fallthrough
+      default:
+        parsed[index] += from(character2);
+    }
+  } while (character2 = next());
+  return parsed;
+};
+var getRules = function getRules2(value, points) {
+  return dealloc(toRules(alloc(value), points));
+};
+var fixedElements = /* @__PURE__ */ new WeakMap();
+var compat = function compat2(element) {
+  if (element.type !== "rule" || !element.parent || // positive .length indicates that this rule contains pseudo
+  // negative .length indicates that this rule has been already prefixed
+  element.length < 1) {
+    return;
+  }
+  var value = element.value;
+  var parent = element.parent;
+  var isImplicitRule = element.column === parent.column && element.line === parent.line;
+  while (parent.type !== "rule") {
+    parent = parent.parent;
+    if (!parent) return;
+  }
+  if (element.props.length === 1 && value.charCodeAt(0) !== 58 && !fixedElements.get(parent)) {
+    return;
+  }
+  if (isImplicitRule) {
+    return;
+  }
+  fixedElements.set(element, true);
+  var points = [];
+  var rules = getRules(value, points);
+  var parentRules = parent.props;
+  for (var i = 0, k = 0; i < rules.length; i++) {
+    for (var j = 0; j < parentRules.length; j++, k++) {
+      element.props[k] = points[i] ? rules[i].replace(/&\f/g, parentRules[j]) : parentRules[j] + " " + rules[i];
+    }
+  }
+};
+var removeLabel = function removeLabel2(element) {
+  if (element.type === "decl") {
+    var value = element.value;
+    if (
+      // charcode for l
+      value.charCodeAt(0) === 108 && // charcode for b
+      value.charCodeAt(2) === 98
+    ) {
+      element["return"] = "";
+      element.value = "";
+    }
+  }
+};
+function prefix(value, length2) {
+  switch (hash(value, length2)) {
+    // color-adjust
+    case 5103:
+      return WEBKIT + "print-" + value + value;
+    // animation, animation-(delay|direction|duration|fill-mode|iteration-count|name|play-state|timing-function)
+    case 5737:
+    case 4201:
+    case 3177:
+    case 3433:
+    case 1641:
+    case 4457:
+    case 2921:
+    // text-decoration, filter, clip-path, backface-visibility, column, box-decoration-break
+    case 5572:
+    case 6356:
+    case 5844:
+    case 3191:
+    case 6645:
+    case 3005:
+    // mask, mask-image, mask-(mode|clip|size), mask-(repeat|origin), mask-position, mask-composite,
+    case 6391:
+    case 5879:
+    case 5623:
+    case 6135:
+    case 4599:
+    case 4855:
+    // background-clip, columns, column-(count|fill|gap|rule|rule-color|rule-style|rule-width|span|width)
+    case 4215:
+    case 6389:
+    case 5109:
+    case 5365:
+    case 5621:
+    case 3829:
+      return WEBKIT + value + value;
+    // appearance, user-select, transform, hyphens, text-size-adjust
+    case 5349:
+    case 4246:
+    case 4810:
+    case 6968:
+    case 2756:
+      return WEBKIT + value + MOZ + value + MS + value + value;
+    // flex, flex-direction
+    case 6828:
+    case 4268:
+      return WEBKIT + value + MS + value + value;
+    // order
+    case 6165:
+      return WEBKIT + value + MS + "flex-" + value + value;
+    // align-items
+    case 5187:
+      return WEBKIT + value + replace(value, /(\w+).+(:[^]+)/, WEBKIT + "box-$1$2" + MS + "flex-$1$2") + value;
+    // align-self
+    case 5443:
+      return WEBKIT + value + MS + "flex-item-" + replace(value, /flex-|-self/, "") + value;
+    // align-content
+    case 4675:
+      return WEBKIT + value + MS + "flex-line-pack" + replace(value, /align-content|flex-|-self/, "") + value;
+    // flex-shrink
+    case 5548:
+      return WEBKIT + value + MS + replace(value, "shrink", "negative") + value;
+    // flex-basis
+    case 5292:
+      return WEBKIT + value + MS + replace(value, "basis", "preferred-size") + value;
+    // flex-grow
+    case 6060:
+      return WEBKIT + "box-" + replace(value, "-grow", "") + WEBKIT + value + MS + replace(value, "grow", "positive") + value;
+    // transition
+    case 4554:
+      return WEBKIT + replace(value, /([^-])(transform)/g, "$1" + WEBKIT + "$2") + value;
+    // cursor
+    case 6187:
+      return replace(replace(replace(value, /(zoom-|grab)/, WEBKIT + "$1"), /(image-set)/, WEBKIT + "$1"), value, "") + value;
+    // background, background-image
+    case 5495:
+    case 3959:
+      return replace(value, /(image-set\([^]*)/, WEBKIT + "$1$`$1");
+    // justify-content
+    case 4968:
+      return replace(replace(value, /(.+:)(flex-)?(.*)/, WEBKIT + "box-pack:$3" + MS + "flex-pack:$3"), /s.+-b[^;]+/, "justify") + WEBKIT + value + value;
+    // (margin|padding)-inline-(start|end)
+    case 4095:
+    case 3583:
+    case 4068:
+    case 2532:
+      return replace(value, /(.+)-inline(.+)/, WEBKIT + "$1$2") + value;
+    // (min|max)?(width|height|inline-size|block-size)
+    case 8116:
+    case 7059:
+    case 5753:
+    case 5535:
+    case 5445:
+    case 5701:
+    case 4933:
+    case 4677:
+    case 5533:
+    case 5789:
+    case 5021:
+    case 4765:
+      if (strlen(value) - 1 - length2 > 6) switch (charat(value, length2 + 1)) {
+        // (m)ax-content, (m)in-content
+        case 109:
+          if (charat(value, length2 + 4) !== 45) break;
+        // (f)ill-available, (f)it-content
+        case 102:
+          return replace(value, /(.+:)(.+)-([^]+)/, "$1" + WEBKIT + "$2-$3$1" + MOZ + (charat(value, length2 + 3) == 108 ? "$3" : "$2-$3")) + value;
+        // (s)tretch
+        case 115:
+          return ~indexof(value, "stretch") ? prefix(replace(value, "stretch", "fill-available"), length2) + value : value;
+      }
+      break;
+    // position: sticky
+    case 4949:
+      if (charat(value, length2 + 1) !== 115) break;
+    // display: (flex|inline-flex)
+    case 6444:
+      switch (charat(value, strlen(value) - 3 - (~indexof(value, "!important") && 10))) {
+        // stic(k)y
+        case 107:
+          return replace(value, ":", ":" + WEBKIT) + value;
+        // (inline-)?fl(e)x
+        case 101:
+          return replace(value, /(.+:)([^;!]+)(;|!.+)?/, "$1" + WEBKIT + (charat(value, 14) === 45 ? "inline-" : "") + "box$3$1" + WEBKIT + "$2$3$1" + MS + "$2box$3") + value;
+      }
+      break;
+    // writing-mode
+    case 5936:
+      switch (charat(value, length2 + 11)) {
+        // vertical-l(r)
+        case 114:
+          return WEBKIT + value + MS + replace(value, /[svh]\w+-[tblr]{2}/, "tb") + value;
+        // vertical-r(l)
+        case 108:
+          return WEBKIT + value + MS + replace(value, /[svh]\w+-[tblr]{2}/, "tb-rl") + value;
+        // horizontal(-)tb
+        case 45:
+          return WEBKIT + value + MS + replace(value, /[svh]\w+-[tblr]{2}/, "lr") + value;
+      }
+      return WEBKIT + value + MS + value + value;
+  }
+  return value;
+}
+var prefixer = function prefixer2(element, index, children, callback) {
+  if (element.length > -1) {
+    if (!element["return"]) switch (element.type) {
+      case DECLARATION:
+        element["return"] = prefix(element.value, element.length);
+        break;
+      case KEYFRAMES:
+        return serialize([copy(element, {
+          value: replace(element.value, "@", "@" + WEBKIT)
+        })], callback);
+      case RULESET:
+        if (element.length) return combine(element.props, function(value) {
+          switch (match(value, /(::plac\w+|:read-\w+)/)) {
+            // :read-(only|write)
+            case ":read-only":
+            case ":read-write":
+              return serialize([copy(element, {
+                props: [replace(value, /:(read-\w+)/, ":" + MOZ + "$1")]
+              })], callback);
+            // :placeholder
+            case "::placeholder":
+              return serialize([copy(element, {
+                props: [replace(value, /:(plac\w+)/, ":" + WEBKIT + "input-$1")]
+              }), copy(element, {
+                props: [replace(value, /:(plac\w+)/, ":" + MOZ + "$1")]
+              }), copy(element, {
+                props: [replace(value, /:(plac\w+)/, MS + "input-$1")]
+              })], callback);
+          }
+          return "";
+        });
+    }
+  }
+};
+var defaultStylisPlugins = [prefixer];
+var createCache = function createCache2(options) {
+  var key = options.key;
+  if (key === "css") {
+    var ssrStyles = document.querySelectorAll("style[data-emotion]:not([data-s])");
+    Array.prototype.forEach.call(ssrStyles, function(node6) {
+      var dataEmotionAttribute = node6.getAttribute("data-emotion");
+      if (dataEmotionAttribute.indexOf(" ") === -1) {
+        return;
+      }
+      document.head.appendChild(node6);
+      node6.setAttribute("data-s", "");
+    });
+  }
+  var stylisPlugins = options.stylisPlugins || defaultStylisPlugins;
+  var inserted = {};
+  var container2;
+  var nodesToHydrate = [];
+  {
+    container2 = options.container || document.head;
+    Array.prototype.forEach.call(
+      // this means we will ignore elements which don't have a space in them which
+      // means that the style elements we're looking at are only Emotion 11 server-rendered style elements
+      document.querySelectorAll('style[data-emotion^="' + key + ' "]'),
+      function(node6) {
+        var attrib = node6.getAttribute("data-emotion").split(" ");
+        for (var i = 1; i < attrib.length; i++) {
+          inserted[attrib[i]] = true;
+        }
+        nodesToHydrate.push(node6);
+      }
+    );
+  }
+  var _insert;
+  var omnipresentPlugins = [compat, removeLabel];
+  {
+    var currentSheet;
+    var finalizingPlugins = [stringify, rulesheet(function(rule) {
+      currentSheet.insert(rule);
+    })];
+    var serializer = middleware(omnipresentPlugins.concat(stylisPlugins, finalizingPlugins));
+    var stylis = function stylis2(styles) {
+      return serialize(compile(styles), serializer);
+    };
+    _insert = function insert(selector, serialized, sheet, shouldCache) {
+      currentSheet = sheet;
+      stylis(selector ? selector + "{" + serialized.styles + "}" : serialized.styles);
+      if (shouldCache) {
+        cache.inserted[serialized.name] = true;
+      }
+    };
+  }
+  var cache = {
+    key,
+    sheet: new StyleSheet({
+      key,
+      container: container2,
+      nonce: options.nonce,
+      speedy: options.speedy,
+      prepend: options.prepend,
+      insertionPoint: options.insertionPoint
+    }),
+    nonce: options.nonce,
+    inserted,
+    registered: {},
+    insert: _insert
+  };
+  cache.sheet.hydrate(nodesToHydrate);
+  return cache;
+};
+
+// node_modules/@emotion/utils/dist/emotion-utils.browser.esm.js
+var isBrowser = true;
+function getRegisteredStyles(registered, registeredStyles, classNames) {
+  var rawClassName = "";
+  classNames.split(" ").forEach(function(className) {
+    if (registered[className] !== void 0) {
+      registeredStyles.push(registered[className] + ";");
+    } else if (className) {
+      rawClassName += className + " ";
+    }
+  });
+  return rawClassName;
+}
+var registerStyles = function registerStyles2(cache, serialized, isStringTag) {
+  var className = cache.key + "-" + serialized.name;
+  if (
+    // we only need to add the styles to the registered cache if the
+    // class name could be used further down
+    // the tree but if it's a string tag, we know it won't
+    // so we don't have to add it to registered cache.
+    // this improves memory usage since we can avoid storing the whole style string
+    (isStringTag === false || // we need to always store it if we're in compat mode and
+    // in node since emotion-server relies on whether a style is in
+    // the registered cache to know whether a style is global or not
+    // also, note that this check will be dead code eliminated in the browser
+    isBrowser === false) && cache.registered[className] === void 0
+  ) {
+    cache.registered[className] = serialized.styles;
+  }
+};
+var insertStyles = function insertStyles2(cache, serialized, isStringTag) {
+  registerStyles(cache, serialized, isStringTag);
+  var className = cache.key + "-" + serialized.name;
+  if (cache.inserted[serialized.name] === void 0) {
+    var current = serialized;
+    do {
+      cache.insert(serialized === current ? "." + className : "", current, cache.sheet, true);
+      current = current.next;
+    } while (current !== void 0);
+  }
+};
+
+// node_modules/@emotion/hash/dist/emotion-hash.esm.js
+function murmur2(str) {
+  var h = 0;
+  var k, i = 0, len = str.length;
+  for (; len >= 4; ++i, len -= 4) {
+    k = str.charCodeAt(i) & 255 | (str.charCodeAt(++i) & 255) << 8 | (str.charCodeAt(++i) & 255) << 16 | (str.charCodeAt(++i) & 255) << 24;
+    k = /* Math.imul(k, m): */
+    (k & 65535) * 1540483477 + ((k >>> 16) * 59797 << 16);
+    k ^= /* k >>> r: */
+    k >>> 24;
+    h = /* Math.imul(k, m): */
+    (k & 65535) * 1540483477 + ((k >>> 16) * 59797 << 16) ^ /* Math.imul(h, m): */
+    (h & 65535) * 1540483477 + ((h >>> 16) * 59797 << 16);
+  }
+  switch (len) {
+    case 3:
+      h ^= (str.charCodeAt(i + 2) & 255) << 16;
+    case 2:
+      h ^= (str.charCodeAt(i + 1) & 255) << 8;
+    case 1:
+      h ^= str.charCodeAt(i) & 255;
+      h = /* Math.imul(h, m): */
+      (h & 65535) * 1540483477 + ((h >>> 16) * 59797 << 16);
+  }
+  h ^= h >>> 13;
+  h = /* Math.imul(h, m): */
+  (h & 65535) * 1540483477 + ((h >>> 16) * 59797 << 16);
+  return ((h ^ h >>> 15) >>> 0).toString(36);
+}
+
+// node_modules/@emotion/unitless/dist/emotion-unitless.esm.js
+var unitlessKeys = {
+  animationIterationCount: 1,
+  aspectRatio: 1,
+  borderImageOutset: 1,
+  borderImageSlice: 1,
+  borderImageWidth: 1,
+  boxFlex: 1,
+  boxFlexGroup: 1,
+  boxOrdinalGroup: 1,
+  columnCount: 1,
+  columns: 1,
+  flex: 1,
+  flexGrow: 1,
+  flexPositive: 1,
+  flexShrink: 1,
+  flexNegative: 1,
+  flexOrder: 1,
+  gridRow: 1,
+  gridRowEnd: 1,
+  gridRowSpan: 1,
+  gridRowStart: 1,
+  gridColumn: 1,
+  gridColumnEnd: 1,
+  gridColumnSpan: 1,
+  gridColumnStart: 1,
+  msGridRow: 1,
+  msGridRowSpan: 1,
+  msGridColumn: 1,
+  msGridColumnSpan: 1,
+  fontWeight: 1,
+  lineHeight: 1,
+  opacity: 1,
+  order: 1,
+  orphans: 1,
+  scale: 1,
+  tabSize: 1,
+  widows: 1,
+  zIndex: 1,
+  zoom: 1,
+  WebkitLineClamp: 1,
+  // SVG-related properties
+  fillOpacity: 1,
+  floodOpacity: 1,
+  stopOpacity: 1,
+  strokeDasharray: 1,
+  strokeDashoffset: 1,
+  strokeMiterlimit: 1,
+  strokeOpacity: 1,
+  strokeWidth: 1
+};
+
+// node_modules/@emotion/serialize/dist/emotion-serialize.esm.js
+var isDevelopment2 = false;
+var hyphenateRegex = /[A-Z]|^ms/g;
+var animationRegex = /_EMO_([^_]+?)_([^]*?)_EMO_/g;
+var isCustomProperty = function isCustomProperty2(property) {
+  return property.charCodeAt(1) === 45;
+};
+var isProcessableValue = function isProcessableValue2(value) {
+  return value != null && typeof value !== "boolean";
+};
+var processStyleName = /* @__PURE__ */ memoize(function(styleName) {
+  return isCustomProperty(styleName) ? styleName : styleName.replace(hyphenateRegex, "-$&").toLowerCase();
+});
+var processStyleValue = function processStyleValue2(key, value) {
+  switch (key) {
+    case "animation":
+    case "animationName": {
+      if (typeof value === "string") {
+        return value.replace(animationRegex, function(match2, p1, p2) {
+          cursor = {
+            name: p1,
+            styles: p2,
+            next: cursor
+          };
+          return p1;
+        });
+      }
+    }
+  }
+  if (unitlessKeys[key] !== 1 && !isCustomProperty(key) && typeof value === "number" && value !== 0) {
+    return value + "px";
+  }
+  return value;
+};
+var noComponentSelectorMessage = "Component selectors can only be used in conjunction with @emotion/babel-plugin, the swc Emotion plugin, or another Emotion-aware compiler transform.";
+function handleInterpolation(mergedProps, registered, interpolation) {
+  if (interpolation == null) {
+    return "";
+  }
+  var componentSelector = interpolation;
+  if (componentSelector.__emotion_styles !== void 0) {
+    return componentSelector;
+  }
+  switch (typeof interpolation) {
+    case "boolean": {
+      return "";
+    }
+    case "object": {
+      var keyframes = interpolation;
+      if (keyframes.anim === 1) {
+        cursor = {
+          name: keyframes.name,
+          styles: keyframes.styles,
+          next: cursor
+        };
+        return keyframes.name;
+      }
+      var serializedStyles = interpolation;
+      if (serializedStyles.styles !== void 0) {
+        var next2 = serializedStyles.next;
+        if (next2 !== void 0) {
+          while (next2 !== void 0) {
+            cursor = {
+              name: next2.name,
+              styles: next2.styles,
+              next: cursor
+            };
+            next2 = next2.next;
+          }
+        }
+        var styles = serializedStyles.styles + ";";
+        return styles;
+      }
+      return createStringFromObject(mergedProps, registered, interpolation);
+    }
+    case "function": {
+      if (mergedProps !== void 0) {
+        var previousCursor = cursor;
+        var result = interpolation(mergedProps);
+        cursor = previousCursor;
+        return handleInterpolation(mergedProps, registered, result);
+      }
+      break;
+    }
+  }
+  var asString = interpolation;
+  if (registered == null) {
+    return asString;
+  }
+  var cached = registered[asString];
+  return cached !== void 0 ? cached : asString;
+}
+function createStringFromObject(mergedProps, registered, obj) {
+  var string = "";
+  if (Array.isArray(obj)) {
+    for (var i = 0; i < obj.length; i++) {
+      string += handleInterpolation(mergedProps, registered, obj[i]) + ";";
+    }
+  } else {
+    for (var key in obj) {
+      var value = obj[key];
+      if (typeof value !== "object") {
+        var asString = value;
+        if (registered != null && registered[asString] !== void 0) {
+          string += key + "{" + registered[asString] + "}";
+        } else if (isProcessableValue(asString)) {
+          string += processStyleName(key) + ":" + processStyleValue(key, asString) + ";";
+        }
+      } else {
+        if (key === "NO_COMPONENT_SELECTOR" && isDevelopment2) {
+          throw new Error(noComponentSelectorMessage);
+        }
+        if (Array.isArray(value) && typeof value[0] === "string" && (registered == null || registered[value[0]] === void 0)) {
+          for (var _i = 0; _i < value.length; _i++) {
+            if (isProcessableValue(value[_i])) {
+              string += processStyleName(key) + ":" + processStyleValue(key, value[_i]) + ";";
+            }
+          }
+        } else {
+          var interpolated = handleInterpolation(mergedProps, registered, value);
+          switch (key) {
+            case "animation":
+            case "animationName": {
+              string += processStyleName(key) + ":" + interpolated + ";";
+              break;
+            }
+            default: {
+              string += key + "{" + interpolated + "}";
+            }
+          }
+        }
+      }
+    }
+  }
+  return string;
+}
+var labelPattern = /label:\s*([^\s;{]+)\s*(;|$)/g;
+var cursor;
+function serializeStyles(args, registered, mergedProps) {
+  if (args.length === 1 && typeof args[0] === "object" && args[0] !== null && args[0].styles !== void 0) {
+    return args[0];
+  }
+  var stringMode = true;
+  var styles = "";
+  cursor = void 0;
+  var strings = args[0];
+  if (strings == null || strings.raw === void 0) {
+    stringMode = false;
+    styles += handleInterpolation(mergedProps, registered, strings);
+  } else {
+    var asTemplateStringsArr = strings;
+    styles += asTemplateStringsArr[0];
+  }
+  for (var i = 1; i < args.length; i++) {
+    styles += handleInterpolation(mergedProps, registered, args[i]);
+    if (stringMode) {
+      var templateStringsArr = strings;
+      styles += templateStringsArr[i];
+    }
+  }
+  labelPattern.lastIndex = 0;
+  var identifierName = "";
+  var match2;
+  while ((match2 = labelPattern.exec(styles)) !== null) {
+    identifierName += "-" + match2[1];
+  }
+  var name = murmur2(styles) + identifierName;
+  return {
+    name,
+    styles,
+    next: cursor
+  };
+}
+
+// node_modules/@emotion/use-insertion-effect-with-fallbacks/dist/emotion-use-insertion-effect-with-fallbacks.browser.esm.js
+var React = __toESM(require_react());
+var syncFallback = function syncFallback2(create) {
+  return create();
+};
+var useInsertionEffect2 = React["useInsertionEffect"] ? React["useInsertionEffect"] : false;
+var useInsertionEffectAlwaysWithSyncFallback = useInsertionEffect2 || syncFallback;
+var useInsertionEffectWithLayoutFallback = useInsertionEffect2 || React.useLayoutEffect;
+
+// node_modules/@emotion/react/dist/emotion-element-f0de968e.browser.esm.js
+var isDevelopment3 = false;
+var EmotionCacheContext = /* @__PURE__ */ React2.createContext(
+  // we're doing this to avoid preconstruct's dead code elimination in this one case
+  // because this module is primarily intended for the browser and node
+  // but it's also required in react native and similar environments sometimes
+  // and we could have a special build just for that
+  // but this is much easier and the native packages
+  // might use a different theme context in the future anyway
+  typeof HTMLElement !== "undefined" ? /* @__PURE__ */ createCache({
+    key: "css"
+  }) : null
+);
+var CacheProvider = EmotionCacheContext.Provider;
+var withEmotionCache = function withEmotionCache2(func) {
+  return /* @__PURE__ */ (0, import_react.forwardRef)(function(props, ref) {
+    var cache = (0, import_react.useContext)(EmotionCacheContext);
+    return func(props, cache, ref);
+  });
+};
+var ThemeContext = /* @__PURE__ */ React2.createContext({});
+var hasOwn = {}.hasOwnProperty;
+var typePropName = "__EMOTION_TYPE_PLEASE_DO_NOT_USE__";
+var createEmotionProps = function createEmotionProps2(type, props) {
+  var newProps = {};
+  for (var _key in props) {
+    if (hasOwn.call(props, _key)) {
+      newProps[_key] = props[_key];
+    }
+  }
+  newProps[typePropName] = type;
+  return newProps;
+};
+var Insertion = function Insertion2(_ref) {
+  var cache = _ref.cache, serialized = _ref.serialized, isStringTag = _ref.isStringTag;
+  registerStyles(cache, serialized, isStringTag);
+  useInsertionEffectAlwaysWithSyncFallback(function() {
+    return insertStyles(cache, serialized, isStringTag);
+  });
+  return null;
+};
+var Emotion = /* @__PURE__ */ withEmotionCache(function(props, cache, ref) {
+  var cssProp = props.css;
+  if (typeof cssProp === "string" && cache.registered[cssProp] !== void 0) {
+    cssProp = cache.registered[cssProp];
+  }
+  var WrappedComponent = props[typePropName];
+  var registeredStyles = [cssProp];
+  var className = "";
+  if (typeof props.className === "string") {
+    className = getRegisteredStyles(cache.registered, registeredStyles, props.className);
+  } else if (props.className != null) {
+    className = props.className + " ";
+  }
+  var serialized = serializeStyles(registeredStyles, void 0, React2.useContext(ThemeContext));
+  className += cache.key + "-" + serialized.name;
+  var newProps = {};
+  for (var _key2 in props) {
+    if (hasOwn.call(props, _key2) && _key2 !== "css" && _key2 !== typePropName && !isDevelopment3) {
+      newProps[_key2] = props[_key2];
+    }
+  }
+  newProps.className = className;
+  if (ref) {
+    newProps.ref = ref;
+  }
+  return /* @__PURE__ */ React2.createElement(React2.Fragment, null, /* @__PURE__ */ React2.createElement(Insertion, {
+    cache,
+    serialized,
+    isStringTag: typeof WrappedComponent === "string"
+  }), /* @__PURE__ */ React2.createElement(WrappedComponent, newProps));
+});
+var Emotion$1 = Emotion;
+
+// node_modules/@emotion/react/dist/emotion-react.browser.esm.js
+var React3 = __toESM(require_react());
+var import_hoist_non_react_statics = __toESM(require_hoist_non_react_statics_cjs());
+var jsx = function jsx2(type, props) {
+  var args = arguments;
+  if (props == null || !hasOwn.call(props, "css")) {
+    return React3.createElement.apply(void 0, args);
+  }
+  var argsLength = args.length;
+  var createElementArgArray = new Array(argsLength);
+  createElementArgArray[0] = Emotion$1;
+  createElementArgArray[1] = createEmotionProps(type, props);
+  for (var i = 2; i < argsLength; i++) {
+    createElementArgArray[i] = args[i];
+  }
+  return React3.createElement.apply(null, createElementArgArray);
+};
+(function(_jsx) {
+  var JSX;
+  /* @__PURE__ */ (function(_JSX) {
+  })(JSX || (JSX = _jsx.JSX || (_jsx.JSX = {})));
+})(jsx || (jsx = {}));
+var Global = /* @__PURE__ */ withEmotionCache(function(props, cache) {
+  var styles = props.styles;
+  var serialized = serializeStyles([styles], void 0, React3.useContext(ThemeContext));
+  var sheetRef = React3.useRef();
+  useInsertionEffectWithLayoutFallback(function() {
+    var key = cache.key + "-global";
+    var sheet = new cache.sheet.constructor({
+      key,
+      nonce: cache.sheet.nonce,
+      container: cache.sheet.container,
+      speedy: cache.sheet.isSpeedy
+    });
+    var rehydrating = false;
+    var node6 = document.querySelector('style[data-emotion="' + key + " " + serialized.name + '"]');
+    if (cache.sheet.tags.length) {
+      sheet.before = cache.sheet.tags[0];
+    }
+    if (node6 !== null) {
+      rehydrating = true;
+      node6.setAttribute("data-emotion", key);
+      sheet.hydrate([node6]);
+    }
+    sheetRef.current = [sheet, rehydrating];
+    return function() {
+      sheet.flush();
+    };
+  }, [cache]);
+  useInsertionEffectWithLayoutFallback(function() {
+    var sheetRefCurrent = sheetRef.current;
+    var sheet = sheetRefCurrent[0], rehydrating = sheetRefCurrent[1];
+    if (rehydrating) {
+      sheetRefCurrent[1] = false;
+      return;
+    }
+    if (serialized.next !== void 0) {
+      insertStyles(cache, serialized.next, true);
+    }
+    if (sheet.tags.length) {
+      var element = sheet.tags[sheet.tags.length - 1].nextElementSibling;
+      sheet.before = element;
+      sheet.flush();
+    }
+    cache.insert("", serialized, sheet, false);
+  }, [cache, serialized.name]);
+  return null;
+});
+function css() {
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+  return serializeStyles(args);
+}
+
+// src/web/client/index.tsx
+var import_react11 = __toESM(require_react(), 1);
+var import_client = __toESM(require_client(), 1);
+var import_react_relay4 = __toESM(require_react_relay(), 1);
+
+// node_modules/react-router-dom/dist/index.js
+var React5 = __toESM(require_react());
+var ReactDOM = __toESM(require_react_dom());
+
+// node_modules/react-router/dist/index.js
+var React4 = __toESM(require_react());
+
+// node_modules/@remix-run/router/dist/router.js
+function _extends2() {
+  _extends2 = Object.assign ? Object.assign.bind() : function(target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends2.apply(this, arguments);
+}
+var Action;
+(function(Action2) {
+  Action2["Pop"] = "POP";
+  Action2["Push"] = "PUSH";
+  Action2["Replace"] = "REPLACE";
+})(Action || (Action = {}));
+var PopStateEventType = "popstate";
+function createBrowserHistory(options) {
+  if (options === void 0) {
+    options = {};
+  }
+  function createBrowserLocation(window2, globalHistory) {
+    let {
+      pathname,
+      search,
+      hash: hash2
+    } = window2.location;
+    return createLocation(
+      "",
+      {
+        pathname,
+        search,
+        hash: hash2
+      },
+      // state defaults to `null` because `window.history.state` does
+      globalHistory.state && globalHistory.state.usr || null,
+      globalHistory.state && globalHistory.state.key || "default"
+    );
+  }
+  function createBrowserHref(window2, to) {
+    return typeof to === "string" ? to : createPath(to);
+  }
+  return getUrlBasedHistory(createBrowserLocation, createBrowserHref, null, options);
+}
+function invariant(value, message) {
+  if (value === false || value === null || typeof value === "undefined") {
+    throw new Error(message);
+  }
+}
+function warning(cond, message) {
+  if (!cond) {
+    if (typeof console !== "undefined") console.warn(message);
+    try {
+      throw new Error(message);
+    } catch (e) {
+    }
+  }
+}
+function createKey() {
+  return Math.random().toString(36).substr(2, 8);
+}
+function getHistoryState(location, index) {
+  return {
+    usr: location.state,
+    key: location.key,
+    idx: index
+  };
+}
+function createLocation(current, to, state, key) {
+  if (state === void 0) {
+    state = null;
+  }
+  let location = _extends2({
+    pathname: typeof current === "string" ? current : current.pathname,
+    search: "",
+    hash: ""
+  }, typeof to === "string" ? parsePath(to) : to, {
+    state,
+    // TODO: This could be cleaned up.  push/replace should probably just take
+    // full Locations now and avoid the need to run through this flow at all
+    // But that's a pretty big refactor to the current test suite so going to
+    // keep as is for the time being and just let any incoming keys take precedence
+    key: to && to.key || key || createKey()
+  });
+  return location;
+}
+function createPath(_ref) {
+  let {
+    pathname = "/",
+    search = "",
+    hash: hash2 = ""
+  } = _ref;
+  if (search && search !== "?") pathname += search.charAt(0) === "?" ? search : "?" + search;
+  if (hash2 && hash2 !== "#") pathname += hash2.charAt(0) === "#" ? hash2 : "#" + hash2;
+  return pathname;
+}
+function parsePath(path) {
+  let parsedPath = {};
+  if (path) {
+    let hashIndex = path.indexOf("#");
+    if (hashIndex >= 0) {
+      parsedPath.hash = path.substr(hashIndex);
+      path = path.substr(0, hashIndex);
+    }
+    let searchIndex = path.indexOf("?");
+    if (searchIndex >= 0) {
+      parsedPath.search = path.substr(searchIndex);
+      path = path.substr(0, searchIndex);
+    }
+    if (path) {
+      parsedPath.pathname = path;
+    }
+  }
+  return parsedPath;
+}
+function getUrlBasedHistory(getLocation, createHref, validateLocation, options) {
+  if (options === void 0) {
+    options = {};
+  }
+  let {
+    window: window2 = document.defaultView,
+    v5Compat = false
+  } = options;
+  let globalHistory = window2.history;
+  let action = Action.Pop;
+  let listener = null;
+  let index = getIndex();
+  if (index == null) {
+    index = 0;
+    globalHistory.replaceState(_extends2({}, globalHistory.state, {
+      idx: index
+    }), "");
+  }
+  function getIndex() {
+    let state = globalHistory.state || {
+      idx: null
+    };
+    return state.idx;
+  }
+  function handlePop() {
+    action = Action.Pop;
+    let nextIndex = getIndex();
+    let delta = nextIndex == null ? null : nextIndex - index;
+    index = nextIndex;
+    if (listener) {
+      listener({
+        action,
+        location: history.location,
+        delta
+      });
+    }
+  }
+  function push(to, state) {
+    action = Action.Push;
+    let location = createLocation(history.location, to, state);
+    if (validateLocation) validateLocation(location, to);
+    index = getIndex() + 1;
+    let historyState = getHistoryState(location, index);
+    let url = history.createHref(location);
+    try {
+      globalHistory.pushState(historyState, "", url);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "DataCloneError") {
+        throw error;
+      }
+      window2.location.assign(url);
+    }
+    if (v5Compat && listener) {
+      listener({
+        action,
+        location: history.location,
+        delta: 1
+      });
+    }
+  }
+  function replace3(to, state) {
+    action = Action.Replace;
+    let location = createLocation(history.location, to, state);
+    if (validateLocation) validateLocation(location, to);
+    index = getIndex();
+    let historyState = getHistoryState(location, index);
+    let url = history.createHref(location);
+    globalHistory.replaceState(historyState, "", url);
+    if (v5Compat && listener) {
+      listener({
+        action,
+        location: history.location,
+        delta: 0
+      });
+    }
+  }
+  function createURL(to) {
+    let base = window2.location.origin !== "null" ? window2.location.origin : window2.location.href;
+    let href = typeof to === "string" ? to : createPath(to);
+    href = href.replace(/ $/, "%20");
+    invariant(base, "No window.location.(origin|href) available to create URL for href: " + href);
+    return new URL(href, base);
+  }
+  let history = {
+    get action() {
+      return action;
+    },
+    get location() {
+      return getLocation(window2, globalHistory);
+    },
+    listen(fn) {
+      if (listener) {
+        throw new Error("A history only accepts one active listener");
+      }
+      window2.addEventListener(PopStateEventType, handlePop);
+      listener = fn;
+      return () => {
+        window2.removeEventListener(PopStateEventType, handlePop);
+        listener = null;
+      };
+    },
+    createHref(to) {
+      return createHref(window2, to);
+    },
+    createURL,
+    encodeLocation(to) {
+      let url = createURL(to);
+      return {
+        pathname: url.pathname,
+        search: url.search,
+        hash: url.hash
+      };
+    },
+    push,
+    replace: replace3,
+    go(n) {
+      return globalHistory.go(n);
+    }
+  };
+  return history;
+}
+var ResultType;
+(function(ResultType2) {
+  ResultType2["data"] = "data";
+  ResultType2["deferred"] = "deferred";
+  ResultType2["redirect"] = "redirect";
+  ResultType2["error"] = "error";
+})(ResultType || (ResultType = {}));
+var immutableRouteKeys = /* @__PURE__ */ new Set(["lazy", "caseSensitive", "path", "id", "index", "children"]);
+function isIndexRoute(route) {
+  return route.index === true;
+}
+function convertRoutesToDataRoutes(routes, mapRouteProperties2, parentPath, manifest) {
+  if (parentPath === void 0) {
+    parentPath = [];
+  }
+  if (manifest === void 0) {
+    manifest = {};
+  }
+  return routes.map((route, index) => {
+    let treePath = [...parentPath, String(index)];
+    let id = typeof route.id === "string" ? route.id : treePath.join("-");
+    invariant(route.index !== true || !route.children, "Cannot specify children on an index route");
+    invariant(!manifest[id], 'Found a route id collision on id "' + id + `".  Route id's must be globally unique within Data Router usages`);
+    if (isIndexRoute(route)) {
+      let indexRoute = _extends2({}, route, mapRouteProperties2(route), {
+        id
+      });
+      manifest[id] = indexRoute;
+      return indexRoute;
+    } else {
+      let pathOrLayoutRoute = _extends2({}, route, mapRouteProperties2(route), {
+        id,
+        children: void 0
+      });
+      manifest[id] = pathOrLayoutRoute;
+      if (route.children) {
+        pathOrLayoutRoute.children = convertRoutesToDataRoutes(route.children, mapRouteProperties2, treePath, manifest);
+      }
+      return pathOrLayoutRoute;
+    }
+  });
+}
+function matchRoutes(routes, locationArg, basename) {
+  if (basename === void 0) {
+    basename = "/";
+  }
+  return matchRoutesImpl(routes, locationArg, basename, false);
+}
+function matchRoutesImpl(routes, locationArg, basename, allowPartial) {
+  let location = typeof locationArg === "string" ? parsePath(locationArg) : locationArg;
+  let pathname = stripBasename(location.pathname || "/", basename);
+  if (pathname == null) {
+    return null;
+  }
+  let branches = flattenRoutes(routes);
+  rankRouteBranches(branches);
+  let matches = null;
+  for (let i = 0; matches == null && i < branches.length; ++i) {
+    let decoded = decodePath(pathname);
+    matches = matchRouteBranch(branches[i], decoded, allowPartial);
+  }
+  return matches;
+}
+function convertRouteMatchToUiMatch(match2, loaderData) {
+  let {
+    route,
+    pathname,
+    params
+  } = match2;
+  return {
+    id: route.id,
+    pathname,
+    params,
+    data: loaderData[route.id],
+    handle: route.handle
+  };
+}
+function flattenRoutes(routes, branches, parentsMeta, parentPath) {
+  if (branches === void 0) {
+    branches = [];
+  }
+  if (parentsMeta === void 0) {
+    parentsMeta = [];
+  }
+  if (parentPath === void 0) {
+    parentPath = "";
+  }
+  let flattenRoute = (route, index, relativePath) => {
+    let meta = {
+      relativePath: relativePath === void 0 ? route.path || "" : relativePath,
+      caseSensitive: route.caseSensitive === true,
+      childrenIndex: index,
+      route
+    };
+    if (meta.relativePath.startsWith("/")) {
+      invariant(meta.relativePath.startsWith(parentPath), 'Absolute route path "' + meta.relativePath + '" nested under path ' + ('"' + parentPath + '" is not valid. An absolute child route path ') + "must start with the combined path of all its parent routes.");
+      meta.relativePath = meta.relativePath.slice(parentPath.length);
+    }
+    let path = joinPaths([parentPath, meta.relativePath]);
+    let routesMeta = parentsMeta.concat(meta);
+    if (route.children && route.children.length > 0) {
+      invariant(
+        // Our types know better, but runtime JS may not!
+        // @ts-expect-error
+        route.index !== true,
+        "Index routes must not have child routes. Please remove " + ('all child routes from route path "' + path + '".')
+      );
+      flattenRoutes(route.children, branches, routesMeta, path);
+    }
+    if (route.path == null && !route.index) {
+      return;
+    }
+    branches.push({
+      path,
+      score: computeScore(path, route.index),
+      routesMeta
+    });
+  };
+  routes.forEach((route, index) => {
+    var _route$path;
+    if (route.path === "" || !((_route$path = route.path) != null && _route$path.includes("?"))) {
+      flattenRoute(route, index);
+    } else {
+      for (let exploded of explodeOptionalSegments(route.path)) {
+        flattenRoute(route, index, exploded);
+      }
+    }
+  });
+  return branches;
+}
+function explodeOptionalSegments(path) {
+  let segments = path.split("/");
+  if (segments.length === 0) return [];
+  let [first, ...rest] = segments;
+  let isOptional = first.endsWith("?");
+  let required = first.replace(/\?$/, "");
+  if (rest.length === 0) {
+    return isOptional ? [required, ""] : [required];
+  }
+  let restExploded = explodeOptionalSegments(rest.join("/"));
+  let result = [];
+  result.push(...restExploded.map((subpath) => subpath === "" ? required : [required, subpath].join("/")));
+  if (isOptional) {
+    result.push(...restExploded);
+  }
+  return result.map((exploded) => path.startsWith("/") && exploded === "" ? "/" : exploded);
+}
+function rankRouteBranches(branches) {
+  branches.sort((a, b) => a.score !== b.score ? b.score - a.score : compareIndexes(a.routesMeta.map((meta) => meta.childrenIndex), b.routesMeta.map((meta) => meta.childrenIndex)));
+}
+var paramRe = /^:[\w-]+$/;
+var dynamicSegmentValue = 3;
+var indexRouteValue = 2;
+var emptySegmentValue = 1;
+var staticSegmentValue = 10;
+var splatPenalty = -2;
+var isSplat = (s) => s === "*";
+function computeScore(path, index) {
+  let segments = path.split("/");
+  let initialScore = segments.length;
+  if (segments.some(isSplat)) {
+    initialScore += splatPenalty;
+  }
+  if (index) {
+    initialScore += indexRouteValue;
+  }
+  return segments.filter((s) => !isSplat(s)).reduce((score, segment) => score + (paramRe.test(segment) ? dynamicSegmentValue : segment === "" ? emptySegmentValue : staticSegmentValue), initialScore);
+}
+function compareIndexes(a, b) {
+  let siblings = a.length === b.length && a.slice(0, -1).every((n, i) => n === b[i]);
+  return siblings ? (
+    // If two routes are siblings, we should try to match the earlier sibling
+    // first. This allows people to have fine-grained control over the matching
+    // behavior by simply putting routes with identical paths in the order they
+    // want them tried.
+    a[a.length - 1] - b[b.length - 1]
+  ) : (
+    // Otherwise, it doesn't really make sense to rank non-siblings by index,
+    // so they sort equally.
+    0
+  );
+}
+function matchRouteBranch(branch, pathname, allowPartial) {
+  if (allowPartial === void 0) {
+    allowPartial = false;
+  }
+  let {
+    routesMeta
+  } = branch;
+  let matchedParams = {};
+  let matchedPathname = "/";
+  let matches = [];
+  for (let i = 0; i < routesMeta.length; ++i) {
+    let meta = routesMeta[i];
+    let end = i === routesMeta.length - 1;
+    let remainingPathname = matchedPathname === "/" ? pathname : pathname.slice(matchedPathname.length) || "/";
+    let match2 = matchPath({
+      path: meta.relativePath,
+      caseSensitive: meta.caseSensitive,
+      end
+    }, remainingPathname);
+    let route = meta.route;
+    if (!match2 && end && allowPartial && !routesMeta[routesMeta.length - 1].route.index) {
+      match2 = matchPath({
+        path: meta.relativePath,
+        caseSensitive: meta.caseSensitive,
+        end: false
+      }, remainingPathname);
+    }
+    if (!match2) {
+      return null;
+    }
+    Object.assign(matchedParams, match2.params);
+    matches.push({
+      // TODO: Can this as be avoided?
+      params: matchedParams,
+      pathname: joinPaths([matchedPathname, match2.pathname]),
+      pathnameBase: normalizePathname(joinPaths([matchedPathname, match2.pathnameBase])),
+      route
+    });
+    if (match2.pathnameBase !== "/") {
+      matchedPathname = joinPaths([matchedPathname, match2.pathnameBase]);
+    }
+  }
+  return matches;
+}
+function matchPath(pattern, pathname) {
+  if (typeof pattern === "string") {
+    pattern = {
+      path: pattern,
+      caseSensitive: false,
+      end: true
+    };
+  }
+  let [matcher, compiledParams] = compilePath(pattern.path, pattern.caseSensitive, pattern.end);
+  let match2 = pathname.match(matcher);
+  if (!match2) return null;
+  let matchedPathname = match2[0];
+  let pathnameBase = matchedPathname.replace(/(.)\/+$/, "$1");
+  let captureGroups = match2.slice(1);
+  let params = compiledParams.reduce((memo2, _ref, index) => {
+    let {
+      paramName,
+      isOptional
+    } = _ref;
+    if (paramName === "*") {
+      let splatValue = captureGroups[index] || "";
+      pathnameBase = matchedPathname.slice(0, matchedPathname.length - splatValue.length).replace(/(.)\/+$/, "$1");
+    }
+    const value = captureGroups[index];
+    if (isOptional && !value) {
+      memo2[paramName] = void 0;
+    } else {
+      memo2[paramName] = (value || "").replace(/%2F/g, "/");
+    }
+    return memo2;
+  }, {});
+  return {
+    params,
+    pathname: matchedPathname,
+    pathnameBase,
+    pattern
+  };
+}
+function compilePath(path, caseSensitive, end) {
+  if (caseSensitive === void 0) {
+    caseSensitive = false;
+  }
+  if (end === void 0) {
+    end = true;
+  }
+  warning(path === "*" || !path.endsWith("*") || path.endsWith("/*"), 'Route path "' + path + '" will be treated as if it were ' + ('"' + path.replace(/\*$/, "/*") + '" because the `*` character must ') + "always follow a `/` in the pattern. To get rid of this warning, " + ('please change the route path to "' + path.replace(/\*$/, "/*") + '".'));
+  let params = [];
+  let regexpSource = "^" + path.replace(/\/*\*?$/, "").replace(/^\/*/, "/").replace(/[\\.*+^${}|()[\]]/g, "\\$&").replace(/\/:([\w-]+)(\?)?/g, (_, paramName, isOptional) => {
+    params.push({
+      paramName,
+      isOptional: isOptional != null
+    });
+    return isOptional ? "/?([^\\/]+)?" : "/([^\\/]+)";
+  });
+  if (path.endsWith("*")) {
+    params.push({
+      paramName: "*"
+    });
+    regexpSource += path === "*" || path === "/*" ? "(.*)$" : "(?:\\/(.+)|\\/*)$";
+  } else if (end) {
+    regexpSource += "\\/*$";
+  } else if (path !== "" && path !== "/") {
+    regexpSource += "(?:(?=\\/|$))";
+  } else ;
+  let matcher = new RegExp(regexpSource, caseSensitive ? void 0 : "i");
+  return [matcher, params];
+}
+function decodePath(value) {
+  try {
+    return value.split("/").map((v) => decodeURIComponent(v).replace(/\//g, "%2F")).join("/");
+  } catch (error) {
+    warning(false, 'The URL path "' + value + '" could not be decoded because it is is a malformed URL segment. This is probably due to a bad percent ' + ("encoding (" + error + ")."));
+    return value;
+  }
+}
+function stripBasename(pathname, basename) {
+  if (basename === "/") return pathname;
+  if (!pathname.toLowerCase().startsWith(basename.toLowerCase())) {
+    return null;
+  }
+  let startIndex = basename.endsWith("/") ? basename.length - 1 : basename.length;
+  let nextChar = pathname.charAt(startIndex);
+  if (nextChar && nextChar !== "/") {
+    return null;
+  }
+  return pathname.slice(startIndex) || "/";
+}
+var ABSOLUTE_URL_REGEX$1 = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i;
+var isAbsoluteUrl = (url) => ABSOLUTE_URL_REGEX$1.test(url);
+function resolvePath(to, fromPathname) {
+  if (fromPathname === void 0) {
+    fromPathname = "/";
+  }
+  let {
+    pathname: toPathname,
+    search = "",
+    hash: hash2 = ""
+  } = typeof to === "string" ? parsePath(to) : to;
+  let pathname;
+  if (toPathname) {
+    if (isAbsoluteUrl(toPathname)) {
+      pathname = toPathname;
+    } else {
+      if (toPathname.includes("//")) {
+        let oldPathname = toPathname;
+        toPathname = toPathname.replace(/\/\/+/g, "/");
+        warning(false, "Pathnames cannot have embedded double slashes - normalizing " + (oldPathname + " -> " + toPathname));
+      }
+      if (toPathname.startsWith("/")) {
+        pathname = resolvePathname(toPathname.substring(1), "/");
+      } else {
+        pathname = resolvePathname(toPathname, fromPathname);
+      }
+    }
+  } else {
+    pathname = fromPathname;
+  }
+  return {
+    pathname,
+    search: normalizeSearch(search),
+    hash: normalizeHash(hash2)
+  };
+}
+function resolvePathname(relativePath, fromPathname) {
+  let segments = fromPathname.replace(/\/+$/, "").split("/");
+  let relativeSegments = relativePath.split("/");
+  relativeSegments.forEach((segment) => {
+    if (segment === "..") {
+      if (segments.length > 1) segments.pop();
+    } else if (segment !== ".") {
+      segments.push(segment);
+    }
+  });
+  return segments.length > 1 ? segments.join("/") : "/";
+}
+function getInvalidPathError(char2, field, dest, path) {
+  return "Cannot include a '" + char2 + "' character in a manually specified " + ("`to." + field + "` field [" + JSON.stringify(path) + "].  Please separate it out to the ") + ("`to." + dest + "` field. Alternatively you may provide the full path as ") + 'a string in <Link to="..."> and the router will parse it for you.';
+}
+function getPathContributingMatches(matches) {
+  return matches.filter((match2, index) => index === 0 || match2.route.path && match2.route.path.length > 0);
+}
+function getResolveToMatches(matches, v7_relativeSplatPath) {
+  let pathMatches = getPathContributingMatches(matches);
+  if (v7_relativeSplatPath) {
+    return pathMatches.map((match2, idx) => idx === pathMatches.length - 1 ? match2.pathname : match2.pathnameBase);
+  }
+  return pathMatches.map((match2) => match2.pathnameBase);
+}
+function resolveTo(toArg, routePathnames, locationPathname, isPathRelative) {
+  if (isPathRelative === void 0) {
+    isPathRelative = false;
+  }
+  let to;
+  if (typeof toArg === "string") {
+    to = parsePath(toArg);
+  } else {
+    to = _extends2({}, toArg);
+    invariant(!to.pathname || !to.pathname.includes("?"), getInvalidPathError("?", "pathname", "search", to));
+    invariant(!to.pathname || !to.pathname.includes("#"), getInvalidPathError("#", "pathname", "hash", to));
+    invariant(!to.search || !to.search.includes("#"), getInvalidPathError("#", "search", "hash", to));
+  }
+  let isEmptyPath = toArg === "" || to.pathname === "";
+  let toPathname = isEmptyPath ? "/" : to.pathname;
+  let from2;
+  if (toPathname == null) {
+    from2 = locationPathname;
+  } else {
+    let routePathnameIndex = routePathnames.length - 1;
+    if (!isPathRelative && toPathname.startsWith("..")) {
+      let toSegments = toPathname.split("/");
+      while (toSegments[0] === "..") {
+        toSegments.shift();
+        routePathnameIndex -= 1;
+      }
+      to.pathname = toSegments.join("/");
+    }
+    from2 = routePathnameIndex >= 0 ? routePathnames[routePathnameIndex] : "/";
+  }
+  let path = resolvePath(to, from2);
+  let hasExplicitTrailingSlash = toPathname && toPathname !== "/" && toPathname.endsWith("/");
+  let hasCurrentTrailingSlash = (isEmptyPath || toPathname === ".") && locationPathname.endsWith("/");
+  if (!path.pathname.endsWith("/") && (hasExplicitTrailingSlash || hasCurrentTrailingSlash)) {
+    path.pathname += "/";
+  }
+  return path;
+}
+var joinPaths = (paths) => paths.join("/").replace(/\/\/+/g, "/");
+var normalizePathname = (pathname) => pathname.replace(/\/+$/, "").replace(/^\/*/, "/");
+var normalizeSearch = (search) => !search || search === "?" ? "" : search.startsWith("?") ? search : "?" + search;
+var normalizeHash = (hash2) => !hash2 || hash2 === "#" ? "" : hash2.startsWith("#") ? hash2 : "#" + hash2;
+var ErrorResponseImpl = class {
+  constructor(status, statusText, data, internal) {
+    if (internal === void 0) {
+      internal = false;
+    }
+    this.status = status;
+    this.statusText = statusText || "";
+    this.internal = internal;
+    if (data instanceof Error) {
+      this.data = data.toString();
+      this.error = data;
+    } else {
+      this.data = data;
+    }
+  }
+};
+function isRouteErrorResponse(error) {
+  return error != null && typeof error.status === "number" && typeof error.statusText === "string" && typeof error.internal === "boolean" && "data" in error;
+}
+var validMutationMethodsArr = ["post", "put", "patch", "delete"];
+var validMutationMethods = new Set(validMutationMethodsArr);
+var validRequestMethodsArr = ["get", ...validMutationMethodsArr];
+var validRequestMethods = new Set(validRequestMethodsArr);
+var redirectStatusCodes = /* @__PURE__ */ new Set([301, 302, 303, 307, 308]);
+var redirectPreserveMethodStatusCodes = /* @__PURE__ */ new Set([307, 308]);
+var IDLE_NAVIGATION = {
+  state: "idle",
+  location: void 0,
+  formMethod: void 0,
+  formAction: void 0,
+  formEncType: void 0,
+  formData: void 0,
+  json: void 0,
+  text: void 0
+};
+var IDLE_FETCHER = {
+  state: "idle",
+  data: void 0,
+  formMethod: void 0,
+  formAction: void 0,
+  formEncType: void 0,
+  formData: void 0,
+  json: void 0,
+  text: void 0
+};
+var IDLE_BLOCKER = {
+  state: "unblocked",
+  proceed: void 0,
+  reset: void 0,
+  location: void 0
+};
+var ABSOLUTE_URL_REGEX = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i;
+var defaultMapRouteProperties = (route) => ({
+  hasErrorBoundary: Boolean(route.hasErrorBoundary)
+});
+var TRANSITIONS_STORAGE_KEY = "remix-router-transitions";
+function createRouter(init) {
+  const routerWindow = init.window ? init.window : typeof window !== "undefined" ? window : void 0;
+  const isBrowser3 = typeof routerWindow !== "undefined" && typeof routerWindow.document !== "undefined" && typeof routerWindow.document.createElement !== "undefined";
+  const isServer = !isBrowser3;
+  invariant(init.routes.length > 0, "You must provide a non-empty routes array to createRouter");
+  let mapRouteProperties2;
+  if (init.mapRouteProperties) {
+    mapRouteProperties2 = init.mapRouteProperties;
+  } else if (init.detectErrorBoundary) {
+    let detectErrorBoundary = init.detectErrorBoundary;
+    mapRouteProperties2 = (route) => ({
+      hasErrorBoundary: detectErrorBoundary(route)
+    });
+  } else {
+    mapRouteProperties2 = defaultMapRouteProperties;
+  }
+  let manifest = {};
+  let dataRoutes = convertRoutesToDataRoutes(init.routes, mapRouteProperties2, void 0, manifest);
+  let inFlightDataRoutes;
+  let basename = init.basename || "/";
+  let dataStrategyImpl = init.dataStrategy || defaultDataStrategy;
+  let patchRoutesOnNavigationImpl = init.patchRoutesOnNavigation;
+  let future = _extends2({
+    v7_fetcherPersist: false,
+    v7_normalizeFormMethod: false,
+    v7_partialHydration: false,
+    v7_prependBasename: false,
+    v7_relativeSplatPath: false,
+    v7_skipActionErrorRevalidation: false
+  }, init.future);
+  let unlistenHistory = null;
+  let subscribers = /* @__PURE__ */ new Set();
+  let savedScrollPositions2 = null;
+  let getScrollRestorationKey = null;
+  let getScrollPosition = null;
+  let initialScrollRestored = init.hydrationData != null;
+  let initialMatches = matchRoutes(dataRoutes, init.history.location, basename);
+  let initialMatchesIsFOW = false;
+  let initialErrors = null;
+  if (initialMatches == null && !patchRoutesOnNavigationImpl) {
+    let error = getInternalRouterError(404, {
+      pathname: init.history.location.pathname
+    });
+    let {
+      matches,
+      route
+    } = getShortCircuitMatches(dataRoutes);
+    initialMatches = matches;
+    initialErrors = {
+      [route.id]: error
+    };
+  }
+  if (initialMatches && !init.hydrationData) {
+    let fogOfWar = checkFogOfWar(initialMatches, dataRoutes, init.history.location.pathname);
+    if (fogOfWar.active) {
+      initialMatches = null;
+    }
+  }
+  let initialized;
+  if (!initialMatches) {
+    initialized = false;
+    initialMatches = [];
+    if (future.v7_partialHydration) {
+      let fogOfWar = checkFogOfWar(null, dataRoutes, init.history.location.pathname);
+      if (fogOfWar.active && fogOfWar.matches) {
+        initialMatchesIsFOW = true;
+        initialMatches = fogOfWar.matches;
+      }
+    }
+  } else if (initialMatches.some((m) => m.route.lazy)) {
+    initialized = false;
+  } else if (!initialMatches.some((m) => m.route.loader)) {
+    initialized = true;
+  } else if (future.v7_partialHydration) {
+    let loaderData = init.hydrationData ? init.hydrationData.loaderData : null;
+    let errors = init.hydrationData ? init.hydrationData.errors : null;
+    if (errors) {
+      let idx = initialMatches.findIndex((m) => errors[m.route.id] !== void 0);
+      initialized = initialMatches.slice(0, idx + 1).every((m) => !shouldLoadRouteOnHydration(m.route, loaderData, errors));
+    } else {
+      initialized = initialMatches.every((m) => !shouldLoadRouteOnHydration(m.route, loaderData, errors));
+    }
+  } else {
+    initialized = init.hydrationData != null;
+  }
+  let router2;
+  let state = {
+    historyAction: init.history.action,
+    location: init.history.location,
+    matches: initialMatches,
+    initialized,
+    navigation: IDLE_NAVIGATION,
+    // Don't restore on initial updateState() if we were SSR'd
+    restoreScrollPosition: init.hydrationData != null ? false : null,
+    preventScrollReset: false,
+    revalidation: "idle",
+    loaderData: init.hydrationData && init.hydrationData.loaderData || {},
+    actionData: init.hydrationData && init.hydrationData.actionData || null,
+    errors: init.hydrationData && init.hydrationData.errors || initialErrors,
+    fetchers: /* @__PURE__ */ new Map(),
+    blockers: /* @__PURE__ */ new Map()
+  };
+  let pendingAction = Action.Pop;
+  let pendingPreventScrollReset = false;
+  let pendingNavigationController;
+  let pendingViewTransitionEnabled = false;
+  let appliedViewTransitions = /* @__PURE__ */ new Map();
+  let removePageHideEventListener = null;
+  let isUninterruptedRevalidation = false;
+  let isRevalidationRequired = false;
+  let cancelledDeferredRoutes = [];
+  let cancelledFetcherLoads = /* @__PURE__ */ new Set();
+  let fetchControllers = /* @__PURE__ */ new Map();
+  let incrementingLoadId = 0;
+  let pendingNavigationLoadId = -1;
+  let fetchReloadIds = /* @__PURE__ */ new Map();
+  let fetchRedirectIds = /* @__PURE__ */ new Set();
+  let fetchLoadMatches = /* @__PURE__ */ new Map();
+  let activeFetchers = /* @__PURE__ */ new Map();
+  let deletedFetchers = /* @__PURE__ */ new Set();
+  let activeDeferreds = /* @__PURE__ */ new Map();
+  let blockerFunctions = /* @__PURE__ */ new Map();
+  let unblockBlockerHistoryUpdate = void 0;
+  function initialize() {
+    unlistenHistory = init.history.listen((_ref) => {
+      let {
+        action: historyAction,
+        location,
+        delta
+      } = _ref;
+      if (unblockBlockerHistoryUpdate) {
+        unblockBlockerHistoryUpdate();
+        unblockBlockerHistoryUpdate = void 0;
+        return;
+      }
+      warning(blockerFunctions.size === 0 || delta != null, "You are trying to use a blocker on a POP navigation to a location that was not created by @remix-run/router. This will fail silently in production. This can happen if you are navigating outside the router via `window.history.pushState`/`window.location.hash` instead of using router navigation APIs.  This can also happen if you are using createHashRouter and the user manually changes the URL.");
+      let blockerKey = shouldBlockNavigation({
+        currentLocation: state.location,
+        nextLocation: location,
+        historyAction
+      });
+      if (blockerKey && delta != null) {
+        let nextHistoryUpdatePromise = new Promise((resolve) => {
+          unblockBlockerHistoryUpdate = resolve;
+        });
+        init.history.go(delta * -1);
+        updateBlocker(blockerKey, {
+          state: "blocked",
+          location,
+          proceed() {
+            updateBlocker(blockerKey, {
+              state: "proceeding",
+              proceed: void 0,
+              reset: void 0,
+              location
+            });
+            nextHistoryUpdatePromise.then(() => init.history.go(delta));
+          },
+          reset() {
+            let blockers = new Map(state.blockers);
+            blockers.set(blockerKey, IDLE_BLOCKER);
+            updateState({
+              blockers
+            });
+          }
+        });
+        return;
+      }
+      return startNavigation(historyAction, location);
+    });
+    if (isBrowser3) {
+      restoreAppliedTransitions(routerWindow, appliedViewTransitions);
+      let _saveAppliedTransitions = () => persistAppliedTransitions(routerWindow, appliedViewTransitions);
+      routerWindow.addEventListener("pagehide", _saveAppliedTransitions);
+      removePageHideEventListener = () => routerWindow.removeEventListener("pagehide", _saveAppliedTransitions);
+    }
+    if (!state.initialized) {
+      startNavigation(Action.Pop, state.location, {
+        initialHydration: true
+      });
+    }
+    return router2;
+  }
+  function dispose() {
+    if (unlistenHistory) {
+      unlistenHistory();
+    }
+    if (removePageHideEventListener) {
+      removePageHideEventListener();
+    }
+    subscribers.clear();
+    pendingNavigationController && pendingNavigationController.abort();
+    state.fetchers.forEach((_, key) => deleteFetcher(key));
+    state.blockers.forEach((_, key) => deleteBlocker(key));
+  }
+  function subscribe(fn) {
+    subscribers.add(fn);
+    return () => subscribers.delete(fn);
+  }
+  function updateState(newState, opts) {
+    if (opts === void 0) {
+      opts = {};
+    }
+    state = _extends2({}, state, newState);
+    let completedFetchers = [];
+    let deletedFetchersKeys = [];
+    if (future.v7_fetcherPersist) {
+      state.fetchers.forEach((fetcher, key) => {
+        if (fetcher.state === "idle") {
+          if (deletedFetchers.has(key)) {
+            deletedFetchersKeys.push(key);
+          } else {
+            completedFetchers.push(key);
+          }
+        }
+      });
+    }
+    deletedFetchers.forEach((key) => {
+      if (!state.fetchers.has(key) && !fetchControllers.has(key)) {
+        deletedFetchersKeys.push(key);
+      }
+    });
+    [...subscribers].forEach((subscriber) => subscriber(state, {
+      deletedFetchers: deletedFetchersKeys,
+      viewTransitionOpts: opts.viewTransitionOpts,
+      flushSync: opts.flushSync === true
+    }));
+    if (future.v7_fetcherPersist) {
+      completedFetchers.forEach((key) => state.fetchers.delete(key));
+      deletedFetchersKeys.forEach((key) => deleteFetcher(key));
+    } else {
+      deletedFetchersKeys.forEach((key) => deletedFetchers.delete(key));
+    }
+  }
+  function completeNavigation(location, newState, _temp) {
+    var _location$state, _location$state2;
+    let {
+      flushSync
+    } = _temp === void 0 ? {} : _temp;
+    let isActionReload = state.actionData != null && state.navigation.formMethod != null && isMutationMethod(state.navigation.formMethod) && state.navigation.state === "loading" && ((_location$state = location.state) == null ? void 0 : _location$state._isRedirect) !== true;
+    let actionData;
+    if (newState.actionData) {
+      if (Object.keys(newState.actionData).length > 0) {
+        actionData = newState.actionData;
+      } else {
+        actionData = null;
+      }
+    } else if (isActionReload) {
+      actionData = state.actionData;
+    } else {
+      actionData = null;
+    }
+    let loaderData = newState.loaderData ? mergeLoaderData(state.loaderData, newState.loaderData, newState.matches || [], newState.errors) : state.loaderData;
+    let blockers = state.blockers;
+    if (blockers.size > 0) {
+      blockers = new Map(blockers);
+      blockers.forEach((_, k) => blockers.set(k, IDLE_BLOCKER));
+    }
+    let preventScrollReset = pendingPreventScrollReset === true || state.navigation.formMethod != null && isMutationMethod(state.navigation.formMethod) && ((_location$state2 = location.state) == null ? void 0 : _location$state2._isRedirect) !== true;
+    if (inFlightDataRoutes) {
+      dataRoutes = inFlightDataRoutes;
+      inFlightDataRoutes = void 0;
+    }
+    if (isUninterruptedRevalidation) ;
+    else if (pendingAction === Action.Pop) ;
+    else if (pendingAction === Action.Push) {
+      init.history.push(location, location.state);
+    } else if (pendingAction === Action.Replace) {
+      init.history.replace(location, location.state);
+    }
+    let viewTransitionOpts;
+    if (pendingAction === Action.Pop) {
+      let priorPaths = appliedViewTransitions.get(state.location.pathname);
+      if (priorPaths && priorPaths.has(location.pathname)) {
+        viewTransitionOpts = {
+          currentLocation: state.location,
+          nextLocation: location
+        };
+      } else if (appliedViewTransitions.has(location.pathname)) {
+        viewTransitionOpts = {
+          currentLocation: location,
+          nextLocation: state.location
+        };
+      }
+    } else if (pendingViewTransitionEnabled) {
+      let toPaths = appliedViewTransitions.get(state.location.pathname);
+      if (toPaths) {
+        toPaths.add(location.pathname);
+      } else {
+        toPaths = /* @__PURE__ */ new Set([location.pathname]);
+        appliedViewTransitions.set(state.location.pathname, toPaths);
+      }
+      viewTransitionOpts = {
+        currentLocation: state.location,
+        nextLocation: location
+      };
+    }
+    updateState(_extends2({}, newState, {
+      actionData,
+      loaderData,
+      historyAction: pendingAction,
+      location,
+      initialized: true,
+      navigation: IDLE_NAVIGATION,
+      revalidation: "idle",
+      restoreScrollPosition: getSavedScrollPosition(location, newState.matches || state.matches),
+      preventScrollReset,
+      blockers
+    }), {
+      viewTransitionOpts,
+      flushSync: flushSync === true
+    });
+    pendingAction = Action.Pop;
+    pendingPreventScrollReset = false;
+    pendingViewTransitionEnabled = false;
+    isUninterruptedRevalidation = false;
+    isRevalidationRequired = false;
+    cancelledDeferredRoutes = [];
+  }
+  async function navigate(to, opts) {
+    if (typeof to === "number") {
+      init.history.go(to);
+      return;
+    }
+    let normalizedPath = normalizeTo(state.location, state.matches, basename, future.v7_prependBasename, to, future.v7_relativeSplatPath, opts == null ? void 0 : opts.fromRouteId, opts == null ? void 0 : opts.relative);
+    let {
+      path,
+      submission,
+      error
+    } = normalizeNavigateOptions(future.v7_normalizeFormMethod, false, normalizedPath, opts);
+    let currentLocation = state.location;
+    let nextLocation = createLocation(state.location, path, opts && opts.state);
+    nextLocation = _extends2({}, nextLocation, init.history.encodeLocation(nextLocation));
+    let userReplace = opts && opts.replace != null ? opts.replace : void 0;
+    let historyAction = Action.Push;
+    if (userReplace === true) {
+      historyAction = Action.Replace;
+    } else if (userReplace === false) ;
+    else if (submission != null && isMutationMethod(submission.formMethod) && submission.formAction === state.location.pathname + state.location.search) {
+      historyAction = Action.Replace;
+    }
+    let preventScrollReset = opts && "preventScrollReset" in opts ? opts.preventScrollReset === true : void 0;
+    let flushSync = (opts && opts.flushSync) === true;
+    let blockerKey = shouldBlockNavigation({
+      currentLocation,
+      nextLocation,
+      historyAction
+    });
+    if (blockerKey) {
+      updateBlocker(blockerKey, {
+        state: "blocked",
+        location: nextLocation,
+        proceed() {
+          updateBlocker(blockerKey, {
+            state: "proceeding",
+            proceed: void 0,
+            reset: void 0,
+            location: nextLocation
+          });
+          navigate(to, opts);
+        },
+        reset() {
+          let blockers = new Map(state.blockers);
+          blockers.set(blockerKey, IDLE_BLOCKER);
+          updateState({
+            blockers
+          });
+        }
+      });
+      return;
+    }
+    return await startNavigation(historyAction, nextLocation, {
+      submission,
+      // Send through the formData serialization error if we have one so we can
+      // render at the right error boundary after we match routes
+      pendingError: error,
+      preventScrollReset,
+      replace: opts && opts.replace,
+      enableViewTransition: opts && opts.viewTransition,
+      flushSync
+    });
+  }
+  function revalidate() {
+    interruptActiveLoads();
+    updateState({
+      revalidation: "loading"
+    });
+    if (state.navigation.state === "submitting") {
+      return;
+    }
+    if (state.navigation.state === "idle") {
+      startNavigation(state.historyAction, state.location, {
+        startUninterruptedRevalidation: true
+      });
+      return;
+    }
+    startNavigation(pendingAction || state.historyAction, state.navigation.location, {
+      overrideNavigation: state.navigation,
+      // Proxy through any rending view transition
+      enableViewTransition: pendingViewTransitionEnabled === true
+    });
+  }
+  async function startNavigation(historyAction, location, opts) {
+    pendingNavigationController && pendingNavigationController.abort();
+    pendingNavigationController = null;
+    pendingAction = historyAction;
+    isUninterruptedRevalidation = (opts && opts.startUninterruptedRevalidation) === true;
+    saveScrollPosition(state.location, state.matches);
+    pendingPreventScrollReset = (opts && opts.preventScrollReset) === true;
+    pendingViewTransitionEnabled = (opts && opts.enableViewTransition) === true;
+    let routesToUse = inFlightDataRoutes || dataRoutes;
+    let loadingNavigation = opts && opts.overrideNavigation;
+    let matches = opts != null && opts.initialHydration && state.matches && state.matches.length > 0 && !initialMatchesIsFOW ? (
+      // `matchRoutes()` has already been called if we're in here via `router.initialize()`
+      state.matches
+    ) : matchRoutes(routesToUse, location, basename);
+    let flushSync = (opts && opts.flushSync) === true;
+    if (matches && state.initialized && !isRevalidationRequired && isHashChangeOnly(state.location, location) && !(opts && opts.submission && isMutationMethod(opts.submission.formMethod))) {
+      completeNavigation(location, {
+        matches
+      }, {
+        flushSync
+      });
+      return;
+    }
+    let fogOfWar = checkFogOfWar(matches, routesToUse, location.pathname);
+    if (fogOfWar.active && fogOfWar.matches) {
+      matches = fogOfWar.matches;
+    }
+    if (!matches) {
+      let {
+        error,
+        notFoundMatches,
+        route
+      } = handleNavigational404(location.pathname);
+      completeNavigation(location, {
+        matches: notFoundMatches,
+        loaderData: {},
+        errors: {
+          [route.id]: error
+        }
+      }, {
+        flushSync
+      });
+      return;
+    }
+    pendingNavigationController = new AbortController();
+    let request = createClientSideRequest(init.history, location, pendingNavigationController.signal, opts && opts.submission);
+    let pendingActionResult;
+    if (opts && opts.pendingError) {
+      pendingActionResult = [findNearestBoundary(matches).route.id, {
+        type: ResultType.error,
+        error: opts.pendingError
+      }];
+    } else if (opts && opts.submission && isMutationMethod(opts.submission.formMethod)) {
+      let actionResult = await handleAction(request, location, opts.submission, matches, fogOfWar.active, {
+        replace: opts.replace,
+        flushSync
+      });
+      if (actionResult.shortCircuited) {
+        return;
+      }
+      if (actionResult.pendingActionResult) {
+        let [routeId, result] = actionResult.pendingActionResult;
+        if (isErrorResult(result) && isRouteErrorResponse(result.error) && result.error.status === 404) {
+          pendingNavigationController = null;
+          completeNavigation(location, {
+            matches: actionResult.matches,
+            loaderData: {},
+            errors: {
+              [routeId]: result.error
+            }
+          });
+          return;
+        }
+      }
+      matches = actionResult.matches || matches;
+      pendingActionResult = actionResult.pendingActionResult;
+      loadingNavigation = getLoadingNavigation(location, opts.submission);
+      flushSync = false;
+      fogOfWar.active = false;
+      request = createClientSideRequest(init.history, request.url, request.signal);
+    }
+    let {
+      shortCircuited,
+      matches: updatedMatches,
+      loaderData,
+      errors
+    } = await handleLoaders(request, location, matches, fogOfWar.active, loadingNavigation, opts && opts.submission, opts && opts.fetcherSubmission, opts && opts.replace, opts && opts.initialHydration === true, flushSync, pendingActionResult);
+    if (shortCircuited) {
+      return;
+    }
+    pendingNavigationController = null;
+    completeNavigation(location, _extends2({
+      matches: updatedMatches || matches
+    }, getActionDataForCommit(pendingActionResult), {
+      loaderData,
+      errors
+    }));
+  }
+  async function handleAction(request, location, submission, matches, isFogOfWar, opts) {
+    if (opts === void 0) {
+      opts = {};
+    }
+    interruptActiveLoads();
+    let navigation = getSubmittingNavigation(location, submission);
+    updateState({
+      navigation
+    }, {
+      flushSync: opts.flushSync === true
+    });
+    if (isFogOfWar) {
+      let discoverResult = await discoverRoutes(matches, location.pathname, request.signal);
+      if (discoverResult.type === "aborted") {
+        return {
+          shortCircuited: true
+        };
+      } else if (discoverResult.type === "error") {
+        let boundaryId = findNearestBoundary(discoverResult.partialMatches).route.id;
+        return {
+          matches: discoverResult.partialMatches,
+          pendingActionResult: [boundaryId, {
+            type: ResultType.error,
+            error: discoverResult.error
+          }]
+        };
+      } else if (!discoverResult.matches) {
+        let {
+          notFoundMatches,
+          error,
+          route
+        } = handleNavigational404(location.pathname);
+        return {
+          matches: notFoundMatches,
+          pendingActionResult: [route.id, {
+            type: ResultType.error,
+            error
+          }]
+        };
+      } else {
+        matches = discoverResult.matches;
+      }
+    }
+    let result;
+    let actionMatch = getTargetMatch(matches, location);
+    if (!actionMatch.route.action && !actionMatch.route.lazy) {
+      result = {
+        type: ResultType.error,
+        error: getInternalRouterError(405, {
+          method: request.method,
+          pathname: location.pathname,
+          routeId: actionMatch.route.id
+        })
+      };
+    } else {
+      let results = await callDataStrategy("action", state, request, [actionMatch], matches, null);
+      result = results[actionMatch.route.id];
+      if (request.signal.aborted) {
+        return {
+          shortCircuited: true
+        };
+      }
+    }
+    if (isRedirectResult(result)) {
+      let replace3;
+      if (opts && opts.replace != null) {
+        replace3 = opts.replace;
+      } else {
+        let location2 = normalizeRedirectLocation(result.response.headers.get("Location"), new URL(request.url), basename);
+        replace3 = location2 === state.location.pathname + state.location.search;
+      }
+      await startRedirectNavigation(request, result, true, {
+        submission,
+        replace: replace3
+      });
+      return {
+        shortCircuited: true
+      };
+    }
+    if (isDeferredResult(result)) {
+      throw getInternalRouterError(400, {
+        type: "defer-action"
+      });
+    }
+    if (isErrorResult(result)) {
+      let boundaryMatch = findNearestBoundary(matches, actionMatch.route.id);
+      if ((opts && opts.replace) !== true) {
+        pendingAction = Action.Push;
+      }
+      return {
+        matches,
+        pendingActionResult: [boundaryMatch.route.id, result]
+      };
+    }
+    return {
+      matches,
+      pendingActionResult: [actionMatch.route.id, result]
+    };
+  }
+  async function handleLoaders(request, location, matches, isFogOfWar, overrideNavigation, submission, fetcherSubmission, replace3, initialHydration, flushSync, pendingActionResult) {
+    let loadingNavigation = overrideNavigation || getLoadingNavigation(location, submission);
+    let activeSubmission = submission || fetcherSubmission || getSubmissionFromNavigation(loadingNavigation);
+    let shouldUpdateNavigationState = !isUninterruptedRevalidation && (!future.v7_partialHydration || !initialHydration);
+    if (isFogOfWar) {
+      if (shouldUpdateNavigationState) {
+        let actionData = getUpdatedActionData(pendingActionResult);
+        updateState(_extends2({
+          navigation: loadingNavigation
+        }, actionData !== void 0 ? {
+          actionData
+        } : {}), {
+          flushSync
+        });
+      }
+      let discoverResult = await discoverRoutes(matches, location.pathname, request.signal);
+      if (discoverResult.type === "aborted") {
+        return {
+          shortCircuited: true
+        };
+      } else if (discoverResult.type === "error") {
+        let boundaryId = findNearestBoundary(discoverResult.partialMatches).route.id;
+        return {
+          matches: discoverResult.partialMatches,
+          loaderData: {},
+          errors: {
+            [boundaryId]: discoverResult.error
+          }
+        };
+      } else if (!discoverResult.matches) {
+        let {
+          error,
+          notFoundMatches,
+          route
+        } = handleNavigational404(location.pathname);
+        return {
+          matches: notFoundMatches,
+          loaderData: {},
+          errors: {
+            [route.id]: error
+          }
+        };
+      } else {
+        matches = discoverResult.matches;
+      }
+    }
+    let routesToUse = inFlightDataRoutes || dataRoutes;
+    let [matchesToLoad, revalidatingFetchers] = getMatchesToLoad(init.history, state, matches, activeSubmission, location, future.v7_partialHydration && initialHydration === true, future.v7_skipActionErrorRevalidation, isRevalidationRequired, cancelledDeferredRoutes, cancelledFetcherLoads, deletedFetchers, fetchLoadMatches, fetchRedirectIds, routesToUse, basename, pendingActionResult);
+    cancelActiveDeferreds((routeId) => !(matches && matches.some((m) => m.route.id === routeId)) || matchesToLoad && matchesToLoad.some((m) => m.route.id === routeId));
+    pendingNavigationLoadId = ++incrementingLoadId;
+    if (matchesToLoad.length === 0 && revalidatingFetchers.length === 0) {
+      let updatedFetchers2 = markFetchRedirectsDone();
+      completeNavigation(location, _extends2({
+        matches,
+        loaderData: {},
+        // Commit pending error if we're short circuiting
+        errors: pendingActionResult && isErrorResult(pendingActionResult[1]) ? {
+          [pendingActionResult[0]]: pendingActionResult[1].error
+        } : null
+      }, getActionDataForCommit(pendingActionResult), updatedFetchers2 ? {
+        fetchers: new Map(state.fetchers)
+      } : {}), {
+        flushSync
+      });
+      return {
+        shortCircuited: true
+      };
+    }
+    if (shouldUpdateNavigationState) {
+      let updates = {};
+      if (!isFogOfWar) {
+        updates.navigation = loadingNavigation;
+        let actionData = getUpdatedActionData(pendingActionResult);
+        if (actionData !== void 0) {
+          updates.actionData = actionData;
+        }
+      }
+      if (revalidatingFetchers.length > 0) {
+        updates.fetchers = getUpdatedRevalidatingFetchers(revalidatingFetchers);
+      }
+      updateState(updates, {
+        flushSync
+      });
+    }
+    revalidatingFetchers.forEach((rf) => {
+      abortFetcher(rf.key);
+      if (rf.controller) {
+        fetchControllers.set(rf.key, rf.controller);
+      }
+    });
+    let abortPendingFetchRevalidations = () => revalidatingFetchers.forEach((f) => abortFetcher(f.key));
+    if (pendingNavigationController) {
+      pendingNavigationController.signal.addEventListener("abort", abortPendingFetchRevalidations);
+    }
+    let {
+      loaderResults,
+      fetcherResults
+    } = await callLoadersAndMaybeResolveData(state, matches, matchesToLoad, revalidatingFetchers, request);
+    if (request.signal.aborted) {
+      return {
+        shortCircuited: true
+      };
+    }
+    if (pendingNavigationController) {
+      pendingNavigationController.signal.removeEventListener("abort", abortPendingFetchRevalidations);
+    }
+    revalidatingFetchers.forEach((rf) => fetchControllers.delete(rf.key));
+    let redirect2 = findRedirect(loaderResults);
+    if (redirect2) {
+      await startRedirectNavigation(request, redirect2.result, true, {
+        replace: replace3
+      });
+      return {
+        shortCircuited: true
+      };
+    }
+    redirect2 = findRedirect(fetcherResults);
+    if (redirect2) {
+      fetchRedirectIds.add(redirect2.key);
+      await startRedirectNavigation(request, redirect2.result, true, {
+        replace: replace3
+      });
+      return {
+        shortCircuited: true
+      };
+    }
+    let {
+      loaderData,
+      errors
+    } = processLoaderData(state, matches, loaderResults, pendingActionResult, revalidatingFetchers, fetcherResults, activeDeferreds);
+    activeDeferreds.forEach((deferredData, routeId) => {
+      deferredData.subscribe((aborted) => {
+        if (aborted || deferredData.done) {
+          activeDeferreds.delete(routeId);
+        }
+      });
+    });
+    if (future.v7_partialHydration && initialHydration && state.errors) {
+      errors = _extends2({}, state.errors, errors);
+    }
+    let updatedFetchers = markFetchRedirectsDone();
+    let didAbortFetchLoads = abortStaleFetchLoads(pendingNavigationLoadId);
+    let shouldUpdateFetchers = updatedFetchers || didAbortFetchLoads || revalidatingFetchers.length > 0;
+    return _extends2({
+      matches,
+      loaderData,
+      errors
+    }, shouldUpdateFetchers ? {
+      fetchers: new Map(state.fetchers)
+    } : {});
+  }
+  function getUpdatedActionData(pendingActionResult) {
+    if (pendingActionResult && !isErrorResult(pendingActionResult[1])) {
+      return {
+        [pendingActionResult[0]]: pendingActionResult[1].data
+      };
+    } else if (state.actionData) {
+      if (Object.keys(state.actionData).length === 0) {
+        return null;
+      } else {
+        return state.actionData;
+      }
+    }
+  }
+  function getUpdatedRevalidatingFetchers(revalidatingFetchers) {
+    revalidatingFetchers.forEach((rf) => {
+      let fetcher = state.fetchers.get(rf.key);
+      let revalidatingFetcher = getLoadingFetcher(void 0, fetcher ? fetcher.data : void 0);
+      state.fetchers.set(rf.key, revalidatingFetcher);
+    });
+    return new Map(state.fetchers);
+  }
+  function fetch2(key, routeId, href, opts) {
+    if (isServer) {
+      throw new Error("router.fetch() was called during the server render, but it shouldn't be. You are likely calling a useFetcher() method in the body of your component. Try moving it to a useEffect or a callback.");
+    }
+    abortFetcher(key);
+    let flushSync = (opts && opts.flushSync) === true;
+    let routesToUse = inFlightDataRoutes || dataRoutes;
+    let normalizedPath = normalizeTo(state.location, state.matches, basename, future.v7_prependBasename, href, future.v7_relativeSplatPath, routeId, opts == null ? void 0 : opts.relative);
+    let matches = matchRoutes(routesToUse, normalizedPath, basename);
+    let fogOfWar = checkFogOfWar(matches, routesToUse, normalizedPath);
+    if (fogOfWar.active && fogOfWar.matches) {
+      matches = fogOfWar.matches;
+    }
+    if (!matches) {
+      setFetcherError(key, routeId, getInternalRouterError(404, {
+        pathname: normalizedPath
+      }), {
+        flushSync
+      });
+      return;
+    }
+    let {
+      path,
+      submission,
+      error
+    } = normalizeNavigateOptions(future.v7_normalizeFormMethod, true, normalizedPath, opts);
+    if (error) {
+      setFetcherError(key, routeId, error, {
+        flushSync
+      });
+      return;
+    }
+    let match2 = getTargetMatch(matches, path);
+    let preventScrollReset = (opts && opts.preventScrollReset) === true;
+    if (submission && isMutationMethod(submission.formMethod)) {
+      handleFetcherAction(key, routeId, path, match2, matches, fogOfWar.active, flushSync, preventScrollReset, submission);
+      return;
+    }
+    fetchLoadMatches.set(key, {
+      routeId,
+      path
+    });
+    handleFetcherLoader(key, routeId, path, match2, matches, fogOfWar.active, flushSync, preventScrollReset, submission);
+  }
+  async function handleFetcherAction(key, routeId, path, match2, requestMatches, isFogOfWar, flushSync, preventScrollReset, submission) {
+    interruptActiveLoads();
+    fetchLoadMatches.delete(key);
+    function detectAndHandle405Error(m) {
+      if (!m.route.action && !m.route.lazy) {
+        let error = getInternalRouterError(405, {
+          method: submission.formMethod,
+          pathname: path,
+          routeId
+        });
+        setFetcherError(key, routeId, error, {
+          flushSync
+        });
+        return true;
+      }
+      return false;
+    }
+    if (!isFogOfWar && detectAndHandle405Error(match2)) {
+      return;
+    }
+    let existingFetcher = state.fetchers.get(key);
+    updateFetcherState(key, getSubmittingFetcher(submission, existingFetcher), {
+      flushSync
+    });
+    let abortController = new AbortController();
+    let fetchRequest = createClientSideRequest(init.history, path, abortController.signal, submission);
+    if (isFogOfWar) {
+      let discoverResult = await discoverRoutes(requestMatches, new URL(fetchRequest.url).pathname, fetchRequest.signal, key);
+      if (discoverResult.type === "aborted") {
+        return;
+      } else if (discoverResult.type === "error") {
+        setFetcherError(key, routeId, discoverResult.error, {
+          flushSync
+        });
+        return;
+      } else if (!discoverResult.matches) {
+        setFetcherError(key, routeId, getInternalRouterError(404, {
+          pathname: path
+        }), {
+          flushSync
+        });
+        return;
+      } else {
+        requestMatches = discoverResult.matches;
+        match2 = getTargetMatch(requestMatches, path);
+        if (detectAndHandle405Error(match2)) {
+          return;
+        }
+      }
+    }
+    fetchControllers.set(key, abortController);
+    let originatingLoadId = incrementingLoadId;
+    let actionResults = await callDataStrategy("action", state, fetchRequest, [match2], requestMatches, key);
+    let actionResult = actionResults[match2.route.id];
+    if (fetchRequest.signal.aborted) {
+      if (fetchControllers.get(key) === abortController) {
+        fetchControllers.delete(key);
+      }
+      return;
+    }
+    if (future.v7_fetcherPersist && deletedFetchers.has(key)) {
+      if (isRedirectResult(actionResult) || isErrorResult(actionResult)) {
+        updateFetcherState(key, getDoneFetcher(void 0));
+        return;
+      }
+    } else {
+      if (isRedirectResult(actionResult)) {
+        fetchControllers.delete(key);
+        if (pendingNavigationLoadId > originatingLoadId) {
+          updateFetcherState(key, getDoneFetcher(void 0));
+          return;
+        } else {
+          fetchRedirectIds.add(key);
+          updateFetcherState(key, getLoadingFetcher(submission));
+          return startRedirectNavigation(fetchRequest, actionResult, false, {
+            fetcherSubmission: submission,
+            preventScrollReset
+          });
+        }
+      }
+      if (isErrorResult(actionResult)) {
+        setFetcherError(key, routeId, actionResult.error);
+        return;
+      }
+    }
+    if (isDeferredResult(actionResult)) {
+      throw getInternalRouterError(400, {
+        type: "defer-action"
+      });
+    }
+    let nextLocation = state.navigation.location || state.location;
+    let revalidationRequest = createClientSideRequest(init.history, nextLocation, abortController.signal);
+    let routesToUse = inFlightDataRoutes || dataRoutes;
+    let matches = state.navigation.state !== "idle" ? matchRoutes(routesToUse, state.navigation.location, basename) : state.matches;
+    invariant(matches, "Didn't find any matches after fetcher action");
+    let loadId = ++incrementingLoadId;
+    fetchReloadIds.set(key, loadId);
+    let loadFetcher = getLoadingFetcher(submission, actionResult.data);
+    state.fetchers.set(key, loadFetcher);
+    let [matchesToLoad, revalidatingFetchers] = getMatchesToLoad(init.history, state, matches, submission, nextLocation, false, future.v7_skipActionErrorRevalidation, isRevalidationRequired, cancelledDeferredRoutes, cancelledFetcherLoads, deletedFetchers, fetchLoadMatches, fetchRedirectIds, routesToUse, basename, [match2.route.id, actionResult]);
+    revalidatingFetchers.filter((rf) => rf.key !== key).forEach((rf) => {
+      let staleKey = rf.key;
+      let existingFetcher2 = state.fetchers.get(staleKey);
+      let revalidatingFetcher = getLoadingFetcher(void 0, existingFetcher2 ? existingFetcher2.data : void 0);
+      state.fetchers.set(staleKey, revalidatingFetcher);
+      abortFetcher(staleKey);
+      if (rf.controller) {
+        fetchControllers.set(staleKey, rf.controller);
+      }
+    });
+    updateState({
+      fetchers: new Map(state.fetchers)
+    });
+    let abortPendingFetchRevalidations = () => revalidatingFetchers.forEach((rf) => abortFetcher(rf.key));
+    abortController.signal.addEventListener("abort", abortPendingFetchRevalidations);
+    let {
+      loaderResults,
+      fetcherResults
+    } = await callLoadersAndMaybeResolveData(state, matches, matchesToLoad, revalidatingFetchers, revalidationRequest);
+    if (abortController.signal.aborted) {
+      return;
+    }
+    abortController.signal.removeEventListener("abort", abortPendingFetchRevalidations);
+    fetchReloadIds.delete(key);
+    fetchControllers.delete(key);
+    revalidatingFetchers.forEach((r) => fetchControllers.delete(r.key));
+    let redirect2 = findRedirect(loaderResults);
+    if (redirect2) {
+      return startRedirectNavigation(revalidationRequest, redirect2.result, false, {
+        preventScrollReset
+      });
+    }
+    redirect2 = findRedirect(fetcherResults);
+    if (redirect2) {
+      fetchRedirectIds.add(redirect2.key);
+      return startRedirectNavigation(revalidationRequest, redirect2.result, false, {
+        preventScrollReset
+      });
+    }
+    let {
+      loaderData,
+      errors
+    } = processLoaderData(state, matches, loaderResults, void 0, revalidatingFetchers, fetcherResults, activeDeferreds);
+    if (state.fetchers.has(key)) {
+      let doneFetcher = getDoneFetcher(actionResult.data);
+      state.fetchers.set(key, doneFetcher);
+    }
+    abortStaleFetchLoads(loadId);
+    if (state.navigation.state === "loading" && loadId > pendingNavigationLoadId) {
+      invariant(pendingAction, "Expected pending action");
+      pendingNavigationController && pendingNavigationController.abort();
+      completeNavigation(state.navigation.location, {
+        matches,
+        loaderData,
+        errors,
+        fetchers: new Map(state.fetchers)
+      });
+    } else {
+      updateState({
+        errors,
+        loaderData: mergeLoaderData(state.loaderData, loaderData, matches, errors),
+        fetchers: new Map(state.fetchers)
+      });
+      isRevalidationRequired = false;
+    }
+  }
+  async function handleFetcherLoader(key, routeId, path, match2, matches, isFogOfWar, flushSync, preventScrollReset, submission) {
+    let existingFetcher = state.fetchers.get(key);
+    updateFetcherState(key, getLoadingFetcher(submission, existingFetcher ? existingFetcher.data : void 0), {
+      flushSync
+    });
+    let abortController = new AbortController();
+    let fetchRequest = createClientSideRequest(init.history, path, abortController.signal);
+    if (isFogOfWar) {
+      let discoverResult = await discoverRoutes(matches, new URL(fetchRequest.url).pathname, fetchRequest.signal, key);
+      if (discoverResult.type === "aborted") {
+        return;
+      } else if (discoverResult.type === "error") {
+        setFetcherError(key, routeId, discoverResult.error, {
+          flushSync
+        });
+        return;
+      } else if (!discoverResult.matches) {
+        setFetcherError(key, routeId, getInternalRouterError(404, {
+          pathname: path
+        }), {
+          flushSync
+        });
+        return;
+      } else {
+        matches = discoverResult.matches;
+        match2 = getTargetMatch(matches, path);
+      }
+    }
+    fetchControllers.set(key, abortController);
+    let originatingLoadId = incrementingLoadId;
+    let results = await callDataStrategy("loader", state, fetchRequest, [match2], matches, key);
+    let result = results[match2.route.id];
+    if (isDeferredResult(result)) {
+      result = await resolveDeferredData(result, fetchRequest.signal, true) || result;
+    }
+    if (fetchControllers.get(key) === abortController) {
+      fetchControllers.delete(key);
+    }
+    if (fetchRequest.signal.aborted) {
+      return;
+    }
+    if (deletedFetchers.has(key)) {
+      updateFetcherState(key, getDoneFetcher(void 0));
+      return;
+    }
+    if (isRedirectResult(result)) {
+      if (pendingNavigationLoadId > originatingLoadId) {
+        updateFetcherState(key, getDoneFetcher(void 0));
+        return;
+      } else {
+        fetchRedirectIds.add(key);
+        await startRedirectNavigation(fetchRequest, result, false, {
+          preventScrollReset
+        });
+        return;
+      }
+    }
+    if (isErrorResult(result)) {
+      setFetcherError(key, routeId, result.error);
+      return;
+    }
+    invariant(!isDeferredResult(result), "Unhandled fetcher deferred data");
+    updateFetcherState(key, getDoneFetcher(result.data));
+  }
+  async function startRedirectNavigation(request, redirect2, isNavigation, _temp2) {
+    let {
+      submission,
+      fetcherSubmission,
+      preventScrollReset,
+      replace: replace3
+    } = _temp2 === void 0 ? {} : _temp2;
+    if (redirect2.response.headers.has("X-Remix-Revalidate")) {
+      isRevalidationRequired = true;
+    }
+    let location = redirect2.response.headers.get("Location");
+    invariant(location, "Expected a Location header on the redirect Response");
+    location = normalizeRedirectLocation(location, new URL(request.url), basename);
+    let redirectLocation = createLocation(state.location, location, {
+      _isRedirect: true
+    });
+    if (isBrowser3) {
+      let isDocumentReload = false;
+      if (redirect2.response.headers.has("X-Remix-Reload-Document")) {
+        isDocumentReload = true;
+      } else if (ABSOLUTE_URL_REGEX.test(location)) {
+        const url = init.history.createURL(location);
+        isDocumentReload = // Hard reload if it's an absolute URL to a new origin
+        url.origin !== routerWindow.location.origin || // Hard reload if it's an absolute URL that does not match our basename
+        stripBasename(url.pathname, basename) == null;
+      }
+      if (isDocumentReload) {
+        if (replace3) {
+          routerWindow.location.replace(location);
+        } else {
+          routerWindow.location.assign(location);
+        }
+        return;
+      }
+    }
+    pendingNavigationController = null;
+    let redirectHistoryAction = replace3 === true || redirect2.response.headers.has("X-Remix-Replace") ? Action.Replace : Action.Push;
+    let {
+      formMethod,
+      formAction,
+      formEncType
+    } = state.navigation;
+    if (!submission && !fetcherSubmission && formMethod && formAction && formEncType) {
+      submission = getSubmissionFromNavigation(state.navigation);
+    }
+    let activeSubmission = submission || fetcherSubmission;
+    if (redirectPreserveMethodStatusCodes.has(redirect2.response.status) && activeSubmission && isMutationMethod(activeSubmission.formMethod)) {
+      await startNavigation(redirectHistoryAction, redirectLocation, {
+        submission: _extends2({}, activeSubmission, {
+          formAction: location
+        }),
+        // Preserve these flags across redirects
+        preventScrollReset: preventScrollReset || pendingPreventScrollReset,
+        enableViewTransition: isNavigation ? pendingViewTransitionEnabled : void 0
+      });
+    } else {
+      let overrideNavigation = getLoadingNavigation(redirectLocation, submission);
+      await startNavigation(redirectHistoryAction, redirectLocation, {
+        overrideNavigation,
+        // Send fetcher submissions through for shouldRevalidate
+        fetcherSubmission,
+        // Preserve these flags across redirects
+        preventScrollReset: preventScrollReset || pendingPreventScrollReset,
+        enableViewTransition: isNavigation ? pendingViewTransitionEnabled : void 0
+      });
+    }
+  }
+  async function callDataStrategy(type, state2, request, matchesToLoad, matches, fetcherKey) {
+    let results;
+    let dataResults = {};
+    try {
+      results = await callDataStrategyImpl(dataStrategyImpl, type, state2, request, matchesToLoad, matches, fetcherKey, manifest, mapRouteProperties2);
+    } catch (e) {
+      matchesToLoad.forEach((m) => {
+        dataResults[m.route.id] = {
+          type: ResultType.error,
+          error: e
+        };
+      });
+      return dataResults;
+    }
+    for (let [routeId, result] of Object.entries(results)) {
+      if (isRedirectDataStrategyResultResult(result)) {
+        let response = result.result;
+        dataResults[routeId] = {
+          type: ResultType.redirect,
+          response: normalizeRelativeRoutingRedirectResponse(response, request, routeId, matches, basename, future.v7_relativeSplatPath)
+        };
+      } else {
+        dataResults[routeId] = await convertDataStrategyResultToDataResult(result);
+      }
+    }
+    return dataResults;
+  }
+  async function callLoadersAndMaybeResolveData(state2, matches, matchesToLoad, fetchersToLoad, request) {
+    let currentMatches = state2.matches;
+    let loaderResultsPromise = callDataStrategy("loader", state2, request, matchesToLoad, matches, null);
+    let fetcherResultsPromise = Promise.all(fetchersToLoad.map(async (f) => {
+      if (f.matches && f.match && f.controller) {
+        let results = await callDataStrategy("loader", state2, createClientSideRequest(init.history, f.path, f.controller.signal), [f.match], f.matches, f.key);
+        let result = results[f.match.route.id];
+        return {
+          [f.key]: result
+        };
+      } else {
+        return Promise.resolve({
+          [f.key]: {
+            type: ResultType.error,
+            error: getInternalRouterError(404, {
+              pathname: f.path
+            })
+          }
+        });
+      }
+    }));
+    let loaderResults = await loaderResultsPromise;
+    let fetcherResults = (await fetcherResultsPromise).reduce((acc, r) => Object.assign(acc, r), {});
+    await Promise.all([resolveNavigationDeferredResults(matches, loaderResults, request.signal, currentMatches, state2.loaderData), resolveFetcherDeferredResults(matches, fetcherResults, fetchersToLoad)]);
+    return {
+      loaderResults,
+      fetcherResults
+    };
+  }
+  function interruptActiveLoads() {
+    isRevalidationRequired = true;
+    cancelledDeferredRoutes.push(...cancelActiveDeferreds());
+    fetchLoadMatches.forEach((_, key) => {
+      if (fetchControllers.has(key)) {
+        cancelledFetcherLoads.add(key);
+      }
+      abortFetcher(key);
+    });
+  }
+  function updateFetcherState(key, fetcher, opts) {
+    if (opts === void 0) {
+      opts = {};
+    }
+    state.fetchers.set(key, fetcher);
+    updateState({
+      fetchers: new Map(state.fetchers)
+    }, {
+      flushSync: (opts && opts.flushSync) === true
+    });
+  }
+  function setFetcherError(key, routeId, error, opts) {
+    if (opts === void 0) {
+      opts = {};
+    }
+    let boundaryMatch = findNearestBoundary(state.matches, routeId);
+    deleteFetcher(key);
+    updateState({
+      errors: {
+        [boundaryMatch.route.id]: error
+      },
+      fetchers: new Map(state.fetchers)
+    }, {
+      flushSync: (opts && opts.flushSync) === true
+    });
+  }
+  function getFetcher(key) {
+    activeFetchers.set(key, (activeFetchers.get(key) || 0) + 1);
+    if (deletedFetchers.has(key)) {
+      deletedFetchers.delete(key);
+    }
+    return state.fetchers.get(key) || IDLE_FETCHER;
+  }
+  function deleteFetcher(key) {
+    let fetcher = state.fetchers.get(key);
+    if (fetchControllers.has(key) && !(fetcher && fetcher.state === "loading" && fetchReloadIds.has(key))) {
+      abortFetcher(key);
+    }
+    fetchLoadMatches.delete(key);
+    fetchReloadIds.delete(key);
+    fetchRedirectIds.delete(key);
+    if (future.v7_fetcherPersist) {
+      deletedFetchers.delete(key);
+    }
+    cancelledFetcherLoads.delete(key);
+    state.fetchers.delete(key);
+  }
+  function deleteFetcherAndUpdateState(key) {
+    let count = (activeFetchers.get(key) || 0) - 1;
+    if (count <= 0) {
+      activeFetchers.delete(key);
+      deletedFetchers.add(key);
+      if (!future.v7_fetcherPersist) {
+        deleteFetcher(key);
+      }
+    } else {
+      activeFetchers.set(key, count);
+    }
+    updateState({
+      fetchers: new Map(state.fetchers)
+    });
+  }
+  function abortFetcher(key) {
+    let controller = fetchControllers.get(key);
+    if (controller) {
+      controller.abort();
+      fetchControllers.delete(key);
+    }
+  }
+  function markFetchersDone(keys) {
+    for (let key of keys) {
+      let fetcher = getFetcher(key);
+      let doneFetcher = getDoneFetcher(fetcher.data);
+      state.fetchers.set(key, doneFetcher);
+    }
+  }
+  function markFetchRedirectsDone() {
+    let doneKeys = [];
+    let updatedFetchers = false;
+    for (let key of fetchRedirectIds) {
+      let fetcher = state.fetchers.get(key);
+      invariant(fetcher, "Expected fetcher: " + key);
+      if (fetcher.state === "loading") {
+        fetchRedirectIds.delete(key);
+        doneKeys.push(key);
+        updatedFetchers = true;
+      }
+    }
+    markFetchersDone(doneKeys);
+    return updatedFetchers;
+  }
+  function abortStaleFetchLoads(landedId) {
+    let yeetedKeys = [];
+    for (let [key, id] of fetchReloadIds) {
+      if (id < landedId) {
+        let fetcher = state.fetchers.get(key);
+        invariant(fetcher, "Expected fetcher: " + key);
+        if (fetcher.state === "loading") {
+          abortFetcher(key);
+          fetchReloadIds.delete(key);
+          yeetedKeys.push(key);
+        }
+      }
+    }
+    markFetchersDone(yeetedKeys);
+    return yeetedKeys.length > 0;
+  }
+  function getBlocker(key, fn) {
+    let blocker = state.blockers.get(key) || IDLE_BLOCKER;
+    if (blockerFunctions.get(key) !== fn) {
+      blockerFunctions.set(key, fn);
+    }
+    return blocker;
+  }
+  function deleteBlocker(key) {
+    state.blockers.delete(key);
+    blockerFunctions.delete(key);
+  }
+  function updateBlocker(key, newBlocker) {
+    let blocker = state.blockers.get(key) || IDLE_BLOCKER;
+    invariant(blocker.state === "unblocked" && newBlocker.state === "blocked" || blocker.state === "blocked" && newBlocker.state === "blocked" || blocker.state === "blocked" && newBlocker.state === "proceeding" || blocker.state === "blocked" && newBlocker.state === "unblocked" || blocker.state === "proceeding" && newBlocker.state === "unblocked", "Invalid blocker state transition: " + blocker.state + " -> " + newBlocker.state);
+    let blockers = new Map(state.blockers);
+    blockers.set(key, newBlocker);
+    updateState({
+      blockers
+    });
+  }
+  function shouldBlockNavigation(_ref2) {
+    let {
+      currentLocation,
+      nextLocation,
+      historyAction
+    } = _ref2;
+    if (blockerFunctions.size === 0) {
+      return;
+    }
+    if (blockerFunctions.size > 1) {
+      warning(false, "A router only supports one blocker at a time");
+    }
+    let entries = Array.from(blockerFunctions.entries());
+    let [blockerKey, blockerFunction] = entries[entries.length - 1];
+    let blocker = state.blockers.get(blockerKey);
+    if (blocker && blocker.state === "proceeding") {
+      return;
+    }
+    if (blockerFunction({
+      currentLocation,
+      nextLocation,
+      historyAction
+    })) {
+      return blockerKey;
+    }
+  }
+  function handleNavigational404(pathname) {
+    let error = getInternalRouterError(404, {
+      pathname
+    });
+    let routesToUse = inFlightDataRoutes || dataRoutes;
+    let {
+      matches,
+      route
+    } = getShortCircuitMatches(routesToUse);
+    cancelActiveDeferreds();
+    return {
+      notFoundMatches: matches,
+      route,
+      error
+    };
+  }
+  function cancelActiveDeferreds(predicate) {
+    let cancelledRouteIds = [];
+    activeDeferreds.forEach((dfd, routeId) => {
+      if (!predicate || predicate(routeId)) {
+        dfd.cancel();
+        cancelledRouteIds.push(routeId);
+        activeDeferreds.delete(routeId);
+      }
+    });
+    return cancelledRouteIds;
+  }
+  function enableScrollRestoration(positions, getPosition, getKey) {
+    savedScrollPositions2 = positions;
+    getScrollPosition = getPosition;
+    getScrollRestorationKey = getKey || null;
+    if (!initialScrollRestored && state.navigation === IDLE_NAVIGATION) {
+      initialScrollRestored = true;
+      let y = getSavedScrollPosition(state.location, state.matches);
+      if (y != null) {
+        updateState({
+          restoreScrollPosition: y
+        });
+      }
+    }
+    return () => {
+      savedScrollPositions2 = null;
+      getScrollPosition = null;
+      getScrollRestorationKey = null;
+    };
+  }
+  function getScrollKey(location, matches) {
+    if (getScrollRestorationKey) {
+      let key = getScrollRestorationKey(location, matches.map((m) => convertRouteMatchToUiMatch(m, state.loaderData)));
+      return key || location.key;
+    }
+    return location.key;
+  }
+  function saveScrollPosition(location, matches) {
+    if (savedScrollPositions2 && getScrollPosition) {
+      let key = getScrollKey(location, matches);
+      savedScrollPositions2[key] = getScrollPosition();
+    }
+  }
+  function getSavedScrollPosition(location, matches) {
+    if (savedScrollPositions2) {
+      let key = getScrollKey(location, matches);
+      let y = savedScrollPositions2[key];
+      if (typeof y === "number") {
+        return y;
+      }
+    }
+    return null;
+  }
+  function checkFogOfWar(matches, routesToUse, pathname) {
+    if (patchRoutesOnNavigationImpl) {
+      if (!matches) {
+        let fogMatches = matchRoutesImpl(routesToUse, pathname, basename, true);
+        return {
+          active: true,
+          matches: fogMatches || []
+        };
+      } else {
+        if (Object.keys(matches[0].params).length > 0) {
+          let partialMatches = matchRoutesImpl(routesToUse, pathname, basename, true);
+          return {
+            active: true,
+            matches: partialMatches
+          };
+        }
+      }
+    }
+    return {
+      active: false,
+      matches: null
+    };
+  }
+  async function discoverRoutes(matches, pathname, signal, fetcherKey) {
+    if (!patchRoutesOnNavigationImpl) {
+      return {
+        type: "success",
+        matches
+      };
+    }
+    let partialMatches = matches;
+    while (true) {
+      let isNonHMR = inFlightDataRoutes == null;
+      let routesToUse = inFlightDataRoutes || dataRoutes;
+      let localManifest = manifest;
+      try {
+        await patchRoutesOnNavigationImpl({
+          signal,
+          path: pathname,
+          matches: partialMatches,
+          fetcherKey,
+          patch: (routeId, children) => {
+            if (signal.aborted) return;
+            patchRoutesImpl(routeId, children, routesToUse, localManifest, mapRouteProperties2);
+          }
+        });
+      } catch (e) {
+        return {
+          type: "error",
+          error: e,
+          partialMatches
+        };
+      } finally {
+        if (isNonHMR && !signal.aborted) {
+          dataRoutes = [...dataRoutes];
+        }
+      }
+      if (signal.aborted) {
+        return {
+          type: "aborted"
+        };
+      }
+      let newMatches = matchRoutes(routesToUse, pathname, basename);
+      if (newMatches) {
+        return {
+          type: "success",
+          matches: newMatches
+        };
+      }
+      let newPartialMatches = matchRoutesImpl(routesToUse, pathname, basename, true);
+      if (!newPartialMatches || partialMatches.length === newPartialMatches.length && partialMatches.every((m, i) => m.route.id === newPartialMatches[i].route.id)) {
+        return {
+          type: "success",
+          matches: null
+        };
+      }
+      partialMatches = newPartialMatches;
+    }
+  }
+  function _internalSetRoutes(newRoutes) {
+    manifest = {};
+    inFlightDataRoutes = convertRoutesToDataRoutes(newRoutes, mapRouteProperties2, void 0, manifest);
+  }
+  function patchRoutes(routeId, children) {
+    let isNonHMR = inFlightDataRoutes == null;
+    let routesToUse = inFlightDataRoutes || dataRoutes;
+    patchRoutesImpl(routeId, children, routesToUse, manifest, mapRouteProperties2);
+    if (isNonHMR) {
+      dataRoutes = [...dataRoutes];
+      updateState({});
+    }
+  }
+  router2 = {
+    get basename() {
+      return basename;
+    },
+    get future() {
+      return future;
+    },
+    get state() {
+      return state;
+    },
+    get routes() {
+      return dataRoutes;
+    },
+    get window() {
+      return routerWindow;
+    },
+    initialize,
+    subscribe,
+    enableScrollRestoration,
+    navigate,
+    fetch: fetch2,
+    revalidate,
+    // Passthrough to history-aware createHref used by useHref so we get proper
+    // hash-aware URLs in DOM paths
+    createHref: (to) => init.history.createHref(to),
+    encodeLocation: (to) => init.history.encodeLocation(to),
+    getFetcher,
+    deleteFetcher: deleteFetcherAndUpdateState,
+    dispose,
+    getBlocker,
+    deleteBlocker,
+    patchRoutes,
+    _internalFetchControllers: fetchControllers,
+    _internalActiveDeferreds: activeDeferreds,
+    // TODO: Remove setRoutes, it's temporary to avoid dealing with
+    // updating the tree while validating the update algorithm.
+    _internalSetRoutes
+  };
+  return router2;
+}
+var UNSAFE_DEFERRED_SYMBOL = Symbol("deferred");
+function isSubmissionNavigation(opts) {
+  return opts != null && ("formData" in opts && opts.formData != null || "body" in opts && opts.body !== void 0);
+}
+function normalizeTo(location, matches, basename, prependBasename, to, v7_relativeSplatPath, fromRouteId, relative) {
+  let contextualMatches;
+  let activeRouteMatch;
+  if (fromRouteId) {
+    contextualMatches = [];
+    for (let match2 of matches) {
+      contextualMatches.push(match2);
+      if (match2.route.id === fromRouteId) {
+        activeRouteMatch = match2;
+        break;
+      }
+    }
+  } else {
+    contextualMatches = matches;
+    activeRouteMatch = matches[matches.length - 1];
+  }
+  let path = resolveTo(to ? to : ".", getResolveToMatches(contextualMatches, v7_relativeSplatPath), stripBasename(location.pathname, basename) || location.pathname, relative === "path");
+  if (to == null) {
+    path.search = location.search;
+    path.hash = location.hash;
+  }
+  if ((to == null || to === "" || to === ".") && activeRouteMatch) {
+    let nakedIndex = hasNakedIndexQuery(path.search);
+    if (activeRouteMatch.route.index && !nakedIndex) {
+      path.search = path.search ? path.search.replace(/^\?/, "?index&") : "?index";
+    } else if (!activeRouteMatch.route.index && nakedIndex) {
+      let params = new URLSearchParams(path.search);
+      let indexValues = params.getAll("index");
+      params.delete("index");
+      indexValues.filter((v) => v).forEach((v) => params.append("index", v));
+      let qs = params.toString();
+      path.search = qs ? "?" + qs : "";
+    }
+  }
+  if (prependBasename && basename !== "/") {
+    path.pathname = path.pathname === "/" ? basename : joinPaths([basename, path.pathname]);
+  }
+  return createPath(path);
+}
+function normalizeNavigateOptions(normalizeFormMethod, isFetcher, path, opts) {
+  if (!opts || !isSubmissionNavigation(opts)) {
+    return {
+      path
+    };
+  }
+  if (opts.formMethod && !isValidMethod(opts.formMethod)) {
+    return {
+      path,
+      error: getInternalRouterError(405, {
+        method: opts.formMethod
+      })
+    };
+  }
+  let getInvalidBodyError = () => ({
+    path,
+    error: getInternalRouterError(400, {
+      type: "invalid-body"
+    })
+  });
+  let rawFormMethod = opts.formMethod || "get";
+  let formMethod = normalizeFormMethod ? rawFormMethod.toUpperCase() : rawFormMethod.toLowerCase();
+  let formAction = stripHashFromPath(path);
+  if (opts.body !== void 0) {
+    if (opts.formEncType === "text/plain") {
+      if (!isMutationMethod(formMethod)) {
+        return getInvalidBodyError();
+      }
+      let text = typeof opts.body === "string" ? opts.body : opts.body instanceof FormData || opts.body instanceof URLSearchParams ? (
+        // https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#plain-text-form-data
+        Array.from(opts.body.entries()).reduce((acc, _ref3) => {
+          let [name, value] = _ref3;
+          return "" + acc + name + "=" + value + "\n";
+        }, "")
+      ) : String(opts.body);
+      return {
+        path,
+        submission: {
+          formMethod,
+          formAction,
+          formEncType: opts.formEncType,
+          formData: void 0,
+          json: void 0,
+          text
+        }
+      };
+    } else if (opts.formEncType === "application/json") {
+      if (!isMutationMethod(formMethod)) {
+        return getInvalidBodyError();
+      }
+      try {
+        let json2 = typeof opts.body === "string" ? JSON.parse(opts.body) : opts.body;
+        return {
+          path,
+          submission: {
+            formMethod,
+            formAction,
+            formEncType: opts.formEncType,
+            formData: void 0,
+            json: json2,
+            text: void 0
+          }
+        };
+      } catch (e) {
+        return getInvalidBodyError();
+      }
+    }
+  }
+  invariant(typeof FormData === "function", "FormData is not available in this environment");
+  let searchParams;
+  let formData;
+  if (opts.formData) {
+    searchParams = convertFormDataToSearchParams(opts.formData);
+    formData = opts.formData;
+  } else if (opts.body instanceof FormData) {
+    searchParams = convertFormDataToSearchParams(opts.body);
+    formData = opts.body;
+  } else if (opts.body instanceof URLSearchParams) {
+    searchParams = opts.body;
+    formData = convertSearchParamsToFormData(searchParams);
+  } else if (opts.body == null) {
+    searchParams = new URLSearchParams();
+    formData = new FormData();
+  } else {
+    try {
+      searchParams = new URLSearchParams(opts.body);
+      formData = convertSearchParamsToFormData(searchParams);
+    } catch (e) {
+      return getInvalidBodyError();
+    }
+  }
+  let submission = {
+    formMethod,
+    formAction,
+    formEncType: opts && opts.formEncType || "application/x-www-form-urlencoded",
+    formData,
+    json: void 0,
+    text: void 0
+  };
+  if (isMutationMethod(submission.formMethod)) {
+    return {
+      path,
+      submission
+    };
+  }
+  let parsedPath = parsePath(path);
+  if (isFetcher && parsedPath.search && hasNakedIndexQuery(parsedPath.search)) {
+    searchParams.append("index", "");
+  }
+  parsedPath.search = "?" + searchParams;
+  return {
+    path: createPath(parsedPath),
+    submission
+  };
+}
+function getLoaderMatchesUntilBoundary(matches, boundaryId, includeBoundary) {
+  if (includeBoundary === void 0) {
+    includeBoundary = false;
+  }
+  let index = matches.findIndex((m) => m.route.id === boundaryId);
+  if (index >= 0) {
+    return matches.slice(0, includeBoundary ? index + 1 : index);
+  }
+  return matches;
+}
+function getMatchesToLoad(history, state, matches, submission, location, initialHydration, skipActionErrorRevalidation, isRevalidationRequired, cancelledDeferredRoutes, cancelledFetcherLoads, deletedFetchers, fetchLoadMatches, fetchRedirectIds, routesToUse, basename, pendingActionResult) {
+  let actionResult = pendingActionResult ? isErrorResult(pendingActionResult[1]) ? pendingActionResult[1].error : pendingActionResult[1].data : void 0;
+  let currentUrl = history.createURL(state.location);
+  let nextUrl = history.createURL(location);
+  let boundaryMatches = matches;
+  if (initialHydration && state.errors) {
+    boundaryMatches = getLoaderMatchesUntilBoundary(matches, Object.keys(state.errors)[0], true);
+  } else if (pendingActionResult && isErrorResult(pendingActionResult[1])) {
+    boundaryMatches = getLoaderMatchesUntilBoundary(matches, pendingActionResult[0]);
+  }
+  let actionStatus = pendingActionResult ? pendingActionResult[1].statusCode : void 0;
+  let shouldSkipRevalidation = skipActionErrorRevalidation && actionStatus && actionStatus >= 400;
+  let navigationMatches = boundaryMatches.filter((match2, index) => {
+    let {
+      route
+    } = match2;
+    if (route.lazy) {
+      return true;
+    }
+    if (route.loader == null) {
+      return false;
+    }
+    if (initialHydration) {
+      return shouldLoadRouteOnHydration(route, state.loaderData, state.errors);
+    }
+    if (isNewLoader(state.loaderData, state.matches[index], match2) || cancelledDeferredRoutes.some((id) => id === match2.route.id)) {
+      return true;
+    }
+    let currentRouteMatch = state.matches[index];
+    let nextRouteMatch = match2;
+    return shouldRevalidateLoader(match2, _extends2({
+      currentUrl,
+      currentParams: currentRouteMatch.params,
+      nextUrl,
+      nextParams: nextRouteMatch.params
+    }, submission, {
+      actionResult,
+      actionStatus,
+      defaultShouldRevalidate: shouldSkipRevalidation ? false : (
+        // Forced revalidation due to submission, useRevalidator, or X-Remix-Revalidate
+        isRevalidationRequired || currentUrl.pathname + currentUrl.search === nextUrl.pathname + nextUrl.search || // Search params affect all loaders
+        currentUrl.search !== nextUrl.search || isNewRouteInstance(currentRouteMatch, nextRouteMatch)
+      )
+    }));
+  });
+  let revalidatingFetchers = [];
+  fetchLoadMatches.forEach((f, key) => {
+    if (initialHydration || !matches.some((m) => m.route.id === f.routeId) || deletedFetchers.has(key)) {
+      return;
+    }
+    let fetcherMatches = matchRoutes(routesToUse, f.path, basename);
+    if (!fetcherMatches) {
+      revalidatingFetchers.push({
+        key,
+        routeId: f.routeId,
+        path: f.path,
+        matches: null,
+        match: null,
+        controller: null
+      });
+      return;
+    }
+    let fetcher = state.fetchers.get(key);
+    let fetcherMatch = getTargetMatch(fetcherMatches, f.path);
+    let shouldRevalidate = false;
+    if (fetchRedirectIds.has(key)) {
+      shouldRevalidate = false;
+    } else if (cancelledFetcherLoads.has(key)) {
+      cancelledFetcherLoads.delete(key);
+      shouldRevalidate = true;
+    } else if (fetcher && fetcher.state !== "idle" && fetcher.data === void 0) {
+      shouldRevalidate = isRevalidationRequired;
+    } else {
+      shouldRevalidate = shouldRevalidateLoader(fetcherMatch, _extends2({
+        currentUrl,
+        currentParams: state.matches[state.matches.length - 1].params,
+        nextUrl,
+        nextParams: matches[matches.length - 1].params
+      }, submission, {
+        actionResult,
+        actionStatus,
+        defaultShouldRevalidate: shouldSkipRevalidation ? false : isRevalidationRequired
+      }));
+    }
+    if (shouldRevalidate) {
+      revalidatingFetchers.push({
+        key,
+        routeId: f.routeId,
+        path: f.path,
+        matches: fetcherMatches,
+        match: fetcherMatch,
+        controller: new AbortController()
+      });
+    }
+  });
+  return [navigationMatches, revalidatingFetchers];
+}
+function shouldLoadRouteOnHydration(route, loaderData, errors) {
+  if (route.lazy) {
+    return true;
+  }
+  if (!route.loader) {
+    return false;
+  }
+  let hasData = loaderData != null && loaderData[route.id] !== void 0;
+  let hasError = errors != null && errors[route.id] !== void 0;
+  if (!hasData && hasError) {
+    return false;
+  }
+  if (typeof route.loader === "function" && route.loader.hydrate === true) {
+    return true;
+  }
+  return !hasData && !hasError;
+}
+function isNewLoader(currentLoaderData, currentMatch, match2) {
+  let isNew = (
+    // [a] -> [a, b]
+    !currentMatch || // [a, b] -> [a, c]
+    match2.route.id !== currentMatch.route.id
+  );
+  let isMissingData = currentLoaderData[match2.route.id] === void 0;
+  return isNew || isMissingData;
+}
+function isNewRouteInstance(currentMatch, match2) {
+  let currentPath = currentMatch.route.path;
+  return (
+    // param change for this match, /users/123 -> /users/456
+    currentMatch.pathname !== match2.pathname || // splat param changed, which is not present in match.path
+    // e.g. /files/images/avatar.jpg -> files/finances.xls
+    currentPath != null && currentPath.endsWith("*") && currentMatch.params["*"] !== match2.params["*"]
+  );
+}
+function shouldRevalidateLoader(loaderMatch, arg) {
+  if (loaderMatch.route.shouldRevalidate) {
+    let routeChoice = loaderMatch.route.shouldRevalidate(arg);
+    if (typeof routeChoice === "boolean") {
+      return routeChoice;
+    }
+  }
+  return arg.defaultShouldRevalidate;
+}
+function patchRoutesImpl(routeId, children, routesToUse, manifest, mapRouteProperties2) {
+  var _childrenToPatch;
+  let childrenToPatch;
+  if (routeId) {
+    let route = manifest[routeId];
+    invariant(route, "No route found to patch children into: routeId = " + routeId);
+    if (!route.children) {
+      route.children = [];
+    }
+    childrenToPatch = route.children;
+  } else {
+    childrenToPatch = routesToUse;
+  }
+  let uniqueChildren = children.filter((newRoute) => !childrenToPatch.some((existingRoute) => isSameRoute(newRoute, existingRoute)));
+  let newRoutes = convertRoutesToDataRoutes(uniqueChildren, mapRouteProperties2, [routeId || "_", "patch", String(((_childrenToPatch = childrenToPatch) == null ? void 0 : _childrenToPatch.length) || "0")], manifest);
+  childrenToPatch.push(...newRoutes);
+}
+function isSameRoute(newRoute, existingRoute) {
+  if ("id" in newRoute && "id" in existingRoute && newRoute.id === existingRoute.id) {
+    return true;
+  }
+  if (!(newRoute.index === existingRoute.index && newRoute.path === existingRoute.path && newRoute.caseSensitive === existingRoute.caseSensitive)) {
+    return false;
+  }
+  if ((!newRoute.children || newRoute.children.length === 0) && (!existingRoute.children || existingRoute.children.length === 0)) {
+    return true;
+  }
+  return newRoute.children.every((aChild, i) => {
+    var _existingRoute$childr;
+    return (_existingRoute$childr = existingRoute.children) == null ? void 0 : _existingRoute$childr.some((bChild) => isSameRoute(aChild, bChild));
+  });
+}
+async function loadLazyRouteModule(route, mapRouteProperties2, manifest) {
+  if (!route.lazy) {
+    return;
+  }
+  let lazyRoute = await route.lazy();
+  if (!route.lazy) {
+    return;
+  }
+  let routeToUpdate = manifest[route.id];
+  invariant(routeToUpdate, "No route found in manifest");
+  let routeUpdates = {};
+  for (let lazyRouteProperty in lazyRoute) {
+    let staticRouteValue = routeToUpdate[lazyRouteProperty];
+    let isPropertyStaticallyDefined = staticRouteValue !== void 0 && // This property isn't static since it should always be updated based
+    // on the route updates
+    lazyRouteProperty !== "hasErrorBoundary";
+    warning(!isPropertyStaticallyDefined, 'Route "' + routeToUpdate.id + '" has a static property "' + lazyRouteProperty + '" defined but its lazy function is also returning a value for this property. ' + ('The lazy route property "' + lazyRouteProperty + '" will be ignored.'));
+    if (!isPropertyStaticallyDefined && !immutableRouteKeys.has(lazyRouteProperty)) {
+      routeUpdates[lazyRouteProperty] = lazyRoute[lazyRouteProperty];
+    }
+  }
+  Object.assign(routeToUpdate, routeUpdates);
+  Object.assign(routeToUpdate, _extends2({}, mapRouteProperties2(routeToUpdate), {
+    lazy: void 0
+  }));
+}
+async function defaultDataStrategy(_ref4) {
+  let {
+    matches
+  } = _ref4;
+  let matchesToLoad = matches.filter((m) => m.shouldLoad);
+  let results = await Promise.all(matchesToLoad.map((m) => m.resolve()));
+  return results.reduce((acc, result, i) => Object.assign(acc, {
+    [matchesToLoad[i].route.id]: result
+  }), {});
+}
+async function callDataStrategyImpl(dataStrategyImpl, type, state, request, matchesToLoad, matches, fetcherKey, manifest, mapRouteProperties2, requestContext) {
+  let loadRouteDefinitionsPromises = matches.map((m) => m.route.lazy ? loadLazyRouteModule(m.route, mapRouteProperties2, manifest) : void 0);
+  let dsMatches = matches.map((match2, i) => {
+    let loadRoutePromise = loadRouteDefinitionsPromises[i];
+    let shouldLoad = matchesToLoad.some((m) => m.route.id === match2.route.id);
+    let resolve = async (handlerOverride) => {
+      if (handlerOverride && request.method === "GET" && (match2.route.lazy || match2.route.loader)) {
+        shouldLoad = true;
+      }
+      return shouldLoad ? callLoaderOrAction(type, request, match2, loadRoutePromise, handlerOverride, requestContext) : Promise.resolve({
+        type: ResultType.data,
+        result: void 0
+      });
+    };
+    return _extends2({}, match2, {
+      shouldLoad,
+      resolve
+    });
+  });
+  let results = await dataStrategyImpl({
+    matches: dsMatches,
+    request,
+    params: matches[0].params,
+    fetcherKey,
+    context: requestContext
+  });
+  try {
+    await Promise.all(loadRouteDefinitionsPromises);
+  } catch (e) {
+  }
+  return results;
+}
+async function callLoaderOrAction(type, request, match2, loadRoutePromise, handlerOverride, staticContext) {
+  let result;
+  let onReject;
+  let runHandler = (handler) => {
+    let reject;
+    let abortPromise = new Promise((_, r) => reject = r);
+    onReject = () => reject();
+    request.signal.addEventListener("abort", onReject);
+    let actualHandler = (ctx) => {
+      if (typeof handler !== "function") {
+        return Promise.reject(new Error("You cannot call the handler for a route which defines a boolean " + ('"' + type + '" [routeId: ' + match2.route.id + "]")));
+      }
+      return handler({
+        request,
+        params: match2.params,
+        context: staticContext
+      }, ...ctx !== void 0 ? [ctx] : []);
+    };
+    let handlerPromise = (async () => {
+      try {
+        let val = await (handlerOverride ? handlerOverride((ctx) => actualHandler(ctx)) : actualHandler());
+        return {
+          type: "data",
+          result: val
+        };
+      } catch (e) {
+        return {
+          type: "error",
+          result: e
+        };
+      }
+    })();
+    return Promise.race([handlerPromise, abortPromise]);
+  };
+  try {
+    let handler = match2.route[type];
+    if (loadRoutePromise) {
+      if (handler) {
+        let handlerError;
+        let [value] = await Promise.all([
+          // If the handler throws, don't let it immediately bubble out,
+          // since we need to let the lazy() execution finish so we know if this
+          // route has a boundary that can handle the error
+          runHandler(handler).catch((e) => {
+            handlerError = e;
+          }),
+          loadRoutePromise
+        ]);
+        if (handlerError !== void 0) {
+          throw handlerError;
+        }
+        result = value;
+      } else {
+        await loadRoutePromise;
+        handler = match2.route[type];
+        if (handler) {
+          result = await runHandler(handler);
+        } else if (type === "action") {
+          let url = new URL(request.url);
+          let pathname = url.pathname + url.search;
+          throw getInternalRouterError(405, {
+            method: request.method,
+            pathname,
+            routeId: match2.route.id
+          });
+        } else {
+          return {
+            type: ResultType.data,
+            result: void 0
+          };
+        }
+      }
+    } else if (!handler) {
+      let url = new URL(request.url);
+      let pathname = url.pathname + url.search;
+      throw getInternalRouterError(404, {
+        pathname
+      });
+    } else {
+      result = await runHandler(handler);
+    }
+    invariant(result.result !== void 0, "You defined " + (type === "action" ? "an action" : "a loader") + " for route " + ('"' + match2.route.id + "\" but didn't return anything from your `" + type + "` ") + "function. Please return a value or `null`.");
+  } catch (e) {
+    return {
+      type: ResultType.error,
+      result: e
+    };
+  } finally {
+    if (onReject) {
+      request.signal.removeEventListener("abort", onReject);
+    }
+  }
+  return result;
+}
+async function convertDataStrategyResultToDataResult(dataStrategyResult) {
+  let {
+    result,
+    type
+  } = dataStrategyResult;
+  if (isResponse(result)) {
+    let data;
+    try {
+      let contentType = result.headers.get("Content-Type");
+      if (contentType && /\bapplication\/json\b/.test(contentType)) {
+        if (result.body == null) {
+          data = null;
+        } else {
+          data = await result.json();
+        }
+      } else {
+        data = await result.text();
+      }
+    } catch (e) {
+      return {
+        type: ResultType.error,
+        error: e
+      };
+    }
+    if (type === ResultType.error) {
+      return {
+        type: ResultType.error,
+        error: new ErrorResponseImpl(result.status, result.statusText, data),
+        statusCode: result.status,
+        headers: result.headers
+      };
+    }
+    return {
+      type: ResultType.data,
+      data,
+      statusCode: result.status,
+      headers: result.headers
+    };
+  }
+  if (type === ResultType.error) {
+    if (isDataWithResponseInit(result)) {
+      var _result$init3, _result$init4;
+      if (result.data instanceof Error) {
+        var _result$init, _result$init2;
+        return {
+          type: ResultType.error,
+          error: result.data,
+          statusCode: (_result$init = result.init) == null ? void 0 : _result$init.status,
+          headers: (_result$init2 = result.init) != null && _result$init2.headers ? new Headers(result.init.headers) : void 0
+        };
+      }
+      return {
+        type: ResultType.error,
+        error: new ErrorResponseImpl(((_result$init3 = result.init) == null ? void 0 : _result$init3.status) || 500, void 0, result.data),
+        statusCode: isRouteErrorResponse(result) ? result.status : void 0,
+        headers: (_result$init4 = result.init) != null && _result$init4.headers ? new Headers(result.init.headers) : void 0
+      };
+    }
+    return {
+      type: ResultType.error,
+      error: result,
+      statusCode: isRouteErrorResponse(result) ? result.status : void 0
+    };
+  }
+  if (isDeferredData(result)) {
+    var _result$init5, _result$init6;
+    return {
+      type: ResultType.deferred,
+      deferredData: result,
+      statusCode: (_result$init5 = result.init) == null ? void 0 : _result$init5.status,
+      headers: ((_result$init6 = result.init) == null ? void 0 : _result$init6.headers) && new Headers(result.init.headers)
+    };
+  }
+  if (isDataWithResponseInit(result)) {
+    var _result$init7, _result$init8;
+    return {
+      type: ResultType.data,
+      data: result.data,
+      statusCode: (_result$init7 = result.init) == null ? void 0 : _result$init7.status,
+      headers: (_result$init8 = result.init) != null && _result$init8.headers ? new Headers(result.init.headers) : void 0
+    };
+  }
+  return {
+    type: ResultType.data,
+    data: result
+  };
+}
+function normalizeRelativeRoutingRedirectResponse(response, request, routeId, matches, basename, v7_relativeSplatPath) {
+  let location = response.headers.get("Location");
+  invariant(location, "Redirects returned/thrown from loaders/actions must have a Location header");
+  if (!ABSOLUTE_URL_REGEX.test(location)) {
+    let trimmedMatches = matches.slice(0, matches.findIndex((m) => m.route.id === routeId) + 1);
+    location = normalizeTo(new URL(request.url), trimmedMatches, basename, true, location, v7_relativeSplatPath);
+    response.headers.set("Location", location);
+  }
+  return response;
+}
+function normalizeRedirectLocation(location, currentUrl, basename) {
+  if (ABSOLUTE_URL_REGEX.test(location)) {
+    let normalizedLocation = location;
+    let url = normalizedLocation.startsWith("//") ? new URL(currentUrl.protocol + normalizedLocation) : new URL(normalizedLocation);
+    let isSameBasename = stripBasename(url.pathname, basename) != null;
+    if (url.origin === currentUrl.origin && isSameBasename) {
+      return url.pathname + url.search + url.hash;
+    }
+  }
+  return location;
+}
+function createClientSideRequest(history, location, signal, submission) {
+  let url = history.createURL(stripHashFromPath(location)).toString();
+  let init = {
+    signal
+  };
+  if (submission && isMutationMethod(submission.formMethod)) {
+    let {
+      formMethod,
+      formEncType
+    } = submission;
+    init.method = formMethod.toUpperCase();
+    if (formEncType === "application/json") {
+      init.headers = new Headers({
+        "Content-Type": formEncType
+      });
+      init.body = JSON.stringify(submission.json);
+    } else if (formEncType === "text/plain") {
+      init.body = submission.text;
+    } else if (formEncType === "application/x-www-form-urlencoded" && submission.formData) {
+      init.body = convertFormDataToSearchParams(submission.formData);
+    } else {
+      init.body = submission.formData;
+    }
+  }
+  return new Request(url, init);
+}
+function convertFormDataToSearchParams(formData) {
+  let searchParams = new URLSearchParams();
+  for (let [key, value] of formData.entries()) {
+    searchParams.append(key, typeof value === "string" ? value : value.name);
+  }
+  return searchParams;
+}
+function convertSearchParamsToFormData(searchParams) {
+  let formData = new FormData();
+  for (let [key, value] of searchParams.entries()) {
+    formData.append(key, value);
+  }
+  return formData;
+}
+function processRouteLoaderData(matches, results, pendingActionResult, activeDeferreds, skipLoaderErrorBubbling) {
+  let loaderData = {};
+  let errors = null;
+  let statusCode;
+  let foundError = false;
+  let loaderHeaders = {};
+  let pendingError = pendingActionResult && isErrorResult(pendingActionResult[1]) ? pendingActionResult[1].error : void 0;
+  matches.forEach((match2) => {
+    if (!(match2.route.id in results)) {
+      return;
+    }
+    let id = match2.route.id;
+    let result = results[id];
+    invariant(!isRedirectResult(result), "Cannot handle redirect results in processLoaderData");
+    if (isErrorResult(result)) {
+      let error = result.error;
+      if (pendingError !== void 0) {
+        error = pendingError;
+        pendingError = void 0;
+      }
+      errors = errors || {};
+      if (skipLoaderErrorBubbling) {
+        errors[id] = error;
+      } else {
+        let boundaryMatch = findNearestBoundary(matches, id);
+        if (errors[boundaryMatch.route.id] == null) {
+          errors[boundaryMatch.route.id] = error;
+        }
+      }
+      loaderData[id] = void 0;
+      if (!foundError) {
+        foundError = true;
+        statusCode = isRouteErrorResponse(result.error) ? result.error.status : 500;
+      }
+      if (result.headers) {
+        loaderHeaders[id] = result.headers;
+      }
+    } else {
+      if (isDeferredResult(result)) {
+        activeDeferreds.set(id, result.deferredData);
+        loaderData[id] = result.deferredData.data;
+        if (result.statusCode != null && result.statusCode !== 200 && !foundError) {
+          statusCode = result.statusCode;
+        }
+        if (result.headers) {
+          loaderHeaders[id] = result.headers;
+        }
+      } else {
+        loaderData[id] = result.data;
+        if (result.statusCode && result.statusCode !== 200 && !foundError) {
+          statusCode = result.statusCode;
+        }
+        if (result.headers) {
+          loaderHeaders[id] = result.headers;
+        }
+      }
+    }
+  });
+  if (pendingError !== void 0 && pendingActionResult) {
+    errors = {
+      [pendingActionResult[0]]: pendingError
+    };
+    loaderData[pendingActionResult[0]] = void 0;
+  }
+  return {
+    loaderData,
+    errors,
+    statusCode: statusCode || 200,
+    loaderHeaders
+  };
+}
+function processLoaderData(state, matches, results, pendingActionResult, revalidatingFetchers, fetcherResults, activeDeferreds) {
+  let {
+    loaderData,
+    errors
+  } = processRouteLoaderData(
+    matches,
+    results,
+    pendingActionResult,
+    activeDeferreds,
+    false
+    // This method is only called client side so we always want to bubble
+  );
+  revalidatingFetchers.forEach((rf) => {
+    let {
+      key,
+      match: match2,
+      controller
+    } = rf;
+    let result = fetcherResults[key];
+    invariant(result, "Did not find corresponding fetcher result");
+    if (controller && controller.signal.aborted) {
+      return;
+    } else if (isErrorResult(result)) {
+      let boundaryMatch = findNearestBoundary(state.matches, match2 == null ? void 0 : match2.route.id);
+      if (!(errors && errors[boundaryMatch.route.id])) {
+        errors = _extends2({}, errors, {
+          [boundaryMatch.route.id]: result.error
+        });
+      }
+      state.fetchers.delete(key);
+    } else if (isRedirectResult(result)) {
+      invariant(false, "Unhandled fetcher revalidation redirect");
+    } else if (isDeferredResult(result)) {
+      invariant(false, "Unhandled fetcher deferred data");
+    } else {
+      let doneFetcher = getDoneFetcher(result.data);
+      state.fetchers.set(key, doneFetcher);
+    }
+  });
+  return {
+    loaderData,
+    errors
+  };
+}
+function mergeLoaderData(loaderData, newLoaderData, matches, errors) {
+  let mergedLoaderData = _extends2({}, newLoaderData);
+  for (let match2 of matches) {
+    let id = match2.route.id;
+    if (newLoaderData.hasOwnProperty(id)) {
+      if (newLoaderData[id] !== void 0) {
+        mergedLoaderData[id] = newLoaderData[id];
+      }
+    } else if (loaderData[id] !== void 0 && match2.route.loader) {
+      mergedLoaderData[id] = loaderData[id];
+    }
+    if (errors && errors.hasOwnProperty(id)) {
+      break;
+    }
+  }
+  return mergedLoaderData;
+}
+function getActionDataForCommit(pendingActionResult) {
+  if (!pendingActionResult) {
+    return {};
+  }
+  return isErrorResult(pendingActionResult[1]) ? {
+    // Clear out prior actionData on errors
+    actionData: {}
+  } : {
+    actionData: {
+      [pendingActionResult[0]]: pendingActionResult[1].data
+    }
+  };
+}
+function findNearestBoundary(matches, routeId) {
+  let eligibleMatches = routeId ? matches.slice(0, matches.findIndex((m) => m.route.id === routeId) + 1) : [...matches];
+  return eligibleMatches.reverse().find((m) => m.route.hasErrorBoundary === true) || matches[0];
+}
+function getShortCircuitMatches(routes) {
+  let route = routes.length === 1 ? routes[0] : routes.find((r) => r.index || !r.path || r.path === "/") || {
+    id: "__shim-error-route__"
+  };
+  return {
+    matches: [{
+      params: {},
+      pathname: "",
+      pathnameBase: "",
+      route
+    }],
+    route
+  };
+}
+function getInternalRouterError(status, _temp5) {
+  let {
+    pathname,
+    routeId,
+    method,
+    type,
+    message
+  } = _temp5 === void 0 ? {} : _temp5;
+  let statusText = "Unknown Server Error";
+  let errorMessage = "Unknown @remix-run/router error";
+  if (status === 400) {
+    statusText = "Bad Request";
+    if (method && pathname && routeId) {
+      errorMessage = "You made a " + method + ' request to "' + pathname + '" but ' + ('did not provide a `loader` for route "' + routeId + '", ') + "so there is no way to handle the request.";
+    } else if (type === "defer-action") {
+      errorMessage = "defer() is not supported in actions";
+    } else if (type === "invalid-body") {
+      errorMessage = "Unable to encode submission body";
+    }
+  } else if (status === 403) {
+    statusText = "Forbidden";
+    errorMessage = 'Route "' + routeId + '" does not match URL "' + pathname + '"';
+  } else if (status === 404) {
+    statusText = "Not Found";
+    errorMessage = 'No route matches URL "' + pathname + '"';
+  } else if (status === 405) {
+    statusText = "Method Not Allowed";
+    if (method && pathname && routeId) {
+      errorMessage = "You made a " + method.toUpperCase() + ' request to "' + pathname + '" but ' + ('did not provide an `action` for route "' + routeId + '", ') + "so there is no way to handle the request.";
+    } else if (method) {
+      errorMessage = 'Invalid request method "' + method.toUpperCase() + '"';
+    }
+  }
+  return new ErrorResponseImpl(status || 500, statusText, new Error(errorMessage), true);
+}
+function findRedirect(results) {
+  let entries = Object.entries(results);
+  for (let i = entries.length - 1; i >= 0; i--) {
+    let [key, result] = entries[i];
+    if (isRedirectResult(result)) {
+      return {
+        key,
+        result
+      };
+    }
+  }
+}
+function stripHashFromPath(path) {
+  let parsedPath = typeof path === "string" ? parsePath(path) : path;
+  return createPath(_extends2({}, parsedPath, {
+    hash: ""
+  }));
+}
+function isHashChangeOnly(a, b) {
+  if (a.pathname !== b.pathname || a.search !== b.search) {
+    return false;
+  }
+  if (a.hash === "") {
+    return b.hash !== "";
+  } else if (a.hash === b.hash) {
+    return true;
+  } else if (b.hash !== "") {
+    return true;
+  }
+  return false;
+}
+function isRedirectDataStrategyResultResult(result) {
+  return isResponse(result.result) && redirectStatusCodes.has(result.result.status);
+}
+function isDeferredResult(result) {
+  return result.type === ResultType.deferred;
+}
+function isErrorResult(result) {
+  return result.type === ResultType.error;
+}
+function isRedirectResult(result) {
+  return (result && result.type) === ResultType.redirect;
+}
+function isDataWithResponseInit(value) {
+  return typeof value === "object" && value != null && "type" in value && "data" in value && "init" in value && value.type === "DataWithResponseInit";
+}
+function isDeferredData(value) {
+  let deferred = value;
+  return deferred && typeof deferred === "object" && typeof deferred.data === "object" && typeof deferred.subscribe === "function" && typeof deferred.cancel === "function" && typeof deferred.resolveData === "function";
+}
+function isResponse(value) {
+  return value != null && typeof value.status === "number" && typeof value.statusText === "string" && typeof value.headers === "object" && typeof value.body !== "undefined";
+}
+function isValidMethod(method) {
+  return validRequestMethods.has(method.toLowerCase());
+}
+function isMutationMethod(method) {
+  return validMutationMethods.has(method.toLowerCase());
+}
+async function resolveNavigationDeferredResults(matches, results, signal, currentMatches, currentLoaderData) {
+  let entries = Object.entries(results);
+  for (let index = 0; index < entries.length; index++) {
+    let [routeId, result] = entries[index];
+    let match2 = matches.find((m) => (m == null ? void 0 : m.route.id) === routeId);
+    if (!match2) {
+      continue;
+    }
+    let currentMatch = currentMatches.find((m) => m.route.id === match2.route.id);
+    let isRevalidatingLoader = currentMatch != null && !isNewRouteInstance(currentMatch, match2) && (currentLoaderData && currentLoaderData[match2.route.id]) !== void 0;
+    if (isDeferredResult(result) && isRevalidatingLoader) {
+      await resolveDeferredData(result, signal, false).then((result2) => {
+        if (result2) {
+          results[routeId] = result2;
+        }
+      });
+    }
+  }
+}
+async function resolveFetcherDeferredResults(matches, results, revalidatingFetchers) {
+  for (let index = 0; index < revalidatingFetchers.length; index++) {
+    let {
+      key,
+      routeId,
+      controller
+    } = revalidatingFetchers[index];
+    let result = results[key];
+    let match2 = matches.find((m) => (m == null ? void 0 : m.route.id) === routeId);
+    if (!match2) {
+      continue;
+    }
+    if (isDeferredResult(result)) {
+      invariant(controller, "Expected an AbortController for revalidating fetcher deferred result");
+      await resolveDeferredData(result, controller.signal, true).then((result2) => {
+        if (result2) {
+          results[key] = result2;
+        }
+      });
+    }
+  }
+}
+async function resolveDeferredData(result, signal, unwrap) {
+  if (unwrap === void 0) {
+    unwrap = false;
+  }
+  let aborted = await result.deferredData.resolveData(signal);
+  if (aborted) {
+    return;
+  }
+  if (unwrap) {
+    try {
+      return {
+        type: ResultType.data,
+        data: result.deferredData.unwrappedData
+      };
+    } catch (e) {
+      return {
+        type: ResultType.error,
+        error: e
+      };
+    }
+  }
+  return {
+    type: ResultType.data,
+    data: result.deferredData.data
+  };
+}
+function hasNakedIndexQuery(search) {
+  return new URLSearchParams(search).getAll("index").some((v) => v === "");
+}
+function getTargetMatch(matches, location) {
+  let search = typeof location === "string" ? parsePath(location).search : location.search;
+  if (matches[matches.length - 1].route.index && hasNakedIndexQuery(search || "")) {
+    return matches[matches.length - 1];
+  }
+  let pathMatches = getPathContributingMatches(matches);
+  return pathMatches[pathMatches.length - 1];
+}
+function getSubmissionFromNavigation(navigation) {
+  let {
+    formMethod,
+    formAction,
+    formEncType,
+    text,
+    formData,
+    json: json2
+  } = navigation;
+  if (!formMethod || !formAction || !formEncType) {
+    return;
+  }
+  if (text != null) {
+    return {
+      formMethod,
+      formAction,
+      formEncType,
+      formData: void 0,
+      json: void 0,
+      text
+    };
+  } else if (formData != null) {
+    return {
+      formMethod,
+      formAction,
+      formEncType,
+      formData,
+      json: void 0,
+      text: void 0
+    };
+  } else if (json2 !== void 0) {
+    return {
+      formMethod,
+      formAction,
+      formEncType,
+      formData: void 0,
+      json: json2,
+      text: void 0
+    };
+  }
+}
+function getLoadingNavigation(location, submission) {
+  if (submission) {
+    let navigation = {
+      state: "loading",
+      location,
+      formMethod: submission.formMethod,
+      formAction: submission.formAction,
+      formEncType: submission.formEncType,
+      formData: submission.formData,
+      json: submission.json,
+      text: submission.text
+    };
+    return navigation;
+  } else {
+    let navigation = {
+      state: "loading",
+      location,
+      formMethod: void 0,
+      formAction: void 0,
+      formEncType: void 0,
+      formData: void 0,
+      json: void 0,
+      text: void 0
+    };
+    return navigation;
+  }
+}
+function getSubmittingNavigation(location, submission) {
+  let navigation = {
+    state: "submitting",
+    location,
+    formMethod: submission.formMethod,
+    formAction: submission.formAction,
+    formEncType: submission.formEncType,
+    formData: submission.formData,
+    json: submission.json,
+    text: submission.text
+  };
+  return navigation;
+}
+function getLoadingFetcher(submission, data) {
+  if (submission) {
+    let fetcher = {
+      state: "loading",
+      formMethod: submission.formMethod,
+      formAction: submission.formAction,
+      formEncType: submission.formEncType,
+      formData: submission.formData,
+      json: submission.json,
+      text: submission.text,
+      data
+    };
+    return fetcher;
+  } else {
+    let fetcher = {
+      state: "loading",
+      formMethod: void 0,
+      formAction: void 0,
+      formEncType: void 0,
+      formData: void 0,
+      json: void 0,
+      text: void 0,
+      data
+    };
+    return fetcher;
+  }
+}
+function getSubmittingFetcher(submission, existingFetcher) {
+  let fetcher = {
+    state: "submitting",
+    formMethod: submission.formMethod,
+    formAction: submission.formAction,
+    formEncType: submission.formEncType,
+    formData: submission.formData,
+    json: submission.json,
+    text: submission.text,
+    data: existingFetcher ? existingFetcher.data : void 0
+  };
+  return fetcher;
+}
+function getDoneFetcher(data) {
+  let fetcher = {
+    state: "idle",
+    formMethod: void 0,
+    formAction: void 0,
+    formEncType: void 0,
+    formData: void 0,
+    json: void 0,
+    text: void 0,
+    data
+  };
+  return fetcher;
+}
+function restoreAppliedTransitions(_window, transitions) {
+  try {
+    let sessionPositions = _window.sessionStorage.getItem(TRANSITIONS_STORAGE_KEY);
+    if (sessionPositions) {
+      let json2 = JSON.parse(sessionPositions);
+      for (let [k, v] of Object.entries(json2 || {})) {
+        if (v && Array.isArray(v)) {
+          transitions.set(k, new Set(v || []));
+        }
+      }
+    }
+  } catch (e) {
+  }
+}
+function persistAppliedTransitions(_window, transitions) {
+  if (transitions.size > 0) {
+    let json2 = {};
+    for (let [k, v] of transitions) {
+      json2[k] = [...v];
+    }
+    try {
+      _window.sessionStorage.setItem(TRANSITIONS_STORAGE_KEY, JSON.stringify(json2));
+    } catch (error) {
+      warning(false, "Failed to save applied view transitions in sessionStorage (" + error + ").");
+    }
+  }
+}
+
+// node_modules/react-router/dist/index.js
+function _extends3() {
+  _extends3 = Object.assign ? Object.assign.bind() : function(target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends3.apply(this, arguments);
+}
+var DataRouterContext = /* @__PURE__ */ React4.createContext(null);
+if (true) {
+  DataRouterContext.displayName = "DataRouter";
+}
+var DataRouterStateContext = /* @__PURE__ */ React4.createContext(null);
+if (true) {
+  DataRouterStateContext.displayName = "DataRouterState";
+}
+var AwaitContext = /* @__PURE__ */ React4.createContext(null);
+if (true) {
+  AwaitContext.displayName = "Await";
+}
+var NavigationContext = /* @__PURE__ */ React4.createContext(null);
+if (true) {
+  NavigationContext.displayName = "Navigation";
+}
+var LocationContext = /* @__PURE__ */ React4.createContext(null);
+if (true) {
+  LocationContext.displayName = "Location";
+}
+var RouteContext = /* @__PURE__ */ React4.createContext({
+  outlet: null,
+  matches: [],
+  isDataRoute: false
+});
+if (true) {
+  RouteContext.displayName = "Route";
+}
+var RouteErrorContext = /* @__PURE__ */ React4.createContext(null);
+if (true) {
+  RouteErrorContext.displayName = "RouteError";
+}
+function useHref(to, _temp) {
+  let {
+    relative
+  } = _temp === void 0 ? {} : _temp;
+  !useInRouterContext() ? true ? invariant(
+    false,
+    // TODO: This error is probably because they somehow have 2 versions of the
+    // router loaded. We can help them understand how to avoid that.
+    "useHref() may be used only in the context of a <Router> component."
+  ) : invariant(false) : void 0;
+  let {
+    basename,
+    navigator: navigator2
+  } = React4.useContext(NavigationContext);
+  let {
+    hash: hash2,
+    pathname,
+    search
+  } = useResolvedPath(to, {
+    relative
+  });
+  let joinedPathname = pathname;
+  if (basename !== "/") {
+    joinedPathname = pathname === "/" ? basename : joinPaths([basename, pathname]);
+  }
+  return navigator2.createHref({
+    pathname: joinedPathname,
+    search,
+    hash: hash2
+  });
+}
+function useInRouterContext() {
+  return React4.useContext(LocationContext) != null;
+}
+function useLocation() {
+  !useInRouterContext() ? true ? invariant(
+    false,
+    // TODO: This error is probably because they somehow have 2 versions of the
+    // router loaded. We can help them understand how to avoid that.
+    "useLocation() may be used only in the context of a <Router> component."
+  ) : invariant(false) : void 0;
+  return React4.useContext(LocationContext).location;
+}
+var navigateEffectWarning = "You should call navigate() in a React.useEffect(), not when your component is first rendered.";
+function useIsomorphicLayoutEffect(cb) {
+  let isStatic = React4.useContext(NavigationContext).static;
+  if (!isStatic) {
+    React4.useLayoutEffect(cb);
+  }
+}
+function useNavigate() {
+  let {
+    isDataRoute
+  } = React4.useContext(RouteContext);
+  return isDataRoute ? useNavigateStable() : useNavigateUnstable();
+}
+function useNavigateUnstable() {
+  !useInRouterContext() ? true ? invariant(
+    false,
+    // TODO: This error is probably because they somehow have 2 versions of the
+    // router loaded. We can help them understand how to avoid that.
+    "useNavigate() may be used only in the context of a <Router> component."
+  ) : invariant(false) : void 0;
+  let dataRouterContext = React4.useContext(DataRouterContext);
+  let {
+    basename,
+    future,
+    navigator: navigator2
+  } = React4.useContext(NavigationContext);
+  let {
+    matches
+  } = React4.useContext(RouteContext);
+  let {
+    pathname: locationPathname
+  } = useLocation();
+  let routePathnamesJson = JSON.stringify(getResolveToMatches(matches, future.v7_relativeSplatPath));
+  let activeRef = React4.useRef(false);
+  useIsomorphicLayoutEffect(() => {
+    activeRef.current = true;
+  });
+  let navigate = React4.useCallback(function(to, options) {
+    if (options === void 0) {
+      options = {};
+    }
+    true ? warning(activeRef.current, navigateEffectWarning) : void 0;
+    if (!activeRef.current) return;
+    if (typeof to === "number") {
+      navigator2.go(to);
+      return;
+    }
+    let path = resolveTo(to, JSON.parse(routePathnamesJson), locationPathname, options.relative === "path");
+    if (dataRouterContext == null && basename !== "/") {
+      path.pathname = path.pathname === "/" ? basename : joinPaths([basename, path.pathname]);
+    }
+    (!!options.replace ? navigator2.replace : navigator2.push)(path, options.state, options);
+  }, [basename, navigator2, routePathnamesJson, locationPathname, dataRouterContext]);
+  return navigate;
+}
+var OutletContext = /* @__PURE__ */ React4.createContext(null);
+function useOutlet(context) {
+  let outlet = React4.useContext(RouteContext).outlet;
+  if (outlet) {
+    return /* @__PURE__ */ React4.createElement(OutletContext.Provider, {
+      value: context
+    }, outlet);
+  }
+  return outlet;
+}
+function useResolvedPath(to, _temp2) {
+  let {
+    relative
+  } = _temp2 === void 0 ? {} : _temp2;
+  let {
+    future
+  } = React4.useContext(NavigationContext);
+  let {
+    matches
+  } = React4.useContext(RouteContext);
+  let {
+    pathname: locationPathname
+  } = useLocation();
+  let routePathnamesJson = JSON.stringify(getResolveToMatches(matches, future.v7_relativeSplatPath));
+  return React4.useMemo(() => resolveTo(to, JSON.parse(routePathnamesJson), locationPathname, relative === "path"), [to, routePathnamesJson, locationPathname, relative]);
+}
+function useRoutesImpl(routes, locationArg, dataRouterState, future) {
+  !useInRouterContext() ? true ? invariant(
+    false,
+    // TODO: This error is probably because they somehow have 2 versions of the
+    // router loaded. We can help them understand how to avoid that.
+    "useRoutes() may be used only in the context of a <Router> component."
+  ) : invariant(false) : void 0;
+  let {
+    navigator: navigator2
+  } = React4.useContext(NavigationContext);
+  let {
+    matches: parentMatches
+  } = React4.useContext(RouteContext);
+  let routeMatch = parentMatches[parentMatches.length - 1];
+  let parentParams = routeMatch ? routeMatch.params : {};
+  let parentPathname = routeMatch ? routeMatch.pathname : "/";
+  let parentPathnameBase = routeMatch ? routeMatch.pathnameBase : "/";
+  let parentRoute = routeMatch && routeMatch.route;
+  if (true) {
+    let parentPath = parentRoute && parentRoute.path || "";
+    warningOnce(parentPathname, !parentRoute || parentPath.endsWith("*"), "You rendered descendant <Routes> (or called `useRoutes()`) at " + ('"' + parentPathname + '" (under <Route path="' + parentPath + '">) but the ') + `parent route path has no trailing "*". This means if you navigate deeper, the parent won't match anymore and therefore the child routes will never render.
+
+` + ('Please change the parent <Route path="' + parentPath + '"> to <Route ') + ('path="' + (parentPath === "/" ? "*" : parentPath + "/*") + '">.'));
+  }
+  let locationFromContext = useLocation();
+  let location;
+  if (locationArg) {
+    var _parsedLocationArg$pa;
+    let parsedLocationArg = typeof locationArg === "string" ? parsePath(locationArg) : locationArg;
+    !(parentPathnameBase === "/" || ((_parsedLocationArg$pa = parsedLocationArg.pathname) == null ? void 0 : _parsedLocationArg$pa.startsWith(parentPathnameBase))) ? true ? invariant(false, "When overriding the location using `<Routes location>` or `useRoutes(routes, location)`, the location pathname must begin with the portion of the URL pathname that was " + ('matched by all parent routes. The current pathname base is "' + parentPathnameBase + '" ') + ('but pathname "' + parsedLocationArg.pathname + '" was given in the `location` prop.')) : invariant(false) : void 0;
+    location = parsedLocationArg;
+  } else {
+    location = locationFromContext;
+  }
+  let pathname = location.pathname || "/";
+  let remainingPathname = pathname;
+  if (parentPathnameBase !== "/") {
+    let parentSegments = parentPathnameBase.replace(/^\//, "").split("/");
+    let segments = pathname.replace(/^\//, "").split("/");
+    remainingPathname = "/" + segments.slice(parentSegments.length).join("/");
+  }
+  let matches = matchRoutes(routes, {
+    pathname: remainingPathname
+  });
+  if (true) {
+    true ? warning(parentRoute || matches != null, 'No routes matched location "' + location.pathname + location.search + location.hash + '" ') : void 0;
+    true ? warning(matches == null || matches[matches.length - 1].route.element !== void 0 || matches[matches.length - 1].route.Component !== void 0 || matches[matches.length - 1].route.lazy !== void 0, 'Matched leaf route at location "' + location.pathname + location.search + location.hash + '" does not have an element or Component. This means it will render an <Outlet /> with a null value by default resulting in an "empty" page.') : void 0;
+  }
+  let renderedMatches = _renderMatches(matches && matches.map((match2) => Object.assign({}, match2, {
+    params: Object.assign({}, parentParams, match2.params),
+    pathname: joinPaths([
+      parentPathnameBase,
+      // Re-encode pathnames that were decoded inside matchRoutes
+      navigator2.encodeLocation ? navigator2.encodeLocation(match2.pathname).pathname : match2.pathname
+    ]),
+    pathnameBase: match2.pathnameBase === "/" ? parentPathnameBase : joinPaths([
+      parentPathnameBase,
+      // Re-encode pathnames that were decoded inside matchRoutes
+      navigator2.encodeLocation ? navigator2.encodeLocation(match2.pathnameBase).pathname : match2.pathnameBase
+    ])
+  })), parentMatches, dataRouterState, future);
+  if (locationArg && renderedMatches) {
+    return /* @__PURE__ */ React4.createElement(LocationContext.Provider, {
+      value: {
+        location: _extends3({
+          pathname: "/",
+          search: "",
+          hash: "",
+          state: null,
+          key: "default"
+        }, location),
+        navigationType: Action.Pop
+      }
+    }, renderedMatches);
+  }
+  return renderedMatches;
+}
+function DefaultErrorComponent() {
+  let error = useRouteError();
+  let message = isRouteErrorResponse(error) ? error.status + " " + error.statusText : error instanceof Error ? error.message : JSON.stringify(error);
+  let stack = error instanceof Error ? error.stack : null;
+  let lightgrey = "rgba(200,200,200, 0.5)";
+  let preStyles = {
+    padding: "0.5rem",
+    backgroundColor: lightgrey
+  };
+  let codeStyles = {
+    padding: "2px 4px",
+    backgroundColor: lightgrey
+  };
+  let devInfo = null;
+  if (true) {
+    console.error("Error handled by React Router default ErrorBoundary:", error);
+    devInfo = /* @__PURE__ */ React4.createElement(React4.Fragment, null, /* @__PURE__ */ React4.createElement("p", null, "\u{1F4BF} Hey developer \u{1F44B}"), /* @__PURE__ */ React4.createElement("p", null, "You can provide a way better UX than this when your app throws errors by providing your own ", /* @__PURE__ */ React4.createElement("code", {
+      style: codeStyles
+    }, "ErrorBoundary"), " or", " ", /* @__PURE__ */ React4.createElement("code", {
+      style: codeStyles
+    }, "errorElement"), " prop on your route."));
+  }
+  return /* @__PURE__ */ React4.createElement(React4.Fragment, null, /* @__PURE__ */ React4.createElement("h2", null, "Unexpected Application Error!"), /* @__PURE__ */ React4.createElement("h3", {
+    style: {
+      fontStyle: "italic"
+    }
+  }, message), stack ? /* @__PURE__ */ React4.createElement("pre", {
+    style: preStyles
+  }, stack) : null, devInfo);
+}
+var defaultErrorElement = /* @__PURE__ */ React4.createElement(DefaultErrorComponent, null);
+var RenderErrorBoundary = class extends React4.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      location: props.location,
+      revalidation: props.revalidation,
+      error: props.error
+    };
+  }
+  static getDerivedStateFromError(error) {
+    return {
+      error
+    };
+  }
+  static getDerivedStateFromProps(props, state) {
+    if (state.location !== props.location || state.revalidation !== "idle" && props.revalidation === "idle") {
+      return {
+        error: props.error,
+        location: props.location,
+        revalidation: props.revalidation
+      };
+    }
+    return {
+      error: props.error !== void 0 ? props.error : state.error,
+      location: state.location,
+      revalidation: props.revalidation || state.revalidation
+    };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("React Router caught the following error during render", error, errorInfo);
+  }
+  render() {
+    return this.state.error !== void 0 ? /* @__PURE__ */ React4.createElement(RouteContext.Provider, {
+      value: this.props.routeContext
+    }, /* @__PURE__ */ React4.createElement(RouteErrorContext.Provider, {
+      value: this.state.error,
+      children: this.props.component
+    })) : this.props.children;
+  }
+};
+function RenderedRoute(_ref) {
+  let {
+    routeContext,
+    match: match2,
+    children
+  } = _ref;
+  let dataRouterContext = React4.useContext(DataRouterContext);
+  if (dataRouterContext && dataRouterContext.static && dataRouterContext.staticContext && (match2.route.errorElement || match2.route.ErrorBoundary)) {
+    dataRouterContext.staticContext._deepestRenderedBoundaryId = match2.route.id;
+  }
+  return /* @__PURE__ */ React4.createElement(RouteContext.Provider, {
+    value: routeContext
+  }, children);
+}
+function _renderMatches(matches, parentMatches, dataRouterState, future) {
+  var _dataRouterState;
+  if (parentMatches === void 0) {
+    parentMatches = [];
+  }
+  if (dataRouterState === void 0) {
+    dataRouterState = null;
+  }
+  if (future === void 0) {
+    future = null;
+  }
+  if (matches == null) {
+    var _future;
+    if (!dataRouterState) {
+      return null;
+    }
+    if (dataRouterState.errors) {
+      matches = dataRouterState.matches;
+    } else if ((_future = future) != null && _future.v7_partialHydration && parentMatches.length === 0 && !dataRouterState.initialized && dataRouterState.matches.length > 0) {
+      matches = dataRouterState.matches;
+    } else {
+      return null;
+    }
+  }
+  let renderedMatches = matches;
+  let errors = (_dataRouterState = dataRouterState) == null ? void 0 : _dataRouterState.errors;
+  if (errors != null) {
+    let errorIndex = renderedMatches.findIndex((m) => m.route.id && (errors == null ? void 0 : errors[m.route.id]) !== void 0);
+    !(errorIndex >= 0) ? true ? invariant(false, "Could not find a matching route for errors on route IDs: " + Object.keys(errors).join(",")) : invariant(false) : void 0;
+    renderedMatches = renderedMatches.slice(0, Math.min(renderedMatches.length, errorIndex + 1));
+  }
+  let renderFallback = false;
+  let fallbackIndex = -1;
+  if (dataRouterState && future && future.v7_partialHydration) {
+    for (let i = 0; i < renderedMatches.length; i++) {
+      let match2 = renderedMatches[i];
+      if (match2.route.HydrateFallback || match2.route.hydrateFallbackElement) {
+        fallbackIndex = i;
+      }
+      if (match2.route.id) {
+        let {
+          loaderData,
+          errors: errors2
+        } = dataRouterState;
+        let needsToRunLoader = match2.route.loader && loaderData[match2.route.id] === void 0 && (!errors2 || errors2[match2.route.id] === void 0);
+        if (match2.route.lazy || needsToRunLoader) {
+          renderFallback = true;
+          if (fallbackIndex >= 0) {
+            renderedMatches = renderedMatches.slice(0, fallbackIndex + 1);
+          } else {
+            renderedMatches = [renderedMatches[0]];
+          }
+          break;
+        }
+      }
+    }
+  }
+  return renderedMatches.reduceRight((outlet, match2, index) => {
+    let error;
+    let shouldRenderHydrateFallback = false;
+    let errorElement = null;
+    let hydrateFallbackElement = null;
+    if (dataRouterState) {
+      error = errors && match2.route.id ? errors[match2.route.id] : void 0;
+      errorElement = match2.route.errorElement || defaultErrorElement;
+      if (renderFallback) {
+        if (fallbackIndex < 0 && index === 0) {
+          warningOnce("route-fallback", false, "No `HydrateFallback` element provided to render during initial hydration");
+          shouldRenderHydrateFallback = true;
+          hydrateFallbackElement = null;
+        } else if (fallbackIndex === index) {
+          shouldRenderHydrateFallback = true;
+          hydrateFallbackElement = match2.route.hydrateFallbackElement || null;
+        }
+      }
+    }
+    let matches2 = parentMatches.concat(renderedMatches.slice(0, index + 1));
+    let getChildren = () => {
+      let children;
+      if (error) {
+        children = errorElement;
+      } else if (shouldRenderHydrateFallback) {
+        children = hydrateFallbackElement;
+      } else if (match2.route.Component) {
+        children = /* @__PURE__ */ React4.createElement(match2.route.Component, null);
+      } else if (match2.route.element) {
+        children = match2.route.element;
+      } else {
+        children = outlet;
+      }
+      return /* @__PURE__ */ React4.createElement(RenderedRoute, {
+        match: match2,
+        routeContext: {
+          outlet,
+          matches: matches2,
+          isDataRoute: dataRouterState != null
+        },
+        children
+      });
+    };
+    return dataRouterState && (match2.route.ErrorBoundary || match2.route.errorElement || index === 0) ? /* @__PURE__ */ React4.createElement(RenderErrorBoundary, {
+      location: dataRouterState.location,
+      revalidation: dataRouterState.revalidation,
+      component: errorElement,
+      error,
+      children: getChildren(),
+      routeContext: {
+        outlet: null,
+        matches: matches2,
+        isDataRoute: true
+      }
+    }) : getChildren();
+  }, null);
+}
+var DataRouterHook = /* @__PURE__ */ function(DataRouterHook3) {
+  DataRouterHook3["UseBlocker"] = "useBlocker";
+  DataRouterHook3["UseRevalidator"] = "useRevalidator";
+  DataRouterHook3["UseNavigateStable"] = "useNavigate";
+  return DataRouterHook3;
+}(DataRouterHook || {});
+var DataRouterStateHook = /* @__PURE__ */ function(DataRouterStateHook3) {
+  DataRouterStateHook3["UseBlocker"] = "useBlocker";
+  DataRouterStateHook3["UseLoaderData"] = "useLoaderData";
+  DataRouterStateHook3["UseActionData"] = "useActionData";
+  DataRouterStateHook3["UseRouteError"] = "useRouteError";
+  DataRouterStateHook3["UseNavigation"] = "useNavigation";
+  DataRouterStateHook3["UseRouteLoaderData"] = "useRouteLoaderData";
+  DataRouterStateHook3["UseMatches"] = "useMatches";
+  DataRouterStateHook3["UseRevalidator"] = "useRevalidator";
+  DataRouterStateHook3["UseNavigateStable"] = "useNavigate";
+  DataRouterStateHook3["UseRouteId"] = "useRouteId";
+  return DataRouterStateHook3;
+}(DataRouterStateHook || {});
+function getDataRouterConsoleError(hookName) {
+  return hookName + " must be used within a data router.  See https://reactrouter.com/v6/routers/picking-a-router.";
+}
+function useDataRouterContext(hookName) {
+  let ctx = React4.useContext(DataRouterContext);
+  !ctx ? true ? invariant(false, getDataRouterConsoleError(hookName)) : invariant(false) : void 0;
+  return ctx;
+}
+function useDataRouterState(hookName) {
+  let state = React4.useContext(DataRouterStateContext);
+  !state ? true ? invariant(false, getDataRouterConsoleError(hookName)) : invariant(false) : void 0;
+  return state;
+}
+function useRouteContext(hookName) {
+  let route = React4.useContext(RouteContext);
+  !route ? true ? invariant(false, getDataRouterConsoleError(hookName)) : invariant(false) : void 0;
+  return route;
+}
+function useCurrentRouteId(hookName) {
+  let route = useRouteContext(hookName);
+  let thisRoute = route.matches[route.matches.length - 1];
+  !thisRoute.route.id ? true ? invariant(false, hookName + ' can only be used on routes that contain a unique "id"') : invariant(false) : void 0;
+  return thisRoute.route.id;
+}
+function useRouteId() {
+  return useCurrentRouteId(DataRouterStateHook.UseRouteId);
+}
+function useNavigation() {
+  let state = useDataRouterState(DataRouterStateHook.UseNavigation);
+  return state.navigation;
+}
+function useMatches() {
+  let {
+    matches,
+    loaderData
+  } = useDataRouterState(DataRouterStateHook.UseMatches);
+  return React4.useMemo(() => matches.map((m) => convertRouteMatchToUiMatch(m, loaderData)), [matches, loaderData]);
+}
+function useRouteError() {
+  var _state$errors;
+  let error = React4.useContext(RouteErrorContext);
+  let state = useDataRouterState(DataRouterStateHook.UseRouteError);
+  let routeId = useCurrentRouteId(DataRouterStateHook.UseRouteError);
+  if (error !== void 0) {
+    return error;
+  }
+  return (_state$errors = state.errors) == null ? void 0 : _state$errors[routeId];
+}
+function useNavigateStable() {
+  let {
+    router: router2
+  } = useDataRouterContext(DataRouterHook.UseNavigateStable);
+  let id = useCurrentRouteId(DataRouterStateHook.UseNavigateStable);
+  let activeRef = React4.useRef(false);
+  useIsomorphicLayoutEffect(() => {
+    activeRef.current = true;
+  });
+  let navigate = React4.useCallback(function(to, options) {
+    if (options === void 0) {
+      options = {};
+    }
+    true ? warning(activeRef.current, navigateEffectWarning) : void 0;
+    if (!activeRef.current) return;
+    if (typeof to === "number") {
+      router2.navigate(to);
+    } else {
+      router2.navigate(to, _extends3({
+        fromRouteId: id
+      }, options));
+    }
+  }, [router2, id]);
+  return navigate;
+}
+var alreadyWarned$1 = {};
+function warningOnce(key, cond, message) {
+  if (!cond && !alreadyWarned$1[key]) {
+    alreadyWarned$1[key] = true;
+    true ? warning(false, message) : void 0;
+  }
+}
+var alreadyWarned = {};
+function warnOnce(key, message) {
+  if (!alreadyWarned[message]) {
+    alreadyWarned[message] = true;
+    console.warn(message);
+  }
+}
+var logDeprecation = (flag, msg, link) => warnOnce(flag, "\u26A0\uFE0F React Router Future Flag Warning: " + msg + ". " + ("You can use the `" + flag + "` future flag to opt-in early. ") + ("For more information, see " + link + "."));
+function logV6DeprecationWarnings(renderFuture, routerFuture) {
+  if ((renderFuture == null ? void 0 : renderFuture.v7_startTransition) === void 0) {
+    logDeprecation("v7_startTransition", "React Router will begin wrapping state updates in `React.startTransition` in v7", "https://reactrouter.com/v6/upgrading/future#v7_starttransition");
+  }
+  if ((renderFuture == null ? void 0 : renderFuture.v7_relativeSplatPath) === void 0 && (!routerFuture || routerFuture.v7_relativeSplatPath === void 0)) {
+    logDeprecation("v7_relativeSplatPath", "Relative route resolution within Splat routes is changing in v7", "https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath");
+  }
+  if (routerFuture) {
+    if (routerFuture.v7_fetcherPersist === void 0) {
+      logDeprecation("v7_fetcherPersist", "The persistence behavior of fetchers is changing in v7", "https://reactrouter.com/v6/upgrading/future#v7_fetcherpersist");
+    }
+    if (routerFuture.v7_normalizeFormMethod === void 0) {
+      logDeprecation("v7_normalizeFormMethod", "Casing of `formMethod` fields is being normalized to uppercase in v7", "https://reactrouter.com/v6/upgrading/future#v7_normalizeformmethod");
+    }
+    if (routerFuture.v7_partialHydration === void 0) {
+      logDeprecation("v7_partialHydration", "`RouterProvider` hydration behavior is changing in v7", "https://reactrouter.com/v6/upgrading/future#v7_partialhydration");
+    }
+    if (routerFuture.v7_skipActionErrorRevalidation === void 0) {
+      logDeprecation("v7_skipActionErrorRevalidation", "The revalidation behavior after 4xx/5xx `action` responses is changing in v7", "https://reactrouter.com/v6/upgrading/future#v7_skipactionerrorrevalidation");
+    }
+  }
+}
+var START_TRANSITION = "startTransition";
+var startTransitionImpl = React4[START_TRANSITION];
+function Outlet(props) {
+  return useOutlet(props.context);
+}
+function Router(_ref5) {
+  let {
+    basename: basenameProp = "/",
+    children = null,
+    location: locationProp,
+    navigationType = Action.Pop,
+    navigator: navigator2,
+    static: staticProp = false,
+    future
+  } = _ref5;
+  !!useInRouterContext() ? true ? invariant(false, "You cannot render a <Router> inside another <Router>. You should never have more than one in your app.") : invariant(false) : void 0;
+  let basename = basenameProp.replace(/^\/*/, "/");
+  let navigationContext = React4.useMemo(() => ({
+    basename,
+    navigator: navigator2,
+    static: staticProp,
+    future: _extends3({
+      v7_relativeSplatPath: false
+    }, future)
+  }), [basename, future, navigator2, staticProp]);
+  if (typeof locationProp === "string") {
+    locationProp = parsePath(locationProp);
+  }
+  let {
+    pathname = "/",
+    search = "",
+    hash: hash2 = "",
+    state = null,
+    key = "default"
+  } = locationProp;
+  let locationContext = React4.useMemo(() => {
+    let trailingPathname = stripBasename(pathname, basename);
+    if (trailingPathname == null) {
+      return null;
+    }
+    return {
+      location: {
+        pathname: trailingPathname,
+        search,
+        hash: hash2,
+        state,
+        key
+      },
+      navigationType
+    };
+  }, [basename, pathname, search, hash2, state, key, navigationType]);
+  true ? warning(locationContext != null, '<Router basename="' + basename + '"> is not able to match the URL ' + ('"' + pathname + search + hash2 + '" because it does not start with the ') + "basename, so the <Router> won't render anything.") : void 0;
+  if (locationContext == null) {
+    return null;
+  }
+  return /* @__PURE__ */ React4.createElement(NavigationContext.Provider, {
+    value: navigationContext
+  }, /* @__PURE__ */ React4.createElement(LocationContext.Provider, {
+    children,
+    value: locationContext
+  }));
+}
+var neverSettledPromise = new Promise(() => {
+});
+function mapRouteProperties(route) {
+  let updates = {
+    // Note: this check also occurs in createRoutesFromChildren so update
+    // there if you change this -- please and thank you!
+    hasErrorBoundary: route.ErrorBoundary != null || route.errorElement != null
+  };
+  if (route.Component) {
+    if (true) {
+      if (route.element) {
+        true ? warning(false, "You should not include both `Component` and `element` on your route - `Component` will be used.") : void 0;
+      }
+    }
+    Object.assign(updates, {
+      element: /* @__PURE__ */ React4.createElement(route.Component),
+      Component: void 0
+    });
+  }
+  if (route.HydrateFallback) {
+    if (true) {
+      if (route.hydrateFallbackElement) {
+        true ? warning(false, "You should not include both `HydrateFallback` and `hydrateFallbackElement` on your route - `HydrateFallback` will be used.") : void 0;
+      }
+    }
+    Object.assign(updates, {
+      hydrateFallbackElement: /* @__PURE__ */ React4.createElement(route.HydrateFallback),
+      HydrateFallback: void 0
+    });
+  }
+  if (route.ErrorBoundary) {
+    if (true) {
+      if (route.errorElement) {
+        true ? warning(false, "You should not include both `ErrorBoundary` and `errorElement` on your route - `ErrorBoundary` will be used.") : void 0;
+      }
+    }
+    Object.assign(updates, {
+      errorElement: /* @__PURE__ */ React4.createElement(route.ErrorBoundary),
+      ErrorBoundary: void 0
+    });
+  }
+  return updates;
+}
+
+// node_modules/react-router-dom/dist/index.js
+function _extends4() {
+  _extends4 = Object.assign ? Object.assign.bind() : function(target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends4.apply(this, arguments);
+}
+function _objectWithoutPropertiesLoose(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  var sourceKeys = Object.keys(source);
+  var key, i;
+  for (i = 0; i < sourceKeys.length; i++) {
+    key = sourceKeys[i];
+    if (excluded.indexOf(key) >= 0) continue;
+    target[key] = source[key];
+  }
+  return target;
+}
+var defaultMethod = "get";
+var defaultEncType = "application/x-www-form-urlencoded";
+function isHtmlElement(object) {
+  return object != null && typeof object.tagName === "string";
+}
+function isButtonElement(object) {
+  return isHtmlElement(object) && object.tagName.toLowerCase() === "button";
+}
+function isFormElement(object) {
+  return isHtmlElement(object) && object.tagName.toLowerCase() === "form";
+}
+function isInputElement(object) {
+  return isHtmlElement(object) && object.tagName.toLowerCase() === "input";
+}
+function isModifiedEvent(event) {
+  return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
+}
+function shouldProcessLinkClick(event, target) {
+  return event.button === 0 && // Ignore everything but left clicks
+  (!target || target === "_self") && // Let browser handle "target=_blank" etc.
+  !isModifiedEvent(event);
+}
+var _formDataSupportsSubmitter = null;
+function isFormDataSubmitterSupported() {
+  if (_formDataSupportsSubmitter === null) {
+    try {
+      new FormData(
+        document.createElement("form"),
+        // @ts-expect-error if FormData supports the submitter parameter, this will throw
+        0
+      );
+      _formDataSupportsSubmitter = false;
+    } catch (e) {
+      _formDataSupportsSubmitter = true;
+    }
+  }
+  return _formDataSupportsSubmitter;
+}
+var supportedFormEncTypes = /* @__PURE__ */ new Set(["application/x-www-form-urlencoded", "multipart/form-data", "text/plain"]);
+function getFormEncType(encType) {
+  if (encType != null && !supportedFormEncTypes.has(encType)) {
+    true ? warning(false, '"' + encType + '" is not a valid `encType` for `<Form>`/`<fetcher.Form>` ' + ('and will default to "' + defaultEncType + '"')) : void 0;
+    return null;
+  }
+  return encType;
+}
+function getFormSubmissionInfo(target, basename) {
+  let method;
+  let action;
+  let encType;
+  let formData;
+  let body;
+  if (isFormElement(target)) {
+    let attr = target.getAttribute("action");
+    action = attr ? stripBasename(attr, basename) : null;
+    method = target.getAttribute("method") || defaultMethod;
+    encType = getFormEncType(target.getAttribute("enctype")) || defaultEncType;
+    formData = new FormData(target);
+  } else if (isButtonElement(target) || isInputElement(target) && (target.type === "submit" || target.type === "image")) {
+    let form = target.form;
+    if (form == null) {
+      throw new Error('Cannot submit a <button> or <input type="submit"> without a <form>');
+    }
+    let attr = target.getAttribute("formaction") || form.getAttribute("action");
+    action = attr ? stripBasename(attr, basename) : null;
+    method = target.getAttribute("formmethod") || form.getAttribute("method") || defaultMethod;
+    encType = getFormEncType(target.getAttribute("formenctype")) || getFormEncType(form.getAttribute("enctype")) || defaultEncType;
+    formData = new FormData(form, target);
+    if (!isFormDataSubmitterSupported()) {
+      let {
+        name,
+        type,
+        value
+      } = target;
+      if (type === "image") {
+        let prefix2 = name ? name + "." : "";
+        formData.append(prefix2 + "x", "0");
+        formData.append(prefix2 + "y", "0");
+      } else if (name) {
+        formData.append(name, value);
+      }
+    }
+  } else if (isHtmlElement(target)) {
+    throw new Error('Cannot submit element that is not <form>, <button>, or <input type="submit|image">');
+  } else {
+    method = defaultMethod;
+    action = null;
+    encType = defaultEncType;
+    body = target;
+  }
+  if (formData && encType === "text/plain") {
+    body = formData;
+    formData = void 0;
+  }
+  return {
+    action,
+    method: method.toLowerCase(),
+    encType,
+    formData,
+    body
+  };
+}
+var _excluded = ["onClick", "relative", "reloadDocument", "replace", "state", "target", "to", "preventScrollReset", "viewTransition"];
+var _excluded2 = ["aria-current", "caseSensitive", "className", "end", "style", "to", "viewTransition", "children"];
+var _excluded3 = ["fetcherKey", "navigate", "reloadDocument", "replace", "state", "method", "action", "onSubmit", "relative", "preventScrollReset", "viewTransition"];
+var REACT_ROUTER_VERSION = "6";
+try {
+  window.__reactRouterVersion = REACT_ROUTER_VERSION;
+} catch (e) {
+}
+function createBrowserRouter(routes, opts) {
+  return createRouter({
+    basename: opts == null ? void 0 : opts.basename,
+    future: _extends4({}, opts == null ? void 0 : opts.future, {
+      v7_prependBasename: true
+    }),
+    history: createBrowserHistory({
+      window: opts == null ? void 0 : opts.window
+    }),
+    hydrationData: (opts == null ? void 0 : opts.hydrationData) || parseHydrationData(),
+    routes,
+    mapRouteProperties,
+    dataStrategy: opts == null ? void 0 : opts.dataStrategy,
+    patchRoutesOnNavigation: opts == null ? void 0 : opts.patchRoutesOnNavigation,
+    window: opts == null ? void 0 : opts.window
+  }).initialize();
+}
+function parseHydrationData() {
+  var _window;
+  let state = (_window = window) == null ? void 0 : _window.__staticRouterHydrationData;
+  if (state && state.errors) {
+    state = _extends4({}, state, {
+      errors: deserializeErrors(state.errors)
+    });
+  }
+  return state;
+}
+function deserializeErrors(errors) {
+  if (!errors) return null;
+  let entries = Object.entries(errors);
+  let serialized = {};
+  for (let [key, val] of entries) {
+    if (val && val.__type === "RouteErrorResponse") {
+      serialized[key] = new ErrorResponseImpl(val.status, val.statusText, val.data, val.internal === true);
+    } else if (val && val.__type === "Error") {
+      if (val.__subType) {
+        let ErrorConstructor = window[val.__subType];
+        if (typeof ErrorConstructor === "function") {
+          try {
+            let error = new ErrorConstructor(val.message);
+            error.stack = "";
+            serialized[key] = error;
+          } catch (e) {
+          }
+        }
+      }
+      if (serialized[key] == null) {
+        let error = new Error(val.message);
+        error.stack = "";
+        serialized[key] = error;
+      }
+    } else {
+      serialized[key] = val;
+    }
+  }
+  return serialized;
+}
+var ViewTransitionContext = /* @__PURE__ */ React5.createContext({
+  isTransitioning: false
+});
+if (true) {
+  ViewTransitionContext.displayName = "ViewTransition";
+}
+var FetchersContext = /* @__PURE__ */ React5.createContext(/* @__PURE__ */ new Map());
+if (true) {
+  FetchersContext.displayName = "Fetchers";
+}
+var START_TRANSITION2 = "startTransition";
+var startTransitionImpl2 = React5[START_TRANSITION2];
+var FLUSH_SYNC = "flushSync";
+var flushSyncImpl = ReactDOM[FLUSH_SYNC];
+var USE_ID = "useId";
+var useIdImpl = React5[USE_ID];
+function startTransitionSafe(cb) {
+  if (startTransitionImpl2) {
+    startTransitionImpl2(cb);
+  } else {
+    cb();
+  }
+}
+function flushSyncSafe(cb) {
+  if (flushSyncImpl) {
+    flushSyncImpl(cb);
+  } else {
+    cb();
+  }
+}
+var Deferred = class {
+  constructor() {
+    this.status = "pending";
+    this.promise = new Promise((resolve, reject) => {
+      this.resolve = (value) => {
+        if (this.status === "pending") {
+          this.status = "resolved";
+          resolve(value);
+        }
+      };
+      this.reject = (reason) => {
+        if (this.status === "pending") {
+          this.status = "rejected";
+          reject(reason);
+        }
+      };
+    });
+  }
+};
+function RouterProvider(_ref) {
+  let {
+    fallbackElement,
+    router: router2,
+    future
+  } = _ref;
+  let [state, setStateImpl] = React5.useState(router2.state);
+  let [pendingState, setPendingState] = React5.useState();
+  let [vtContext, setVtContext] = React5.useState({
+    isTransitioning: false
+  });
+  let [renderDfd, setRenderDfd] = React5.useState();
+  let [transition, setTransition] = React5.useState();
+  let [interruption, setInterruption] = React5.useState();
+  let fetcherData = React5.useRef(/* @__PURE__ */ new Map());
+  let {
+    v7_startTransition
+  } = future || {};
+  let optInStartTransition = React5.useCallback((cb) => {
+    if (v7_startTransition) {
+      startTransitionSafe(cb);
+    } else {
+      cb();
+    }
+  }, [v7_startTransition]);
+  let setState = React5.useCallback((newState, _ref2) => {
+    let {
+      deletedFetchers,
+      flushSync,
+      viewTransitionOpts
+    } = _ref2;
+    newState.fetchers.forEach((fetcher, key) => {
+      if (fetcher.data !== void 0) {
+        fetcherData.current.set(key, fetcher.data);
+      }
+    });
+    deletedFetchers.forEach((key) => fetcherData.current.delete(key));
+    let isViewTransitionUnavailable = router2.window == null || router2.window.document == null || typeof router2.window.document.startViewTransition !== "function";
+    if (!viewTransitionOpts || isViewTransitionUnavailable) {
+      if (flushSync) {
+        flushSyncSafe(() => setStateImpl(newState));
+      } else {
+        optInStartTransition(() => setStateImpl(newState));
+      }
+      return;
+    }
+    if (flushSync) {
+      flushSyncSafe(() => {
+        if (transition) {
+          renderDfd && renderDfd.resolve();
+          transition.skipTransition();
+        }
+        setVtContext({
+          isTransitioning: true,
+          flushSync: true,
+          currentLocation: viewTransitionOpts.currentLocation,
+          nextLocation: viewTransitionOpts.nextLocation
+        });
+      });
+      let t = router2.window.document.startViewTransition(() => {
+        flushSyncSafe(() => setStateImpl(newState));
+      });
+      t.finished.finally(() => {
+        flushSyncSafe(() => {
+          setRenderDfd(void 0);
+          setTransition(void 0);
+          setPendingState(void 0);
+          setVtContext({
+            isTransitioning: false
+          });
+        });
+      });
+      flushSyncSafe(() => setTransition(t));
+      return;
+    }
+    if (transition) {
+      renderDfd && renderDfd.resolve();
+      transition.skipTransition();
+      setInterruption({
+        state: newState,
+        currentLocation: viewTransitionOpts.currentLocation,
+        nextLocation: viewTransitionOpts.nextLocation
+      });
+    } else {
+      setPendingState(newState);
+      setVtContext({
+        isTransitioning: true,
+        flushSync: false,
+        currentLocation: viewTransitionOpts.currentLocation,
+        nextLocation: viewTransitionOpts.nextLocation
+      });
+    }
+  }, [router2.window, transition, renderDfd, fetcherData, optInStartTransition]);
+  React5.useLayoutEffect(() => router2.subscribe(setState), [router2, setState]);
+  React5.useEffect(() => {
+    if (vtContext.isTransitioning && !vtContext.flushSync) {
+      setRenderDfd(new Deferred());
+    }
+  }, [vtContext]);
+  React5.useEffect(() => {
+    if (renderDfd && pendingState && router2.window) {
+      let newState = pendingState;
+      let renderPromise = renderDfd.promise;
+      let transition2 = router2.window.document.startViewTransition(async () => {
+        optInStartTransition(() => setStateImpl(newState));
+        await renderPromise;
+      });
+      transition2.finished.finally(() => {
+        setRenderDfd(void 0);
+        setTransition(void 0);
+        setPendingState(void 0);
+        setVtContext({
+          isTransitioning: false
+        });
+      });
+      setTransition(transition2);
+    }
+  }, [optInStartTransition, pendingState, renderDfd, router2.window]);
+  React5.useEffect(() => {
+    if (renderDfd && pendingState && state.location.key === pendingState.location.key) {
+      renderDfd.resolve();
+    }
+  }, [renderDfd, transition, state.location, pendingState]);
+  React5.useEffect(() => {
+    if (!vtContext.isTransitioning && interruption) {
+      setPendingState(interruption.state);
+      setVtContext({
+        isTransitioning: true,
+        flushSync: false,
+        currentLocation: interruption.currentLocation,
+        nextLocation: interruption.nextLocation
+      });
+      setInterruption(void 0);
+    }
+  }, [vtContext.isTransitioning, interruption]);
+  React5.useEffect(() => {
+    true ? warning(fallbackElement == null || !router2.future.v7_partialHydration, "`<RouterProvider fallbackElement>` is deprecated when using `v7_partialHydration`, use a `HydrateFallback` component instead") : void 0;
+  }, []);
+  let navigator2 = React5.useMemo(() => {
+    return {
+      createHref: router2.createHref,
+      encodeLocation: router2.encodeLocation,
+      go: (n) => router2.navigate(n),
+      push: (to, state2, opts) => router2.navigate(to, {
+        state: state2,
+        preventScrollReset: opts == null ? void 0 : opts.preventScrollReset
+      }),
+      replace: (to, state2, opts) => router2.navigate(to, {
+        replace: true,
+        state: state2,
+        preventScrollReset: opts == null ? void 0 : opts.preventScrollReset
+      })
+    };
+  }, [router2]);
+  let basename = router2.basename || "/";
+  let dataRouterContext = React5.useMemo(() => ({
+    router: router2,
+    navigator: navigator2,
+    static: false,
+    basename
+  }), [router2, navigator2, basename]);
+  let routerFuture = React5.useMemo(() => ({
+    v7_relativeSplatPath: router2.future.v7_relativeSplatPath
+  }), [router2.future.v7_relativeSplatPath]);
+  React5.useEffect(() => logV6DeprecationWarnings(future, router2.future), [future, router2.future]);
+  return /* @__PURE__ */ React5.createElement(React5.Fragment, null, /* @__PURE__ */ React5.createElement(DataRouterContext.Provider, {
+    value: dataRouterContext
+  }, /* @__PURE__ */ React5.createElement(DataRouterStateContext.Provider, {
+    value: state
+  }, /* @__PURE__ */ React5.createElement(FetchersContext.Provider, {
+    value: fetcherData.current
+  }, /* @__PURE__ */ React5.createElement(ViewTransitionContext.Provider, {
+    value: vtContext
+  }, /* @__PURE__ */ React5.createElement(Router, {
+    basename,
+    location: state.location,
+    navigationType: state.historyAction,
+    navigator: navigator2,
+    future: routerFuture
+  }, state.initialized || router2.future.v7_partialHydration ? /* @__PURE__ */ React5.createElement(MemoizedDataRoutes, {
+    routes: router2.routes,
+    future: router2.future,
+    state
+  }) : fallbackElement))))), null);
+}
+var MemoizedDataRoutes = /* @__PURE__ */ React5.memo(DataRoutes);
+function DataRoutes(_ref3) {
+  let {
+    routes,
+    future,
+    state
+  } = _ref3;
+  return useRoutesImpl(routes, void 0, state, future);
+}
+function HistoryRouter(_ref6) {
+  let {
+    basename,
+    children,
+    future,
+    history
+  } = _ref6;
+  let [state, setStateImpl] = React5.useState({
+    action: history.action,
+    location: history.location
+  });
+  let {
+    v7_startTransition
+  } = future || {};
+  let setState = React5.useCallback((newState) => {
+    v7_startTransition && startTransitionImpl2 ? startTransitionImpl2(() => setStateImpl(newState)) : setStateImpl(newState);
+  }, [setStateImpl, v7_startTransition]);
+  React5.useLayoutEffect(() => history.listen(setState), [history, setState]);
+  React5.useEffect(() => logV6DeprecationWarnings(future), [future]);
+  return /* @__PURE__ */ React5.createElement(Router, {
+    basename,
+    children,
+    location: state.location,
+    navigationType: state.action,
+    navigator: history,
+    future
+  });
+}
+if (true) {
+  HistoryRouter.displayName = "unstable_HistoryRouter";
+}
+var isBrowser2 = typeof window !== "undefined" && typeof window.document !== "undefined" && typeof window.document.createElement !== "undefined";
+var ABSOLUTE_URL_REGEX2 = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i;
+var Link = /* @__PURE__ */ React5.forwardRef(function LinkWithRef(_ref7, ref) {
+  let {
+    onClick,
+    relative,
+    reloadDocument,
+    replace: replace3,
+    state,
+    target,
+    to,
+    preventScrollReset,
+    viewTransition
+  } = _ref7, rest = _objectWithoutPropertiesLoose(_ref7, _excluded);
+  let {
+    basename
+  } = React5.useContext(NavigationContext);
+  let absoluteHref;
+  let isExternal = false;
+  if (typeof to === "string" && ABSOLUTE_URL_REGEX2.test(to)) {
+    absoluteHref = to;
+    if (isBrowser2) {
+      try {
+        let currentUrl = new URL(window.location.href);
+        let targetUrl = to.startsWith("//") ? new URL(currentUrl.protocol + to) : new URL(to);
+        let path = stripBasename(targetUrl.pathname, basename);
+        if (targetUrl.origin === currentUrl.origin && path != null) {
+          to = path + targetUrl.search + targetUrl.hash;
+        } else {
+          isExternal = true;
+        }
+      } catch (e) {
+        true ? warning(false, '<Link to="' + to + '"> contains an invalid URL which will probably break when clicked - please update to a valid URL path.') : void 0;
+      }
+    }
+  }
+  let href = useHref(to, {
+    relative
+  });
+  let internalOnClick = useLinkClickHandler(to, {
+    replace: replace3,
+    state,
+    target,
+    preventScrollReset,
+    relative,
+    viewTransition
+  });
+  function handleClick(event) {
+    if (onClick) onClick(event);
+    if (!event.defaultPrevented) {
+      internalOnClick(event);
+    }
+  }
+  return (
+    // eslint-disable-next-line jsx-a11y/anchor-has-content
+    /* @__PURE__ */ React5.createElement("a", _extends4({}, rest, {
+      href: absoluteHref || href,
+      onClick: isExternal || reloadDocument ? onClick : handleClick,
+      ref,
+      target
+    }))
+  );
+});
+if (true) {
+  Link.displayName = "Link";
+}
+var NavLink = /* @__PURE__ */ React5.forwardRef(function NavLinkWithRef(_ref8, ref) {
+  let {
+    "aria-current": ariaCurrentProp = "page",
+    caseSensitive = false,
+    className: classNameProp = "",
+    end = false,
+    style: styleProp,
+    to,
+    viewTransition,
+    children
+  } = _ref8, rest = _objectWithoutPropertiesLoose(_ref8, _excluded2);
+  let path = useResolvedPath(to, {
+    relative: rest.relative
+  });
+  let location = useLocation();
+  let routerState = React5.useContext(DataRouterStateContext);
+  let {
+    navigator: navigator2,
+    basename
+  } = React5.useContext(NavigationContext);
+  let isTransitioning = routerState != null && // Conditional usage is OK here because the usage of a data router is static
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useViewTransitionState(path) && viewTransition === true;
+  let toPathname = navigator2.encodeLocation ? navigator2.encodeLocation(path).pathname : path.pathname;
+  let locationPathname = location.pathname;
+  let nextLocationPathname = routerState && routerState.navigation && routerState.navigation.location ? routerState.navigation.location.pathname : null;
+  if (!caseSensitive) {
+    locationPathname = locationPathname.toLowerCase();
+    nextLocationPathname = nextLocationPathname ? nextLocationPathname.toLowerCase() : null;
+    toPathname = toPathname.toLowerCase();
+  }
+  if (nextLocationPathname && basename) {
+    nextLocationPathname = stripBasename(nextLocationPathname, basename) || nextLocationPathname;
+  }
+  const endSlashPosition = toPathname !== "/" && toPathname.endsWith("/") ? toPathname.length - 1 : toPathname.length;
+  let isActive = locationPathname === toPathname || !end && locationPathname.startsWith(toPathname) && locationPathname.charAt(endSlashPosition) === "/";
+  let isPending = nextLocationPathname != null && (nextLocationPathname === toPathname || !end && nextLocationPathname.startsWith(toPathname) && nextLocationPathname.charAt(toPathname.length) === "/");
+  let renderProps = {
+    isActive,
+    isPending,
+    isTransitioning
+  };
+  let ariaCurrent = isActive ? ariaCurrentProp : void 0;
+  let className;
+  if (typeof classNameProp === "function") {
+    className = classNameProp(renderProps);
+  } else {
+    className = [classNameProp, isActive ? "active" : null, isPending ? "pending" : null, isTransitioning ? "transitioning" : null].filter(Boolean).join(" ");
+  }
+  let style = typeof styleProp === "function" ? styleProp(renderProps) : styleProp;
+  return /* @__PURE__ */ React5.createElement(Link, _extends4({}, rest, {
+    "aria-current": ariaCurrent,
+    className,
+    ref,
+    style,
+    to,
+    viewTransition
+  }), typeof children === "function" ? children(renderProps) : children);
+});
+if (true) {
+  NavLink.displayName = "NavLink";
+}
+var Form = /* @__PURE__ */ React5.forwardRef((_ref9, forwardedRef) => {
+  let {
+    fetcherKey,
+    navigate,
+    reloadDocument,
+    replace: replace3,
+    state,
+    method = defaultMethod,
+    action,
+    onSubmit,
+    relative,
+    preventScrollReset,
+    viewTransition
+  } = _ref9, props = _objectWithoutPropertiesLoose(_ref9, _excluded3);
+  let submit = useSubmit();
+  let formAction = useFormAction(action, {
+    relative
+  });
+  let formMethod = method.toLowerCase() === "get" ? "get" : "post";
+  let submitHandler = (event) => {
+    onSubmit && onSubmit(event);
+    if (event.defaultPrevented) return;
+    event.preventDefault();
+    let submitter = event.nativeEvent.submitter;
+    let submitMethod = (submitter == null ? void 0 : submitter.getAttribute("formmethod")) || method;
+    submit(submitter || event.currentTarget, {
+      fetcherKey,
+      method: submitMethod,
+      navigate,
+      replace: replace3,
+      state,
+      relative,
+      preventScrollReset,
+      viewTransition
+    });
+  };
+  return /* @__PURE__ */ React5.createElement("form", _extends4({
+    ref: forwardedRef,
+    method: formMethod,
+    action: formAction,
+    onSubmit: reloadDocument ? onSubmit : submitHandler
+  }, props));
+});
+if (true) {
+  Form.displayName = "Form";
+}
+function ScrollRestoration(_ref10) {
+  let {
+    getKey,
+    storageKey
+  } = _ref10;
+  useScrollRestoration({
+    getKey,
+    storageKey
+  });
+  return null;
+}
+if (true) {
+  ScrollRestoration.displayName = "ScrollRestoration";
+}
+var DataRouterHook2;
+(function(DataRouterHook3) {
+  DataRouterHook3["UseScrollRestoration"] = "useScrollRestoration";
+  DataRouterHook3["UseSubmit"] = "useSubmit";
+  DataRouterHook3["UseSubmitFetcher"] = "useSubmitFetcher";
+  DataRouterHook3["UseFetcher"] = "useFetcher";
+  DataRouterHook3["useViewTransitionState"] = "useViewTransitionState";
+})(DataRouterHook2 || (DataRouterHook2 = {}));
+var DataRouterStateHook2;
+(function(DataRouterStateHook3) {
+  DataRouterStateHook3["UseFetcher"] = "useFetcher";
+  DataRouterStateHook3["UseFetchers"] = "useFetchers";
+  DataRouterStateHook3["UseScrollRestoration"] = "useScrollRestoration";
+})(DataRouterStateHook2 || (DataRouterStateHook2 = {}));
+function getDataRouterConsoleError2(hookName) {
+  return hookName + " must be used within a data router.  See https://reactrouter.com/v6/routers/picking-a-router.";
+}
+function useDataRouterContext2(hookName) {
+  let ctx = React5.useContext(DataRouterContext);
+  !ctx ? true ? invariant(false, getDataRouterConsoleError2(hookName)) : invariant(false) : void 0;
+  return ctx;
+}
+function useDataRouterState2(hookName) {
+  let state = React5.useContext(DataRouterStateContext);
+  !state ? true ? invariant(false, getDataRouterConsoleError2(hookName)) : invariant(false) : void 0;
+  return state;
+}
+function useLinkClickHandler(to, _temp) {
+  let {
+    target,
+    replace: replaceProp,
+    state,
+    preventScrollReset,
+    relative,
+    viewTransition
+  } = _temp === void 0 ? {} : _temp;
+  let navigate = useNavigate();
+  let location = useLocation();
+  let path = useResolvedPath(to, {
+    relative
+  });
+  return React5.useCallback((event) => {
+    if (shouldProcessLinkClick(event, target)) {
+      event.preventDefault();
+      let replace3 = replaceProp !== void 0 ? replaceProp : createPath(location) === createPath(path);
+      navigate(to, {
+        replace: replace3,
+        state,
+        preventScrollReset,
+        relative,
+        viewTransition
+      });
+    }
+  }, [location, navigate, path, replaceProp, state, target, to, preventScrollReset, relative, viewTransition]);
+}
+function validateClientSideSubmission() {
+  if (typeof document === "undefined") {
+    throw new Error("You are calling submit during the server render. Try calling submit within a `useEffect` or callback instead.");
+  }
+}
+var fetcherId = 0;
+var getUniqueFetcherId = () => "__" + String(++fetcherId) + "__";
+function useSubmit() {
+  let {
+    router: router2
+  } = useDataRouterContext2(DataRouterHook2.UseSubmit);
+  let {
+    basename
+  } = React5.useContext(NavigationContext);
+  let currentRouteId = useRouteId();
+  return React5.useCallback(function(target, options) {
+    if (options === void 0) {
+      options = {};
+    }
+    validateClientSideSubmission();
+    let {
+      action,
+      method,
+      encType,
+      formData,
+      body
+    } = getFormSubmissionInfo(target, basename);
+    if (options.navigate === false) {
+      let key = options.fetcherKey || getUniqueFetcherId();
+      router2.fetch(key, currentRouteId, options.action || action, {
+        preventScrollReset: options.preventScrollReset,
+        formData,
+        body,
+        formMethod: options.method || method,
+        formEncType: options.encType || encType,
+        flushSync: options.flushSync
+      });
+    } else {
+      router2.navigate(options.action || action, {
+        preventScrollReset: options.preventScrollReset,
+        formData,
+        body,
+        formMethod: options.method || method,
+        formEncType: options.encType || encType,
+        replace: options.replace,
+        state: options.state,
+        fromRouteId: currentRouteId,
+        flushSync: options.flushSync,
+        viewTransition: options.viewTransition
+      });
+    }
+  }, [router2, basename, currentRouteId]);
+}
+function useFormAction(action, _temp2) {
+  let {
+    relative
+  } = _temp2 === void 0 ? {} : _temp2;
+  let {
+    basename
+  } = React5.useContext(NavigationContext);
+  let routeContext = React5.useContext(RouteContext);
+  !routeContext ? true ? invariant(false, "useFormAction must be used inside a RouteContext") : invariant(false) : void 0;
+  let [match2] = routeContext.matches.slice(-1);
+  let path = _extends4({}, useResolvedPath(action ? action : ".", {
+    relative
+  }));
+  let location = useLocation();
+  if (action == null) {
+    path.search = location.search;
+    let params = new URLSearchParams(path.search);
+    let indexValues = params.getAll("index");
+    let hasNakedIndexParam = indexValues.some((v) => v === "");
+    if (hasNakedIndexParam) {
+      params.delete("index");
+      indexValues.filter((v) => v).forEach((v) => params.append("index", v));
+      let qs = params.toString();
+      path.search = qs ? "?" + qs : "";
+    }
+  }
+  if ((!action || action === ".") && match2.route.index) {
+    path.search = path.search ? path.search.replace(/^\?/, "?index&") : "?index";
+  }
+  if (basename !== "/") {
+    path.pathname = path.pathname === "/" ? basename : joinPaths([basename, path.pathname]);
+  }
+  return createPath(path);
+}
+var SCROLL_RESTORATION_STORAGE_KEY = "react-router-scroll-positions";
+var savedScrollPositions = {};
+function useScrollRestoration(_temp4) {
+  let {
+    getKey,
+    storageKey
+  } = _temp4 === void 0 ? {} : _temp4;
+  let {
+    router: router2
+  } = useDataRouterContext2(DataRouterHook2.UseScrollRestoration);
+  let {
+    restoreScrollPosition,
+    preventScrollReset
+  } = useDataRouterState2(DataRouterStateHook2.UseScrollRestoration);
+  let {
+    basename
+  } = React5.useContext(NavigationContext);
+  let location = useLocation();
+  let matches = useMatches();
+  let navigation = useNavigation();
+  React5.useEffect(() => {
+    window.history.scrollRestoration = "manual";
+    return () => {
+      window.history.scrollRestoration = "auto";
+    };
+  }, []);
+  usePageHide(React5.useCallback(() => {
+    if (navigation.state === "idle") {
+      let key = (getKey ? getKey(location, matches) : null) || location.key;
+      savedScrollPositions[key] = window.scrollY;
+    }
+    try {
+      sessionStorage.setItem(storageKey || SCROLL_RESTORATION_STORAGE_KEY, JSON.stringify(savedScrollPositions));
+    } catch (error) {
+      true ? warning(false, "Failed to save scroll positions in sessionStorage, <ScrollRestoration /> will not work properly (" + error + ").") : void 0;
+    }
+    window.history.scrollRestoration = "auto";
+  }, [storageKey, getKey, navigation.state, location, matches]));
+  if (typeof document !== "undefined") {
+    React5.useLayoutEffect(() => {
+      try {
+        let sessionPositions = sessionStorage.getItem(storageKey || SCROLL_RESTORATION_STORAGE_KEY);
+        if (sessionPositions) {
+          savedScrollPositions = JSON.parse(sessionPositions);
+        }
+      } catch (e) {
+      }
+    }, [storageKey]);
+    React5.useLayoutEffect(() => {
+      let getKeyWithoutBasename = getKey && basename !== "/" ? (location2, matches2) => getKey(
+        // Strip the basename to match useLocation()
+        _extends4({}, location2, {
+          pathname: stripBasename(location2.pathname, basename) || location2.pathname
+        }),
+        matches2
+      ) : getKey;
+      let disableScrollRestoration = router2 == null ? void 0 : router2.enableScrollRestoration(savedScrollPositions, () => window.scrollY, getKeyWithoutBasename);
+      return () => disableScrollRestoration && disableScrollRestoration();
+    }, [router2, basename, getKey]);
+    React5.useLayoutEffect(() => {
+      if (restoreScrollPosition === false) {
+        return;
+      }
+      if (typeof restoreScrollPosition === "number") {
+        window.scrollTo(0, restoreScrollPosition);
+        return;
+      }
+      if (location.hash) {
+        let el = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+        if (el) {
+          el.scrollIntoView();
+          return;
+        }
+      }
+      if (preventScrollReset === true) {
+        return;
+      }
+      window.scrollTo(0, 0);
+    }, [location, restoreScrollPosition, preventScrollReset]);
+  }
+}
+function usePageHide(callback, options) {
+  let {
+    capture
+  } = options || {};
+  React5.useEffect(() => {
+    let opts = capture != null ? {
+      capture
+    } : void 0;
+    window.addEventListener("pagehide", callback, opts);
+    return () => {
+      window.removeEventListener("pagehide", callback, opts);
+    };
+  }, [callback, capture]);
+}
+function useViewTransitionState(to, opts) {
+  if (opts === void 0) {
+    opts = {};
+  }
+  let vtContext = React5.useContext(ViewTransitionContext);
+  !(vtContext != null) ? true ? invariant(false, "`useViewTransitionState` must be used within `react-router-dom`'s `RouterProvider`.  Did you accidentally import `RouterProvider` from `react-router`?") : invariant(false) : void 0;
+  let {
+    basename
+  } = useDataRouterContext2(DataRouterHook2.useViewTransitionState);
+  let path = useResolvedPath(to, {
+    relative: opts.relative
+  });
+  if (!vtContext.isTransitioning) {
+    return false;
+  }
+  let currentPath = stripBasename(vtContext.currentLocation.pathname, basename) || vtContext.currentLocation.pathname;
+  let nextPath = stripBasename(vtContext.nextLocation.pathname, basename) || vtContext.nextLocation.pathname;
+  return matchPath(path.pathname, nextPath) != null || matchPath(path.pathname, currentPath) != null;
+}
+
+// src/web/client/routes/auth/AuthForm.tsx
+var import_react5 = __toESM(require_react(), 1);
 var import_react_relay = __toESM(require_react_relay(), 1);
 
-// src/web/client/__generated__/HelloQuery.graphql.ts
+// src/web/client/__generated__/LoginMutation.graphql.ts
 var import_relay_runtime = __toESM(require_relay_runtime(), 1);
-var node = {
+var node2 = {
+  fragment: {
+    argumentDefinitions: [
+      {
+        defaultValue: null,
+        kind: "LocalArgument",
+        name: "input"
+      }
+    ],
+    kind: "Fragment",
+    metadata: null,
+    name: "LoginMutation",
+    selections: [
+      {
+        alias: null,
+        args: [
+          {
+            kind: "Variable",
+            name: "input",
+            variableName: "input"
+          }
+        ],
+        concreteType: "AuthPayload",
+        kind: "LinkedField",
+        name: "login",
+        plural: false,
+        selections: [
+          {
+            alias: null,
+            args: null,
+            concreteType: "User",
+            kind: "LinkedField",
+            name: "user",
+            plural: false,
+            selections: [
+              {
+                alias: null,
+                args: null,
+                kind: "ScalarField",
+                name: "id",
+                storageKey: null
+              },
+              {
+                alias: null,
+                args: null,
+                kind: "ScalarField",
+                name: "username",
+                storageKey: null
+              },
+              {
+                alias: null,
+                args: null,
+                kind: "ScalarField",
+                name: "createdAt",
+                storageKey: null
+              }
+            ],
+            storageKey: null
+          },
+          {
+            alias: null,
+            args: null,
+            kind: "ScalarField",
+            name: "sessionExpiresAt",
+            storageKey: null
+          }
+        ],
+        storageKey: null
+      }
+    ],
+    type: "Mutation",
+    abstractKey: null
+  },
+  kind: "Request",
+  operation: {
+    argumentDefinitions: [
+      {
+        defaultValue: null,
+        kind: "LocalArgument",
+        name: "input"
+      }
+    ],
+    kind: "Operation",
+    name: "LoginMutation",
+    selections: [
+      {
+        alias: null,
+        args: [
+          {
+            kind: "Variable",
+            name: "input",
+            variableName: "input"
+          }
+        ],
+        concreteType: "AuthPayload",
+        kind: "LinkedField",
+        name: "login",
+        plural: false,
+        selections: [
+          {
+            alias: null,
+            args: null,
+            concreteType: "User",
+            kind: "LinkedField",
+            name: "user",
+            plural: false,
+            selections: [
+              {
+                alias: null,
+                args: null,
+                kind: "ScalarField",
+                name: "id",
+                storageKey: null
+              },
+              {
+                alias: null,
+                args: null,
+                kind: "ScalarField",
+                name: "username",
+                storageKey: null
+              },
+              {
+                alias: null,
+                args: null,
+                kind: "ScalarField",
+                name: "createdAt",
+                storageKey: null
+              }
+            ],
+            storageKey: null
+          },
+          {
+            alias: null,
+            args: null,
+            kind: "ScalarField",
+            name: "sessionExpiresAt",
+            storageKey: null
+          }
+        ],
+        storageKey: null
+      }
+    ]
+  },
+  params: {
+    cacheID: "LoginMutation",
+    id: null,
+    metadata: {},
+    name: "LoginMutation",
+    operationKind: "mutation",
+    text: "mutation LoginMutation(\n  $input: AuthInput!\n) {\n  login(input: $input) {\n    user {\n      id\n      username\n      createdAt\n    }\n    sessionExpiresAt\n  }\n}\n"
+  }
+};
+var LoginMutation_graphql_default = node2;
+
+// src/web/client/__generated__/RegisterMutation.graphql.ts
+var import_relay_runtime2 = __toESM(require_relay_runtime(), 1);
+var node3 = {
+  fragment: {
+    argumentDefinitions: [
+      {
+        defaultValue: null,
+        kind: "LocalArgument",
+        name: "input"
+      }
+    ],
+    kind: "Fragment",
+    metadata: null,
+    name: "RegisterMutation",
+    selections: [
+      {
+        alias: null,
+        args: [
+          {
+            kind: "Variable",
+            name: "input",
+            variableName: "input"
+          }
+        ],
+        concreteType: "AuthPayload",
+        kind: "LinkedField",
+        name: "register",
+        plural: false,
+        selections: [
+          {
+            alias: null,
+            args: null,
+            concreteType: "User",
+            kind: "LinkedField",
+            name: "user",
+            plural: false,
+            selections: [
+              {
+                alias: null,
+                args: null,
+                kind: "ScalarField",
+                name: "id",
+                storageKey: null
+              },
+              {
+                alias: null,
+                args: null,
+                kind: "ScalarField",
+                name: "username",
+                storageKey: null
+              },
+              {
+                alias: null,
+                args: null,
+                kind: "ScalarField",
+                name: "createdAt",
+                storageKey: null
+              }
+            ],
+            storageKey: null
+          },
+          {
+            alias: null,
+            args: null,
+            kind: "ScalarField",
+            name: "sessionExpiresAt",
+            storageKey: null
+          }
+        ],
+        storageKey: null
+      }
+    ],
+    type: "Mutation",
+    abstractKey: null
+  },
+  kind: "Request",
+  operation: {
+    argumentDefinitions: [
+      {
+        defaultValue: null,
+        kind: "LocalArgument",
+        name: "input"
+      }
+    ],
+    kind: "Operation",
+    name: "RegisterMutation",
+    selections: [
+      {
+        alias: null,
+        args: [
+          {
+            kind: "Variable",
+            name: "input",
+            variableName: "input"
+          }
+        ],
+        concreteType: "AuthPayload",
+        kind: "LinkedField",
+        name: "register",
+        plural: false,
+        selections: [
+          {
+            alias: null,
+            args: null,
+            concreteType: "User",
+            kind: "LinkedField",
+            name: "user",
+            plural: false,
+            selections: [
+              {
+                alias: null,
+                args: null,
+                kind: "ScalarField",
+                name: "id",
+                storageKey: null
+              },
+              {
+                alias: null,
+                args: null,
+                kind: "ScalarField",
+                name: "username",
+                storageKey: null
+              },
+              {
+                alias: null,
+                args: null,
+                kind: "ScalarField",
+                name: "createdAt",
+                storageKey: null
+              }
+            ],
+            storageKey: null
+          },
+          {
+            alias: null,
+            args: null,
+            kind: "ScalarField",
+            name: "sessionExpiresAt",
+            storageKey: null
+          }
+        ],
+        storageKey: null
+      }
+    ]
+  },
+  params: {
+    cacheID: "RegisterMutation",
+    id: null,
+    metadata: {},
+    name: "RegisterMutation",
+    operationKind: "mutation",
+    text: "mutation RegisterMutation(\n  $input: AuthInput!\n) {\n  register(input: $input) {\n    user {\n      id\n      username\n      createdAt\n    }\n    sessionExpiresAt\n  }\n}\n"
+  }
+};
+var RegisterMutation_graphql_default = node3;
+
+// src/web/client/styles/typography.ts
+var eyebrowStyles = css`
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  color: #536ad6;
+  font-size: 0.85rem;
+`;
+var titleStyles = css`
+  margin: 0;
+  font-size: clamp(2.1rem, 3vw, 2.8rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+`;
+var ledeStyles = css`
+  margin: 0;
+  max-width: 56ch;
+  color: #3b4058;
+  font-size: 1.05rem;
+`;
+var labelStyles = css`
+  margin: 0 0 4px;
+  color: #6c748c;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+`;
+var valueStyles = css`
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0b132b;
+`;
+
+// node_modules/@emotion/react/jsx-runtime/dist/emotion-react-jsx-runtime.browser.esm.js
+var ReactJSXRuntime = __toESM(require_jsx_runtime());
+var import_react3 = __toESM(require_react());
+var import_hoist_non_react_statics2 = __toESM(require_hoist_non_react_statics_cjs());
+var Fragment6 = ReactJSXRuntime.Fragment;
+var jsx4 = function jsx5(type, props, key) {
+  if (!hasOwn.call(props, "css")) {
+    return ReactJSXRuntime.jsx(type, props, key);
+  }
+  return ReactJSXRuntime.jsx(Emotion$1, createEmotionProps(type, props), key);
+};
+var jsxs2 = function jsxs3(type, props, key) {
+  if (!hasOwn.call(props, "css")) {
+    return ReactJSXRuntime.jsxs(type, props, key);
+  }
+  return ReactJSXRuntime.jsxs(Emotion$1, createEmotionProps(type, props), key);
+};
+
+// src/web/client/components/Card.tsx
+var cardStyles = css`
+  background: #fff;
+  border: 1px solid #e2e8f4;
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 10px 35px rgba(26, 32, 44, 0.08);
+
+  .label {
+    ${labelStyles}
+  }
+
+  .value {
+    ${valueStyles}
+  }
+
+  .lede {
+    ${ledeStyles}
+  }
+
+  @media (max-width: 640px) {
+    padding: 18px 20px;
+  }
+`;
+function Card({ title, className, children }) {
+  const classes = ["card", className].filter(Boolean).join(" ");
+  return /* @__PURE__ */ jsxs2("section", { className: classes, css: cardStyles, children: [
+    title ? /* @__PURE__ */ jsx4("p", { className: "label", children: title }) : null,
+    children
+  ] });
+}
+
+// src/web/client/routes/auth/AuthForm.tsx
+function AuthPage({ mode }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from2 = location.state?.from ?? "/";
+  const [username, setUsername] = (0, import_react5.useState)("");
+  const [password, setPassword] = (0, import_react5.useState)("");
+  const [confirm, setConfirm] = (0, import_react5.useState)("");
+  const [error, setError] = (0, import_react5.useState)(null);
+  const [commitLogin, isLoginInFlight] = (0, import_react_relay.useMutation)(LoginMutation_graphql_default);
+  const [commitRegister, isRegisterInFlight] = (0, import_react_relay.useMutation)(RegisterMutation_graphql_default);
+  const isInFlight = mode === "login" ? isLoginInFlight : isRegisterInFlight;
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setError(null);
+    if (isInFlight) return;
+    if (mode === "register" && password !== confirm) {
+      setError("Passwords must match.");
+      return;
+    }
+    const variables = { input: { username: username.trim(), password } };
+    if (mode === "login") {
+      commitLogin({
+        variables,
+        onCompleted: (data, errors) => {
+          if (errors?.length) {
+            setError(errors[0]?.message ?? "Something went wrong.");
+            return;
+          }
+          if (!data?.login?.user) {
+            setError("Invalid username or password.");
+            return;
+          }
+          navigate(from2 || "/", { replace: true });
+        },
+        onError: () => {
+          setError("Unable to reach the server.");
+        }
+      });
+      return;
+    }
+    commitRegister({
+      variables,
+      onCompleted: (data, errors) => {
+        if (errors?.length) {
+          setError(errors[0]?.message ?? "Something went wrong.");
+          return;
+        }
+        if (!data?.register?.user) {
+          setError("Unable to create the account.");
+          return;
+        }
+        navigate(from2 || "/", { replace: true });
+      },
+      onError: () => setError("Unable to reach the server.")
+    });
+  };
+  const title = mode === "login" ? "Log in" : "Create account";
+  const switchText = mode === "login" ? "Need an account?" : "Already have an account?";
+  const switchHref = mode === "login" ? "/register" : "/login";
+  return /* @__PURE__ */ jsxs2(Card, { title, children: [
+    /* @__PURE__ */ jsxs2("form", { onSubmit: handleSubmit, children: [
+      /* @__PURE__ */ jsxs2("label", { className: "label", children: [
+        "Username",
+        /* @__PURE__ */ jsx4(
+          "input",
+          {
+            name: "username",
+            value: username,
+            onChange: (e) => setUsername(e.target.value),
+            autoComplete: "username",
+            required: true,
+            minLength: 3
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxs2("label", { className: "label", children: [
+        "Password",
+        /* @__PURE__ */ jsx4(
+          "input",
+          {
+            type: "password",
+            name: "password",
+            value: password,
+            onChange: (e) => setPassword(e.target.value),
+            autoComplete: mode === "login" ? "current-password" : "new-password",
+            required: true,
+            minLength: 3
+          }
+        )
+      ] }),
+      mode === "register" ? /* @__PURE__ */ jsxs2("label", { className: "label", children: [
+        "Confirm password",
+        /* @__PURE__ */ jsx4(
+          "input",
+          {
+            type: "password",
+            name: "confirm",
+            value: confirm,
+            onChange: (e) => setConfirm(e.target.value),
+            autoComplete: "new-password",
+            required: true,
+            minLength: 3
+          }
+        )
+      ] }) : null,
+      error ? /* @__PURE__ */ jsx4("p", { className: "lede", role: "alert", children: error }) : null,
+      /* @__PURE__ */ jsx4("button", { type: "submit", disabled: isInFlight, children: isInFlight ? "Please wait\u2026" : title })
+    ] }),
+    /* @__PURE__ */ jsxs2("p", { className: "lede", children: [
+      switchText,
+      " ",
+      /* @__PURE__ */ jsx4(Link, { to: switchHref, children: "Go here." })
+    ] })
+  ] });
+}
+
+// src/web/client/styles/layout.ts
+var shellStyles = css`
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 72px 20px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+
+  @media (max-width: 640px) {
+    padding: 56px 18px 72px;
+    gap: 22px;
+  }
+`;
+var heroStyles = css`
+  display: grid;
+  gap: 12px;
+`;
+
+// src/web/client/routes/AuthLayout.tsx
+function AuthLayout() {
+  return /* @__PURE__ */ jsxs2("main", { className: "shell", css: shellStyles, children: [
+    /* @__PURE__ */ jsxs2("header", { className: "hero", css: heroStyles, children: [
+      /* @__PURE__ */ jsx4("p", { className: "eyebrow", css: eyebrowStyles, children: "RaceCraft" }),
+      /* @__PURE__ */ jsx4("h1", { className: "title", css: titleStyles, children: "Welcome" }),
+      /* @__PURE__ */ jsx4("p", { className: "lede", css: ledeStyles, children: "Log in or create an account to keep going." })
+    ] }),
+    /* @__PURE__ */ jsx4(Outlet, {})
+  ] });
+}
+
+// src/web/client/routes/index.tsx
+function HomePage() {
+  return /* @__PURE__ */ jsx4(Card, { title: "Get started", children: /* @__PURE__ */ jsx4("p", { className: "value", children: "Uploads and overlays will live here once auth is wired into the rest of the flow." }) });
+}
+
+// src/web/client/routes/not-found/index.tsx
+function NotFoundPage() {
+  return /* @__PURE__ */ jsxs2(Card, { title: "Not found", children: [
+    /* @__PURE__ */ jsx4("p", { className: "value", children: "The page you are looking for does not exist." }),
+    /* @__PURE__ */ jsx4(Link, { to: "/", children: "Go home" })
+  ] });
+}
+
+// src/web/client/routes/RequireAuth.tsx
+var import_react8 = __toESM(require_react(), 1);
+var import_react_relay3 = __toESM(require_react_relay(), 1);
+
+// src/web/client/__generated__/ViewerQuery.graphql.ts
+var import_relay_runtime3 = __toESM(require_relay_runtime(), 1);
+var node4 = {
   fragment: {
     argumentDefinitions: [],
     kind: "Fragment",
     metadata: null,
-    name: "HelloQuery",
+    name: "ViewerQuery",
     selections: [
       {
         alias: null,
         args: null,
-        kind: "ScalarField",
-        name: "hello",
+        concreteType: "User",
+        kind: "LinkedField",
+        name: "viewer",
+        plural: false,
+        selections: [
+          {
+            alias: null,
+            args: null,
+            kind: "ScalarField",
+            name: "id",
+            storageKey: null
+          },
+          {
+            alias: null,
+            args: null,
+            kind: "ScalarField",
+            name: "username",
+            storageKey: null
+          },
+          {
+            alias: null,
+            args: null,
+            kind: "ScalarField",
+            name: "createdAt",
+            storageKey: null
+          }
+        ],
         storageKey: null
       }
     ],
@@ -40165,53 +47271,216 @@ var node = {
   operation: {
     argumentDefinitions: [],
     kind: "Operation",
-    name: "HelloQuery",
+    name: "ViewerQuery",
     selections: [
       {
         alias: null,
         args: null,
-        kind: "ScalarField",
-        name: "hello",
+        concreteType: "User",
+        kind: "LinkedField",
+        name: "viewer",
+        plural: false,
+        selections: [
+          {
+            alias: null,
+            args: null,
+            kind: "ScalarField",
+            name: "id",
+            storageKey: null
+          },
+          {
+            alias: null,
+            args: null,
+            kind: "ScalarField",
+            name: "username",
+            storageKey: null
+          },
+          {
+            alias: null,
+            args: null,
+            kind: "ScalarField",
+            name: "createdAt",
+            storageKey: null
+          }
+        ],
         storageKey: null
       }
     ]
   },
   params: {
-    cacheID: "HelloQuery",
+    cacheID: "ViewerQuery",
     id: null,
     metadata: {},
-    name: "HelloQuery",
+    name: "ViewerQuery",
     operationKind: "query",
-    text: "query HelloQuery {\n  hello\n}\n"
+    text: "query ViewerQuery {\n  viewer {\n    id\n    username\n    createdAt\n  }\n}\n"
   }
 };
-var HelloQuery_graphql_default = node;
+var ViewerQuery_graphql_default = node4;
 
-// src/web/client/App.tsx
-var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
-function App() {
-  const data = (0, import_react_relay.useLazyLoadQuery)(HelloQuery_graphql_default, {});
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", { className: "shell", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("header", { className: "hero", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "eyebrow", children: "Lap Time Overlap" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { className: "title", children: "Hello, Relay + GraphQL!" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "lede", children: "Fresh React + TypeScript experience is ready." })
+// src/web/client/routes/AppShell.tsx
+var import_react7 = __toESM(require_react(), 1);
+var import_react_relay2 = __toESM(require_react_relay(), 1);
+
+// src/web/client/__generated__/LogoutMutation.graphql.ts
+var import_relay_runtime4 = __toESM(require_relay_runtime(), 1);
+var node5 = {
+  fragment: {
+    argumentDefinitions: [],
+    kind: "Fragment",
+    metadata: null,
+    name: "LogoutMutation",
+    selections: [
+      {
+        alias: null,
+        args: null,
+        concreteType: "LogoutResult",
+        kind: "LinkedField",
+        name: "logout",
+        plural: false,
+        selections: [
+          {
+            alias: null,
+            args: null,
+            kind: "ScalarField",
+            name: "success",
+            storageKey: null
+          }
+        ],
+        storageKey: null
+      }
+    ],
+    type: "Mutation",
+    abstractKey: null
+  },
+  kind: "Request",
+  operation: {
+    argumentDefinitions: [],
+    kind: "Operation",
+    name: "LogoutMutation",
+    selections: [
+      {
+        alias: null,
+        args: null,
+        concreteType: "LogoutResult",
+        kind: "LinkedField",
+        name: "logout",
+        plural: false,
+        selections: [
+          {
+            alias: null,
+            args: null,
+            kind: "ScalarField",
+            name: "success",
+            storageKey: null
+          }
+        ],
+        storageKey: null
+      }
+    ]
+  },
+  params: {
+    cacheID: "LogoutMutation",
+    id: null,
+    metadata: {},
+    name: "LogoutMutation",
+    operationKind: "mutation",
+    text: "mutation LogoutMutation {\n  logout {\n    success\n  }\n}\n"
+  }
+};
+var LogoutMutation_graphql_default = node5;
+
+// src/web/client/routes/AppShell.tsx
+function AppShell({ viewer }) {
+  const navigate = useNavigate();
+  const environment2 = (0, import_react_relay2.useRelayEnvironment)();
+  const [error, setError] = (0, import_react7.useState)(null);
+  const [commitLogout, isLogoutInFlight] = (0, import_react_relay2.useMutation)(LogoutMutation_graphql_default);
+  const handleLogout = () => {
+    if (isLogoutInFlight) return;
+    setError(null);
+    commitLogout({
+      variables: {},
+      onCompleted: () => {
+        const store = environment2.getStore();
+        store.invalidateStore?.();
+        navigate("/login", { replace: true });
+      },
+      onError: () => setError("Failed to log out. Try again.")
+    });
+  };
+  return /* @__PURE__ */ jsxs2("main", { className: "shell", css: shellStyles, children: [
+    /* @__PURE__ */ jsxs2("header", { className: "hero", css: heroStyles, children: [
+      /* @__PURE__ */ jsx4("p", { className: "eyebrow", css: eyebrowStyles, children: "Lap Time Overlap" }),
+      /* @__PURE__ */ jsx4("h1", { className: "title", css: titleStyles, children: "Overlay workspace" }),
+      /* @__PURE__ */ jsxs2("p", { className: "lede", css: ledeStyles, children: [
+        "Signed in as ",
+        viewer.username
+      ] }),
+      /* @__PURE__ */ jsxs2(Card, { title: "Account", children: [
+        /* @__PURE__ */ jsx4("div", { className: "value", children: viewer.username }),
+        /* @__PURE__ */ jsx4("button", { onClick: handleLogout, disabled: isLogoutInFlight, children: isLogoutInFlight ? "Logging out\u2026" : "Log out" }),
+        error ? /* @__PURE__ */ jsx4("p", { className: "lede", role: "alert", children: error }) : null
+      ] }),
+      /* @__PURE__ */ jsx4(Card, { title: "Navigation", children: /* @__PURE__ */ jsx4("p", { className: "value", children: /* @__PURE__ */ jsx4(Link, { to: "/", children: "Home" }) }) })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", { className: "card", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "label", children: "GraphQL says" }),
-      /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", { className: "value", children: data.hello })
-    ] })
+    /* @__PURE__ */ jsx4(Outlet, {})
   ] });
 }
 
+// src/web/client/routes/RequireAuth.tsx
+function RequireAuth() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const data = (0, import_react_relay3.useLazyLoadQuery)(ViewerQuery_graphql_default, {}, {
+    fetchPolicy: "network-only"
+  });
+  (0, import_react8.useEffect)(() => {
+    if (!data.viewer) {
+      navigate("/login", {
+        replace: true,
+        state: { from: location.pathname + location.search }
+      });
+    }
+  }, [data.viewer, navigate, location.pathname, location.search]);
+  if (!data.viewer) {
+    return /* @__PURE__ */ jsx4(Card, { children: "Redirecting to login\u2026" });
+  }
+  return /* @__PURE__ */ jsx4(AppShell, { viewer: data.viewer });
+}
+
+// src/web/client/router.tsx
+var router = createBrowserRouter([
+  {
+    element: /* @__PURE__ */ jsx4(AuthLayout, {}),
+    children: [
+      { path: "/login", element: /* @__PURE__ */ jsx4(AuthPage, { mode: "login" }) },
+      { path: "/register", element: /* @__PURE__ */ jsx4(AuthPage, { mode: "register" }) }
+    ]
+  },
+  {
+    element: /* @__PURE__ */ jsx4(RequireAuth, {}),
+    children: [
+      { path: "/", element: /* @__PURE__ */ jsx4(HomePage, {}) },
+      { path: "*", element: /* @__PURE__ */ jsx4(NotFoundPage, {}) }
+    ]
+  }
+]);
+
+// src/web/client/App.tsx
+function App() {
+  return /* @__PURE__ */ jsx4(RouterProvider, { router });
+}
+
 // src/web/client/relayEnvironment.ts
-var import_relay_runtime2 = __toESM(require_relay_runtime(), 1);
+var import_relay_runtime5 = __toESM(require_relay_runtime(), 1);
 var fetchGraphQL = async (params, variables) => {
   const response = await fetch("/graphql", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
+    credentials: "same-origin",
     body: JSON.stringify({
       query: params.text,
       variables
@@ -40225,22 +47494,49 @@ var fetchGraphQL = async (params, variables) => {
 var cachedEnvironment = null;
 function createRelayEnvironment() {
   if (cachedEnvironment) return cachedEnvironment;
-  cachedEnvironment = new import_relay_runtime2.Environment({
-    network: import_relay_runtime2.Network.create(fetchGraphQL),
-    store: new import_relay_runtime2.Store(new import_relay_runtime2.RecordSource())
+  cachedEnvironment = new import_relay_runtime5.Environment({
+    network: import_relay_runtime5.Network.create(fetchGraphQL),
+    store: new import_relay_runtime5.Store(new import_relay_runtime5.RecordSource())
   });
   return cachedEnvironment;
 }
 
+// src/web/client/styles/global.ts
+var globalStyles = css`
+  @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap");
+
+  :root {
+    font-family: "Space Grotesk", "SF Pro Text", "Segoe UI", -apple-system,
+      system-ui, sans-serif;
+    color: #0b1021;
+    background-color: #eef2f8;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(circle at 20% 20%, #f9fbff, #e6ecf7 50%),
+      radial-gradient(circle at 80% 0%, #f3f7ff, #e1e8f4 40%),
+      linear-gradient(135deg, #f7faff, #f0f5ff);
+    color: inherit;
+  }
+`;
+
 // src/web/client/index.tsx
-var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
 var container = document.getElementById("root");
 if (!container) {
   throw new Error("Root element not found");
 }
 var environment = createRelayEnvironment();
 (0, import_client.createRoot)(container).render(
-  /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(import_react_relay2.RelayEnvironmentProvider, { environment, children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(import_react.Suspense, { fallback: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)("div", { className: "card", children: "Loading\u2026" }), children: /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(App, {}) }) })
+  /* @__PURE__ */ jsxs2(Fragment6, { children: [
+    /* @__PURE__ */ jsx4(Global, { styles: globalStyles }),
+    /* @__PURE__ */ jsx4(import_react_relay4.RelayEnvironmentProvider, { environment, children: /* @__PURE__ */ jsx4(import_react11.Suspense, { fallback: /* @__PURE__ */ jsx4("div", { className: "card", children: "Loading\u2026" }), children: /* @__PURE__ */ jsx4(App, {}) }) })
+  ] })
 );
 /*! Bundled license information:
 
@@ -40248,6 +47544,16 @@ react/cjs/react.development.js:
   (**
    * @license React
    * react.development.js
+   *
+   * Copyright (c) Facebook, Inc. and its affiliates.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE file in the root directory of this source tree.
+   *)
+
+react-is/cjs/react-is.development.js:
+  (** @license React v16.13.1
+   * react-is.development.js
    *
    * Copyright (c) Facebook, Inc. and its affiliates.
    *
@@ -40309,6 +47615,42 @@ react/cjs/react-jsx-runtime.development.js:
    *
    * This source code is licensed under the MIT license found in the
    * LICENSE file in the root directory of this source tree.
+   *)
+
+@remix-run/router/dist/router.js:
+  (**
+   * @remix-run/router v1.23.1
+   *
+   * Copyright (c) Remix Software Inc.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE.md file in the root directory of this source tree.
+   *
+   * @license MIT
+   *)
+
+react-router/dist/index.js:
+  (**
+   * React Router v6.30.2
+   *
+   * Copyright (c) Remix Software Inc.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE.md file in the root directory of this source tree.
+   *
+   * @license MIT
+   *)
+
+react-router-dom/dist/index.js:
+  (**
+   * React Router DOM v6.30.2
+   *
+   * Copyright (c) Remix Software Inc.
+   *
+   * This source code is licensed under the MIT license found in the
+   * LICENSE.md file in the root directory of this source tree.
+   *
+   * @license MIT
    *)
 */
 //# sourceMappingURL=app.js.map

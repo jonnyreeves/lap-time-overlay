@@ -13,6 +13,7 @@ const fetchGraphQL: FetchFunction = async (params, variables) => {
     headers: {
       "Content-Type": "application/json",
     },
+    credentials: "same-origin",
     body: JSON.stringify({
       query: params.text,
       variables,

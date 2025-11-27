@@ -1,8 +1,10 @@
+import { Global } from "@emotion/react";
 import React, { Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { RelayEnvironmentProvider } from "react-relay";
 import { App } from "./App.js";
 import { createRelayEnvironment } from "./relayEnvironment.js";
+import { globalStyles } from "./styles/global.js";
 
 const container = document.getElementById("root");
 if (!container) {
@@ -12,9 +14,12 @@ if (!container) {
 const environment = createRelayEnvironment();
 
 createRoot(container).render(
-  <RelayEnvironmentProvider environment={environment}>
-    <Suspense fallback={<div className="card">Loading…</div>}>
-      <App />
-    </Suspense>
-  </RelayEnvironmentProvider>
+  <>
+    <Global styles={globalStyles} />
+    <RelayEnvironmentProvider environment={environment}>
+      <Suspense fallback={<div className="card">Loading…</div>}>
+        <App />
+      </Suspense>
+    </RelayEnvironmentProvider>
+  </>
 );

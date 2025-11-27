@@ -6,4 +6,7 @@ export interface Migration {
 }
 
 // Add new migrations here; keep order stable.
-export const migrations: Migration[] = [];
+export const migrations: Migration[] = [
+  (await import("./01_create_users.js")).migration,
+  (await import("./02_create_sessions.js")).migration,
+];
