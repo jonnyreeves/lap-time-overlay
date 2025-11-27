@@ -12,6 +12,13 @@ export const shellStyles = css`
     padding: 56px 18px 72px;
     gap: 22px;
   }
+
+  .header {
+    flex: 1;
+    display: flex;
+    justify-content: space-between; /* pushes them to opposite edges */
+    align-items: center; /* vertical alignment */
+  }
 `;
 
 export const heroStyles = css`

@@ -1083,7 +1083,7 @@ var require_react_development = __commonJS({
           }
           return dispatcher.useContext(Context);
         }
-        function useState5(initialState) {
+        function useState4(initialState) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useState(initialState);
         }
@@ -1886,7 +1886,7 @@ var require_react_development = __commonJS({
         exports.useMemo = useMemo3;
         exports.useReducer = useReducer;
         exports.useRef = useRef4;
-        exports.useState = useState5;
+        exports.useState = useState4;
         exports.useSyncExternalStore = useSyncExternalStore;
         exports.useTransition = useTransition;
         exports.version = ReactVersion;
@@ -35294,7 +35294,7 @@ var require_ReactRelayLocalQueryRenderer = __commonJS({
     var deepFreeze = _require.deepFreeze;
     var getRequest = _require.getRequest;
     var useLayoutEffect4 = React7.useLayoutEffect;
-    var useState5 = React7.useState;
+    var useState4 = React7.useState;
     var useRef4 = React7.useRef;
     var useMemo3 = React7.useMemo;
     var queryRendererContext = {
@@ -35323,7 +35323,7 @@ var require_ReactRelayLocalQueryRenderer = __commonJS({
         };
       }, [environment2]);
       var dataRef = useRef4(null);
-      var _useState = useState5(null), forceUpdate = _useState[1];
+      var _useState = useState4(null), forceUpdate = _useState[1];
       var cleanupFnRef = useRef4(null);
       var snapshot = useMemo3(function() {
         environment2.check(operation);
@@ -38061,7 +38061,7 @@ var require_useFragmentNode = __commonJS({
     var getFragmentResourceForEnvironment = _require.getFragmentResourceForEnvironment;
     var _require2 = require_react();
     var useEffect4 = _require2.useEffect;
-    var useState5 = _require2.useState;
+    var useState4 = _require2.useState;
     var _require3 = require_relay_runtime();
     var RelayFeatureFlags = _require3.RelayFeatureFlags;
     var getFragmentIdentifier = _require3.getFragmentIdentifier;
@@ -38070,7 +38070,7 @@ var require_useFragmentNode = __commonJS({
       var environment2 = useRelayEnvironment2();
       var FragmentResource = getFragmentResourceForEnvironment(environment2);
       var isMountedRef = useUnsafeRef_DEPRECATED(false);
-      var _useState = useState5(0), forceUpdate = _useState[1];
+      var _useState = useState4(0), forceUpdate = _useState[1];
       var fragmentIdentifier = getFragmentIdentifier(fragmentNode, fragmentRef);
       var fragmentResult = FragmentResource.readWithIdentifier(fragmentNode, fragmentRef, fragmentIdentifier, componentDisplayName);
       var isListeningForUpdatesRef = useUnsafeRef_DEPRECATED(true);
@@ -38172,14 +38172,14 @@ var require_useLazyLoadQueryNode = __commonJS({
     var React7 = require_react();
     var useContext6 = React7.useContext;
     var useEffect4 = React7.useEffect;
-    var useState5 = React7.useState;
+    var useState4 = React7.useState;
     var useRef4 = React7.useRef;
     function useLazyLoadQueryNode(_ref) {
       var query = _ref.query, componentDisplayName = _ref.componentDisplayName, fetchObservable = _ref.fetchObservable, fetchPolicy = _ref.fetchPolicy, fetchKey = _ref.fetchKey, renderPolicy = _ref.renderPolicy;
       var environment2 = useRelayEnvironment2();
       var profilerContext = useContext6(ProfilerContext);
       var QueryResource = getQueryResourceForEnvironment(environment2);
-      var _useState = useState5(0), forceUpdateKey = _useState[0], forceUpdate = _useState[1];
+      var _useState = useState4(0), forceUpdateKey = _useState[0], forceUpdate = _useState[1];
       var _useFetchTrackingRef = useFetchTrackingRef(), startFetch = _useFetchTrackingRef.startFetch, completeFetch = _useFetchTrackingRef.completeFetch;
       var cacheBreaker = "".concat(forceUpdateKey, "-").concat(fetchKey !== null && fetchKey !== void 0 ? fetchKey : "");
       var cacheIdentifier = getQueryCacheIdentifier(environment2, query, fetchPolicy, renderPolicy, cacheBreaker);
@@ -38235,9 +38235,9 @@ var require_useMemoVariables = __commonJS({
     "use strict";
     var areEqual = require_areEqual();
     var _require = require_react();
-    var useState5 = _require.useState;
+    var useState4 = _require.useState;
     function useMemoVariables(variables) {
-      var _useState = useState5(variables), mirroredVariables = _useState[0], setMirroredVariables = _useState[1];
+      var _useState = useState4(variables), mirroredVariables = _useState[0], setMirroredVariables = _useState[1];
       if (areEqual(variables, mirroredVariables)) {
         return mirroredVariables;
       } else {
@@ -38353,7 +38353,7 @@ var require_useEntryPointLoader = __commonJS({
     var useCallback3 = _require2.useCallback;
     var useEffect4 = _require2.useEffect;
     var useRef4 = _require2.useRef;
-    var useState5 = _require2.useState;
+    var useState4 = _require2.useState;
     var initialNullEntryPointReferenceState = {
       kind: "NullEntryPointReference"
     };
@@ -38364,8 +38364,8 @@ var require_useEntryPointLoader = __commonJS({
       var initialEntryPointParamsInternal = (_options$TEST_ONLY__i3 = options === null || options === void 0 ? void 0 : (_options$TEST_ONLY__i4 = options.TEST_ONLY__initialEntryPointData) === null || _options$TEST_ONLY__i4 === void 0 ? void 0 : _options$TEST_ONLY__i4.entryPointParams) !== null && _options$TEST_ONLY__i3 !== void 0 ? _options$TEST_ONLY__i3 : null;
       var isMountedRef = useIsMountedRef();
       var undisposedEntryPointReferencesRef = useRef4(/* @__PURE__ */ new Set([initialEntryPointReferenceInternal]));
-      var _useState = useState5(initialEntryPointReferenceInternal), entryPointReference = _useState[0], setEntryPointReference = _useState[1];
-      var _useState2 = useState5(initialEntryPointParamsInternal), entryPointParams = _useState2[0], setEntryPointParams = _useState2[1];
+      var _useState = useState4(initialEntryPointReferenceInternal), entryPointReference = _useState[0], setEntryPointReference = _useState[1];
+      var _useState2 = useState4(initialEntryPointParamsInternal), entryPointParams = _useState2[0], setEntryPointParams = _useState2[1];
       var disposeEntryPoint = useCallback3(function() {
         if (isMountedRef.current) {
           var nullEntryPointReference = {
@@ -38506,7 +38506,7 @@ var require_useMutation = __commonJS({
     var React7 = require_react();
     var _require = require_relay_runtime();
     var defaultCommitMutation = _require.commitMutation;
-    var useState5 = React7.useState;
+    var useState4 = React7.useState;
     var useEffect4 = React7.useEffect;
     var useRef4 = React7.useRef;
     var useCallback3 = React7.useCallback;
@@ -38517,7 +38517,7 @@ var require_useMutation = __commonJS({
       var environmentRef = useRef4(environment2);
       var mutationRef = useRef4(mutation);
       var inFlightMutationsRef = useRef4(/* @__PURE__ */ new Set());
-      var _useState = useState5(false), isMutationInFlight = _useState[0], setMutationInFlight = _useState[1];
+      var _useState = useState4(false), isMutationInFlight = _useState[0], setMutationInFlight = _useState[1];
       var cleanup = useCallback3(function(disposable) {
         if (environmentRef.current === environment2 && mutationRef.current === mutation) {
           inFlightMutationsRef.current["delete"](disposable);
@@ -38586,7 +38586,7 @@ var require_useQueryLoader = __commonJS({
     var useCallback3 = _require2.useCallback;
     var useEffect4 = _require2.useEffect;
     var useRef4 = _require2.useRef;
-    var useState5 = _require2.useState;
+    var useState4 = _require2.useState;
     var _require3 = require_relay_runtime();
     var getRequest = _require3.getRequest;
     var initialNullQueryReferenceState = {
@@ -38605,10 +38605,10 @@ var require_useQueryLoader = __commonJS({
       useTrackLoadQueryInRender();
       var isMountedRef = useIsMountedRef();
       var undisposedQueryReferencesRef = useRef4(/* @__PURE__ */ new Set([initialQueryReferenceInternal]));
-      var _useState = useState5(function() {
+      var _useState = useState4(function() {
         return initialQueryReferenceInternal;
       }), queryReference = _useState[0], setQueryReference = _useState[1];
-      var _useState2 = useState5(function() {
+      var _useState2 = useState4(function() {
         return initialQueryReferenceInternal;
       }), previousInitialQueryReference = _useState2[0], setPreviousInitialQueryReference = _useState2[1];
       if (initialQueryReferenceInternal !== previousInitialQueryReference) {
@@ -38947,7 +38947,7 @@ var require_useIsOperationNodeActive = __commonJS({
     var getObservableForActiveRequest = _require.__internal.getObservableForActiveRequest;
     var getSelector = _require.getSelector;
     var useEffect4 = React7.useEffect;
-    var useState5 = React7.useState;
+    var useState4 = React7.useState;
     var useMemo3 = React7.useMemo;
     function useIsOperationNodeActive(fragmentNode, fragmentRef) {
       var environment2 = useRelayEnvironment2();
@@ -38959,7 +38959,7 @@ var require_useIsOperationNodeActive = __commonJS({
         !(selector.kind === "SingularReaderSelector") ? true ? invariant2(false, "useIsOperationNodeActive: Plural fragments are not supported.") : invariant2(false) : void 0;
         return getObservableForActiveRequest(environment2, selector.owner);
       }, [environment2, fragmentNode, fragmentRef]);
-      var _useState = useState5(observable != null), isActive = _useState[0], setIsActive = _useState[1];
+      var _useState = useState4(observable != null), isActive = _useState[0], setIsActive = _useState[1];
       useEffect4(function() {
         var subscription;
         setIsActive(observable != null);
@@ -38998,7 +38998,7 @@ var require_useLoadMoreFunction = __commonJS({
     var _require = require_react();
     var useCallback3 = _require.useCallback;
     var useEffect4 = _require.useEffect;
-    var useState5 = _require.useState;
+    var useState4 = _require.useState;
     var _require2 = require_relay_runtime();
     var fetchQuery = _require2.__internal.fetchQuery;
     var ConnectionInterface = _require2.ConnectionInterface;
@@ -39015,8 +39015,8 @@ var require_useLoadMoreFunction = __commonJS({
       var _getRefetchMetadata = getRefetchMetadata(fragmentNode, componentDisplayName), identifierInfo = _getRefetchMetadata.identifierInfo;
       var identifierValue = (identifierInfo === null || identifierInfo === void 0 ? void 0 : identifierInfo.identifierField) != null && fragmentData != null && typeof fragmentData === "object" ? fragmentData[identifierInfo.identifierField] : null;
       var isMountedRef = useIsMountedRef();
-      var _useState = useState5(environment2), mirroredEnvironment = _useState[0], setMirroredEnvironment = _useState[1];
-      var _useState2 = useState5(fragmentIdentifier), mirroredFragmentIdentifier = _useState2[0], setMirroredFragmentIdentifier = _useState2[1];
+      var _useState = useState4(environment2), mirroredEnvironment = _useState[0], setMirroredEnvironment = _useState[1];
+      var _useState2 = useState4(fragmentIdentifier), mirroredFragmentIdentifier = _useState2[0], setMirroredFragmentIdentifier = _useState2[1];
       var isParentQueryActive = useIsOperationNodeActive(fragmentNode, fragmentRef);
       var shouldReset = environment2 !== mirroredEnvironment || fragmentIdentifier !== mirroredFragmentIdentifier;
       if (shouldReset) {
@@ -39141,7 +39141,7 @@ var require_usePaginationFragment = __commonJS({
     var _require = require_react();
     var useCallback3 = _require.useCallback;
     var useDebugValue = _require.useDebugValue;
-    var useState5 = _require.useState;
+    var useState4 = _require.useState;
     var _require2 = require_relay_runtime();
     var getFragment = _require2.getFragment;
     var getFragmentIdentifier = _require2.getFragmentIdentifier;
@@ -39204,7 +39204,7 @@ var require_usePaginationFragment = __commonJS({
       };
     }
     function useLoadMore(args) {
-      var _useState = useState5(false), isLoadingMore = _useState[0], setIsLoadingMore = _useState[1];
+      var _useState = useState4(false), isLoadingMore = _useState[0], setIsLoadingMore = _useState[1];
       var observer = {
         start: function start() {
           return setIsLoadingMore(true);
@@ -41656,7 +41656,7 @@ function css() {
 }
 
 // src/web/client/index.tsx
-var import_react11 = __toESM(require_react(), 1);
+var import_react10 = __toESM(require_react(), 1);
 var import_client = __toESM(require_client(), 1);
 var import_react_relay4 = __toESM(require_react_relay(), 1);
 
@@ -47187,6 +47187,13 @@ var shellStyles = css`
     padding: 56px 18px 72px;
     gap: 22px;
   }
+
+  .header {
+    flex: 1;
+    display: flex;
+    justify-content: space-between; /* pushes them to opposite edges */
+    align-items: center; /* vertical alignment */
+  }
 `;
 var heroStyles = css`
   display: grid;
@@ -47219,7 +47226,7 @@ function NotFoundPage() {
 }
 
 // src/web/client/routes/RequireAuth.tsx
-var import_react8 = __toESM(require_react(), 1);
+var import_react7 = __toESM(require_react(), 1);
 var import_react_relay3 = __toESM(require_react_relay(), 1);
 
 // src/web/client/__generated__/ViewerQuery.graphql.ts
@@ -47319,7 +47326,6 @@ var node4 = {
 var ViewerQuery_graphql_default = node4;
 
 // src/web/client/routes/AppShell.tsx
-var import_react7 = __toESM(require_react(), 1);
 var import_react_relay2 = __toESM(require_react_relay(), 1);
 
 // src/web/client/__generated__/LogoutMutation.graphql.ts
@@ -47394,11 +47400,9 @@ var LogoutMutation_graphql_default = node5;
 function AppShell({ viewer }) {
   const navigate = useNavigate();
   const environment2 = (0, import_react_relay2.useRelayEnvironment)();
-  const [error, setError] = (0, import_react7.useState)(null);
   const [commitLogout, isLogoutInFlight] = (0, import_react_relay2.useMutation)(LogoutMutation_graphql_default);
   const handleLogout = () => {
     if (isLogoutInFlight) return;
-    setError(null);
     commitLogout({
       variables: {},
       onCompleted: () => {
@@ -47406,24 +47410,19 @@ function AppShell({ viewer }) {
         store.invalidateStore?.();
         navigate("/login", { replace: true });
       },
-      onError: () => setError("Failed to log out. Try again.")
+      onError: () => console.error("Failed to log out. Try again.")
     });
   };
   return /* @__PURE__ */ jsxs2("main", { className: "shell", css: shellStyles, children: [
-    /* @__PURE__ */ jsxs2("header", { className: "hero", css: heroStyles, children: [
-      /* @__PURE__ */ jsx4("p", { className: "eyebrow", css: eyebrowStyles, children: "Lap Time Overlap" }),
-      /* @__PURE__ */ jsx4("h1", { className: "title", css: titleStyles, children: "Overlay workspace" }),
+    /* @__PURE__ */ jsx4("header", { className: "hero", css: heroStyles, children: /* @__PURE__ */ jsxs2("div", { className: "header", children: [
+      /* @__PURE__ */ jsx4("h1", { className: "title", css: titleStyles, children: "RaceCraft \u{1F3C1}" }),
       /* @__PURE__ */ jsxs2("p", { className: "lede", css: ledeStyles, children: [
         "Signed in as ",
-        viewer.username
-      ] }),
-      /* @__PURE__ */ jsxs2(Card, { title: "Account", children: [
-        /* @__PURE__ */ jsx4("div", { className: "value", children: viewer.username }),
-        /* @__PURE__ */ jsx4("button", { onClick: handleLogout, disabled: isLogoutInFlight, children: isLogoutInFlight ? "Logging out\u2026" : "Log out" }),
-        error ? /* @__PURE__ */ jsx4("p", { className: "lede", role: "alert", children: error }) : null
-      ] }),
-      /* @__PURE__ */ jsx4(Card, { title: "Navigation", children: /* @__PURE__ */ jsx4("p", { className: "value", children: /* @__PURE__ */ jsx4(Link, { to: "/", children: "Home" }) }) })
-    ] }),
+        viewer.username,
+        " | ",
+        /* @__PURE__ */ jsx4("a", { href: "#", onClick: handleLogout, children: "Sign out" })
+      ] })
+    ] }) }),
     /* @__PURE__ */ jsx4(Outlet, {})
   ] });
 }
@@ -47435,7 +47434,7 @@ function RequireAuth() {
   const data = (0, import_react_relay3.useLazyLoadQuery)(ViewerQuery_graphql_default, {}, {
     fetchPolicy: "network-only"
   });
-  (0, import_react8.useEffect)(() => {
+  (0, import_react7.useEffect)(() => {
     if (!data.viewer) {
       navigate("/login", {
         replace: true,
@@ -47535,7 +47534,7 @@ var environment = createRelayEnvironment();
 (0, import_client.createRoot)(container).render(
   /* @__PURE__ */ jsxs2(Fragment6, { children: [
     /* @__PURE__ */ jsx4(Global, { styles: globalStyles }),
-    /* @__PURE__ */ jsx4(import_react_relay4.RelayEnvironmentProvider, { environment, children: /* @__PURE__ */ jsx4(import_react11.Suspense, { fallback: /* @__PURE__ */ jsx4("div", { className: "card", children: "Loading\u2026" }), children: /* @__PURE__ */ jsx4(App, {}) }) })
+    /* @__PURE__ */ jsx4(import_react_relay4.RelayEnvironmentProvider, { environment, children: /* @__PURE__ */ jsx4(import_react10.Suspense, { fallback: /* @__PURE__ */ jsx4("div", { className: "card", children: "Loading\u2026" }), children: /* @__PURE__ */ jsx4(App, {}) }) })
   ] })
 );
 /*! Bundled license information:
