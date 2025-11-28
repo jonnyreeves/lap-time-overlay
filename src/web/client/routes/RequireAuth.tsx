@@ -3,7 +3,7 @@ import { useLazyLoadQuery } from "react-relay";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { ViewerQuery } from "../__generated__/ViewerQuery.graphql.js";
 import ViewerQueryNode from "../__generated__/ViewerQuery.graphql.js";
-import { Card } from "../components/index.js";
+import { Card } from "../components/Card.js";
 import { AppShell } from "./AppShell.js";
 
 export function RequireAuth() {

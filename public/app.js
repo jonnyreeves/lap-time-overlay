@@ -46924,8 +46924,6 @@ var labelStyles = css`
 `;
 var valueStyles = css`
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
   color: #0b132b;
 `;
 
@@ -46937,8 +46935,11 @@ var cardStyles = css`
   padding: 20px 24px;
   box-shadow: 0 10px 35px rgba(26, 32, 44, 0.08);
 
-  .label {
-    ${labelStyles}
+  .title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.02em;
   }
 
   .value {
@@ -46956,7 +46957,7 @@ var cardStyles = css`
 function Card({ title, className, children }) {
   const classes = ["card", className].filter(Boolean).join(" ");
   return /* @__PURE__ */ jsxs2("section", { className: classes, css: cardStyles, children: [
-    title ? /* @__PURE__ */ jsx4("p", { className: "label", children: title }) : null,
+    title ? /* @__PURE__ */ jsx4("p", { className: "title", children: title }) : null,
     children
   ] });
 }

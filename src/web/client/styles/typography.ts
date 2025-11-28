@@ -34,7 +34,5 @@ export const labelStyles = css`
 
 export const valueStyles = css`
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
   color: #0b132b;
 `;

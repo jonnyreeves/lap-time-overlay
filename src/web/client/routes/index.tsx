@@ -1,4 +1,4 @@
-import { Card } from "../components/index.js";
+import { Card } from "../components/Card.js";
 
 export function HomePage() {
   return (
