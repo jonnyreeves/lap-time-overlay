@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { LoginPage } from "./routes/auth/login.js";
 import { RegisterPage } from "./routes/auth/register.js";
 import { AuthLayout } from "./routes/AuthLayout.js";
+import CreateSessionRoute from "./routes/session/create.js";
 import { HomePage } from "./routes/index.js";
 import { NotFoundPage } from "./routes/not-found/index.js";
 import { RequireAuth } from "./routes/RequireAuth.js";
@@ -18,6 +19,7 @@ export const router = createBrowserRouter([
     element: <RequireAuth />,
     children: [
       { path: "/", element: <HomePage /> },
+      { path: "/session/create", element: <CreateSessionRoute /> },
       { path: "*", element: <NotFoundPage /> },
     ],
   },

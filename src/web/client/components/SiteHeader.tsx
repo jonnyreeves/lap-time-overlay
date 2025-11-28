@@ -38,7 +38,7 @@ export function SiteHeader({ viewer }: SiteHeaderProps) {
     return (
         <header className="hero" css={heroStyles}>
             <div className="header">
-                <h1 className="title" css={titleStyles}>
+                <h1 className="title" css={titleStyles} onClick={() => navigate("/")}>
                     RaceCraft 🏁
                 </h1>
                 {viewer ? (

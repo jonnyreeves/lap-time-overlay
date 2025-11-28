@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { Link, useNavigate } from "react-router-dom";
 import { Card } from "./Card.js";
 
 export type Session = {
@@ -30,10 +31,15 @@ export const sessions: Session[] = [
 ];
 
 export function RecentSessionsCard() {
+  const navigate = useNavigate();
   return (
     <Card
       title="Recent sessions"
-      rightComponent={<button className="button">Add Session</button>}
+      rightComponent={
+        <button className="button" onClick={() => navigate("/session/create")}>
+          Add Session
+        </button>
+      }
     >
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">

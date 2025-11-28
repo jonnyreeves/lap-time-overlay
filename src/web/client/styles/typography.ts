@@ -14,6 +14,7 @@ export const titleStyles = css`
   font-size: clamp(2.1rem, 3vw, 2.8rem);
   font-weight: 600;
   letter-spacing: -0.02em;
+  cursor: pointer;
 `;
 
 export const ledeStyles = css`
