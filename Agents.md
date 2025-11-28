@@ -1,5 +1,6 @@
 # Agents Guide
 
+- The web server has a watch script that automatically reloads on changes, so there is no need to stop and restart it after modifying the web app.
 - Always run `npm run type-check` before handing work back to the user and fix any reported issues. Run the fast suite with `npm run test` (Vitest). Only run the slow ffmpeg overlay integration snapshots (`npm run test:integration`) when touching the ffmpeg renderer/overlay paths or fixtures.
 - Keep changes minimal, aligned with existing style, and explain them succinctly in the final message (reference paths, not file dumps).
 - Web UI  React + Relay bundled via esbuild (`npm run web:build` / `npm run web:watch`); keep IDs/classes stable.

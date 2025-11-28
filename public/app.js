@@ -123,38 +123,38 @@ var require_react_development = __commonJS({
           ReactSharedInternals.ReactDebugCurrentFrame = ReactDebugCurrentFrame;
           ReactSharedInternals.ReactCurrentActQueue = ReactCurrentActQueue;
         }
-        function warn(format) {
+        function warn(format2) {
           {
             {
               for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
                 args[_key - 1] = arguments[_key];
               }
-              printWarning("warn", format, args);
+              printWarning("warn", format2, args);
             }
           }
         }
-        function error(format) {
+        function error(format2) {
           {
             {
               for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
                 args[_key2 - 1] = arguments[_key2];
               }
-              printWarning("error", format, args);
+              printWarning("error", format2, args);
             }
           }
         }
-        function printWarning(level, format, args) {
+        function printWarning(level, format2, args) {
           {
             var ReactDebugCurrentFrame2 = ReactSharedInternals.ReactDebugCurrentFrame;
             var stack = ReactDebugCurrentFrame2.getStackAddendum();
             if (stack !== "") {
-              format += "%s";
+              format2 += "%s";
               args = args.concat([stack]);
             }
             var argsWithFormat = args.map(function(item) {
               return String(item);
             });
-            argsWithFormat.unshift("Warning: " + format);
+            argsWithFormat.unshift("Warning: " + format2);
             Function.prototype.apply.call(console[level], console, argsWithFormat);
           }
         }
@@ -636,8 +636,8 @@ var require_react_development = __commonJS({
             "=": "=0",
             ":": "=2"
           };
-          var escapedString = key.replace(escapeRegex, function(match2) {
-            return escaperLookup[match2];
+          var escapedString = key.replace(escapeRegex, function(match3) {
+            return escaperLookup[match3];
           });
           return "$" + escapedString;
         }
@@ -1227,8 +1227,8 @@ var require_react_development = __commonJS({
               try {
                 throw Error();
               } catch (x) {
-                var match2 = x.stack.trim().match(/\n( *(at )?)/);
-                prefix2 = match2 && match2[1] || "";
+                var match3 = x.stack.trim().match(/\n( *(at )?)/);
+                prefix2 = match3 && match3[1] || "";
               }
             }
             return "\n" + prefix2 + name;
@@ -2646,38 +2646,38 @@ var require_react_dom_development = __commonJS({
             suppressWarning = newSuppressWarning;
           }
         }
-        function warn(format) {
+        function warn(format2) {
           {
             if (!suppressWarning) {
               for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
                 args[_key - 1] = arguments[_key];
               }
-              printWarning("warn", format, args);
+              printWarning("warn", format2, args);
             }
           }
         }
-        function error(format) {
+        function error(format2) {
           {
             if (!suppressWarning) {
               for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
                 args[_key2 - 1] = arguments[_key2];
               }
-              printWarning("error", format, args);
+              printWarning("error", format2, args);
             }
           }
         }
-        function printWarning(level, format, args) {
+        function printWarning(level, format2, args) {
           {
             var ReactDebugCurrentFrame2 = ReactSharedInternals.ReactDebugCurrentFrame;
             var stack = ReactDebugCurrentFrame2.getStackAddendum();
             if (stack !== "") {
-              format += "%s";
+              format2 += "%s";
               args = args.concat([stack]);
             }
             var argsWithFormat = args.map(function(item) {
               return String(item);
             });
-            argsWithFormat.unshift("Warning: " + format);
+            argsWithFormat.unshift("Warning: " + format2);
             Function.prototype.apply.call(console[level], console, argsWithFormat);
           }
         }
@@ -3549,8 +3549,8 @@ var require_react_dom_development = __commonJS({
               try {
                 throw Error();
               } catch (x) {
-                var match2 = x.stack.trim().match(/\n( *(at )?)/);
-                prefix2 = match2 && match2[1] || "";
+                var match3 = x.stack.trim().match(/\n( *(at )?)/);
+                prefix2 = match3 && match3[1] || "";
               }
             }
             return "\n" + prefix2 + name;
@@ -5479,8 +5479,8 @@ var require_react_dom_development = __commonJS({
           {
             var invalidProps = [];
             for (var key in props) {
-              var isValid = validateProperty(type, key);
-              if (!isValid) {
+              var isValid2 = validateProperty(type, key);
+              if (!isValid2) {
                 invalidProps.push(key);
               }
             }
@@ -5622,8 +5622,8 @@ var require_react_dom_development = __commonJS({
           {
             var unknownProps = [];
             for (var key in props) {
-              var isValid = validateProperty$1(type, key, props[key], eventRegistry);
-              if (!isValid) {
+              var isValid2 = validateProperty$1(type, key, props[key], eventRegistry);
+              if (!isValid2) {
                 unknownProps.push(key);
               }
             }
@@ -6223,9 +6223,9 @@ var require_react_dom_development = __commonJS({
           }
           var child = node6.child;
           while (child !== null) {
-            var match2 = findCurrentHostFiberImpl(child);
-            if (match2 !== null) {
-              return match2;
+            var match3 = findCurrentHostFiberImpl(child);
+            if (match3 !== null) {
+              return match3;
             }
             child = child.sibling;
           }
@@ -6242,9 +6242,9 @@ var require_react_dom_development = __commonJS({
           var child = node6.child;
           while (child !== null) {
             if (child.tag !== HostPortal) {
-              var match2 = findCurrentHostFiberWithNoPortalsImpl(child);
-              if (match2 !== null) {
-                return match2;
+              var match3 = findCurrentHostFiberWithNoPortalsImpl(child);
+              if (match3 !== null) {
+                return match3;
               }
             }
             child = child.sibling;
@@ -10757,17 +10757,17 @@ var require_react_dom_development = __commonJS({
         }
         function getSuspenseInstanceFallbackErrorDetails(instance) {
           var dataset = instance.nextSibling && instance.nextSibling.dataset;
-          var digest, message, stack;
+          var digest, message2, stack;
           if (dataset) {
             digest = dataset.dgst;
             {
-              message = dataset.msg;
+              message2 = dataset.msg;
               stack = dataset.stck;
             }
           }
           {
             return {
-              message,
+              message: message2,
               digest,
               stack
             };
@@ -15854,11 +15854,11 @@ var require_react_dom_development = __commonJS({
           var contextType = ctor.contextType;
           {
             if ("contextType" in ctor) {
-              var isValid = (
+              var isValid2 = (
                 // Allow null for conditional declaration
                 contextType === null || contextType !== void 0 && contextType.$$typeof === REACT_CONTEXT_TYPE && contextType._context === void 0
               );
-              if (!isValid && !didWarnAboutInvalidateContextType.has(ctor)) {
+              if (!isValid2 && !didWarnAboutInvalidateContextType.has(ctor)) {
                 didWarnAboutInvalidateContextType.add(ctor);
                 var addendum = "";
                 if (contextType === void 0) {
@@ -17521,16 +17521,16 @@ var require_react_dom_development = __commonJS({
               );
             }
             if (isSuspenseInstanceFallback(suspenseInstance)) {
-              var digest, message, stack;
+              var digest, message2, stack;
               {
                 var _getSuspenseInstanceF = getSuspenseInstanceFallbackErrorDetails(suspenseInstance);
                 digest = _getSuspenseInstanceF.digest;
-                message = _getSuspenseInstanceF.message;
+                message2 = _getSuspenseInstanceF.message;
                 stack = _getSuspenseInstanceF.stack;
               }
               var error2;
-              if (message) {
-                error2 = new Error(message);
+              if (message2) {
+                error2 = new Error(message2);
               } else {
                 error2 = new Error("The server could not finish this Suspense boundary, likely due to an error during server rendering. Switched to client rendering.");
               }
@@ -24046,15 +24046,15 @@ var require_RelayDefaultHandleKey = __commonJS({
 var require_browser = __commonJS({
   "node_modules/invariant/browser.js"(exports, module) {
     "use strict";
-    var invariant2 = function(condition, format, a, b, c, d, e, f) {
+    var invariant2 = function(condition, format2, a, b, c, d, e, f) {
       if (true) {
-        if (format === void 0) {
+        if (format2 === void 0) {
           throw new Error("invariant requires an error message argument");
         }
       }
       if (!condition) {
         var error;
-        if (format === void 0) {
+        if (format2 === void 0) {
           error = new Error(
             "Minified exception occurred; use the non-minified dev environment for the full error message and additional helpful warnings."
           );
@@ -24062,7 +24062,7 @@ var require_browser = __commonJS({
           var args = [a, b, c, d, e, f];
           var argIndex = 0;
           error = new Error(
-            format.replace(/%s/g, function() {
+            format2.replace(/%s/g, function() {
               return args[argIndex++];
             })
           );
@@ -24381,31 +24381,31 @@ var require_warning = __commonJS({
   "node_modules/fbjs/lib/warning.js"(exports, module) {
     "use strict";
     var emptyFunction = require_emptyFunction();
-    function printWarning(format) {
+    function printWarning(format2) {
       for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
         args[_key - 1] = arguments[_key];
       }
       var argIndex = 0;
-      var message = "Warning: " + format.replace(/%s/g, function() {
+      var message2 = "Warning: " + format2.replace(/%s/g, function() {
         return args[argIndex++];
       });
       if (typeof console !== "undefined") {
-        console.error(message);
+        console.error(message2);
       }
       try {
-        throw new Error(message);
+        throw new Error(message2);
       } catch (x) {
       }
     }
-    var warning2 = true ? function(condition, format) {
-      if (format === void 0) {
+    var warning2 = true ? function(condition, format2) {
+      if (format2 === void 0) {
         throw new Error("`warning(condition, format, ...args)` requires a warning message argument");
       }
       if (!condition) {
         for (var _len2 = arguments.length, args = new Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
           args[_key2 - 2] = arguments[_key2];
         }
-        printWarning.apply(void 0, [format].concat(args));
+        printWarning.apply(void 0, [format2].concat(args));
       }
     } : emptyFunction;
     module.exports = warning2;
@@ -26983,12 +26983,12 @@ var require_RelayErrorTrie = __commonJS({
     var SELF = Symbol("$SELF");
     var RelayFieldError = /* @__PURE__ */ function(_Error) {
       (0, _inheritsLoose2["default"])(RelayFieldError2, _Error);
-      function RelayFieldError2(message) {
+      function RelayFieldError2(message2) {
         var _this;
         var errors = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : [];
-        _this = _Error.call(this, message) || this;
+        _this = _Error.call(this, message2) || this;
         _this.name = "RelayFieldError";
-        _this.message = message;
+        _this.message = message2;
         _this.errors = errors;
         return _this;
       }
@@ -29356,10 +29356,10 @@ var require_RelayError = __commonJS({
         messageParams[_key - 3] = arguments[_key];
       }
       var index = 0;
-      var message = messageFormat.replace(/%s/g, function() {
+      var message2 = messageFormat.replace(/%s/g, function() {
         return String(messageParams[index++]);
       });
-      var err = new Error(message);
+      var err = new Error(message2);
       var error = Object.assign(err, {
         name,
         messageFormat,
@@ -29650,8 +29650,8 @@ var require_OperationExecutor = __commonJS({
           } else if (response.data == null) {
             var errors = response.hasOwnProperty("errors") && response.errors != null ? response.errors : null;
             var messages = errors ? errors.map(function(_ref3) {
-              var message = _ref3.message;
-              return message;
+              var message2 = _ref3.message;
+              return message2;
             }).join("\n") : "(No errors)";
             var error = RelayError.create("RelayNetwork", "No data returned for operation `" + _this5._operation.request.node.params.name + "`, got error(s):\n" + messages + "\n\nSee the error `source` property for more information.");
             error.source = {
@@ -39517,28 +39517,28 @@ var require_react_jsx_runtime_development = __commonJS({
           return null;
         }
         var ReactSharedInternals = React7.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
-        function error(format) {
+        function error(format2) {
           {
             {
               for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
                 args[_key2 - 1] = arguments[_key2];
               }
-              printWarning("error", format, args);
+              printWarning("error", format2, args);
             }
           }
         }
-        function printWarning(level, format, args) {
+        function printWarning(level, format2, args) {
           {
             var ReactDebugCurrentFrame2 = ReactSharedInternals.ReactDebugCurrentFrame;
             var stack = ReactDebugCurrentFrame2.getStackAddendum();
             if (stack !== "") {
-              format += "%s";
+              format2 += "%s";
               args = args.concat([stack]);
             }
             var argsWithFormat = args.map(function(item) {
               return String(item);
             });
-            argsWithFormat.unshift("Warning: " + format);
+            argsWithFormat.unshift("Warning: " + format2);
             Function.prototype.apply.call(console[level], console, argsWithFormat);
           }
         }
@@ -39726,8 +39726,8 @@ var require_react_jsx_runtime_development = __commonJS({
               try {
                 throw Error();
               } catch (x) {
-                var match2 = x.stack.trim().match(/\n( *(at )?)/);
-                prefix2 = match2 && match2[1] || "";
+                var match3 = x.stack.trim().match(/\n( *(at )?)/);
+                prefix2 = match3 && match3[1] || "";
               }
             }
             return "\n" + prefix2 + name;
@@ -41341,7 +41341,7 @@ var processStyleValue = function processStyleValue2(key, value) {
     case "animation":
     case "animationName": {
       if (typeof value === "string") {
-        return value.replace(animationRegex, function(match2, p1, p2) {
+        return value.replace(animationRegex, function(match3, p1, p2) {
           cursor = {
             name: p1,
             styles: p2,
@@ -41485,9 +41485,9 @@ function serializeStyles(args, registered, mergedProps) {
   }
   labelPattern.lastIndex = 0;
   var identifierName = "";
-  var match2;
-  while ((match2 = labelPattern.exec(styles)) !== null) {
-    identifierName += "-" + match2[1];
+  var match3;
+  while ((match3 = labelPattern.exec(styles)) !== null) {
+    identifierName += "-" + match3[1];
   }
   var name = murmur2(styles) + identifierName;
   return {
@@ -41716,16 +41716,16 @@ function createBrowserHistory(options) {
   }
   return getUrlBasedHistory(createBrowserLocation, createBrowserHref, null, options);
 }
-function invariant(value, message) {
+function invariant(value, message2) {
   if (value === false || value === null || typeof value === "undefined") {
-    throw new Error(message);
+    throw new Error(message2);
   }
 }
-function warning(cond, message) {
+function warning(cond, message2) {
   if (!cond) {
-    if (typeof console !== "undefined") console.warn(message);
+    if (typeof console !== "undefined") console.warn(message2);
     try {
-      throw new Error(message);
+      throw new Error(message2);
     } catch (e) {
     }
   }
@@ -41971,12 +41971,12 @@ function matchRoutesImpl(routes, locationArg, basename, allowPartial) {
   }
   return matches;
 }
-function convertRouteMatchToUiMatch(match2, loaderData) {
+function convertRouteMatchToUiMatch(match3, loaderData) {
   let {
     route,
     pathname,
     params
-  } = match2;
+  } = match3;
   return {
     id: route.id,
     pathname,
@@ -42104,32 +42104,32 @@ function matchRouteBranch(branch, pathname, allowPartial) {
     let meta = routesMeta[i];
     let end = i === routesMeta.length - 1;
     let remainingPathname = matchedPathname === "/" ? pathname : pathname.slice(matchedPathname.length) || "/";
-    let match2 = matchPath({
+    let match3 = matchPath({
       path: meta.relativePath,
       caseSensitive: meta.caseSensitive,
       end
     }, remainingPathname);
     let route = meta.route;
-    if (!match2 && end && allowPartial && !routesMeta[routesMeta.length - 1].route.index) {
-      match2 = matchPath({
+    if (!match3 && end && allowPartial && !routesMeta[routesMeta.length - 1].route.index) {
+      match3 = matchPath({
         path: meta.relativePath,
         caseSensitive: meta.caseSensitive,
         end: false
       }, remainingPathname);
     }
-    if (!match2) {
+    if (!match3) {
       return null;
     }
-    Object.assign(matchedParams, match2.params);
+    Object.assign(matchedParams, match3.params);
     matches.push({
       // TODO: Can this as be avoided?
       params: matchedParams,
-      pathname: joinPaths([matchedPathname, match2.pathname]),
-      pathnameBase: normalizePathname(joinPaths([matchedPathname, match2.pathnameBase])),
+      pathname: joinPaths([matchedPathname, match3.pathname]),
+      pathnameBase: normalizePathname(joinPaths([matchedPathname, match3.pathnameBase])),
       route
     });
-    if (match2.pathnameBase !== "/") {
-      matchedPathname = joinPaths([matchedPathname, match2.pathnameBase]);
+    if (match3.pathnameBase !== "/") {
+      matchedPathname = joinPaths([matchedPathname, match3.pathnameBase]);
     }
   }
   return matches;
@@ -42143,11 +42143,11 @@ function matchPath(pattern, pathname) {
     };
   }
   let [matcher, compiledParams] = compilePath(pattern.path, pattern.caseSensitive, pattern.end);
-  let match2 = pathname.match(matcher);
-  if (!match2) return null;
-  let matchedPathname = match2[0];
+  let match3 = pathname.match(matcher);
+  if (!match3) return null;
+  let matchedPathname = match3[0];
   let pathnameBase = matchedPathname.replace(/(.)\/+$/, "$1");
-  let captureGroups = match2.slice(1);
+  let captureGroups = match3.slice(1);
   let params = compiledParams.reduce((memo2, _ref, index) => {
     let {
       paramName,
@@ -42273,14 +42273,14 @@ function getInvalidPathError(char2, field, dest, path) {
   return "Cannot include a '" + char2 + "' character in a manually specified " + ("`to." + field + "` field [" + JSON.stringify(path) + "].  Please separate it out to the ") + ("`to." + dest + "` field. Alternatively you may provide the full path as ") + 'a string in <Link to="..."> and the router will parse it for you.';
 }
 function getPathContributingMatches(matches) {
-  return matches.filter((match2, index) => index === 0 || match2.route.path && match2.route.path.length > 0);
+  return matches.filter((match3, index) => index === 0 || match3.route.path && match3.route.path.length > 0);
 }
 function getResolveToMatches(matches, v7_relativeSplatPath) {
   let pathMatches = getPathContributingMatches(matches);
   if (v7_relativeSplatPath) {
-    return pathMatches.map((match2, idx) => idx === pathMatches.length - 1 ? match2.pathname : match2.pathnameBase);
+    return pathMatches.map((match3, idx) => idx === pathMatches.length - 1 ? match3.pathname : match3.pathnameBase);
   }
-  return pathMatches.map((match2) => match2.pathnameBase);
+  return pathMatches.map((match3) => match3.pathnameBase);
 }
 function resolveTo(toArg, routePathnames, locationPathname, isPathRelative) {
   if (isPathRelative === void 0) {
@@ -43183,19 +43183,19 @@ function createRouter(init) {
       });
       return;
     }
-    let match2 = getTargetMatch(matches, path);
+    let match3 = getTargetMatch(matches, path);
     let preventScrollReset = (opts && opts.preventScrollReset) === true;
     if (submission && isMutationMethod(submission.formMethod)) {
-      handleFetcherAction(key, routeId, path, match2, matches, fogOfWar.active, flushSync, preventScrollReset, submission);
+      handleFetcherAction(key, routeId, path, match3, matches, fogOfWar.active, flushSync, preventScrollReset, submission);
       return;
     }
     fetchLoadMatches.set(key, {
       routeId,
       path
     });
-    handleFetcherLoader(key, routeId, path, match2, matches, fogOfWar.active, flushSync, preventScrollReset, submission);
+    handleFetcherLoader(key, routeId, path, match3, matches, fogOfWar.active, flushSync, preventScrollReset, submission);
   }
-  async function handleFetcherAction(key, routeId, path, match2, requestMatches, isFogOfWar, flushSync, preventScrollReset, submission) {
+  async function handleFetcherAction(key, routeId, path, match3, requestMatches, isFogOfWar, flushSync, preventScrollReset, submission) {
     interruptActiveLoads();
     fetchLoadMatches.delete(key);
     function detectAndHandle405Error(m) {
@@ -43212,7 +43212,7 @@ function createRouter(init) {
       }
       return false;
     }
-    if (!isFogOfWar && detectAndHandle405Error(match2)) {
+    if (!isFogOfWar && detectAndHandle405Error(match3)) {
       return;
     }
     let existingFetcher = state.fetchers.get(key);
@@ -43239,16 +43239,16 @@ function createRouter(init) {
         return;
       } else {
         requestMatches = discoverResult.matches;
-        match2 = getTargetMatch(requestMatches, path);
-        if (detectAndHandle405Error(match2)) {
+        match3 = getTargetMatch(requestMatches, path);
+        if (detectAndHandle405Error(match3)) {
           return;
         }
       }
     }
     fetchControllers.set(key, abortController);
     let originatingLoadId = incrementingLoadId;
-    let actionResults = await callDataStrategy("action", state, fetchRequest, [match2], requestMatches, key);
-    let actionResult = actionResults[match2.route.id];
+    let actionResults = await callDataStrategy("action", state, fetchRequest, [match3], requestMatches, key);
+    let actionResult = actionResults[match3.route.id];
     if (fetchRequest.signal.aborted) {
       if (fetchControllers.get(key) === abortController) {
         fetchControllers.delete(key);
@@ -43294,7 +43294,7 @@ function createRouter(init) {
     fetchReloadIds.set(key, loadId);
     let loadFetcher = getLoadingFetcher(submission, actionResult.data);
     state.fetchers.set(key, loadFetcher);
-    let [matchesToLoad, revalidatingFetchers] = getMatchesToLoad(init.history, state, matches, submission, nextLocation, false, future.v7_skipActionErrorRevalidation, isRevalidationRequired, cancelledDeferredRoutes, cancelledFetcherLoads, deletedFetchers, fetchLoadMatches, fetchRedirectIds, routesToUse, basename, [match2.route.id, actionResult]);
+    let [matchesToLoad, revalidatingFetchers] = getMatchesToLoad(init.history, state, matches, submission, nextLocation, false, future.v7_skipActionErrorRevalidation, isRevalidationRequired, cancelledDeferredRoutes, cancelledFetcherLoads, deletedFetchers, fetchLoadMatches, fetchRedirectIds, routesToUse, basename, [match3.route.id, actionResult]);
     revalidatingFetchers.filter((rf) => rf.key !== key).forEach((rf) => {
       let staleKey = rf.key;
       let existingFetcher2 = state.fetchers.get(staleKey);
@@ -43361,7 +43361,7 @@ function createRouter(init) {
       isRevalidationRequired = false;
     }
   }
-  async function handleFetcherLoader(key, routeId, path, match2, matches, isFogOfWar, flushSync, preventScrollReset, submission) {
+  async function handleFetcherLoader(key, routeId, path, match3, matches, isFogOfWar, flushSync, preventScrollReset, submission) {
     let existingFetcher = state.fetchers.get(key);
     updateFetcherState(key, getLoadingFetcher(submission, existingFetcher ? existingFetcher.data : void 0), {
       flushSync
@@ -43386,13 +43386,13 @@ function createRouter(init) {
         return;
       } else {
         matches = discoverResult.matches;
-        match2 = getTargetMatch(matches, path);
+        match3 = getTargetMatch(matches, path);
       }
     }
     fetchControllers.set(key, abortController);
     let originatingLoadId = incrementingLoadId;
-    let results = await callDataStrategy("loader", state, fetchRequest, [match2], matches, key);
-    let result = results[match2.route.id];
+    let results = await callDataStrategy("loader", state, fetchRequest, [match3], matches, key);
+    let result = results[match3.route.id];
     if (isDeferredResult(result)) {
       result = await resolveDeferredData(result, fetchRequest.signal, true) || result;
     }
@@ -43921,10 +43921,10 @@ function normalizeTo(location, matches, basename, prependBasename, to, v7_relati
   let activeRouteMatch;
   if (fromRouteId) {
     contextualMatches = [];
-    for (let match2 of matches) {
-      contextualMatches.push(match2);
-      if (match2.route.id === fromRouteId) {
-        activeRouteMatch = match2;
+    for (let match3 of matches) {
+      contextualMatches.push(match3);
+      if (match3.route.id === fromRouteId) {
+        activeRouteMatch = match3;
         break;
       }
     }
@@ -44092,10 +44092,10 @@ function getMatchesToLoad(history, state, matches, submission, location, initial
   }
   let actionStatus = pendingActionResult ? pendingActionResult[1].statusCode : void 0;
   let shouldSkipRevalidation = skipActionErrorRevalidation && actionStatus && actionStatus >= 400;
-  let navigationMatches = boundaryMatches.filter((match2, index) => {
+  let navigationMatches = boundaryMatches.filter((match3, index) => {
     let {
       route
-    } = match2;
+    } = match3;
     if (route.lazy) {
       return true;
     }
@@ -44105,12 +44105,12 @@ function getMatchesToLoad(history, state, matches, submission, location, initial
     if (initialHydration) {
       return shouldLoadRouteOnHydration(route, state.loaderData, state.errors);
     }
-    if (isNewLoader(state.loaderData, state.matches[index], match2) || cancelledDeferredRoutes.some((id) => id === match2.route.id)) {
+    if (isNewLoader(state.loaderData, state.matches[index], match3) || cancelledDeferredRoutes.some((id) => id === match3.route.id)) {
       return true;
     }
     let currentRouteMatch = state.matches[index];
-    let nextRouteMatch = match2;
-    return shouldRevalidateLoader(match2, _extends2({
+    let nextRouteMatch = match3;
+    return shouldRevalidateLoader(match3, _extends2({
       currentUrl,
       currentParams: currentRouteMatch.params,
       nextUrl,
@@ -44194,22 +44194,22 @@ function shouldLoadRouteOnHydration(route, loaderData, errors) {
   }
   return !hasData && !hasError;
 }
-function isNewLoader(currentLoaderData, currentMatch, match2) {
+function isNewLoader(currentLoaderData, currentMatch, match3) {
   let isNew = (
     // [a] -> [a, b]
     !currentMatch || // [a, b] -> [a, c]
-    match2.route.id !== currentMatch.route.id
+    match3.route.id !== currentMatch.route.id
   );
-  let isMissingData = currentLoaderData[match2.route.id] === void 0;
+  let isMissingData = currentLoaderData[match3.route.id] === void 0;
   return isNew || isMissingData;
 }
-function isNewRouteInstance(currentMatch, match2) {
+function isNewRouteInstance(currentMatch, match3) {
   let currentPath = currentMatch.route.path;
   return (
     // param change for this match, /users/123 -> /users/456
-    currentMatch.pathname !== match2.pathname || // splat param changed, which is not present in match.path
+    currentMatch.pathname !== match3.pathname || // splat param changed, which is not present in match.path
     // e.g. /files/images/avatar.jpg -> files/finances.xls
-    currentPath != null && currentPath.endsWith("*") && currentMatch.params["*"] !== match2.params["*"]
+    currentPath != null && currentPath.endsWith("*") && currentMatch.params["*"] !== match3.params["*"]
   );
 }
 function shouldRevalidateLoader(loaderMatch, arg) {
@@ -44291,19 +44291,19 @@ async function defaultDataStrategy(_ref4) {
 }
 async function callDataStrategyImpl(dataStrategyImpl, type, state, request, matchesToLoad, matches, fetcherKey, manifest, mapRouteProperties2, requestContext) {
   let loadRouteDefinitionsPromises = matches.map((m) => m.route.lazy ? loadLazyRouteModule(m.route, mapRouteProperties2, manifest) : void 0);
-  let dsMatches = matches.map((match2, i) => {
+  let dsMatches = matches.map((match3, i) => {
     let loadRoutePromise = loadRouteDefinitionsPromises[i];
-    let shouldLoad = matchesToLoad.some((m) => m.route.id === match2.route.id);
+    let shouldLoad = matchesToLoad.some((m) => m.route.id === match3.route.id);
     let resolve = async (handlerOverride) => {
-      if (handlerOverride && request.method === "GET" && (match2.route.lazy || match2.route.loader)) {
+      if (handlerOverride && request.method === "GET" && (match3.route.lazy || match3.route.loader)) {
         shouldLoad = true;
       }
-      return shouldLoad ? callLoaderOrAction(type, request, match2, loadRoutePromise, handlerOverride, requestContext) : Promise.resolve({
+      return shouldLoad ? callLoaderOrAction(type, request, match3, loadRoutePromise, handlerOverride, requestContext) : Promise.resolve({
         type: ResultType.data,
         result: void 0
       });
     };
-    return _extends2({}, match2, {
+    return _extends2({}, match3, {
       shouldLoad,
       resolve
     });
@@ -44321,7 +44321,7 @@ async function callDataStrategyImpl(dataStrategyImpl, type, state, request, matc
   }
   return results;
 }
-async function callLoaderOrAction(type, request, match2, loadRoutePromise, handlerOverride, staticContext) {
+async function callLoaderOrAction(type, request, match3, loadRoutePromise, handlerOverride, staticContext) {
   let result;
   let onReject;
   let runHandler = (handler) => {
@@ -44331,11 +44331,11 @@ async function callLoaderOrAction(type, request, match2, loadRoutePromise, handl
     request.signal.addEventListener("abort", onReject);
     let actualHandler = (ctx) => {
       if (typeof handler !== "function") {
-        return Promise.reject(new Error("You cannot call the handler for a route which defines a boolean " + ('"' + type + '" [routeId: ' + match2.route.id + "]")));
+        return Promise.reject(new Error("You cannot call the handler for a route which defines a boolean " + ('"' + type + '" [routeId: ' + match3.route.id + "]")));
       }
       return handler({
         request,
-        params: match2.params,
+        params: match3.params,
         context: staticContext
       }, ...ctx !== void 0 ? [ctx] : []);
     };
@@ -44356,7 +44356,7 @@ async function callLoaderOrAction(type, request, match2, loadRoutePromise, handl
     return Promise.race([handlerPromise, abortPromise]);
   };
   try {
-    let handler = match2.route[type];
+    let handler = match3.route[type];
     if (loadRoutePromise) {
       if (handler) {
         let handlerError;
@@ -44375,7 +44375,7 @@ async function callLoaderOrAction(type, request, match2, loadRoutePromise, handl
         result = value;
       } else {
         await loadRoutePromise;
-        handler = match2.route[type];
+        handler = match3.route[type];
         if (handler) {
           result = await runHandler(handler);
         } else if (type === "action") {
@@ -44384,7 +44384,7 @@ async function callLoaderOrAction(type, request, match2, loadRoutePromise, handl
           throw getInternalRouterError(405, {
             method: request.method,
             pathname,
-            routeId: match2.route.id
+            routeId: match3.route.id
           });
         } else {
           return {
@@ -44402,7 +44402,7 @@ async function callLoaderOrAction(type, request, match2, loadRoutePromise, handl
     } else {
       result = await runHandler(handler);
     }
-    invariant(result.result !== void 0, "You defined " + (type === "action" ? "an action" : "a loader") + " for route " + ('"' + match2.route.id + "\" but didn't return anything from your `" + type + "` ") + "function. Please return a value or `null`.");
+    invariant(result.result !== void 0, "You defined " + (type === "action" ? "an action" : "a loader") + " for route " + ('"' + match3.route.id + "\" but didn't return anything from your `" + type + "` ") + "function. Please return a value or `null`.");
   } catch (e) {
     return {
       type: ResultType.error,
@@ -44570,11 +44570,11 @@ function processRouteLoaderData(matches, results, pendingActionResult, activeDef
   let foundError = false;
   let loaderHeaders = {};
   let pendingError = pendingActionResult && isErrorResult(pendingActionResult[1]) ? pendingActionResult[1].error : void 0;
-  matches.forEach((match2) => {
-    if (!(match2.route.id in results)) {
+  matches.forEach((match3) => {
+    if (!(match3.route.id in results)) {
       return;
     }
-    let id = match2.route.id;
+    let id = match3.route.id;
     let result = results[id];
     invariant(!isRedirectResult(result), "Cannot handle redirect results in processLoaderData");
     if (isErrorResult(result)) {
@@ -44649,7 +44649,7 @@ function processLoaderData(state, matches, results, pendingActionResult, revalid
   revalidatingFetchers.forEach((rf) => {
     let {
       key,
-      match: match2,
+      match: match3,
       controller
     } = rf;
     let result = fetcherResults[key];
@@ -44657,7 +44657,7 @@ function processLoaderData(state, matches, results, pendingActionResult, revalid
     if (controller && controller.signal.aborted) {
       return;
     } else if (isErrorResult(result)) {
-      let boundaryMatch = findNearestBoundary(state.matches, match2 == null ? void 0 : match2.route.id);
+      let boundaryMatch = findNearestBoundary(state.matches, match3 == null ? void 0 : match3.route.id);
       if (!(errors && errors[boundaryMatch.route.id])) {
         errors = _extends2({}, errors, {
           [boundaryMatch.route.id]: result.error
@@ -44680,13 +44680,13 @@ function processLoaderData(state, matches, results, pendingActionResult, revalid
 }
 function mergeLoaderData(loaderData, newLoaderData, matches, errors) {
   let mergedLoaderData = _extends2({}, newLoaderData);
-  for (let match2 of matches) {
-    let id = match2.route.id;
+  for (let match3 of matches) {
+    let id = match3.route.id;
     if (newLoaderData.hasOwnProperty(id)) {
       if (newLoaderData[id] !== void 0) {
         mergedLoaderData[id] = newLoaderData[id];
       }
-    } else if (loaderData[id] !== void 0 && match2.route.loader) {
+    } else if (loaderData[id] !== void 0 && match3.route.loader) {
       mergedLoaderData[id] = loaderData[id];
     }
     if (errors && errors.hasOwnProperty(id)) {
@@ -44732,7 +44732,7 @@ function getInternalRouterError(status, _temp5) {
     routeId,
     method,
     type,
-    message
+    message: message2
   } = _temp5 === void 0 ? {} : _temp5;
   let statusText = "Unknown Server Error";
   let errorMessage = "Unknown @remix-run/router error";
@@ -44824,12 +44824,12 @@ async function resolveNavigationDeferredResults(matches, results, signal, curren
   let entries = Object.entries(results);
   for (let index = 0; index < entries.length; index++) {
     let [routeId, result] = entries[index];
-    let match2 = matches.find((m) => (m == null ? void 0 : m.route.id) === routeId);
-    if (!match2) {
+    let match3 = matches.find((m) => (m == null ? void 0 : m.route.id) === routeId);
+    if (!match3) {
       continue;
     }
-    let currentMatch = currentMatches.find((m) => m.route.id === match2.route.id);
-    let isRevalidatingLoader = currentMatch != null && !isNewRouteInstance(currentMatch, match2) && (currentLoaderData && currentLoaderData[match2.route.id]) !== void 0;
+    let currentMatch = currentMatches.find((m) => m.route.id === match3.route.id);
+    let isRevalidatingLoader = currentMatch != null && !isNewRouteInstance(currentMatch, match3) && (currentLoaderData && currentLoaderData[match3.route.id]) !== void 0;
     if (isDeferredResult(result) && isRevalidatingLoader) {
       await resolveDeferredData(result, signal, false).then((result2) => {
         if (result2) {
@@ -44847,8 +44847,8 @@ async function resolveFetcherDeferredResults(matches, results, revalidatingFetch
       controller
     } = revalidatingFetchers[index];
     let result = results[key];
-    let match2 = matches.find((m) => (m == null ? void 0 : m.route.id) === routeId);
-    if (!match2) {
+    let match3 = matches.find((m) => (m == null ? void 0 : m.route.id) === routeId);
+    if (!match3) {
       continue;
     }
     if (isDeferredResult(result)) {
@@ -45279,17 +45279,17 @@ function useRoutesImpl(routes, locationArg, dataRouterState, future) {
     true ? warning(parentRoute || matches != null, 'No routes matched location "' + location.pathname + location.search + location.hash + '" ') : void 0;
     true ? warning(matches == null || matches[matches.length - 1].route.element !== void 0 || matches[matches.length - 1].route.Component !== void 0 || matches[matches.length - 1].route.lazy !== void 0, 'Matched leaf route at location "' + location.pathname + location.search + location.hash + '" does not have an element or Component. This means it will render an <Outlet /> with a null value by default resulting in an "empty" page.') : void 0;
   }
-  let renderedMatches = _renderMatches(matches && matches.map((match2) => Object.assign({}, match2, {
-    params: Object.assign({}, parentParams, match2.params),
+  let renderedMatches = _renderMatches(matches && matches.map((match3) => Object.assign({}, match3, {
+    params: Object.assign({}, parentParams, match3.params),
     pathname: joinPaths([
       parentPathnameBase,
       // Re-encode pathnames that were decoded inside matchRoutes
-      navigator2.encodeLocation ? navigator2.encodeLocation(match2.pathname).pathname : match2.pathname
+      navigator2.encodeLocation ? navigator2.encodeLocation(match3.pathname).pathname : match3.pathname
     ]),
-    pathnameBase: match2.pathnameBase === "/" ? parentPathnameBase : joinPaths([
+    pathnameBase: match3.pathnameBase === "/" ? parentPathnameBase : joinPaths([
       parentPathnameBase,
       // Re-encode pathnames that were decoded inside matchRoutes
-      navigator2.encodeLocation ? navigator2.encodeLocation(match2.pathnameBase).pathname : match2.pathnameBase
+      navigator2.encodeLocation ? navigator2.encodeLocation(match3.pathnameBase).pathname : match3.pathnameBase
     ])
   })), parentMatches, dataRouterState, future);
   if (locationArg && renderedMatches) {
@@ -45310,7 +45310,7 @@ function useRoutesImpl(routes, locationArg, dataRouterState, future) {
 }
 function DefaultErrorComponent() {
   let error = useRouteError();
-  let message = isRouteErrorResponse(error) ? error.status + " " + error.statusText : error instanceof Error ? error.message : JSON.stringify(error);
+  let message2 = isRouteErrorResponse(error) ? error.status + " " + error.statusText : error instanceof Error ? error.message : JSON.stringify(error);
   let stack = error instanceof Error ? error.stack : null;
   let lightgrey = "rgba(200,200,200, 0.5)";
   let preStyles = {
@@ -45334,7 +45334,7 @@ function DefaultErrorComponent() {
     style: {
       fontStyle: "italic"
     }
-  }, message), stack ? /* @__PURE__ */ React4.createElement("pre", {
+  }, message2), stack ? /* @__PURE__ */ React4.createElement("pre", {
     style: preStyles
   }, stack) : null, devInfo);
 }
@@ -45382,12 +45382,12 @@ var RenderErrorBoundary = class extends React4.Component {
 function RenderedRoute(_ref) {
   let {
     routeContext,
-    match: match2,
+    match: match3,
     children
   } = _ref;
   let dataRouterContext = React4.useContext(DataRouterContext);
-  if (dataRouterContext && dataRouterContext.static && dataRouterContext.staticContext && (match2.route.errorElement || match2.route.ErrorBoundary)) {
-    dataRouterContext.staticContext._deepestRenderedBoundaryId = match2.route.id;
+  if (dataRouterContext && dataRouterContext.static && dataRouterContext.staticContext && (match3.route.errorElement || match3.route.ErrorBoundary)) {
+    dataRouterContext.staticContext._deepestRenderedBoundaryId = match3.route.id;
   }
   return /* @__PURE__ */ React4.createElement(RouteContext.Provider, {
     value: routeContext
@@ -45428,17 +45428,17 @@ function _renderMatches(matches, parentMatches, dataRouterState, future) {
   let fallbackIndex = -1;
   if (dataRouterState && future && future.v7_partialHydration) {
     for (let i = 0; i < renderedMatches.length; i++) {
-      let match2 = renderedMatches[i];
-      if (match2.route.HydrateFallback || match2.route.hydrateFallbackElement) {
+      let match3 = renderedMatches[i];
+      if (match3.route.HydrateFallback || match3.route.hydrateFallbackElement) {
         fallbackIndex = i;
       }
-      if (match2.route.id) {
+      if (match3.route.id) {
         let {
           loaderData,
           errors: errors2
         } = dataRouterState;
-        let needsToRunLoader = match2.route.loader && loaderData[match2.route.id] === void 0 && (!errors2 || errors2[match2.route.id] === void 0);
-        if (match2.route.lazy || needsToRunLoader) {
+        let needsToRunLoader = match3.route.loader && loaderData[match3.route.id] === void 0 && (!errors2 || errors2[match3.route.id] === void 0);
+        if (match3.route.lazy || needsToRunLoader) {
           renderFallback = true;
           if (fallbackIndex >= 0) {
             renderedMatches = renderedMatches.slice(0, fallbackIndex + 1);
@@ -45450,14 +45450,14 @@ function _renderMatches(matches, parentMatches, dataRouterState, future) {
       }
     }
   }
-  return renderedMatches.reduceRight((outlet, match2, index) => {
+  return renderedMatches.reduceRight((outlet, match3, index) => {
     let error;
     let shouldRenderHydrateFallback = false;
     let errorElement = null;
     let hydrateFallbackElement = null;
     if (dataRouterState) {
-      error = errors && match2.route.id ? errors[match2.route.id] : void 0;
-      errorElement = match2.route.errorElement || defaultErrorElement;
+      error = errors && match3.route.id ? errors[match3.route.id] : void 0;
+      errorElement = match3.route.errorElement || defaultErrorElement;
       if (renderFallback) {
         if (fallbackIndex < 0 && index === 0) {
           warningOnce("route-fallback", false, "No `HydrateFallback` element provided to render during initial hydration");
@@ -45465,7 +45465,7 @@ function _renderMatches(matches, parentMatches, dataRouterState, future) {
           hydrateFallbackElement = null;
         } else if (fallbackIndex === index) {
           shouldRenderHydrateFallback = true;
-          hydrateFallbackElement = match2.route.hydrateFallbackElement || null;
+          hydrateFallbackElement = match3.route.hydrateFallbackElement || null;
         }
       }
     }
@@ -45476,15 +45476,15 @@ function _renderMatches(matches, parentMatches, dataRouterState, future) {
         children = errorElement;
       } else if (shouldRenderHydrateFallback) {
         children = hydrateFallbackElement;
-      } else if (match2.route.Component) {
-        children = /* @__PURE__ */ React4.createElement(match2.route.Component, null);
-      } else if (match2.route.element) {
-        children = match2.route.element;
+      } else if (match3.route.Component) {
+        children = /* @__PURE__ */ React4.createElement(match3.route.Component, null);
+      } else if (match3.route.element) {
+        children = match3.route.element;
       } else {
         children = outlet;
       }
       return /* @__PURE__ */ React4.createElement(RenderedRoute, {
-        match: match2,
+        match: match3,
         routeContext: {
           outlet,
           matches: matches2,
@@ -45493,7 +45493,7 @@ function _renderMatches(matches, parentMatches, dataRouterState, future) {
         children
       });
     };
-    return dataRouterState && (match2.route.ErrorBoundary || match2.route.errorElement || index === 0) ? /* @__PURE__ */ React4.createElement(RenderErrorBoundary, {
+    return dataRouterState && (match3.route.ErrorBoundary || match3.route.errorElement || index === 0) ? /* @__PURE__ */ React4.createElement(RenderErrorBoundary, {
       location: dataRouterState.location,
       revalidation: dataRouterState.revalidation,
       component: errorElement,
@@ -45600,17 +45600,17 @@ function useNavigateStable() {
   return navigate;
 }
 var alreadyWarned$1 = {};
-function warningOnce(key, cond, message) {
+function warningOnce(key, cond, message2) {
   if (!cond && !alreadyWarned$1[key]) {
     alreadyWarned$1[key] = true;
-    true ? warning(false, message) : void 0;
+    true ? warning(false, message2) : void 0;
   }
 }
 var alreadyWarned = {};
-function warnOnce(key, message) {
-  if (!alreadyWarned[message]) {
-    alreadyWarned[message] = true;
-    console.warn(message);
+function warnOnce(key, message2) {
+  if (!alreadyWarned[message2]) {
+    alreadyWarned[message2] = true;
+    console.warn(message2);
   }
 }
 var logDeprecation = (flag, msg, link) => warnOnce(flag, "\u26A0\uFE0F React Router Future Flag Warning: " + msg + ". " + ("You can use the `" + flag + "` future flag to opt-in early. ") + ("For more information, see " + link + "."));
@@ -46515,7 +46515,7 @@ function useFormAction(action, _temp2) {
   } = React5.useContext(NavigationContext);
   let routeContext = React5.useContext(RouteContext);
   !routeContext ? true ? invariant(false, "useFormAction must be used inside a RouteContext") : invariant(false) : void 0;
-  let [match2] = routeContext.matches.slice(-1);
+  let [match3] = routeContext.matches.slice(-1);
   let path = _extends4({}, useResolvedPath(action ? action : ".", {
     relative
   }));
@@ -46532,7 +46532,7 @@ function useFormAction(action, _temp2) {
       path.search = qs ? "?" + qs : "";
     }
   }
-  if ((!action || action === ".") && match2.route.index) {
+  if ((!action || action === ".") && match3.route.index) {
     path.search = path.search ? path.search.replace(/^\?/, "?index&") : "?index";
   }
   if (basename !== "/") {
@@ -46954,10 +46954,24 @@ var cardStyles = css`
     padding: 18px 20px;
   }
 `;
-function Card({ title, className, children }) {
+var cardHeaderStyles = css`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+function Card({
+  title,
+  className,
+  children,
+  rightComponent
+}) {
   const classes = ["card", className].filter(Boolean).join(" ");
+  const hasHeader = title || rightComponent;
   return /* @__PURE__ */ jsxs2("section", { className: classes, css: cardStyles, children: [
-    title ? /* @__PURE__ */ jsx4("p", { className: "title", children: title }) : null,
+    hasHeader && /* @__PURE__ */ jsxs2("div", { css: cardHeaderStyles, children: [
+      title ? /* @__PURE__ */ jsx4("p", { className: "title", children: title }) : /* @__PURE__ */ jsx4("div", {}),
+      rightComponent
+    ] }),
     children
   ] });
 }
@@ -47363,9 +47377,1651 @@ function AuthLayout() {
   ] });
 }
 
+// node_modules/date-fns/constants.js
+var daysInYear = 365.2425;
+var maxTime = Math.pow(10, 8) * 24 * 60 * 60 * 1e3;
+var minTime = -maxTime;
+var millisecondsInWeek = 6048e5;
+var millisecondsInDay = 864e5;
+var secondsInHour = 3600;
+var secondsInDay = secondsInHour * 24;
+var secondsInWeek = secondsInDay * 7;
+var secondsInYear = secondsInDay * daysInYear;
+var secondsInMonth = secondsInYear / 12;
+var secondsInQuarter = secondsInMonth * 3;
+var constructFromSymbol = Symbol.for("constructDateFrom");
+
+// node_modules/date-fns/constructFrom.js
+function constructFrom(date, value) {
+  if (typeof date === "function") return date(value);
+  if (date && typeof date === "object" && constructFromSymbol in date)
+    return date[constructFromSymbol](value);
+  if (date instanceof Date) return new date.constructor(value);
+  return new Date(value);
+}
+
+// node_modules/date-fns/toDate.js
+function toDate(argument, context) {
+  return constructFrom(context || argument, argument);
+}
+
+// node_modules/date-fns/_lib/defaultOptions.js
+var defaultOptions = {};
+function getDefaultOptions() {
+  return defaultOptions;
+}
+
+// node_modules/date-fns/startOfWeek.js
+function startOfWeek(date, options) {
+  const defaultOptions2 = getDefaultOptions();
+  const weekStartsOn = options?.weekStartsOn ?? options?.locale?.options?.weekStartsOn ?? defaultOptions2.weekStartsOn ?? defaultOptions2.locale?.options?.weekStartsOn ?? 0;
+  const _date = toDate(date, options?.in);
+  const day = _date.getDay();
+  const diff = (day < weekStartsOn ? 7 : 0) + day - weekStartsOn;
+  _date.setDate(_date.getDate() - diff);
+  _date.setHours(0, 0, 0, 0);
+  return _date;
+}
+
+// node_modules/date-fns/startOfISOWeek.js
+function startOfISOWeek(date, options) {
+  return startOfWeek(date, { ...options, weekStartsOn: 1 });
+}
+
+// node_modules/date-fns/getISOWeekYear.js
+function getISOWeekYear(date, options) {
+  const _date = toDate(date, options?.in);
+  const year = _date.getFullYear();
+  const fourthOfJanuaryOfNextYear = constructFrom(_date, 0);
+  fourthOfJanuaryOfNextYear.setFullYear(year + 1, 0, 4);
+  fourthOfJanuaryOfNextYear.setHours(0, 0, 0, 0);
+  const startOfNextYear = startOfISOWeek(fourthOfJanuaryOfNextYear);
+  const fourthOfJanuaryOfThisYear = constructFrom(_date, 0);
+  fourthOfJanuaryOfThisYear.setFullYear(year, 0, 4);
+  fourthOfJanuaryOfThisYear.setHours(0, 0, 0, 0);
+  const startOfThisYear = startOfISOWeek(fourthOfJanuaryOfThisYear);
+  if (_date.getTime() >= startOfNextYear.getTime()) {
+    return year + 1;
+  } else if (_date.getTime() >= startOfThisYear.getTime()) {
+    return year;
+  } else {
+    return year - 1;
+  }
+}
+
+// node_modules/date-fns/_lib/getTimezoneOffsetInMilliseconds.js
+function getTimezoneOffsetInMilliseconds(date) {
+  const _date = toDate(date);
+  const utcDate = new Date(
+    Date.UTC(
+      _date.getFullYear(),
+      _date.getMonth(),
+      _date.getDate(),
+      _date.getHours(),
+      _date.getMinutes(),
+      _date.getSeconds(),
+      _date.getMilliseconds()
+    )
+  );
+  utcDate.setUTCFullYear(_date.getFullYear());
+  return +date - +utcDate;
+}
+
+// node_modules/date-fns/_lib/normalizeDates.js
+function normalizeDates(context, ...dates) {
+  const normalize = constructFrom.bind(
+    null,
+    context || dates.find((date) => typeof date === "object")
+  );
+  return dates.map(normalize);
+}
+
+// node_modules/date-fns/startOfDay.js
+function startOfDay(date, options) {
+  const _date = toDate(date, options?.in);
+  _date.setHours(0, 0, 0, 0);
+  return _date;
+}
+
+// node_modules/date-fns/differenceInCalendarDays.js
+function differenceInCalendarDays(laterDate, earlierDate, options) {
+  const [laterDate_, earlierDate_] = normalizeDates(
+    options?.in,
+    laterDate,
+    earlierDate
+  );
+  const laterStartOfDay = startOfDay(laterDate_);
+  const earlierStartOfDay = startOfDay(earlierDate_);
+  const laterTimestamp = +laterStartOfDay - getTimezoneOffsetInMilliseconds(laterStartOfDay);
+  const earlierTimestamp = +earlierStartOfDay - getTimezoneOffsetInMilliseconds(earlierStartOfDay);
+  return Math.round((laterTimestamp - earlierTimestamp) / millisecondsInDay);
+}
+
+// node_modules/date-fns/startOfISOWeekYear.js
+function startOfISOWeekYear(date, options) {
+  const year = getISOWeekYear(date, options);
+  const fourthOfJanuary = constructFrom(options?.in || date, 0);
+  fourthOfJanuary.setFullYear(year, 0, 4);
+  fourthOfJanuary.setHours(0, 0, 0, 0);
+  return startOfISOWeek(fourthOfJanuary);
+}
+
+// node_modules/date-fns/isDate.js
+function isDate(value) {
+  return value instanceof Date || typeof value === "object" && Object.prototype.toString.call(value) === "[object Date]";
+}
+
+// node_modules/date-fns/isValid.js
+function isValid(date) {
+  return !(!isDate(date) && typeof date !== "number" || isNaN(+toDate(date)));
+}
+
+// node_modules/date-fns/startOfYear.js
+function startOfYear(date, options) {
+  const date_ = toDate(date, options?.in);
+  date_.setFullYear(date_.getFullYear(), 0, 1);
+  date_.setHours(0, 0, 0, 0);
+  return date_;
+}
+
+// node_modules/date-fns/locale/en-US/_lib/formatDistance.js
+var formatDistanceLocale = {
+  lessThanXSeconds: {
+    one: "less than a second",
+    other: "less than {{count}} seconds"
+  },
+  xSeconds: {
+    one: "1 second",
+    other: "{{count}} seconds"
+  },
+  halfAMinute: "half a minute",
+  lessThanXMinutes: {
+    one: "less than a minute",
+    other: "less than {{count}} minutes"
+  },
+  xMinutes: {
+    one: "1 minute",
+    other: "{{count}} minutes"
+  },
+  aboutXHours: {
+    one: "about 1 hour",
+    other: "about {{count}} hours"
+  },
+  xHours: {
+    one: "1 hour",
+    other: "{{count}} hours"
+  },
+  xDays: {
+    one: "1 day",
+    other: "{{count}} days"
+  },
+  aboutXWeeks: {
+    one: "about 1 week",
+    other: "about {{count}} weeks"
+  },
+  xWeeks: {
+    one: "1 week",
+    other: "{{count}} weeks"
+  },
+  aboutXMonths: {
+    one: "about 1 month",
+    other: "about {{count}} months"
+  },
+  xMonths: {
+    one: "1 month",
+    other: "{{count}} months"
+  },
+  aboutXYears: {
+    one: "about 1 year",
+    other: "about {{count}} years"
+  },
+  xYears: {
+    one: "1 year",
+    other: "{{count}} years"
+  },
+  overXYears: {
+    one: "over 1 year",
+    other: "over {{count}} years"
+  },
+  almostXYears: {
+    one: "almost 1 year",
+    other: "almost {{count}} years"
+  }
+};
+var formatDistance = (token2, count, options) => {
+  let result;
+  const tokenValue = formatDistanceLocale[token2];
+  if (typeof tokenValue === "string") {
+    result = tokenValue;
+  } else if (count === 1) {
+    result = tokenValue.one;
+  } else {
+    result = tokenValue.other.replace("{{count}}", count.toString());
+  }
+  if (options?.addSuffix) {
+    if (options.comparison && options.comparison > 0) {
+      return "in " + result;
+    } else {
+      return result + " ago";
+    }
+  }
+  return result;
+};
+
+// node_modules/date-fns/locale/_lib/buildFormatLongFn.js
+function buildFormatLongFn(args) {
+  return (options = {}) => {
+    const width = options.width ? String(options.width) : args.defaultWidth;
+    const format2 = args.formats[width] || args.formats[args.defaultWidth];
+    return format2;
+  };
+}
+
+// node_modules/date-fns/locale/en-US/_lib/formatLong.js
+var dateFormats = {
+  full: "EEEE, MMMM do, y",
+  long: "MMMM do, y",
+  medium: "MMM d, y",
+  short: "MM/dd/yyyy"
+};
+var timeFormats = {
+  full: "h:mm:ss a zzzz",
+  long: "h:mm:ss a z",
+  medium: "h:mm:ss a",
+  short: "h:mm a"
+};
+var dateTimeFormats = {
+  full: "{{date}} 'at' {{time}}",
+  long: "{{date}} 'at' {{time}}",
+  medium: "{{date}}, {{time}}",
+  short: "{{date}}, {{time}}"
+};
+var formatLong = {
+  date: buildFormatLongFn({
+    formats: dateFormats,
+    defaultWidth: "full"
+  }),
+  time: buildFormatLongFn({
+    formats: timeFormats,
+    defaultWidth: "full"
+  }),
+  dateTime: buildFormatLongFn({
+    formats: dateTimeFormats,
+    defaultWidth: "full"
+  })
+};
+
+// node_modules/date-fns/locale/en-US/_lib/formatRelative.js
+var formatRelativeLocale = {
+  lastWeek: "'last' eeee 'at' p",
+  yesterday: "'yesterday at' p",
+  today: "'today at' p",
+  tomorrow: "'tomorrow at' p",
+  nextWeek: "eeee 'at' p",
+  other: "P"
+};
+var formatRelative = (token2, _date, _baseDate, _options) => formatRelativeLocale[token2];
+
+// node_modules/date-fns/locale/_lib/buildLocalizeFn.js
+function buildLocalizeFn(args) {
+  return (value, options) => {
+    const context = options?.context ? String(options.context) : "standalone";
+    let valuesArray;
+    if (context === "formatting" && args.formattingValues) {
+      const defaultWidth = args.defaultFormattingWidth || args.defaultWidth;
+      const width = options?.width ? String(options.width) : defaultWidth;
+      valuesArray = args.formattingValues[width] || args.formattingValues[defaultWidth];
+    } else {
+      const defaultWidth = args.defaultWidth;
+      const width = options?.width ? String(options.width) : args.defaultWidth;
+      valuesArray = args.values[width] || args.values[defaultWidth];
+    }
+    const index = args.argumentCallback ? args.argumentCallback(value) : value;
+    return valuesArray[index];
+  };
+}
+
+// node_modules/date-fns/locale/en-US/_lib/localize.js
+var eraValues = {
+  narrow: ["B", "A"],
+  abbreviated: ["BC", "AD"],
+  wide: ["Before Christ", "Anno Domini"]
+};
+var quarterValues = {
+  narrow: ["1", "2", "3", "4"],
+  abbreviated: ["Q1", "Q2", "Q3", "Q4"],
+  wide: ["1st quarter", "2nd quarter", "3rd quarter", "4th quarter"]
+};
+var monthValues = {
+  narrow: ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"],
+  abbreviated: [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec"
+  ],
+  wide: [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ]
+};
+var dayValues = {
+  narrow: ["S", "M", "T", "W", "T", "F", "S"],
+  short: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+  abbreviated: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+  wide: [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday"
+  ]
+};
+var dayPeriodValues = {
+  narrow: {
+    am: "a",
+    pm: "p",
+    midnight: "mi",
+    noon: "n",
+    morning: "morning",
+    afternoon: "afternoon",
+    evening: "evening",
+    night: "night"
+  },
+  abbreviated: {
+    am: "AM",
+    pm: "PM",
+    midnight: "midnight",
+    noon: "noon",
+    morning: "morning",
+    afternoon: "afternoon",
+    evening: "evening",
+    night: "night"
+  },
+  wide: {
+    am: "a.m.",
+    pm: "p.m.",
+    midnight: "midnight",
+    noon: "noon",
+    morning: "morning",
+    afternoon: "afternoon",
+    evening: "evening",
+    night: "night"
+  }
+};
+var formattingDayPeriodValues = {
+  narrow: {
+    am: "a",
+    pm: "p",
+    midnight: "mi",
+    noon: "n",
+    morning: "in the morning",
+    afternoon: "in the afternoon",
+    evening: "in the evening",
+    night: "at night"
+  },
+  abbreviated: {
+    am: "AM",
+    pm: "PM",
+    midnight: "midnight",
+    noon: "noon",
+    morning: "in the morning",
+    afternoon: "in the afternoon",
+    evening: "in the evening",
+    night: "at night"
+  },
+  wide: {
+    am: "a.m.",
+    pm: "p.m.",
+    midnight: "midnight",
+    noon: "noon",
+    morning: "in the morning",
+    afternoon: "in the afternoon",
+    evening: "in the evening",
+    night: "at night"
+  }
+};
+var ordinalNumber = (dirtyNumber, _options) => {
+  const number = Number(dirtyNumber);
+  const rem100 = number % 100;
+  if (rem100 > 20 || rem100 < 10) {
+    switch (rem100 % 10) {
+      case 1:
+        return number + "st";
+      case 2:
+        return number + "nd";
+      case 3:
+        return number + "rd";
+    }
+  }
+  return number + "th";
+};
+var localize = {
+  ordinalNumber,
+  era: buildLocalizeFn({
+    values: eraValues,
+    defaultWidth: "wide"
+  }),
+  quarter: buildLocalizeFn({
+    values: quarterValues,
+    defaultWidth: "wide",
+    argumentCallback: (quarter) => quarter - 1
+  }),
+  month: buildLocalizeFn({
+    values: monthValues,
+    defaultWidth: "wide"
+  }),
+  day: buildLocalizeFn({
+    values: dayValues,
+    defaultWidth: "wide"
+  }),
+  dayPeriod: buildLocalizeFn({
+    values: dayPeriodValues,
+    defaultWidth: "wide",
+    formattingValues: formattingDayPeriodValues,
+    defaultFormattingWidth: "wide"
+  })
+};
+
+// node_modules/date-fns/locale/_lib/buildMatchFn.js
+function buildMatchFn(args) {
+  return (string, options = {}) => {
+    const width = options.width;
+    const matchPattern = width && args.matchPatterns[width] || args.matchPatterns[args.defaultMatchWidth];
+    const matchResult = string.match(matchPattern);
+    if (!matchResult) {
+      return null;
+    }
+    const matchedString = matchResult[0];
+    const parsePatterns = width && args.parsePatterns[width] || args.parsePatterns[args.defaultParseWidth];
+    const key = Array.isArray(parsePatterns) ? findIndex(parsePatterns, (pattern) => pattern.test(matchedString)) : (
+      // [TODO] -- I challenge you to fix the type
+      findKey(parsePatterns, (pattern) => pattern.test(matchedString))
+    );
+    let value;
+    value = args.valueCallback ? args.valueCallback(key) : key;
+    value = options.valueCallback ? (
+      // [TODO] -- I challenge you to fix the type
+      options.valueCallback(value)
+    ) : value;
+    const rest = string.slice(matchedString.length);
+    return { value, rest };
+  };
+}
+function findKey(object, predicate) {
+  for (const key in object) {
+    if (Object.prototype.hasOwnProperty.call(object, key) && predicate(object[key])) {
+      return key;
+    }
+  }
+  return void 0;
+}
+function findIndex(array, predicate) {
+  for (let key = 0; key < array.length; key++) {
+    if (predicate(array[key])) {
+      return key;
+    }
+  }
+  return void 0;
+}
+
+// node_modules/date-fns/locale/_lib/buildMatchPatternFn.js
+function buildMatchPatternFn(args) {
+  return (string, options = {}) => {
+    const matchResult = string.match(args.matchPattern);
+    if (!matchResult) return null;
+    const matchedString = matchResult[0];
+    const parseResult = string.match(args.parsePattern);
+    if (!parseResult) return null;
+    let value = args.valueCallback ? args.valueCallback(parseResult[0]) : parseResult[0];
+    value = options.valueCallback ? options.valueCallback(value) : value;
+    const rest = string.slice(matchedString.length);
+    return { value, rest };
+  };
+}
+
+// node_modules/date-fns/locale/en-US/_lib/match.js
+var matchOrdinalNumberPattern = /^(\d+)(th|st|nd|rd)?/i;
+var parseOrdinalNumberPattern = /\d+/i;
+var matchEraPatterns = {
+  narrow: /^(b|a)/i,
+  abbreviated: /^(b\.?\s?c\.?|b\.?\s?c\.?\s?e\.?|a\.?\s?d\.?|c\.?\s?e\.?)/i,
+  wide: /^(before christ|before common era|anno domini|common era)/i
+};
+var parseEraPatterns = {
+  any: [/^b/i, /^(a|c)/i]
+};
+var matchQuarterPatterns = {
+  narrow: /^[1234]/i,
+  abbreviated: /^q[1234]/i,
+  wide: /^[1234](th|st|nd|rd)? quarter/i
+};
+var parseQuarterPatterns = {
+  any: [/1/i, /2/i, /3/i, /4/i]
+};
+var matchMonthPatterns = {
+  narrow: /^[jfmasond]/i,
+  abbreviated: /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i,
+  wide: /^(january|february|march|april|may|june|july|august|september|october|november|december)/i
+};
+var parseMonthPatterns = {
+  narrow: [
+    /^j/i,
+    /^f/i,
+    /^m/i,
+    /^a/i,
+    /^m/i,
+    /^j/i,
+    /^j/i,
+    /^a/i,
+    /^s/i,
+    /^o/i,
+    /^n/i,
+    /^d/i
+  ],
+  any: [
+    /^ja/i,
+    /^f/i,
+    /^mar/i,
+    /^ap/i,
+    /^may/i,
+    /^jun/i,
+    /^jul/i,
+    /^au/i,
+    /^s/i,
+    /^o/i,
+    /^n/i,
+    /^d/i
+  ]
+};
+var matchDayPatterns = {
+  narrow: /^[smtwf]/i,
+  short: /^(su|mo|tu|we|th|fr|sa)/i,
+  abbreviated: /^(sun|mon|tue|wed|thu|fri|sat)/i,
+  wide: /^(sunday|monday|tuesday|wednesday|thursday|friday|saturday)/i
+};
+var parseDayPatterns = {
+  narrow: [/^s/i, /^m/i, /^t/i, /^w/i, /^t/i, /^f/i, /^s/i],
+  any: [/^su/i, /^m/i, /^tu/i, /^w/i, /^th/i, /^f/i, /^sa/i]
+};
+var matchDayPeriodPatterns = {
+  narrow: /^(a|p|mi|n|(in the|at) (morning|afternoon|evening|night))/i,
+  any: /^([ap]\.?\s?m\.?|midnight|noon|(in the|at) (morning|afternoon|evening|night))/i
+};
+var parseDayPeriodPatterns = {
+  any: {
+    am: /^a/i,
+    pm: /^p/i,
+    midnight: /^mi/i,
+    noon: /^no/i,
+    morning: /morning/i,
+    afternoon: /afternoon/i,
+    evening: /evening/i,
+    night: /night/i
+  }
+};
+var match2 = {
+  ordinalNumber: buildMatchPatternFn({
+    matchPattern: matchOrdinalNumberPattern,
+    parsePattern: parseOrdinalNumberPattern,
+    valueCallback: (value) => parseInt(value, 10)
+  }),
+  era: buildMatchFn({
+    matchPatterns: matchEraPatterns,
+    defaultMatchWidth: "wide",
+    parsePatterns: parseEraPatterns,
+    defaultParseWidth: "any"
+  }),
+  quarter: buildMatchFn({
+    matchPatterns: matchQuarterPatterns,
+    defaultMatchWidth: "wide",
+    parsePatterns: parseQuarterPatterns,
+    defaultParseWidth: "any",
+    valueCallback: (index) => index + 1
+  }),
+  month: buildMatchFn({
+    matchPatterns: matchMonthPatterns,
+    defaultMatchWidth: "wide",
+    parsePatterns: parseMonthPatterns,
+    defaultParseWidth: "any"
+  }),
+  day: buildMatchFn({
+    matchPatterns: matchDayPatterns,
+    defaultMatchWidth: "wide",
+    parsePatterns: parseDayPatterns,
+    defaultParseWidth: "any"
+  }),
+  dayPeriod: buildMatchFn({
+    matchPatterns: matchDayPeriodPatterns,
+    defaultMatchWidth: "any",
+    parsePatterns: parseDayPeriodPatterns,
+    defaultParseWidth: "any"
+  })
+};
+
+// node_modules/date-fns/locale/en-US.js
+var enUS = {
+  code: "en-US",
+  formatDistance,
+  formatLong,
+  formatRelative,
+  localize,
+  match: match2,
+  options: {
+    weekStartsOn: 0,
+    firstWeekContainsDate: 1
+  }
+};
+
+// node_modules/date-fns/getDayOfYear.js
+function getDayOfYear(date, options) {
+  const _date = toDate(date, options?.in);
+  const diff = differenceInCalendarDays(_date, startOfYear(_date));
+  const dayOfYear = diff + 1;
+  return dayOfYear;
+}
+
+// node_modules/date-fns/getISOWeek.js
+function getISOWeek(date, options) {
+  const _date = toDate(date, options?.in);
+  const diff = +startOfISOWeek(_date) - +startOfISOWeekYear(_date);
+  return Math.round(diff / millisecondsInWeek) + 1;
+}
+
+// node_modules/date-fns/getWeekYear.js
+function getWeekYear(date, options) {
+  const _date = toDate(date, options?.in);
+  const year = _date.getFullYear();
+  const defaultOptions2 = getDefaultOptions();
+  const firstWeekContainsDate = options?.firstWeekContainsDate ?? options?.locale?.options?.firstWeekContainsDate ?? defaultOptions2.firstWeekContainsDate ?? defaultOptions2.locale?.options?.firstWeekContainsDate ?? 1;
+  const firstWeekOfNextYear = constructFrom(options?.in || date, 0);
+  firstWeekOfNextYear.setFullYear(year + 1, 0, firstWeekContainsDate);
+  firstWeekOfNextYear.setHours(0, 0, 0, 0);
+  const startOfNextYear = startOfWeek(firstWeekOfNextYear, options);
+  const firstWeekOfThisYear = constructFrom(options?.in || date, 0);
+  firstWeekOfThisYear.setFullYear(year, 0, firstWeekContainsDate);
+  firstWeekOfThisYear.setHours(0, 0, 0, 0);
+  const startOfThisYear = startOfWeek(firstWeekOfThisYear, options);
+  if (+_date >= +startOfNextYear) {
+    return year + 1;
+  } else if (+_date >= +startOfThisYear) {
+    return year;
+  } else {
+    return year - 1;
+  }
+}
+
+// node_modules/date-fns/startOfWeekYear.js
+function startOfWeekYear(date, options) {
+  const defaultOptions2 = getDefaultOptions();
+  const firstWeekContainsDate = options?.firstWeekContainsDate ?? options?.locale?.options?.firstWeekContainsDate ?? defaultOptions2.firstWeekContainsDate ?? defaultOptions2.locale?.options?.firstWeekContainsDate ?? 1;
+  const year = getWeekYear(date, options);
+  const firstWeek = constructFrom(options?.in || date, 0);
+  firstWeek.setFullYear(year, 0, firstWeekContainsDate);
+  firstWeek.setHours(0, 0, 0, 0);
+  const _date = startOfWeek(firstWeek, options);
+  return _date;
+}
+
+// node_modules/date-fns/getWeek.js
+function getWeek(date, options) {
+  const _date = toDate(date, options?.in);
+  const diff = +startOfWeek(_date, options) - +startOfWeekYear(_date, options);
+  return Math.round(diff / millisecondsInWeek) + 1;
+}
+
+// node_modules/date-fns/_lib/addLeadingZeros.js
+function addLeadingZeros(number, targetLength) {
+  const sign = number < 0 ? "-" : "";
+  const output = Math.abs(number).toString().padStart(targetLength, "0");
+  return sign + output;
+}
+
+// node_modules/date-fns/_lib/format/lightFormatters.js
+var lightFormatters = {
+  // Year
+  y(date, token2) {
+    const signedYear = date.getFullYear();
+    const year = signedYear > 0 ? signedYear : 1 - signedYear;
+    return addLeadingZeros(token2 === "yy" ? year % 100 : year, token2.length);
+  },
+  // Month
+  M(date, token2) {
+    const month = date.getMonth();
+    return token2 === "M" ? String(month + 1) : addLeadingZeros(month + 1, 2);
+  },
+  // Day of the month
+  d(date, token2) {
+    return addLeadingZeros(date.getDate(), token2.length);
+  },
+  // AM or PM
+  a(date, token2) {
+    const dayPeriodEnumValue = date.getHours() / 12 >= 1 ? "pm" : "am";
+    switch (token2) {
+      case "a":
+      case "aa":
+        return dayPeriodEnumValue.toUpperCase();
+      case "aaa":
+        return dayPeriodEnumValue;
+      case "aaaaa":
+        return dayPeriodEnumValue[0];
+      case "aaaa":
+      default:
+        return dayPeriodEnumValue === "am" ? "a.m." : "p.m.";
+    }
+  },
+  // Hour [1-12]
+  h(date, token2) {
+    return addLeadingZeros(date.getHours() % 12 || 12, token2.length);
+  },
+  // Hour [0-23]
+  H(date, token2) {
+    return addLeadingZeros(date.getHours(), token2.length);
+  },
+  // Minute
+  m(date, token2) {
+    return addLeadingZeros(date.getMinutes(), token2.length);
+  },
+  // Second
+  s(date, token2) {
+    return addLeadingZeros(date.getSeconds(), token2.length);
+  },
+  // Fraction of second
+  S(date, token2) {
+    const numberOfDigits = token2.length;
+    const milliseconds = date.getMilliseconds();
+    const fractionalSeconds = Math.trunc(
+      milliseconds * Math.pow(10, numberOfDigits - 3)
+    );
+    return addLeadingZeros(fractionalSeconds, token2.length);
+  }
+};
+
+// node_modules/date-fns/_lib/format/formatters.js
+var dayPeriodEnum = {
+  am: "am",
+  pm: "pm",
+  midnight: "midnight",
+  noon: "noon",
+  morning: "morning",
+  afternoon: "afternoon",
+  evening: "evening",
+  night: "night"
+};
+var formatters = {
+  // Era
+  G: function(date, token2, localize2) {
+    const era = date.getFullYear() > 0 ? 1 : 0;
+    switch (token2) {
+      // AD, BC
+      case "G":
+      case "GG":
+      case "GGG":
+        return localize2.era(era, { width: "abbreviated" });
+      // A, B
+      case "GGGGG":
+        return localize2.era(era, { width: "narrow" });
+      // Anno Domini, Before Christ
+      case "GGGG":
+      default:
+        return localize2.era(era, { width: "wide" });
+    }
+  },
+  // Year
+  y: function(date, token2, localize2) {
+    if (token2 === "yo") {
+      const signedYear = date.getFullYear();
+      const year = signedYear > 0 ? signedYear : 1 - signedYear;
+      return localize2.ordinalNumber(year, { unit: "year" });
+    }
+    return lightFormatters.y(date, token2);
+  },
+  // Local week-numbering year
+  Y: function(date, token2, localize2, options) {
+    const signedWeekYear = getWeekYear(date, options);
+    const weekYear = signedWeekYear > 0 ? signedWeekYear : 1 - signedWeekYear;
+    if (token2 === "YY") {
+      const twoDigitYear = weekYear % 100;
+      return addLeadingZeros(twoDigitYear, 2);
+    }
+    if (token2 === "Yo") {
+      return localize2.ordinalNumber(weekYear, { unit: "year" });
+    }
+    return addLeadingZeros(weekYear, token2.length);
+  },
+  // ISO week-numbering year
+  R: function(date, token2) {
+    const isoWeekYear = getISOWeekYear(date);
+    return addLeadingZeros(isoWeekYear, token2.length);
+  },
+  // Extended year. This is a single number designating the year of this calendar system.
+  // The main difference between `y` and `u` localizers are B.C. years:
+  // | Year | `y` | `u` |
+  // |------|-----|-----|
+  // | AC 1 |   1 |   1 |
+  // | BC 1 |   1 |   0 |
+  // | BC 2 |   2 |  -1 |
+  // Also `yy` always returns the last two digits of a year,
+  // while `uu` pads single digit years to 2 characters and returns other years unchanged.
+  u: function(date, token2) {
+    const year = date.getFullYear();
+    return addLeadingZeros(year, token2.length);
+  },
+  // Quarter
+  Q: function(date, token2, localize2) {
+    const quarter = Math.ceil((date.getMonth() + 1) / 3);
+    switch (token2) {
+      // 1, 2, 3, 4
+      case "Q":
+        return String(quarter);
+      // 01, 02, 03, 04
+      case "QQ":
+        return addLeadingZeros(quarter, 2);
+      // 1st, 2nd, 3rd, 4th
+      case "Qo":
+        return localize2.ordinalNumber(quarter, { unit: "quarter" });
+      // Q1, Q2, Q3, Q4
+      case "QQQ":
+        return localize2.quarter(quarter, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      // 1, 2, 3, 4 (narrow quarter; could be not numerical)
+      case "QQQQQ":
+        return localize2.quarter(quarter, {
+          width: "narrow",
+          context: "formatting"
+        });
+      // 1st quarter, 2nd quarter, ...
+      case "QQQQ":
+      default:
+        return localize2.quarter(quarter, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // Stand-alone quarter
+  q: function(date, token2, localize2) {
+    const quarter = Math.ceil((date.getMonth() + 1) / 3);
+    switch (token2) {
+      // 1, 2, 3, 4
+      case "q":
+        return String(quarter);
+      // 01, 02, 03, 04
+      case "qq":
+        return addLeadingZeros(quarter, 2);
+      // 1st, 2nd, 3rd, 4th
+      case "qo":
+        return localize2.ordinalNumber(quarter, { unit: "quarter" });
+      // Q1, Q2, Q3, Q4
+      case "qqq":
+        return localize2.quarter(quarter, {
+          width: "abbreviated",
+          context: "standalone"
+        });
+      // 1, 2, 3, 4 (narrow quarter; could be not numerical)
+      case "qqqqq":
+        return localize2.quarter(quarter, {
+          width: "narrow",
+          context: "standalone"
+        });
+      // 1st quarter, 2nd quarter, ...
+      case "qqqq":
+      default:
+        return localize2.quarter(quarter, {
+          width: "wide",
+          context: "standalone"
+        });
+    }
+  },
+  // Month
+  M: function(date, token2, localize2) {
+    const month = date.getMonth();
+    switch (token2) {
+      case "M":
+      case "MM":
+        return lightFormatters.M(date, token2);
+      // 1st, 2nd, ..., 12th
+      case "Mo":
+        return localize2.ordinalNumber(month + 1, { unit: "month" });
+      // Jan, Feb, ..., Dec
+      case "MMM":
+        return localize2.month(month, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      // J, F, ..., D
+      case "MMMMM":
+        return localize2.month(month, {
+          width: "narrow",
+          context: "formatting"
+        });
+      // January, February, ..., December
+      case "MMMM":
+      default:
+        return localize2.month(month, { width: "wide", context: "formatting" });
+    }
+  },
+  // Stand-alone month
+  L: function(date, token2, localize2) {
+    const month = date.getMonth();
+    switch (token2) {
+      // 1, 2, ..., 12
+      case "L":
+        return String(month + 1);
+      // 01, 02, ..., 12
+      case "LL":
+        return addLeadingZeros(month + 1, 2);
+      // 1st, 2nd, ..., 12th
+      case "Lo":
+        return localize2.ordinalNumber(month + 1, { unit: "month" });
+      // Jan, Feb, ..., Dec
+      case "LLL":
+        return localize2.month(month, {
+          width: "abbreviated",
+          context: "standalone"
+        });
+      // J, F, ..., D
+      case "LLLLL":
+        return localize2.month(month, {
+          width: "narrow",
+          context: "standalone"
+        });
+      // January, February, ..., December
+      case "LLLL":
+      default:
+        return localize2.month(month, { width: "wide", context: "standalone" });
+    }
+  },
+  // Local week of year
+  w: function(date, token2, localize2, options) {
+    const week = getWeek(date, options);
+    if (token2 === "wo") {
+      return localize2.ordinalNumber(week, { unit: "week" });
+    }
+    return addLeadingZeros(week, token2.length);
+  },
+  // ISO week of year
+  I: function(date, token2, localize2) {
+    const isoWeek = getISOWeek(date);
+    if (token2 === "Io") {
+      return localize2.ordinalNumber(isoWeek, { unit: "week" });
+    }
+    return addLeadingZeros(isoWeek, token2.length);
+  },
+  // Day of the month
+  d: function(date, token2, localize2) {
+    if (token2 === "do") {
+      return localize2.ordinalNumber(date.getDate(), { unit: "date" });
+    }
+    return lightFormatters.d(date, token2);
+  },
+  // Day of year
+  D: function(date, token2, localize2) {
+    const dayOfYear = getDayOfYear(date);
+    if (token2 === "Do") {
+      return localize2.ordinalNumber(dayOfYear, { unit: "dayOfYear" });
+    }
+    return addLeadingZeros(dayOfYear, token2.length);
+  },
+  // Day of week
+  E: function(date, token2, localize2) {
+    const dayOfWeek = date.getDay();
+    switch (token2) {
+      // Tue
+      case "E":
+      case "EE":
+      case "EEE":
+        return localize2.day(dayOfWeek, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      // T
+      case "EEEEE":
+        return localize2.day(dayOfWeek, {
+          width: "narrow",
+          context: "formatting"
+        });
+      // Tu
+      case "EEEEEE":
+        return localize2.day(dayOfWeek, {
+          width: "short",
+          context: "formatting"
+        });
+      // Tuesday
+      case "EEEE":
+      default:
+        return localize2.day(dayOfWeek, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // Local day of week
+  e: function(date, token2, localize2, options) {
+    const dayOfWeek = date.getDay();
+    const localDayOfWeek = (dayOfWeek - options.weekStartsOn + 8) % 7 || 7;
+    switch (token2) {
+      // Numerical value (Nth day of week with current locale or weekStartsOn)
+      case "e":
+        return String(localDayOfWeek);
+      // Padded numerical value
+      case "ee":
+        return addLeadingZeros(localDayOfWeek, 2);
+      // 1st, 2nd, ..., 7th
+      case "eo":
+        return localize2.ordinalNumber(localDayOfWeek, { unit: "day" });
+      case "eee":
+        return localize2.day(dayOfWeek, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      // T
+      case "eeeee":
+        return localize2.day(dayOfWeek, {
+          width: "narrow",
+          context: "formatting"
+        });
+      // Tu
+      case "eeeeee":
+        return localize2.day(dayOfWeek, {
+          width: "short",
+          context: "formatting"
+        });
+      // Tuesday
+      case "eeee":
+      default:
+        return localize2.day(dayOfWeek, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // Stand-alone local day of week
+  c: function(date, token2, localize2, options) {
+    const dayOfWeek = date.getDay();
+    const localDayOfWeek = (dayOfWeek - options.weekStartsOn + 8) % 7 || 7;
+    switch (token2) {
+      // Numerical value (same as in `e`)
+      case "c":
+        return String(localDayOfWeek);
+      // Padded numerical value
+      case "cc":
+        return addLeadingZeros(localDayOfWeek, token2.length);
+      // 1st, 2nd, ..., 7th
+      case "co":
+        return localize2.ordinalNumber(localDayOfWeek, { unit: "day" });
+      case "ccc":
+        return localize2.day(dayOfWeek, {
+          width: "abbreviated",
+          context: "standalone"
+        });
+      // T
+      case "ccccc":
+        return localize2.day(dayOfWeek, {
+          width: "narrow",
+          context: "standalone"
+        });
+      // Tu
+      case "cccccc":
+        return localize2.day(dayOfWeek, {
+          width: "short",
+          context: "standalone"
+        });
+      // Tuesday
+      case "cccc":
+      default:
+        return localize2.day(dayOfWeek, {
+          width: "wide",
+          context: "standalone"
+        });
+    }
+  },
+  // ISO day of week
+  i: function(date, token2, localize2) {
+    const dayOfWeek = date.getDay();
+    const isoDayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek;
+    switch (token2) {
+      // 2
+      case "i":
+        return String(isoDayOfWeek);
+      // 02
+      case "ii":
+        return addLeadingZeros(isoDayOfWeek, token2.length);
+      // 2nd
+      case "io":
+        return localize2.ordinalNumber(isoDayOfWeek, { unit: "day" });
+      // Tue
+      case "iii":
+        return localize2.day(dayOfWeek, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      // T
+      case "iiiii":
+        return localize2.day(dayOfWeek, {
+          width: "narrow",
+          context: "formatting"
+        });
+      // Tu
+      case "iiiiii":
+        return localize2.day(dayOfWeek, {
+          width: "short",
+          context: "formatting"
+        });
+      // Tuesday
+      case "iiii":
+      default:
+        return localize2.day(dayOfWeek, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // AM or PM
+  a: function(date, token2, localize2) {
+    const hours = date.getHours();
+    const dayPeriodEnumValue = hours / 12 >= 1 ? "pm" : "am";
+    switch (token2) {
+      case "a":
+      case "aa":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      case "aaa":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "abbreviated",
+          context: "formatting"
+        }).toLowerCase();
+      case "aaaaa":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "narrow",
+          context: "formatting"
+        });
+      case "aaaa":
+      default:
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // AM, PM, midnight, noon
+  b: function(date, token2, localize2) {
+    const hours = date.getHours();
+    let dayPeriodEnumValue;
+    if (hours === 12) {
+      dayPeriodEnumValue = dayPeriodEnum.noon;
+    } else if (hours === 0) {
+      dayPeriodEnumValue = dayPeriodEnum.midnight;
+    } else {
+      dayPeriodEnumValue = hours / 12 >= 1 ? "pm" : "am";
+    }
+    switch (token2) {
+      case "b":
+      case "bb":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      case "bbb":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "abbreviated",
+          context: "formatting"
+        }).toLowerCase();
+      case "bbbbb":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "narrow",
+          context: "formatting"
+        });
+      case "bbbb":
+      default:
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // in the morning, in the afternoon, in the evening, at night
+  B: function(date, token2, localize2) {
+    const hours = date.getHours();
+    let dayPeriodEnumValue;
+    if (hours >= 17) {
+      dayPeriodEnumValue = dayPeriodEnum.evening;
+    } else if (hours >= 12) {
+      dayPeriodEnumValue = dayPeriodEnum.afternoon;
+    } else if (hours >= 4) {
+      dayPeriodEnumValue = dayPeriodEnum.morning;
+    } else {
+      dayPeriodEnumValue = dayPeriodEnum.night;
+    }
+    switch (token2) {
+      case "B":
+      case "BB":
+      case "BBB":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "abbreviated",
+          context: "formatting"
+        });
+      case "BBBBB":
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "narrow",
+          context: "formatting"
+        });
+      case "BBBB":
+      default:
+        return localize2.dayPeriod(dayPeriodEnumValue, {
+          width: "wide",
+          context: "formatting"
+        });
+    }
+  },
+  // Hour [1-12]
+  h: function(date, token2, localize2) {
+    if (token2 === "ho") {
+      let hours = date.getHours() % 12;
+      if (hours === 0) hours = 12;
+      return localize2.ordinalNumber(hours, { unit: "hour" });
+    }
+    return lightFormatters.h(date, token2);
+  },
+  // Hour [0-23]
+  H: function(date, token2, localize2) {
+    if (token2 === "Ho") {
+      return localize2.ordinalNumber(date.getHours(), { unit: "hour" });
+    }
+    return lightFormatters.H(date, token2);
+  },
+  // Hour [0-11]
+  K: function(date, token2, localize2) {
+    const hours = date.getHours() % 12;
+    if (token2 === "Ko") {
+      return localize2.ordinalNumber(hours, { unit: "hour" });
+    }
+    return addLeadingZeros(hours, token2.length);
+  },
+  // Hour [1-24]
+  k: function(date, token2, localize2) {
+    let hours = date.getHours();
+    if (hours === 0) hours = 24;
+    if (token2 === "ko") {
+      return localize2.ordinalNumber(hours, { unit: "hour" });
+    }
+    return addLeadingZeros(hours, token2.length);
+  },
+  // Minute
+  m: function(date, token2, localize2) {
+    if (token2 === "mo") {
+      return localize2.ordinalNumber(date.getMinutes(), { unit: "minute" });
+    }
+    return lightFormatters.m(date, token2);
+  },
+  // Second
+  s: function(date, token2, localize2) {
+    if (token2 === "so") {
+      return localize2.ordinalNumber(date.getSeconds(), { unit: "second" });
+    }
+    return lightFormatters.s(date, token2);
+  },
+  // Fraction of second
+  S: function(date, token2) {
+    return lightFormatters.S(date, token2);
+  },
+  // Timezone (ISO-8601. If offset is 0, output is always `'Z'`)
+  X: function(date, token2, _localize) {
+    const timezoneOffset = date.getTimezoneOffset();
+    if (timezoneOffset === 0) {
+      return "Z";
+    }
+    switch (token2) {
+      // Hours and optional minutes
+      case "X":
+        return formatTimezoneWithOptionalMinutes(timezoneOffset);
+      // Hours, minutes and optional seconds without `:` delimiter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `XX`
+      case "XXXX":
+      case "XX":
+        return formatTimezone(timezoneOffset);
+      // Hours, minutes and optional seconds with `:` delimiter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `XXX`
+      case "XXXXX":
+      case "XXX":
+      // Hours and minutes with `:` delimiter
+      default:
+        return formatTimezone(timezoneOffset, ":");
+    }
+  },
+  // Timezone (ISO-8601. If offset is 0, output is `'+00:00'` or equivalent)
+  x: function(date, token2, _localize) {
+    const timezoneOffset = date.getTimezoneOffset();
+    switch (token2) {
+      // Hours and optional minutes
+      case "x":
+        return formatTimezoneWithOptionalMinutes(timezoneOffset);
+      // Hours, minutes and optional seconds without `:` delimiter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `xx`
+      case "xxxx":
+      case "xx":
+        return formatTimezone(timezoneOffset);
+      // Hours, minutes and optional seconds with `:` delimiter
+      // Note: neither ISO-8601 nor JavaScript supports seconds in timezone offsets
+      // so this token always has the same output as `xxx`
+      case "xxxxx":
+      case "xxx":
+      // Hours and minutes with `:` delimiter
+      default:
+        return formatTimezone(timezoneOffset, ":");
+    }
+  },
+  // Timezone (GMT)
+  O: function(date, token2, _localize) {
+    const timezoneOffset = date.getTimezoneOffset();
+    switch (token2) {
+      // Short
+      case "O":
+      case "OO":
+      case "OOO":
+        return "GMT" + formatTimezoneShort(timezoneOffset, ":");
+      // Long
+      case "OOOO":
+      default:
+        return "GMT" + formatTimezone(timezoneOffset, ":");
+    }
+  },
+  // Timezone (specific non-location)
+  z: function(date, token2, _localize) {
+    const timezoneOffset = date.getTimezoneOffset();
+    switch (token2) {
+      // Short
+      case "z":
+      case "zz":
+      case "zzz":
+        return "GMT" + formatTimezoneShort(timezoneOffset, ":");
+      // Long
+      case "zzzz":
+      default:
+        return "GMT" + formatTimezone(timezoneOffset, ":");
+    }
+  },
+  // Seconds timestamp
+  t: function(date, token2, _localize) {
+    const timestamp = Math.trunc(+date / 1e3);
+    return addLeadingZeros(timestamp, token2.length);
+  },
+  // Milliseconds timestamp
+  T: function(date, token2, _localize) {
+    return addLeadingZeros(+date, token2.length);
+  }
+};
+function formatTimezoneShort(offset, delimiter2 = "") {
+  const sign = offset > 0 ? "-" : "+";
+  const absOffset = Math.abs(offset);
+  const hours = Math.trunc(absOffset / 60);
+  const minutes = absOffset % 60;
+  if (minutes === 0) {
+    return sign + String(hours);
+  }
+  return sign + String(hours) + delimiter2 + addLeadingZeros(minutes, 2);
+}
+function formatTimezoneWithOptionalMinutes(offset, delimiter2) {
+  if (offset % 60 === 0) {
+    const sign = offset > 0 ? "-" : "+";
+    return sign + addLeadingZeros(Math.abs(offset) / 60, 2);
+  }
+  return formatTimezone(offset, delimiter2);
+}
+function formatTimezone(offset, delimiter2 = "") {
+  const sign = offset > 0 ? "-" : "+";
+  const absOffset = Math.abs(offset);
+  const hours = addLeadingZeros(Math.trunc(absOffset / 60), 2);
+  const minutes = addLeadingZeros(absOffset % 60, 2);
+  return sign + hours + delimiter2 + minutes;
+}
+
+// node_modules/date-fns/_lib/format/longFormatters.js
+var dateLongFormatter = (pattern, formatLong2) => {
+  switch (pattern) {
+    case "P":
+      return formatLong2.date({ width: "short" });
+    case "PP":
+      return formatLong2.date({ width: "medium" });
+    case "PPP":
+      return formatLong2.date({ width: "long" });
+    case "PPPP":
+    default:
+      return formatLong2.date({ width: "full" });
+  }
+};
+var timeLongFormatter = (pattern, formatLong2) => {
+  switch (pattern) {
+    case "p":
+      return formatLong2.time({ width: "short" });
+    case "pp":
+      return formatLong2.time({ width: "medium" });
+    case "ppp":
+      return formatLong2.time({ width: "long" });
+    case "pppp":
+    default:
+      return formatLong2.time({ width: "full" });
+  }
+};
+var dateTimeLongFormatter = (pattern, formatLong2) => {
+  const matchResult = pattern.match(/(P+)(p+)?/) || [];
+  const datePattern = matchResult[1];
+  const timePattern = matchResult[2];
+  if (!timePattern) {
+    return dateLongFormatter(pattern, formatLong2);
+  }
+  let dateTimeFormat;
+  switch (datePattern) {
+    case "P":
+      dateTimeFormat = formatLong2.dateTime({ width: "short" });
+      break;
+    case "PP":
+      dateTimeFormat = formatLong2.dateTime({ width: "medium" });
+      break;
+    case "PPP":
+      dateTimeFormat = formatLong2.dateTime({ width: "long" });
+      break;
+    case "PPPP":
+    default:
+      dateTimeFormat = formatLong2.dateTime({ width: "full" });
+      break;
+  }
+  return dateTimeFormat.replace("{{date}}", dateLongFormatter(datePattern, formatLong2)).replace("{{time}}", timeLongFormatter(timePattern, formatLong2));
+};
+var longFormatters = {
+  p: timeLongFormatter,
+  P: dateTimeLongFormatter
+};
+
+// node_modules/date-fns/_lib/protectedTokens.js
+var dayOfYearTokenRE = /^D+$/;
+var weekYearTokenRE = /^Y+$/;
+var throwTokens = ["D", "DD", "YY", "YYYY"];
+function isProtectedDayOfYearToken(token2) {
+  return dayOfYearTokenRE.test(token2);
+}
+function isProtectedWeekYearToken(token2) {
+  return weekYearTokenRE.test(token2);
+}
+function warnOrThrowProtectedError(token2, format2, input) {
+  const _message = message(token2, format2, input);
+  console.warn(_message);
+  if (throwTokens.includes(token2)) throw new RangeError(_message);
+}
+function message(token2, format2, input) {
+  const subject = token2[0] === "Y" ? "years" : "days of the month";
+  return `Use \`${token2.toLowerCase()}\` instead of \`${token2}\` (in \`${format2}\`) for formatting ${subject} to the input \`${input}\`; see: https://github.com/date-fns/date-fns/blob/master/docs/unicodeTokens.md`;
+}
+
+// node_modules/date-fns/format.js
+var formattingTokensRegExp = /[yYQqMLwIdDecihHKkms]o|(\w)\1*|''|'(''|[^'])+('|$)|./g;
+var longFormattingTokensRegExp = /P+p+|P+|p+|''|'(''|[^'])+('|$)|./g;
+var escapedStringRegExp = /^'([^]*?)'?$/;
+var doubleQuoteRegExp = /''/g;
+var unescapedLatinCharacterRegExp = /[a-zA-Z]/;
+function format(date, formatStr, options) {
+  const defaultOptions2 = getDefaultOptions();
+  const locale = options?.locale ?? defaultOptions2.locale ?? enUS;
+  const firstWeekContainsDate = options?.firstWeekContainsDate ?? options?.locale?.options?.firstWeekContainsDate ?? defaultOptions2.firstWeekContainsDate ?? defaultOptions2.locale?.options?.firstWeekContainsDate ?? 1;
+  const weekStartsOn = options?.weekStartsOn ?? options?.locale?.options?.weekStartsOn ?? defaultOptions2.weekStartsOn ?? defaultOptions2.locale?.options?.weekStartsOn ?? 0;
+  const originalDate = toDate(date, options?.in);
+  if (!isValid(originalDate)) {
+    throw new RangeError("Invalid time value");
+  }
+  let parts = formatStr.match(longFormattingTokensRegExp).map((substring) => {
+    const firstCharacter = substring[0];
+    if (firstCharacter === "p" || firstCharacter === "P") {
+      const longFormatter = longFormatters[firstCharacter];
+      return longFormatter(substring, locale.formatLong);
+    }
+    return substring;
+  }).join("").match(formattingTokensRegExp).map((substring) => {
+    if (substring === "''") {
+      return { isToken: false, value: "'" };
+    }
+    const firstCharacter = substring[0];
+    if (firstCharacter === "'") {
+      return { isToken: false, value: cleanEscapedString(substring) };
+    }
+    if (formatters[firstCharacter]) {
+      return { isToken: true, value: substring };
+    }
+    if (firstCharacter.match(unescapedLatinCharacterRegExp)) {
+      throw new RangeError(
+        "Format string contains an unescaped latin alphabet character `" + firstCharacter + "`"
+      );
+    }
+    return { isToken: false, value: substring };
+  });
+  if (locale.localize.preprocessor) {
+    parts = locale.localize.preprocessor(originalDate, parts);
+  }
+  const formatterOptions = {
+    firstWeekContainsDate,
+    weekStartsOn,
+    locale
+  };
+  return parts.map((part) => {
+    if (!part.isToken) return part.value;
+    const token2 = part.value;
+    if (!options?.useAdditionalWeekYearTokens && isProtectedWeekYearToken(token2) || !options?.useAdditionalDayOfYearTokens && isProtectedDayOfYearToken(token2)) {
+      warnOrThrowProtectedError(token2, formatStr, String(date));
+    }
+    const formatter = formatters[token2[0]];
+    return formatter(originalDate, token2, locale.localize, formatterOptions);
+  }).join("");
+}
+function cleanEscapedString(input) {
+  const matched = input.match(escapedStringRegExp);
+  if (!matched) {
+    return input;
+  }
+  return matched[1].replace(doubleQuoteRegExp, "'");
+}
+
+// src/web/client/components/RecentSessionsCard.tsx
+var sessions = [
+  {
+    date: (/* @__PURE__ */ new Date("2023-11-23")).getTime(),
+    circuit: "Sandown Park",
+    format: "Race",
+    pb: "00:47.950"
+  },
+  {
+    date: (/* @__PURE__ */ new Date("2023-11-23")).getTime(),
+    circuit: "Sandown Park.",
+    format: "Practice",
+    pb: "00:48.230"
+  },
+  {
+    date: (/* @__PURE__ */ new Date("2023-11-22")).getTime(),
+    circuit: "Farnborough",
+    format: "Practice",
+    pb: "00:44.250"
+  }
+];
+function RecentSessionsCard() {
+  return /* @__PURE__ */ jsx4(
+    Card,
+    {
+      title: "Recent sessions",
+      rightComponent: /* @__PURE__ */ jsx4("button", { className: "button", children: "Add Session" }),
+      children: /* @__PURE__ */ jsx4("div", { className: "overflow-x-auto", children: /* @__PURE__ */ jsxs2("table", { className: "min-w-full divide-y divide-gray-200 dark:divide-gray-700", children: [
+        /* @__PURE__ */ jsx4("thead", { className: "bg-gray-50 dark:bg-gray-800", children: /* @__PURE__ */ jsxs2("tr", { children: [
+          /* @__PURE__ */ jsx4(
+            "th",
+            {
+              scope: "col",
+              className: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300",
+              children: "Date"
+            }
+          ),
+          /* @__PURE__ */ jsx4(
+            "th",
+            {
+              scope: "col",
+              className: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300",
+              children: "Circuit"
+            }
+          ),
+          /* @__PURE__ */ jsx4(
+            "th",
+            {
+              scope: "col",
+              className: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300",
+              children: "Format"
+            }
+          ),
+          /* @__PURE__ */ jsx4(
+            "th",
+            {
+              scope: "col",
+              className: "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300",
+              children: "PB"
+            }
+          )
+        ] }) }),
+        /* @__PURE__ */ jsx4("tbody", { className: "bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700", children: sessions.map((session) => /* @__PURE__ */ jsxs2("tr", { children: [
+          /* @__PURE__ */ jsx4("td", { className: "px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white", children: format(session.date, "do MMMM yyyy") }),
+          /* @__PURE__ */ jsx4("td", { className: "px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300", children: session.circuit }),
+          /* @__PURE__ */ jsx4("td", { className: "px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300", children: session.format }),
+          /* @__PURE__ */ jsx4("td", { className: "px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300", children: session.pb })
+        ] }, `${session.circuit}-${session.format}-${session.pb}`)) })
+      ] }) })
+    }
+  );
+}
+
 // src/web/client/routes/index.tsx
 function HomePage() {
-  return /* @__PURE__ */ jsx4(Card, { title: "Get started", children: /* @__PURE__ */ jsx4("p", { className: "value", children: "Uploads and overlays will live here once auth is wired into the rest of the flow." }) });
+  return /* @__PURE__ */ jsx4("div", { children: /* @__PURE__ */ jsx4(Card, { children: /* @__PURE__ */ jsx4(RecentSessionsCard, {}) }) });
 }
 
 // src/web/client/routes/not-found/index.tsx
