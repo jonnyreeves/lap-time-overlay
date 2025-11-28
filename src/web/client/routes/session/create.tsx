@@ -22,7 +22,8 @@ const inputFieldStyles = css`
   }
 
   input[type="date"],
-  input[type="text"] {
+  input[type="text"],
+  select {
     width: 100%;
     padding: 10px;
     border: 1px solid #e2e8f4;
@@ -74,7 +75,10 @@ export default function CreateSessionRoute() {
         </div>
         <div css={inputFieldStyles}>
           <label htmlFor="session-circuit">Circuit</label>
-          <input type="text" id="session-circuit" placeholder="e.g., Silverstone" />
+          <select id="session-circuit">
+            <option value="Daytona Sandown Park">Daytona Sandown Park</option>
+            <option value="Teamsport Farnborough">Teamsport Farnborough</option>
+          </select>
         </div>
         <div css={inputFieldStyles}>
           <label htmlFor="session-format">Format</label>
