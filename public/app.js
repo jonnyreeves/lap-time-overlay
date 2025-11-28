@@ -41656,7 +41656,7 @@ function css() {
 }
 
 // src/web/client/index.tsx
-var import_react11 = __toESM(require_react(), 1);
+var import_react12 = __toESM(require_react(), 1);
 var import_client = __toESM(require_client(), 1);
 var import_react_relay5 = __toESM(require_react_relay(), 1);
 
@@ -46907,6 +46907,7 @@ var titleStyles = css`
   font-size: clamp(2.1rem, 3vw, 2.8rem);
   font-weight: 600;
   letter-spacing: -0.02em;
+  cursor: pointer;
 `;
 var ledeStyles = css`
   margin: 0;
@@ -47359,7 +47360,7 @@ function SiteHeader({ viewer }) {
     });
   };
   return /* @__PURE__ */ jsx4("header", { className: "hero", css: heroStyles, children: /* @__PURE__ */ jsxs2("div", { className: "header", children: [
-    /* @__PURE__ */ jsx4("h1", { className: "title", css: titleStyles, children: "RaceCraft \u{1F3C1}" }),
+    /* @__PURE__ */ jsx4("h1", { className: "title", css: titleStyles, onClick: () => navigate("/"), children: "RaceCraft \u{1F3C1}" }),
     viewer ? /* @__PURE__ */ jsxs2("p", { className: "lede", css: ledeStyles, children: [
       "Signed in as ",
       viewer.username,
@@ -47374,6 +47375,86 @@ function AuthLayout() {
   return /* @__PURE__ */ jsxs2("main", { className: "shell", css: shellStyles, children: [
     /* @__PURE__ */ jsx4(SiteHeader, {}),
     /* @__PURE__ */ jsx4(Outlet, {})
+  ] });
+}
+
+// src/web/client/routes/session/create.tsx
+var formLayoutStyles = css`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+var inputFieldStyles = css`
+  margin-bottom: 15px;
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  input[type="date"],
+  input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e2e8f4;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #0b1021;
+    background-color: #f7faff;
+    transition: border-color 0.2s ease-in-out;
+
+    &:focus {
+      border-color: #6366f1; /* Example focus color */
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
+  }
+`;
+var videoUploadPlaceholderStyles = css`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px dashed #a0aec0; /* A light grey dashed border */
+  border-radius: 12px;
+  background-color: #edf2f7; /* A very light grey background */
+  min-height: 250px; /* Make it large */
+  text-align: center;
+  color: #4a5568; /* Darker grey text */
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    border-color: #6366f1; /* Example hover color */
+    color: #6366f1;
+    background-color: #e0e7ff; /* Lighter blue on hover */
+  }
+`;
+function CreateSessionRoute() {
+  const today = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+  return /* @__PURE__ */ jsxs2("div", { css: formLayoutStyles, children: [
+    /* @__PURE__ */ jsxs2(Card, { title: "Session Details", children: [
+      /* @__PURE__ */ jsxs2("div", { css: inputFieldStyles, children: [
+        /* @__PURE__ */ jsx4("label", { htmlFor: "session-date", children: "Date" }),
+        /* @__PURE__ */ jsx4("input", { type: "date", id: "session-date", defaultValue: today })
+      ] }),
+      /* @__PURE__ */ jsxs2("div", { css: inputFieldStyles, children: [
+        /* @__PURE__ */ jsx4("label", { htmlFor: "session-circuit", children: "Circuit" }),
+        /* @__PURE__ */ jsx4("input", { type: "text", id: "session-circuit", placeholder: "e.g., Silverstone" })
+      ] }),
+      /* @__PURE__ */ jsxs2("div", { css: inputFieldStyles, children: [
+        /* @__PURE__ */ jsx4("label", { htmlFor: "session-format", children: "Format" }),
+        /* @__PURE__ */ jsx4("input", { type: "text", id: "session-format", placeholder: "e.g., Teamsport Endurance" })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsx4("div", { css: videoUploadPlaceholderStyles, children: "Upload session footage" })
   ] });
 }
 
@@ -48968,11 +49049,12 @@ var sessions = [
   }
 ];
 function RecentSessionsCard() {
+  const navigate = useNavigate();
   return /* @__PURE__ */ jsx4(
     Card,
     {
       title: "Recent sessions",
-      rightComponent: /* @__PURE__ */ jsx4("button", { className: "button", children: "Add Session" }),
+      rightComponent: /* @__PURE__ */ jsx4("button", { className: "button", onClick: () => navigate("/session/create"), children: "Add Session" }),
       children: /* @__PURE__ */ jsx4("div", { className: "overflow-x-auto", children: /* @__PURE__ */ jsxs2("table", { className: "min-w-full divide-y divide-gray-200 dark:divide-gray-700", children: [
         /* @__PURE__ */ jsx4("thead", { className: "bg-gray-50 dark:bg-gray-800", children: /* @__PURE__ */ jsxs2("tr", { children: [
           /* @__PURE__ */ jsx4(
@@ -49033,7 +49115,7 @@ function NotFoundPage() {
 }
 
 // src/web/client/routes/RequireAuth.tsx
-var import_react8 = __toESM(require_react(), 1);
+var import_react9 = __toESM(require_react(), 1);
 var import_react_relay4 = __toESM(require_react_relay(), 1);
 
 // src/web/client/__generated__/ViewerQuery.graphql.ts
@@ -49147,7 +49229,7 @@ function RequireAuth() {
   const data = (0, import_react_relay4.useLazyLoadQuery)(ViewerQuery_graphql_default, {}, {
     fetchPolicy: "network-only"
   });
-  (0, import_react8.useEffect)(() => {
+  (0, import_react9.useEffect)(() => {
     if (!data.viewer) {
       navigate("/auth/login", {
         replace: true,
@@ -49174,6 +49256,7 @@ var router = createBrowserRouter([
     element: /* @__PURE__ */ jsx4(RequireAuth, {}),
     children: [
       { path: "/", element: /* @__PURE__ */ jsx4(HomePage, {}) },
+      { path: "/session/create", element: /* @__PURE__ */ jsx4(CreateSessionRoute, {}) },
       { path: "*", element: /* @__PURE__ */ jsx4(NotFoundPage, {}) }
     ]
   }
@@ -49247,7 +49330,7 @@ var environment = createRelayEnvironment();
 (0, import_client.createRoot)(container).render(
   /* @__PURE__ */ jsxs2(Fragment6, { children: [
     /* @__PURE__ */ jsx4(Global, { styles: globalStyles }),
-    /* @__PURE__ */ jsx4(import_react_relay5.RelayEnvironmentProvider, { environment, children: /* @__PURE__ */ jsx4(import_react11.Suspense, { fallback: /* @__PURE__ */ jsx4("div", { className: "card", children: "Loading\u2026" }), children: /* @__PURE__ */ jsx4(App, {}) }) })
+    /* @__PURE__ */ jsx4(import_react_relay5.RelayEnvironmentProvider, { environment, children: /* @__PURE__ */ jsx4(import_react12.Suspense, { fallback: /* @__PURE__ */ jsx4("div", { className: "card", children: "Loading\u2026" }), children: /* @__PURE__ */ jsx4(App, {}) }) })
   ] })
 );
 /*! Bundled license information:
