@@ -1083,7 +1083,7 @@ var require_react_development = __commonJS({
           }
           return dispatcher.useContext(Context);
         }
-        function useState4(initialState) {
+        function useState5(initialState) {
           var dispatcher = resolveDispatcher();
           return dispatcher.useState(initialState);
         }
@@ -1886,7 +1886,7 @@ var require_react_development = __commonJS({
         exports.useMemo = useMemo3;
         exports.useReducer = useReducer;
         exports.useRef = useRef4;
-        exports.useState = useState4;
+        exports.useState = useState5;
         exports.useSyncExternalStore = useSyncExternalStore;
         exports.useTransition = useTransition;
         exports.version = ReactVersion;
@@ -35294,7 +35294,7 @@ var require_ReactRelayLocalQueryRenderer = __commonJS({
     var deepFreeze = _require.deepFreeze;
     var getRequest = _require.getRequest;
     var useLayoutEffect4 = React7.useLayoutEffect;
-    var useState4 = React7.useState;
+    var useState5 = React7.useState;
     var useRef4 = React7.useRef;
     var useMemo3 = React7.useMemo;
     var queryRendererContext = {
@@ -35323,7 +35323,7 @@ var require_ReactRelayLocalQueryRenderer = __commonJS({
         };
       }, [environment2]);
       var dataRef = useRef4(null);
-      var _useState = useState4(null), forceUpdate = _useState[1];
+      var _useState = useState5(null), forceUpdate = _useState[1];
       var cleanupFnRef = useRef4(null);
       var snapshot = useMemo3(function() {
         environment2.check(operation);
@@ -38061,7 +38061,7 @@ var require_useFragmentNode = __commonJS({
     var getFragmentResourceForEnvironment = _require.getFragmentResourceForEnvironment;
     var _require2 = require_react();
     var useEffect4 = _require2.useEffect;
-    var useState4 = _require2.useState;
+    var useState5 = _require2.useState;
     var _require3 = require_relay_runtime();
     var RelayFeatureFlags = _require3.RelayFeatureFlags;
     var getFragmentIdentifier = _require3.getFragmentIdentifier;
@@ -38070,7 +38070,7 @@ var require_useFragmentNode = __commonJS({
       var environment2 = useRelayEnvironment2();
       var FragmentResource = getFragmentResourceForEnvironment(environment2);
       var isMountedRef = useUnsafeRef_DEPRECATED(false);
-      var _useState = useState4(0), forceUpdate = _useState[1];
+      var _useState = useState5(0), forceUpdate = _useState[1];
       var fragmentIdentifier = getFragmentIdentifier(fragmentNode, fragmentRef);
       var fragmentResult = FragmentResource.readWithIdentifier(fragmentNode, fragmentRef, fragmentIdentifier, componentDisplayName);
       var isListeningForUpdatesRef = useUnsafeRef_DEPRECATED(true);
@@ -38172,14 +38172,14 @@ var require_useLazyLoadQueryNode = __commonJS({
     var React7 = require_react();
     var useContext6 = React7.useContext;
     var useEffect4 = React7.useEffect;
-    var useState4 = React7.useState;
+    var useState5 = React7.useState;
     var useRef4 = React7.useRef;
     function useLazyLoadQueryNode(_ref) {
       var query = _ref.query, componentDisplayName = _ref.componentDisplayName, fetchObservable = _ref.fetchObservable, fetchPolicy = _ref.fetchPolicy, fetchKey = _ref.fetchKey, renderPolicy = _ref.renderPolicy;
       var environment2 = useRelayEnvironment2();
       var profilerContext = useContext6(ProfilerContext);
       var QueryResource = getQueryResourceForEnvironment(environment2);
-      var _useState = useState4(0), forceUpdateKey = _useState[0], forceUpdate = _useState[1];
+      var _useState = useState5(0), forceUpdateKey = _useState[0], forceUpdate = _useState[1];
       var _useFetchTrackingRef = useFetchTrackingRef(), startFetch = _useFetchTrackingRef.startFetch, completeFetch = _useFetchTrackingRef.completeFetch;
       var cacheBreaker = "".concat(forceUpdateKey, "-").concat(fetchKey !== null && fetchKey !== void 0 ? fetchKey : "");
       var cacheIdentifier = getQueryCacheIdentifier(environment2, query, fetchPolicy, renderPolicy, cacheBreaker);
@@ -38235,9 +38235,9 @@ var require_useMemoVariables = __commonJS({
     "use strict";
     var areEqual = require_areEqual();
     var _require = require_react();
-    var useState4 = _require.useState;
+    var useState5 = _require.useState;
     function useMemoVariables(variables) {
-      var _useState = useState4(variables), mirroredVariables = _useState[0], setMirroredVariables = _useState[1];
+      var _useState = useState5(variables), mirroredVariables = _useState[0], setMirroredVariables = _useState[1];
       if (areEqual(variables, mirroredVariables)) {
         return mirroredVariables;
       } else {
@@ -38353,7 +38353,7 @@ var require_useEntryPointLoader = __commonJS({
     var useCallback3 = _require2.useCallback;
     var useEffect4 = _require2.useEffect;
     var useRef4 = _require2.useRef;
-    var useState4 = _require2.useState;
+    var useState5 = _require2.useState;
     var initialNullEntryPointReferenceState = {
       kind: "NullEntryPointReference"
     };
@@ -38364,8 +38364,8 @@ var require_useEntryPointLoader = __commonJS({
       var initialEntryPointParamsInternal = (_options$TEST_ONLY__i3 = options === null || options === void 0 ? void 0 : (_options$TEST_ONLY__i4 = options.TEST_ONLY__initialEntryPointData) === null || _options$TEST_ONLY__i4 === void 0 ? void 0 : _options$TEST_ONLY__i4.entryPointParams) !== null && _options$TEST_ONLY__i3 !== void 0 ? _options$TEST_ONLY__i3 : null;
       var isMountedRef = useIsMountedRef();
       var undisposedEntryPointReferencesRef = useRef4(/* @__PURE__ */ new Set([initialEntryPointReferenceInternal]));
-      var _useState = useState4(initialEntryPointReferenceInternal), entryPointReference = _useState[0], setEntryPointReference = _useState[1];
-      var _useState2 = useState4(initialEntryPointParamsInternal), entryPointParams = _useState2[0], setEntryPointParams = _useState2[1];
+      var _useState = useState5(initialEntryPointReferenceInternal), entryPointReference = _useState[0], setEntryPointReference = _useState[1];
+      var _useState2 = useState5(initialEntryPointParamsInternal), entryPointParams = _useState2[0], setEntryPointParams = _useState2[1];
       var disposeEntryPoint = useCallback3(function() {
         if (isMountedRef.current) {
           var nullEntryPointReference = {
@@ -38506,18 +38506,18 @@ var require_useMutation = __commonJS({
     var React7 = require_react();
     var _require = require_relay_runtime();
     var defaultCommitMutation = _require.commitMutation;
-    var useState4 = React7.useState;
+    var useState5 = React7.useState;
     var useEffect4 = React7.useEffect;
     var useRef4 = React7.useRef;
     var useCallback3 = React7.useCallback;
-    function useMutation3(mutation) {
+    function useMutation4(mutation) {
       var commitMutationFn = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : defaultCommitMutation;
       var environment2 = useRelayEnvironment2();
       var isMountedRef = useIsMountedRef();
       var environmentRef = useRef4(environment2);
       var mutationRef = useRef4(mutation);
       var inFlightMutationsRef = useRef4(/* @__PURE__ */ new Set());
-      var _useState = useState4(false), isMutationInFlight = _useState[0], setMutationInFlight = _useState[1];
+      var _useState = useState5(false), isMutationInFlight = _useState[0], setMutationInFlight = _useState[1];
       var cleanup = useCallback3(function(disposable) {
         if (environmentRef.current === environment2 && mutationRef.current === mutation) {
           inFlightMutationsRef.current["delete"](disposable);
@@ -38567,7 +38567,7 @@ var require_useMutation = __commonJS({
       }, [cleanup, commitMutationFn, environment2, isMountedRef, mutation]);
       return [commit, isMutationInFlight];
     }
-    module.exports = useMutation3;
+    module.exports = useMutation4;
   }
 });
 
@@ -38586,7 +38586,7 @@ var require_useQueryLoader = __commonJS({
     var useCallback3 = _require2.useCallback;
     var useEffect4 = _require2.useEffect;
     var useRef4 = _require2.useRef;
-    var useState4 = _require2.useState;
+    var useState5 = _require2.useState;
     var _require3 = require_relay_runtime();
     var getRequest = _require3.getRequest;
     var initialNullQueryReferenceState = {
@@ -38605,10 +38605,10 @@ var require_useQueryLoader = __commonJS({
       useTrackLoadQueryInRender();
       var isMountedRef = useIsMountedRef();
       var undisposedQueryReferencesRef = useRef4(/* @__PURE__ */ new Set([initialQueryReferenceInternal]));
-      var _useState = useState4(function() {
+      var _useState = useState5(function() {
         return initialQueryReferenceInternal;
       }), queryReference = _useState[0], setQueryReference = _useState[1];
-      var _useState2 = useState4(function() {
+      var _useState2 = useState5(function() {
         return initialQueryReferenceInternal;
       }), previousInitialQueryReference = _useState2[0], setPreviousInitialQueryReference = _useState2[1];
       if (initialQueryReferenceInternal !== previousInitialQueryReference) {
@@ -38947,7 +38947,7 @@ var require_useIsOperationNodeActive = __commonJS({
     var getObservableForActiveRequest = _require.__internal.getObservableForActiveRequest;
     var getSelector = _require.getSelector;
     var useEffect4 = React7.useEffect;
-    var useState4 = React7.useState;
+    var useState5 = React7.useState;
     var useMemo3 = React7.useMemo;
     function useIsOperationNodeActive(fragmentNode, fragmentRef) {
       var environment2 = useRelayEnvironment2();
@@ -38959,7 +38959,7 @@ var require_useIsOperationNodeActive = __commonJS({
         !(selector.kind === "SingularReaderSelector") ? true ? invariant2(false, "useIsOperationNodeActive: Plural fragments are not supported.") : invariant2(false) : void 0;
         return getObservableForActiveRequest(environment2, selector.owner);
       }, [environment2, fragmentNode, fragmentRef]);
-      var _useState = useState4(observable != null), isActive = _useState[0], setIsActive = _useState[1];
+      var _useState = useState5(observable != null), isActive = _useState[0], setIsActive = _useState[1];
       useEffect4(function() {
         var subscription;
         setIsActive(observable != null);
@@ -38998,7 +38998,7 @@ var require_useLoadMoreFunction = __commonJS({
     var _require = require_react();
     var useCallback3 = _require.useCallback;
     var useEffect4 = _require.useEffect;
-    var useState4 = _require.useState;
+    var useState5 = _require.useState;
     var _require2 = require_relay_runtime();
     var fetchQuery = _require2.__internal.fetchQuery;
     var ConnectionInterface = _require2.ConnectionInterface;
@@ -39015,8 +39015,8 @@ var require_useLoadMoreFunction = __commonJS({
       var _getRefetchMetadata = getRefetchMetadata(fragmentNode, componentDisplayName), identifierInfo = _getRefetchMetadata.identifierInfo;
       var identifierValue = (identifierInfo === null || identifierInfo === void 0 ? void 0 : identifierInfo.identifierField) != null && fragmentData != null && typeof fragmentData === "object" ? fragmentData[identifierInfo.identifierField] : null;
       var isMountedRef = useIsMountedRef();
-      var _useState = useState4(environment2), mirroredEnvironment = _useState[0], setMirroredEnvironment = _useState[1];
-      var _useState2 = useState4(fragmentIdentifier), mirroredFragmentIdentifier = _useState2[0], setMirroredFragmentIdentifier = _useState2[1];
+      var _useState = useState5(environment2), mirroredEnvironment = _useState[0], setMirroredEnvironment = _useState[1];
+      var _useState2 = useState5(fragmentIdentifier), mirroredFragmentIdentifier = _useState2[0], setMirroredFragmentIdentifier = _useState2[1];
       var isParentQueryActive = useIsOperationNodeActive(fragmentNode, fragmentRef);
       var shouldReset = environment2 !== mirroredEnvironment || fragmentIdentifier !== mirroredFragmentIdentifier;
       if (shouldReset) {
@@ -39141,7 +39141,7 @@ var require_usePaginationFragment = __commonJS({
     var _require = require_react();
     var useCallback3 = _require.useCallback;
     var useDebugValue = _require.useDebugValue;
-    var useState4 = _require.useState;
+    var useState5 = _require.useState;
     var _require2 = require_relay_runtime();
     var getFragment = _require2.getFragment;
     var getFragmentIdentifier = _require2.getFragmentIdentifier;
@@ -39204,7 +39204,7 @@ var require_usePaginationFragment = __commonJS({
       };
     }
     function useLoadMore(args) {
-      var _useState = useState4(false), isLoadingMore = _useState[0], setIsLoadingMore = _useState[1];
+      var _useState = useState5(false), isLoadingMore = _useState[0], setIsLoadingMore = _useState[1];
       var observer = {
         start: function start() {
           return setIsLoadingMore(true);
@@ -39428,7 +39428,7 @@ var require_lib2 = __commonJS({
     var useEntryPointLoader = require_useEntryPointLoader();
     var useFragment = require_useFragment();
     var useLazyLoadQuery2 = require_useLazyLoadQuery();
-    var useMutation3 = require_useMutation();
+    var useMutation4 = require_useMutation();
     var usePaginationFragment = require_usePaginationFragment();
     var usePreloadedQuery = require_usePreloadedQuery();
     var useQueryLoader = require_useQueryLoader();
@@ -39465,7 +39465,7 @@ var require_lib2 = __commonJS({
       useLazyLoadQuery: useLazyLoadQuery2,
       useEntryPointLoader,
       useQueryLoader,
-      useMutation: useMutation3,
+      useMutation: useMutation4,
       usePaginationFragment,
       usePreloadedQuery,
       useRefetchableFragment,
@@ -41656,9 +41656,9 @@ function css() {
 }
 
 // src/web/client/index.tsx
-var import_react10 = __toESM(require_react(), 1);
+var import_react11 = __toESM(require_react(), 1);
 var import_client = __toESM(require_client(), 1);
-var import_react_relay4 = __toESM(require_react_relay(), 1);
+var import_react_relay5 = __toESM(require_react_relay(), 1);
 
 // node_modules/react-router-dom/dist/index.js
 var React5 = __toESM(require_react());
@@ -46655,7 +46655,7 @@ function useViewTransitionState(to, opts) {
   return matchPath(path.pathname, nextPath) != null || matchPath(path.pathname, currentPath) != null;
 }
 
-// src/web/client/routes/auth/AuthForm.tsx
+// src/web/client/routes/auth/login.tsx
 var import_react5 = __toESM(require_react(), 1);
 var import_react_relay = __toESM(require_react_relay(), 1);
 
@@ -46815,6 +46815,208 @@ var node2 = {
 };
 var LoginMutation_graphql_default = node2;
 
+// node_modules/@emotion/react/jsx-runtime/dist/emotion-react-jsx-runtime.browser.esm.js
+var ReactJSXRuntime = __toESM(require_jsx_runtime());
+var import_react2 = __toESM(require_react());
+var import_hoist_non_react_statics2 = __toESM(require_hoist_non_react_statics_cjs());
+var Fragment6 = ReactJSXRuntime.Fragment;
+var jsx4 = function jsx5(type, props, key) {
+  if (!hasOwn.call(props, "css")) {
+    return ReactJSXRuntime.jsx(type, props, key);
+  }
+  return ReactJSXRuntime.jsx(Emotion$1, createEmotionProps(type, props), key);
+};
+var jsxs2 = function jsxs3(type, props, key) {
+  if (!hasOwn.call(props, "css")) {
+    return ReactJSXRuntime.jsxs(type, props, key);
+  }
+  return ReactJSXRuntime.jsxs(Emotion$1, createEmotionProps(type, props), key);
+};
+
+// src/web/client/components/AuthForm.tsx
+function AuthForm({
+  handleSubmit,
+  username,
+  password,
+  confirm,
+  error,
+  isInFlight,
+  title
+}) {
+  return /* @__PURE__ */ jsxs2("form", { onSubmit: handleSubmit, children: [
+    /* @__PURE__ */ jsxs2("label", { className: "label", children: [
+      "Username",
+      /* @__PURE__ */ jsx4(
+        "input",
+        {
+          name: "username",
+          value: username.value,
+          onChange: username.onChange,
+          autoComplete: "username",
+          required: true,
+          minLength: 3
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxs2("label", { className: "label", children: [
+      "Password",
+      /* @__PURE__ */ jsx4(
+        "input",
+        {
+          type: "password",
+          name: "password",
+          value: password.value,
+          onChange: password.onChange,
+          autoComplete: confirm ? "new-password" : "current-password",
+          required: true,
+          minLength: 3
+        }
+      )
+    ] }),
+    confirm ? /* @__PURE__ */ jsxs2("label", { className: "label", children: [
+      "Confirm password",
+      /* @__PURE__ */ jsx4(
+        "input",
+        {
+          type: "password",
+          name: "confirm",
+          value: confirm.value,
+          onChange: confirm.onChange,
+          autoComplete: "new-password",
+          required: true,
+          minLength: 3
+        }
+      )
+    ] }) : null,
+    error ? /* @__PURE__ */ jsx4("p", { className: "lede", role: "alert", children: error }) : null,
+    /* @__PURE__ */ jsx4("button", { type: "submit", disabled: isInFlight, children: isInFlight ? "Please wait\u2026" : title })
+  ] });
+}
+
+// src/web/client/styles/typography.ts
+var eyebrowStyles = css`
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  color: #536ad6;
+  font-size: 0.85rem;
+`;
+var titleStyles = css`
+  margin: 0;
+  font-size: clamp(2.1rem, 3vw, 2.8rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+`;
+var ledeStyles = css`
+  margin: 0;
+  max-width: 56ch;
+  color: #3b4058;
+  font-size: 1.05rem;
+`;
+var labelStyles = css`
+  margin: 0 0 4px;
+  color: #6c748c;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+`;
+var valueStyles = css`
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0b132b;
+`;
+
+// src/web/client/components/Card.tsx
+var cardStyles = css`
+  background: #fff;
+  border: 1px solid #e2e8f4;
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 10px 35px rgba(26, 32, 44, 0.08);
+
+  .label {
+    ${labelStyles}
+  }
+
+  .value {
+    ${valueStyles}
+  }
+
+  .lede {
+    ${ledeStyles}
+  }
+
+  @media (max-width: 640px) {
+    padding: 18px 20px;
+  }
+`;
+function Card({ title, className, children }) {
+  const classes = ["card", className].filter(Boolean).join(" ");
+  return /* @__PURE__ */ jsxs2("section", { className: classes, css: cardStyles, children: [
+    title ? /* @__PURE__ */ jsx4("p", { className: "label", children: title }) : null,
+    children
+  ] });
+}
+
+// src/web/client/routes/auth/login.tsx
+function LoginPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from2 = location.state?.from ?? "/";
+  const [username, setUsername] = (0, import_react5.useState)("");
+  const [password, setPassword] = (0, import_react5.useState)("");
+  const [error, setError] = (0, import_react5.useState)(null);
+  const [commitLogin, isLoginInFlight] = (0, import_react_relay.useMutation)(LoginMutation_graphql_default);
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setError(null);
+    if (isLoginInFlight) return;
+    const variables = { input: { username: username.trim(), password } };
+    commitLogin({
+      variables,
+      onCompleted: (data, errors) => {
+        if (errors?.length) {
+          setError(errors[0]?.message ?? "Something went wrong.");
+          return;
+        }
+        if (!data?.login?.user) {
+          setError("Invalid username or password.");
+          return;
+        }
+        navigate(from2 || "/", { replace: true });
+      },
+      onError: () => {
+        setError("Unable to reach the server.");
+      }
+    });
+  };
+  const title = "Log in";
+  return /* @__PURE__ */ jsxs2(Card, { title, children: [
+    /* @__PURE__ */ jsx4(
+      AuthForm,
+      {
+        handleSubmit,
+        username: { value: username, onChange: (e) => setUsername(e.target.value) },
+        password: { value: password, onChange: (e) => setPassword(e.target.value) },
+        error,
+        isInFlight: isLoginInFlight,
+        title
+      }
+    ),
+    /* @__PURE__ */ jsxs2("p", { className: "lede", children: [
+      "Need an account? ",
+      /* @__PURE__ */ jsx4(Link, { to: "/auth/register", children: "Go here." })
+    ] })
+  ] });
+}
+
+// src/web/client/routes/auth/register.tsx
+var import_react6 = __toESM(require_react(), 1);
+var import_react_relay2 = __toESM(require_react_relay(), 1);
+
 // src/web/client/__generated__/RegisterMutation.graphql.ts
 var import_relay_runtime2 = __toESM(require_relay_runtime(), 1);
 var node3 = {
@@ -46971,133 +47173,25 @@ var node3 = {
 };
 var RegisterMutation_graphql_default = node3;
 
-// src/web/client/styles/typography.ts
-var eyebrowStyles = css`
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-weight: 600;
-  color: #536ad6;
-  font-size: 0.85rem;
-`;
-var titleStyles = css`
-  margin: 0;
-  font-size: clamp(2.1rem, 3vw, 2.8rem);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-`;
-var ledeStyles = css`
-  margin: 0;
-  max-width: 56ch;
-  color: #3b4058;
-  font-size: 1.05rem;
-`;
-var labelStyles = css`
-  margin: 0 0 4px;
-  color: #6c748c;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  font-size: 0.85rem;
-`;
-var valueStyles = css`
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #0b132b;
-`;
-
-// node_modules/@emotion/react/jsx-runtime/dist/emotion-react-jsx-runtime.browser.esm.js
-var ReactJSXRuntime = __toESM(require_jsx_runtime());
-var import_react3 = __toESM(require_react());
-var import_hoist_non_react_statics2 = __toESM(require_hoist_non_react_statics_cjs());
-var Fragment6 = ReactJSXRuntime.Fragment;
-var jsx4 = function jsx5(type, props, key) {
-  if (!hasOwn.call(props, "css")) {
-    return ReactJSXRuntime.jsx(type, props, key);
-  }
-  return ReactJSXRuntime.jsx(Emotion$1, createEmotionProps(type, props), key);
-};
-var jsxs2 = function jsxs3(type, props, key) {
-  if (!hasOwn.call(props, "css")) {
-    return ReactJSXRuntime.jsxs(type, props, key);
-  }
-  return ReactJSXRuntime.jsxs(Emotion$1, createEmotionProps(type, props), key);
-};
-
-// src/web/client/components/Card.tsx
-var cardStyles = css`
-  background: #fff;
-  border: 1px solid #e2e8f4;
-  border-radius: 16px;
-  padding: 20px 24px;
-  box-shadow: 0 10px 35px rgba(26, 32, 44, 0.08);
-
-  .label {
-    ${labelStyles}
-  }
-
-  .value {
-    ${valueStyles}
-  }
-
-  .lede {
-    ${ledeStyles}
-  }
-
-  @media (max-width: 640px) {
-    padding: 18px 20px;
-  }
-`;
-function Card({ title, className, children }) {
-  const classes = ["card", className].filter(Boolean).join(" ");
-  return /* @__PURE__ */ jsxs2("section", { className: classes, css: cardStyles, children: [
-    title ? /* @__PURE__ */ jsx4("p", { className: "label", children: title }) : null,
-    children
-  ] });
-}
-
-// src/web/client/routes/auth/AuthForm.tsx
-function AuthPage({ mode }) {
+// src/web/client/routes/auth/register.tsx
+function RegisterPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const from2 = location.state?.from ?? "/";
-  const [username, setUsername] = (0, import_react5.useState)("");
-  const [password, setPassword] = (0, import_react5.useState)("");
-  const [confirm, setConfirm] = (0, import_react5.useState)("");
-  const [error, setError] = (0, import_react5.useState)(null);
-  const [commitLogin, isLoginInFlight] = (0, import_react_relay.useMutation)(LoginMutation_graphql_default);
-  const [commitRegister, isRegisterInFlight] = (0, import_react_relay.useMutation)(RegisterMutation_graphql_default);
-  const isInFlight = mode === "login" ? isLoginInFlight : isRegisterInFlight;
+  const [username, setUsername] = (0, import_react6.useState)("");
+  const [password, setPassword] = (0, import_react6.useState)("");
+  const [confirm, setConfirm] = (0, import_react6.useState)("");
+  const [error, setError] = (0, import_react6.useState)(null);
+  const [commitRegister, isRegisterInFlight] = (0, import_react_relay2.useMutation)(RegisterMutation_graphql_default);
   const handleSubmit = (event) => {
     event.preventDefault();
     setError(null);
-    if (isInFlight) return;
-    if (mode === "register" && password !== confirm) {
+    if (isRegisterInFlight) return;
+    if (password !== confirm) {
       setError("Passwords must match.");
       return;
     }
     const variables = { input: { username: username.trim(), password } };
-    if (mode === "login") {
-      commitLogin({
-        variables,
-        onCompleted: (data, errors) => {
-          if (errors?.length) {
-            setError(errors[0]?.message ?? "Something went wrong.");
-            return;
-          }
-          if (!data?.login?.user) {
-            setError("Invalid username or password.");
-            return;
-          }
-          navigate(from2 || "/", { replace: true });
-        },
-        onError: () => {
-          setError("Unable to reach the server.");
-        }
-      });
-      return;
-    }
     commitRegister({
       variables,
       onCompleted: (data, errors) => {
@@ -47114,65 +47208,97 @@ function AuthPage({ mode }) {
       onError: () => setError("Unable to reach the server.")
     });
   };
-  const title = mode === "login" ? "Log in" : "Create account";
-  const switchText = mode === "login" ? "Need an account?" : "Already have an account?";
-  const switchHref = mode === "login" ? "/register" : "/login";
+  const title = "Create account";
   return /* @__PURE__ */ jsxs2(Card, { title, children: [
-    /* @__PURE__ */ jsxs2("form", { onSubmit: handleSubmit, children: [
-      /* @__PURE__ */ jsxs2("label", { className: "label", children: [
-        "Username",
-        /* @__PURE__ */ jsx4(
-          "input",
-          {
-            name: "username",
-            value: username,
-            onChange: (e) => setUsername(e.target.value),
-            autoComplete: "username",
-            required: true,
-            minLength: 3
-          }
-        )
-      ] }),
-      /* @__PURE__ */ jsxs2("label", { className: "label", children: [
-        "Password",
-        /* @__PURE__ */ jsx4(
-          "input",
-          {
-            type: "password",
-            name: "password",
-            value: password,
-            onChange: (e) => setPassword(e.target.value),
-            autoComplete: mode === "login" ? "current-password" : "new-password",
-            required: true,
-            minLength: 3
-          }
-        )
-      ] }),
-      mode === "register" ? /* @__PURE__ */ jsxs2("label", { className: "label", children: [
-        "Confirm password",
-        /* @__PURE__ */ jsx4(
-          "input",
-          {
-            type: "password",
-            name: "confirm",
-            value: confirm,
-            onChange: (e) => setConfirm(e.target.value),
-            autoComplete: "new-password",
-            required: true,
-            minLength: 3
-          }
-        )
-      ] }) : null,
-      error ? /* @__PURE__ */ jsx4("p", { className: "lede", role: "alert", children: error }) : null,
-      /* @__PURE__ */ jsx4("button", { type: "submit", disabled: isInFlight, children: isInFlight ? "Please wait\u2026" : title })
-    ] }),
+    /* @__PURE__ */ jsx4(
+      AuthForm,
+      {
+        handleSubmit,
+        username: { value: username, onChange: (e) => setUsername(e.target.value) },
+        password: { value: password, onChange: (e) => setPassword(e.target.value) },
+        confirm: { value: confirm, onChange: (e) => setConfirm(e.target.value) },
+        error,
+        isInFlight: isRegisterInFlight,
+        title
+      }
+    ),
     /* @__PURE__ */ jsxs2("p", { className: "lede", children: [
-      switchText,
-      " ",
-      /* @__PURE__ */ jsx4(Link, { to: switchHref, children: "Go here." })
+      "Already have an account? ",
+      /* @__PURE__ */ jsx4(Link, { to: "/auth/login", children: "Login here." })
     ] })
   ] });
 }
+
+// src/web/client/components/SiteHeader.tsx
+var import_react_relay3 = __toESM(require_react_relay(), 1);
+
+// src/web/client/__generated__/LogoutMutation.graphql.ts
+var import_relay_runtime3 = __toESM(require_relay_runtime(), 1);
+var node4 = {
+  fragment: {
+    argumentDefinitions: [],
+    kind: "Fragment",
+    metadata: null,
+    name: "LogoutMutation",
+    selections: [
+      {
+        alias: null,
+        args: null,
+        concreteType: "LogoutResult",
+        kind: "LinkedField",
+        name: "logout",
+        plural: false,
+        selections: [
+          {
+            alias: null,
+            args: null,
+            kind: "ScalarField",
+            name: "success",
+            storageKey: null
+          }
+        ],
+        storageKey: null
+      }
+    ],
+    type: "Mutation",
+    abstractKey: null
+  },
+  kind: "Request",
+  operation: {
+    argumentDefinitions: [],
+    kind: "Operation",
+    name: "LogoutMutation",
+    selections: [
+      {
+        alias: null,
+        args: null,
+        concreteType: "LogoutResult",
+        kind: "LinkedField",
+        name: "logout",
+        plural: false,
+        selections: [
+          {
+            alias: null,
+            args: null,
+            kind: "ScalarField",
+            name: "success",
+            storageKey: null
+          }
+        ],
+        storageKey: null
+      }
+    ]
+  },
+  params: {
+    cacheID: "LogoutMutation",
+    id: null,
+    metadata: {},
+    name: "LogoutMutation",
+    operationKind: "mutation",
+    text: "mutation LogoutMutation {\n  logout {\n    success\n  }\n}\n"
+  }
+};
+var LogoutMutation_graphql_default = node4;
 
 // src/web/client/styles/layout.ts
 var shellStyles = css`
@@ -47182,32 +47308,56 @@ var shellStyles = css`
   display: flex;
   flex-direction: column;
   gap: 28px;
+  
 
   @media (max-width: 640px) {
     padding: 56px 18px 72px;
     gap: 22px;
   }
+`;
+var heroStyles = css`
+  display: grid;
+  gap: 12px;
 
   .header {
-    flex: 1;
     display: flex;
     justify-content: space-between; /* pushes them to opposite edges */
     align-items: center; /* vertical alignment */
   }
 `;
-var heroStyles = css`
-  display: grid;
-  gap: 12px;
-`;
+
+// src/web/client/components/SiteHeader.tsx
+function SiteHeader({ viewer }) {
+  const navigate = useNavigate();
+  const environment2 = (0, import_react_relay3.useRelayEnvironment)();
+  const [commitLogout, isLogoutInFlight] = (0, import_react_relay3.useMutation)(LogoutMutation_graphql_default);
+  const handleLogout = () => {
+    if (isLogoutInFlight) return;
+    commitLogout({
+      variables: {},
+      onCompleted: () => {
+        const store = environment2.getStore();
+        store.invalidateStore?.();
+        navigate("/auth/login", { replace: true });
+      },
+      onError: () => console.error("Failed to log out. Try again.")
+    });
+  };
+  return /* @__PURE__ */ jsx4("header", { className: "hero", css: heroStyles, children: /* @__PURE__ */ jsxs2("div", { className: "header", children: [
+    /* @__PURE__ */ jsx4("h1", { className: "title", css: titleStyles, children: "RaceCraft \u{1F3C1}" }),
+    viewer ? /* @__PURE__ */ jsxs2("p", { className: "lede", css: ledeStyles, children: [
+      "Signed in as ",
+      viewer.username,
+      " | ",
+      /* @__PURE__ */ jsx4("a", { href: "#", onClick: handleLogout, children: "Sign out" })
+    ] }) : null
+  ] }) });
+}
 
 // src/web/client/routes/AuthLayout.tsx
 function AuthLayout() {
   return /* @__PURE__ */ jsxs2("main", { className: "shell", css: shellStyles, children: [
-    /* @__PURE__ */ jsxs2("header", { className: "hero", css: heroStyles, children: [
-      /* @__PURE__ */ jsx4("p", { className: "eyebrow", css: eyebrowStyles, children: "RaceCraft" }),
-      /* @__PURE__ */ jsx4("h1", { className: "title", css: titleStyles, children: "Welcome" }),
-      /* @__PURE__ */ jsx4("p", { className: "lede", css: ledeStyles, children: "Log in or create an account to keep going." })
-    ] }),
+    /* @__PURE__ */ jsx4(SiteHeader, {}),
     /* @__PURE__ */ jsx4(Outlet, {})
   ] });
 }
@@ -47226,12 +47376,12 @@ function NotFoundPage() {
 }
 
 // src/web/client/routes/RequireAuth.tsx
-var import_react7 = __toESM(require_react(), 1);
-var import_react_relay3 = __toESM(require_react_relay(), 1);
+var import_react8 = __toESM(require_react(), 1);
+var import_react_relay4 = __toESM(require_react_relay(), 1);
 
 // src/web/client/__generated__/ViewerQuery.graphql.ts
-var import_relay_runtime3 = __toESM(require_relay_runtime(), 1);
-var node4 = {
+var import_relay_runtime4 = __toESM(require_relay_runtime(), 1);
+var node5 = {
   fragment: {
     argumentDefinitions: [],
     kind: "Fragment",
@@ -47323,106 +47473,12 @@ var node4 = {
     text: "query ViewerQuery {\n  viewer {\n    id\n    username\n    createdAt\n  }\n}\n"
   }
 };
-var ViewerQuery_graphql_default = node4;
-
-// src/web/client/routes/AppShell.tsx
-var import_react_relay2 = __toESM(require_react_relay(), 1);
-
-// src/web/client/__generated__/LogoutMutation.graphql.ts
-var import_relay_runtime4 = __toESM(require_relay_runtime(), 1);
-var node5 = {
-  fragment: {
-    argumentDefinitions: [],
-    kind: "Fragment",
-    metadata: null,
-    name: "LogoutMutation",
-    selections: [
-      {
-        alias: null,
-        args: null,
-        concreteType: "LogoutResult",
-        kind: "LinkedField",
-        name: "logout",
-        plural: false,
-        selections: [
-          {
-            alias: null,
-            args: null,
-            kind: "ScalarField",
-            name: "success",
-            storageKey: null
-          }
-        ],
-        storageKey: null
-      }
-    ],
-    type: "Mutation",
-    abstractKey: null
-  },
-  kind: "Request",
-  operation: {
-    argumentDefinitions: [],
-    kind: "Operation",
-    name: "LogoutMutation",
-    selections: [
-      {
-        alias: null,
-        args: null,
-        concreteType: "LogoutResult",
-        kind: "LinkedField",
-        name: "logout",
-        plural: false,
-        selections: [
-          {
-            alias: null,
-            args: null,
-            kind: "ScalarField",
-            name: "success",
-            storageKey: null
-          }
-        ],
-        storageKey: null
-      }
-    ]
-  },
-  params: {
-    cacheID: "LogoutMutation",
-    id: null,
-    metadata: {},
-    name: "LogoutMutation",
-    operationKind: "mutation",
-    text: "mutation LogoutMutation {\n  logout {\n    success\n  }\n}\n"
-  }
-};
-var LogoutMutation_graphql_default = node5;
+var ViewerQuery_graphql_default = node5;
 
 // src/web/client/routes/AppShell.tsx
 function AppShell({ viewer }) {
-  const navigate = useNavigate();
-  const environment2 = (0, import_react_relay2.useRelayEnvironment)();
-  const [commitLogout, isLogoutInFlight] = (0, import_react_relay2.useMutation)(LogoutMutation_graphql_default);
-  const handleLogout = () => {
-    if (isLogoutInFlight) return;
-    commitLogout({
-      variables: {},
-      onCompleted: () => {
-        const store = environment2.getStore();
-        store.invalidateStore?.();
-        navigate("/login", { replace: true });
-      },
-      onError: () => console.error("Failed to log out. Try again.")
-    });
-  };
   return /* @__PURE__ */ jsxs2("main", { className: "shell", css: shellStyles, children: [
-    /* @__PURE__ */ jsx4("header", { className: "hero", css: heroStyles, children: /* @__PURE__ */ jsxs2("div", { className: "header", children: [
-      /* @__PURE__ */ jsx4("h1", { className: "title", css: titleStyles, children: "RaceCraft \u{1F3C1}" }),
-      /* @__PURE__ */ jsxs2("p", { className: "lede", css: ledeStyles, children: [
-        "Signed in as ",
-        viewer.username,
-        " | ",
-        /* @__PURE__ */ jsx4("a", { href: "#", onClick: handleLogout, children: "Sign out" })
-      ] })
-    ] }) }),
+    /* @__PURE__ */ jsx4(SiteHeader, { viewer }),
     /* @__PURE__ */ jsx4(Outlet, {})
   ] });
 }
@@ -47431,12 +47487,12 @@ function AppShell({ viewer }) {
 function RequireAuth() {
   const navigate = useNavigate();
   const location = useLocation();
-  const data = (0, import_react_relay3.useLazyLoadQuery)(ViewerQuery_graphql_default, {}, {
+  const data = (0, import_react_relay4.useLazyLoadQuery)(ViewerQuery_graphql_default, {}, {
     fetchPolicy: "network-only"
   });
-  (0, import_react7.useEffect)(() => {
+  (0, import_react8.useEffect)(() => {
     if (!data.viewer) {
-      navigate("/login", {
+      navigate("/auth/login", {
         replace: true,
         state: { from: location.pathname + location.search }
       });
@@ -47453,8 +47509,8 @@ var router = createBrowserRouter([
   {
     element: /* @__PURE__ */ jsx4(AuthLayout, {}),
     children: [
-      { path: "/login", element: /* @__PURE__ */ jsx4(AuthPage, { mode: "login" }) },
-      { path: "/register", element: /* @__PURE__ */ jsx4(AuthPage, { mode: "register" }) }
+      { path: "/auth/login", element: /* @__PURE__ */ jsx4(LoginPage, {}) },
+      { path: "/auth/register", element: /* @__PURE__ */ jsx4(RegisterPage, {}) }
     ]
   },
   {
@@ -47534,7 +47590,7 @@ var environment = createRelayEnvironment();
 (0, import_client.createRoot)(container).render(
   /* @__PURE__ */ jsxs2(Fragment6, { children: [
     /* @__PURE__ */ jsx4(Global, { styles: globalStyles }),
-    /* @__PURE__ */ jsx4(import_react_relay4.RelayEnvironmentProvider, { environment, children: /* @__PURE__ */ jsx4(import_react10.Suspense, { fallback: /* @__PURE__ */ jsx4("div", { className: "card", children: "Loading\u2026" }), children: /* @__PURE__ */ jsx4(App, {}) }) })
+    /* @__PURE__ */ jsx4(import_react_relay5.RelayEnvironmentProvider, { environment, children: /* @__PURE__ */ jsx4(import_react11.Suspense, { fallback: /* @__PURE__ */ jsx4("div", { className: "card", children: "Loading\u2026" }), children: /* @__PURE__ */ jsx4(App, {}) }) })
   ] })
 );
 /*! Bundled license information:

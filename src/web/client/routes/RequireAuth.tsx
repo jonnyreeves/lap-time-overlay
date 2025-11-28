@@ -3,8 +3,8 @@ import { useLazyLoadQuery } from "react-relay";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { ViewerQuery } from "../__generated__/ViewerQuery.graphql.js";
 import ViewerQueryNode from "../__generated__/ViewerQuery.graphql.js";
-import { AppShell } from "./AppShell.js";
 import { Card } from "../components/index.js";
+import { AppShell } from "./AppShell.js";
 
 export function RequireAuth() {
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ export function RequireAuth() {
 
   useEffect(() => {
     if (!data.viewer) {
-      navigate("/login", {
+      navigate("/auth/login", {
         replace: true,
         state: { from: location.pathname + location.search },
       });

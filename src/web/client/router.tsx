@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
-import { AuthPage } from "./routes/auth/AuthForm.js";
+import { LoginPage } from "./routes/auth/login.js";
+import { RegisterPage } from "./routes/auth/register.js";
 import { AuthLayout } from "./routes/AuthLayout.js";
 import { HomePage } from "./routes/index.js";
 import { NotFoundPage } from "./routes/not-found/index.js";
@@ -9,8 +10,8 @@ export const router = createBrowserRouter([
   {
     element: <AuthLayout />,
     children: [
-      { path: "/login", element: <AuthPage mode="login" /> },
-      { path: "/register", element: <AuthPage mode="register" /> },
+      { path: "/auth/login", element: <LoginPage /> },
+      { path: "/auth/register", element: <RegisterPage /> },
     ],
   },
   {

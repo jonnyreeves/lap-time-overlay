@@ -7,21 +7,21 @@ export const shellStyles = css`
   display: flex;
   flex-direction: column;
   gap: 28px;
+  
 
   @media (max-width: 640px) {
     padding: 56px 18px 72px;
     gap: 22px;
-  }
-
-  .header {
-    flex: 1;
-    display: flex;
-    justify-content: space-between; /* pushes them to opposite edges */
-    align-items: center; /* vertical alignment */
   }
 `;
 
 export const heroStyles = css`
   display: grid;
   gap: 12px;
+
+  .header {
+    display: flex;
+    justify-content: space-between; /* pushes them to opposite edges */
+    align-items: center; /* vertical alignment */
+  }
 `;

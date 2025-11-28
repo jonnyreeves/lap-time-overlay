@@ -1,7 +1,7 @@
 import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
-import path from "node:path";
 import type http from "node:http";
+import path from "node:path";
 import { publicDir } from "../config.js";
 import { sendJson } from "./respond.js";
 
@@ -22,18 +22,32 @@ export async function serveStatic(
 
   try {
     const stats = await fs.stat(targetPath);
-    if (stats.isDirectory()) {
-      sendJson(res, 404, { error: "Not found" });
+    if (stats.isFile()) {
+      const stream = createReadStream(targetPath);
+      res.writeHead(200, {
+        "Content-Type": getContentType(targetPath),
+        "Cache-Control": "no-cache",
+      });
+      stream.pipe(res);
       return;
     }
-    const stream = createReadStream(targetPath);
+  } catch {
+    // ignore if file doesn't exist - we'll serve index.html
+  }
+
+  // For any path that is not a file, serve index.html for client-side routing.
+  try {
+    const indexPath = path.join(publicDir, "index.html");
+    await fs.stat(indexPath); // check it exists
+    const stream = createReadStream(indexPath);
     res.writeHead(200, {
-      "Content-Type": getContentType(targetPath),
+      "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "no-cache",
     });
     stream.pipe(res);
-  } catch {
-    sendJson(res, 404, { error: "Not found" });
+  } catch (err) {
+    console.error("Failed to serve index.html", err);
+    sendJson(res, 500, { error: "Internal server error" });
   }
 }
 
