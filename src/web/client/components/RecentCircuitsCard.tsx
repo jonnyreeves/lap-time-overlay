@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import { graphql, useFragment } from "react-relay";
-import { type RecentCircuitsCard_viewer$key } from "./__generated__/RecentCircuitsCard_viewer.graphql.js";
+import { type RecentCircuitsCard_viewer$key } from "../__generated__/RecentCircuitsCard_viewer.graphql.js";
 import { Card } from "./Card.js";
 
 const RecentCircuitsCardFragment = graphql`
@@ -83,7 +83,7 @@ export function RecentCircuitsCard({
   viewer: RecentCircuitsCard_viewer$key;
 }) {
   const data = useFragment(RecentCircuitsCardFragment, viewer);
-  const circuits = data.recentCircuits;
+  const circuits = data.recentCircuits ?? [];
 
   return (
     <Card title="Recent Circuits">

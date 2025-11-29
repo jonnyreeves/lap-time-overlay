@@ -1,24 +1,40 @@
-import { useMutation, useRelayEnvironment } from "react-relay";
+import { graphql, useFragment, useMutation, useRelayEnvironment } from "react-relay";
 import { useNavigate } from "react-router-dom";
-import type { LogoutMutation } from "../__generated__/LogoutMutation.graphql.js";
-import LogoutMutationNode from "../__generated__/LogoutMutation.graphql.js";
-import type { ViewerQuery } from "../__generated__/ViewerQuery.graphql.js";
+import type { SiteHeader_viewer$key } from "../__generated__/SiteHeader_viewer.graphql.js";
 import { heroStyles } from "../styles/layout.js";
 import {
     ledeStyles,
     titleStyles
 } from "../styles/typography.js";
 
-type Viewer = NonNullable<ViewerQuery["response"]["viewer"]>;
+const SiteHeaderFragment = graphql`
+  fragment SiteHeader_viewer on User {
+    id
+    username
+  }
+`;
+
+const SiteHeaderLogoutMutation = graphql`
+  mutation SiteHeaderLogoutMutation {
+    logout {
+        success
+    }
+  }
+`;
 
 type SiteHeaderProps = {
-    viewer?: Viewer
+    viewer?: SiteHeader_viewer$key,
 }
 
 export function SiteHeader({ viewer }: SiteHeaderProps) {
     const navigate = useNavigate();
     const environment = useRelayEnvironment();
-    const [commitLogout, isLogoutInFlight] = useMutation<LogoutMutation>(LogoutMutationNode);
+    const data = useFragment(SiteHeaderFragment, viewer);
+
+    const isLoggedIn = data != null;
+
+
+    const [commitLogout, isLogoutInFlight] = useMutation(SiteHeaderLogoutMutation);
 
     const handleLogout = () => {
         if (isLogoutInFlight) return;
@@ -41,9 +57,9 @@ export function SiteHeader({ viewer }: SiteHeaderProps) {
                 <h1 className="title" css={titleStyles} onClick={() => navigate("/")}>
                     RaceCraft 🏁
                 </h1>
-                {viewer ? (
+                {isLoggedIn ? (
                     <p className="lede" css={ledeStyles}>
-                        Signed in as {viewer.username} | <a href="#" onClick={handleLogout}>Sign out</a>
+                        Signed in as {data.username} | <a href="#" onClick={handleLogout}>Sign out</a>
                     </p>
                 ) : null}
 

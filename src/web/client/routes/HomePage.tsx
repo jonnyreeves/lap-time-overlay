@@ -1,9 +1,18 @@
 import { css } from "@emotion/react";
 import { Suspense } from "react";
+import { graphql, useFragment } from "react-relay";
 import { useOutletContext } from "react-router-dom";
-import type { RecentCircuitsCard_viewer$key } from "../components/__generated__/RecentCircuitsCard_viewer.graphql.js";
+import type { HomePage_viewer$key } from "../__generated__/HomePage_viewer.graphql.js";
 import { RecentCircuitsCard } from "../components/RecentCircuitsCard.js";
 import { RecentSessionsCard } from "../components/RecentSessionsCard.js";
+
+const HomePageFragment = graphql`
+  fragment HomePage_viewer on User {
+    id
+    username
+    ...RecentCircuitsCard_viewer
+  }
+`;
 
 const homePageLayoutStyles = css`
   display: grid;
@@ -15,18 +24,20 @@ const homePageLayoutStyles = css`
 `;
 
 type OutletContext = {
-  viewer: RecentCircuitsCard_viewer$key;
+  viewer: HomePage_viewer$key;
 };
 
 export function HomePage() {
   const { viewer } = useOutletContext<OutletContext>();
+  const data = useFragment(HomePageFragment, viewer);
 
   return (
     <div css={homePageLayoutStyles}>
       <RecentSessionsCard />
       <Suspense fallback={<p>Loading recent circuits...</p>}>
-        <RecentCircuitsCard viewer={viewer} />
+        <RecentCircuitsCard viewer={data} />
       </Suspense>
     </div>
   );
 }
+

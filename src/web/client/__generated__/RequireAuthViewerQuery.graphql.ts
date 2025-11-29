@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<37d9a1b04bcd164a1c483e8631fe84bf>>
+ * @generated SignedSource<<7c110c241e28f1c16def0e2a66ca6c5d>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,15 +10,15 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type RecentCircuitsCardQuery$variables = Record<PropertyKey, never>;
-export type RecentCircuitsCardQuery$data = {
+export type RequireAuthViewerQuery$variables = Record<PropertyKey, never>;
+export type RequireAuthViewerQuery$data = {
   readonly viewer: {
-    readonly " $fragmentSpreads": FragmentRefs<"RecentCircuitsCard_viewer">;
+    readonly " $fragmentSpreads": FragmentRefs<"HomePage_viewer">;
   } | null | undefined;
 };
-export type RecentCircuitsCardQuery = {
-  response: RecentCircuitsCardQuery$data;
-  variables: RecentCircuitsCardQuery$variables;
+export type RequireAuthViewerQuery = {
+  response: RequireAuthViewerQuery$data;
+  variables: RequireAuthViewerQuery$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -34,7 +34,7 @@ return {
     "argumentDefinitions": [],
     "kind": "Fragment",
     "metadata": null,
-    "name": "RecentCircuitsCardQuery",
+    "name": "RequireAuthViewerQuery",
     "selections": [
       {
         "alias": null,
@@ -47,7 +47,7 @@ return {
           {
             "args": null,
             "kind": "FragmentSpread",
-            "name": "RecentCircuitsCard_viewer"
+            "name": "HomePage_viewer"
           }
         ],
         "storageKey": null
@@ -60,7 +60,7 @@ return {
   "operation": {
     "argumentDefinitions": [],
     "kind": "Operation",
-    "name": "RecentCircuitsCardQuery",
+    "name": "RequireAuthViewerQuery",
     "selections": [
       {
         "alias": null,
@@ -70,6 +70,14 @@ return {
         "name": "viewer",
         "plural": false,
         "selections": [
+          (v0/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "username",
+            "storageKey": null
+          },
           {
             "alias": null,
             "args": null,
@@ -95,24 +103,23 @@ return {
               }
             ],
             "storageKey": null
-          },
-          (v0/*: any*/)
+          }
         ],
         "storageKey": null
       }
     ]
   },
   "params": {
-    "cacheID": "7ec1137f116c89053b1950e015ff2a81",
+    "cacheID": "17a1d0c5620328b74c2471b6b642af90",
     "id": null,
     "metadata": {},
-    "name": "RecentCircuitsCardQuery",
+    "name": "RequireAuthViewerQuery",
     "operationKind": "query",
-    "text": "query RecentCircuitsCardQuery {\n  viewer {\n    ...RecentCircuitsCard_viewer\n    id\n  }\n}\n\nfragment RecentCircuitsCard_viewer on User {\n  recentCircuits {\n    id\n    name\n    heroImage\n  }\n}\n"
+    "text": "query RequireAuthViewerQuery {\n  viewer {\n    ...HomePage_viewer\n    id\n  }\n}\n\nfragment HomePage_viewer on User {\n  id\n  username\n  ...RecentCircuitsCard_viewer\n}\n\nfragment RecentCircuitsCard_viewer on User {\n  recentCircuits {\n    id\n    name\n    heroImage\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "19110c58fd7c6b03a762583590e93323";
+(node as any).hash = "071ca3a4c402a426ba4978dff130a39d";
 
 export default node;

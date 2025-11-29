@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { LoginPage } from "./routes/auth/login.js";
 import { RegisterPage } from "./routes/auth/register.js";
 import { AuthLayout } from "./routes/AuthLayout.js";
-import { HomePage } from "./routes/index.js";
+import { HomePage } from "./routes/HomePage.js";
 import { NotFoundPage } from "./routes/not-found/index.js";
 import { RequireAuth } from "./routes/RequireAuth.js";
 import CreateSessionRoute from "./routes/session/create.js";

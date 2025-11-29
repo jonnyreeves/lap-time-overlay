@@ -1,16 +1,15 @@
 import { Outlet } from "react-router-dom";
-import type { ViewerQuery } from "../__generated__/ViewerQuery.graphql.js";
+import type { RequireAuthViewerQuery } from "../__generated__/RequireAuthViewerQuery.graphql.js";
 import { SiteHeader } from "../components/SiteHeader.js";
 import { shellStyles } from "../styles/layout.js";
 
-type Viewer = NonNullable<ViewerQuery["response"]["viewer"]>;
-
-export function AppShell({ viewer }: { viewer: Viewer }) {
-
-
+type Props = {
+  viewer: NonNullable<RequireAuthViewerQuery["response"]["viewer"]>;
+};
+export function AppShell({ viewer }: Props) {
   return (
     <main className="shell" css={shellStyles}>
-      <SiteHeader viewer={viewer} />
+      <SiteHeader />
       <Outlet context={{ viewer }} />
     </main>
   );

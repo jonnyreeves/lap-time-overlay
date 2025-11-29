@@ -1,17 +1,27 @@
 import { useEffect } from "react";
-import { useLazyLoadQuery } from "react-relay";
+import { graphql, useLazyLoadQuery } from "react-relay";
 import { useLocation, useNavigate } from "react-router-dom";
-import type { ViewerQuery } from "../__generated__/ViewerQuery.graphql.js";
-import ViewerQueryNode from "../__generated__/ViewerQuery.graphql.js";
+import type { RequireAuthViewerQuery } from "../__generated__/RequireAuthViewerQuery.graphql.js";
 import { Card } from "../components/Card.js";
 import { AppShell } from "./AppShell.js";
+
+const RequireAuthViewerQuery = graphql`
+  query RequireAuthViewerQuery {
+    viewer {
+      ...HomePage_viewer
+    }
+  }
+`;
 
 export function RequireAuth() {
   const navigate = useNavigate();
   const location = useLocation();
-  const data = useLazyLoadQuery<ViewerQuery>(ViewerQueryNode, {}, {
-    fetchPolicy: "network-only",
-  });
+
+  const data = useLazyLoadQuery<RequireAuthViewerQuery>(
+    RequireAuthViewerQuery,
+    {},
+    { fetchPolicy: "network-only" }
+  );
 
   useEffect(() => {
     if (!data.viewer) {

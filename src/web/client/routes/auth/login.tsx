@@ -1,11 +1,24 @@
 import type React from "react";
 import { useState } from "react";
-import { useMutation } from "react-relay";
+import { graphql, useMutation } from "react-relay";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import type { LoginMutation } from "../../__generated__/LoginMutation.graphql.js";
-import LoginMutationNode from "../../__generated__/LoginMutation.graphql.js";
+import type { loginMutation } from "../../__generated__/loginMutation.graphql.js";
 import { AuthForm } from "../../components/AuthForm.js";
 import { Card } from "../../components/Card.js";
+
+
+
+const loginMutationNode = graphql`
+  mutation loginMutation($input: AuthInput!) {
+    login(input: $input) {
+      user {
+        id
+        username
+      }
+      sessionExpiresAt
+    }
+  }
+`;
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -14,7 +27,7 @@ export function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [commitLogin, isLoginInFlight] = useMutation<LoginMutation>(LoginMutationNode);
+  const [commitLogin, isLoginInFlight] = useMutation<loginMutation>(loginMutationNode);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -26,6 +39,7 @@ export function LoginPage() {
     commitLogin({
       variables,
       onCompleted: (data, errors) => {
+        console.log(data);
         if (errors?.length) {
           setError(errors[0]?.message ?? "Something went wrong.");
           return;

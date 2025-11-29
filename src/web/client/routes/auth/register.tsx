@@ -1,11 +1,22 @@
 import type React from "react";
 import { useState } from "react";
-import { useMutation } from "react-relay";
+import { graphql, useMutation } from "react-relay";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import type { RegisterMutation } from "../../__generated__/RegisterMutation.graphql.js";
-import RegisterMutationNode from "../../__generated__/RegisterMutation.graphql.js";
+import type { registerMutation } from "../../__generated__/registerMutation.graphql.js";
 import { AuthForm } from "../../components/AuthForm.js";
 import { Card } from "../../components/Card.js";
+
+const registerMutationNode = graphql`
+  mutation registerMutation($input: AuthInput!) {
+    register(input: $input) {
+      user {
+        id
+        username
+      }
+      sessionExpiresAt
+    }
+  }
+`;
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -15,8 +26,7 @@ export function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [commitRegister, isRegisterInFlight] =
-    useMutation<RegisterMutation>(RegisterMutationNode);
+  const [commitRegister, isRegisterInFlight] = useMutation<registerMutation>(registerMutationNode);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();

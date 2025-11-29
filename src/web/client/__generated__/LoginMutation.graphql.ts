@@ -1,177 +1,122 @@
-import { type ConcreteRequest } from "relay-runtime";
+/**
+ * @generated SignedSource<<83ec869547610a69e55b6067f270f106>>
+ * @lightSyntaxTransform
+ * @nogrep
+ */
 
-export type LoginMutation$variables = {
-  input: {
-    password: string;
-    username: string;
-  };
+/* tslint:disable */
+/* eslint-disable */
+// @ts-nocheck
+
+import { ConcreteRequest } from 'relay-runtime';
+export type AuthInput = {
+  password: string;
+  username: string;
 };
-export type LoginMutation$data = {
+export type loginMutation$variables = {
+  input: AuthInput;
+};
+export type loginMutation$data = {
   readonly login: {
     readonly sessionExpiresAt: string;
     readonly user: {
       readonly id: string;
       readonly username: string;
-      readonly createdAt: string;
     };
   };
 };
-export type LoginMutation = {
-  response: LoginMutation$data;
-  variables: LoginMutation$variables;
+export type loginMutation = {
+  response: loginMutation$data;
+  variables: loginMutation$variables;
 };
 
-const node: ConcreteRequest = {
-  fragment: {
-    argumentDefinitions: [
+const node: ConcreteRequest = (function(){
+var v0 = [
+  {
+    "defaultValue": null,
+    "kind": "LocalArgument",
+    "name": "input"
+  }
+],
+v1 = [
+  {
+    "alias": null,
+    "args": [
       {
-        defaultValue: null,
-        kind: "LocalArgument",
-        name: "input",
-      },
+        "kind": "Variable",
+        "name": "input",
+        "variableName": "input"
+      }
     ],
-    kind: "Fragment",
-    metadata: null,
-    name: "LoginMutation",
-    selections: [
+    "concreteType": "AuthPayload",
+    "kind": "LinkedField",
+    "name": "login",
+    "plural": false,
+    "selections": [
       {
-        alias: null,
-        args: [
+        "alias": null,
+        "args": null,
+        "concreteType": "User",
+        "kind": "LinkedField",
+        "name": "user",
+        "plural": false,
+        "selections": [
           {
-            kind: "Variable",
-            name: "input",
-            variableName: "input",
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "id",
+            "storageKey": null
           },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "username",
+            "storageKey": null
+          }
         ],
-        concreteType: "AuthPayload",
-        kind: "LinkedField",
-        name: "login",
-        plural: false,
-        selections: [
-          {
-            alias: null,
-            args: null,
-            concreteType: "User",
-            kind: "LinkedField",
-            name: "user",
-            plural: false,
-            selections: [
-              {
-                alias: null,
-                args: null,
-                kind: "ScalarField",
-                name: "id",
-                storageKey: null,
-              },
-              {
-                alias: null,
-                args: null,
-                kind: "ScalarField",
-                name: "username",
-                storageKey: null,
-              },
-              {
-                alias: null,
-                args: null,
-                kind: "ScalarField",
-                name: "createdAt",
-                storageKey: null,
-              },
-            ],
-            storageKey: null,
-          },
-          {
-            alias: null,
-            args: null,
-            kind: "ScalarField",
-            name: "sessionExpiresAt",
-            storageKey: null,
-          },
-        ],
-        storageKey: null,
+        "storageKey": null
       },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "sessionExpiresAt",
+        "storageKey": null
+      }
     ],
-    type: "Mutation",
-    abstractKey: null,
+    "storageKey": null
+  }
+];
+return {
+  "fragment": {
+    "argumentDefinitions": (v0/*: any*/),
+    "kind": "Fragment",
+    "metadata": null,
+    "name": "loginMutation",
+    "selections": (v1/*: any*/),
+    "type": "Mutation",
+    "abstractKey": null
   },
-  kind: "Request",
-  operation: {
-    argumentDefinitions: [
-      {
-        defaultValue: null,
-        kind: "LocalArgument",
-        name: "input",
-      },
-    ],
-    kind: "Operation",
-    name: "LoginMutation",
-    selections: [
-      {
-        alias: null,
-        args: [
-          {
-            kind: "Variable",
-            name: "input",
-            variableName: "input",
-          },
-        ],
-        concreteType: "AuthPayload",
-        kind: "LinkedField",
-        name: "login",
-        plural: false,
-        selections: [
-          {
-            alias: null,
-            args: null,
-            concreteType: "User",
-            kind: "LinkedField",
-            name: "user",
-            plural: false,
-            selections: [
-              {
-                alias: null,
-                args: null,
-                kind: "ScalarField",
-                name: "id",
-                storageKey: null,
-              },
-              {
-                alias: null,
-                args: null,
-                kind: "ScalarField",
-                name: "username",
-                storageKey: null,
-              },
-              {
-                alias: null,
-                args: null,
-                kind: "ScalarField",
-                name: "createdAt",
-                storageKey: null,
-              },
-            ],
-            storageKey: null,
-          },
-          {
-            alias: null,
-            args: null,
-            kind: "ScalarField",
-            name: "sessionExpiresAt",
-            storageKey: null,
-          },
-        ],
-        storageKey: null,
-      },
-    ],
+  "kind": "Request",
+  "operation": {
+    "argumentDefinitions": (v0/*: any*/),
+    "kind": "Operation",
+    "name": "loginMutation",
+    "selections": (v1/*: any*/)
   },
-  params: {
-    cacheID: "LoginMutation",
-    id: null,
-    metadata: {},
-    name: "LoginMutation",
-    operationKind: "mutation",
-    text: "mutation LoginMutation(\n  $input: AuthInput!\n) {\n  login(input: $input) {\n    user {\n      id\n      username\n      createdAt\n    }\n    sessionExpiresAt\n  }\n}\n",
-  },
+  "params": {
+    "cacheID": "9c61f00c916ea70c0ed70d9ae3da6367",
+    "id": null,
+    "metadata": {},
+    "name": "loginMutation",
+    "operationKind": "mutation",
+    "text": "mutation loginMutation(\n  $input: AuthInput!\n) {\n  login(input: $input) {\n    user {\n      id\n      username\n    }\n    sessionExpiresAt\n  }\n}\n"
+  }
 };
+})();
+
+(node as any).hash = "a15d81edac82ae32af2b2f1021045f3a";
 
 export default node;
