@@ -11,10 +11,13 @@ export function babelRelayPlugin() {
         const result = await transformAsync(source, {
           filename: args.path,
           presets: [
-            ["@babel/preset-react", { runtime: "automatic", importSource: "react" }],
+            ["@babel/preset-react", { runtime: "automatic", importSource: "@emotion/react" }],
             "@babel/preset-typescript",
           ],
-          plugins: ["relay"],
+          plugins: [
+            "relay",
+            "@emotion/babel-plugin",
+          ],
           sourceMaps: true,
         });
 
