@@ -33,7 +33,6 @@ export function SiteHeader({ viewer }: SiteHeaderProps) {
 
     const isLoggedIn = data != null;
 
-
     const [commitLogout, isLogoutInFlight] = useMutation(SiteHeaderLogoutMutation);
 
     const handleLogout = () => {
@@ -59,7 +58,7 @@ export function SiteHeader({ viewer }: SiteHeaderProps) {
                 </h1>
                 {isLoggedIn ? (
                     <p className="lede" css={ledeStyles}>
-                        Signed in as {data.username} | <a href="#" onClick={handleLogout}>Sign out</a>
+                        Signed in as {data.username}! | <a href="#" onClick={handleLogout}>Sign out</a>
                     </p>
                 ) : null}
 

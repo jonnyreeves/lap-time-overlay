@@ -1,7 +1,7 @@
 import esbuild from "esbuild";
 import { babelRelayPlugin } from "./babel-relay-plugin.js";
 
-esbuild.build({
+const ctx = await esbuild.context({
   entryPoints: ["src/web/client/index.tsx"],
   outfile: "public/app.js",
   bundle: true,
@@ -13,5 +13,20 @@ esbuild.build({
   define: {
     "process.env.NODE_ENV": JSON.stringify("development"),
   },
-}).catch(() => process.exit(1));
+});
 
+if (process.argv.includes("--watch")) {
+  await ctx.watch();
+  console.log("watching...");
+} else {
+  ctx.rebuild()
+    .then(() => {
+      console.log("build complete");
+      process.exit(0)
+    }
+    )
+    .catch((err) => {
+      console.error("build failed", err);
+      process.exit(0)
+    });
+}

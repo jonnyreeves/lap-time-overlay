@@ -9,7 +9,10 @@
     "web:watch": "npm run web:build -- --watch",
     "db:migrate": "node --import ./register-ts-node.js src/db/migrate.ts",
     "type-check": "tsc --noEmit",
+    "build": "npm run relay && npm run type-check  && npm run web:build",
+    "watch": "npm-run-all -p relay:watch web:watch",
     "relay": "relay-compiler",
+    "relay:watch": "relay-compiler --watch",
     "test": "npm run type-check && vitest run --exclude **/overlay.integration.test.ts",
     "test:integration": "npm run type-check && vitest run tests/ffmpeg/overlay.integration.test.ts",
     "test:update-overlay-fixture": "UPDATE_OVERLAY_FIXTURE=1 npm run test:integration"
@@ -47,6 +50,7 @@
     "@types/relay-runtime": "^19.0.3",
     "babel-plugin-relay": "^20.1.1",
     "esbuild": "^0.24.0",
+    "npm-run-all": "^4.1.5",
     "pixelmatch": "^5.3.0",
     "pngjs": "^7.0.0",
     "relay-compiler": "^20.1.1",
