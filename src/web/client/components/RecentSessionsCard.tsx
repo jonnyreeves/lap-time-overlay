@@ -1,37 +1,34 @@
 import { format } from "date-fns";
 import { Link, useNavigate } from "react-router-dom";
 import { Card } from "./Card.js";
+import { graphql, useFragment } from "react-relay";
+import type { RecentSessionsCard_viewer$key } from "../__generated__/RecentSessionsCard_viewer.graphql.js";
 
-export type Session = {
-  date: number;
-  circuit: string;
-  format: string;
-  pb: string;
+const RecentSessionsCardFragment = graphql`
+  fragment RecentSessionsCard_viewer on User {
+    recentTrackSessions(first: 5) {
+      id
+      date
+      format
+      notes
+      circuit {
+        name
+      }
+      laps {
+        personalBest
+      }
+    }
+  }
+`;
+
+type Props = {
+  viewer: RecentSessionsCard_viewer$key;
 };
 
-export const sessions: Session[] = [
-  {
-    date: new Date("2023-11-23").getTime(),
-    circuit: "Sandown Park",
-    format: "Race",
-    pb: "00:47.950",
-  },
-  {
-    date: new Date("2023-11-23").getTime(),
-    circuit: "Sandown Park.",
-    format: "Practice",
-    pb: "00:48.230",
-  },
-  {
-    date: new Date("2023-11-22").getTime(),
-    circuit: "Farnborough",
-    format: "Practice",
-    pb: "00:44.250",
-  },
-];
-
-export function RecentSessionsCard() {
+export function RecentSessionsCard({ viewer }: Props) {
   const navigate = useNavigate();
+  const data = useFragment(RecentSessionsCardFragment, viewer);
+
   return (
     <Card
       title="Recent sessions"
@@ -72,19 +69,21 @@ export function RecentSessionsCard() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
-            {sessions.map((session) => (
-              <tr key={`${session.circuit}-${session.format}-${session.pb}`}>
+            {data.recentTrackSessions.map((session) => (
+              <tr key={session.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                  {format(session.date, "do MMMM yyyy")}
+                  {format(new Date(session.date), "do MMMM yyyy")}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                  {session.circuit}
+                  {session.circuit?.name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                   {session.format}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                  {session.pb}
+                  {session.laps && session.laps.length > 0
+                    ? session.laps[0]?.personalBest?.toFixed(3)
+                    : "-"}
                 </td>
               </tr>
             ))}

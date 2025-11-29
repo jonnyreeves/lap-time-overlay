@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<1e4e3275ceaecbb2240cf9ca423f70d6>>
+ * @generated SignedSource<<d4265ef3502a28eed1ae1440614af69c>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -27,6 +27,13 @@ var v0 = {
   "args": null,
   "kind": "ScalarField",
   "name": "id",
+  "storageKey": null
+},
+v1 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "name",
   "storageKey": null
 };
 return {
@@ -92,13 +99,7 @@ return {
             "plural": true,
             "selections": [
               (v0/*: any*/),
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "name",
-                "storageKey": null
-              },
+              (v1/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -108,6 +109,77 @@ return {
               }
             ],
             "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": [
+              {
+                "kind": "Literal",
+                "name": "first",
+                "value": 5
+              }
+            ],
+            "concreteType": "TrackSession",
+            "kind": "LinkedField",
+            "name": "recentTrackSessions",
+            "plural": true,
+            "selections": [
+              (v0/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "date",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "format",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "notes",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "Circuit",
+                "kind": "LinkedField",
+                "name": "circuit",
+                "plural": false,
+                "selections": [
+                  (v1/*: any*/),
+                  (v0/*: any*/)
+                ],
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "Lap",
+                "kind": "LinkedField",
+                "name": "laps",
+                "plural": true,
+                "selections": [
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "personalBest",
+                    "storageKey": null
+                  },
+                  (v0/*: any*/)
+                ],
+                "storageKey": null
+              }
+            ],
+            "storageKey": "recentTrackSessions(first:5)"
           }
         ],
         "storageKey": null
@@ -115,12 +187,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "3045c6ce84a45439972a85ea95694651",
+    "cacheID": "4c6387d7120b2802c8cb2a587b8d0bc5",
     "id": null,
     "metadata": {},
     "name": "RequireAuthViewerQuery",
     "operationKind": "query",
-    "text": "query RequireAuthViewerQuery {\n  viewer {\n    ...HomePage_viewer\n    ...SiteHeader_viewer\n    id\n  }\n}\n\nfragment HomePage_viewer on User {\n  id\n  username\n  ...RecentCircuitsCard_viewer\n}\n\nfragment RecentCircuitsCard_viewer on User {\n  recentCircuits {\n    id\n    name\n    heroImage\n  }\n}\n\nfragment SiteHeader_viewer on User {\n  id\n  username\n}\n"
+    "text": "query RequireAuthViewerQuery {\n  viewer {\n    ...HomePage_viewer\n    ...SiteHeader_viewer\n    id\n  }\n}\n\nfragment HomePage_viewer on User {\n  id\n  username\n  ...RecentCircuitsCard_viewer\n  ...RecentSessionsCard_viewer\n}\n\nfragment RecentCircuitsCard_viewer on User {\n  recentCircuits {\n    id\n    name\n    heroImage\n  }\n}\n\nfragment RecentSessionsCard_viewer on User {\n  recentTrackSessions(first: 5) {\n    id\n    date\n    format\n    notes\n    circuit {\n      name\n      id\n    }\n    laps {\n      personalBest\n      id\n    }\n  }\n}\n\nfragment SiteHeader_viewer on User {\n  id\n  username\n}\n"
   }
 };
 })();

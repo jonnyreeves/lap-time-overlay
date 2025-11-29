@@ -19,12 +19,55 @@ type User {
   username: String!
   createdAt: String!
   recentCircuits(first: Int = 10): [Circuit!]!
+  recentTrackSessions(first: Int = 10): [TrackSession!]!
 }
 
 type Circuit {
   id: ID!
   name: String!
   heroImage: String
+}
+
+type TrackSession {
+  id: ID!
+  date: String!
+  format: String!
+  circuit: Circuit!
+  notes: String
+  createdAt: String!
+  updatedAt: String!
+  laps(first: Int = 10): [Lap!]!
+  trackRecordings(first: Int = 10): [TrackRecording!]!
+}
+
+type Lap {
+  id: ID!
+  session: TrackSession!
+  lapNumber: Int!
+  time: Float!
+  createdAt: String!
+  updatedAt: String!
+  lapEvents(first: Int = 10): [LapEvent!]!
+  personalBest: Float
+}
+
+type LapEvent {
+  id: ID!
+  lap: Lap!
+  offset: Float!
+  event: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type TrackRecording {
+  id: ID!
+  session: TrackSession!
+  mediaId: String!
+  lapOneOffset: Float!
+  description: String
+  createdAt: String!
+  updatedAt: String!
 }
 
 type AuthPayload {

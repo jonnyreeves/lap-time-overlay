@@ -1,7 +1,11 @@
 import { readFileSync } from "fs";
 import { resolve as pathResolve } from "path";
 import { GraphQLError, buildSchema, type GraphQLSchema } from "graphql";
-import { findCircuitsByUserId } from "../../db/circuits.js";
+import { findCircuitsByUserId, findCircuitById } from "../../db/circuits.js";
+import { findTrackSessionsByCircuitId, findTrackSessionById, type TrackSessionRecord } from "../../db/track_sessions.js";
+import { findLapsBySessionId, findLapById, type LapRecord } from "../../db/laps.js";
+import { findLapEventsByLapId, findLapEventById, type LapEventRecord } from "../../db/lap_events.js";
+import { findTrackRecordingsBySessionId, findTrackRecordingById, type TrackRecordingRecord } from "../../db/track_recordings.js";
 import {
   AuthError,
   endSession,
@@ -80,10 +84,113 @@ function toUserPayload(user: PublicUser) {
     username: user.username,
     createdAt: new Date(user.createdAt).toISOString(),
     recentCircuits: (args: { first: number }) => {
-      const circuits = findCircuitsByUserId(user.id);
-      return circuits.slice(0, args.first);
-    },
-  };
+          const circuits = findCircuitsByUserId(user.id);
+          return circuits.slice(0, args.first);
+        },
+        recentTrackSessions: (args: { first: number }) => {
+          const sessions = findTrackSessionsForUser(user.id);
+          return sessions.slice(0, args.first).map(toTrackSessionPayload);
+        },
+      });
+      
+      function toTrackSessionPayload(session: TrackSessionRecord) {
+        return {
+          id: session.id,
+          date: session.date,
+          format: session.format,
+          circuit: () => {
+            const circuit = findCircuitById(session.circuitId);
+            if (!circuit) {
+              throw new GraphQLError(`Circuit with ID ${session.circuitId} not found`, {
+                extensions: { code: "NOT_FOUND" },
+              });
+            }
+            return circuit;
+          },
+          notes: session.notes,
+          createdAt: new Date(session.createdAt).toISOString(),
+          updatedAt: new Date(session.updatedAt).toISOString(),
+          laps: (args: { first: number }) => {
+            const laps = findLapsBySessionId(session.id);
+            return laps.slice(0, args.first).map(toLapPayload);
+          },
+          trackRecordings: (args: { first: number }) => {
+            const recordings = findTrackRecordingsBySessionId(session.id);
+            return recordings.slice(0, args.first).map(toTrackRecordingPayload);
+          },
+        };
+      }
+      
+      function toLapPayload(lap: LapRecord) {
+        return {
+          id: lap.id,
+          session: () => {
+            const session = findTrackSessionById(lap.sessionId);
+            if (!session) {
+              throw new GraphQLError(`Track session with ID ${lap.sessionId} not found`, {
+                extensions: { code: "NOT_FOUND" },
+              });
+            }
+            return toTrackSessionPayload(session);
+          },
+          lapNumber: lap.lapNumber,
+          time: lap.time,
+          createdAt: new Date(lap.createdAt).toISOString(),
+          updatedAt: new Date(lap.updatedAt).toISOString(),
+          lapEvents: (args: { first: number }) => {
+            const events = findLapEventsByLapId(lap.id);
+            return events.slice(0, args.first).map(toLapEventPayload);
+          },
+          personalBest: () => {
+            // Find all laps for the session and return the minimum time
+            const lapsInSession = findLapsBySessionId(lap.sessionId);
+            if (lapsInSession.length === 0) {
+              return null;
+            }
+            return Math.min(...lapsInSession.map((l) => l.time));
+          },
+        };
+      }
+      
+      function toLapEventPayload(lapEvent: LapEventRecord) {
+        return {
+          id: lapEvent.id,
+          lap: () => {
+            const lap = findLapById(lapEvent.lapId);
+            if (!lap) {
+              throw new GraphQLError(`Lap with ID ${lapEvent.lapId} not found`, {
+                extensions: { code: "NOT_FOUND" },
+              });
+            }
+            return toLapPayload(lap);
+          },
+          offset: lapEvent.offset,
+          event: lapEvent.event,
+          createdAt: new Date(lapEvent.createdAt).toISOString(),
+          updatedAt: new Date(lapEvent.updatedAt).toISOString(),
+        };
+      }
+      
+      function toTrackRecordingPayload(recording: TrackRecordingRecord) {
+        return {
+          id: recording.id,
+          session: () => {
+            const session = findTrackSessionById(recording.sessionId);
+            if (!session) {
+              throw new GraphQLError(`Track session with ID ${recording.sessionId} not found`, {
+                extensions: { code: "NOT_FOUND" },
+              });
+            }
+            return toTrackSessionPayload(session);
+          },
+          mediaId: recording.mediaId,
+          lapOneOffset: recording.lapOneOffset,
+          description: recording.description,
+          createdAt: new Date(recording.createdAt).toISOString(),
+          updatedAt: new Date(recording.updatedAt).toISOString(),
+        };
+      }
+        };
 }
 
 function toGraphQLError(err: unknown): GraphQLError {
@@ -97,4 +204,15 @@ function toGraphQLError(err: unknown): GraphQLError {
   return new GraphQLError("Internal error", {
     extensions: { code: "INTERNAL_SERVER_ERROR" },
   });
+}
+
+function findTrackSessionsForUser(userId: string): TrackSessionRecord[] {
+  const circuits = findCircuitsByUserId(userId);
+  let allTrackSessions: TrackSessionRecord[] = [];
+  for (const circuit of circuits) {
+    const sessions = findTrackSessionsByCircuitId(circuit.id);
+    allTrackSessions = allTrackSessions.concat(sessions);
+  }
+  // Sort by date in descending order
+  return allTrackSessions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }

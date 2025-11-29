@@ -11,6 +11,7 @@ const HomePageFragment = graphql`
     id
     username
     ...RecentCircuitsCard_viewer
+    ...RecentSessionsCard_viewer
   }
 `;
 
@@ -33,7 +34,9 @@ export function HomePage() {
 
   return (
     <div css={homePageLayoutStyles}>
-      <RecentSessionsCard />
+      <Suspense fallback={<p>Loading recent sessions...</p>}>
+        <RecentSessionsCard viewer={data} />
+      </Suspense>
       <Suspense fallback={<p>Loading recent circuits...</p>}>
         <RecentCircuitsCard viewer={data} />
       </Suspense>
