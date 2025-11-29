@@ -29,7 +29,10 @@ const fetchGraphQL: FetchFunction = async (params, variables) => {
 
 let cachedEnvironment: Environment | null = null;
 
-export function createRelayEnvironment(): Environment {
+export function createRelayEnvironment(shouldReset: boolean = false): Environment {
+  if (shouldReset) {
+    cachedEnvironment = null;
+  }
   if (cachedEnvironment) return cachedEnvironment;
 
   cachedEnvironment = new Environment({

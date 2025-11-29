@@ -1,5 +1,6 @@
 import { graphql, useMutation, useRelayEnvironment } from "react-relay";
 import { useNavigate } from "react-router-dom";
+import { createRelayEnvironment } from "../relayEnvironment.js";
 
 const useLogoutMutation = graphql`
   mutation useLogoutMutation {
@@ -19,6 +20,7 @@ export function useLogout() {
         commitLogout({
             variables: {},
             onCompleted: () => {
+                createRelayEnvironment(true); // Reset the Relay environment
                 const store = environment.getStore();
                 navigate("/auth/login", { replace: true });
             },
