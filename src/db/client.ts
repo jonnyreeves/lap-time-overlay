@@ -36,3 +36,4 @@ export function closeDb(): void {
   db.close();
   db = null;
 }
+
