@@ -52,6 +52,17 @@ export function findCircuitsByUserId(userId: string): CircuitRecord[] {
   return rows.map(mapRow);
 }
 
+export function findAllCircuits(): CircuitRecord[] {
+  const db = getDb();
+  const rows = db
+    .prepare<unknown[], CircuitRow>(
+      `SELECT id, name, hero_image, user_id, created_at, updated_at
+       FROM circuits ORDER BY created_at DESC`
+    )
+    .all();
+  return rows.map(mapRow);
+}
+
 export function createCircuit(
   name: string,
   userId: string,

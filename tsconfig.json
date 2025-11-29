@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false,
     "outDir": "dist",
     "typeRoots": [
       "./node_modules/@types",
@@ -20,7 +20,8 @@
     "src",
     "tests",
     "scripts",
-    "types"
+    "types",
+    "src/web/client/__generated__"
   ],
   "ts-node": {
     "logError": true,

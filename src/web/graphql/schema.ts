@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { resolve as pathResolve } from "path";
 import { GraphQLError, buildSchema, type GraphQLSchema } from "graphql";
-import { findCircuitsByUserId, findCircuitById } from "../../db/circuits.js";
+import { findCircuitsByUserId, findCircuitById, findAllCircuits, createCircuit } from "../../db/circuits.js";
 import { findTrackSessionsByCircuitId, findTrackSessionById, type TrackSessionRecord } from "../../db/track_sessions.js";
 import { findLapsBySessionId, findLapById, type LapRecord } from "../../db/laps.js";
 import { findLapEventsByLapId, findLapEventById, type LapEventRecord } from "../../db/lap_events.js";
@@ -23,9 +23,13 @@ const schemaFileContents = readFileSync(
 export const schema: GraphQLSchema = buildSchema(schemaFileContents);
 
 export const rootValue = {
+  hello: () => "Hello world!",
   viewer: (_args: unknown, context: GraphQLContext) => {
     if (!context.currentUser) return null;
     return toUserPayload(context.currentUser);
+  },
+  circuits: () => {
+    return findAllCircuits();
   },
   register: (
     args: { input?: { username?: string; password?: string } },
@@ -75,6 +79,47 @@ export const rootValue = {
     }
     context.clearSessionCookie();
     return { success: true };
+  },
+  createCircuit: (
+    args: { input?: { name?: string; heroImage?: string } },
+    context: GraphQLContext
+  ) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+    const input = args.input;
+    if (!input?.name) {
+      throw new GraphQLError("Circuit name is required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    const newCircuit = createCircuit(input.name, context.currentUser.id, input.heroImage);
+    return { circuit: newCircuit };
+  },
+  createTrackSession: (
+    args: { input?: { date?: string; format?: string; circuitId?: string; notes?: string } },
+    context: GraphQLContext
+  ) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+    const input = args.input;
+    if (!input?.date || !input?.format || !input?.circuitId) {
+      throw new GraphQLError("Date, format, and circuitId are required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    const newTrackSession = createTrackSession(
+      input.date,
+      input.format,
+      input.circuitId,
+      input.notes,
+    );
+    return { trackSession: toTrackSessionPayload(newTrackSession) };
   },
 };
 
