@@ -23,3 +23,6 @@ pnpm-debug.log*
 work/
 public/app.js
 public/app.js.map
+
+# Database files
+database/*.sqlite*
