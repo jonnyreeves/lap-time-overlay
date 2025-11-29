@@ -5,7 +5,7 @@ import { shellStyles } from "../styles/layout.js";
 export function AuthLayout() {
   return (
     <main className="shell" css={shellStyles}>
-      <SiteHeader />
+      <SiteHeader viewer={null} />
       <Outlet />
     </main>
   );

@@ -2,7 +2,7 @@
 
 ## Building
 - The web server has a watch script that automatically reloads on changes, the user will always run this during development so there is no need to run the individual build scripts when making changes.
-- Always run `npm run type-check` before handing work back to the user and fix any reported issues. Run the fast suite with `npm run test` (Vitest). Only run the slow ffmpeg overlay integration snapshots (`npm run test:integration`) when touching the ffmpeg renderer/overlay paths or fixtures.
+- Always run `npm run check` before handing work back to the user and fix any reported issues. Run the fast suite with `npm run test` (Vitest). Only run the slow ffmpeg overlay integration snapshots (`npm run test:integration`) when touching the ffmpeg renderer/overlay paths or fixtures.
 
 
 ## Libraries

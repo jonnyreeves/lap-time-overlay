@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<7c110c241e28f1c16def0e2a66ca6c5d>>
+ * @generated SignedSource<<1e4e3275ceaecbb2240cf9ca423f70d6>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,7 +13,7 @@ import { FragmentRefs } from "relay-runtime";
 export type RequireAuthViewerQuery$variables = Record<PropertyKey, never>;
 export type RequireAuthViewerQuery$data = {
   readonly viewer: {
-    readonly " $fragmentSpreads": FragmentRefs<"HomePage_viewer">;
+    readonly " $fragmentSpreads": FragmentRefs<"HomePage_viewer" | "SiteHeader_viewer">;
   } | null | undefined;
 };
 export type RequireAuthViewerQuery = {
@@ -48,6 +48,11 @@ return {
             "args": null,
             "kind": "FragmentSpread",
             "name": "HomePage_viewer"
+          },
+          {
+            "args": null,
+            "kind": "FragmentSpread",
+            "name": "SiteHeader_viewer"
           }
         ],
         "storageKey": null
@@ -110,16 +115,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "17a1d0c5620328b74c2471b6b642af90",
+    "cacheID": "3045c6ce84a45439972a85ea95694651",
     "id": null,
     "metadata": {},
     "name": "RequireAuthViewerQuery",
     "operationKind": "query",
-    "text": "query RequireAuthViewerQuery {\n  viewer {\n    ...HomePage_viewer\n    id\n  }\n}\n\nfragment HomePage_viewer on User {\n  id\n  username\n  ...RecentCircuitsCard_viewer\n}\n\nfragment RecentCircuitsCard_viewer on User {\n  recentCircuits {\n    id\n    name\n    heroImage\n  }\n}\n"
+    "text": "query RequireAuthViewerQuery {\n  viewer {\n    ...HomePage_viewer\n    ...SiteHeader_viewer\n    id\n  }\n}\n\nfragment HomePage_viewer on User {\n  id\n  username\n  ...RecentCircuitsCard_viewer\n}\n\nfragment RecentCircuitsCard_viewer on User {\n  recentCircuits {\n    id\n    name\n    heroImage\n  }\n}\n\nfragment SiteHeader_viewer on User {\n  id\n  username\n}\n"
   }
 };
 })();
 
-(node as any).hash = "071ca3a4c402a426ba4978dff130a39d";
+(node as any).hash = "26381b15cc55842b9b8b203dcf6b33ba";
 
 export default node;

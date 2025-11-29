@@ -9,6 +9,7 @@
     "web:watch": "npm run web:build -- --watch",
     "db:migrate": "node --import ./register-ts-node.js src/db/migrate.ts",
     "type-check": "tsc --noEmit",
+    "check": "npm run type-check && npm run relay && npm run test",
     "build": "npm run relay && npm run type-check  && npm run web:build",
     "watch": "npm-run-all -p relay:watch web:watch",
     "relay": "relay-compiler",

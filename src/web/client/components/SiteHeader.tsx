@@ -1,6 +1,7 @@
-import { graphql, useFragment, useMutation, useRelayEnvironment } from "react-relay";
+import { graphql, useFragment } from "react-relay";
 import { useNavigate } from "react-router-dom";
 import type { SiteHeader_viewer$key } from "../__generated__/SiteHeader_viewer.graphql.js";
+import { useLogout } from "../hooks/useLogout.js";
 import { heroStyles } from "../styles/layout.js";
 import {
     ledeStyles,
@@ -14,41 +15,16 @@ const SiteHeaderFragment = graphql`
   }
 `;
 
-const SiteHeaderLogoutMutation = graphql`
-  mutation SiteHeaderLogoutMutation {
-    logout {
-        success
-    }
-  }
-`;
+type Props = {
+    viewer: SiteHeader_viewer$key | null;
+};
 
-type SiteHeaderProps = {
-    viewer?: SiteHeader_viewer$key,
-}
-
-export function SiteHeader({ viewer }: SiteHeaderProps) {
+export function SiteHeader({ viewer }: Props) {
     const navigate = useNavigate();
-    const environment = useRelayEnvironment();
     const data = useFragment(SiteHeaderFragment, viewer);
+    const { handleLogout, isLogoutInFlight } = useLogout();
 
-    const isLoggedIn = data != null;
-
-    const [commitLogout, isLogoutInFlight] = useMutation(SiteHeaderLogoutMutation);
-
-    const handleLogout = () => {
-        if (isLogoutInFlight) return;
-        commitLogout({
-            variables: {},
-            onCompleted: () => {
-                const store = environment.getStore() as unknown as {
-                    invalidateStore?: () => void;
-                };
-                store.invalidateStore?.();
-                navigate("/auth/login", { replace: true });
-            },
-            onError: () => console.error("Failed to log out. Try again."),
-        });
-    };
+    const isLoggedIn = !!data?.username;
 
     return (
         <header className="hero" css={heroStyles}>
@@ -58,7 +34,7 @@ export function SiteHeader({ viewer }: SiteHeaderProps) {
                 </h1>
                 {isLoggedIn ? (
                     <p className="lede" css={ledeStyles}>
-                        Signed in as {data.username}! | <a href="#" onClick={handleLogout}>Sign out</a>
+                        Signed in as {data.username} | <a href="#" onClick={handleLogout}>Sign out</a>
                     </p>
                 ) : null}
 

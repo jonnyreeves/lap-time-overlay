@@ -9,6 +9,7 @@ const RequireAuthViewerQuery = graphql`
   query RequireAuthViewerQuery {
     viewer {
       ...HomePage_viewer
+      ...SiteHeader_viewer
     }
   }
 `;

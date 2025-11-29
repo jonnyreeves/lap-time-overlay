@@ -9,7 +9,7 @@ type Props = {
 export function AppShell({ viewer }: Props) {
   return (
     <main className="shell" css={shellStyles}>
-      <SiteHeader />
+      <SiteHeader viewer={viewer} />
       <Outlet context={{ viewer }} />
     </main>
   );
