@@ -37,3 +37,12 @@ export function closeDb(): void {
   db = null;
 }
 
+export function setDb(newDb: Database.Database | null): void {
+  if (process.env.NODE_ENV === 'test') {
+    db = newDb;
+  } else {
+    throw new Error('setDb can only be used in test environment');
+  }
+}
+
+
