@@ -2,7 +2,7 @@ import assert from "assert";
 import { describe, it, beforeEach } from "vitest";
 import { getDb, setDb } from "../../src/db/client.js";
 import { createCircuit, findCircuitById, findCircuitsByUserId, type CircuitRecord } from "../../src/db/circuits.js";
-import { createUser, type UserRecord } from "../../src/web/auth/users.js";
+import { createUser, type UserRecord } from "../../src/db/users.js";
 import Database from "better-sqlite3";
 import { migration } from "../../src/db/migrations/01_create_users.js";
 import { migration as circuitMigration } from "../../src/db/migrations/03_create_circuits.js";

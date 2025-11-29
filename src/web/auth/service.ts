@@ -4,14 +4,14 @@ import {
   deleteSession,
   getSession,
   slideSession,
-} from "./sessions.js";
+} from "../../db/sessions.js";
 import {
   createUser,
   findUserById,
   findUserByUsername,
   normalizeUsername,
   type UserRecord,
-} from "./users.js";
+} from "../../db/users.js";
 
 export interface PublicUser {
   id: string;

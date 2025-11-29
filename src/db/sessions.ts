@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import { getDb } from "../../db/client.js";
+import { getDb } from "../../src/db/client.js";
 
 export const SESSION_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { getDb } from "../../db/client.js";
+import { getDb } from "../../src/db/client.js";
 
 export interface UserRecord {
   id: string;
