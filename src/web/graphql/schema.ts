@@ -1,4 +1,7 @@
+import { readFileSync } from "fs";
+import { resolve as pathResolve } from "path";
 import { GraphQLError, buildSchema, type GraphQLSchema } from "graphql";
+import { findCircuitsByUserId } from "../../db/circuits.js";
 import {
   AuthError,
   endSession,
@@ -8,41 +11,14 @@ import {
 } from "../auth/service.js";
 import type { GraphQLContext } from "./context.js";
 
-export const schema: GraphQLSchema = buildSchema(`
-  type Query {
-    hello: String!
-    viewer: User
-  }
+const schemaFileContents = readFileSync(
+  pathResolve(process.cwd(), "schema.graphql"),
+  { encoding: "utf8" },
+);
 
-  type Mutation {
-    register(input: AuthInput!): AuthPayload!
-    login(input: AuthInput!): AuthPayload!
-    logout: LogoutResult!
-  }
-
-  input AuthInput {
-    username: String!
-    password: String!
-  }
-
-  type User {
-    id: ID!
-    username: String!
-    createdAt: String!
-  }
-
-  type AuthPayload {
-    user: User!
-    sessionExpiresAt: String!
-  }
-
-  type LogoutResult {
-    success: Boolean!
-  }
-`);
+export const schema: GraphQLSchema = buildSchema(schemaFileContents);
 
 export const rootValue = {
-  hello: () => "Hello from Lap Time Overlap!",
   viewer: (_args: unknown, context: GraphQLContext) => {
     if (!context.currentUser) return null;
     return toUserPayload(context.currentUser);
@@ -103,6 +79,10 @@ function toUserPayload(user: PublicUser) {
     id: user.id,
     username: user.username,
     createdAt: new Date(user.createdAt).toISOString(),
+    recentCircuits: (args: { first: number }) => {
+      const circuits = findCircuitsByUserId(user.id);
+      return circuits.slice(0, args.first);
+    },
   };
 }
 

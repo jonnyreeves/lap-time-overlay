@@ -11,7 +11,7 @@ export function AppShell({ viewer }: { viewer: Viewer }) {
   return (
     <main className="shell" css={shellStyles}>
       <SiteHeader viewer={viewer} />
-      <Outlet />
+      <Outlet context={{ viewer }} />
     </main>
   );
 }

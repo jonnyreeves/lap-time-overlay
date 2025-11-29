@@ -10,7 +10,20 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "verbatimModuleSyntax": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types"
+    ]
   },
-  "include": ["src", "tests"]
+  "include": [
+    "src",
+    "tests",
+    "scripts",
+    "types"
+  ],
+  "ts-node": {
+    "logError": true,
+    "pretty": true /* <= technically not required */
+  }
 }

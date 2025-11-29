@@ -1,0 +1,37 @@
+type Query {
+  hello: String!
+  viewer: User
+}
+
+type Mutation {
+  register(input: AuthInput!): AuthPayload!
+  login(input: AuthInput!): AuthPayload!
+  logout: LogoutResult!
+}
+
+input AuthInput {
+  username: String!
+  password: String!
+}
+
+type User {
+  id: ID!
+  username: String!
+  createdAt: String!
+  recentCircuits(first: Int = 10): [Circuit!]!
+}
+
+type Circuit {
+  id: ID!
+  name: String!
+  heroImage: String
+}
+
+type AuthPayload {
+  user: User!
+  sessionExpiresAt: String!
+}
+
+type LogoutResult {
+  success: Boolean!
+}

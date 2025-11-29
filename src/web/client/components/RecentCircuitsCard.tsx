@@ -1,35 +1,17 @@
 import { css } from "@emotion/react";
+import { graphql, useFragment } from "react-relay";
+import { type RecentCircuitsCard_viewer$key } from "./__generated__/RecentCircuitsCard_viewer.graphql.js";
 import { Card } from "./Card.js";
 
-export type Circuit = {
-  id: string;
-  name: string;
-  heroImage?: string;
-};
-
-// Dummy data for now
-export const circuits: Circuit[] = [
-  {
-    id: "1",
-    name: "Daytona Sandown Park",
-    heroImage: "",
-  },
-  {
-    id: "2",
-    name: "Teamsport Farnborough",
-    heroImage: "", // No hero image for this one to test initials
-  },
-  {
-    id: "3",
-    name: "Daytona Milton Keynes",
-    heroImage: "",
-  },
-  {
-    id: "4",
-    name: "PFI Karting",
-    heroImage: "", // No hero image for this one to test initials
-  },
-];
+const RecentCircuitsCardFragment = graphql`
+  fragment RecentCircuitsCard_viewer on User {
+    recentCircuits {
+      id
+      name
+      heroImage
+    }
+  }
+`;
 
 const circuitsContainerStyles = css`
   display: flex;
@@ -89,13 +71,20 @@ function getInitials(name: string): string {
     return name.substring(0, 2).toUpperCase();
   }
   return words
-    .filter(word => word.length > 0) // Filter out empty strings from multiple spaces
+    .filter((word) => word.length > 0) // Filter out empty strings from multiple spaces
     .map((word) => word[0])
     .join("")
     .toUpperCase();
 }
 
-export function RecentCircuitsCard() {
+export function RecentCircuitsCard({
+  viewer,
+}: {
+  viewer: RecentCircuitsCard_viewer$key;
+}) {
+  const data = useFragment(RecentCircuitsCardFragment, viewer);
+  const circuits = data.recentCircuits;
+
   return (
     <Card title="Recent Circuits">
       <div css={circuitsContainerStyles}>
