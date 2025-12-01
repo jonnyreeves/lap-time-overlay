@@ -1,10 +1,10 @@
 import { css } from "@emotion/react";
+import { useEffect, useState } from "react"; // Import hooks
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 import { useNavigate } from "react-router-dom";
-import { type CreateTrackSessionMutation as CreateTrackSessionMutationType } from "../../__generated__/CreateTrackSessionMutation.graphql.ts";
-import { type create_tsxCircuitsQuery } from "../__generated__/create_tsxCircuitsQuery.graphql.ts";
+import { type create_tsxCircuitsQuery } from "../../__generated__/create_tsxCircuitsQuery.graphql.js";
+import { createTrackSessionMutation } from "../../__generated__/createTrackSessionMutation.graphql.js";
 import { Card } from "../../components/Card.js";
-import { useState } from "react"; // Import useState
 import { CreateCircuitModal } from "../../components/CreateCircuitModal.js"; // Import CreateCircuitModal
 
 const formLayoutStyles = css`
@@ -85,6 +85,33 @@ const AddCircuitButtonStyles = css`
   }
 `;
 
+const formActionsStyles = css`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+`;
+
+const primaryButtonStyles = css`
+  padding: 10px 18px;
+  background-color: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: #4f46e5;
+  }
+
+  &:disabled {
+    background-color: #a5b4fc;
+    cursor: not-allowed;
+  }
+`;
+
 const CreateSessionRouteCircuitsQuery = graphql`
   query create_tsxCircuitsQuery {
     circuits {
@@ -120,7 +147,7 @@ export default function CreateSessionRoute() {
 
   const navigate = useNavigate();
 
-  const [commitMutation, isInFlight] = useMutation<CreateTrackSessionMutationType>(
+  const [commitMutation, isInFlight] = useMutation<createTrackSessionMutation>(
     CreateTrackSessionMutation,
   );
 
@@ -135,12 +162,19 @@ export default function CreateSessionRoute() {
     }
   );
 
-  // Set default circuitId once data is loaded, if not already set
-  useState(() => {
-    if (data.circuits.length > 0 && circuitId === "") {
+  useEffect(() => {
+    if (data.circuits.length === 0) {
+      if (circuitId !== "") {
+        setCircuitId("");
+      }
+      return;
+    }
+
+    const circuitStillExists = data.circuits.some((circuit) => circuit.id === circuitId);
+    if (!circuitStillExists) {
       setCircuitId(data.circuits[0].id);
     }
-  });
+  }, [circuitId, data.circuits]);
 
   const handleCircuitCreated = () => {
     // Increment the key to force useLazyLoadQuery to refetch
@@ -229,9 +263,11 @@ export default function CreateSessionRoute() {
               <option value="Race">Race</option>
             </select>
           </div>
-          <button type="submit" disabled={isInFlight}>
-            {isInFlight ? "Creating..." : "Create Session"}
-          </button>
+          <div css={formActionsStyles}>
+            <button type="submit" css={primaryButtonStyles} disabled={isInFlight}>
+              {isInFlight ? "Creating..." : "Create Session"}
+            </button>
+          </div>
         </form>
       </Card>
 

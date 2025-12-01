@@ -1,11 +1,11 @@
 import { readFileSync } from "fs";
-import { resolve as pathResolve } from "path";
 import { GraphQLError, buildSchema, type GraphQLSchema } from "graphql";
-import { findCircuitsByUserId, findCircuitById, findAllCircuits, createCircuit } from "../../db/circuits.js";
-import { findTrackSessionsByCircuitId, findTrackSessionById, type TrackSessionRecord } from "../../db/track_sessions.js";
-import { findLapsBySessionId, findLapById, type LapRecord } from "../../db/laps.js";
-import { findLapEventsByLapId, findLapEventById, type LapEventRecord } from "../../db/lap_events.js";
-import { findTrackRecordingsBySessionId, findTrackRecordingById, type TrackRecordingRecord } from "../../db/track_recordings.js";
+import { resolve as pathResolve } from "path";
+import { createCircuit, findAllCircuits, findCircuitById, findCircuitsByUserId } from "../../db/circuits.js";
+import { findLapEventsByLapId, type LapEventRecord } from "../../db/lap_events.js";
+import { findLapById, findLapsBySessionId, type LapRecord } from "../../db/laps.js";
+import { findTrackRecordingsBySessionId, type TrackRecordingRecord } from "../../db/track_recordings.js";
+import { createTrackSession as createTrackSessionDb, findTrackSessionById, findTrackSessionsByCircuitId, type TrackSessionRecord } from "../../db/track_sessions.js";
 import {
   AuthError,
   endSession,
@@ -113,7 +113,7 @@ export const rootValue = {
         extensions: { code: "VALIDATION_FAILED" },
       });
     }
-    const newTrackSession = createTrackSession(
+    const newTrackSession = createTrackSessionDb(
       input.date,
       input.format,
       input.circuitId,
