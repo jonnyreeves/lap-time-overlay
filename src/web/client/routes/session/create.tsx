@@ -6,6 +6,8 @@ import { type create_tsxCircuitsQuery } from "../../__generated__/create_tsxCirc
 import { createTrackSessionMutation } from "../../__generated__/createTrackSessionMutation.graphql.js";
 import { Card } from "../../components/Card.js";
 import { CreateCircuitModal } from "../../components/CreateCircuitModal.js"; // Import CreateCircuitModal
+import { LapInputsCard } from "../../components/LapInputsCard.js";
+import { useLapRows, type LapInputPayload } from "../../hooks/useLapRows.js";
 
 const formLayoutStyles = css`
   display: grid;
@@ -112,6 +114,10 @@ const primaryButtonStyles = css`
   }
 `;
 
+const lapCardWrapperStyles = css`
+  grid-column: 1 / -1;
+`;
+
 const CreateSessionRouteCircuitsQuery = graphql`
   query create_tsxCircuitsQuery {
     circuits {
@@ -146,6 +152,7 @@ export default function CreateSessionRoute() {
   const [circuitId, setCircuitId] = useState("");
 
   const navigate = useNavigate();
+  const { laps, addLapRow, updateLapRow, removeLapRow, buildLapPayload } = useLapRows();
 
   const [commitMutation, isInFlight] = useMutation<createTrackSessionMutation>(
     CreateTrackSessionMutation,
@@ -189,12 +196,22 @@ export default function CreateSessionRoute() {
       return;
     }
 
+    let lapInput: LapInputPayload[] = [];
+    try {
+      lapInput = buildLapPayload();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Please fix your lap entries.";
+      alert(message);
+      return;
+    }
+
     commitMutation({
       variables: {
         input: {
           date,
           format: sessionFormat,
           circuitId,
+          ...(lapInput.length ? { laps: lapInput } : {}),
         },
       },
       onCompleted: (response) => {
@@ -273,6 +290,17 @@ export default function CreateSessionRoute() {
 
       <div css={videoUploadPlaceholderStyles}>
         Upload session footage
+      </div>
+
+      <div css={lapCardWrapperStyles}>
+        <LapInputsCard
+          laps={laps}
+          disabled={isInFlight}
+          onAddLap={addLapRow}
+          onChangeLap={updateLapRow}
+          onRemoveLap={removeLapRow}
+          fieldStyles={inputFieldStyles}
+        />
       </div>
 
       <CreateCircuitModal

@@ -5,10 +5,13 @@ import Database from "better-sqlite3";
 import { migration as userMigration } from "../../src/db/migrations/01_create_users.js";
 import { migration as circuitMigration } from "../../src/db/migrations/03_create_circuits.js";
 import { migration as trackSessionMigration } from "../../src/db/migrations/04_create_track_sessions.js";
+import { migration as lapMigration } from "../../src/db/migrations/05_create_laps.js";
 import { createUser, type UserRecord } from "../../src/db/users.js";
 import { createCircuit, type CircuitRecord } from "../../src/db/circuits.js";
+import { findLapsBySessionId } from "../../src/db/laps.js";
 import {
   createTrackSession,
+  createTrackSessionWithLaps,
   findTrackSessionById,
   findTrackSessionsByCircuitId,
   type TrackSessionRecord,
@@ -25,6 +28,7 @@ describe("track_sessions", () => {
     userMigration.up(db);
     circuitMigration.up(db);
     trackSessionMigration.up(db);
+    lapMigration.up(db);
     user = createUser("testuser", "hashedpassword");
     circuit = createCircuit("Test Circuit", user.id);
   });
@@ -53,6 +57,28 @@ describe("track_sessions", () => {
   it("returns null for non-existent track session", () => {
     const session = findTrackSessionById("non-existent-id");
     assert.strictEqual(session, null);
+  });
+
+  it("can create a track session with laps in one go", () => {
+    const now = Date.now();
+    const { trackSession, laps } = createTrackSessionWithLaps({
+      date: "2023-11-29T12:00:00Z",
+      format: "Race",
+      circuitId: circuit.id,
+      notes: "with laps",
+      laps: [
+        { lapNumber: 1, time: 60.1 },
+        { lapNumber: 2, time: 59.5 },
+      ],
+      now,
+    });
+
+    assert.ok(trackSession.id);
+    assert.strictEqual(trackSession.createdAt, now);
+    assert.strictEqual(trackSession.notes, "with laps");
+    assert.strictEqual(laps.length, 2);
+    assert.strictEqual(laps[0].sessionId, trackSession.id);
+    assert.deepStrictEqual(findLapsBySessionId(trackSession.id), laps);
   });
 
   it("can find track sessions by circuit ID", () => {

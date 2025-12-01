@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { getDb } from "./client.js";
+import type { LapRecord } from "./laps.js";
 
 export interface TrackSessionRecord {
   id: string;
@@ -55,6 +56,69 @@ export function findTrackSessionsByCircuitId(circuitId: string): TrackSessionRec
   return rows.map(mapRow);
 }
 
+export type TrackSessionLapInput = Pick<LapRecord, "lapNumber" | "time">;
+
+export function createTrackSessionWithLaps({
+  date,
+  format,
+  circuitId,
+  notes = null,
+  laps = [],
+  now = Date.now(),
+}: {
+  date: string;
+  format: string;
+  circuitId: string;
+  notes?: string | null;
+  laps?: TrackSessionLapInput[];
+  now?: number;
+}): { trackSession: TrackSessionRecord; laps: LapRecord[] } {
+  const db = getDb();
+  const sessionId = randomUUID();
+  const insertSession = db.prepare(
+    `INSERT INTO track_sessions (id, date, format, circuit_id, notes, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`
+  );
+  const insertLap =
+    laps.length > 0
+      ? db.prepare(
+          `INSERT INTO laps (id, session_id, lap_number, time, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?)`
+        )
+      : null;
+  const createdLaps: LapRecord[] = [];
+
+  db.transaction(() => {
+    insertSession.run(sessionId, date, format, circuitId, notes, now, now);
+    if (insertLap) {
+      for (const lap of laps) {
+        const lapId = randomUUID();
+        insertLap.run(lapId, sessionId, lap.lapNumber, lap.time, now, now);
+        createdLaps.push({
+          id: lapId,
+          sessionId,
+          lapNumber: lap.lapNumber,
+          time: lap.time,
+          createdAt: now,
+          updatedAt: now,
+        });
+      }
+    }
+  })();
+
+  const trackSession: TrackSessionRecord = {
+    id: sessionId,
+    date,
+    format,
+    circuitId,
+    notes: notes ?? null,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  return { trackSession, laps: createdLaps };
+}
+
 export function createTrackSession(
   date: string,
   format: string,
@@ -62,20 +126,12 @@ export function createTrackSession(
   notes: string | null = null,
   now = Date.now()
 ): TrackSessionRecord {
-  const db = getDb();
-  const id = randomUUID();
-  db.prepare(
-    `INSERT INTO track_sessions (id, date, format, circuit_id, notes, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
-  ).run(id, date, format, circuitId, notes, now, now);
-
-  return {
-    id,
+  return createTrackSessionWithLaps({
     date,
     format,
     circuitId,
     notes,
-    createdAt: now,
-    updatedAt: now,
-  };
+    now,
+    laps: [],
+  }).trackSession;
 }

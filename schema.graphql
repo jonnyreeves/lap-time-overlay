@@ -13,11 +13,17 @@ type CreateCircuitPayload {
   circuit: Circuit!
 }
 
+input LapInput {
+  lapNumber: Int!
+  time: Float!
+}
+
 input CreateTrackSessionInput {
   date: String!
   format: String!
   circuitId: ID!
   notes: String
+  laps: [LapInput!]
 }
 
 type CreateTrackSessionPayload {

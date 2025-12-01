@@ -5,7 +5,7 @@ import { createCircuit, findAllCircuits, findCircuitById, findCircuitsByUserId }
 import { findLapEventsByLapId, type LapEventRecord } from "../../db/lap_events.js";
 import { findLapById, findLapsBySessionId, type LapRecord } from "../../db/laps.js";
 import { findTrackRecordingsBySessionId, type TrackRecordingRecord } from "../../db/track_recordings.js";
-import { createTrackSession as createTrackSessionDb, findTrackSessionById, findTrackSessionsByCircuitId, type TrackSessionRecord } from "../../db/track_sessions.js";
+import { createTrackSessionWithLaps, findTrackSessionById, findTrackSessionsByCircuitId, type TrackSessionLapInput, type TrackSessionRecord } from "../../db/track_sessions.js";
 import {
   AuthError,
   endSession,
@@ -19,6 +19,18 @@ const schemaFileContents = readFileSync(
   pathResolve(process.cwd(), "schema.graphql"),
   { encoding: "utf8" },
 );
+
+type LapInputArg = { lapNumber?: number; time?: number };
+
+type CreateTrackSessionInputArgs = {
+  input?: {
+    date?: string;
+    format?: string;
+    circuitId?: string;
+    notes?: string;
+    laps?: LapInputArg[] | null;
+  };
+};
 
 export const schema: GraphQLSchema = buildSchema(schemaFileContents);
 
@@ -99,7 +111,7 @@ export const rootValue = {
     return { circuit: newCircuit };
   },
   createTrackSession: (
-    args: { input?: { date?: string; format?: string; circuitId?: string; notes?: string } },
+    args: CreateTrackSessionInputArgs,
     context: GraphQLContext
   ) => {
     if (!context.currentUser) {
@@ -113,15 +125,51 @@ export const rootValue = {
         extensions: { code: "VALIDATION_FAILED" },
       });
     }
-    const newTrackSession = createTrackSessionDb(
-      input.date,
-      input.format,
-      input.circuitId,
-      input.notes,
-    );
-    return { trackSession: toTrackSessionPayload(newTrackSession) };
+    const laps = parseLapInputs(input.laps);
+    const { trackSession } = createTrackSessionWithLaps({
+      date: input.date,
+      format: input.format,
+      circuitId: input.circuitId,
+      notes: input.notes,
+      laps,
+    });
+    return { trackSession: toTrackSessionPayload(trackSession) };
   },
 };
+
+function parseLapInputs(laps: LapInputArg[] | null | undefined): TrackSessionLapInput[] {
+  if (!laps || laps.length === 0) {
+    return [];
+  }
+
+  const seenLapNumbers = new Set<number>();
+  const parsed = laps.map((lap, idx) => {
+    const lapNumber = Number(lap?.lapNumber);
+    const time = Number(lap?.time);
+
+    if (!Number.isFinite(lapNumber) || lapNumber < 1) {
+      throw new GraphQLError(`Lap number must be >= 1 (row ${idx + 1})`, {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    if (!Number.isFinite(time) || time <= 0) {
+      throw new GraphQLError(`Lap time must be positive for lap ${lapNumber}`, {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    if (seenLapNumbers.has(lapNumber)) {
+      throw new GraphQLError(`Lap ${lapNumber} is duplicated`, {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    seenLapNumbers.add(lapNumber);
+    return { lapNumber: Math.round(lapNumber), time };
+  });
+
+  parsed.sort((a, b) => a.lapNumber - b.lapNumber);
+  return parsed;
+}
 
 function toUserPayload(user: PublicUser) {
   return {
@@ -260,5 +308,3 @@ function findTrackSessionsForUser(userId: string): TrackSessionRecord[] {
   // Sort by date in descending order
   return allTrackSessions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
-
-
