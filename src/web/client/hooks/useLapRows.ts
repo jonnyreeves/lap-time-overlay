@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { formatLapTimeSeconds } from "../utils/lapTime.js";
 
 export type LapFormRow = {
   id: string;
@@ -94,11 +95,22 @@ export function useLapRows() {
     return parsed;
   }, [laps]);
 
+  const setLapRowsFromImport = useCallback((imported: LapInputPayload[]) => {
+    setLaps(
+      imported.map((lap) => ({
+        id: buildLapId(),
+        lapNumber: String(lap.lapNumber),
+        time: formatLapTimeSeconds(lap.time),
+      }))
+    );
+  }, []);
+
   return {
     laps,
     addLapRow,
     updateLapRow,
     removeLapRow,
     buildLapPayload,
+    setLapRowsFromImport,
   };
 }

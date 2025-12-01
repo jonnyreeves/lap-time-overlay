@@ -5,8 +5,10 @@ import { useNavigate } from "react-router-dom";
 import { type create_tsxCircuitsQuery } from "../../__generated__/create_tsxCircuitsQuery.graphql.js";
 import { createTrackSessionMutation } from "../../__generated__/createTrackSessionMutation.graphql.js";
 import { Card } from "../../components/Card.js";
-import { CreateCircuitModal } from "../../components/CreateCircuitModal.js"; // Import CreateCircuitModal
+import { CreateCircuitModal } from "../../components/CreateCircuitModal.js";
+import { ImportSessionModal } from "../../components/ImportSessionModal.js";
 import { LapInputsCard } from "../../components/LapInputsCard.js";
+import { type ParsedDaytonaEmail } from "../../utils/parseDaytonaEmail.js";
 import { useLapRows, type LapInputPayload } from "../../hooks/useLapRows.js";
 
 const formLayoutStyles = css`
@@ -90,6 +92,7 @@ const AddCircuitButtonStyles = css`
 const formActionsStyles = css`
   display: flex;
   justify-content: flex-end;
+  gap: 10px;
   margin-top: 20px;
 `;
 
@@ -110,6 +113,29 @@ const primaryButtonStyles = css`
 
   &:disabled {
     background-color: #a5b4fc;
+    cursor: not-allowed;
+  }
+`;
+
+const secondaryButtonStyles = css`
+  padding: 10px 18px;
+  background-color: #e2e8f4;
+  color: #0b1021;
+  border: 1px solid #d7deed;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: #cbd5e1;
+    border-color: #cbd5e1;
+  }
+
+  &:disabled {
+    background-color: #e2e8f4;
+    color: #94a3b8;
     cursor: not-allowed;
   }
 `;
@@ -145,6 +171,7 @@ const CreateTrackSessionMutation = graphql`
 
 export default function CreateSessionRoute() {
   const [showCreateCircuitModal, setShowCreateCircuitModal] = useState(false);
+  const [showImportSessionModal, setShowImportSessionModal] = useState(false);
   const [refetchKey, setRefetchKey] = useState(0); // Key to force refetch
   const [sessionFormat, setSessionFormat] = useState("Practice");
   const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
@@ -152,7 +179,14 @@ export default function CreateSessionRoute() {
   const [circuitId, setCircuitId] = useState("");
 
   const navigate = useNavigate();
-  const { laps, addLapRow, updateLapRow, removeLapRow, buildLapPayload } = useLapRows();
+  const {
+    laps,
+    addLapRow,
+    updateLapRow,
+    removeLapRow,
+    buildLapPayload,
+    setLapRowsFromImport,
+  } = useLapRows();
 
   const [commitMutation, isInFlight] = useMutation<createTrackSessionMutation>(
     CreateTrackSessionMutation,
@@ -228,6 +262,20 @@ export default function CreateSessionRoute() {
     });
   };
 
+  const handleImportEmail = (importResult: ParsedDaytonaEmail) => {
+    if (importResult.sessionFormat) {
+      setSessionFormat(importResult.sessionFormat);
+    }
+    if (importResult.laps.length) {
+      setLapRowsFromImport(
+        importResult.laps.map((lap) => ({
+          lapNumber: lap.lapNumber,
+          time: lap.timeSeconds,
+        }))
+      );
+    }
+  };
+
   return (
     <div css={formLayoutStyles}>
       <Card title="Session Details">
@@ -281,6 +329,14 @@ export default function CreateSessionRoute() {
             </select>
           </div>
           <div css={formActionsStyles}>
+            <button
+              type="button"
+              css={secondaryButtonStyles}
+              onClick={() => setShowImportSessionModal(true)}
+              disabled={isInFlight}
+            >
+              Import
+            </button>
             <button type="submit" css={primaryButtonStyles} disabled={isInFlight}>
               {isInFlight ? "Creating..." : "Create Session"}
             </button>
@@ -307,6 +363,11 @@ export default function CreateSessionRoute() {
         isOpen={showCreateCircuitModal}
         onClose={() => setShowCreateCircuitModal(false)}
         onCircuitCreated={handleCircuitCreated}
+      />
+      <ImportSessionModal
+        isOpen={showImportSessionModal}
+        onClose={() => setShowImportSessionModal(false)}
+        onImport={handleImportEmail}
       />
     </div>
   );
