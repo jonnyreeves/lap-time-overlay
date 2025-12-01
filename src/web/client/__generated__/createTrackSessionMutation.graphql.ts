@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<6eded4b1f92160b843bdd0a01bfd38ef>>
+ * @generated SignedSource<<bb86a64c4af5c8eca2f35336854c3a56>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -17,8 +17,14 @@ export type CreateTrackSessionInput = {
   notes?: string | null | undefined;
 };
 export type LapInput = {
+  lapEvents?: ReadonlyArray<LapEventInput> | null | undefined;
   lapNumber: number;
   time: number;
+};
+export type LapEventInput = {
+  event: string;
+  offset: number;
+  value: string;
 };
 export type createTrackSessionMutation$variables = {
   input: CreateTrackSessionInput;

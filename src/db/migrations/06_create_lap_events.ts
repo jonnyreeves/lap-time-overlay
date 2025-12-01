@@ -9,6 +9,7 @@ export const migration = {
         lap_id TEXT NOT NULL,
         offset REAL NOT NULL,
         event TEXT NOT NULL,
+        value TEXT NOT NULL,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL,
         FOREIGN KEY (lap_id) REFERENCES laps(id) ON DELETE CASCADE

@@ -1,15 +1,16 @@
 import { css } from "@emotion/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { parseSessionEmail } from "../utils/parseSessionEmail.js";
 import {
-  parseDaytonaEmail,
-  type ParsedDaytonaEmail,
-} from "../utils/parseDaytonaEmail.js";
+  type ParsedSessionEmail,
+  type SessionImportSelection,
+} from "../utils/sessionImportTypes.js";
 import { formatLapTimeSeconds } from "../utils/lapTime.js";
 
 interface ImportSessionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onImport: (result: ParsedDaytonaEmail) => void;
+  onImport: (result: SessionImportSelection) => void;
 }
 
 const modalOverlayStyles = css`
@@ -107,7 +108,6 @@ const secondaryButtonStyles = css`
 `;
 
 const previewStyles = css`
-  margin-top: 20px;
   padding: 12px;
   border: 1px solid #e2e8f4;
   border-radius: 8px;
@@ -128,24 +128,99 @@ const lapListStyles = css`
   line-height: 1.4;
 `;
 
+const selectStyles = css`
+  margin-top: 10px;
+
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e2e8f4;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #fff;
+  }
+`;
+
+const inputPreviewGridStyles = css`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+function getSelectedDriverLaps(parsed: ParsedSessionEmail, selectedDriver: string) {
+  if (parsed.provider !== "teamsport") return parsed.laps;
+  const driver =
+    parsed.drivers.find((d) => d.name === selectedDriver) ?? parsed.drivers[0] ?? null;
+  return driver?.laps ?? [];
+}
+
 export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionModalProps) {
   const [emailContent, setEmailContent] = useState("");
+  const [selectedDriver, setSelectedDriver] = useState("");
 
   const handleClose = () => {
     setEmailContent("");
+    setSelectedDriver("");
     onClose();
   };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    const parsed = parseDaytonaEmail(emailContent);
-    onImport(parsed);
+    const parsed = parseSessionEmail(emailContent);
+    if (!parsed) return;
+
+    const laps =
+      parsed.provider === "teamsport"
+        ? getSelectedDriverLaps(parsed, selectedDriver)
+        : parsed.laps;
+
+    if (!laps.length) return;
+
+    onImport({
+      sessionFormat: parsed.sessionFormat,
+      sessionDate: parsed.sessionDate,
+      sessionTime: parsed.sessionTime,
+      laps,
+      driverName: parsed.provider === "teamsport" ? selectedDriver || parsed.drivers[0]?.name : undefined,
+    });
     handleClose();
   };
 
-  const parsed = useMemo(() => parseDaytonaEmail(emailContent), [emailContent]);
-  const hasLaps = parsed.laps.length > 0;
-  const importDisabled = !emailContent.trim() || !hasLaps;
+  const parsed = useMemo<ParsedSessionEmail | null>(
+    () => parseSessionEmail(emailContent),
+    [emailContent]
+  );
+
+  useEffect(() => {
+    if (parsed?.provider === "teamsport") {
+      const defaultDriver = parsed.drivers[0]?.name ?? "";
+      setSelectedDriver((current) =>
+        current && parsed.drivers.some((driver) => driver.name === current)
+          ? current
+          : defaultDriver
+      );
+    } else {
+      setSelectedDriver("");
+    }
+  }, [parsed]);
+
+  const previewLaps =
+    parsed?.provider === "teamsport"
+      ? getSelectedDriverLaps(parsed, selectedDriver)
+      : parsed?.laps ?? [];
+
+  const importDisabled = !emailContent.trim() || !(previewLaps?.length ?? 0);
 
   if (!isOpen) return null;
 
@@ -155,37 +230,72 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
         <h2>Import Session Email</h2>
         <p>Paste the email that describes your session and we&apos;ll crunch it soon.</p>
         <form onSubmit={handleSubmit}>
-          <div css={inputFieldStyles}>
-            <label htmlFor="session-import-email">Email contents</label>
-            <textarea
-              id="session-import-email"
-              value={emailContent}
-              onChange={(e) => setEmailContent(e.target.value)}
-              placeholder="Paste the raw email text here"
-              required
-            />
-          </div>
-          <div css={previewStyles}>
-            <div>
-              <strong>Session format:</strong>{" "}
-              {parsed.sessionFormat ?? "Not found"}
+          <div css={inputPreviewGridStyles}>
+            <div css={inputFieldStyles}>
+              <label htmlFor="session-import-email">Email contents</label>
+              <textarea
+                id="session-import-email"
+                value={emailContent}
+                onChange={(e) => setEmailContent(e.target.value)}
+                placeholder="Paste the raw email text here"
+                required
+              />
             </div>
-            <div>
-              <strong>Lap timings:</strong>{" "}
-              {parsed.laps.length ? `${parsed.laps.length} found` : "None found"}
-              {parsed.laps.length ? (
-                <div css={lapListStyles}>
-                  {parsed.laps.slice(0, 15).map((lap) => (
-                    <div key={lap.lapNumber}>
-                      Lap {lap.lapNumber.toString().padStart(2, "0")} —{" "}
-                      {formatLapTimeSeconds(lap.timeSeconds)}s
+            <div css={previewStyles}>
+              {parsed ? (
+                <>
+                  <div>
+                    <strong>Source:</strong> {parsed.provider}
+                  </div>
+                  <div>
+                    <strong>Session date:</strong>{" "}
+                    {parsed.sessionDate ?? "Not found"}
+                  </div>
+                  <div>
+                    <strong>Session time:</strong>{" "}
+                    {parsed.sessionTime ?? "Not found"}
+                  </div>
+                  <div>
+                    <strong>Session format:</strong>{" "}
+                    {parsed.sessionFormat ?? "Not found"}
+                  </div>
+                  {parsed.provider === "teamsport" ? (
+                    <div css={selectStyles}>
+                      <label htmlFor="session-import-driver">Choose your driver</label>
+                      <select
+                        id="session-import-driver"
+                        value={selectedDriver}
+                        onChange={(e) => setSelectedDriver(e.target.value)}
+                      >
+                        {parsed.drivers.map((driver) => (
+                          <option key={driver.name} value={driver.name}>
+                            {driver.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                  ))}
-                  {parsed.laps.length > 15 ? (
-                    <div>…and {parsed.laps.length - 15} more</div>
                   ) : null}
-                </div>
-              ) : null}
+                  <div>
+                    <strong>Lap timings:</strong>{" "}
+                    {previewLaps.length ? `${previewLaps.length} found` : "None found"}
+                    {previewLaps.length ? (
+                      <div css={lapListStyles}>
+                        {previewLaps.slice(0, 15).map((lap) => (
+                          <div key={lap.lapNumber}>
+                            Lap {lap.lapNumber.toString().padStart(2, "0")} —{" "}
+                            {formatLapTimeSeconds(lap.timeSeconds)}s
+                          </div>
+                        ))}
+                        {previewLaps.length > 15 ? (
+                          <div>…and {previewLaps.length - 15} more</div>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
+                </>
+              ) : (
+                <div>No importable data detected yet.</div>
+              )}
             </div>
           </div>
           <div css={buttonGroupStyles}>

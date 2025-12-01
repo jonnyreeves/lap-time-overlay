@@ -6,6 +6,7 @@ export interface LapEventRecord {
   lapId: string;
   offset: number;
   event: string;
+  value: string;
   createdAt: number;
   updatedAt: number;
 }
@@ -15,6 +16,7 @@ interface LapEventRow {
   lap_id: string;
   offset: number;
   event: string;
+  value: string;
   created_at: number;
   updated_at: number;
 }
@@ -25,6 +27,7 @@ function mapRow(row: LapEventRow): LapEventRecord {
     lapId: row.lap_id,
     offset: row.offset,
     event: row.event,
+    value: row.value,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -34,7 +37,7 @@ export function findLapEventById(id: string): LapEventRecord | null {
   const db = getDb();
   const row = db
     .prepare<unknown[], LapEventRow>(
-      `SELECT id, lap_id, offset, event, created_at, updated_at
+      `SELECT id, lap_id, offset, event, value, created_at, updated_at
        FROM lap_events WHERE id = ? LIMIT 1`
     )
     .get(id);
@@ -45,7 +48,7 @@ export function findLapEventsByLapId(lapId: string): LapEventRecord[] {
   const db = getDb();
   const rows = db
     .prepare<unknown[], LapEventRow>(
-      `SELECT id, lap_id, offset, event, created_at, updated_at
+      `SELECT id, lap_id, offset, event, value, created_at, updated_at
        FROM lap_events WHERE lap_id = ? ORDER BY offset ASC`
     )
     .all(lapId);
@@ -56,20 +59,22 @@ export function createLapEvent(
   lapId: string,
   offset: number,
   event: string,
+  value: string,
   now = Date.now()
 ): LapEventRecord {
   const db = getDb();
   const id = randomUUID();
   db.prepare(
-    `INSERT INTO lap_events (id, lap_id, offset, event, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?)`
-  ).run(id, lapId, offset, event, now, now);
+    `INSERT INTO lap_events (id, lap_id, offset, event, value, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`
+  ).run(id, lapId, offset, event, value, now, now);
 
   return {
     id,
     lapId,
     offset,
     event,
+    value,
     createdAt: now,
     updatedAt: now,
   };
@@ -82,14 +87,14 @@ export function createLapEvents(
 ): LapEventRecord[] {
   const db = getDb();
   const insert = db.prepare(
-    `INSERT INTO lap_events (id, lap_id, offset, event, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?)`
+    `INSERT INTO lap_events (id, lap_id, offset, event, value, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`
   );
   const newLapEvents: LapEventRecord[] = [];
   db.transaction(() => {
     for (const lapEvent of lapEventsData) {
       const id = randomUUID();
-      insert.run(id, lapId, lapEvent.offset, lapEvent.event, now, now);
+      insert.run(id, lapId, lapEvent.offset, lapEvent.event, lapEvent.value, now, now);
       newLapEvents.push({ ...lapEvent, id, lapId, createdAt: now, updatedAt: now });
     }
   })();

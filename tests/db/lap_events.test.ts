@@ -46,11 +46,12 @@ describe("lap_events", () => {
 
   it("can create and retrieve a lap event", () => {
     const now = Date.now();
-    const lapEvent = createLapEvent(lap.id, 10.2, "Brake Point", now);
+    const lapEvent = createLapEvent(lap.id, 10.2, "Brake Point", "P1", now);
     assert.ok(lapEvent.id);
     assert.strictEqual(lapEvent.lapId, lap.id);
     assert.strictEqual(lapEvent.offset, 10.2);
     assert.strictEqual(lapEvent.event, "Brake Point");
+    assert.strictEqual(lapEvent.value, "P1");
     assert.strictEqual(lapEvent.createdAt, now);
     assert.strictEqual(lapEvent.updatedAt, now);
 
@@ -65,11 +66,11 @@ describe("lap_events", () => {
 
   it("can find lap events by lap ID", () => {
     const now = Date.now();
-    const event1 = createLapEvent(lap.id, 5.0, "Apex", now);
-    const event2 = createLapEvent(lap.id, 15.0, "Throttle On", now + 100);
+    const event1 = createLapEvent(lap.id, 5.0, "Apex", "P2", now);
+    const event2 = createLapEvent(lap.id, 15.0, "Throttle On", "P3", now + 100);
     // Create another lap and an event for it to ensure filtering works
     const anotherLap = createLap(trackSession.id, 2, 61.0);
-    createLapEvent(anotherLap.id, 20.0, "Something Else", now + 200);
+    createLapEvent(anotherLap.id, 20.0, "Something Else", "P4", now + 200);
 
     const lapEvents = findLapEventsByLapId(lap.id);
     assert.strictEqual(lapEvents.length, 2);
@@ -80,9 +81,9 @@ describe("lap_events", () => {
   it("can create multiple lap events", () => {
     const now = Date.now();
     const lapEventsData = [
-      { offset: 5.0, event: "Apex 1" },
-      { offset: 10.0, event: "Brake 1" },
-      { offset: 15.0, event: "Throttle 1" },
+      { offset: 5.0, event: "Apex 1", value: "P1" },
+      { offset: 10.0, event: "Brake 1", value: "P2" },
+      { offset: 15.0, event: "Throttle 1", value: "P3" },
     ];
     const createdLapEvents = createLapEvents(lap.id, lapEventsData, now);
     assert.strictEqual(createdLapEvents.length, 3);
@@ -90,6 +91,7 @@ describe("lap_events", () => {
     assert.strictEqual(createdLapEvents[0].lapId, lap.id);
     assert.strictEqual(createdLapEvents[0].offset, 5.0);
     assert.strictEqual(createdLapEvents[0].event, "Apex 1");
+    assert.strictEqual(createdLapEvents[0].value, "P1");
     assert.strictEqual(createdLapEvents[0].createdAt, now);
 
     const retrievedLapEvents = findLapEventsByLapId(lap.id);

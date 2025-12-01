@@ -6,9 +6,11 @@ import { migration as userMigration } from "../../src/db/migrations/01_create_us
 import { migration as circuitMigration } from "../../src/db/migrations/03_create_circuits.js";
 import { migration as trackSessionMigration } from "../../src/db/migrations/04_create_track_sessions.js";
 import { migration as lapMigration } from "../../src/db/migrations/05_create_laps.js";
+import { migration as lapEventsMigration } from "../../src/db/migrations/06_create_lap_events.js";
 import { createUser, type UserRecord } from "../../src/db/users.js";
 import { createCircuit, type CircuitRecord } from "../../src/db/circuits.js";
 import { findLapsBySessionId } from "../../src/db/laps.js";
+import { findLapEventsByLapId } from "../../src/db/lap_events.js";
 import {
   createTrackSession,
   createTrackSessionWithLaps,
@@ -29,6 +31,7 @@ describe("track_sessions", () => {
     circuitMigration.up(db);
     trackSessionMigration.up(db);
     lapMigration.up(db);
+    lapEventsMigration.up(db);
     user = createUser("testuser", "hashedpassword");
     circuit = createCircuit("Test Circuit", user.id);
   });
@@ -79,6 +82,36 @@ describe("track_sessions", () => {
     assert.strictEqual(laps.length, 2);
     assert.strictEqual(laps[0].sessionId, trackSession.id);
     assert.deepStrictEqual(findLapsBySessionId(trackSession.id), laps);
+  });
+
+  it("creates lap events alongside laps", () => {
+    const now = Date.now();
+    const { laps } = createTrackSessionWithLaps({
+      date: "2023-11-29T12:00:00Z",
+      format: "Race",
+      circuitId: circuit.id,
+      laps: [
+        {
+          lapNumber: 1,
+          time: 60.1,
+          lapEvents: [
+            { offset: 5.5, event: "position", value: "P1" },
+            { offset: 10.2, event: "position", value: "P2" },
+          ],
+        },
+        { lapNumber: 2, time: 59.5 },
+      ],
+      now,
+    });
+
+    const lapOneEvents = findLapEventsByLapId(laps[0].id);
+    assert.strictEqual(lapOneEvents.length, 2);
+    assert.strictEqual(lapOneEvents[0].offset, 5.5);
+    assert.strictEqual(lapOneEvents[0].value, "P1");
+    assert.strictEqual(lapOneEvents[1].offset, 10.2);
+
+    const lapTwoEvents = findLapEventsByLapId(laps[1].id);
+    assert.strictEqual(lapTwoEvents.length, 0);
   });
 
   it("can find track sessions by circuit ID", () => {

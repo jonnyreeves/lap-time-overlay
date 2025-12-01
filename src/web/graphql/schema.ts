@@ -20,7 +20,8 @@ const schemaFileContents = readFileSync(
   { encoding: "utf8" },
 );
 
-type LapInputArg = { lapNumber?: number; time?: number };
+type LapEventInputArg = { offset?: number; event?: string; value?: string };
+type LapInputArg = { lapNumber?: number; time?: number; lapEvents?: LapEventInputArg[] | null };
 
 type CreateTrackSessionInputArgs = {
   input?: {
@@ -164,10 +165,57 @@ function parseLapInputs(laps: LapInputArg[] | null | undefined): TrackSessionLap
     }
 
     seenLapNumbers.add(lapNumber);
-    return { lapNumber: Math.round(lapNumber), time };
+    const lapEvents = parseLapEventInputs(lap.lapEvents, lapNumber, time);
+    return lapEvents.length > 0
+      ? { lapNumber: Math.round(lapNumber), time, lapEvents }
+      : { lapNumber: Math.round(lapNumber), time };
   });
 
   parsed.sort((a, b) => a.lapNumber - b.lapNumber);
+  return parsed;
+}
+
+function parseLapEventInputs(
+  lapEvents: LapEventInputArg[] | null | undefined,
+  lapNumber: number,
+  lapTime: number
+) {
+  if (!lapEvents || lapEvents.length === 0) {
+    return [];
+  }
+
+  const parsed = lapEvents.map((lapEvent, idx) => {
+    const offset = Number(lapEvent?.offset);
+    if (!Number.isFinite(offset) || offset < 0) {
+      throw new GraphQLError(`Lap ${lapNumber} event offset must be >= 0 (row ${idx + 1})`, {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    if (offset > lapTime) {
+      throw new GraphQLError(
+        `Lap ${lapNumber} event offset cannot exceed lap time (${lapTime}s)`,
+        { extensions: { code: "VALIDATION_FAILED" } },
+      );
+    }
+
+    const eventName = lapEvent?.event?.trim();
+    if (!eventName) {
+      throw new GraphQLError(`Lap ${lapNumber} event type is required (row ${idx + 1})`, {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const value = lapEvent?.value?.trim();
+    if (!value) {
+      throw new GraphQLError(`Lap ${lapNumber} event value is required (row ${idx + 1})`, {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    return { offset, event: eventName, value };
+  });
+
+  parsed.sort((a, b) => a.offset - b.offset);
   return parsed;
 }
 
@@ -260,6 +308,7 @@ function toLapEventPayload(lapEvent: LapEventRecord) {
     },
     offset: lapEvent.offset,
     event: lapEvent.event,
+    value: lapEvent.value,
     createdAt: new Date(lapEvent.createdAt).toISOString(),
     updatedAt: new Date(lapEvent.updatedAt).toISOString(),
   };

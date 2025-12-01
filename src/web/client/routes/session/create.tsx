@@ -8,7 +8,7 @@ import { Card } from "../../components/Card.js";
 import { CreateCircuitModal } from "../../components/CreateCircuitModal.js";
 import { ImportSessionModal } from "../../components/ImportSessionModal.js";
 import { LapInputsCard } from "../../components/LapInputsCard.js";
-import { type ParsedDaytonaEmail } from "../../utils/parseDaytonaEmail.js";
+import { type SessionImportSelection } from "../../utils/sessionImportTypes.js";
 import { useLapRows, type LapInputPayload } from "../../hooks/useLapRows.js";
 
 const formLayoutStyles = css`
@@ -32,6 +32,7 @@ const inputFieldStyles = css`
   }
 
   input[type="date"],
+  input[type="time"],
   input[type="text"],
   select {
     width: 100%;
@@ -176,14 +177,18 @@ export default function CreateSessionRoute() {
   const [sessionFormat, setSessionFormat] = useState("Practice");
   const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
   const [date, setDate] = useState(today);
+  const [time, setTime] = useState("");
   const [circuitId, setCircuitId] = useState("");
 
   const navigate = useNavigate();
   const {
     laps,
     addLapRow,
+    addLapEventRow,
     updateLapRow,
+    updateLapEventRow,
     removeLapRow,
+    removeLapEventRow,
     buildLapPayload,
     setLapRowsFromImport,
   } = useLapRows();
@@ -242,7 +247,7 @@ export default function CreateSessionRoute() {
     commitMutation({
       variables: {
         input: {
-          date,
+          date: time ? `${date}T${time}` : date,
           format: sessionFormat,
           circuitId,
           ...(lapInput.length ? { laps: lapInput } : {}),
@@ -262,15 +267,22 @@ export default function CreateSessionRoute() {
     });
   };
 
-  const handleImportEmail = (importResult: ParsedDaytonaEmail) => {
+  const handleImportEmail = (importResult: SessionImportSelection) => {
     if (importResult.sessionFormat) {
       setSessionFormat(importResult.sessionFormat);
+    }
+    if (importResult.sessionDate) {
+      setDate(importResult.sessionDate);
+    }
+    if (importResult.sessionTime) {
+      setTime(importResult.sessionTime);
     }
     if (importResult.laps.length) {
       setLapRowsFromImport(
         importResult.laps.map((lap) => ({
           lapNumber: lap.lapNumber,
           time: lap.timeSeconds,
+          lapEvents: lap.lapEvents,
         }))
       );
     }
@@ -287,6 +299,16 @@ export default function CreateSessionRoute() {
               id="session-date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
+              disabled={isInFlight}
+            />
+          </div>
+          <div css={inputFieldStyles}>
+            <label htmlFor="session-time">Time (HH:mm)</label>
+            <input
+              type="time"
+              id="session-time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
               disabled={isInFlight}
             />
           </div>
@@ -355,6 +377,9 @@ export default function CreateSessionRoute() {
           onAddLap={addLapRow}
           onChangeLap={updateLapRow}
           onRemoveLap={removeLapRow}
+          onAddLapEvent={addLapEventRow}
+          onChangeLapEvent={updateLapEventRow}
+          onRemoveLapEvent={removeLapEventRow}
           fieldStyles={inputFieldStyles}
         />
       </div>

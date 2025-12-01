@@ -2,6 +2,12 @@ import { randomUUID } from "node:crypto";
 import { getDb } from "./client.js";
 import type { LapRecord } from "./laps.js";
 
+export interface TrackSessionLapEventInput {
+  offset: number;
+  event: string;
+  value: string;
+}
+
 export interface TrackSessionRecord {
   id: string;
   date: string;
@@ -56,7 +62,9 @@ export function findTrackSessionsByCircuitId(circuitId: string): TrackSessionRec
   return rows.map(mapRow);
 }
 
-export type TrackSessionLapInput = Pick<LapRecord, "lapNumber" | "time">;
+export type TrackSessionLapInput = Pick<LapRecord, "lapNumber" | "time"> & {
+  lapEvents?: TrackSessionLapEventInput[];
+};
 
 export function createTrackSessionWithLaps({
   date,
@@ -86,6 +94,13 @@ export function createTrackSessionWithLaps({
            VALUES (?, ?, ?, ?, ?, ?)`
         )
       : null;
+  const insertLapEvent =
+    laps.length > 0
+      ? db.prepare(
+          `INSERT INTO lap_events (id, lap_id, offset, event, value, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`
+        )
+      : null;
   const createdLaps: LapRecord[] = [];
 
   db.transaction(() => {
@@ -102,6 +117,19 @@ export function createTrackSessionWithLaps({
           createdAt: now,
           updatedAt: now,
         });
+        if (insertLapEvent && lap.lapEvents?.length) {
+          for (const lapEvent of lap.lapEvents) {
+            insertLapEvent.run(
+              randomUUID(),
+              lapId,
+              lapEvent.offset,
+              lapEvent.event,
+              lapEvent.value,
+              now,
+              now
+            );
+          }
+        }
       }
     }
   })();

@@ -8,6 +8,7 @@
     "web:build": "node ./scripts/build-web.js",
     "web:watch": "npm run web:build -- --watch",
     "db:migrate": "node --import ./register-ts-node.js src/db/migrate.ts",
+    "db:reset": "node --import ./register-ts-node.js scripts/reset-db.ts",
     "type-check": "tsc --noEmit",
     "check": "npm run relay:codex && npm run type-check &&  npm run test",
     "build": "npm run relay && npm run type-check  && npm run web:build",

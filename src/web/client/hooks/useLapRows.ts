@@ -5,11 +5,26 @@ export type LapFormRow = {
   id: string;
   lapNumber: string;
   time: string;
+  events: LapEventFormRow[];
+};
+
+export type LapEventFormRow = {
+  id: string;
+  offset: string;
+  event: string;
+  value: string;
+};
+
+export type LapEventInputPayload = {
+  offset: number;
+  event: string;
+  value: string;
 };
 
 export type LapInputPayload = {
   lapNumber: number;
   time: number;
+  lapEvents?: LapEventInputPayload[];
 };
 
 function parseLapTimeInput(time: string): number | null {
@@ -50,7 +65,10 @@ export function useLapRows() {
         return Math.max(max, lapNumber);
       }, 0);
       const nextLapNumber = highestLapNumber + 1;
-      return [...current, { id: buildLapId(), lapNumber: String(nextLapNumber), time: "" }];
+      return [
+        ...current,
+        { id: buildLapId(), lapNumber: String(nextLapNumber), time: "", events: [] },
+      ];
     });
   }, []);
 
@@ -62,6 +80,50 @@ export function useLapRows() {
 
   const removeLapRow = useCallback((id: string) => {
     setLaps((current) => current.filter((lap) => lap.id !== id));
+  }, []);
+
+  const addLapEventRow = useCallback((lapId: string) => {
+    setLaps((current) =>
+      current.map((lap) =>
+        lap.id === lapId
+          ? {
+              ...lap,
+              events: [
+                ...lap.events,
+                { id: buildLapId(), offset: "", event: "position", value: "" },
+              ],
+            }
+          : lap
+      )
+    );
+  }, []);
+
+  const updateLapEventRow = useCallback(
+    (lapId: string, eventId: string, field: "offset" | "event" | "value", value: string) => {
+      setLaps((current) =>
+        current.map((lap) =>
+          lap.id === lapId
+            ? {
+                ...lap,
+                events: lap.events.map((event) =>
+                  event.id === eventId ? { ...event, [field]: value } : event
+                ),
+              }
+            : lap
+        )
+      );
+    },
+    []
+  );
+
+  const removeLapEventRow = useCallback((lapId: string, eventId: string) => {
+    setLaps((current) =>
+      current.map((lap) =>
+        lap.id === lapId
+          ? { ...lap, events: lap.events.filter((event) => event.id !== eventId) }
+          : lap
+      )
+    );
   }, []);
 
   const buildLapPayload = useCallback((): LapInputPayload[] => {
@@ -88,7 +150,10 @@ export function useLapRows() {
       }
       seen.add(lapNumber);
 
-      return { lapNumber: Math.round(lapNumber), time: lapTimeSeconds };
+      const lapEvents = parseLapEvents(lap.events, lapNumber, lapTimeSeconds);
+      return lapEvents.length > 0
+        ? { lapNumber: Math.round(lapNumber), time: lapTimeSeconds, lapEvents }
+        : { lapNumber: Math.round(lapNumber), time: lapTimeSeconds };
     });
 
     parsed.sort((a, b) => a.lapNumber - b.lapNumber);
@@ -101,6 +166,13 @@ export function useLapRows() {
         id: buildLapId(),
         lapNumber: String(lap.lapNumber),
         time: formatLapTimeSeconds(lap.time),
+        events:
+          lap.lapEvents?.map((event) => ({
+            id: buildLapId(),
+            offset: String(event.offset),
+            event: event.event,
+            value: event.value,
+          })) ?? [],
       }))
     );
   }, []);
@@ -110,7 +182,45 @@ export function useLapRows() {
     addLapRow,
     updateLapRow,
     removeLapRow,
+    addLapEventRow,
+    updateLapEventRow,
+    removeLapEventRow,
     buildLapPayload,
     setLapRowsFromImport,
   };
+}
+
+function parseLapEvents(
+  events: LapEventFormRow[],
+  lapNumber: number,
+  lapTimeSeconds: number
+): LapEventInputPayload[] {
+  if (events.length === 0) return [];
+
+  const parsed = events.map((event, idx) => {
+    if (event.offset.trim() === "") {
+      throw new Error(`Lap ${lapNumber} event offset is required (row ${idx + 1}).`);
+    }
+    const offset = Number(event.offset);
+    if (!Number.isFinite(offset) || offset < 0) {
+      throw new Error(`Lap ${lapNumber} event offset must be >= 0 (row ${idx + 1}).`);
+    }
+    if (offset > lapTimeSeconds) {
+      throw new Error(
+        `Lap ${lapNumber} event offset (${offset}s) cannot exceed lap time (${lapTimeSeconds}s).`
+      );
+    }
+    const eventType = event.event.trim();
+    if (!eventType) {
+      throw new Error(`Lap ${lapNumber} event needs a type (row ${idx + 1}).`);
+    }
+    const value = event.value.trim();
+    if (!value) {
+      throw new Error(`Lap ${lapNumber} event value is required (row ${idx + 1}).`);
+    }
+    return { offset, event: eventType, value };
+  });
+
+  parsed.sort((a, b) => a.offset - b.offset);
+  return parsed;
 }

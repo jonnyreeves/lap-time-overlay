@@ -16,6 +16,13 @@ type CreateCircuitPayload {
 input LapInput {
   lapNumber: Int!
   time: Float!
+  lapEvents: [LapEventInput!]
+}
+
+input LapEventInput {
+  offset: Float!
+  event: String!
+  value: String!
 }
 
 input CreateTrackSessionInput {
@@ -85,6 +92,7 @@ type LapEvent {
   lap: Lap!
   offset: Float!
   event: String!
+  value: String!
   createdAt: String!
   updatedAt: String!
 }
