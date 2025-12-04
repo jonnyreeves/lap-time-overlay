@@ -13,12 +13,8 @@ import { useLapRows, type LapInputPayload } from "../../hooks/useLapRows.js";
 
 const formLayoutStyles = css`
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 20px;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
 `;
 
 const inputFieldStyles = css`
@@ -52,25 +48,13 @@ const inputFieldStyles = css`
   }
 `;
 
-const videoUploadPlaceholderStyles = css`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 2px dashed #a0aec0; /* A light grey dashed border */
-  border-radius: 12px;
-  background-color: #edf2f7; /* A very light grey background */
-  min-height: 250px; /* Make it large */
-  text-align: center;
-  color: #4a5568; /* Darker grey text */
-  font-size: 1.2rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
+const twoColumnRowStyles = css`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 
-  &:hover {
-    border-color: #6366f1; /* Example hover color */
-    color: #6366f1;
-    background-color: #e0e7ff; /* Lighter blue on hover */
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
   }
 `;
 
@@ -141,8 +125,10 @@ const secondaryButtonStyles = css`
   }
 `;
 
-const lapCardWrapperStyles = css`
-  grid-column: 1 / -1;
+const rightColumnStyles = css`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 `;
 
 const CreateSessionRouteCircuitsQuery = graphql`
@@ -161,6 +147,7 @@ const CreateTrackSessionMutation = graphql`
         id
         date
         format
+        conditions
         circuit {
           id
           name
@@ -175,6 +162,7 @@ export default function CreateSessionRoute() {
   const [showImportSessionModal, setShowImportSessionModal] = useState(false);
   const [refetchKey, setRefetchKey] = useState(0); // Key to force refetch
   const [sessionFormat, setSessionFormat] = useState("Practice");
+  const [conditions, setConditions] = useState("Dry");
   const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
   const [date, setDate] = useState(today);
   const [time, setTime] = useState("");
@@ -196,6 +184,7 @@ export default function CreateSessionRoute() {
   const [commitMutation, isInFlight] = useMutation<createTrackSessionMutation>(
     CreateTrackSessionMutation,
   );
+  const isCreateDisabled = isInFlight || !date || !sessionFormat || !circuitId;
 
   const data = useLazyLoadQuery<create_tsxCircuitsQuery>(
     CreateSessionRouteCircuitsQuery,
@@ -250,6 +239,7 @@ export default function CreateSessionRoute() {
           date: time ? `${date}T${time}` : date,
           format: sessionFormat,
           circuitId,
+          conditions,
           ...(lapInput.length ? { laps: lapInput } : {}),
         },
       },
@@ -290,27 +280,41 @@ export default function CreateSessionRoute() {
 
   return (
     <div css={formLayoutStyles}>
-      <Card title="Session Details">
-        <form onSubmit={handleSubmit}>
-          <div css={inputFieldStyles}>
-            <label htmlFor="session-date">Date</label>
-            <input
-              type="date"
-              id="session-date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              disabled={isInFlight}
-            />
-          </div>
-          <div css={inputFieldStyles}>
-            <label htmlFor="session-time">Time (HH:mm)</label>
-            <input
-              type="time"
-              id="session-time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              disabled={isInFlight}
-            />
+      <Card
+        title="Session Details"
+        rightComponent={
+          <button
+            type="button"
+            css={secondaryButtonStyles}
+            onClick={() => setShowImportSessionModal(true)}
+            disabled={isInFlight}
+          >
+            Import
+          </button>
+        }
+      >
+        <form id="create-session-form" onSubmit={handleSubmit}>
+          <div css={twoColumnRowStyles}>
+            <div css={inputFieldStyles}>
+              <label htmlFor="session-date">Date</label>
+              <input
+                type="date"
+                id="session-date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                disabled={isInFlight}
+              />
+            </div>
+            <div css={inputFieldStyles}>
+              <label htmlFor="session-time">Time (HH:mm)</label>
+              <input
+                type="time"
+                id="session-time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                disabled={isInFlight}
+              />
+            </div>
           </div>
           <div css={inputFieldStyles}>
             <label htmlFor="session-circuit">Circuit</label>
@@ -337,51 +341,60 @@ export default function CreateSessionRoute() {
               </button>
             </div>
           </div>
-          <div css={inputFieldStyles}>
-            <label htmlFor="session-format">Format</label>
-            <select
-              id="session-format"
-              value={sessionFormat}
-              onChange={(e) => setSessionFormat(e.target.value)}
-              disabled={isInFlight}
-            >
-              <option value="Practice">Practice</option>
-              <option value="Qualifying">Qualifying</option>
-              <option value="Race">Race</option>
-            </select>
-          </div>
-          <div css={formActionsStyles}>
-            <button
-              type="button"
-              css={secondaryButtonStyles}
-              onClick={() => setShowImportSessionModal(true)}
-              disabled={isInFlight}
-            >
-              Import
-            </button>
-            <button type="submit" css={primaryButtonStyles} disabled={isInFlight}>
-              {isInFlight ? "Creating..." : "Create Session"}
-            </button>
+          <div css={twoColumnRowStyles}>
+            <div css={inputFieldStyles}>
+              <label htmlFor="session-format">Format</label>
+              <select
+                id="session-format"
+                value={sessionFormat}
+                onChange={(e) => setSessionFormat(e.target.value)}
+                disabled={isInFlight}
+              >
+                <option value="Practice">Practice</option>
+                <option value="Qualifying">Qualifying</option>
+                <option value="Race">Race</option>
+              </select>
+            </div>
+            <div css={inputFieldStyles}>
+              <label htmlFor="session-conditions">Conditions</label>
+              <select
+                id="session-conditions"
+                value={conditions}
+                onChange={(e) => setConditions(e.target.value)}
+                disabled={isInFlight}
+              >
+                <option value="Dry">Dry</option>
+                <option value="Wet">Wet</option>
+              </select>
+            </div>
           </div>
         </form>
       </Card>
 
-      <div css={videoUploadPlaceholderStyles}>
-        Upload session footage
-      </div>
-
-      <div css={lapCardWrapperStyles}>
-        <LapInputsCard
-          laps={laps}
-          disabled={isInFlight}
-          onAddLap={addLapRow}
-          onChangeLap={updateLapRow}
-          onRemoveLap={removeLapRow}
-          onAddLapEvent={addLapEventRow}
-          onChangeLapEvent={updateLapEventRow}
-          onRemoveLapEvent={removeLapEventRow}
-          fieldStyles={inputFieldStyles}
-        />
+      <div css={rightColumnStyles}>
+        <div>
+          <LapInputsCard
+            laps={laps}
+            disabled={isInFlight}
+            onAddLap={addLapRow}
+            onChangeLap={updateLapRow}
+            onRemoveLap={removeLapRow}
+            onAddLapEvent={addLapEventRow}
+            onChangeLapEvent={updateLapEventRow}
+            onRemoveLapEvent={removeLapEventRow}
+            fieldStyles={inputFieldStyles}
+          />
+        </div>
+        <div css={formActionsStyles}>
+          <button
+            type="submit"
+            form="create-session-form"
+            css={primaryButtonStyles}
+            disabled={isCreateDisabled}
+          >
+            {isInFlight ? "Creating..." : "Create Session"}
+          </button>
+        </div>
       </div>
 
       <CreateCircuitModal

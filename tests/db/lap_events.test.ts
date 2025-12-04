@@ -7,6 +7,7 @@ import { migration as circuitMigration } from "../../src/db/migrations/03_create
 import { migration as trackSessionMigration } from "../../src/db/migrations/04_create_track_sessions.js";
 import { migration as lapMigration } from "../../src/db/migrations/05_create_laps.js";
 import { migration as lapEventMigration } from "../../src/db/migrations/06_create_lap_events.js";
+import { migration as trackSessionConditionsMigration } from "../../src/db/migrations/08_add_track_session_conditions.js";
 import { createUser, type UserRecord } from "../../src/db/users.js";
 import { createCircuit, type CircuitRecord } from "../../src/db/circuits.js";
 import { createTrackSession, type TrackSessionRecord } from "../../src/db/track_sessions.js";
@@ -32,6 +33,7 @@ describe("lap_events", () => {
     userMigration.up(db);
     circuitMigration.up(db);
     trackSessionMigration.up(db);
+    trackSessionConditionsMigration.up(db);
     lapMigration.up(db);
     lapEventMigration.up(db);
     user = createUser("testuser", "hashedpassword");

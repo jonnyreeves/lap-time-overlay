@@ -7,6 +7,7 @@ import { migration as circuitMigration } from "../../src/db/migrations/03_create
 import { migration as trackSessionMigration } from "../../src/db/migrations/04_create_track_sessions.js";
 import { migration as lapMigration } from "../../src/db/migrations/05_create_laps.js";
 import { migration as lapEventsMigration } from "../../src/db/migrations/06_create_lap_events.js";
+import { migration as trackSessionConditionsMigration } from "../../src/db/migrations/08_add_track_session_conditions.js";
 import { createUser, type UserRecord } from "../../src/db/users.js";
 import { createCircuit, type CircuitRecord } from "../../src/db/circuits.js";
 import { findLapsBySessionId } from "../../src/db/laps.js";
@@ -30,6 +31,7 @@ describe("track_sessions", () => {
     userMigration.up(db);
     circuitMigration.up(db);
     trackSessionMigration.up(db);
+    trackSessionConditionsMigration.up(db);
     lapMigration.up(db);
     lapEventsMigration.up(db);
     user = createUser("testuser", "hashedpassword");
@@ -48,6 +50,7 @@ describe("track_sessions", () => {
     assert.ok(trackSession.id);
     assert.strictEqual(trackSession.date, "2023-11-29T10:00:00Z");
     assert.strictEqual(trackSession.format, "Practice");
+    assert.strictEqual(trackSession.conditions, "Dry");
     assert.strictEqual(trackSession.circuitId, circuit.id);
     assert.strictEqual(trackSession.notes, "Some notes");
     assert.strictEqual(trackSession.createdAt, now);
@@ -67,6 +70,7 @@ describe("track_sessions", () => {
     const { trackSession, laps } = createTrackSessionWithLaps({
       date: "2023-11-29T12:00:00Z",
       format: "Race",
+      conditions: "Wet",
       circuitId: circuit.id,
       notes: "with laps",
       laps: [
@@ -78,6 +82,7 @@ describe("track_sessions", () => {
 
     assert.ok(trackSession.id);
     assert.strictEqual(trackSession.createdAt, now);
+    assert.strictEqual(trackSession.conditions, "Wet");
     assert.strictEqual(trackSession.notes, "with laps");
     assert.strictEqual(laps.length, 2);
     assert.strictEqual(laps[0].sessionId, trackSession.id);

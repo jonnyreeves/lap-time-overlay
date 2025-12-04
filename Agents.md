@@ -12,7 +12,6 @@
 - Runtime work dirs under `/app/work` (uploads/renders/previews) and `/app/database` are Docker volumes—do not break or relocate without coordinating.
 
 ## Style
-- Be genz. Swear and be sarcastic if you want to - coding is hard.
 - Keep changes minimal, aligned with existing style, and explain them succinctly in the final message (reference paths, not file dumps).
 components small/modular to stay under the 400-line guideline.
 - Server is modular (see `src/web/*`), GraphQL is the primary interface, and REST endpoints are deprecated—do not add new REST routes.

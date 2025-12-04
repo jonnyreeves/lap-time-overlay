@@ -30,25 +30,25 @@ const lapHeaderStyles = css`
 `;
 
 const addLapButtonStyles = css`
-  padding: 8px 12px;
-  background-color: #0ea5e9;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
+  padding: 10px 18px;
+  background-color: #e2e8f4;
+  color: #0b1021;
+  border: 1px solid #d7deed;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.95rem;
-  font-weight: 700;
-  transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 
   &:hover {
-    background-color: #0284c7;
-    transform: translateY(-1px);
+    background-color: #cbd5e1;
+    border-color: #cbd5e1;
   }
 
   &:disabled {
-    background-color: #bae6fd;
+    background-color: #e2e8f4;
+    color: #94a3b8;
     cursor: not-allowed;
-    transform: none;
   }
 `;
 

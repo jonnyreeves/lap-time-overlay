@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<bb86a64c4af5c8eca2f35336854c3a56>>
+ * @generated SignedSource<<e2e28a9cfb88fa8b98d4b085ec11dd7f>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,6 +11,7 @@
 import { ConcreteRequest } from 'relay-runtime';
 export type CreateTrackSessionInput = {
   circuitId: string;
+  conditions?: string | null | undefined;
   date: string;
   format: string;
   laps?: ReadonlyArray<LapInput> | null | undefined;
@@ -36,6 +37,7 @@ export type createTrackSessionMutation$data = {
         readonly id: string;
         readonly name: string;
       };
+      readonly conditions: string;
       readonly date: string;
       readonly format: string;
       readonly id: string;
@@ -103,6 +105,13 @@ v2 = [
           {
             "alias": null,
             "args": null,
+            "kind": "ScalarField",
+            "name": "conditions",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
             "concreteType": "Circuit",
             "kind": "LinkedField",
             "name": "circuit",
@@ -144,16 +153,16 @@ return {
     "selections": (v2/*: any*/)
   },
   "params": {
-    "cacheID": "0ce0df824cc4197cac0b418fb22aafc3",
+    "cacheID": "1b96acb16558b85fae98b767198ed5c2",
     "id": null,
     "metadata": {},
     "name": "createTrackSessionMutation",
     "operationKind": "mutation",
-    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      circuit {\n        id\n        name\n      }\n    }\n  }\n}\n"
+    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      conditions\n      circuit {\n        id\n        name\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "c0cb45042d7cd45f0a44d675ca4e7de2";
+(node as any).hash = "8f8808aa80d46578aeb32888d8bae14b";
 
 export default node;

@@ -5,7 +5,7 @@ import { createCircuit, findAllCircuits, findCircuitById, findCircuitsByUserId }
 import { findLapEventsByLapId, type LapEventRecord } from "../../db/lap_events.js";
 import { findLapById, findLapsBySessionId, type LapRecord } from "../../db/laps.js";
 import { findTrackRecordingsBySessionId, type TrackRecordingRecord } from "../../db/track_recordings.js";
-import { createTrackSessionWithLaps, findTrackSessionById, findTrackSessionsByCircuitId, type TrackSessionLapInput, type TrackSessionRecord } from "../../db/track_sessions.js";
+import { createTrackSessionWithLaps, findTrackSessionById, findTrackSessionsByCircuitId, type TrackSessionConditions, type TrackSessionLapInput, type TrackSessionRecord } from "../../db/track_sessions.js";
 import {
   AuthError,
   endSession,
@@ -27,6 +27,7 @@ type CreateTrackSessionInputArgs = {
   input?: {
     date?: string;
     format?: string;
+    conditions?: string;
     circuitId?: string;
     notes?: string;
     laps?: LapInputArg[] | null;
@@ -127,10 +128,12 @@ export const rootValue = {
       });
     }
     const laps = parseLapInputs(input.laps);
+    const conditions = parseConditions(input.conditions);
     const { trackSession } = createTrackSessionWithLaps({
       date: input.date,
       format: input.format,
       circuitId: input.circuitId,
+      conditions,
       notes: input.notes,
       laps,
     });
@@ -240,6 +243,7 @@ function toTrackSessionPayload(session: TrackSessionRecord) {
     id: session.id,
     date: session.date,
     format: session.format,
+    conditions: session.conditions,
     circuit: () => {
       const circuit = findCircuitById(session.circuitId);
       if (!circuit) {
@@ -356,4 +360,19 @@ function findTrackSessionsForUser(userId: string): TrackSessionRecord[] {
   }
   // Sort by date in descending order
   return allTrackSessions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
+function parseConditions(conditions: string | undefined): TrackSessionConditions {
+  if (!conditions) {
+    return "Dry";
+  }
+
+  const normalized = conditions.trim();
+  if (normalized === "Dry" || normalized === "Wet") {
+    return normalized;
+  }
+
+  throw new GraphQLError("conditions must be either Dry or Wet", {
+    extensions: { code: "VALIDATION_FAILED" },
+  });
 }

@@ -28,6 +28,7 @@ input LapEventInput {
 input CreateTrackSessionInput {
   date: String!
   format: String!
+  conditions: String
   circuitId: ID!
   notes: String
   laps: [LapInput!]
@@ -68,6 +69,7 @@ type TrackSession {
   id: ID!
   date: String!
   format: String!
+  conditions: String!
   circuit: Circuit!
   notes: String
   createdAt: String!
