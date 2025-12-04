@@ -95,3 +95,13 @@ export function createLaps(
   })();
   return newLaps;
 }
+
+export interface LapRepository {
+  findById: (id: string) => LapRecord | null;
+  findBySessionId: (sessionId: string) => LapRecord[];
+}
+
+export const lapsRepository: LapRepository = {
+  findById: findLapById,
+  findBySessionId: findLapsBySessionId,
+};

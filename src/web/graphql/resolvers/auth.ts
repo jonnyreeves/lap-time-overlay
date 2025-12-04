@@ -1,6 +1,5 @@
 import { GraphQLError } from "graphql";
 import { endSession, loginUser, registerUser, type PublicUser } from "../../auth/service.js";
-import { findCircuitsByUserId } from "../../../db/circuits.js";
 import { toCircuitPayload } from "./circuit.js";
 import {
   findTrackSessionsForUser,
@@ -22,14 +21,19 @@ export const authResolvers = {
   viewer: (_args: unknown, context: GraphQLContext) => {
     if (!context.currentUser) return null;
     const user = context.currentUser;
+    const { repositories } = context;
     return toUserPayload(user, {
       recentCircuits: (args: { first: number }) => {
-        const circuits = findCircuitsByUserId(user.id);
-        return circuits.slice(0, args.first).map(toCircuitPayload);
+        const circuits = repositories.circuits.findByUserId(user.id);
+        return circuits
+          .slice(0, args.first)
+          .map((circuit) => toCircuitPayload(circuit, repositories));
       },
       recentTrackSessions: (args: { first: number }) => {
-        const sessions = findTrackSessionsForUser(user.id);
-        return sessions.slice(0, args.first).map(toTrackSessionPayload);
+        const sessions = findTrackSessionsForUser(user.id, repositories);
+        return sessions
+          .slice(0, args.first)
+          .map((session) => toTrackSessionPayload(session, repositories));
       },
     });
   },

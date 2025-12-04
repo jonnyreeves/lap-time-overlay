@@ -79,3 +79,11 @@ export function createTrackRecording(
     updatedAt: now,
   };
 }
+
+export interface TrackRecordingRepository {
+  findBySessionId: (sessionId: string) => TrackRecordingRecord[];
+}
+
+export const trackRecordingsRepository: TrackRecordingRepository = {
+  findBySessionId: findTrackRecordingsBySessionId,
+};

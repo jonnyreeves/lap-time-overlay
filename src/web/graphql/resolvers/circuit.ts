@@ -1,14 +1,13 @@
 import { GraphQLError } from "graphql";
-import { createCircuit, findAllCircuits, type CircuitRecord } from "../../../db/circuits.js";
-import { findLapsBySessionId } from "../../../db/laps.js";
-import { findTrackSessionsByCircuitId } from "../../../db/track_sessions.js";
+import type { CircuitRecord } from "../../../db/circuits.js";
 import type { GraphQLContext } from "../context.js";
+import type { Repositories } from "../repositories.js";
 
-export function getCircuitPersonalBest(circuitId: string) {
-  const sessions = findTrackSessionsByCircuitId(circuitId);
+export function getCircuitPersonalBest(circuitId: string, repositories: Repositories) {
+  const sessions = repositories.trackSessions.findByCircuitId(circuitId);
   const lapTimes: number[] = [];
   for (const session of sessions) {
-    const laps = findLapsBySessionId(session.id);
+    const laps = repositories.laps.findBySessionId(session.id);
     lapTimes.push(...laps.map((lap) => lap.time));
   }
   if (lapTimes.length === 0) {
@@ -17,18 +16,19 @@ export function getCircuitPersonalBest(circuitId: string) {
   return Math.min(...lapTimes);
 }
 
-export function toCircuitPayload(circuit: CircuitRecord) {
+export function toCircuitPayload(circuit: CircuitRecord, repositories: Repositories) {
   return {
     id: circuit.id,
     name: circuit.name,
     heroImage: circuit.heroImage,
-    personalBest: () => getCircuitPersonalBest(circuit.id),
+    personalBest: () => getCircuitPersonalBest(circuit.id, repositories),
   };
 }
 
 export const circuitResolvers = {
-  circuits: () => {
-    return findAllCircuits().map(toCircuitPayload);
+  circuits: (_args: unknown, context: GraphQLContext) => {
+    const { repositories } = context;
+    return repositories.circuits.findAll().map((circuit) => toCircuitPayload(circuit, repositories));
   },
   createCircuit: (args: { input?: { name?: string; heroImage?: string } }, context: GraphQLContext) => {
     if (!context.currentUser) {
@@ -42,7 +42,11 @@ export const circuitResolvers = {
         extensions: { code: "VALIDATION_FAILED" },
       });
     }
-    const newCircuit = createCircuit(input.name, context.currentUser.id, input.heroImage);
+    const newCircuit = context.repositories.circuits.create(
+      input.name,
+      context.currentUser.id,
+      input.heroImage
+    );
     return { circuit: newCircuit };
   },
 };

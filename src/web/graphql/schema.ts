@@ -1,15 +1,11 @@
 import { readFileSync } from "fs";
-import { GraphQLError, buildSchema, type GraphQLSchema } from "graphql";
+import { buildSchema, type GraphQLSchema } from "graphql";
 import { resolve as pathResolve } from "path";
-import type { GraphQLContext } from "./context.js";
+import { authResolvers } from "./resolvers/auth.js";
 import { circuitResolvers } from "./resolvers/circuit.js";
 import {
-  type CreateTrackSessionInputArgs,
-  type TrackSessionArgs,
-  type UpdateTrackSessionInputArgs,
-  trackSessionResolvers,
+  trackSessionResolvers
 } from "./resolvers/trackSession.js";
-import { authResolvers } from "./resolvers/auth.js";
 
 const schemaFileContents = readFileSync(
   pathResolve(process.cwd(), "schema.graphql"),
@@ -25,10 +21,7 @@ export const rootValue = {
   register: authResolvers.register,
   login: authResolvers.login,
   logout: authResolvers.logout,
-  createCircuit: (
-    args: { input?: { name?: string; heroImage?: string } },
-    context: GraphQLContext
-  ) => circuitResolvers.createCircuit(args, context),
+  createCircuit: circuitResolvers.createCircuit,
   createTrackSession: trackSessionResolvers.createTrackSession,
   updateTrackSession: trackSessionResolvers.updateTrackSession,
 };

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createMockGraphQLContext } from "../context.mock.js";
 import { rootValue } from "../../../../src/web/graphql/schema.js";
 
 const registerUser = vi.hoisted(() => vi.fn());
@@ -12,18 +13,12 @@ vi.mock("../../../../src/web/auth/service.js", () => ({
 }));
 
 describe("auth resolvers", () => {
-  const baseContext = {
-    setSessionCookie: vi.fn(),
-    clearSessionCookie: vi.fn(),
+  const { context: baseContext, repositories } = createMockGraphQLContext({
     sessionToken: "token-123",
-  };
+  });
 
   beforeEach(() => {
-    registerUser.mockReset();
-    loginUser.mockReset();
-    endSession.mockReset();
-    baseContext.setSessionCookie.mockReset();
-    baseContext.clearSessionCookie.mockReset();
+    vi.clearAllMocks();
   });
 
   it("register validates required fields", () => {

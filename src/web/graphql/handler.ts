@@ -15,6 +15,9 @@ import {
   refreshSession,
 } from "../auth/service.js";
 import type { GraphQLContext } from "./context.js";
+import { createRepositories } from "./repositories.js";
+
+const repositories = createRepositories();
 
 export async function handleGraphQL(
   req: http.IncomingMessage,
@@ -64,6 +67,7 @@ export async function handleGraphQL(
     setSessionCookie: (token: string, expiresAt: number) =>
       appendSetCookie(res, buildSessionCookie(token, expiresAt)),
     clearSessionCookie: () => appendSetCookie(res, buildClearCookie()),
+    repositories,
   };
 
   try {

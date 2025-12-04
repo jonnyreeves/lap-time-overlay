@@ -215,3 +215,33 @@ export function updateTrackSession({
 
   return next;
 }
+
+export interface TrackSessionRepository {
+  findById: (id: string) => TrackSessionRecord | null;
+  findByCircuitId: (circuitId: string) => TrackSessionRecord[];
+  createWithLaps: (input: {
+    date: string;
+    format: string;
+    circuitId: string;
+    conditions?: TrackSessionConditions;
+    notes?: string | null;
+    laps?: TrackSessionLapInput[];
+    now?: number;
+  }) => { trackSession: TrackSessionRecord; laps: LapRecord[] };
+  update: (input: {
+    id: string;
+    date?: string;
+    format?: string;
+    circuitId?: string;
+    conditions?: TrackSessionConditions;
+    notes?: string | null;
+    now?: number;
+  }) => TrackSessionRecord | null;
+}
+
+export const trackSessionsRepository: TrackSessionRepository = {
+  findById: findTrackSessionById,
+  findByCircuitId: findTrackSessionsByCircuitId,
+  createWithLaps: createTrackSessionWithLaps,
+  update: updateTrackSession,
+};

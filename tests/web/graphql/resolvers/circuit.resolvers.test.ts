@@ -1,48 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createMockGraphQLContext } from "../context.mock.js";
 import { rootValue } from "../../../../src/web/graphql/schema.js";
 
-const findAllCircuits = vi.hoisted(() => vi.fn());
-const findTrackSessionsByCircuitId = vi.hoisted(() => vi.fn());
-const findLapsBySessionId = vi.hoisted(() => vi.fn());
-const createCircuit = vi.hoisted(() => vi.fn());
-
-vi.mock("../../../../src/db/circuits.js", () => ({
-  findAllCircuits,
-  findCircuitById: vi.fn(),
-  findCircuitsByUserId: vi.fn(),
-  createCircuit,
-}));
-
-vi.mock("../../../../src/db/track_sessions.js", () => ({
-  findTrackSessionById: vi.fn(),
-  findTrackSessionsByCircuitId,
-  createTrackSessionWithLaps: vi.fn(),
-  updateTrackSession: vi.fn(),
-}));
-
-vi.mock("../../../../src/db/laps.js", () => ({
-  findLapById: vi.fn(),
-  findLapsBySessionId,
-}));
-
-vi.mock("../../../../src/db/lap_events.js", () => ({
-  findLapEventsByLapId: vi.fn(),
-}));
-
-vi.mock("../../../../src/db/track_recordings.js", () => ({
-  findTrackRecordingsBySessionId: vi.fn(),
-}));
+const { context: baseContext, repositories } = createMockGraphQLContext();
 
 describe("circuit resolver", () => {
   beforeEach(() => {
-    findAllCircuits.mockReset();
-    findTrackSessionsByCircuitId.mockReset();
-    findLapsBySessionId.mockReset();
-    createCircuit.mockReset();
+    vi.clearAllMocks();
   });
 
   it("returns the fastest lap per circuit or null when no laps", async () => {
-    findAllCircuits.mockReturnValue([
+    repositories.circuits.findAll.mockReturnValue([
       {
         id: "c1",
         name: "Spa",
@@ -61,7 +29,7 @@ describe("circuit resolver", () => {
       },
     ]);
 
-    findTrackSessionsByCircuitId.mockImplementation((circuitId: string) => {
+    repositories.trackSessions.findByCircuitId.mockImplementation((circuitId: string) => {
       if (circuitId === "c1") {
         return [
           {
@@ -79,7 +47,7 @@ describe("circuit resolver", () => {
       return [];
     });
 
-    findLapsBySessionId.mockImplementation((sessionId: string) => {
+    repositories.laps.findBySessionId.mockImplementation((sessionId: string) => {
       if (sessionId === "s1") {
         return [
           { id: "l1", sessionId: "s1", lapNumber: 1, time: 75.123, createdAt: 0, updatedAt: 0 },
@@ -89,7 +57,7 @@ describe("circuit resolver", () => {
       return [];
     });
 
-    const circuits = rootValue.circuits();
+    const circuits = rootValue.circuits({}, baseContext as never);
     expect(circuits).toHaveLength(2);
 
     expect(await circuits[0]?.personalBest()).toBeCloseTo(74.987, 3);
@@ -98,12 +66,12 @@ describe("circuit resolver", () => {
 
   it("createCircuit rejects unauthenticated requests", () => {
     expect(() =>
-      rootValue.createCircuit({ input: { name: "Spa" } }, { currentUser: null } as never)
+      rootValue.createCircuit({ input: { name: "Spa" } }, baseContext as never)
     ).toThrowError("Authentication required");
   });
 
   it("createCircuit validates name and returns new circuit", () => {
-    createCircuit.mockReturnValue({
+    repositories.circuits.create.mockReturnValue({
       id: "c1",
       name: "Spa",
       heroImage: "img",
@@ -114,10 +82,10 @@ describe("circuit resolver", () => {
 
     const result = rootValue.createCircuit(
       { input: { name: "Spa", heroImage: "img" } },
-      { currentUser: { id: "user-1" } } as never
+      { ...baseContext, currentUser: { id: "user-1" } } as never
     );
 
-    expect(createCircuit).toHaveBeenCalledWith("Spa", "user-1", "img");
+    expect(repositories.circuits.create).toHaveBeenCalledWith("Spa", "user-1", "img");
     expect(result.circuit).toMatchObject({ id: "c1", name: "Spa", heroImage: "img" });
   });
 });

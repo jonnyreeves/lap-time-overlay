@@ -1,10 +1,14 @@
 import { GraphQLError } from "graphql";
-import { findCircuitById, findCircuitsByUserId } from "../../../db/circuits.js";
-import { findLapEventsByLapId, type LapEventRecord } from "../../../db/lap_events.js";
-import { findLapById, findLapsBySessionId, type LapRecord } from "../../../db/laps.js";
-import { findTrackRecordingsBySessionId, type TrackRecordingRecord } from "../../../db/track_recordings.js";
-import { createTrackSessionWithLaps, findTrackSessionById, findTrackSessionsByCircuitId, updateTrackSession as updateTrackSessionDb, type TrackSessionConditions, type TrackSessionLapInput, type TrackSessionRecord } from "../../../db/track_sessions.js";
+import type { LapEventRecord } from "../../../db/lap_events.js";
+import type { LapRecord } from "../../../db/laps.js";
+import type { TrackRecordingRecord } from "../../../db/track_recordings.js";
+import type {
+  TrackSessionConditions,
+  TrackSessionLapInput,
+  TrackSessionRecord,
+} from "../../../db/track_sessions.js";
 import type { GraphQLContext } from "../context.js";
+import type { Repositories } from "../repositories.js";
 import { toCircuitPayload } from "./circuit.js";
 
 export type LapEventInputArg = { offset?: number; event?: string; value?: string };
@@ -132,57 +136,59 @@ export function parseLapInputs(laps: LapInputArg[] | null | undefined): TrackSes
   return parsed;
 }
 
-export function toTrackSessionPayload(session: TrackSessionRecord) {
+export function toTrackSessionPayload(session: TrackSessionRecord, repositories: Repositories) {
   return {
     id: session.id,
     date: session.date,
     format: session.format,
     conditions: session.conditions,
     circuit: () => {
-      const circuit = findCircuitById(session.circuitId);
+      const circuit = repositories.circuits.findById(session.circuitId);
       if (!circuit) {
         throw new GraphQLError(`Circuit with ID ${session.circuitId} not found`, {
           extensions: { code: "NOT_FOUND" },
         });
       }
-      return toCircuitPayload(circuit);
+      return toCircuitPayload(circuit, repositories);
     },
     notes: session.notes,
     createdAt: new Date(session.createdAt).toISOString(),
     updatedAt: new Date(session.updatedAt).toISOString(),
     laps: (args: { first: number }) => {
-      const laps = findLapsBySessionId(session.id);
-      return laps.slice(0, args.first).map(toLapPayload);
+      const laps = repositories.laps.findBySessionId(session.id);
+      return laps.slice(0, args.first).map((lap) => toLapPayload(lap, repositories));
     },
     trackRecordings: (args: { first: number }) => {
-      const recordings = findTrackRecordingsBySessionId(session.id);
-      return recordings.slice(0, args.first).map(toTrackRecordingPayload);
+      const recordings = repositories.trackRecordings.findBySessionId(session.id);
+      return recordings
+        .slice(0, args.first)
+        .map((recording) => toTrackRecordingPayload(recording, repositories));
     },
   };
 }
 
-export function toLapPayload(lap: LapRecord) {
+export function toLapPayload(lap: LapRecord, repositories: Repositories) {
   return {
     id: lap.id,
     session: () => {
-      const session = findTrackSessionById(lap.sessionId);
+      const session = repositories.trackSessions.findById(lap.sessionId);
       if (!session) {
         throw new GraphQLError(`Track session with ID ${lap.sessionId} not found`, {
           extensions: { code: "NOT_FOUND" },
         });
       }
-      return toTrackSessionPayload(session);
+      return toTrackSessionPayload(session, repositories);
     },
     lapNumber: lap.lapNumber,
     time: lap.time,
     createdAt: new Date(lap.createdAt).toISOString(),
     updatedAt: new Date(lap.updatedAt).toISOString(),
     lapEvents: (args: { first: number }) => {
-      const events = findLapEventsByLapId(lap.id);
-      return events.slice(0, args.first).map(toLapEventPayload);
+      const events = repositories.lapEvents.findByLapId(lap.id);
+      return events.slice(0, args.first).map((event) => toLapEventPayload(event, repositories));
     },
     personalBest: () => {
-      const lapsInSession = findLapsBySessionId(lap.sessionId);
+      const lapsInSession = repositories.laps.findBySessionId(lap.sessionId);
       if (lapsInSession.length === 0) {
         return null;
       }
@@ -191,17 +197,17 @@ export function toLapPayload(lap: LapRecord) {
   };
 }
 
-export function toLapEventPayload(lapEvent: LapEventRecord) {
+export function toLapEventPayload(lapEvent: LapEventRecord, repositories: Repositories) {
   return {
     id: lapEvent.id,
     lap: () => {
-      const lap = findLapById(lapEvent.lapId);
+      const lap = repositories.laps.findById(lapEvent.lapId);
       if (!lap) {
         throw new GraphQLError(`Lap with ID ${lapEvent.lapId} not found`, {
           extensions: { code: "NOT_FOUND" },
         });
       }
-      return toLapPayload(lap);
+      return toLapPayload(lap, repositories);
     },
     offset: lapEvent.offset,
     event: lapEvent.event,
@@ -211,17 +217,17 @@ export function toLapEventPayload(lapEvent: LapEventRecord) {
   };
 }
 
-export function toTrackRecordingPayload(recording: TrackRecordingRecord) {
+export function toTrackRecordingPayload(recording: TrackRecordingRecord, repositories: Repositories) {
   return {
     id: recording.id,
     session: () => {
-      const session = findTrackSessionById(recording.sessionId);
+      const session = repositories.trackSessions.findById(recording.sessionId);
       if (!session) {
         throw new GraphQLError(`Track session with ID ${recording.sessionId} not found`, {
           extensions: { code: "NOT_FOUND" },
         });
       }
-      return toTrackSessionPayload(session);
+      return toTrackSessionPayload(session, repositories);
     },
     mediaId: recording.mediaId,
     lapOneOffset: recording.lapOneOffset,
@@ -231,11 +237,11 @@ export function toTrackRecordingPayload(recording: TrackRecordingRecord) {
   };
 }
 
-export function findTrackSessionsForUser(userId: string): TrackSessionRecord[] {
-  const circuitsForUser = findCircuitsByUserId(userId);
+export function findTrackSessionsForUser(userId: string, repositories: Repositories): TrackSessionRecord[] {
+  const circuitsForUser = repositories.circuits.findByUserId(userId);
   let allTrackSessions: TrackSessionRecord[] = [];
   for (const circuit of circuitsForUser) {
-    const sessions = findTrackSessionsByCircuitId(circuit.id);
+    const sessions = repositories.trackSessions.findByCircuitId(circuit.id);
     allTrackSessions = allTrackSessions.concat(sessions);
   }
   return allTrackSessions.sort(
@@ -245,6 +251,7 @@ export function findTrackSessionsForUser(userId: string): TrackSessionRecord[] {
 
 export const trackSessionResolvers = {
   trackSession: (args: TrackSessionArgs, context: GraphQLContext) => {
+    const { repositories } = context;
     if (!context.currentUser) {
       throw new GraphQLError("Authentication required", {
         extensions: { code: "UNAUTHENTICATED" },
@@ -256,23 +263,24 @@ export const trackSessionResolvers = {
       });
     }
 
-    const session = findTrackSessionById(args.id);
+    const session = repositories.trackSessions.findById(args.id);
     if (!session) {
       throw new GraphQLError(`Track session with ID ${args.id} not found`, {
         extensions: { code: "NOT_FOUND" },
       });
     }
 
-    const circuit = findCircuitById(session.circuitId);
+    const circuit = repositories.circuits.findById(session.circuitId);
     if (!circuit || circuit.userId !== context.currentUser.id) {
       throw new GraphQLError("You do not have access to this session", {
         extensions: { code: "UNAUTHENTICATED" },
       });
     }
 
-    return toTrackSessionPayload(session);
+    return toTrackSessionPayload(session, repositories);
   },
   createTrackSession: (args: CreateTrackSessionInputArgs, context: GraphQLContext) => {
+    const { repositories } = context;
     if (!context.currentUser) {
       throw new GraphQLError("Authentication required", {
         extensions: { code: "UNAUTHENTICATED" },
@@ -286,7 +294,7 @@ export const trackSessionResolvers = {
     }
     const laps = parseLapInputs(input.laps);
     const conditions = parseConditions(input.conditions);
-    const { trackSession } = createTrackSessionWithLaps({
+    const { trackSession } = repositories.trackSessions.createWithLaps({
       date: input.date,
       format: input.format,
       circuitId: input.circuitId,
@@ -294,9 +302,10 @@ export const trackSessionResolvers = {
       notes: input.notes,
       laps,
     });
-    return { trackSession: toTrackSessionPayload(trackSession) };
+    return { trackSession: toTrackSessionPayload(trackSession, repositories) };
   },
   updateTrackSession: (args: UpdateTrackSessionInputArgs, context: GraphQLContext) => {
+    const { repositories } = context;
     if (!context.currentUser) {
       throw new GraphQLError("Authentication required", {
         extensions: { code: "UNAUTHENTICATED" },
@@ -310,14 +319,14 @@ export const trackSessionResolvers = {
       });
     }
 
-    const existingSession = findTrackSessionById(input.id);
+    const existingSession = repositories.trackSessions.findById(input.id);
     if (!existingSession) {
       throw new GraphQLError(`Track session with ID ${input.id} not found`, {
         extensions: { code: "NOT_FOUND" },
       });
     }
 
-    const currentCircuit = findCircuitById(existingSession.circuitId);
+    const currentCircuit = repositories.circuits.findById(existingSession.circuitId);
     if (!currentCircuit || currentCircuit.userId !== context.currentUser.id) {
       throw new GraphQLError("You do not have access to this session", {
         extensions: { code: "UNAUTHENTICATED" },
@@ -337,7 +346,7 @@ export const trackSessionResolvers = {
     }
 
     if (circuitIdProvided && input.circuitId) {
-      const newCircuit = findCircuitById(input.circuitId);
+      const newCircuit = repositories.circuits.findById(input.circuitId);
       if (!newCircuit) {
         throw new GraphQLError(`Circuit with ID ${input.circuitId} not found`, {
           extensions: { code: "NOT_FOUND" },
@@ -381,7 +390,7 @@ export const trackSessionResolvers = {
         ? parseConditions(input.conditions)
         : undefined;
 
-    const updated = updateTrackSessionDb({
+    const updated = repositories.trackSessions.update({
       id: input.id,
       date: nextDate,
       format: nextFormat,
@@ -396,6 +405,6 @@ export const trackSessionResolvers = {
       });
     }
 
-    return { trackSession: toTrackSessionPayload(updated) };
+    return { trackSession: toTrackSessionPayload(updated, repositories) };
   },
 };

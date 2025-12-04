@@ -85,3 +85,17 @@ export function createCircuit(
     updatedAt: now,
   };
 }
+
+export interface CircuitRepository {
+  findById: (id: string) => CircuitRecord | null;
+  findByUserId: (userId: string) => CircuitRecord[];
+  findAll: () => CircuitRecord[];
+  create: (name: string, userId: string, heroImage?: string | null) => CircuitRecord;
+}
+
+export const circuitsRepository: CircuitRepository = {
+  findById: findCircuitById,
+  findByUserId: findCircuitsByUserId,
+  findAll: findAllCircuits,
+  create: createCircuit,
+};

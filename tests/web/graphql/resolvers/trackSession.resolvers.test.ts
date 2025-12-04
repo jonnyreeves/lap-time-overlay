@@ -1,49 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { createMockGraphQLContext } from "../context.mock.js";
 import { rootValue } from "../../../../src/web/graphql/schema.js";
 
-const findTrackSessionById = vi.hoisted(() => vi.fn());
-const findTrackSessionsByCircuitId = vi.hoisted(() => vi.fn());
-const updateTrackSession = vi.hoisted(() => vi.fn());
-const createTrackSessionWithLaps = vi.hoisted(() => vi.fn());
-
-const findCircuitById = vi.hoisted(() => vi.fn());
-const findLapEventsByLapId = vi.hoisted(() => vi.fn());
-const findTrackRecordingsBySessionId = vi.hoisted(() => vi.fn());
-const findLapsBySessionId = vi.hoisted(() => vi.fn());
-
-vi.mock("../../../../src/db/track_sessions.js", () => ({
-  findTrackSessionById,
-  findTrackSessionsByCircuitId,
-  updateTrackSession,
-  createTrackSessionWithLaps,
-}));
-
-vi.mock("../../../../src/db/circuits.js", () => ({
-  findCircuitById,
-  findAllCircuits: vi.fn(),
-  findCircuitsByUserId: vi.fn(),
-  createCircuit: vi.fn(),
-}));
-
-vi.mock("../../../../src/db/laps.js", () => ({
-  findLapById: vi.fn(),
-  findLapsBySessionId,
-}));
-
-vi.mock("../../../../src/db/lap_events.js", () => ({
-  findLapEventsByLapId,
-}));
-
-vi.mock("../../../../src/db/track_recordings.js", () => ({
-  findTrackRecordingsBySessionId,
-}));
-
-const context = {
+const { context, repositories } = createMockGraphQLContext({
   currentUser: { id: "user-1", username: "sam", createdAt: Date.now() },
-  setSessionCookie: vi.fn(),
-  clearSessionCookie: vi.fn(),
   sessionToken: "token",
-};
+});
 
 const mockSession = {
   id: "s1",
@@ -67,14 +29,7 @@ const mockCircuit = {
 
 describe("trackSession resolvers", () => {
   beforeEach(() => {
-    findTrackSessionById.mockReset();
-    findTrackSessionsByCircuitId.mockReset();
-    updateTrackSession.mockReset();
-    createTrackSessionWithLaps.mockReset();
-    findCircuitById.mockReset();
-    findLapsBySessionId.mockReset();
-    findLapEventsByLapId.mockReset();
-    findTrackRecordingsBySessionId.mockReset();
+    vi.clearAllMocks();
   });
 
   it("rejects unauthenticated trackSession query", async () => {
@@ -83,8 +38,8 @@ describe("trackSession resolvers", () => {
   });
 
   it("rejects trackSession query when circuit not owned by user", async () => {
-    findTrackSessionById.mockReturnValue(mockSession);
-    findCircuitById.mockReturnValue({ ...mockCircuit, userId: "other" });
+    repositories.trackSessions.findById.mockReturnValue(mockSession);
+    repositories.circuits.findById.mockReturnValue({ ...mockCircuit, userId: "other" });
 
     expect(() => rootValue.trackSession({ id: "s1" }, context)).toThrowError(
       "You do not have access to this session"
@@ -92,9 +47,9 @@ describe("trackSession resolvers", () => {
   });
 
   it("returns session payload with laps and circuit on happy path", async () => {
-    findTrackSessionById.mockReturnValue(mockSession);
-    findCircuitById.mockReturnValue(mockCircuit);
-    findLapsBySessionId.mockReturnValue([
+    repositories.trackSessions.findById.mockReturnValue(mockSession);
+    repositories.circuits.findById.mockReturnValue(mockCircuit);
+    repositories.laps.findBySessionId.mockReturnValue([
       { id: "l1", sessionId: "s1", lapNumber: 1, time: 75.123, createdAt: 0, updatedAt: 0 },
     ]);
 
@@ -111,8 +66,8 @@ describe("trackSession resolvers", () => {
   });
 
   it("createTrackSession forwards parsed input", async () => {
-    createTrackSessionWithLaps.mockReturnValue({ trackSession: mockSession, laps: [] });
-    findCircuitById.mockReturnValue(mockCircuit);
+    repositories.trackSessions.createWithLaps.mockReturnValue({ trackSession: mockSession, laps: [] });
+    repositories.circuits.findById.mockReturnValue(mockCircuit);
 
     const result = rootValue.createTrackSession(
       {
@@ -128,7 +83,7 @@ describe("trackSession resolvers", () => {
       context
     );
 
-    expect(createTrackSessionWithLaps).toHaveBeenCalledWith({
+    expect(repositories.trackSessions.createWithLaps).toHaveBeenCalledWith({
       date: "2024-02-01",
       format: "Race",
       circuitId: "c1",
@@ -147,18 +102,18 @@ describe("trackSession resolvers", () => {
   });
 
   it("updateTrackSession forwards fields to DB and returns payload", async () => {
-    findTrackSessionById.mockReturnValue(mockSession);
-    updateTrackSession.mockReturnValue({ ...mockSession, format: "Practice" });
-    findCircuitById.mockReturnValue(mockCircuit);
-    findLapEventsByLapId.mockReturnValue([]);
-    findTrackRecordingsBySessionId.mockReturnValue([]);
+    repositories.trackSessions.findById.mockReturnValue(mockSession);
+    repositories.trackSessions.update.mockReturnValue({ ...mockSession, format: "Practice" });
+    repositories.circuits.findById.mockReturnValue(mockCircuit);
+    repositories.lapEvents.findByLapId.mockReturnValue([]);
+    repositories.trackRecordings.findBySessionId.mockReturnValue([]);
 
     const result = rootValue.updateTrackSession(
       { input: { id: "s1", format: "Practice" } },
       context
     );
 
-    expect(updateTrackSession).toHaveBeenCalledWith(
+    expect(repositories.trackSessions.update).toHaveBeenCalledWith(
       expect.objectContaining({
         id: "s1",
         date: undefined,

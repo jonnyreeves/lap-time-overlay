@@ -100,3 +100,11 @@ export function createLapEvents(
   })();
   return newLapEvents;
 }
+
+export interface LapEventRepository {
+  findByLapId: (lapId: string) => LapEventRecord[];
+}
+
+export const lapEventsRepository: LapEventRepository = {
+  findByLapId: findLapEventsByLapId,
+};
