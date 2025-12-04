@@ -9,6 +9,7 @@ const RecentCircuitsCardFragment = graphql`
       id
       name
       heroImage
+      personalBest
     }
   }
 `;
@@ -64,6 +65,13 @@ const circuitNameStyles = css`
   margin-top: 5px;
 `;
 
+const circuitPbStyles = css`
+  margin: 4px 0 0;
+  font-size: 0.95rem;
+  color: #6b7280;
+  font-weight: 600;
+`;
+
 function getInitials(name: string): string {
   if (!name) return "";
   const words = name.split(" ");
@@ -98,6 +106,11 @@ export function RecentCircuitsCard({
               )}
             </div>
             <div css={circuitNameStyles}>{circuit.name}</div>
+            <div css={circuitPbStyles}>
+              {typeof circuit.personalBest === "number"
+                ? `PB ${circuit.personalBest.toFixed(3)}s`
+                : "No laps yet"}
+            </div>
           </div>
         ))}
       </div>

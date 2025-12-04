@@ -1,7 +1,7 @@
 type Query {
-  hello: String!
   viewer: User
   circuits: [Circuit!]!
+  trackSession(id: ID!): TrackSession!
 }
 
 input CreateCircuitInput {
@@ -38,12 +38,26 @@ type CreateTrackSessionPayload {
   trackSession: TrackSession!
 }
 
+input UpdateTrackSessionInput {
+  id: ID!
+  date: String
+  format: String
+  conditions: String
+  circuitId: ID
+  notes: String
+}
+
+type UpdateTrackSessionPayload {
+  trackSession: TrackSession!
+}
+
 type Mutation {
   register(input: AuthInput!): AuthPayload!
   login(input: AuthInput!): AuthPayload!
   logout: LogoutResult!
   createCircuit(input: CreateCircuitInput!): CreateCircuitPayload!
   createTrackSession(input: CreateTrackSessionInput!): CreateTrackSessionPayload!
+  updateTrackSession(input: UpdateTrackSessionInput!): UpdateTrackSessionPayload!
 }
 
 input AuthInput {
@@ -63,6 +77,7 @@ type Circuit {
   id: ID!
   name: String!
   heroImage: String
+  personalBest: Float
 }
 
 type TrackSession {

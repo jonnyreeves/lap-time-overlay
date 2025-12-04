@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<2ffbda4852c1c64171500650cb8aa6f7>>
+ * @generated SignedSource<<085f8f0eb0088039ea897a6027247852>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,6 +15,7 @@ export type RecentCircuitsCard_viewer$data = {
     readonly heroImage: string | null | undefined;
     readonly id: string;
     readonly name: string;
+    readonly personalBest: number | null | undefined;
   }>;
   readonly " $fragmentType": "RecentCircuitsCard_viewer";
 };
@@ -57,6 +58,13 @@ const node: ReaderFragment = {
           "kind": "ScalarField",
           "name": "heroImage",
           "storageKey": null
+        },
+        {
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
+          "name": "personalBest",
+          "storageKey": null
         }
       ],
       "storageKey": null
@@ -66,6 +74,6 @@ const node: ReaderFragment = {
   "abstractKey": null
 };
 
-(node as any).hash = "e4031c335da515eb18274b1c8c55fda0";
+(node as any).hash = "0c8a30b93930bb8516dae36231008696";
 
 export default node;

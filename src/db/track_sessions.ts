@@ -173,3 +173,45 @@ export function createTrackSession(
     laps: [],
   }).trackSession;
 }
+
+export function updateTrackSession({
+  id,
+  date,
+  format,
+  circuitId,
+  conditions,
+  notes,
+  now = Date.now(),
+}: {
+  id: string;
+  date?: string;
+  format?: string;
+  circuitId?: string;
+  conditions?: TrackSessionConditions;
+  notes?: string | null;
+  now?: number;
+}): TrackSessionRecord | null {
+  const db = getDb();
+  const current = findTrackSessionById(id);
+  if (!current) {
+    return null;
+  }
+
+  const next: TrackSessionRecord = {
+    ...current,
+    date: date ?? current.date,
+    format: format ?? current.format,
+    circuitId: circuitId ?? current.circuitId,
+    conditions: conditions ?? current.conditions,
+    notes: notes === undefined ? current.notes : notes,
+    updatedAt: now,
+  };
+
+  db.prepare(
+    `UPDATE track_sessions
+     SET date = ?, format = ?, conditions = ?, circuit_id = ?, notes = ?, updated_at = ?
+     WHERE id = ?`
+  ).run(next.date, next.format, next.conditions, next.circuitId, next.notes, next.updatedAt, id);
+
+  return next;
+}

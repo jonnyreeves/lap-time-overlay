@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<21bb111b5ce6e5ba342ebbc696a64f35>>
+ * @generated SignedSource<<38c151c52e7570c7bb0ee11b76de57ab>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,6 +15,7 @@ export type RecentSessionsCard_viewer$data = {
     readonly circuit: {
       readonly name: string;
     };
+    readonly conditions: string;
     readonly date: string;
     readonly format: string;
     readonly id: string;
@@ -75,6 +76,13 @@ const node: ReaderFragment = {
           "alias": null,
           "args": null,
           "kind": "ScalarField",
+          "name": "conditions",
+          "storageKey": null
+        },
+        {
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
           "name": "notes",
           "storageKey": null
         },
@@ -122,6 +130,6 @@ const node: ReaderFragment = {
   "abstractKey": null
 };
 
-(node as any).hash = "a2c838fc7370d3fb567b99493f51572f";
+(node as any).hash = "cbfad4954deb9c16c6c76433b5faf479";
 
 export default node;

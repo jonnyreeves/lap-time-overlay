@@ -17,6 +17,7 @@ import {
   createTrackSessionWithLaps,
   findTrackSessionById,
   findTrackSessionsByCircuitId,
+  updateTrackSession,
   type TrackSessionRecord,
 } from "../../src/db/track_sessions.js";
 
@@ -137,5 +138,38 @@ describe("track_sessions", () => {
     assert.strictEqual(sessions.length, 2);
     assert.deepStrictEqual(sessions[0], session2); // Ordered by date DESC (createdAt in this case)
     assert.deepStrictEqual(sessions[1], session1);
+  });
+
+  it("updates a track session", () => {
+    const now = Date.now();
+    const session = createTrackSession(
+      "2023-11-29T10:00:00Z",
+      "Practice",
+      circuit.id,
+      "notes",
+      now
+    );
+    const otherCircuit = createCircuit("Other Circuit", user.id);
+
+    const updated = updateTrackSession({
+      id: session.id,
+      date: "2023-12-01",
+      format: "Race",
+      circuitId: otherCircuit.id,
+      conditions: "Wet",
+      notes: "Updated",
+      now: now + 1000,
+    });
+
+    assert.ok(updated);
+    assert.strictEqual(updated?.date, "2023-12-01");
+    assert.strictEqual(updated?.format, "Race");
+    assert.strictEqual(updated?.circuitId, otherCircuit.id);
+    assert.strictEqual(updated?.conditions, "Wet");
+    assert.strictEqual(updated?.notes, "Updated");
+    assert.strictEqual(updated?.updatedAt, now + 1000);
+
+    const persisted = findTrackSessionById(session.id);
+    assert.deepStrictEqual(persisted, updated);
   });
 });
