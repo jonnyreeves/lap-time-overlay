@@ -6,6 +6,7 @@ import { circuitResolvers } from "./resolvers/circuit.js";
 import {
   trackSessionResolvers
 } from "./resolvers/trackSession.js";
+import { viewerResolvers } from "./resolvers/viewer.js";
 
 const schemaFileContents = readFileSync(
   pathResolve(process.cwd(), "schema.graphql"),
@@ -15,7 +16,7 @@ const schemaFileContents = readFileSync(
 export const schema: GraphQLSchema = buildSchema(schemaFileContents);
 
 export const rootValue = {
-  viewer: authResolvers.viewer,
+  viewer: viewerResolvers.viewer,
   circuits: circuitResolvers.circuits,
   trackSession: trackSessionResolvers.trackSession,
   register: authResolvers.register,
