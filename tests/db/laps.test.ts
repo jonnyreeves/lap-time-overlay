@@ -33,7 +33,7 @@ describe("laps", () => {
     trackSessionConditionsMigration.up(db);
     lapMigration.up(db);
     user = createUser("testuser", "hashedpassword");
-    circuit = createCircuit("Test Circuit", user.id);
+    circuit = createCircuit("Test Circuit");
     trackSession = createTrackSession(
       "2023-11-29T10:00:00Z",
       "Practice",

@@ -149,7 +149,7 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
           extensions: { code: "NOT_FOUND" },
         });
       }
-      return toCircuitPayload(circuit, repositories);
+      return toCircuitPayload(circuit, repositories, session.userId);
     },
     notes: session.notes,
     createdAt: new Date(session.createdAt).toISOString(),
@@ -269,13 +269,6 @@ export const trackSessionResolvers = {
       });
     }
 
-    const circuit = repositories.circuits.findById(session.circuitId);
-    if (!circuit || circuit.userId !== context.currentUser.id) {
-      throw new GraphQLError("You do not have access to this session", {
-        extensions: { code: "UNAUTHENTICATED" },
-      });
-    }
-
     return toTrackSessionPayload(session, repositories);
   },
   createTrackSession: (args: CreateTrackSessionInputArgs, context: GraphQLContext) => {
@@ -296,11 +289,6 @@ export const trackSessionResolvers = {
     if (!circuit) {
       throw new GraphQLError(`Circuit with ID ${input.circuitId} not found`, {
         extensions: { code: "NOT_FOUND" },
-      });
-    }
-    if (circuit.userId !== context.currentUser.id) {
-      throw new GraphQLError("You do not have access to this circuit", {
-        extensions: { code: "UNAUTHENTICATED" },
       });
     }
 
@@ -345,13 +333,6 @@ export const trackSessionResolvers = {
       });
     }
 
-    const currentCircuit = repositories.circuits.findById(existingSession.circuitId);
-    if (!currentCircuit || currentCircuit.userId !== context.currentUser.id) {
-      throw new GraphQLError("You do not have access to this session", {
-        extensions: { code: "UNAUTHENTICATED" },
-      });
-    }
-
     const circuitIdProvided = Object.prototype.hasOwnProperty.call(input, "circuitId");
     let targetCircuitId = existingSession.circuitId;
     if (circuitIdProvided && input.circuitId) {
@@ -369,11 +350,6 @@ export const trackSessionResolvers = {
       if (!newCircuit) {
         throw new GraphQLError(`Circuit with ID ${input.circuitId} not found`, {
           extensions: { code: "NOT_FOUND" },
-        });
-      }
-      if (newCircuit.userId !== context.currentUser.id) {
-        throw new GraphQLError("You do not have access to this circuit", {
-          extensions: { code: "UNAUTHENTICATED" },
         });
       }
     }

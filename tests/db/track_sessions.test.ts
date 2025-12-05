@@ -37,7 +37,7 @@ describe("track_sessions", () => {
     lapMigration.up(db);
     lapEventsMigration.up(db);
     user = createUser("testuser", "hashedpassword");
-    circuit = createCircuit("Test Circuit", user.id);
+    circuit = createCircuit("Test Circuit");
   });
 
   it("can create and retrieve a track session", () => {
@@ -138,7 +138,7 @@ describe("track_sessions", () => {
       now + 1000
     );
     // Create another circuit and a session for it to ensure filtering works
-    const anotherCircuit = createCircuit("Another Circuit", user.id);
+    const anotherCircuit = createCircuit("Another Circuit");
     createTrackSession("2023-11-29T12:00:00Z", "Race", anotherCircuit.id, user.id, null, now + 2000);
 
     const sessions = findTrackSessionsByCircuitId(circuit.id);
@@ -166,7 +166,7 @@ describe("track_sessions", () => {
       now + 1000
     );
     const otherUser = createUser("another-user", "hashed");
-    const otherCircuit = createCircuit("Other User Circuit", otherUser.id);
+    const otherCircuit = createCircuit("Other User Circuit");
     createTrackSession("2023-12-01T09:00:00Z", "Race", otherCircuit.id, otherUser.id, null, now + 2000);
 
     const sessions = findTrackSessionsByUserId(user.id);
@@ -185,7 +185,7 @@ describe("track_sessions", () => {
       "notes",
       now
     );
-    const otherCircuit = createCircuit("Other Circuit", user.id);
+    const otherCircuit = createCircuit("Other Circuit");
 
     const updated = updateTrackSession({
       id: session.id,

@@ -15,7 +15,6 @@ describe("circuit resolver", () => {
         id: "c1",
         name: "Spa",
         heroImage: null,
-        userId: "user-1",
         createdAt: 0,
         updatedAt: 0,
       },
@@ -23,7 +22,6 @@ describe("circuit resolver", () => {
         id: "c2",
         name: "Monza",
         heroImage: null,
-        userId: "user-1",
         createdAt: 0,
         updatedAt: 0,
       },
@@ -76,7 +74,6 @@ describe("circuit resolver", () => {
       id: "c1",
       name: "Spa",
       heroImage: "img",
-      userId: "user-1",
       createdAt: 0,
       updatedAt: 0,
     });
@@ -86,7 +83,7 @@ describe("circuit resolver", () => {
       { ...baseContext, currentUser: { id: "user-1" } } as never
     );
 
-    expect(repositories.circuits.create).toHaveBeenCalledWith("Spa", "user-1", "img");
+    expect(repositories.circuits.create).toHaveBeenCalledWith("Spa", "img");
     expect(result.circuit).toMatchObject({ id: "c1", name: "Spa", heroImage: "img" });
   });
 });

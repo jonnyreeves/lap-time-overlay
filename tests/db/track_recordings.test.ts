@@ -32,7 +32,7 @@ describe("track_recordings", () => {
     trackSessionConditionsMigration.up(db);
     trackRecordingMigration.up(db);
     user = createUser("testuser", "hashedpassword");
-    circuit = createCircuit("Test Circuit", user.id);
+    circuit = createCircuit("Test Circuit");
     trackSession = createTrackSession(
       "2023-11-29T10:00:00Z",
       "Practice",

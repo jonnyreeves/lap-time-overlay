@@ -8,14 +8,9 @@ export const migration = {
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         hero_image TEXT,
-        user_id TEXT NOT NULL,
         created_at INTEGER NOT NULL,
-        updated_at INTEGER NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        updated_at INTEGER NOT NULL
       );
-
-      CREATE INDEX IF NOT EXISTS circuits_user_id_idx
-        ON circuits(user_id);
     `);
   },
 };

@@ -5,7 +5,6 @@ export function createMockRepositories() {
   const repositories = {
     circuits: {
       findById: vi.fn(),
-      findByUserId: vi.fn(),
       findAll: vi.fn(),
       create: vi.fn(),
     },

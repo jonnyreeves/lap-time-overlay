@@ -23,7 +23,6 @@ const mockCircuit = {
   id: "c1",
   name: "Spa",
   heroImage: null,
-  userId: "user-1",
   createdAt: 0,
   updatedAt: 0,
 };
@@ -36,15 +35,6 @@ describe("trackSession resolvers", () => {
   it("rejects unauthenticated trackSession query", async () => {
     await expect(() => rootValue.trackSession({ id: "s1" }, { ...context, currentUser: null }))
       .toThrowError("Authentication required");
-  });
-
-  it("rejects trackSession query when circuit not owned by user", async () => {
-    repositories.trackSessions.findById.mockReturnValue(mockSession);
-    repositories.circuits.findById.mockReturnValue({ ...mockCircuit, userId: "other" });
-
-    expect(() => rootValue.trackSession({ id: "s1" }, context)).toThrowError(
-      "You do not have access to this session"
-    );
   });
 
   it("rejects trackSession query when session not owned by user", async () => {
@@ -74,7 +64,7 @@ describe("trackSession resolvers", () => {
     );
   });
 
-  it("createTrackSession rejects when circuit is missing or not owned", async () => {
+  it("createTrackSession rejects when circuit is missing", async () => {
     repositories.circuits.findById.mockReturnValueOnce(null);
     expect(() =>
       rootValue.createTrackSession(
@@ -82,15 +72,6 @@ describe("trackSession resolvers", () => {
         context
       )
     ).toThrowError("Circuit with ID missing not found");
-
-    repositories.circuits.findById.mockReturnValue({ ...mockCircuit, userId: "other-user" });
-    expect(() =>
-      rootValue.createTrackSession(
-        { input: { date: "2024-02-01", format: "Race", circuitId: "c1" } },
-        context
-      )
-    ).toThrowError("You do not have access to this circuit");
-    expect(repositories.trackSessions.createWithLaps).not.toHaveBeenCalled();
   });
 
   it("createTrackSession forwards parsed input", async () => {
@@ -133,7 +114,6 @@ describe("trackSession resolvers", () => {
   it("updateTrackSession forwards fields to DB and returns payload", async () => {
     repositories.trackSessions.findById.mockReturnValue(mockSession);
     repositories.trackSessions.update.mockReturnValue({ ...mockSession, format: "Practice" });
-    repositories.circuits.findById.mockReturnValue(mockCircuit);
     repositories.lapEvents.findByLapId.mockReturnValue([]);
     repositories.trackRecordings.findBySessionId.mockReturnValue([]);
 
