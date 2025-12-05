@@ -9,14 +9,19 @@ export const migration = {
         date TEXT NOT NULL,
         format TEXT NOT NULL,
         circuit_id TEXT NOT NULL,
+        user_id TEXT NOT NULL,
         notes TEXT,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL,
-        FOREIGN KEY (circuit_id) REFERENCES circuits(id) ON DELETE CASCADE
+        FOREIGN KEY (circuit_id) REFERENCES circuits(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
 
       CREATE INDEX IF NOT EXISTS track_sessions_circuit_id_idx
         ON track_sessions(circuit_id);
+
+      CREATE INDEX IF NOT EXISTS track_sessions_user_id_idx
+        ON track_sessions(user_id);
     `);
   },
   down: (db: Database.Database): void => {

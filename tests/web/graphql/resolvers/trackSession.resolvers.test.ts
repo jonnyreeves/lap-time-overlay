@@ -13,6 +13,7 @@ const mockSession = {
   format: "Race",
   conditions: "Dry" as const,
   circuitId: "c1",
+  userId: "user-1",
   notes: null,
   createdAt: 0,
   updatedAt: 0,
@@ -29,7 +30,7 @@ const mockCircuit = {
 
 describe("trackSession resolvers", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
   });
 
   it("rejects unauthenticated trackSession query", async () => {
@@ -40,6 +41,14 @@ describe("trackSession resolvers", () => {
   it("rejects trackSession query when circuit not owned by user", async () => {
     repositories.trackSessions.findById.mockReturnValue(mockSession);
     repositories.circuits.findById.mockReturnValue({ ...mockCircuit, userId: "other" });
+
+    expect(() => rootValue.trackSession({ id: "s1" }, context)).toThrowError(
+      "You do not have access to this session"
+    );
+  });
+
+  it("rejects trackSession query when session not owned by user", async () => {
+    repositories.trackSessions.findById.mockReturnValue({ ...mockSession, userId: "another-user" });
 
     expect(() => rootValue.trackSession({ id: "s1" }, context)).toThrowError(
       "You do not have access to this session"
@@ -65,6 +74,25 @@ describe("trackSession resolvers", () => {
     );
   });
 
+  it("createTrackSession rejects when circuit is missing or not owned", async () => {
+    repositories.circuits.findById.mockReturnValueOnce(null);
+    expect(() =>
+      rootValue.createTrackSession(
+        { input: { date: "2024-02-01", format: "Race", circuitId: "missing" } },
+        context
+      )
+    ).toThrowError("Circuit with ID missing not found");
+
+    repositories.circuits.findById.mockReturnValue({ ...mockCircuit, userId: "other-user" });
+    expect(() =>
+      rootValue.createTrackSession(
+        { input: { date: "2024-02-01", format: "Race", circuitId: "c1" } },
+        context
+      )
+    ).toThrowError("You do not have access to this circuit");
+    expect(repositories.trackSessions.createWithLaps).not.toHaveBeenCalled();
+  });
+
   it("createTrackSession forwards parsed input", async () => {
     repositories.trackSessions.createWithLaps.mockReturnValue({ trackSession: mockSession, laps: [] });
     repositories.circuits.findById.mockReturnValue(mockCircuit);
@@ -87,6 +115,7 @@ describe("trackSession resolvers", () => {
       date: "2024-02-01",
       format: "Race",
       circuitId: "c1",
+      userId: "user-1",
       conditions: "Wet",
       notes: "fun",
       laps: [{ lapNumber: 1, time: 74.5 }],

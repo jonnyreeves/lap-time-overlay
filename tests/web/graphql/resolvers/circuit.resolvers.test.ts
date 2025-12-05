@@ -38,6 +38,7 @@ describe("circuit resolver", () => {
             format: "Race",
             conditions: "Dry",
             circuitId: "c1",
+            userId: "user-1",
             notes: null,
             createdAt: 0,
             updatedAt: 0,

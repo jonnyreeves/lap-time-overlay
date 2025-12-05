@@ -238,15 +238,8 @@ export function toTrackRecordingPayload(recording: TrackRecordingRecord, reposit
 }
 
 export function findTrackSessionsForUser(userId: string, repositories: Repositories): TrackSessionRecord[] {
-  const circuitsForUser = repositories.circuits.findByUserId(userId);
-  let allTrackSessions: TrackSessionRecord[] = [];
-  for (const circuit of circuitsForUser) {
-    const sessions = repositories.trackSessions.findByCircuitId(circuit.id);
-    allTrackSessions = allTrackSessions.concat(sessions);
-  }
-  return allTrackSessions.sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
+  const sessions = repositories.trackSessions.findByUserId(userId);
+  return sessions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
 export const trackSessionResolvers = {
@@ -267,6 +260,12 @@ export const trackSessionResolvers = {
     if (!session) {
       throw new GraphQLError(`Track session with ID ${args.id} not found`, {
         extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    if (session.userId !== context.currentUser.id) {
+      throw new GraphQLError("You do not have access to this session", {
+        extensions: { code: "UNAUTHENTICATED" },
       });
     }
 
@@ -292,12 +291,26 @@ export const trackSessionResolvers = {
         extensions: { code: "VALIDATION_FAILED" },
       });
     }
+
+    const circuit = repositories.circuits.findById(input.circuitId);
+    if (!circuit) {
+      throw new GraphQLError(`Circuit with ID ${input.circuitId} not found`, {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+    if (circuit.userId !== context.currentUser.id) {
+      throw new GraphQLError("You do not have access to this circuit", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+
     const laps = parseLapInputs(input.laps);
     const conditions = parseConditions(input.conditions);
     const { trackSession } = repositories.trackSessions.createWithLaps({
       date: input.date,
       format: input.format,
       circuitId: input.circuitId,
+      userId: context.currentUser.id,
       conditions,
       notes: input.notes,
       laps,
@@ -323,6 +336,12 @@ export const trackSessionResolvers = {
     if (!existingSession) {
       throw new GraphQLError(`Track session with ID ${input.id} not found`, {
         extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    if (existingSession.userId !== context.currentUser.id) {
+      throw new GraphQLError("You do not have access to this session", {
+        extensions: { code: "UNAUTHENTICATED" },
       });
     }
 

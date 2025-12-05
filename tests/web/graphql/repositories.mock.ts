@@ -12,6 +12,7 @@ export function createMockRepositories() {
     trackSessions: {
       findById: vi.fn(),
       findByCircuitId: vi.fn(),
+      findByUserId: vi.fn(),
       createWithLaps: vi.fn(),
       update: vi.fn(),
     },

@@ -41,7 +41,8 @@ describe("lap_events", () => {
     trackSession = createTrackSession(
       "2023-11-29T10:00:00Z",
       "Practice",
-      circuit.id
+      circuit.id,
+      user.id
     );
     lap = createLap(trackSession.id, 1, 60.5);
   });
