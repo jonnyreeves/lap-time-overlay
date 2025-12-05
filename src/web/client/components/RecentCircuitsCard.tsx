@@ -5,11 +5,17 @@ import { Card } from "./Card.js";
 
 const RecentCircuitsCardFragment = graphql`
   fragment RecentCircuitsCard_viewer on User {
-    recentCircuits {
-      id
-      name
-      heroImage
-      personalBest
+    id
+    recentCircuits(first: 5)
+      @connection(key: "RecentCircuitsCard_recentCircuits") {
+      edges {
+        node {
+          id
+          name
+          heroImage
+          personalBest
+        }
+      }
     }
   }
 `;
@@ -91,7 +97,9 @@ export function RecentCircuitsCard({
   viewer: RecentCircuitsCard_viewer$key;
 }) {
   const data = useFragment(RecentCircuitsCardFragment, viewer);
-  const circuits = data.recentCircuits ?? [];
+  const circuits = (data.recentCircuits?.edges ?? [])
+    .map((edge) => edge?.node)
+    .filter(Boolean);
 
   return (
     <Card title="Recent Circuits">

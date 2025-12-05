@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<01e31f5e1aef16c351ff1b1b8ed24551>>
+ * @generated SignedSource<<bfcef9c1352bbc72cf0d183599cc47ef>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -29,18 +29,64 @@ var v0 = {
   "name": "id",
   "storageKey": null
 },
-v1 = {
+v1 = [
+  {
+    "kind": "Literal",
+    "name": "first",
+    "value": 5
+  }
+],
+v2 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "name",
   "storageKey": null
 },
-v2 = {
+v3 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "personalBest",
+  "storageKey": null
+},
+v4 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "__typename",
+  "storageKey": null
+},
+v5 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "cursor",
+  "storageKey": null
+},
+v6 = {
+  "alias": null,
+  "args": null,
+  "concreteType": "PageInfo",
+  "kind": "LinkedField",
+  "name": "pageInfo",
+  "plural": false,
+  "selections": [
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "endCursor",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "hasNextPage",
+      "storageKey": null
+    }
+  ],
   "storageKey": null
 };
 return {
@@ -99,96 +145,164 @@ return {
           },
           {
             "alias": null,
-            "args": null,
-            "concreteType": "Circuit",
+            "args": (v1/*: any*/),
+            "concreteType": "CircuitConnection",
             "kind": "LinkedField",
             "name": "recentCircuits",
-            "plural": true,
+            "plural": false,
             "selections": [
-              (v0/*: any*/),
-              (v1/*: any*/),
               {
                 "alias": null,
                 "args": null,
-                "kind": "ScalarField",
-                "name": "heroImage",
+                "concreteType": "CircuitEdge",
+                "kind": "LinkedField",
+                "name": "edges",
+                "plural": true,
+                "selections": [
+                  {
+                    "alias": null,
+                    "args": null,
+                    "concreteType": "Circuit",
+                    "kind": "LinkedField",
+                    "name": "node",
+                    "plural": false,
+                    "selections": [
+                      (v0/*: any*/),
+                      (v2/*: any*/),
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "heroImage",
+                        "storageKey": null
+                      },
+                      (v3/*: any*/),
+                      (v4/*: any*/)
+                    ],
+                    "storageKey": null
+                  },
+                  (v5/*: any*/)
+                ],
                 "storageKey": null
               },
-              (v2/*: any*/)
+              (v6/*: any*/)
             ],
-            "storageKey": null
+            "storageKey": "recentCircuits(first:5)"
           },
           {
             "alias": null,
-            "args": [
-              {
-                "kind": "Literal",
-                "name": "first",
-                "value": 5
-              }
-            ],
-            "concreteType": "TrackSession",
+            "args": (v1/*: any*/),
+            "filters": null,
+            "handle": "connection",
+            "key": "RecentCircuitsCard_recentCircuits",
+            "kind": "LinkedHandle",
+            "name": "recentCircuits"
+          },
+          {
+            "alias": null,
+            "args": (v1/*: any*/),
+            "concreteType": "TrackSessionConnection",
             "kind": "LinkedField",
             "name": "recentTrackSessions",
-            "plural": true,
+            "plural": false,
             "selections": [
-              (v0/*: any*/),
               {
                 "alias": null,
                 "args": null,
-                "kind": "ScalarField",
-                "name": "date",
-                "storageKey": null
-              },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "format",
-                "storageKey": null
-              },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "conditions",
-                "storageKey": null
-              },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "notes",
-                "storageKey": null
-              },
-              {
-                "alias": null,
-                "args": null,
-                "concreteType": "Circuit",
+                "concreteType": "TrackSessionEdge",
                 "kind": "LinkedField",
-                "name": "circuit",
-                "plural": false,
-                "selections": [
-                  (v1/*: any*/),
-                  (v0/*: any*/)
-                ],
-                "storageKey": null
-              },
-              {
-                "alias": null,
-                "args": null,
-                "concreteType": "Lap",
-                "kind": "LinkedField",
-                "name": "laps",
+                "name": "edges",
                 "plural": true,
                 "selections": [
-                  (v2/*: any*/),
-                  (v0/*: any*/)
+                  {
+                    "alias": null,
+                    "args": null,
+                    "concreteType": "TrackSession",
+                    "kind": "LinkedField",
+                    "name": "node",
+                    "plural": false,
+                    "selections": [
+                      (v0/*: any*/),
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "date",
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "format",
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "conditions",
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "notes",
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "concreteType": "Circuit",
+                        "kind": "LinkedField",
+                        "name": "circuit",
+                        "plural": false,
+                        "selections": [
+                          (v2/*: any*/),
+                          (v0/*: any*/)
+                        ],
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
+                        "args": [
+                          {
+                            "kind": "Literal",
+                            "name": "first",
+                            "value": 1
+                          }
+                        ],
+                        "concreteType": "Lap",
+                        "kind": "LinkedField",
+                        "name": "laps",
+                        "plural": true,
+                        "selections": [
+                          (v3/*: any*/),
+                          (v0/*: any*/)
+                        ],
+                        "storageKey": "laps(first:1)"
+                      },
+                      (v4/*: any*/)
+                    ],
+                    "storageKey": null
+                  },
+                  (v5/*: any*/)
                 ],
                 "storageKey": null
-              }
+              },
+              (v6/*: any*/)
             ],
             "storageKey": "recentTrackSessions(first:5)"
+          },
+          {
+            "alias": null,
+            "args": (v1/*: any*/),
+            "filters": null,
+            "handle": "connection",
+            "key": "RecentSessionsCard_recentTrackSessions",
+            "kind": "LinkedHandle",
+            "name": "recentTrackSessions"
           }
         ],
         "storageKey": null
@@ -196,12 +310,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "0332540956e5e61409d8da1c988c8bc5",
+    "cacheID": "56bb4faa5d1d227a9c9d0bb7c27b85d0",
     "id": null,
     "metadata": {},
     "name": "RequireAuthViewerQuery",
     "operationKind": "query",
-    "text": "query RequireAuthViewerQuery {\n  viewer {\n    ...HomePage_viewer\n    ...SiteHeader_viewer\n    id\n  }\n}\n\nfragment HomePage_viewer on User {\n  id\n  username\n  ...RecentCircuitsCard_viewer\n  ...RecentSessionsCard_viewer\n}\n\nfragment RecentCircuitsCard_viewer on User {\n  recentCircuits {\n    id\n    name\n    heroImage\n    personalBest\n  }\n}\n\nfragment RecentSessionsCard_viewer on User {\n  recentTrackSessions(first: 5) {\n    id\n    date\n    format\n    conditions\n    notes\n    circuit {\n      name\n      id\n    }\n    laps {\n      personalBest\n      id\n    }\n  }\n}\n\nfragment SiteHeader_viewer on User {\n  id\n  username\n}\n"
+    "text": "query RequireAuthViewerQuery {\n  viewer {\n    ...HomePage_viewer\n    ...SiteHeader_viewer\n    id\n  }\n}\n\nfragment HomePage_viewer on User {\n  id\n  username\n  ...RecentCircuitsCard_viewer\n  ...RecentSessionsCard_viewer\n}\n\nfragment RecentCircuitsCard_viewer on User {\n  id\n  recentCircuits(first: 5) {\n    edges {\n      node {\n        id\n        name\n        heroImage\n        personalBest\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment RecentSessionsCard_viewer on User {\n  id\n  recentTrackSessions(first: 5) {\n    edges {\n      node {\n        id\n        date\n        format\n        conditions\n        notes\n        circuit {\n          name\n          id\n        }\n        laps(first: 1) {\n          personalBest\n          id\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment SiteHeader_viewer on User {\n  id\n  username\n}\n"
   }
 };
 })();

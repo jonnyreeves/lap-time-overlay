@@ -69,8 +69,8 @@ type User {
   id: ID!
   username: String!
   createdAt: String!
-  recentCircuits(first: Int = 10): [Circuit!]!
-  recentTrackSessions(first: Int = 10): [TrackSession!]!
+  recentCircuits(first: Int = 10, after: String): CircuitConnection!
+  recentTrackSessions(first: Int = 10, after: String): TrackSessionConnection!
 }
 
 type Circuit {
@@ -78,6 +78,16 @@ type Circuit {
   name: String!
   heroImage: String
   personalBest: Float
+}
+
+type CircuitEdge {
+  cursor: String!
+  node: Circuit!
+}
+
+type CircuitConnection {
+  edges: [CircuitEdge!]!
+  pageInfo: PageInfo!
 }
 
 type TrackSession {
@@ -102,6 +112,23 @@ type Lap {
   updatedAt: String!
   lapEvents(first: Int = 10): [LapEvent!]!
   personalBest: Float
+}
+
+type TrackSessionEdge {
+  cursor: String!
+  node: TrackSession!
+}
+
+type TrackSessionConnection {
+  edges: [TrackSessionEdge!]!
+  pageInfo: PageInfo!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
 }
 
 type LapEvent {

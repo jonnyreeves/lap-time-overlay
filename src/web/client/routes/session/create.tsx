@@ -1,7 +1,8 @@
 import { css } from "@emotion/react";
 import { useEffect, useState } from "react"; // Import hooks
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
-import { useNavigate } from "react-router-dom";
+import { ConnectionHandler } from "relay-runtime";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { type create_tsxCircuitsQuery } from "../../__generated__/create_tsxCircuitsQuery.graphql.js";
 import { createTrackSessionMutation } from "../../__generated__/createTrackSessionMutation.graphql.js";
 import { Card } from "../../components/Card.js";
@@ -10,6 +11,7 @@ import { ImportSessionModal } from "../../components/ImportSessionModal.js";
 import { LapInputsCard } from "../../components/LapInputsCard.js";
 import { type SessionImportSelection } from "../../utils/sessionImportTypes.js";
 import { useLapRows, type LapInputPayload } from "../../hooks/useLapRows.js";
+import { prependCircuitForCreatedSession, prependCreatedSessionToRecentSessions } from "./createUpdater.js";
 
 const formLayoutStyles = css`
   display: grid;
@@ -141,23 +143,47 @@ const CreateSessionRouteCircuitsQuery = graphql`
 `;
 
 const CreateTrackSessionMutation = graphql`
-  mutation createTrackSessionMutation($input: CreateTrackSessionInput!) {
+  mutation createTrackSessionMutation(
+    $input: CreateTrackSessionInput!
+    $connections: [ID!]!
+    $circuitConnections: [ID!]!
+  ) {
     createTrackSession(input: $input) {
-      trackSession {
+      trackSession
+        @prependNode(
+          connections: $connections
+          edgeTypeName: "TrackSessionEdge"
+        ) {
         id
         date
         format
         conditions
-        circuit {
+        circuit
+          @prependNode(
+            connections: $circuitConnections
+            edgeTypeName: "CircuitEdge"
+          ) {
           id
           name
+          heroImage
+          personalBest
+        }
+        notes
+        laps(first: 1) {
+          personalBest
+          id
         }
       }
     }
   }
 `;
 
+type OutletContext = {
+  viewer: { id: string; __id?: string };
+};
+
 export default function CreateSessionRoute() {
+  const { viewer } = useOutletContext<OutletContext>();
   const [showCreateCircuitModal, setShowCreateCircuitModal] = useState(false);
   const [showImportSessionModal, setShowImportSessionModal] = useState(false);
   const [refetchKey, setRefetchKey] = useState(0); // Key to force refetch
@@ -185,6 +211,14 @@ export default function CreateSessionRoute() {
     CreateTrackSessionMutation,
   );
   const isCreateDisabled = isInFlight || !date || !sessionFormat || !circuitId;
+  const viewerConnectionId = ConnectionHandler.getConnectionID(
+    viewer.__id ?? viewer.id,
+    "RecentSessionsCard_recentTrackSessions"
+  );
+  const viewerCircuitConnectionId = ConnectionHandler.getConnectionID(
+    viewer.__id ?? viewer.id,
+    "RecentCircuitsCard_recentCircuits"
+  );
 
   const data = useLazyLoadQuery<create_tsxCircuitsQuery>(
     CreateSessionRouteCircuitsQuery,
@@ -242,6 +276,13 @@ export default function CreateSessionRoute() {
           conditions,
           ...(lapInput.length ? { laps: lapInput } : {}),
         },
+        connections: [viewerConnectionId],
+        circuitConnections: [viewerCircuitConnectionId],
+      },
+      updater: (store) => {
+        const viewerId = viewer.__id ?? viewer.id;
+        prependCreatedSessionToRecentSessions(store, viewerId);
+        prependCircuitForCreatedSession(store, viewerId);
       },
       onCompleted: (response) => {
         const newSessionId = response.createTrackSession?.trackSession?.id;

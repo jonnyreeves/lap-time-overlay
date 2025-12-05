@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<e2e28a9cfb88fa8b98d4b085ec11dd7f>>
+ * @generated SignedSource<<8f16f1bb196d5939719bae3836ccfe60>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -28,19 +28,28 @@ export type LapEventInput = {
   value: string;
 };
 export type createTrackSessionMutation$variables = {
+  circuitConnections: ReadonlyArray<string>;
+  connections: ReadonlyArray<string>;
   input: CreateTrackSessionInput;
 };
 export type createTrackSessionMutation$data = {
   readonly createTrackSession: {
     readonly trackSession: {
       readonly circuit: {
+        readonly heroImage: string | null | undefined;
         readonly id: string;
         readonly name: string;
+        readonly personalBest: number | null | undefined;
       };
       readonly conditions: string;
       readonly date: string;
       readonly format: string;
       readonly id: string;
+      readonly laps: ReadonlyArray<{
+        readonly id: string;
+        readonly personalBest: number | null | undefined;
+      }>;
+      readonly notes: string | null | undefined;
     };
   };
 };
@@ -50,81 +59,150 @@ export type createTrackSessionMutation = {
 };
 
 const node: ConcreteRequest = (function(){
-var v0 = [
+var v0 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
+  "name": "circuitConnections"
+},
+v1 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
+  "name": "connections"
+},
+v2 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
+  "name": "input"
+},
+v3 = [
   {
-    "defaultValue": null,
-    "kind": "LocalArgument",
-    "name": "input"
+    "kind": "Variable",
+    "name": "input",
+    "variableName": "input"
   }
 ],
-v1 = {
+v4 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
 },
-v2 = [
-  {
-    "alias": null,
-    "args": [
-      {
-        "kind": "Variable",
-        "name": "input",
-        "variableName": "input"
-      }
+v5 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "date",
+  "storageKey": null
+},
+v6 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "format",
+  "storageKey": null
+},
+v7 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "conditions",
+  "storageKey": null
+},
+v8 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "personalBest",
+  "storageKey": null
+},
+v9 = {
+  "alias": null,
+  "args": null,
+  "concreteType": "Circuit",
+  "kind": "LinkedField",
+  "name": "circuit",
+  "plural": false,
+  "selections": [
+    (v4/*: any*/),
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "name",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "heroImage",
+      "storageKey": null
+    },
+    (v8/*: any*/)
+  ],
+  "storageKey": null
+},
+v10 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "notes",
+  "storageKey": null
+},
+v11 = {
+  "alias": null,
+  "args": [
+    {
+      "kind": "Literal",
+      "name": "first",
+      "value": 1
+    }
+  ],
+  "concreteType": "Lap",
+  "kind": "LinkedField",
+  "name": "laps",
+  "plural": true,
+  "selections": [
+    (v8/*: any*/),
+    (v4/*: any*/)
+  ],
+  "storageKey": "laps(first:1)"
+};
+return {
+  "fragment": {
+    "argumentDefinitions": [
+      (v0/*: any*/),
+      (v1/*: any*/),
+      (v2/*: any*/)
     ],
-    "concreteType": "CreateTrackSessionPayload",
-    "kind": "LinkedField",
-    "name": "createTrackSession",
-    "plural": false,
+    "kind": "Fragment",
+    "metadata": null,
+    "name": "createTrackSessionMutation",
     "selections": [
       {
         "alias": null,
-        "args": null,
-        "concreteType": "TrackSession",
+        "args": (v3/*: any*/),
+        "concreteType": "CreateTrackSessionPayload",
         "kind": "LinkedField",
-        "name": "trackSession",
+        "name": "createTrackSession",
         "plural": false,
         "selections": [
-          (v1/*: any*/),
           {
             "alias": null,
             "args": null,
-            "kind": "ScalarField",
-            "name": "date",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "format",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "conditions",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "Circuit",
+            "concreteType": "TrackSession",
             "kind": "LinkedField",
-            "name": "circuit",
+            "name": "trackSession",
             "plural": false,
             "selections": [
-              (v1/*: any*/),
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "name",
-                "storageKey": null
-              }
+              (v4/*: any*/),
+              (v5/*: any*/),
+              (v6/*: any*/),
+              (v7/*: any*/),
+              (v9/*: any*/),
+              (v10/*: any*/),
+              (v11/*: any*/)
             ],
             "storageKey": null
           }
@@ -132,37 +210,103 @@ v2 = [
         "storageKey": null
       }
     ],
-    "storageKey": null
-  }
-];
-return {
-  "fragment": {
-    "argumentDefinitions": (v0/*: any*/),
-    "kind": "Fragment",
-    "metadata": null,
-    "name": "createTrackSessionMutation",
-    "selections": (v2/*: any*/),
     "type": "Mutation",
     "abstractKey": null
   },
   "kind": "Request",
   "operation": {
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": [
+      (v2/*: any*/),
+      (v1/*: any*/),
+      (v0/*: any*/)
+    ],
     "kind": "Operation",
     "name": "createTrackSessionMutation",
-    "selections": (v2/*: any*/)
+    "selections": [
+      {
+        "alias": null,
+        "args": (v3/*: any*/),
+        "concreteType": "CreateTrackSessionPayload",
+        "kind": "LinkedField",
+        "name": "createTrackSession",
+        "plural": false,
+        "selections": [
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "TrackSession",
+            "kind": "LinkedField",
+            "name": "trackSession",
+            "plural": false,
+            "selections": [
+              (v4/*: any*/),
+              (v5/*: any*/),
+              (v6/*: any*/),
+              (v7/*: any*/),
+              (v9/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "filters": null,
+                "handle": "prependNode",
+                "key": "",
+                "kind": "LinkedHandle",
+                "name": "circuit",
+                "handleArgs": [
+                  {
+                    "kind": "Variable",
+                    "name": "connections",
+                    "variableName": "circuitConnections"
+                  },
+                  {
+                    "kind": "Literal",
+                    "name": "edgeTypeName",
+                    "value": "CircuitEdge"
+                  }
+                ]
+              },
+              (v10/*: any*/),
+              (v11/*: any*/)
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "filters": null,
+            "handle": "prependNode",
+            "key": "",
+            "kind": "LinkedHandle",
+            "name": "trackSession",
+            "handleArgs": [
+              {
+                "kind": "Variable",
+                "name": "connections",
+                "variableName": "connections"
+              },
+              {
+                "kind": "Literal",
+                "name": "edgeTypeName",
+                "value": "TrackSessionEdge"
+              }
+            ]
+          }
+        ],
+        "storageKey": null
+      }
+    ]
   },
   "params": {
-    "cacheID": "1b96acb16558b85fae98b767198ed5c2",
+    "cacheID": "30cdc972dbb501be943e4c28094107c3",
     "id": null,
     "metadata": {},
     "name": "createTrackSessionMutation",
     "operationKind": "mutation",
-    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      conditions\n      circuit {\n        id\n        name\n      }\n    }\n  }\n}\n"
+    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      conditions\n      circuit {\n        id\n        name\n        heroImage\n        personalBest\n      }\n      notes\n      laps(first: 1) {\n        personalBest\n        id\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "8f8808aa80d46578aeb32888d8bae14b";
+(node as any).hash = "c7cafd9d1e9b153c40a95c3b857fbbe2";
 
 export default node;

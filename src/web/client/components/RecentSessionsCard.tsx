@@ -7,17 +7,25 @@ import type { RecentSessionsCard_viewer$key } from "../__generated__/RecentSessi
 
 const RecentSessionsCardFragment = graphql`
   fragment RecentSessionsCard_viewer on User {
-    recentTrackSessions(first: 5) {
-      id
-      date
-      format
-      conditions
-      notes
-      circuit {
-        name
-      }
-      laps {
-        personalBest
+    id
+    recentTrackSessions(first: 5)
+      @connection(key: "RecentSessionsCard_recentTrackSessions") {
+      edges {
+        node {
+          id
+          date
+          format
+          conditions
+          notes
+          circuit {
+            name
+            id
+          }
+          laps(first: 1) {
+            personalBest
+            id
+          }
+        }
       }
     }
   }
@@ -195,7 +203,9 @@ function getConditionsEmoji(conditions: string | null | undefined) {
 export function RecentSessionsCard({ viewer }: Props) {
   const navigate = useNavigate();
   const data = useFragment(RecentSessionsCardFragment, viewer);
-  const sessions = data.recentTrackSessions ?? [];
+  const sessions = (data.recentTrackSessions?.edges ?? [])
+    .map((edge) => edge?.node)
+    .filter(Boolean);
 
   return (
     <Card

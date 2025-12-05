@@ -65,10 +65,19 @@ describe("viewer resolver", () => {
     expect(viewer?.id).toBe("user-1");
 
     const recentCircuits = await viewer?.recentCircuits({ first: 2 });
-    expect(recentCircuits?.map((circuit) => circuit.id)).toEqual(["c1", "c2"]);
+    expect(recentCircuits?.edges.map((edge) => edge.node.id)).toEqual(["c1", "c2"]);
+    expect(recentCircuits?.pageInfo).toMatchObject({ hasNextPage: false, hasPreviousPage: false });
+    const circuitsAfter = await viewer?.recentCircuits({ first: 2, after: recentCircuits?.edges[1]?.cursor });
+    expect(circuitsAfter?.edges.map((edge) => edge.node.id)).toEqual([]);
 
     const recentSessions = await viewer?.recentTrackSessions({ first: 2 });
-    expect(recentSessions?.map((session) => session.id)).toEqual(["s3", "s2"]);
-    expect(await recentSessions?.[0].circuit()).toMatchObject({ id: "c1", name: "Monza" });
+    expect(recentSessions?.edges.map((edge) => edge.node.id)).toEqual(["s3", "s2"]);
+    expect(await recentSessions?.edges[0]?.node.circuit()).toMatchObject({ id: "c1", name: "Monza" });
+    expect(recentSessions?.pageInfo).toMatchObject({ hasNextPage: true, hasPreviousPage: false });
+
+    const afterCursor = recentSessions?.edges[1]?.cursor;
+    const pagedSessions = await viewer?.recentTrackSessions({ first: 2, after: afterCursor });
+    expect(pagedSessions?.edges.map((edge) => edge.node.id)).toEqual(["s1"]);
+    expect(pagedSessions?.pageInfo).toMatchObject({ hasNextPage: false, hasPreviousPage: true });
   });
 });
