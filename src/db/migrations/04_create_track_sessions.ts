@@ -8,6 +8,7 @@ export const migration = {
         id TEXT PRIMARY KEY,
         date TEXT NOT NULL,
         format TEXT NOT NULL,
+        classification INTEGER NOT NULL,
         circuit_id TEXT NOT NULL,
         user_id TEXT NOT NULL,
         notes TEXT,

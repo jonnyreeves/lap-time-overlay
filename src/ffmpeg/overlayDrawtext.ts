@@ -1,5 +1,5 @@
 import ffmpeg from "fluent-ffmpeg";
-import { totalSessionDuration, type Lap } from "../laps.js";
+import { totalSessionDuration, type Lap } from "./laps.js";
 import { DEFAULT_OVERLAY_STYLE, type RenderContext } from "./overlayTypes.js";
 
 function normalizeHexColor(input: string | undefined, fallback: string): string {
@@ -121,8 +121,8 @@ function buildPositionTimeline(
     segments.length > 0
       ? segments[segments.length - 1].position
       : startPosition > 0
-      ? startPosition
-      : carryPosition;
+        ? startPosition
+        : carryPosition;
 
   return { segments, lastPosition };
 }

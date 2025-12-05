@@ -34,6 +34,7 @@ describe("circuit resolver", () => {
             id: "s1",
             date: "2024-01-01",
             format: "Race",
+            classification: 2,
             conditions: "Dry",
             circuitId: "c1",
             userId: "user-1",

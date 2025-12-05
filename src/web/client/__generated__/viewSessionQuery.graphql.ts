@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<735a0db1c0ebb1c953b054912678aab7>>
+ * @generated SignedSource<<70d0fb611da60d370da22a635efdc264>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -22,6 +22,7 @@ export type viewSessionQuery$data = {
       readonly id: string;
       readonly name: string;
     };
+    readonly classification: number;
     readonly conditions: string;
     readonly createdAt: string;
     readonly date: string;
@@ -97,6 +98,13 @@ v3 = [
         "args": null,
         "kind": "ScalarField",
         "name": "format",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "classification",
         "storageKey": null
       },
       {
@@ -213,16 +221,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "98d1fc892b173698d8646fcccc59affb",
+    "cacheID": "5d359ef674dbf6cf008ee995c3a8d911",
     "id": null,
     "metadata": {},
     "name": "viewSessionQuery",
     "operationKind": "query",
-    "text": "query viewSessionQuery(\n  $id: ID!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    conditions\n    notes\n    circuit {\n      id\n      name\n    }\n    createdAt\n    updatedAt\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents {\n        id\n      }\n    }\n  }\n  circuits {\n    id\n    name\n  }\n}\n"
+    "text": "query viewSessionQuery(\n  $id: ID!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    classification\n    conditions\n    notes\n    circuit {\n      id\n      name\n    }\n    createdAt\n    updatedAt\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents {\n        id\n      }\n    }\n  }\n  circuits {\n    id\n    name\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "d0a4429206bff32159f82c60da57c8b3";
+(node as any).hash = "fc35eb52b1ef92de41d406c2c749a9d2";
 
 export default node;

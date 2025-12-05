@@ -14,6 +14,7 @@ export const migration = {
         id TEXT PRIMARY KEY,
         date TEXT NOT NULL,
         format TEXT NOT NULL,
+        classification INTEGER NOT NULL,
         circuit_id TEXT NOT NULL,
         user_id TEXT NOT NULL,
         notes TEXT,
@@ -23,8 +24,8 @@ export const migration = {
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
 
-      INSERT INTO track_sessions_tmp (id, date, format, circuit_id, user_id, notes, created_at, updated_at)
-        SELECT id, date, format, circuit_id, user_id, notes, created_at, updated_at FROM track_sessions;
+      INSERT INTO track_sessions_tmp (id, date, format, classification, circuit_id, user_id, notes, created_at, updated_at)
+        SELECT id, date, format, classification, circuit_id, user_id, notes, created_at, updated_at FROM track_sessions;
 
       DROP TABLE track_sessions;
       ALTER TABLE track_sessions_tmp RENAME TO track_sessions;

@@ -18,6 +18,7 @@ export type CreateTrackSessionInputArgs = {
   input?: {
     date?: string;
     format?: string;
+    classification?: number | null;
     conditions?: string;
     circuitId?: string;
     notes?: string;
@@ -30,6 +31,7 @@ export type UpdateTrackSessionInputArgs = {
     id?: string;
     date?: string | null;
     format?: string | null;
+    classification?: number | null;
     conditions?: string | null;
     circuitId?: string | null;
     notes?: string | null;
@@ -53,6 +55,24 @@ export function parseConditions(conditions: string | undefined): TrackSessionCon
   throw new GraphQLError("conditions must be either Dry or Wet", {
     extensions: { code: "VALIDATION_FAILED" },
   });
+}
+
+export function parseClassification(classification: number | string | null | undefined): number {
+  if (classification === null || classification === undefined) {
+    throw new GraphQLError("classification is required", {
+      extensions: { code: "VALIDATION_FAILED" },
+    });
+  }
+
+  const parsed =
+    typeof classification === "string" ? Number.parseInt(classification, 10) : classification;
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    throw new GraphQLError("classification must be an integer >= 1", {
+      extensions: { code: "VALIDATION_FAILED" },
+    });
+  }
+
+  return parsed;
 }
 
 function parseLapEventInputs(
@@ -141,6 +161,7 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
     id: session.id,
     date: session.date,
     format: session.format,
+    classification: session.classification,
     conditions: session.conditions,
     circuit: () => {
       const circuit = repositories.circuits.findById(session.circuitId);
@@ -279,8 +300,8 @@ export const trackSessionResolvers = {
       });
     }
     const input = args.input;
-    if (!input?.date || !input?.format || !input?.circuitId) {
-      throw new GraphQLError("Date, format, and circuitId are required", {
+    if (!input?.date || !input?.format || !input?.circuitId || input.classification == null) {
+      throw new GraphQLError("Date, format, circuitId, and classification are required", {
         extensions: { code: "VALIDATION_FAILED" },
       });
     }
@@ -293,10 +314,12 @@ export const trackSessionResolvers = {
     }
 
     const laps = parseLapInputs(input.laps);
+    const classification = parseClassification(input.classification);
     const conditions = parseConditions(input.conditions);
     const { trackSession } = repositories.trackSessions.createWithLaps({
       date: input.date,
       format: input.format,
+      classification,
       circuitId: input.circuitId,
       userId: context.currentUser.id,
       conditions,
@@ -377,9 +400,20 @@ export const trackSessionResolvers = {
     }
 
     const notesProvided = Object.prototype.hasOwnProperty.call(input, "notes");
+    const classificationProvided = Object.prototype.hasOwnProperty.call(input, "classification");
     const conditionsProvided = Object.prototype.hasOwnProperty.call(input, "conditions");
 
+    if (classificationProvided && input.classification === null) {
+      throw new GraphQLError("classification cannot be null", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
     const notes = notesProvided ? input.notes ?? null : undefined;
+    const classification =
+      classificationProvided && input.classification !== null && input.classification !== undefined
+        ? parseClassification(input.classification)
+        : undefined;
     const conditions =
       conditionsProvided && input.conditions !== null && input.conditions !== undefined
         ? parseConditions(input.conditions)
@@ -389,6 +423,7 @@ export const trackSessionResolvers = {
       id: input.id,
       date: nextDate,
       format: nextFormat,
+      classification,
       circuitId: targetCircuitId,
       conditions,
       notes,

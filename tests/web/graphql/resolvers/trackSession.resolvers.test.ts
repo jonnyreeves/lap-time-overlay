@@ -11,6 +11,7 @@ const mockSession = {
   id: "s1",
   date: "2024-02-01",
   format: "Race",
+  classification: 1,
   conditions: "Dry" as const,
   circuitId: "c1",
   userId: "user-1",
@@ -60,7 +61,7 @@ describe("trackSession resolvers", () => {
 
   it("createTrackSession validates required fields", async () => {
     expect(() => rootValue.createTrackSession({ input: {} }, context)).toThrowError(
-      "Date, format, and circuitId are required"
+      "Date, format, circuitId, and classification are required"
     );
   });
 
@@ -68,7 +69,7 @@ describe("trackSession resolvers", () => {
     repositories.circuits.findById.mockReturnValueOnce(null);
     expect(() =>
       rootValue.createTrackSession(
-        { input: { date: "2024-02-01", format: "Race", circuitId: "missing" } },
+        { input: { date: "2024-02-01", format: "Race", classification: 5, circuitId: "missing" } },
         context
       )
     ).toThrowError("Circuit with ID missing not found");
@@ -83,6 +84,7 @@ describe("trackSession resolvers", () => {
         input: {
           date: "2024-02-01",
           format: "Race",
+          classification: 2,
           circuitId: "c1",
           conditions: "Wet",
           notes: "fun",
@@ -95,6 +97,7 @@ describe("trackSession resolvers", () => {
     expect(repositories.trackSessions.createWithLaps).toHaveBeenCalledWith({
       date: "2024-02-01",
       format: "Race",
+      classification: 2,
       circuitId: "c1",
       userId: "user-1",
       conditions: "Wet",
@@ -102,6 +105,7 @@ describe("trackSession resolvers", () => {
       laps: [{ lapNumber: 1, time: 74.5 }],
     });
     expect(result.trackSession.id).toBe("s1");
+    expect(result.trackSession.classification).toBe(1);
   });
 
   it("updateTrackSession validates presence of id and auth", async () => {
@@ -127,11 +131,13 @@ describe("trackSession resolvers", () => {
         id: "s1",
         date: undefined,
         format: "Practice",
+        classification: undefined,
         circuitId: "c1",
         conditions: undefined,
         notes: undefined,
       })
     );
     expect(result.trackSession.format).toBe("Practice");
+    expect(result.trackSession.classification).toBe(1);
   });
 });

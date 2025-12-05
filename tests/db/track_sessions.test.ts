@@ -45,6 +45,7 @@ describe("track_sessions", () => {
     const trackSession = createTrackSession(
       "2023-11-29T10:00:00Z",
       "Practice",
+      5,
       circuit.id,
       user.id,
       "Some notes",
@@ -53,6 +54,7 @@ describe("track_sessions", () => {
     assert.ok(trackSession.id);
     assert.strictEqual(trackSession.date, "2023-11-29T10:00:00Z");
     assert.strictEqual(trackSession.format, "Practice");
+    assert.strictEqual(trackSession.classification, 5);
     assert.strictEqual(trackSession.conditions, "Dry");
     assert.strictEqual(trackSession.circuitId, circuit.id);
     assert.strictEqual(trackSession.userId, user.id);
@@ -74,6 +76,7 @@ describe("track_sessions", () => {
     const { trackSession, laps } = createTrackSessionWithLaps({
       date: "2023-11-29T12:00:00Z",
       format: "Race",
+      classification: 4,
       conditions: "Wet",
       circuitId: circuit.id,
       userId: user.id,
@@ -87,6 +90,7 @@ describe("track_sessions", () => {
 
     assert.ok(trackSession.id);
     assert.strictEqual(trackSession.createdAt, now);
+    assert.strictEqual(trackSession.classification, 4);
     assert.strictEqual(trackSession.conditions, "Wet");
     assert.strictEqual(trackSession.notes, "with laps");
     assert.strictEqual(trackSession.userId, user.id);
@@ -100,6 +104,7 @@ describe("track_sessions", () => {
     const { laps } = createTrackSessionWithLaps({
       date: "2023-11-29T12:00:00Z",
       format: "Race",
+      classification: 6,
       circuitId: circuit.id,
       userId: user.id,
       laps: [
@@ -128,10 +133,11 @@ describe("track_sessions", () => {
 
   it("can find track sessions by circuit ID", () => {
     const now = Date.now();
-    const session1 = createTrackSession("2023-11-29T10:00:00Z", "Practice", circuit.id, user.id, null, now);
+    const session1 = createTrackSession("2023-11-29T10:00:00Z", "Practice", 6, circuit.id, user.id, null, now);
     const session2 = createTrackSession(
       "2023-11-29T11:00:00Z",
       "Qualifying",
+      3,
       circuit.id,
       user.id,
       null,
@@ -139,7 +145,7 @@ describe("track_sessions", () => {
     );
     // Create another circuit and a session for it to ensure filtering works
     const anotherCircuit = createCircuit("Another Circuit");
-    createTrackSession("2023-11-29T12:00:00Z", "Race", anotherCircuit.id, user.id, null, now + 2000);
+    createTrackSession("2023-11-29T12:00:00Z", "Race", 4, anotherCircuit.id, user.id, null, now + 2000);
 
     const sessions = findTrackSessionsByCircuitId(circuit.id);
     assert.strictEqual(sessions.length, 2);
@@ -152,6 +158,7 @@ describe("track_sessions", () => {
     const session1 = createTrackSession(
       "2023-11-29T09:00:00Z",
       "Practice",
+      8,
       circuit.id,
       user.id,
       null,
@@ -160,6 +167,7 @@ describe("track_sessions", () => {
     const session2 = createTrackSession(
       "2023-11-30T09:00:00Z",
       "Race",
+      9,
       circuit.id,
       user.id,
       null,
@@ -167,7 +175,7 @@ describe("track_sessions", () => {
     );
     const otherUser = createUser("another-user", "hashed");
     const otherCircuit = createCircuit("Other User Circuit");
-    createTrackSession("2023-12-01T09:00:00Z", "Race", otherCircuit.id, otherUser.id, null, now + 2000);
+    createTrackSession("2023-12-01T09:00:00Z", "Race", 2, otherCircuit.id, otherUser.id, null, now + 2000);
 
     const sessions = findTrackSessionsByUserId(user.id);
     assert.strictEqual(sessions.length, 2);
@@ -180,6 +188,7 @@ describe("track_sessions", () => {
     const session = createTrackSession(
       "2023-11-29T10:00:00Z",
       "Practice",
+      7,
       circuit.id,
       user.id,
       "notes",
@@ -191,6 +200,7 @@ describe("track_sessions", () => {
       id: session.id,
       date: "2023-12-01",
       format: "Race",
+      classification: 2,
       circuitId: otherCircuit.id,
       conditions: "Wet",
       notes: "Updated",
@@ -200,6 +210,7 @@ describe("track_sessions", () => {
     assert.ok(updated);
     assert.strictEqual(updated?.date, "2023-12-01");
     assert.strictEqual(updated?.format, "Race");
+    assert.strictEqual(updated?.classification, 2);
     assert.strictEqual(updated?.circuitId, otherCircuit.id);
     assert.strictEqual(updated?.userId, user.id);
     assert.strictEqual(updated?.conditions, "Wet");

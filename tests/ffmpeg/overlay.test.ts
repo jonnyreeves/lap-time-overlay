@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
+import type { Lap } from "../../src/ffmpeg/lapTypes.js";
 import {
   DEFAULT_OVERLAY_STYLE,
   buildDrawtextFilterGraph,
 } from "../../src/ffmpeg/overlay.js";
-import type { Lap } from "../../src/lapTypes.js";
 
 const sampleLaps: Lap[] = [
   {

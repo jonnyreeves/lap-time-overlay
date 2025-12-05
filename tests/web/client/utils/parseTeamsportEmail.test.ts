@@ -47,6 +47,7 @@ describe("parseTeamsportEmail", () => {
     expect(parsed?.provider).toBe("teamsport");
     expect(parsed?.drivers.length).toBeGreaterThan(0);
     const jonny = parsed?.drivers.find((d) => d.name === "Jonny");
+    expect(jonny?.classification).toBe(1);
     expect(jonny?.laps.length).toBe(14);
     expect(jonny?.laps[0].timeSeconds).toBeCloseTo(70.171, 3);
     expect(jonny?.laps[1].timeSeconds).toBeCloseTo(49.872, 3);

@@ -1,4 +1,4 @@
-import type { Lap } from "../laps.js";
+import type { Lap } from "./laps.js";
 import type { VideoInfo } from "./videoInfo.js";
 
 export interface OverlayStyle {

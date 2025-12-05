@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<e636ce70cbad596c3240560142a3e013>>
+ * @generated SignedSource<<9fb093c07364f862884bddde11105cd9>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -19,6 +19,7 @@ export type RecentSessionsCard_viewer$data = {
           readonly id: string;
           readonly name: string;
         };
+        readonly classification: number;
         readonly conditions: string;
         readonly date: string;
         readonly format: string;
@@ -101,6 +102,13 @@ return {
                   "args": null,
                   "kind": "ScalarField",
                   "name": "format",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "classification",
                   "storageKey": null
                 },
                 {
@@ -215,6 +223,6 @@ return {
 };
 })();
 
-(node as any).hash = "ec19225457ff60265c88c027c9ddfa5f";
+(node as any).hash = "4760f50c28523c6b000461d5342c639f";
 
 export default node;

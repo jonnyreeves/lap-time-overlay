@@ -1,4 +1,4 @@
-import type { Lap } from "../lapTypes.js";
+import type { Lap } from "../ffmpeg/lapTypes.js";
 
 export function addStartOffsets(laps: Lap[]): Lap[] {
   let cumulative = 0;

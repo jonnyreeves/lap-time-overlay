@@ -25,6 +25,7 @@ describe("parseDaytonaEmail", () => {
       lapEvents: [{ offset: 0, event: "position", value: "11" }],
     });
     expect(result.laps[2]).toMatchObject({ lapNumber: 3, timeSeconds: 51.258 });
+    expect(result.classification).toBe(11);
   });
 
   it("parses time started date when separated by tabs", () => {

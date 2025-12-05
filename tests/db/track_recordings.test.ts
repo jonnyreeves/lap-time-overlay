@@ -36,6 +36,7 @@ describe("track_recordings", () => {
     trackSession = createTrackSession(
       "2023-11-29T10:00:00Z",
       "Practice",
+      4,
       circuit.id,
       user.id
     );
@@ -87,6 +88,7 @@ describe("track_recordings", () => {
     const anotherTrackSession = createTrackSession(
       "2023-11-29T14:00:00Z",
       "Qualifying",
+      2,
       circuit.id,
       user.id
     );

@@ -1,7 +1,7 @@
-import type { Lap } from "../lapTypes.js";
-import { parseStartTimestamp } from "../time.js";
-import { addStartOffsets } from "./shared.js";
 import fs from "fs";
+import type { Lap } from "../ffmpeg/lapTypes.js";
+import { parseStartTimestamp } from "../ffmpeg/time.js";
+import { addStartOffsets } from "./shared.js";
 
 function splitCells(line: string): string[] {
   const tabParts = line.split(/\t+/);

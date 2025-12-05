@@ -37,6 +37,7 @@ describe("laps", () => {
     trackSession = createTrackSession(
       "2023-11-29T10:00:00Z",
       "Practice",
+      3,
       circuit.id,
       user.id
     );
@@ -69,6 +70,7 @@ describe("laps", () => {
     const anotherTrackSession = createTrackSession(
       "2023-11-29T13:00:00Z",
       "Race",
+      4,
       circuit.id,
       user.id
     );

@@ -24,6 +24,7 @@ const inputFieldStyles = css`
   input[type="date"],
   input[type="time"],
   input[type="text"],
+  input[type="number"],
   select,
   textarea {
     width: 100%;
@@ -83,6 +84,7 @@ const SessionQuery = graphql`
       id
       date
       format
+      classification
       conditions
       notes
       circuit {
@@ -127,6 +129,7 @@ export default function ViewSessionRoute() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [circuitId, setCircuitId] = useState("");
+  const [classification, setClassification] = useState("");
   const [notes, setNotes] = useState("");
 
   const data = useLazyLoadQuery<viewSessionQuery>(
@@ -148,6 +151,7 @@ export default function ViewSessionRoute() {
     setCircuitId(session.circuit.id);
     setSessionFormat(session.format);
     setConditions(session.conditions ?? "Dry");
+    setClassification(session.classification?.toString() ?? "");
     setNotes(session.notes ?? "");
   }, [session]);
 
@@ -230,6 +234,16 @@ export default function ViewSessionRoute() {
                 <option value="Wet">Wet</option>
               </select>
             </div>
+          </div>
+          <div css={inputFieldStyles}>
+            <label htmlFor="session-classification">Classification</label>
+            <input
+              type="number"
+              id="session-classification"
+              value={classification}
+              readOnly
+              disabled
+            />
           </div>
           <div css={inputFieldStyles}>
             <label htmlFor="session-notes">Notes</label>

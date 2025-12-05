@@ -1,6 +1,6 @@
-import type { Lap } from "../lapTypes.js";
-import { addStartOffsets } from "./shared.js";
 import fs from "fs";
+import type { Lap } from "../ffmpeg/lapTypes.js";
+import { addStartOffsets } from "./shared.js";
 
 const DAYTONA_LAP_LINE_RE = /^\s*(\d+)\s+(\d+):(\d+):(\d+)\s+\[(\d+)\]\s*$/; // 01 0:57:755 [11]
 

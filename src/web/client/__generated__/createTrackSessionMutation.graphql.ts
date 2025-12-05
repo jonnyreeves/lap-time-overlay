@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<8f16f1bb196d5939719bae3836ccfe60>>
+ * @generated SignedSource<<e0b7ce02b2107864bb17ba15a34b3627>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,6 +11,7 @@
 import { ConcreteRequest } from 'relay-runtime';
 export type CreateTrackSessionInput = {
   circuitId: string;
+  classification: number;
   conditions?: string | null | undefined;
   date: string;
   format: string;
@@ -41,6 +42,7 @@ export type createTrackSessionMutation$data = {
         readonly name: string;
         readonly personalBest: number | null | undefined;
       };
+      readonly classification: number;
       readonly conditions: string;
       readonly date: string;
       readonly format: string;
@@ -106,17 +108,24 @@ v7 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "conditions",
+  "name": "classification",
   "storageKey": null
 },
 v8 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "personalBest",
+  "name": "conditions",
   "storageKey": null
 },
 v9 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "personalBest",
+  "storageKey": null
+},
+v10 = {
   "alias": null,
   "args": null,
   "concreteType": "Circuit",
@@ -139,18 +148,18 @@ v9 = {
       "name": "heroImage",
       "storageKey": null
     },
-    (v8/*: any*/)
+    (v9/*: any*/)
   ],
   "storageKey": null
 },
-v10 = {
+v11 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "notes",
   "storageKey": null
 },
-v11 = {
+v12 = {
   "alias": null,
   "args": [
     {
@@ -164,7 +173,7 @@ v11 = {
   "name": "laps",
   "plural": true,
   "selections": [
-    (v8/*: any*/),
+    (v9/*: any*/),
     (v4/*: any*/)
   ],
   "storageKey": "laps(first:1)"
@@ -200,9 +209,10 @@ return {
               (v5/*: any*/),
               (v6/*: any*/),
               (v7/*: any*/),
-              (v9/*: any*/),
+              (v8/*: any*/),
               (v10/*: any*/),
-              (v11/*: any*/)
+              (v11/*: any*/),
+              (v12/*: any*/)
             ],
             "storageKey": null
           }
@@ -243,7 +253,8 @@ return {
               (v5/*: any*/),
               (v6/*: any*/),
               (v7/*: any*/),
-              (v9/*: any*/),
+              (v8/*: any*/),
+              (v10/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -265,8 +276,8 @@ return {
                   }
                 ]
               },
-              (v10/*: any*/),
-              (v11/*: any*/)
+              (v11/*: any*/),
+              (v12/*: any*/)
             ],
             "storageKey": null
           },
@@ -297,16 +308,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "30cdc972dbb501be943e4c28094107c3",
+    "cacheID": "df045c27bc81661f33517ea70c61efd6",
     "id": null,
     "metadata": {},
     "name": "createTrackSessionMutation",
     "operationKind": "mutation",
-    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      conditions\n      circuit {\n        id\n        name\n        heroImage\n        personalBest\n      }\n      notes\n      laps(first: 1) {\n        personalBest\n        id\n      }\n    }\n  }\n}\n"
+    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      conditions\n      circuit {\n        id\n        name\n        heroImage\n        personalBest\n      }\n      notes\n      laps(first: 1) {\n        personalBest\n        id\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "c7cafd9d1e9b153c40a95c3b857fbbe2";
+(node as any).hash = "ee0e33f99a4eecd610e64c2cb325a3a7";
 
 export default node;

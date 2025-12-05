@@ -6,13 +6,13 @@ import path from "node:path";
 import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
 import { describe, expect, it } from "vitest";
+import type { Lap } from "../../src/ffmpeg/lapTypes.js";
 import type { OverlayStyle } from "../../src/ffmpeg/overlay.js";
 import {
   DEFAULT_OVERLAY_STYLE,
   renderWithFfmpegDrawtext,
 } from "../../src/ffmpeg/overlay.js";
 import { probeVideoInfo } from "../../src/ffmpeg/videoInfo.js";
-import type { Lap } from "../../src/lapTypes.js";
 
 const FIXTURE_DIR = path.resolve("tests/testdata");
 const EXPECTED_DIR = path.join(FIXTURE_DIR, "expected");

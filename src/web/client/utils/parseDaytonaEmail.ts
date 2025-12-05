@@ -8,6 +8,7 @@ const TIME_STARTED_RE = /time\s*started\s*(?::|\-)?\s*(.+)/i;
 export function parseDaytonaEmail(text: string): ParsedDaytonaEmail {
   const lines = text.split(/\r?\n/);
   const { date: sessionDate, time: sessionTime } = parseTimeStarted(text);
+  let finalPosition: number | null = null;
 
   const laps: ParsedLap[] = [];
 
@@ -27,6 +28,7 @@ export function parseDaytonaEmail(text: string): ParsedDaytonaEmail {
     const pos = parseInt(m[5], 10);
 
     if (![lapNum, mm, ss, ms, pos].every(Number.isFinite)) continue;
+    finalPosition = pos;
 
     const durationS = mm * 60 + ss + ms / 1000;
     laps.push({
@@ -44,6 +46,7 @@ export function parseDaytonaEmail(text: string): ParsedDaytonaEmail {
     sessionFormat: parseSessionFormat(text),
     sessionDate,
     sessionTime,
+    classification: finalPosition,
     laps,
   };
 }

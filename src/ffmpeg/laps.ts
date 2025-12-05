@@ -4,43 +4,7 @@ import type {
   PositionChange,
   PositionChangeInput,
 } from "./lapTypes.js";
-import { parseDaytonaLapFile, parseDaytonaLapText } from "./lapFormats/daytona.js";
-import {
-  parseTeamsportLapFile,
-  parseTeamsportLapText,
-} from "./lapFormats/teamsport.js";
 
-export type LapFormat = "daytona" | "teamsport";
-
-export function parseLapFile(
-  filePath: string,
-  format: LapFormat = "daytona",
-  driverName?: string
-): Lap[] {
-  switch (format) {
-    case "daytona":
-      return parseDaytonaLapFile(filePath);
-    case "teamsport":
-      return parseTeamsportLapFile(filePath, driverName);
-    default:
-      throw new Error(`Unknown lap format: ${format}`);
-  }
-}
-
-export function parseLapText(
-  text: string,
-  format: LapFormat = "daytona",
-  driverName?: string
-): Lap[] {
-  switch (format) {
-    case "daytona":
-      return parseDaytonaLapText(text);
-    case "teamsport":
-      return parseTeamsportLapText(text, driverName);
-    default:
-      throw new Error(`Unknown lap format: ${format}`);
-  }
-}
 
 export function totalSessionDuration(laps: Lap[]): number {
   if (!laps.length) return 0;

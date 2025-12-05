@@ -32,6 +32,7 @@ const inputFieldStyles = css`
   input[type="date"],
   input[type="time"],
   input[type="text"],
+  input[type="number"],
   select {
     width: 100%;
     padding: 10px;
@@ -157,6 +158,7 @@ const CreateTrackSessionMutation = graphql`
         id
         date
         format
+        classification
         conditions
         circuit
           @prependNode(
@@ -193,6 +195,7 @@ export default function CreateSessionRoute() {
   const [date, setDate] = useState(today);
   const [time, setTime] = useState("");
   const [circuitId, setCircuitId] = useState("");
+  const [classification, setClassification] = useState("");
 
   const navigate = useNavigate();
   const {
@@ -210,7 +213,8 @@ export default function CreateSessionRoute() {
   const [commitMutation, isInFlight] = useMutation<createTrackSessionMutation>(
     CreateTrackSessionMutation,
   );
-  const isCreateDisabled = isInFlight || !date || !sessionFormat || !circuitId;
+  const isCreateDisabled =
+    isInFlight || !date || !sessionFormat || !circuitId || classification.trim() === "";
   const viewerConnectionId = ConnectionHandler.getConnectionID(
     viewer.__id ?? viewer.id,
     "RecentSessionsCard_recentTrackSessions"
@@ -258,6 +262,12 @@ export default function CreateSessionRoute() {
       return;
     }
 
+    const parsedClassification = Number.parseInt(classification, 10);
+    if (!Number.isInteger(parsedClassification) || parsedClassification < 1) {
+      alert("Please enter a classification of 1 or higher.");
+      return;
+    }
+
     let lapInput: LapInputPayload[] = [];
     try {
       lapInput = buildLapPayload();
@@ -272,6 +282,7 @@ export default function CreateSessionRoute() {
         input: {
           date: time ? `${date}T${time}` : date,
           format: sessionFormat,
+          classification: parsedClassification,
           circuitId,
           conditions,
           ...(lapInput.length ? { laps: lapInput } : {}),
@@ -308,6 +319,9 @@ export default function CreateSessionRoute() {
     if (importResult.sessionTime) {
       setTime(importResult.sessionTime);
     }
+    setClassification(
+      importResult.classification != null ? String(importResult.classification) : ""
+    );
     if (importResult.laps.length) {
       setLapRowsFromImport(
         importResult.laps.map((lap) => ({
@@ -408,6 +422,18 @@ export default function CreateSessionRoute() {
                 <option value="Wet">Wet</option>
               </select>
             </div>
+          </div>
+          <div css={inputFieldStyles}>
+            <label htmlFor="session-classification">Classification (finishing position)</label>
+            <input
+              type="number"
+              min={1}
+              id="session-classification"
+              value={classification}
+              onChange={(e) => setClassification(e.target.value)}
+              placeholder="e.g. 1 for P1"
+              disabled={isInFlight}
+            />
           </div>
         </form>
       </Card>

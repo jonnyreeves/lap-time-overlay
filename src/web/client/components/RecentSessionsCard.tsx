@@ -15,6 +15,7 @@ const RecentSessionsCardFragment = graphql`
           id
           date
           format
+          classification
           conditions
           notes
           circuit {
@@ -43,12 +44,10 @@ const addSessionButtonStyles = css`
   color: #fff;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 10px 25px rgba(83, 106, 214, 0.3);
   transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 12px 28px rgba(83, 106, 214, 0.35);
   }
 
   &:active {
@@ -126,6 +125,18 @@ const formatPillStyles = css`
   border: 1px solid #c7d2fe;
 `;
 
+const classificationPillStyles = css`
+  padding: 7px 12px;
+  border-radius: 12px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-weight: 800;
+  border: 1px solid #fed7aa;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+`;
+
 const notesStyles = css`
   margin: 0;
   color: #475569;
@@ -149,13 +160,13 @@ const pbValueStyles = css`
   gap: 2px;
   padding: 8px 12px;
   border-radius: 10px;
-  background: linear-gradient(140deg, #5b6fe9, #88a7ff);
-  color: #f7faff;
+  background: #e0e7ff;
+  color: #1f2a44;
   font-weight: 700;
   letter-spacing: -0.01em;
   min-width: 82px;
-  box-shadow: 0 10px 25px rgba(83, 106, 214, 0.24);
-  border: 1px solid #5b6fe9;
+  box-shadow: 0 8px 18px rgba(55, 48, 163, 0.08);
+  border: 1px solid #c7d2fe;
 `;
 
 const pbLabelStyles = css`
@@ -200,6 +211,13 @@ function getConditionsEmoji(conditions: string | null | undefined) {
   return "⛅️";
 }
 
+function getClassificationEmoji(classification: number | null) {
+  if (classification === 1) return "🥇";
+  if (classification === 2) return "🥈";
+  if (classification === 3) return "🥉";
+  return null;
+}
+
 export function RecentSessionsCard({ viewer }: Props) {
   const navigate = useNavigate();
   const data = useFragment(RecentSessionsCardFragment, viewer);
@@ -228,6 +246,8 @@ export function RecentSessionsCard({ viewer }: Props) {
               typeof personalBestSeconds === "number"
                 ? personalBestSeconds.toFixed(3)
                 : null;
+            const finishingPosition =
+              typeof session.classification === "number" ? session.classification : null;
 
             return (
               <div key={session.id} css={sessionRowStyles}>
@@ -242,6 +262,18 @@ export function RecentSessionsCard({ viewer }: Props) {
                       {session.circuit?.name ?? "Unknown circuit"}
                     </p>
                     <span css={formatPillStyles}>{session.format}</span>
+                    {finishingPosition ? (
+                      <span
+                        css={classificationPillStyles}
+                        aria-label={`Finished P${finishingPosition}`}
+                        title={`Finished P${finishingPosition}`}
+                      >
+                        {getClassificationEmoji(finishingPosition) ? (
+                          <span aria-hidden>{getClassificationEmoji(finishingPosition)}</span>
+                        ) : null}
+                        <span>P{finishingPosition}</span>
+                      </span>
+                    ) : null}
                     <span
                       css={conditionsPillStyles}
                       aria-label={session.conditions ?? "Unknown conditions"}

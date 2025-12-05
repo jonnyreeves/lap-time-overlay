@@ -19,6 +19,28 @@ function splitColumns(line: string): string[] {
     .filter(Boolean);
 }
 
+function parseClassifications(lines: string[], endIndex: number) {
+  const standings = new Map<string, number>();
+  const sliceEnd = endIndex >= 0 ? endIndex : lines.length;
+
+  for (const line of lines.slice(0, sliceEnd)) {
+    const columns = splitColumns(line);
+    if (columns.length < 2) continue;
+
+    const positionRaw = columns[0];
+    const match = positionRaw.match(/^(\d+)(?:[.)])?$/);
+    const position = match ? Number.parseInt(match[1], 10) : Number.parseInt(positionRaw, 10);
+    if (!Number.isInteger(position) || position < 1) continue;
+
+    const driverName = columns[1];
+    if (!driverName) continue;
+
+    standings.set(driverName, position);
+  }
+
+  return standings;
+}
+
 export function parseTeamsportEmail(text: string): ParsedTeamsportEmail | null {
   const lines = text
     .split(/\r?\n/)
@@ -34,6 +56,7 @@ export function parseTeamsportEmail(text: string): ParsedTeamsportEmail | null {
   const driverNames = splitColumns(headerLine);
   if (!driverNames.length) return null;
 
+  const classifications = parseClassifications(lines, detailIdx);
   const lapsByDriver = new Map<string, ParsedLap[]>();
   driverNames.forEach((name) => lapsByDriver.set(name, []));
 
@@ -65,6 +88,7 @@ export function parseTeamsportEmail(text: string): ParsedTeamsportEmail | null {
     .map((name) => ({
       name,
       laps: (lapsByDriver.get(name) ?? []).sort((a, b) => a.lapNumber - b.lapNumber),
+      classification: classifications.get(name) ?? null,
     }))
     .filter((driver) => driver.laps.length > 0);
 

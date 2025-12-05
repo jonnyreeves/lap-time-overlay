@@ -28,6 +28,7 @@ input LapEventInput {
 input CreateTrackSessionInput {
   date: String!
   format: String!
+  classification: Int!
   conditions: String
   circuitId: ID!
   notes: String
@@ -42,6 +43,7 @@ input UpdateTrackSessionInput {
   id: ID!
   date: String
   format: String
+  classification: Int
   conditions: String
   circuitId: ID
   notes: String
@@ -94,6 +96,7 @@ type TrackSession {
   id: ID!
   date: String!
   format: String!
+  classification: Int!
   conditions: String!
   circuit: Circuit!
   notes: String

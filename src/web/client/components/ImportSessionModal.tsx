@@ -165,6 +165,13 @@ function getSelectedDriverLaps(parsed: ParsedSessionEmail, selectedDriver: strin
   return driver?.laps ?? [];
 }
 
+function getSelectedClassification(parsed: ParsedSessionEmail, selectedDriver: string) {
+  if (parsed.provider !== "teamsport") return parsed.classification ?? null;
+  const driver =
+    parsed.drivers.find((d) => d.name === selectedDriver) ?? parsed.drivers[0] ?? null;
+  return driver?.classification ?? null;
+}
+
 export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionModalProps) {
   const [emailContent, setEmailContent] = useState("");
   const [selectedDriver, setSelectedDriver] = useState("");
@@ -191,6 +198,7 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
       sessionFormat: parsed.sessionFormat,
       sessionDate: parsed.sessionDate,
       sessionTime: parsed.sessionTime,
+      classification: getSelectedClassification(parsed, selectedDriver),
       laps,
       driverName: parsed.provider === "teamsport" ? selectedDriver || parsed.drivers[0]?.name : undefined,
     });
@@ -219,6 +227,9 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
     parsed?.provider === "teamsport"
       ? getSelectedDriverLaps(parsed, selectedDriver)
       : parsed?.laps ?? [];
+  const previewClassification = parsed
+    ? getSelectedClassification(parsed, selectedDriver)
+    : null;
 
   const importDisabled = !emailContent.trim() || !(previewLaps?.length ?? 0);
 
@@ -258,6 +269,10 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
                   <div>
                     <strong>Session format:</strong>{" "}
                     {parsed.sessionFormat ?? "Not found"}
+                  </div>
+                  <div>
+                    <strong>Classification:</strong>{" "}
+                    {previewClassification ?? "Not found"}
                   </div>
                   {parsed.provider === "teamsport" ? (
                     <div css={selectStyles}>
