@@ -8,7 +8,18 @@ import { PrimaryRecordingCard } from "./PrimaryRecordingCard.js";
 import { type viewSessionQuery } from "../../__generated__/viewSessionQuery.graphql.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 
-const formLayoutStyles = css`
+const pageGridStyles = css`
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 20px;
+  align-items: start;
+
+  @media (max-width: 980px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const columnStackStyles = css`
   display: grid;
   gap: 20px;
 `;
@@ -296,161 +307,165 @@ export default function ViewSessionRoute() {
   }
 
   return (
-    <div css={formLayoutStyles}>
-      <Card
-        title="Track Session"
-        rightComponent={<Link to="/session/create">Create new session</Link>}
-      >
-        <div css={metaStyles}>
-          <span>Created: {new Date(session.createdAt).toLocaleString()}</span>
-          <span>Last updated: {new Date(session.updatedAt).toLocaleString()}</span>
-        </div>
-        <form>
-          <div css={twoColumnRowStyles}>
+    <div css={pageGridStyles}>
+      <div css={columnStackStyles}>
+        <Card
+          title="Track Session"
+          rightComponent={<Link to="/session/create">Create new session</Link>}
+        >
+          <div css={metaStyles}>
+            <span>Created: {new Date(session.createdAt).toLocaleString()}</span>
+            <span>Last updated: {new Date(session.updatedAt).toLocaleString()}</span>
+          </div>
+          <form>
+            <div css={twoColumnRowStyles}>
+              <div css={inputFieldStyles}>
+                <label htmlFor="session-date">Date</label>
+                <input
+                  type="date"
+                  id="session-date"
+                  value={date}
+                  readOnly
+                  disabled
+                />
+              </div>
+              <div css={inputFieldStyles}>
+                <label htmlFor="session-time">Time (HH:mm)</label>
+                <input
+                  type="time"
+                  id="session-time"
+                  value={time}
+                  readOnly
+                  disabled
+                />
+              </div>
+            </div>
             <div css={inputFieldStyles}>
-              <label htmlFor="session-date">Date</label>
+              <label htmlFor="session-circuit">Circuit</label>
+              <select
+                id="session-circuit"
+                value={circuitId}
+                disabled
+              >
+                {data.circuits.map((circuit) => (
+                  <option key={circuit.id} value={circuit.id}>
+                    {circuit.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div css={twoColumnRowStyles}>
+              <div css={inputFieldStyles}>
+                <label htmlFor="session-format">Format</label>
+                <select
+                  id="session-format"
+                  value={sessionFormat}
+                  disabled
+                >
+                  <option value="Practice">Practice</option>
+                  <option value="Qualifying">Qualifying</option>
+                  <option value="Race">Race</option>
+                </select>
+              </div>
+              <div css={inputFieldStyles}>
+                <label htmlFor="session-conditions">Conditions</label>
+                <select
+                  id="session-conditions"
+                  value={conditions}
+                  disabled
+                >
+                  <option value="Dry">Dry</option>
+                  <option value="Wet">Wet</option>
+                </select>
+              </div>
+            </div>
+            <div css={inputFieldStyles}>
+              <label htmlFor="session-classification">Classification</label>
               <input
-                type="date"
-                id="session-date"
-                value={date}
+                type="number"
+                id="session-classification"
+                value={classification}
                 readOnly
                 disabled
               />
             </div>
             <div css={inputFieldStyles}>
-              <label htmlFor="session-time">Time (HH:mm)</label>
-              <input
-                type="time"
-                id="session-time"
-                value={time}
+              <label htmlFor="session-notes">Notes</label>
+              <textarea
+                id="session-notes"
+                rows={3}
+                value={notes}
+                placeholder="Optional session notes"
                 readOnly
                 disabled
               />
             </div>
-          </div>
-          <div css={inputFieldStyles}>
-            <label htmlFor="session-circuit">Circuit</label>
-            <select
-              id="session-circuit"
-              value={circuitId}
-              disabled
-            >
-              {data.circuits.map((circuit) => (
-                <option key={circuit.id} value={circuit.id}>
-                  {circuit.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div css={twoColumnRowStyles}>
-            <div css={inputFieldStyles}>
-              <label htmlFor="session-format">Format</label>
-              <select
-                id="session-format"
-                value={sessionFormat}
-                disabled
-              >
-                <option value="Practice">Practice</option>
-                <option value="Qualifying">Qualifying</option>
-                <option value="Race">Race</option>
-              </select>
-            </div>
-            <div css={inputFieldStyles}>
-              <label htmlFor="session-conditions">Conditions</label>
-              <select
-                id="session-conditions"
-                value={conditions}
-                disabled
-              >
-                <option value="Dry">Dry</option>
-                <option value="Wet">Wet</option>
-              </select>
-            </div>
-          </div>
-          <div css={inputFieldStyles}>
-            <label htmlFor="session-classification">Classification</label>
-            <input
-              type="number"
-              id="session-classification"
-              value={classification}
-              readOnly
-              disabled
-            />
-          </div>
-          <div css={inputFieldStyles}>
-            <label htmlFor="session-notes">Notes</label>
-            <textarea
-              id="session-notes"
-              rows={3}
-              value={notes}
-              placeholder="Optional session notes"
-              readOnly
-              disabled
-            />
-          </div>
-        </form>
-      </Card>
+          </form>
+        </Card>
 
-      <PrimaryRecordingCard
-        recording={primaryRecording}
-        videoRefs={recordingVideoRefs}
-        onRefresh={() => setRefreshKey((key) => key + 1)}
-      />
-
-      <RecordingsCard
-        sessionId={session.id}
-        recordings={normalizedRecordings}
-        onRefresh={() => setRefreshKey((key) => key + 1)}
-      />
-
-      <Card title="Laps">
-        {lapsWithStart.length === 0 ? (
-          <p>No laps recorded for this session.</p>
-        ) : (
-          <div css={lapsListStyles}>
-            {lapsWithStart.map((lap) => {
-              const hasAnchor = Boolean(
-                primaryRecordingForJump && recordingVideoRefs.current[primaryRecordingForJump.id]
-              );
-              return (
-                <div key={lap.id} css={lapRowStyles}>
-                  <div>
-                    <span>Lap {lap.lapNumber}</span>
-                    <div>{formatLapTimeSeconds(lap.time)}s</div>
+        <Card title="Laps">
+          {lapsWithStart.length === 0 ? (
+            <p>No laps recorded for this session.</p>
+          ) : (
+            <div css={lapsListStyles}>
+              {lapsWithStart.map((lap) => {
+                const hasAnchor = Boolean(
+                  primaryRecordingForJump && recordingVideoRefs.current[primaryRecordingForJump.id]
+                );
+                return (
+                  <div key={lap.id} css={lapRowStyles}>
+                    <div>
+                      <span>Lap {lap.lapNumber}</span>
+                      <div>{formatLapTimeSeconds(lap.time)}s</div>
+                    </div>
+                    <button
+                      css={lapActionButtonStyles}
+                      type="button"
+                      disabled={!hasAnchor}
+                      onClick={() => jumpToLapStart(lap.start)}
+                      title={
+                        hasAnchor
+                          ? "Jump the video to the start of this lap"
+                          : "Set Lap 1 start on the video to enable jumping"
+                      }
+                    >
+                      Jump to start
+                    </button>
                   </div>
-                  <button
-                    css={lapActionButtonStyles}
-                    type="button"
-                    disabled={!hasAnchor}
-                    onClick={() => jumpToLapStart(lap.start)}
-                    title={
-                      hasAnchor
-                        ? "Jump the video to the start of this lap"
-                        : "Set Lap 1 start on the video to enable jumping"
-                    }
-                  >
-                    Jump to start
-                  </button>
-                </div>
-              );
-            })}
-            {!primaryRecording && <p>Mark a primary recording to sync lap jumps.</p>}
-            {primaryRecording &&
-              primaryRecording.status !== "READY" && (
-              <p>Primary recording must finish processing to enable lap jumps.</p>
-            )}
-            {primaryRecording &&
-              primaryRecording.status === "READY" &&
-              primaryRecording.lapOneOffset <= 0 && (
-              <p>Set the Lap 1 start time on the primary recording to enable jumping.</p>
-            )}
-            {primaryRecordingForJump &&
-              !recordingVideoRefs.current[primaryRecordingForJump.id] && (
-                <p>Load the video preview to enable lap jump controls.</p>
+                );
+              })}
+              {!primaryRecording && <p>Mark a primary recording to sync lap jumps.</p>}
+              {primaryRecording &&
+                primaryRecording.status !== "READY" && (
+                <p>Primary recording must finish processing to enable lap jumps.</p>
               )}
-          </div>
-        )}
-      </Card>
+              {primaryRecording &&
+                primaryRecording.status === "READY" &&
+                primaryRecording.lapOneOffset <= 0 && (
+                <p>Set the Lap 1 start time on the primary recording to enable jumping.</p>
+              )}
+              {primaryRecordingForJump &&
+                !recordingVideoRefs.current[primaryRecordingForJump.id] && (
+                  <p>Load the video preview to enable lap jump controls.</p>
+                )}
+            </div>
+          )}
+        </Card>
+      </div>
+
+      <div css={columnStackStyles}>
+        <PrimaryRecordingCard
+          recording={primaryRecording}
+          videoRefs={recordingVideoRefs}
+          onRefresh={() => setRefreshKey((key) => key + 1)}
+        />
+
+        <RecordingsCard
+          sessionId={session.id}
+          recordings={normalizedRecordings}
+          onRefresh={() => setRefreshKey((key) => key + 1)}
+        />
+      </div>
     </div>
   );
 }
