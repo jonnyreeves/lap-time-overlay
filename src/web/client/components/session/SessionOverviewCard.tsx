@@ -132,7 +132,7 @@ function splitDateTime(value: string): { date: string; time: string } {
   return { date, time: `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}` };
 }
 
-export function SessionDetailsCard({ session, laps }: Props) {
+export function SessionOverviewCard({ session, laps }: Props) {
   const { date: sessionDate, time: sessionTime } = splitDateTime(session.date);
   const conditionsLabel = session.conditions ?? "Not set";
   const classificationValue = session.classification;
@@ -170,7 +170,7 @@ export function SessionDetailsCard({ session, laps }: Props) {
             <p className="value">{sessionTime || "—"}</p>
           </div>
           <div css={infoTileStyles}>
-            <p className="label">Laps logged</p>
+            <p className="label">Laps completed</p>
             <p className="value">{lapsCount}</p>
             {fastestLapTime ? <p className="note">Fastest lap {fastestLapTime}</p> : null}
           </div>

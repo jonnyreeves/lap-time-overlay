@@ -6,7 +6,7 @@ import { LapsCard, type LapWithEvents } from "../../components/session/LapsCard.
 import { PrimaryRecordingCard } from "../../components/session/PrimaryRecordingCard.js";
 import { RecordingsCard } from "../../components/session/RecordingsCard.js";
 import { UploadRecordingCard } from "../../components/session/UploadRecordingCard.js";
-import { SessionDetailsCard } from "../../components/session/SessionDetailsCard.js";
+import { SessionOverviewCard } from "../../components/session/SessionOverviewCard.js";
 import { type viewSessionQuery } from "../../__generated__/viewSessionQuery.graphql.js";
 
 const pageGridStyles = css`
@@ -239,7 +239,7 @@ export default function ViewSessionRoute() {
   return (
     <div css={pageGridStyles}>
       <div css={columnStackStyles}>
-        <SessionDetailsCard
+        <SessionOverviewCard
           session={session}
           laps={lapsWithStart}
         />
