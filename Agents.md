@@ -11,6 +11,11 @@
 - SQLite is the persistence layer (default `DB_PATH=/app/database/app.sqlite`, PRAGMAs set via `DB_PRAGMAS`, `npm run db:migrate` to run migrations); keep DB writes in the `/app/database` volume.
 - Runtime work dirs under `/app/work` (uploads/renders/previews) and `/app/database` are Docker volumes—do not break or relocate without coordinating.
 
+## Frontend structure
+- Screens/routes live under `src/web/client/routes/**` and should stay light: fetch/query, compose, and delegate to components.
+- Shared UI lives under `src/web/client/components/**`; domain-specific pieces (e.g., session recording cards and helpers) belong in `src/web/client/components/session/**`.
+- Keep styles co-located with their components and reuse shared helpers (e.g., `recordingShared`) from the `components/session` folder instead of duplicating in routes.
+
 ## Style
 - Keep changes minimal, aligned with existing style, and explain them succinctly in the final message (reference paths, not file dumps).
 components small/modular to stay under the 400-line guideline.

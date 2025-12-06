@@ -2,7 +2,7 @@ import { css } from "@emotion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { graphql, useMutation } from "react-relay";
 import type { UploadRecordingCardStartUploadMutation } from "../../__generated__/UploadRecordingCardStartUploadMutation.graphql.js";
-import { Card } from "../../components/Card.js";
+import { Card } from "../Card.js";
 import {
   formatBytes,
   recordingButtonStyles,

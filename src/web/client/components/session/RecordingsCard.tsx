@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { graphql, useMutation } from "react-relay";
 import type { RecordingsCardDeleteRecordingMutation } from "../../__generated__/RecordingsCardDeleteRecordingMutation.graphql.js";
 import type { RecordingsCardMarkPrimaryRecordingMutation } from "../../__generated__/RecordingsCardMarkPrimaryRecordingMutation.graphql.js";
-import { Card } from "../../components/Card.js";
+import { Card } from "../Card.js";
 import {
   formatBytes,
   recordingButtonStyles,

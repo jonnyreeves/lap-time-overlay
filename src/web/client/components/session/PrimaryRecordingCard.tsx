@@ -2,7 +2,7 @@ import { css } from "@emotion/react";
 import { useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { graphql, useMutation } from "react-relay";
 import type { PrimaryRecordingCardUpdateRecordingMutation } from "../../__generated__/PrimaryRecordingCardUpdateRecordingMutation.graphql.js";
-import { Card } from "../../components/Card.js";
+import { Card } from "../Card.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 
 type Recording = {
