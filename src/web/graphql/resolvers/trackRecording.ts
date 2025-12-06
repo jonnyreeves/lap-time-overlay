@@ -1,5 +1,5 @@
 import { GraphQLError } from "graphql";
-import { findTrackRecordingById, updateTrackRecording } from "../../../db/track_recordings.js";
+import { findTrackRecordingById, markPrimaryRecording, updateTrackRecording } from "../../../db/track_recordings.js";
 import type { GraphQLContext } from "../context.js";
 import { RecordingUploadError, startRecordingUploadSession, deleteRecordingAndFiles } from "../../recordings/service.js";
 import { toTrackRecordingPayload } from "./trackSession.js";
@@ -80,6 +80,39 @@ export const trackRecordingResolvers = {
     } catch (err) {
       throw toUploadError(err);
     }
+  },
+  markPrimaryTrackRecording: async (args: { id?: string }, context: GraphQLContext) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+    if (!args.id) {
+      throw new GraphQLError("id is required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const recording = findTrackRecordingById(args.id);
+    if (!recording) {
+      throw new GraphQLError("Recording not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+    if (recording.userId !== context.currentUser.id) {
+      throw new GraphQLError("You do not have access to this recording", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+
+    const updated = markPrimaryRecording(recording.id);
+    if (!updated) {
+      throw new GraphQLError("Recording not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    return { recording: toTrackRecordingPayload(updated, context.repositories) };
   },
   updateTrackRecording: async (
     args: { input?: { id?: string; lapOneOffset?: number | null } },

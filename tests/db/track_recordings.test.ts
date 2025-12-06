@@ -8,6 +8,7 @@ import { migration as trackSessionMigration } from "../../src/db/migrations/04_c
 import { migration as trackRecordingMigration } from "../../src/db/migrations/07_create_track_recordings.js";
 import { migration as trackSessionConditionsMigration } from "../../src/db/migrations/08_add_track_session_conditions.js";
 import { migration as extendTrackRecordings } from "../../src/db/migrations/09_extend_track_recordings.js";
+import { migration as addPrimaryRecording } from "../../src/db/migrations/10_add_primary_track_recording.js";
 import { createUser, type UserRecord } from "../../src/db/users.js";
 import { createCircuit, type CircuitRecord } from "../../src/db/circuits.js";
 import { createTrackSession, type TrackSessionRecord } from "../../src/db/track_sessions.js";
@@ -33,6 +34,7 @@ describe("track_recordings", () => {
     trackSessionConditionsMigration.up(db);
     trackRecordingMigration.up(db);
     extendTrackRecordings.up(db);
+    addPrimaryRecording.up(db);
     user = createUser("testuser", "hashedpassword");
     circuit = createCircuit("Test Circuit");
     trackSession = createTrackSession(
@@ -51,6 +53,7 @@ describe("track_recordings", () => {
         sessionId: trackSession.id,
         userId: trackSession.userId,
         mediaId: "media-uuid-123",
+        isPrimary: true,
         lapOneOffset: 1.5,
         description: "Dashcam footage",
         now,
@@ -60,6 +63,7 @@ describe("track_recordings", () => {
     assert.strictEqual(trackRecording.sessionId, trackSession.id);
     assert.strictEqual(trackRecording.userId, trackSession.userId);
     assert.strictEqual(trackRecording.mediaId, "media-uuid-123");
+    assert.strictEqual(trackRecording.isPrimary, true);
     assert.strictEqual(trackRecording.lapOneOffset, 1.5);
     assert.strictEqual(trackRecording.description, "Dashcam footage");
     assert.strictEqual(trackRecording.status, "pending_upload");
@@ -84,6 +88,7 @@ describe("track_recordings", () => {
         sessionId: trackSession.id,
         userId: trackSession.userId,
         mediaId: "media-uuid-a",
+        isPrimary: true,
         lapOneOffset: 0.1,
         description: "External cam",
         now,
@@ -95,6 +100,7 @@ describe("track_recordings", () => {
         sessionId: trackSession.id,
         userId: trackSession.userId,
         mediaId: "media-uuid-b",
+        isPrimary: false,
         lapOneOffset: 0.2,
         description: "Internal cam",
         now: now + 100,
@@ -123,5 +129,6 @@ describe("track_recordings", () => {
     assert.strictEqual(recordings.length, 2);
     assert.deepStrictEqual(recordings[0], recording2); // Ordered by created_at DESC
     assert.deepStrictEqual(recordings[1], recording1);
+    assert.strictEqual(recordings[1]?.isPrimary, true);
   });
 });

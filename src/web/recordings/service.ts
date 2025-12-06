@@ -9,6 +9,7 @@ import {
   createTrackRecording,
   deleteTrackRecording,
   findTrackRecordingById,
+  findTrackRecordingsBySessionId,
   updateTrackRecording,
   type TrackRecordingRecord,
 } from "../../db/track_recordings.js";
@@ -219,6 +220,8 @@ export async function startRecordingUploadSession({
     throw new RecordingUploadError("At least one source file is required", 400);
   }
 
+  const existingRecordings = findTrackRecordingsBySessionId(sessionId);
+  const shouldBePrimary = existingRecordings.length === 0 || !existingRecordings.some((rec) => rec.isPrimary);
   const recordingId = randomUUID();
   const plannedMediaId = toPlannedMediaId(recordingId, sessionId, sources[0]?.fileName ?? "");
   const recording = createTrackRecording({
@@ -226,6 +229,7 @@ export async function startRecordingUploadSession({
     sessionId,
     userId,
     mediaId: plannedMediaId,
+    isPrimary: shouldBePrimary,
     lapOneOffset: lapOneOffset ?? 0,
     description: description ?? null,
     status: "pending_upload",

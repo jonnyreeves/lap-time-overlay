@@ -49,6 +49,7 @@ describe("trackRecording resolvers", () => {
       sessionId: "s1",
       userId: "user-1",
       mediaId: "media/path",
+      isPrimary: true,
       lapOneOffset: 0,
       description: "desc",
       status: "pending_upload",
@@ -110,6 +111,7 @@ describe("trackRecording resolvers", () => {
       sessionId: "s1",
       userId: "user-1",
       mediaId: "media/path",
+      isPrimary: true,
       lapOneOffset: 0,
       description: null,
       status: "ready",
@@ -144,6 +146,7 @@ describe("trackRecording resolvers", () => {
       sessionId: "s1",
       userId: "user-1",
       mediaId: "media/path",
+      isPrimary: true,
       lapOneOffset: 0,
       description: null,
       status: "uploading",
@@ -165,6 +168,36 @@ describe("trackRecording resolvers", () => {
     ).rejects.toThrowError("Recording is not ready for lap offset updates");
   });
 
+  it("marks a recording as primary", async () => {
+    const recording: recordingsDb.TrackRecordingRecord = {
+      id: "rec-primary",
+      sessionId: "s1",
+      userId: "user-1",
+      mediaId: "media/path",
+      isPrimary: false,
+      lapOneOffset: 1,
+      description: null,
+      status: "ready",
+      error: null,
+      sizeBytes: null,
+      durationMs: null,
+      fps: null,
+      combineProgress: 1,
+      createdAt: 0,
+      updatedAt: 0,
+    };
+    vi.spyOn(recordingsDb, "findTrackRecordingById").mockReturnValue(recording);
+    vi.spyOn(recordingsDb, "markPrimaryRecording").mockReturnValue({ ...recording, isPrimary: true });
+
+    const result = await trackRecordingResolvers.markPrimaryTrackRecording(
+      { id: recording.id },
+      context
+    );
+
+    expect(recordingsDb.markPrimaryRecording).toHaveBeenCalledWith(recording.id);
+    expect(result.recording.isPrimary).toBe(true);
+  });
+
   it("maps service errors to GraphQL errors", async () => {
     vi.mocked(startRecordingUploadSession).mockRejectedValue(
       new RecordingUploadError("boom", 404)
@@ -183,6 +216,7 @@ describe("trackRecording resolvers", () => {
       sessionId: "s1",
       userId: "user-1",
       mediaId: "media/path",
+      isPrimary: true,
       lapOneOffset: 0,
       description: null,
       status: "ready",

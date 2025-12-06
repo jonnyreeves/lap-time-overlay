@@ -4,6 +4,7 @@ import { graphql, useMutation } from "react-relay";
 import type { RecordingsCardStartUploadMutation } from "../../__generated__/RecordingsCardStartUploadMutation.graphql.js";
 import type { RecordingsCardDeleteRecordingMutation } from "../../__generated__/RecordingsCardDeleteRecordingMutation.graphql.js";
 import type { RecordingsCardUpdateRecordingMutation } from "../../__generated__/RecordingsCardUpdateRecordingMutation.graphql.js";
+import type { RecordingsCardMarkPrimaryRecordingMutation } from "../../__generated__/RecordingsCardMarkPrimaryRecordingMutation.graphql.js";
 import { Card } from "../../components/Card.js";
 
 type UploadTarget = {
@@ -20,6 +21,7 @@ type Recording = {
   id: string;
   description: string | null;
   sizeBytes: number | null;
+  isPrimary: boolean;
   lapOneOffset: number;
   durationMs: number | null;
   fps: number | null;
@@ -99,6 +101,15 @@ const recordingRowStyles = css`
     background: #e0e7ff;
     color: #312e81;
     text-transform: capitalize;
+  }
+
+  .primary {
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    background: #ecfdf3;
+    color: #166534;
+    border: 1px solid #bbf7d0;
   }
 
   .error {
@@ -236,6 +247,7 @@ const StartUploadMutation = graphql`
     startTrackRecordingUpload(input: $input) {
       recording {
         id
+        isPrimary
         status
         combineProgress
         uploadProgress {
@@ -271,6 +283,18 @@ const UpdateRecordingMutation = graphql`
         id
         lapOneOffset
         fps
+        updatedAt
+      }
+    }
+  }
+`;
+
+const MarkPrimaryRecordingMutation = graphql`
+  mutation RecordingsCardMarkPrimaryRecordingMutation($id: ID!) {
+    markPrimaryTrackRecording(id: $id) {
+      recording {
+        id
+        isPrimary
         updatedAt
       }
     }
@@ -330,6 +354,8 @@ export function RecordingsCard({ sessionId, recordings, onRefresh, videoRefs: ex
   );
   const [updateLapOffset, isUpdateLapOffsetInFlight] =
     useMutation<RecordingsCardUpdateRecordingMutation>(UpdateRecordingMutation);
+  const [markPrimary, isMarkPrimaryInFlight] =
+    useMutation<RecordingsCardMarkPrimaryRecordingMutation>(MarkPrimaryRecordingMutation);
 
   const hasPendingRecording = useMemo(
     () => recordings.some((recording) => recording.status !== "READY"),
@@ -470,6 +496,16 @@ export function RecordingsCard({ sessionId, recordings, onRefresh, videoRefs: ex
       onError: (err) => {
         setLapOffsetErrors((current) => ({ ...current, [recording.id]: err.message }));
       },
+    });
+  }
+
+  function setPrimaryRecording(recording: Recording) {
+    if (isMarkPrimaryInFlight) return;
+    setUploadError(null);
+    markPrimary({
+      variables: { id: recording.id },
+      onCompleted: () => onRefresh(),
+      onError: (err) => setUploadError(err.message),
     });
   }
 
@@ -689,7 +725,10 @@ export function RecordingsCard({ sessionId, recordings, onRefresh, videoRefs: ex
                       <div>Size: {formatBytes(recording.sizeBytes)}</div>
                     )}
                   </div>
-                  <div className="status">{recording.status.toLowerCase()}</div>
+                  <div css={css`display: flex; gap: 8px; align-items: center;`}>
+                    {recording.isPrimary && <span className="primary">Primary</span>}
+                    <div className="status">{recording.status.toLowerCase()}</div>
+                  </div>
                 </div>
                 {isFinished && (
                   <div css={previewStyles}>
@@ -780,6 +819,15 @@ export function RecordingsCard({ sessionId, recordings, onRefresh, videoRefs: ex
                     >
                       Download / View
                     </a>
+                  )}
+                  {isFinished && !recording.isPrimary && (
+                    <button
+                      css={buttonStyles}
+                      onClick={() => setPrimaryRecording(recording)}
+                      disabled={isMarkPrimaryInFlight}
+                    >
+                      {isMarkPrimaryInFlight ? "Updating…" : "Mark as primary"}
+                    </button>
                   )}
                   <button
                     css={buttonStyles}

@@ -74,6 +74,7 @@ describe("handleRecordingDownloadRequest", () => {
       sessionId,
       userId,
       mediaId,
+      isPrimary: true,
       lapOneOffset: 0,
       description: null,
       status: "ready",

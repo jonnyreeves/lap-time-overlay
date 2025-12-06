@@ -7,6 +7,7 @@
 ## Scope and assumptions
 - Reuse the existing `track_recordings` table (`id`, `session_id`, `media_id`, `lap_one_offset`, `description`, timestamps) but feel free to extend this table as needed (eg: add `user_id`) and relevant metadata such as size, fps, etc.
 - `lap_one_offset` defaults to 0 on upload and can be set after upload to align the start of Lap 1 with the video.
+- Track sessions keep one primary recording for sync/export; default to the first upload and allow re-selection.
 - Storage should live in a durable work dir (e.g., `/app/work/media/session_recordings`).
 - A session may have multiple recordings.
 - The user's footage may be split across multiple source files which will need to be combined into a single file using ffmpeg. Combining the separate files must use ffmpeg copy stream to preserve metadata.

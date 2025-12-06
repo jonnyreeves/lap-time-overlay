@@ -27,6 +27,7 @@ export const rootValue = {
   createTrackSession: trackSessionResolvers.createTrackSession,
   updateTrackSession: trackSessionResolvers.updateTrackSession,
   startTrackRecordingUpload: trackRecordingResolvers.startTrackRecordingUpload,
+  markPrimaryTrackRecording: trackRecordingResolvers.markPrimaryTrackRecording,
   updateTrackRecording: trackRecordingResolvers.updateTrackRecording,
   deleteTrackRecording: trackRecordingResolvers.deleteTrackRecording,
 };

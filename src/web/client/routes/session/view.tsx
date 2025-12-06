@@ -121,6 +121,7 @@ const SessionQuery = graphql`
         status
         error
         sizeBytes
+        isPrimary
         lapOneOffset
         durationMs
         fps
@@ -221,6 +222,7 @@ export default function ViewSessionRoute() {
         id: recording.id,
         description: recording.description ?? null,
         sizeBytes: recording.sizeBytes ?? null,
+        isPrimary: recording.isPrimary ?? false,
         lapOneOffset: recording.lapOneOffset ?? 0,
         durationMs: recording.durationMs ?? null,
         fps: recording.fps ?? null,
@@ -256,11 +258,17 @@ export default function ViewSessionRoute() {
     });
   }, [laps]);
 
+  const primaryRecording = useMemo(
+    () => normalizedRecordings.find((rec) => rec.isPrimary) ?? null,
+    [normalizedRecordings]
+  );
+
   const primaryRecordingForJump = useMemo(() => {
-    return [...normalizedRecordings]
-      .filter((rec) => rec.status === "READY" && rec.lapOneOffset > 0)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
-  }, [normalizedRecordings]);
+    if (!primaryRecording) return null;
+    if (primaryRecording.status !== "READY") return null;
+    if (primaryRecording.lapOneOffset <= 0) return null;
+    return primaryRecording;
+  }, [primaryRecording]);
 
   function jumpToLapStart(lapStart: number) {
     if (!primaryRecordingForJump) return;
@@ -420,10 +428,15 @@ export default function ViewSessionRoute() {
                 </div>
               );
             })}
-            {!primaryRecordingForJump && (
-              <p>
-                Set the Lap 1 start time in the Video card to enable jumping to lap starts.
-              </p>
+            {!primaryRecording && <p>Mark a primary recording to sync lap jumps.</p>}
+            {primaryRecording &&
+              primaryRecording.status !== "READY" && (
+              <p>Primary recording must finish processing to enable lap jumps.</p>
+            )}
+            {primaryRecording &&
+              primaryRecording.status === "READY" &&
+              primaryRecording.lapOneOffset <= 0 && (
+              <p>Set the Lap 1 start time on the primary recording to enable jumping.</p>
             )}
             {primaryRecordingForJump &&
               !recordingVideoRefs.current[primaryRecordingForJump.id] && (

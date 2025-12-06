@@ -70,6 +70,10 @@ type StartTrackRecordingUploadPayload {
   uploadTargets: [RecordingUploadTarget!]!
 }
 
+type MarkPrimaryTrackRecordingPayload {
+  recording: TrackRecording!
+}
+
 input UpdateTrackRecordingInput {
   id: ID!
   lapOneOffset: Float!
@@ -93,6 +97,7 @@ type Mutation {
   startTrackRecordingUpload(
     input: StartTrackRecordingUploadInput!
   ): StartTrackRecordingUploadPayload!
+  markPrimaryTrackRecording(id: ID!): MarkPrimaryTrackRecordingPayload!
   updateTrackRecording(input: UpdateTrackRecordingInput!): UpdateTrackRecordingPayload!
   deleteTrackRecording(id: ID!): DeleteTrackRecordingPayload!
 }
@@ -213,6 +218,7 @@ type TrackRecording {
   id: ID!
   session: TrackSession!
   mediaId: String!
+  isPrimary: Boolean!
   lapOneOffset: Float!
   description: String
   status: TrackRecordingStatus!

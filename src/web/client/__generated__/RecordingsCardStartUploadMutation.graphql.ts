@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<7ebb887d6fe883dd98a164b75d295773>>
+ * @generated SignedSource<<aa18e926478208c8c7e439115bd7cd0c>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -29,6 +29,7 @@ export type RecordingsCardStartUploadMutation$data = {
     readonly recording: {
       readonly combineProgress: number | null | undefined;
       readonly id: string;
+      readonly isPrimary: boolean;
       readonly status: TrackRecordingStatus;
       readonly uploadProgress: {
         readonly totalBytes: number | null | undefined;
@@ -104,6 +105,13 @@ v4 = [
         "plural": false,
         "selections": [
           (v1/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "isPrimary",
+            "storageKey": null
+          },
           (v2/*: any*/),
           {
             "alias": null,
@@ -198,16 +206,16 @@ return {
     "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "58ec8fd04c8d1ed72135e010fe9cd3c0",
+    "cacheID": "343842f5703ea7dbab760a1f5d13b3a2",
     "id": null,
     "metadata": {},
     "name": "RecordingsCardStartUploadMutation",
     "operationKind": "mutation",
-    "text": "mutation RecordingsCardStartUploadMutation(\n  $input: StartTrackRecordingUploadInput!\n) {\n  startTrackRecordingUpload(input: $input) {\n    recording {\n      id\n      status\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n    }\n    uploadTargets {\n      id\n      fileName\n      sizeBytes\n      uploadedBytes\n      status\n      ordinal\n      uploadUrl\n    }\n  }\n}\n"
+    "text": "mutation RecordingsCardStartUploadMutation(\n  $input: StartTrackRecordingUploadInput!\n) {\n  startTrackRecordingUpload(input: $input) {\n    recording {\n      id\n      isPrimary\n      status\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n    }\n    uploadTargets {\n      id\n      fileName\n      sizeBytes\n      uploadedBytes\n      status\n      ordinal\n      uploadUrl\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "5152aad903f3c8ebda17da1a7cdb9f60";
+(node as any).hash = "923174f8067ececf36f53b33490f2157";
 
 export default node;

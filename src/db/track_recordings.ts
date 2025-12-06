@@ -13,6 +13,7 @@ export interface TrackRecordingRecord {
   sessionId: string;
   userId: string;
   mediaId: string;
+  isPrimary: boolean;
   lapOneOffset: number;
   description: string | null;
   status: TrackRecordingStatus;
@@ -30,6 +31,7 @@ interface TrackRecordingRow {
   session_id: string;
   user_id: string;
   media_id: string;
+  is_primary: number;
   lap_one_offset: number;
   description: string | null;
   status: TrackRecordingStatus;
@@ -48,6 +50,7 @@ function mapRow(row: TrackRecordingRow): TrackRecordingRecord {
     sessionId: row.session_id,
     userId: row.user_id,
     mediaId: row.media_id,
+    isPrimary: Boolean(row.is_primary),
     lapOneOffset: row.lap_one_offset,
     description: row.description,
     status: row.status,
@@ -66,7 +69,7 @@ export function findTrackRecordingById(id: string): TrackRecordingRecord | null 
   const row = db
     .prepare<unknown[], TrackRecordingRow>(
       `SELECT id, session_id, user_id, media_id, lap_one_offset, description, status, error, size_bytes,
-              duration_ms, fps, combine_progress, created_at, updated_at
+              duration_ms, fps, combine_progress, is_primary, created_at, updated_at
        FROM track_recordings WHERE id = ? LIMIT 1`
     )
     .get(id);
@@ -78,7 +81,7 @@ export function findTrackRecordingsBySessionId(sessionId: string): TrackRecordin
   const rows = db
     .prepare<unknown[], TrackRecordingRow>(
       `SELECT id, session_id, user_id, media_id, lap_one_offset, description, status, error, size_bytes,
-              duration_ms, fps, combine_progress, created_at, updated_at
+              duration_ms, fps, combine_progress, is_primary, created_at, updated_at
        FROM track_recordings WHERE session_id = ? ORDER BY created_at DESC`
     )
     .all(sessionId);
@@ -90,6 +93,7 @@ export function createTrackRecording({
   sessionId,
   userId,
   mediaId,
+  isPrimary = false,
   lapOneOffset,
   description = null,
   status = "pending_upload",
@@ -98,6 +102,7 @@ export function createTrackRecording({
   sessionId: string;
   userId: string;
   mediaId: string;
+  isPrimary?: boolean;
   lapOneOffset: number;
   description?: string | null;
   status?: TrackRecordingStatus;
@@ -108,9 +113,9 @@ export function createTrackRecording({
   db.prepare(
     `INSERT INTO track_recordings (
       id, session_id, user_id, media_id, status, error, lap_one_offset, description, size_bytes, duration_ms, fps,
-      combine_progress, created_at, updated_at
+      combine_progress, is_primary, created_at, updated_at
      )
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(
     id,
     sessionId,
@@ -124,6 +129,7 @@ export function createTrackRecording({
     null,
     null,
     0,
+    isPrimary ? 1 : 0,
     now,
     now
   );
@@ -133,6 +139,7 @@ export function createTrackRecording({
     sessionId,
     userId,
     mediaId,
+    isPrimary,
     lapOneOffset,
     description: description ?? null,
     status,
@@ -151,7 +158,7 @@ export function updateTrackRecording(
   fields: Partial<
     Pick<
       TrackRecordingRecord,
-      "mediaId" | "lapOneOffset" | "description" | "status" | "error" | "sizeBytes" | "durationMs" | "fps" | "combineProgress"
+      "mediaId" | "lapOneOffset" | "description" | "status" | "error" | "sizeBytes" | "durationMs" | "fps" | "combineProgress" | "isPrimary"
     >
   >,
   now = Date.now()
@@ -168,7 +175,7 @@ export function updateTrackRecording(
   const db = getDb();
   db.prepare(
     `UPDATE track_recordings
-     SET media_id = ?, lap_one_offset = ?, description = ?, status = ?, error = ?, size_bytes = ?, duration_ms = ?, fps = ?, combine_progress = ?, updated_at = ?
+     SET media_id = ?, lap_one_offset = ?, description = ?, status = ?, error = ?, size_bytes = ?, duration_ms = ?, fps = ?, combine_progress = ?, is_primary = ?, updated_at = ?
      WHERE id = ?`
   ).run(
     next.mediaId,
@@ -180,6 +187,7 @@ export function updateTrackRecording(
     next.durationMs,
     next.fps,
     next.combineProgress,
+    next.isPrimary ? 1 : 0,
     next.updatedAt,
     id
   );
@@ -196,9 +204,25 @@ export function deleteTrackRecording(id: string): boolean {
 export interface TrackRecordingRepository {
   findBySessionId: (sessionId: string) => TrackRecordingRecord[];
   findById?: (id: string) => TrackRecordingRecord | null;
+  markPrimary?: (id: string) => TrackRecordingRecord | null;
 }
 
 export const trackRecordingsRepository: TrackRecordingRepository = {
   findBySessionId: findTrackRecordingsBySessionId,
   findById: findTrackRecordingById,
+  markPrimary: markPrimaryRecording,
 };
+
+export function markPrimaryRecording(recordingId: string): TrackRecordingRecord | null {
+  const recording = findTrackRecordingById(recordingId);
+  if (!recording) return null;
+
+  const db = getDb();
+  const txn = db.transaction((id: string, sessionId: string, timestamp: number) => {
+    db.prepare(`UPDATE track_recordings SET is_primary = 0 WHERE session_id = ?`).run(sessionId);
+    db.prepare(`UPDATE track_recordings SET is_primary = 1, updated_at = ? WHERE id = ?`).run(timestamp, id);
+  });
+
+  txn.immediate(recordingId, recording.sessionId, Date.now());
+  return findTrackRecordingById(recordingId);
+}
