@@ -3,11 +3,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { Link, useParams } from "react-router-dom";
 import { Card } from "../../components/Card.js";
+import { LapsCard, type LapWithEvents } from "../../components/session/LapsCard.js";
 import { PrimaryRecordingCard } from "../../components/session/PrimaryRecordingCard.js";
 import { RecordingsCard } from "../../components/session/RecordingsCard.js";
 import { UploadRecordingCard } from "../../components/session/UploadRecordingCard.js";
 import { type viewSessionQuery } from "../../__generated__/viewSessionQuery.graphql.js";
-import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 
 const pageGridStyles = css`
   display: grid;
@@ -76,88 +76,6 @@ const metaStyles = css`
   font-size: 0.95rem;
 `;
 
-const lapsListStyles = css`
-  display: grid;
-  gap: 10px;
-  margin-top: 12px;
-`;
-
-const lapRowStyles = css`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 12px;
-  border: 1px solid #e2e8f4;
-  border-radius: 10px;
-  background: #f8fafc;
-`;
-
-const lapActionButtonStyles = css`
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid #d7deed;
-  background: #fff;
-  cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
-  font-size: 0.95rem;
-
-  &:hover {
-    background: #eef2ff;
-    border-color: #cbd5e1;
-  }
-
-  &:disabled {
-    background: #e2e8f4;
-    color: #94a3b8;
-    cursor: not-allowed;
-  }
-`;
-
-const lapDetailsStyles = css`
-  display: grid;
-  gap: 4px;
-`;
-
-const lapTitleRowStyles = css`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-`;
-
-const fastestLapPillStyles = css`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  width: fit-content;
-  padding: 4px 8px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #22d3ee, #0ea5e9);
-  color: #0b1021;
-  font-weight: 700;
-  font-size: 0.85rem;
-  box-shadow: 0 10px 30px rgba(14, 165, 233, 0.25);
-`;
-
-const fastestLapDotStyles = css`
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: #0b1021;
-  opacity: 0.7;
-`;
-
-const lapTimeRowStyles = css`
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-`;
-
-const lapDeltaStyles = css`
-  color: #475569;
-  font-size: 0.9rem;
-`;
-
 const SessionQuery = graphql`
   query viewSessionQuery($id: ID!) {
     trackSession(id: $id) {
@@ -203,8 +121,11 @@ const SessionQuery = graphql`
         id
         lapNumber
         time
-        lapEvents {
+        lapEvents(first: 50) {
           id
+          offset
+          event
+          value
         }
       }
     }
@@ -306,7 +227,7 @@ export default function ViewSessionRoute() {
     [trackRecordings]
   );
 
-  const lapsWithStart = useMemo(() => {
+  const lapsWithStart = useMemo<LapWithEvents[]>(() => {
     const sorted = [...laps].sort((a, b) => a.lapNumber - b.lapNumber);
     const fastestLapTime = sorted.reduce<number | null>((best, lap) => {
       const lapTime = Number.isFinite(lap.time) ? lap.time : null;
@@ -325,7 +246,23 @@ export default function ViewSessionRoute() {
         fastestLapTime != null && lapTime > 0 && Math.abs(lapTime - fastestLapTime) < 1e-6;
       const deltaToFastest =
         !isFastest && fastestLapTime != null && lapTime > 0 ? lapTime - fastestLapTime : null;
-      return { ...lap, start, isFastest, deltaToFastest };
+      const lapEvents = [...(lap.lapEvents ?? [])]
+        .sort((a, b) => a.offset - b.offset)
+        .map((event) => ({
+          id: event.id,
+          offset: event.offset,
+          event: event.event,
+          value: event.value,
+        }));
+      return {
+        id: lap.id,
+        lapNumber: lap.lapNumber,
+        time: lap.time,
+        start,
+        isFastest,
+        deltaToFastest,
+        lapEvents,
+      };
     });
   }, [laps]);
 
@@ -356,6 +293,26 @@ export default function ViewSessionRoute() {
       video.addEventListener("loadedmetadata", seek, { once: true });
     }
   }
+
+  const lapJumpAnchorLoaded = Boolean(
+    primaryRecordingForJump && recordingVideoRefs.current[primaryRecordingForJump.id]
+  );
+  const lapJumpEnabled = lapJumpAnchorLoaded;
+  const lapJumpMessages: string[] = [];
+  if (!primaryRecording) {
+    lapJumpMessages.push("Mark a primary recording to sync lap jumps.");
+  } else if (primaryRecording.status !== "READY") {
+    lapJumpMessages.push("Primary recording must finish processing to enable lap jumps.");
+  } else if (primaryRecording.lapOneOffset <= 0) {
+    lapJumpMessages.push("Set the Lap 1 start time on the primary recording to enable jumping.");
+  }
+  if (primaryRecordingForJump && !lapJumpAnchorLoaded) {
+    lapJumpMessages.push("Load the video preview to enable lap jump controls.");
+  }
+  const lapJumpTitle =
+    lapJumpEnabled || lapJumpMessages.length === 0
+      ? "Jump the video to the start of this lap"
+      : lapJumpMessages[0];
 
   if (!sessionId) {
     return <p>Missing session id.</p>;
@@ -462,69 +419,13 @@ export default function ViewSessionRoute() {
           </form>
         </Card>
 
-        <Card title="Laps">
-          {lapsWithStart.length === 0 ? (
-            <p>No laps recorded for this session.</p>
-          ) : (
-            <div css={lapsListStyles}>
-              {lapsWithStart.map((lap) => {
-                const hasAnchor = Boolean(
-                  primaryRecordingForJump && recordingVideoRefs.current[primaryRecordingForJump.id]
-                );
-                const deltaToFastest =
-                  typeof lap.deltaToFastest === "number" ? lap.deltaToFastest : null;
-                return (
-                  <div key={lap.id} css={lapRowStyles}>
-                    <div css={lapDetailsStyles}>
-                      <div css={lapTitleRowStyles}>
-                        <span>Lap {lap.lapNumber}</span>
-                        {lap.isFastest ? (
-                          <span css={fastestLapPillStyles}>
-                            <span css={fastestLapDotStyles} aria-hidden />
-                            Fastest
-                          </span>
-                        ) : null}
-                      </div>
-                      <div css={lapTimeRowStyles}>
-                        <span>{formatLapTimeSeconds(lap.time)}s</span>
-                        {deltaToFastest != null ? (
-                          <span css={lapDeltaStyles}>[+{deltaToFastest.toFixed(3)}s]</span>
-                        ) : null}
-                      </div>
-                    </div>
-                    <button
-                      css={lapActionButtonStyles}
-                      type="button"
-                      disabled={!hasAnchor}
-                      onClick={() => jumpToLapStart(lap.start)}
-                      title={
-                        hasAnchor
-                          ? "Jump the video to the start of this lap"
-                          : "Set Lap 1 start on the video to enable jumping"
-                      }
-                    >
-                      Jump to start
-                    </button>
-                  </div>
-                );
-              })}
-              {!primaryRecording && <p>Mark a primary recording to sync lap jumps.</p>}
-              {primaryRecording &&
-                primaryRecording.status !== "READY" && (
-                <p>Primary recording must finish processing to enable lap jumps.</p>
-              )}
-              {primaryRecording &&
-                primaryRecording.status === "READY" &&
-                primaryRecording.lapOneOffset <= 0 && (
-                <p>Set the Lap 1 start time on the primary recording to enable jumping.</p>
-              )}
-              {primaryRecordingForJump &&
-                !recordingVideoRefs.current[primaryRecordingForJump.id] && (
-                  <p>Load the video preview to enable lap jump controls.</p>
-                )}
-            </div>
-          )}
-        </Card>
+        <LapsCard
+          laps={lapsWithStart}
+          onJumpToStart={jumpToLapStart}
+          jumpEnabled={lapJumpEnabled}
+          jumpTitle={lapJumpTitle}
+          statusMessages={lapJumpMessages}
+        />
       </div>
 
       <div css={columnStackStyles}>

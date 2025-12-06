@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<2e8ef22ec48b69d479d7d9cd38970fbe>>
+ * @generated SignedSource<<2641ae419db7313d2025b5e108c46a2d>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -33,7 +33,10 @@ export type viewSessionQuery$data = {
     readonly laps: ReadonlyArray<{
       readonly id: string;
       readonly lapEvents: ReadonlyArray<{
+        readonly event: string;
         readonly id: string;
+        readonly offset: number;
+        readonly value: string;
       }>;
       readonly lapNumber: number;
       readonly time: number;
@@ -352,15 +355,36 @@ v8 = [
           },
           {
             "alias": null,
-            "args": null,
+            "args": (v7/*: any*/),
             "concreteType": "LapEvent",
             "kind": "LinkedField",
             "name": "lapEvents",
             "plural": true,
             "selections": [
-              (v1/*: any*/)
+              (v1/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "offset",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "event",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "value",
+                "storageKey": null
+              }
             ],
-            "storageKey": null
+            "storageKey": "lapEvents(first:50)"
           }
         ],
         "storageKey": "laps(first:50)"
@@ -397,16 +421,16 @@ return {
     "selections": (v8/*: any*/)
   },
   "params": {
-    "cacheID": "db7ac75132873f3d3c96e2452e2aa181",
+    "cacheID": "8dd93aa50a31d143329758236fbc00de",
     "id": null,
     "metadata": {},
     "name": "viewSessionQuery",
     "operationKind": "query",
-    "text": "query viewSessionQuery(\n  $id: ID!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    classification\n    conditions\n    notes\n    circuit {\n      id\n      name\n    }\n    createdAt\n    updatedAt\n    trackRecordings(first: 20) {\n      id\n      description\n      status\n      error\n      sizeBytes\n      isPrimary\n      lapOneOffset\n      durationMs\n      fps\n      createdAt\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n      uploadTargets(first: 50) {\n        id\n        fileName\n        sizeBytes\n        uploadedBytes\n        status\n        ordinal\n        uploadUrl\n      }\n    }\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents {\n        id\n      }\n    }\n  }\n  circuits {\n    id\n    name\n  }\n}\n"
+    "text": "query viewSessionQuery(\n  $id: ID!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    classification\n    conditions\n    notes\n    circuit {\n      id\n      name\n    }\n    createdAt\n    updatedAt\n    trackRecordings(first: 20) {\n      id\n      description\n      status\n      error\n      sizeBytes\n      isPrimary\n      lapOneOffset\n      durationMs\n      fps\n      createdAt\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n      uploadTargets(first: 50) {\n        id\n        fileName\n        sizeBytes\n        uploadedBytes\n        status\n        ordinal\n        uploadUrl\n      }\n    }\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents(first: 50) {\n        id\n        offset\n        event\n        value\n      }\n    }\n  }\n  circuits {\n    id\n    name\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "eaccf78dc693472c7c8ad9c3906eb317";
+(node as any).hash = "a92d781e544ef60cc8d47cadcab9678e";
 
 export default node;
