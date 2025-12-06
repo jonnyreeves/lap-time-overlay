@@ -1,20 +1,15 @@
 import { css } from "@emotion/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { graphql, useMutation } from "react-relay";
-import type { RecordingsCardStartUploadMutation } from "../../__generated__/RecordingsCardStartUploadMutation.graphql.js";
 import type { RecordingsCardDeleteRecordingMutation } from "../../__generated__/RecordingsCardDeleteRecordingMutation.graphql.js";
 import type { RecordingsCardMarkPrimaryRecordingMutation } from "../../__generated__/RecordingsCardMarkPrimaryRecordingMutation.graphql.js";
 import { Card } from "../../components/Card.js";
-
-type UploadTarget = {
-  id: string;
-  fileName: string;
-  sizeBytes: number | null | undefined;
-  uploadedBytes: number;
-  status: string;
-  ordinal: number;
-  uploadUrl?: string | null;
-};
+import {
+  formatBytes,
+  recordingButtonStyles,
+  uploadToTargets,
+  type UploadTarget,
+} from "./recordingShared.js";
 
 type Recording = {
   id: string;
@@ -33,44 +28,11 @@ type Recording = {
 };
 
 type Props = {
-  sessionId: string;
   recordings: readonly Recording[];
   onRefresh: () => void;
+  uploadInProgress: boolean;
+  onUploadStateChange?: (inProgress: boolean) => void;
 };
-
-const uploadControlsStyles = css`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 16px;
-`;
-
-const fileListStyles = css`
-  display: grid;
-  gap: 8px;
-`;
-
-const fileRowStyles = css`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid #e2e8f4;
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: #f8fafc;
-  gap: 10px;
-
-  .meta {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .actions {
-    display: flex;
-    gap: 6px;
-  }
-`;
 
 const recordingsListStyles = css`
   display: grid;
@@ -136,95 +98,6 @@ const controlsRowStyles = css`
   flex-wrap: wrap;
 `;
 
-const dropZoneStyles = css`
-  width: 100%;
-  margin-top: 10px;
-  border: 2px dashed #cbd5e1;
-  border-radius: 12px;
-  padding: 16px;
-  background: #f8fafc;
-  color: #0f172a;
-  display: grid;
-  gap: 6px;
-  cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.1s ease;
-
-  &:hover {
-    border-color: #6366f1;
-    background: #eef2ff;
-    transform: translateY(-1px);
-  }
-`;
-
-const buttonStyles = css`
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid #d7deed;
-  background: #fff;
-  cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
-
-  &:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
-  }
-
-  &:disabled {
-    background: #e2e8f4;
-    color: #94a3b8;
-    cursor: not-allowed;
-  }
-`;
-
-const primaryButtonStyles = css`
-  padding: 10px 14px;
-  border-radius: 10px;
-  background: linear-gradient(90deg, #4f46e5, #6366f1);
-  color: white;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.25);
-  transition: transform 0.15s ease, box-shadow 0.2s ease;
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 12px 32px rgba(79, 70, 229, 0.25);
-  }
-
-  &:disabled {
-    background: #a5b4fc;
-    box-shadow: none;
-    cursor: not-allowed;
-  }
-`;
-
-const StartUploadMutation = graphql`
-  mutation RecordingsCardStartUploadMutation($input: StartTrackRecordingUploadInput!) {
-    startTrackRecordingUpload(input: $input) {
-      recording {
-        id
-        isPrimary
-        status
-        combineProgress
-        uploadProgress {
-          uploadedBytes
-          totalBytes
-        }
-      }
-      uploadTargets {
-        id
-        fileName
-        sizeBytes
-        uploadedBytes
-        status
-        ordinal
-        uploadUrl
-      }
-    }
-  }
-`;
-
 const DeleteRecordingMutation = graphql`
   mutation RecordingsCardDeleteRecordingMutation($id: ID!) {
     deleteTrackRecording(id: $id) {
@@ -245,50 +118,22 @@ const MarkPrimaryRecordingMutation = graphql`
   }
 `;
 
-function formatBytes(bytes: number | null | undefined): string {
-  if (bytes == null) return "—";
-  if (bytes < 1024) return `${bytes} B`;
-  const units = ["KB", "MB", "GB"];
-  let val = bytes / 1024;
-  let unit = units[0];
-  for (let i = 0; i < units.length; i++) {
-    if (val < 1024 || i === units.length - 1) {
-      unit = units[i];
-      break;
-    }
-    val /= 1024;
-  }
-  return `${val.toFixed(1)} ${unit}`;
-}
-
 function percent(value: number | null | undefined): number {
   if (value == null || Number.isNaN(value)) return 0;
   return Math.max(0, Math.min(100, Math.round(value * 100)));
 }
 
-function nextId(): string {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return Math.random().toString(36).slice(2);
-}
-
-type FileEntry = { id: string; file: File };
-
-export function RecordingsCard({ sessionId, recordings, onRefresh }: Props) {
-  const [fileEntries, setFileEntries] = useState<FileEntry[]>([]);
-  const [description, setDescription] = useState("");
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
+export function RecordingsCard({
+  recordings,
+  onRefresh,
+  uploadInProgress,
+  onUploadStateChange,
+}: Props) {
   const [resumeSelections, setResumeSelections] = useState<Record<string, File[]>>({});
-  const [isDragging, setIsDragging] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [startUpload, isStartInFlight] = useMutation<RecordingsCardStartUploadMutation>(
-    StartUploadMutation
-  );
-  const [deleteRecording, isDeleteInFlight] = useMutation<RecordingsCardDeleteRecordingMutation>(
-    DeleteRecordingMutation
-  );
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [isResuming, setIsResuming] = useState(false);
+  const [deleteRecording, isDeleteInFlight] =
+    useMutation<RecordingsCardDeleteRecordingMutation>(DeleteRecordingMutation);
   const [markPrimary, isMarkPrimaryInFlight] =
     useMutation<RecordingsCardMarkPrimaryRecordingMutation>(MarkPrimaryRecordingMutation);
 
@@ -307,7 +152,7 @@ export function RecordingsCard({ sessionId, recordings, onRefresh }: Props) {
 
   useEffect(() => {
     const hasResumeFiles = Object.values(resumeSelections).some((files) => files.length > 0);
-    const shouldWarn = isUploading || isStartInFlight || fileEntries.length > 0 || hasResumeFiles;
+    const shouldWarn = isResuming || hasResumeFiles;
     if (!shouldWarn) return;
 
     const handler = (event: BeforeUnloadEvent) => {
@@ -316,50 +161,7 @@ export function RecordingsCard({ sessionId, recordings, onRefresh }: Props) {
     };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
-  }, [fileEntries.length, isStartInFlight, isUploading, resumeSelections]);
-
-  function onFilesSelected(list: FileList | null) {
-    if (!list) return;
-    const next: FileEntry[] = [...fileEntries];
-    for (const file of Array.from(list)) {
-      next.push({ id: nextId(), file });
-    }
-    setFileEntries(next);
-  }
-
-  function onDropFiles(event: React.DragEvent) {
-    event.preventDefault();
-    if (isUploading || isStartInFlight) return;
-    setIsDragging(false);
-    onFilesSelected(event.dataTransfer?.files ?? null);
-  }
-
-  function onDragOver(event: React.DragEvent) {
-    event.preventDefault();
-    if (isUploading || isStartInFlight) return;
-    setIsDragging(true);
-  }
-
-  function onDragLeave() {
-    setIsDragging(false);
-  }
-
-  function triggerFilePicker() {
-    if (isUploading || isStartInFlight) return;
-    fileInputRef.current?.click();
-  }
-
-  function moveFile(idx: number, direction: -1 | 1) {
-    const target = idx + direction;
-    if (target < 0 || target >= fileEntries.length) return;
-    const next = [...fileEntries];
-    [next[idx], next[target]] = [next[target], next[idx]];
-    setFileEntries(next);
-  }
-
-  function removeFile(id: string) {
-    setFileEntries((current) => current.filter((entry) => entry.id !== id));
-  }
+  }, [isResuming, resumeSelections]);
 
   function onResumeFilesSelected(recordingId: string, list: FileList | null) {
     if (!list) return;
@@ -373,100 +175,35 @@ export function RecordingsCard({ sessionId, recordings, onRefresh }: Props) {
     const pendingTargets = recording.uploadTargets.filter(
       (target) => target.uploadUrl && target.status !== "UPLOADED"
     );
-    if (pendingTargets.length === 0) return;
+    if (pendingTargets.length === 0 || uploadInProgress || isResuming) return;
     const selected = resumeSelections[recording.id] ?? [];
     if (selected.length !== pendingTargets.length) {
-      setUploadError(
+      setActionError(
         "Please select the same number of files (in the original order) to resume this upload."
       );
       return;
     }
-    setUploadError(null);
-    setIsUploading(true);
+    setActionError(null);
+    setIsResuming(true);
+    onUploadStateChange?.(true);
     try {
       await uploadToTargets(pendingTargets as UploadTarget[], selected);
       onRefresh();
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : "Upload failed");
+      setActionError(err instanceof Error ? err.message : "Upload failed");
     } finally {
-      setIsUploading(false);
+      setIsResuming(false);
+      onUploadStateChange?.(false);
     }
   }
 
   function setPrimaryRecording(recording: Recording) {
     if (isMarkPrimaryInFlight) return;
-    setUploadError(null);
+    setActionError(null);
     markPrimary({
       variables: { id: recording.id },
       onCompleted: () => onRefresh(),
-      onError: (err) => setUploadError(err.message),
-    });
-  }
-
-  async function uploadToTargets(targets: UploadTarget[], sources: File[]) {
-    const orderedTargets = [...targets].sort((a, b) => a.ordinal - b.ordinal);
-    for (const target of orderedTargets) {
-      const file = sources[target.ordinal - 1];
-      if (!file || !target.uploadUrl) {
-        throw new Error("Upload target is missing");
-      }
-      const response = await fetch(target.uploadUrl, {
-        method: "PUT",
-        body: file,
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/octet-stream" },
-      });
-      if (!response.ok) {
-        throw new Error(`Upload failed with ${response.status}`);
-      }
-    }
-  }
-
-  function beginUpload() {
-    if (fileEntries.length === 0) {
-      setUploadError("Select at least one file to upload.");
-      return;
-    }
-    const selectedFiles = fileEntries.map((entry) => entry.file);
-    setFileEntries([]);
-    setUploadError(null);
-    setIsUploading(true);
-
-    startUpload({
-      variables: {
-        input: {
-          sessionId,
-          description: description.trim() || null,
-          sources: selectedFiles.map((entry) => ({
-            fileName: entry.name,
-            sizeBytes: entry.size,
-          })),
-        },
-      },
-      onCompleted: (payload) => {
-        void (async () => {
-          try {
-            const session = payload.startTrackRecordingUpload;
-            if (!session) {
-              throw new Error("Upload session was not created");
-            }
-            // Kick off a refresh immediately so the new recording shows up and polling can track progress.
-            onRefresh();
-            const targets = (session.uploadTargets ?? []).map((target) => ({ ...target }));
-            await uploadToTargets(targets, selectedFiles);
-            setDescription("");
-            onRefresh();
-          } catch (err) {
-            setUploadError(err instanceof Error ? err.message : "Upload failed");
-          } finally {
-            setIsUploading(false);
-          }
-        })();
-      },
-      onError: (err) => {
-        setUploadError(err.message);
-        setIsUploading(false);
-      },
+      onError: (err) => setActionError(err.message),
     });
   }
 
@@ -477,126 +214,13 @@ export function RecordingsCard({ sessionId, recordings, onRefresh }: Props) {
     deleteRecording({
       variables: { id },
       onCompleted: () => onRefresh(),
-      onError: (err) => setUploadError(err.message),
+      onError: (err) => setActionError(err.message),
     });
   }
 
   return (
-    <Card
-      title="Video Upload"
-      rightComponent={
-        !isUploading && !isStartInFlight ? (
-          <button css={primaryButtonStyles} onClick={beginUpload}>
-            Upload footage
-          </button>
-        ) : undefined
-      }
-    >
-      <div css={uploadControlsStyles}>
-        {isUploading || isStartInFlight ? (
-          <div
-            css={css`
-              padding: 12px;
-              border: 1px solid #d7deed;
-              border-radius: 10px;
-              background: #eef2ff;
-            `}
-          >
-            <strong>Upload in progress…</strong>
-            <p css={css`margin: 6px 0 0; color: #475569;`}>
-              Sit tight while your files are streaming. This card will update as we receive progress.
-            </p>
-          </div>
-        ) : (
-          <>
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              accept="video/*"
-              onChange={(e) => onFilesSelected(e.target.files)}
-              disabled={isUploading || isStartInFlight}
-              css={css`
-                display: none;
-              `}
-            />
-            <div
-              css={[
-                dropZoneStyles,
-                isDragging &&
-                  css`
-                    border-color: #4f46e5;
-                    background: #eef2ff;
-                  `,
-              ]}
-              onClick={triggerFilePicker}
-              onDrop={onDropFiles}
-              onDragOver={onDragOver}
-              onDragLeave={onDragLeave}
-            >
-              <strong>Drag & drop video files</strong>
-              <span>…or click to choose files to attach to this session.</span>
-              <button
-                css={buttonStyles}
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  triggerFilePicker();
-                }}
-              >
-                Choose files
-              </button>
-            </div>
-            <label>
-              <span>Description</span>
-              <input
-                type="text"
-                placeholder="Optional description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                disabled={isUploading || isStartInFlight}
-                css={css`
-                  width: 100%;
-                  padding: 10px 12px;
-                  border-radius: 8px;
-                  border: 1px solid #e2e8f4;
-                  margin-top: 6px;
-                `}
-              />
-            </label>
-            {fileEntries.length > 0 && (
-              <div css={fileListStyles}>
-                {fileEntries.map((entry, idx) => (
-                  <div key={entry.id} css={fileRowStyles}>
-                    <div className="meta">
-                      <strong>
-                        {idx + 1}. {entry.file.name}
-                      </strong>
-                      <span>{formatBytes(entry.file.size)}</span>
-                    </div>
-                    <div className="actions">
-                      <button css={buttonStyles} onClick={() => moveFile(idx, -1)} disabled={idx === 0}>
-                        ↑
-                      </button>
-                      <button
-                        css={buttonStyles}
-                        onClick={() => moveFile(idx, 1)}
-                        disabled={idx === fileEntries.length - 1}
-                      >
-                        ↓
-                      </button>
-                      <button css={buttonStyles} onClick={() => removeFile(entry.id)}>
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-        {uploadError && <div css={css`color: #b91c1c;`}>{uploadError}</div>}
-      </div>
+    <Card title="Recordings">
+      {actionError && <div css={css`color: #b91c1c; margin-bottom: 8px;`}>{actionError}</div>}
 
       <div css={recordingsListStyles}>
         {sortedRecordings.length === 0 ? (
@@ -643,7 +267,7 @@ export function RecordingsCard({ sessionId, recordings, onRefresh }: Props) {
                 <div css={controlsRowStyles}>
                   {isFinished && (
                     <a
-                      css={buttonStyles}
+                      css={recordingButtonStyles}
                       href={`/recordings/${recording.id}`}
                       target="_blank"
                       rel="noreferrer"
@@ -653,17 +277,19 @@ export function RecordingsCard({ sessionId, recordings, onRefresh }: Props) {
                   )}
                   {isFinished && !recording.isPrimary && (
                     <button
-                      css={buttonStyles}
+                      css={recordingButtonStyles}
                       onClick={() => setPrimaryRecording(recording)}
                       disabled={isMarkPrimaryInFlight}
+                      type="button"
                     >
                       {isMarkPrimaryInFlight ? "Updating…" : "Mark as primary"}
                     </button>
                   )}
                   <button
-                    css={buttonStyles}
+                    css={recordingButtonStyles}
                     onClick={() => handleDelete(recording.id)}
                     disabled={isDeleteInFlight}
+                    type="button"
                   >
                     Delete
                   </button>
@@ -678,14 +304,15 @@ export function RecordingsCard({ sessionId, recordings, onRefresh }: Props) {
                         multiple
                         accept="video/*"
                         onChange={(e) => onResumeFilesSelected(recording.id, e.target.files)}
-                        disabled={isUploading || isStartInFlight}
+                        disabled={uploadInProgress || isResuming}
                       />
                       <button
-                        css={buttonStyles}
+                        css={recordingButtonStyles}
                         onClick={() => resumeRecordingUpload(recording)}
-                        disabled={isUploading || isStartInFlight}
+                        disabled={uploadInProgress || isResuming}
+                        type="button"
                       >
-                        Resume
+                        {isResuming ? "Resuming…" : "Resume"}
                       </button>
                     </div>
                     <p css={css`margin: 6px 0 0; color: #475569;`}>

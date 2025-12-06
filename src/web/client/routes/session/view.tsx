@@ -3,8 +3,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { Link, useParams } from "react-router-dom";
 import { Card } from "../../components/Card.js";
-import { RecordingsCard } from "./RecordingsCard.js";
 import { PrimaryRecordingCard } from "./PrimaryRecordingCard.js";
+import { RecordingsCard } from "./RecordingsCard.js";
+import { UploadRecordingCard } from "./UploadRecordingCard.js";
 import { type viewSessionQuery } from "../../__generated__/viewSessionQuery.graphql.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 
@@ -192,6 +193,7 @@ export default function ViewSessionRoute() {
   const [classification, setClassification] = useState("");
   const [notes, setNotes] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
+  const [uploadInProgress, setUploadInProgress] = useState(false);
   const recordingVideoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
 
   const data = useLazyLoadQuery<viewSessionQuery>(
@@ -456,14 +458,23 @@ export default function ViewSessionRoute() {
       <div css={columnStackStyles}>
         <PrimaryRecordingCard
           recording={primaryRecording}
+          laps={lapsWithStart}
           videoRefs={recordingVideoRefs}
           onRefresh={() => setRefreshKey((key) => key + 1)}
         />
 
-        <RecordingsCard
+        <UploadRecordingCard
           sessionId={session.id}
+          onRefresh={() => setRefreshKey((key) => key + 1)}
+          uploadInProgress={uploadInProgress}
+          onUploadStateChange={setUploadInProgress}
+        />
+
+        <RecordingsCard
           recordings={normalizedRecordings}
           onRefresh={() => setRefreshKey((key) => key + 1)}
+          uploadInProgress={uploadInProgress}
+          onUploadStateChange={setUploadInProgress}
         />
       </div>
     </div>

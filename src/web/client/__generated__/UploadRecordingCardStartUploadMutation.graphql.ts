@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<aa18e926478208c8c7e439115bd7cd0c>>
+ * @generated SignedSource<<a1c9d744c21ee23b49c2eff30c9a76d7>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -21,10 +21,10 @@ export type RecordingSourceInput = {
   fileName: string;
   sizeBytes?: number | null | undefined;
 };
-export type RecordingsCardStartUploadMutation$variables = {
+export type UploadRecordingCardStartUploadMutation$variables = {
   input: StartTrackRecordingUploadInput;
 };
-export type RecordingsCardStartUploadMutation$data = {
+export type UploadRecordingCardStartUploadMutation$data = {
   readonly startTrackRecordingUpload: {
     readonly recording: {
       readonly combineProgress: number | null | undefined;
@@ -47,9 +47,9 @@ export type RecordingsCardStartUploadMutation$data = {
     }>;
   };
 };
-export type RecordingsCardStartUploadMutation = {
-  response: RecordingsCardStartUploadMutation$data;
-  variables: RecordingsCardStartUploadMutation$variables;
+export type UploadRecordingCardStartUploadMutation = {
+  response: UploadRecordingCardStartUploadMutation$data;
+  variables: UploadRecordingCardStartUploadMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -193,7 +193,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "RecordingsCardStartUploadMutation",
+    "name": "UploadRecordingCardStartUploadMutation",
     "selections": (v4/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -202,20 +202,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "RecordingsCardStartUploadMutation",
+    "name": "UploadRecordingCardStartUploadMutation",
     "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "343842f5703ea7dbab760a1f5d13b3a2",
+    "cacheID": "b59344c147eaaa98517679623db13721",
     "id": null,
     "metadata": {},
-    "name": "RecordingsCardStartUploadMutation",
+    "name": "UploadRecordingCardStartUploadMutation",
     "operationKind": "mutation",
-    "text": "mutation RecordingsCardStartUploadMutation(\n  $input: StartTrackRecordingUploadInput!\n) {\n  startTrackRecordingUpload(input: $input) {\n    recording {\n      id\n      isPrimary\n      status\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n    }\n    uploadTargets {\n      id\n      fileName\n      sizeBytes\n      uploadedBytes\n      status\n      ordinal\n      uploadUrl\n    }\n  }\n}\n"
+    "text": "mutation UploadRecordingCardStartUploadMutation(\n  $input: StartTrackRecordingUploadInput!\n) {\n  startTrackRecordingUpload(input: $input) {\n    recording {\n      id\n      isPrimary\n      status\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n    }\n    uploadTargets {\n      id\n      fileName\n      sizeBytes\n      uploadedBytes\n      status\n      ordinal\n      uploadUrl\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "923174f8067ececf36f53b33490f2157";
+(node as any).hash = "bf6ab9c652d3fac532f7d1745f4b287c";
 
 export default node;
