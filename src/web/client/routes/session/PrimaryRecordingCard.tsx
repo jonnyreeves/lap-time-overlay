@@ -19,6 +19,8 @@ type LapWithStart = {
   lapNumber: number;
   time: number;
   start: number;
+  isFastest: boolean;
+  deltaToFastest: number | null;
 };
 
 type Props = {
@@ -126,6 +128,7 @@ const modalContentStyles = css`
   padding: 16px;
   display: grid;
   gap: 14px;
+  overflow: auto;
 `;
 
 const modalHeaderStyles = css`
@@ -163,7 +166,9 @@ const expandedVideoStyles = css`
 
   video {
     width: 100%;
-    height: min(78vh, 80vw);
+    height: auto;
+    aspect-ratio: 16 / 9;
+    max-height: 70vh;
     display: block;
     object-fit: contain;
     background: #0f172a;
@@ -172,7 +177,7 @@ const expandedVideoStyles = css`
 
 const expandedLayoutStyles = css`
   display: grid;
-  grid-template-columns: minmax(0, 4fr) minmax(220px, 1fr);
+  grid-template-columns: minmax(0, 4fr) minmax(280px, 1fr);
   gap: 14px;
   align-items: start;
 
@@ -189,6 +194,12 @@ const lapsPanelStyles = css`
   display: grid;
   gap: 10px;
   color: #e2e8f0;
+  min-width: 280px;
+
+  @media (max-width: 1100px) {
+    max-height: 60vh;
+    overflow: auto;
+  }
 `;
 
 const lapsHeaderStyles = css`
@@ -246,6 +257,51 @@ const lapRowStyles = css`
   }
 `;
 
+const activeLapRowStyles = css`
+  border-color: #22d3ee;
+  box-shadow: 0 10px 30px rgba(34, 211, 238, 0.2);
+`;
+
+const fastestLapPillStyles = css`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #22d3ee, #0ea5e9);
+  color: #0b1021;
+  font-weight: 700;
+  font-size: 0.85rem;
+  box-shadow: 0 10px 30px rgba(14, 165, 233, 0.3);
+`;
+
+const fastestLapDotStyles = css`
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #0b1021;
+  opacity: 0.7;
+`;
+
+const lapTimeRowStyles = css`
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+
+  .lap-delta {
+    color: #94a3b8;
+    font-size: 0.9rem;
+  }
+`;
+
+const lapTitleRowStyles = css`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+`;
+
 const lapJumpButtonStyles = css`
   ${buttonStyles}
   background: #111827;
@@ -294,6 +350,7 @@ export function PrimaryRecordingCard({ recording, onRefresh, videoRefs, laps }: 
   const [lapOffsetError, setLapOffsetError] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [expandedStartTime, setExpandedStartTime] = useState(0);
+  const [activeLapId, setActiveLapId] = useState<string | null>(null);
   const expandedVideoRef = useRef<HTMLVideoElement | null>(null);
   const frameStep = useMemo(() => {
     if (!recording?.fps || recording.fps <= 0) return null;
@@ -409,7 +466,50 @@ export function PrimaryRecordingCard({ recording, onRefresh, videoRefs, laps }: 
     return null;
   })();
 
+  const lapRanges = useMemo(() => {
+    if (!recording || !laps?.length) return [];
+    const baseOffset = Math.max(0, recording.lapOneOffset);
+    return laps.map((lap) => {
+      const lapTime = Number.isFinite(lap.time) && lap.time > 0 ? lap.time : 0;
+      const start = Math.max(0, baseOffset + lap.start);
+      const end = lapTime > 0 ? start + lapTime : start + 0.001;
+      return { id: lap.id, start, end };
+    });
+  }, [laps, recording]);
   const canJumpToLaps = lapJumpMessage == null;
+
+  useEffect(() => {
+    if (!isExpanded) {
+      setActiveLapId(null);
+      return;
+    }
+    const video = expandedVideoRef.current;
+    if (!video || lapRanges.length === 0) {
+      setActiveLapId(null);
+      return;
+    }
+
+    const updateActiveLap = () => {
+      const current = Number.isFinite(video.currentTime) ? video.currentTime : 0;
+      const match =
+        lapRanges.find((lap) => current >= lap.start && current < lap.end) ??
+        (() => {
+          for (let idx = lapRanges.length - 1; idx >= 0; idx -= 1) {
+            if (current >= lapRanges[idx]?.start) {
+              return lapRanges[idx];
+            }
+          }
+          return null;
+        })();
+      setActiveLapId(match?.id ?? null);
+    };
+
+    updateActiveLap();
+    video.addEventListener("timeupdate", updateActiveLap);
+    return () => {
+      video.removeEventListener("timeupdate", updateActiveLap);
+    };
+  }, [isExpanded, lapRanges]);
 
   const statusContent = (() => {
     if (!recording) {
@@ -534,11 +634,28 @@ export function PrimaryRecordingCard({ recording, onRefresh, videoRefs, laps }: 
                     <div css={lapsListStyles}>
                       {laps.map((lap) => {
                         const lapTime = Number.isFinite(lap.time) ? lap.time : 0;
+                        const isFastest = Boolean(lap.isFastest);
+                        const isActive = lap.id === activeLapId;
+                        const deltaToFastest =
+                          typeof lap.deltaToFastest === "number" ? lap.deltaToFastest : null;
                         return (
-                          <div key={lap.id} css={lapRowStyles}>
+                          <div key={lap.id} css={[lapRowStyles, isActive && activeLapRowStyles]}>
                             <div className="lap-meta">
-                              <span className="lap-number">Lap {lap.lapNumber}</span>
-                              <span className="lap-time">{formatLapTimeSeconds(lapTime)}s</span>
+                              <div css={lapTitleRowStyles}>
+                                <span className="lap-number">Lap {lap.lapNumber}</span>
+                                {isFastest ? (
+                                  <span css={fastestLapPillStyles}>
+                                    <span css={fastestLapDotStyles} aria-hidden />
+                                    Fastest
+                                  </span>
+                                ) : null}
+                              </div>
+                              <div css={lapTimeRowStyles}>
+                                <span className="lap-time">{formatLapTimeSeconds(lapTime)}s</span>
+                                {deltaToFastest != null ? (
+                                  <span className="lap-delta">[+{deltaToFastest.toFixed(3)}s]</span>
+                                ) : null}
+                              </div>
                             </div>
                             <button
                               css={lapJumpButtonStyles}

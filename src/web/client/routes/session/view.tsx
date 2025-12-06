@@ -113,6 +113,51 @@ const lapActionButtonStyles = css`
   }
 `;
 
+const lapDetailsStyles = css`
+  display: grid;
+  gap: 4px;
+`;
+
+const lapTitleRowStyles = css`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+`;
+
+const fastestLapPillStyles = css`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #22d3ee, #0ea5e9);
+  color: #0b1021;
+  font-weight: 700;
+  font-size: 0.85rem;
+  box-shadow: 0 10px 30px rgba(14, 165, 233, 0.25);
+`;
+
+const fastestLapDotStyles = css`
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #0b1021;
+  opacity: 0.7;
+`;
+
+const lapTimeRowStyles = css`
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+`;
+
+const lapDeltaStyles = css`
+  color: #475569;
+  font-size: 0.9rem;
+`;
+
 const SessionQuery = graphql`
   query viewSessionQuery($id: ID!) {
     trackSession(id: $id) {
@@ -263,12 +308,24 @@ export default function ViewSessionRoute() {
 
   const lapsWithStart = useMemo(() => {
     const sorted = [...laps].sort((a, b) => a.lapNumber - b.lapNumber);
+    const fastestLapTime = sorted.reduce<number | null>((best, lap) => {
+      const lapTime = Number.isFinite(lap.time) ? lap.time : null;
+      if (lapTime == null || lapTime <= 0) {
+        return best;
+      }
+      return best == null ? lapTime : Math.min(best, lapTime);
+    }, null);
+
     let elapsed = 0;
     return sorted.map((lap) => {
       const start = elapsed;
       const lapTime = Number.isFinite(lap.time) ? lap.time : 0;
       elapsed += lapTime;
-      return { ...lap, start };
+      const isFastest =
+        fastestLapTime != null && lapTime > 0 && Math.abs(lapTime - fastestLapTime) < 1e-6;
+      const deltaToFastest =
+        !isFastest && fastestLapTime != null && lapTime > 0 ? lapTime - fastestLapTime : null;
+      return { ...lap, start, isFastest, deltaToFastest };
     });
   }, [laps]);
 
@@ -414,11 +471,26 @@ export default function ViewSessionRoute() {
                 const hasAnchor = Boolean(
                   primaryRecordingForJump && recordingVideoRefs.current[primaryRecordingForJump.id]
                 );
+                const deltaToFastest =
+                  typeof lap.deltaToFastest === "number" ? lap.deltaToFastest : null;
                 return (
                   <div key={lap.id} css={lapRowStyles}>
-                    <div>
-                      <span>Lap {lap.lapNumber}</span>
-                      <div>{formatLapTimeSeconds(lap.time)}s</div>
+                    <div css={lapDetailsStyles}>
+                      <div css={lapTitleRowStyles}>
+                        <span>Lap {lap.lapNumber}</span>
+                        {lap.isFastest ? (
+                          <span css={fastestLapPillStyles}>
+                            <span css={fastestLapDotStyles} aria-hidden />
+                            Fastest
+                          </span>
+                        ) : null}
+                      </div>
+                      <div css={lapTimeRowStyles}>
+                        <span>{formatLapTimeSeconds(lap.time)}s</span>
+                        {deltaToFastest != null ? (
+                          <span css={lapDeltaStyles}>[+{deltaToFastest.toFixed(3)}s]</span>
+                        ) : null}
+                      </div>
                     </div>
                     <button
                       css={lapActionButtonStyles}
