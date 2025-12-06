@@ -79,6 +79,10 @@ const SessionQuery = graphql`
         }
       }
     }
+    circuits {
+      id
+      name
+    }
   }
 `;
 
@@ -99,6 +103,7 @@ export default function ViewSessionRoute() {
   );
 
   const session = data.trackSession;
+  const circuits = data.circuits ?? [];
   const trackRecordings = session?.trackRecordings ?? [];
   const laps = session?.laps ?? [];
 
@@ -242,6 +247,7 @@ export default function ViewSessionRoute() {
         <SessionOverviewCard
           session={session}
           laps={lapsWithStart}
+          circuits={circuits}
         />
 
         <LapsCard

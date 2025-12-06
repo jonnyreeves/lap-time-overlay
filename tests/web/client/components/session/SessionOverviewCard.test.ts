@@ -1,0 +1,40 @@
+import { describe, expect, it } from "vitest";
+import {
+  type SessionOverviewFormState,
+  validateSessionOverviewForm,
+} from "../../../../../src/web/client/components/session/sessionOverviewForm.js";
+
+const baseForm: SessionOverviewFormState = {
+  circuitId: "c1",
+  format: "Practice",
+  date: "2024-01-01",
+  time: "10:00",
+  conditions: "Dry",
+  classification: "1",
+  notes: "Notes",
+};
+
+describe("validateSessionOverviewForm", () => {
+  it("builds the payload when all fields are valid", () => {
+    const result = validateSessionOverviewForm(baseForm);
+    expect(result.error).toBeNull();
+    expect(result.payload).toEqual({
+      circuitId: "c1",
+      format: "Practice",
+      date: "2024-01-01T10:00",
+      classification: 1,
+      conditions: "Dry",
+      notes: "Notes",
+    });
+  });
+
+  it("rejects when classification is below 1", () => {
+    const result = validateSessionOverviewForm({ ...baseForm, classification: "0" });
+    expect(result.error).toBe("Classification must be 1 or higher.");
+  });
+
+  it("rejects when date or time is missing", () => {
+    const result = validateSessionOverviewForm({ ...baseForm, time: "" });
+    expect(result.error).toBe("Please provide both date and start time.");
+  });
+});

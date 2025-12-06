@@ -1,7 +1,28 @@
-import { css } from "@emotion/react";
+import { useEffect, useState } from "react";
+import { graphql, useMutation } from "react-relay";
+import type { SessionOverviewCardUpdateTrackSessionMutation } from "../../__generated__/SessionOverviewCardUpdateTrackSessionMutation.graphql.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 import { Card } from "../Card.js";
 import type { LapWithEvents } from "./LapsCard.js";
+import {
+  actionsRowStyles,
+  infoTileStyles,
+  inlineHelpStyles,
+  inputStyles,
+  notesStyles,
+  primaryButtonStyles,
+  secondaryButtonStyles,
+  sessionCardLayoutStyles,
+  sessionInfoGridStyles,
+  textareaStyles,
+} from "./sessionOverviewStyles.js";
+import {
+  conditionsOptions,
+  formatOptions,
+  SessionOverviewFormState,
+  splitDateTime,
+  validateSessionOverviewForm,
+} from "./sessionOverviewForm.js";
 
 type SessionDetails = {
   id: string;
@@ -18,123 +39,71 @@ type SessionDetails = {
 type Props = {
   session: SessionDetails;
   laps: LapWithEvents[];
+  circuits: readonly { id: string; name: string }[];
 };
 
-const metaStyles = css`
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 2px;
-`;
-
-const metaChipStyles = css`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f4;
-  color: #0f172a;
-  font-size: 0.9rem;
-  font-weight: 600;
-
-  .label {
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-size: 0.72rem;
-    color: #475569;
-    font-weight: 700;
-  }
-
-  .value {
-    letter-spacing: -0.01em;
+const UpdateTrackSessionMutation = graphql`
+  mutation SessionOverviewCardUpdateTrackSessionMutation($input: UpdateTrackSessionInput!) {
+    updateTrackSession(input: $input) {
+      trackSession {
+        id
+        date
+        format
+        classification
+        conditions
+        notes
+        circuit {
+          id
+          name
+        }
+        updatedAt
+      }
+    }
   }
 `;
 
-const sessionCardLayoutStyles = css`
-  display: grid;
-  gap: 14px;
-`;
+type FormState = SessionOverviewFormState;
 
-const sessionInfoGridStyles = css`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-`;
-
-const infoTileStyles = css`
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f4;
-  background: #f8fafc;
-  display: grid;
-  gap: 6px;
-
-  .label {
-    font-size: 0.85rem;
-    color: #475569;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin: 0;
-  }
-
-  .value {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0;
-  }
-
-  .note {
-    margin: 0;
-    color: #475569;
-    font-size: 0.9rem;
-  }
-`;
-
-const notesStyles = css`
-  padding: 14px 16px;
-  border-radius: 12px;
-  border: 1px dashed #d7deed;
-  background: #f8fafc;
-  display: grid;
-  gap: 6px;
-
-  .label {
-    margin: 0;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    color: #1f2937;
-  }
-
-  .body {
-    margin: 0;
-    color: #0f172a;
-    white-space: pre-wrap;
-  }
-
-  .empty {
-    color: #475569;
-  }
-`;
-
-function splitDateTime(value: string): { date: string; time: string } {
-  if (!value.includes("T")) {
-    return { date: value, time: "" };
-  }
-  const [date, rest] = value.split("T");
-  const cleaned = rest.replace(/Z$/, "");
-  const [hours, minutes] = cleaned.split(":");
-  if (!hours || !minutes) {
-    return { date, time: "" };
-  }
-  return { date, time: `${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}` };
+function toFormState(session: SessionDetails): FormState {
+  const { date, time } = splitDateTime(session.date);
+  return {
+    circuitId: session.circuit.id,
+    format: session.format || "Practice",
+    date,
+    time,
+    conditions: session.conditions ?? "Dry",
+    classification:
+      session.classification != null && session.classification !== ""
+        ? String(session.classification)
+        : "",
+    notes: session.notes ?? "",
+  };
 }
 
-export function SessionOverviewCard({ session, laps }: Props) {
+export function SessionOverviewCard({ session, laps, circuits }: Props) {
+  const formId = `session-overview-${session.id}`;
+  const [isEditing, setIsEditing] = useState(false);
+  const [formValues, setFormValues] = useState<FormState>(() => toFormState(session));
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [commitUpdate, isSaving] =
+    useMutation<SessionOverviewCardUpdateTrackSessionMutation>(UpdateTrackSessionMutation);
+
+  useEffect(() => {
+    if (isEditing) return;
+    setFormValues(toFormState(session));
+  }, [
+    isEditing,
+    session.circuit.id,
+    session.classification,
+    session.conditions,
+    session.date,
+    session.format,
+    session.id,
+    session.notes,
+  ]);
+
   const { date: sessionDate, time: sessionTime } = splitDateTime(session.date);
-  const conditionsLabel = session.conditions ?? "Not set";
+  const conditionsLabel = (isEditing ? formValues.conditions : session.conditions) ?? "Not set";
   const classificationValue = session.classification;
   const classificationLabel =
     classificationValue != null && classificationValue !== ""
@@ -146,28 +115,189 @@ export function SessionOverviewCard({ session, laps }: Props) {
     fastestLap && Number.isFinite(fastestLap.time) && fastestLap.time > 0
       ? `${formatLapTimeSeconds(fastestLap.time)}s`
       : null;
-  const notesText = session.notes?.trim() ?? "";
+  const notesText = (isEditing ? formValues.notes : session.notes)?.trim() ?? "";
   const conditionsIcon = /wet/i.test(conditionsLabel) ? "🌧️" : "☀️";
+  const circuitOptions =
+    circuits.length > 0 ? [...circuits] : [{ id: session.circuit.id, name: session.circuit.name }];
+  const selectedCircuit = circuitOptions.find((option) => option.id === formValues.circuitId);
+
+  function handleEdit() {
+    setActionError(null);
+    setFormValues(toFormState(session));
+    setIsEditing(true);
+  }
+
+  function handleCancel() {
+    setActionError(null);
+    setFormValues(toFormState(session));
+    setIsEditing(false);
+  }
+
+  function handleSubmit(event?: React.FormEvent<HTMLFormElement>) {
+    event?.preventDefault();
+    if (!isEditing || isSaving) return;
+    setActionError(null);
+
+    const validation = validateSessionOverviewForm(formValues);
+    if (validation.error) {
+      setActionError(validation.error);
+      return;
+    }
+
+    const payload = validation.payload;
+    if (!payload) return;
+    const nextCircuitName = selectedCircuit?.name ?? session.circuit.name;
+
+    commitUpdate({
+      variables: {
+        input: {
+          id: session.id,
+          circuitId: payload.circuitId,
+          format: payload.format,
+          date: payload.date,
+          classification: payload.classification,
+          conditions: payload.conditions,
+          notes: payload.notes,
+        },
+      },
+      optimisticResponse: {
+        updateTrackSession: {
+          trackSession: {
+            id: session.id,
+            date: payload.date,
+            format: payload.format,
+            classification: payload.classification,
+            conditions: payload.conditions,
+            notes: payload.notes,
+            circuit: {
+              id: payload.circuitId,
+              name: nextCircuitName,
+              __typename: "Circuit",
+            },
+            updatedAt: new Date().toISOString(),
+            __typename: "TrackSession",
+          },
+          __typename: "UpdateTrackSessionPayload",
+        },
+      },
+      onCompleted: () => {
+        setIsEditing(false);
+        setActionError(null);
+      },
+      onError: (error) => {
+        setActionError(error.message);
+      },
+    });
+  }
 
   return (
-    <Card title="Session Overview">
-      <div css={sessionCardLayoutStyles}>
+    <Card
+      title="Session Overview"
+      rightComponent={
+        <div css={actionsRowStyles}>
+          {isEditing ? (
+            <>
+              <button
+                type="button"
+                css={secondaryButtonStyles}
+                onClick={handleCancel}
+                disabled={isSaving}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form={formId}
+                css={primaryButtonStyles}
+                disabled={isSaving}
+              >
+                {isSaving ? "Saving..." : "Save"}
+              </button>
+            </>
+          ) : (
+            <button type="button" css={secondaryButtonStyles} onClick={handleEdit}>
+              Edit
+            </button>
+          )}
+        </div>
+      }
+    >
+      <form id={formId} onSubmit={handleSubmit} css={sessionCardLayoutStyles}>
+        {actionError ? <p css={inlineHelpStyles}>{actionError}</p> : null}
         <div css={sessionInfoGridStyles}>
           <div css={infoTileStyles}>
             <p className="label">Circuit</p>
-            <p className="value">{session.circuit.name}</p>
+            {isEditing ? (
+              <select
+                css={inputStyles}
+                value={formValues.circuitId}
+                onChange={(e) =>
+                  setFormValues((current) => ({ ...current, circuitId: e.target.value }))
+                }
+                disabled={isSaving}
+              >
+                {circuitOptions.map((circuit) => (
+                  <option key={circuit.id} value={circuit.id}>
+                    {circuit.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p className="value">{session.circuit.name}</p>
+            )}
           </div>
           <div css={infoTileStyles}>
             <p className="label">Format</p>
-            <p className="value">{session.format || "—"}</p>
+            {isEditing ? (
+              <select
+                css={inputStyles}
+                value={formValues.format}
+                onChange={(e) =>
+                  setFormValues((current) => ({ ...current, format: e.target.value }))
+                }
+                disabled={isSaving}
+              >
+                {formatOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p className="value">{session.format || "—"}</p>
+            )}
           </div>
           <div css={infoTileStyles}>
             <p className="label">Session date</p>
-            <p className="value">{sessionDate || "—"}</p>
+            {isEditing ? (
+              <input
+                type="date"
+                css={inputStyles}
+                value={formValues.date}
+                onChange={(e) =>
+                  setFormValues((current) => ({ ...current, date: e.target.value }))
+                }
+                disabled={isSaving}
+              />
+            ) : (
+              <p className="value">{sessionDate || "—"}</p>
+            )}
           </div>
           <div css={infoTileStyles}>
             <p className="label">Start time</p>
-            <p className="value">{sessionTime || "—"}</p>
+            {isEditing ? (
+              <input
+                type="time"
+                css={inputStyles}
+                value={formValues.time}
+                onChange={(e) =>
+                  setFormValues((current) => ({ ...current, time: e.target.value }))
+                }
+                disabled={isSaving}
+              />
+            ) : (
+              <p className="value">{sessionTime || "—"}</p>
+            )}
           </div>
           <div css={infoTileStyles}>
             <p className="label">Laps completed</p>
@@ -176,23 +306,65 @@ export function SessionOverviewCard({ session, laps }: Props) {
           </div>
           <div css={infoTileStyles}>
             <p className="label">Conditions</p>
-            <p className="value">
-              {conditionsIcon} {conditionsLabel}
-            </p>
+            {isEditing ? (
+              <select
+                css={inputStyles}
+                value={formValues.conditions}
+                onChange={(e) =>
+                  setFormValues((current) => ({ ...current, conditions: e.target.value }))
+                }
+                disabled={isSaving}
+              >
+                {conditionsOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p className="value">
+                {conditionsIcon} {conditionsLabel}
+              </p>
+            )}
           </div>
           <div css={infoTileStyles}>
             <p className="label">Classification</p>
-            <p className="value">{classificationLabel}</p>
+            {isEditing ? (
+              <input
+                type="number"
+                min={1}
+                css={inputStyles}
+                value={formValues.classification}
+                onChange={(e) =>
+                  setFormValues((current) => ({ ...current, classification: e.target.value }))
+                }
+                disabled={isSaving}
+              />
+            ) : (
+              <p className="value">{classificationLabel}</p>
+            )}
           </div>
         </div>
 
         <div css={notesStyles}>
           <p className="label">Notes</p>
-          <p className={notesText ? "body" : "body empty"}>
-            {notesText || "No notes recorded for this session."}
-          </p>
+          {isEditing ? (
+            <textarea
+              css={textareaStyles}
+              value={formValues.notes}
+              onChange={(e) =>
+                setFormValues((current) => ({ ...current, notes: e.target.value }))
+              }
+              disabled={isSaving}
+              placeholder="Add notes about this session"
+            />
+          ) : (
+            <p className={notesText ? "body" : "body empty"}>
+              {notesText || "No notes recorded for this session."}
+            </p>
+          )}
         </div>
-      </div>
+      </form>
     </Card>
   );
 }
