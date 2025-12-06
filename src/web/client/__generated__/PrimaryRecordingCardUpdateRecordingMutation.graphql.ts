@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<865aa4830334b16ddf992324f8dc9f64>>
+ * @generated SignedSource<<3a9caeff0359b47afe8da89fa4918d11>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,10 +13,10 @@ export type UpdateTrackRecordingInput = {
   id: string;
   lapOneOffset: number;
 };
-export type RecordingsCardUpdateRecordingMutation$variables = {
+export type PrimaryRecordingCardUpdateRecordingMutation$variables = {
   input: UpdateTrackRecordingInput;
 };
-export type RecordingsCardUpdateRecordingMutation$data = {
+export type PrimaryRecordingCardUpdateRecordingMutation$data = {
   readonly updateTrackRecording: {
     readonly recording: {
       readonly fps: number | null | undefined;
@@ -26,9 +26,9 @@ export type RecordingsCardUpdateRecordingMutation$data = {
     };
   };
 };
-export type RecordingsCardUpdateRecordingMutation = {
-  response: RecordingsCardUpdateRecordingMutation$data;
-  variables: RecordingsCardUpdateRecordingMutation$variables;
+export type PrimaryRecordingCardUpdateRecordingMutation = {
+  response: PrimaryRecordingCardUpdateRecordingMutation$data;
+  variables: PrimaryRecordingCardUpdateRecordingMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -102,7 +102,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "RecordingsCardUpdateRecordingMutation",
+    "name": "PrimaryRecordingCardUpdateRecordingMutation",
     "selections": (v1/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -111,20 +111,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "RecordingsCardUpdateRecordingMutation",
+    "name": "PrimaryRecordingCardUpdateRecordingMutation",
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "1331d1328c0ba9694b4c4c2af226dd75",
+    "cacheID": "61848f39b796724aae7e35ea42ff1d96",
     "id": null,
     "metadata": {},
-    "name": "RecordingsCardUpdateRecordingMutation",
+    "name": "PrimaryRecordingCardUpdateRecordingMutation",
     "operationKind": "mutation",
-    "text": "mutation RecordingsCardUpdateRecordingMutation(\n  $input: UpdateTrackRecordingInput!\n) {\n  updateTrackRecording(input: $input) {\n    recording {\n      id\n      lapOneOffset\n      fps\n      updatedAt\n    }\n  }\n}\n"
+    "text": "mutation PrimaryRecordingCardUpdateRecordingMutation(\n  $input: UpdateTrackRecordingInput!\n) {\n  updateTrackRecording(input: $input) {\n    recording {\n      id\n      lapOneOffset\n      fps\n      updatedAt\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "98709078dd85f69fa8175d6bf87f84e0";
+(node as any).hash = "46959a23a3f39a9119b609f85c05e959";
 
 export default node;

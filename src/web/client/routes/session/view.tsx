@@ -4,6 +4,7 @@ import { graphql, useLazyLoadQuery } from "react-relay";
 import { Link, useParams } from "react-router-dom";
 import { Card } from "../../components/Card.js";
 import { RecordingsCard } from "./RecordingsCard.js";
+import { PrimaryRecordingCard } from "./PrimaryRecordingCard.js";
 import { type viewSessionQuery } from "../../__generated__/viewSessionQuery.graphql.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 
@@ -390,10 +391,15 @@ export default function ViewSessionRoute() {
         </form>
       </Card>
 
+      <PrimaryRecordingCard
+        recording={primaryRecording}
+        videoRefs={recordingVideoRefs}
+        onRefresh={() => setRefreshKey((key) => key + 1)}
+      />
+
       <RecordingsCard
         sessionId={session.id}
         recordings={normalizedRecordings}
-        videoRefs={recordingVideoRefs}
         onRefresh={() => setRefreshKey((key) => key + 1)}
       />
 
