@@ -2,6 +2,7 @@ import http from "node:http";
 import { runMigrations } from "../db/migrations/runner.js";
 import { ensureWorkDirs } from "./config.js";
 import { handleGraphQL } from "./graphql/handler.js";
+import { handleRecordingDownloadRequest, handleRecordingUploadRequest } from "./http/uploads.js";
 import { serveStatic } from "./http/static.js";
 
 await runMigrations();
@@ -9,6 +10,20 @@ await ensureWorkDirs();
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", "http://localhost");
+
+  if (req.method === "PUT" && url.pathname.startsWith("/uploads/recordings/")) {
+    const match = url.pathname.match(/^\/uploads\/recordings\/([^/]+)$/);
+    if (match) {
+      return void handleRecordingUploadRequest(req, res, match[1], url.searchParams.get("token"));
+    }
+  }
+
+  if (req.method === "GET" && url.pathname.startsWith("/recordings/")) {
+    const match = url.pathname.match(/^\/recordings\/([^/]+)$/);
+    if (match) {
+      return void handleRecordingDownloadRequest(req, res, match[1]);
+    }
+  }
 
   if (req.method === "POST" && url.pathname === "/graphql") {
     return void handleGraphQL(req, res);

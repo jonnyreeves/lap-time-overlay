@@ -7,6 +7,7 @@ import { migration as circuitMigration } from "../../src/db/migrations/03_create
 import { migration as trackSessionMigration } from "../../src/db/migrations/04_create_track_sessions.js";
 import { migration as trackRecordingMigration } from "../../src/db/migrations/07_create_track_recordings.js";
 import { migration as trackSessionConditionsMigration } from "../../src/db/migrations/08_add_track_session_conditions.js";
+import { migration as extendTrackRecordings } from "../../src/db/migrations/09_extend_track_recordings.js";
 import { createUser, type UserRecord } from "../../src/db/users.js";
 import { createCircuit, type CircuitRecord } from "../../src/db/circuits.js";
 import { createTrackSession, type TrackSessionRecord } from "../../src/db/track_sessions.js";
@@ -31,6 +32,7 @@ describe("track_recordings", () => {
     trackSessionMigration.up(db);
     trackSessionConditionsMigration.up(db);
     trackRecordingMigration.up(db);
+    extendTrackRecordings.up(db);
     user = createUser("testuser", "hashedpassword");
     circuit = createCircuit("Test Circuit");
     trackSession = createTrackSession(
@@ -45,17 +47,24 @@ describe("track_recordings", () => {
   it("can create and retrieve a track recording", () => {
     const now = Date.now();
     const trackRecording = createTrackRecording(
-      trackSession.id,
-      "media-uuid-123",
-      1.5,
-      "Dashcam footage",
-      now
+      {
+        sessionId: trackSession.id,
+        userId: trackSession.userId,
+        mediaId: "media-uuid-123",
+        lapOneOffset: 1.5,
+        description: "Dashcam footage",
+        now,
+      }
     );
     assert.ok(trackRecording.id);
     assert.strictEqual(trackRecording.sessionId, trackSession.id);
+    assert.strictEqual(trackRecording.userId, trackSession.userId);
     assert.strictEqual(trackRecording.mediaId, "media-uuid-123");
     assert.strictEqual(trackRecording.lapOneOffset, 1.5);
     assert.strictEqual(trackRecording.description, "Dashcam footage");
+    assert.strictEqual(trackRecording.status, "pending_upload");
+    assert.strictEqual(trackRecording.error, null);
+    assert.strictEqual(trackRecording.combineProgress, 0);
     assert.strictEqual(trackRecording.createdAt, now);
     assert.strictEqual(trackRecording.updatedAt, now);
 
@@ -71,18 +80,26 @@ describe("track_recordings", () => {
   it("can find track recordings by session ID", () => {
     const now = Date.now();
     const recording1 = createTrackRecording(
-      trackSession.id,
-      "media-uuid-a",
-      0.1,
-      "External cam",
-      now
+      {
+        sessionId: trackSession.id,
+        userId: trackSession.userId,
+        mediaId: "media-uuid-a",
+        lapOneOffset: 0.1,
+        description: "External cam",
+        now,
+        status: "ready",
+      }
     );
     const recording2 = createTrackRecording(
-      trackSession.id,
-      "media-uuid-b",
-      0.2,
-      "Internal cam",
-      now + 100
+      {
+        sessionId: trackSession.id,
+        userId: trackSession.userId,
+        mediaId: "media-uuid-b",
+        lapOneOffset: 0.2,
+        description: "Internal cam",
+        now: now + 100,
+        status: "ready",
+      }
     );
     // Create another session and a recording for it to ensure filtering works
     const anotherTrackSession = createTrackSession(
@@ -92,13 +109,15 @@ describe("track_recordings", () => {
       circuit.id,
       user.id
     );
-    createTrackRecording(
-      anotherTrackSession.id,
-      "media-uuid-c",
-      0.3,
-      "Other session",
-      now + 200
-    );
+    createTrackRecording({
+      sessionId: anotherTrackSession.id,
+      userId: anotherTrackSession.userId,
+      mediaId: "media-uuid-c",
+      lapOneOffset: 0.3,
+      description: "Other session",
+      now: now + 200,
+      status: "ready",
+    });
 
     const recordings = findTrackRecordingsBySessionId(trackSession.id);
     assert.strictEqual(recordings.length, 2);

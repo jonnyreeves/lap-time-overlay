@@ -23,7 +23,12 @@ export function createMockRepositories() {
       findByLapId: vi.fn(),
     },
     trackRecordings: {
-      findBySessionId: vi.fn(),
+      findBySessionId: vi.fn(() => []),
+      findById: vi.fn(),
+    },
+    trackRecordingSources: {
+      findByRecordingId: vi.fn(() => []),
+      findById: vi.fn(),
     },
   } satisfies Repositories;
 

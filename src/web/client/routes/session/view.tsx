@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { Link, useParams } from "react-router-dom";
 import { Card } from "../../components/Card.js";
+import { RecordingsCard } from "./RecordingsCard.js";
 import { type viewSessionQuery } from "../../__generated__/viewSessionQuery.graphql.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 
@@ -93,6 +94,28 @@ const SessionQuery = graphql`
       }
       createdAt
       updatedAt
+      trackRecordings(first: 20) {
+        id
+        description
+        status
+        error
+        sizeBytes
+        createdAt
+        combineProgress
+        uploadProgress {
+          uploadedBytes
+          totalBytes
+        }
+        uploadTargets(first: 50) {
+          id
+          fileName
+          sizeBytes
+          uploadedBytes
+          status
+          ordinal
+          uploadUrl
+        }
+      }
       laps(first: 50) {
         id
         lapNumber
@@ -131,6 +154,7 @@ export default function ViewSessionRoute() {
   const [circuitId, setCircuitId] = useState("");
   const [classification, setClassification] = useState("");
   const [notes, setNotes] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const data = useLazyLoadQuery<viewSessionQuery>(
     SessionQuery,
@@ -138,6 +162,7 @@ export default function ViewSessionRoute() {
     {
       fetchPolicy: "store-and-network",
       UNSTABLE_renderPolicy: "full",
+      fetchKey: refreshKey,
     }
   );
 
@@ -155,6 +180,14 @@ export default function ViewSessionRoute() {
     setNotes(session.notes ?? "");
   }, [session]);
 
+  useEffect(() => {
+    const recordings = data.trackSession?.trackRecordings ?? [];
+    const hasPending = recordings.some((rec) => rec.status !== "READY");
+    if (!hasPending) return;
+    const timer = window.setInterval(() => setRefreshKey((key) => key + 1), 3000);
+    return () => window.clearInterval(timer);
+  }, [data.trackSession.trackRecordings, setRefreshKey]);
+
   if (!sessionId) {
     return <p>Missing session id.</p>;
   }
@@ -162,6 +195,29 @@ export default function ViewSessionRoute() {
   if (!session) {
     return <p>Session not found.</p>;
   }
+
+  const normalizedRecordings = session.trackRecordings.map((recording) => ({
+    id: recording.id,
+    description: recording.description ?? null,
+    sizeBytes: recording.sizeBytes ?? null,
+    createdAt: recording.createdAt,
+    status: recording.status,
+    error: recording.error ?? null,
+    combineProgress: recording.combineProgress ?? 0,
+    uploadProgress: {
+      uploadedBytes: recording.uploadProgress.uploadedBytes ?? 0,
+      totalBytes: recording.uploadProgress.totalBytes ?? null,
+    },
+    uploadTargets: recording.uploadTargets.map((target) => ({
+      id: target.id,
+      fileName: target.fileName,
+      sizeBytes: target.sizeBytes ?? null,
+      uploadedBytes: target.uploadedBytes,
+      status: target.status,
+      ordinal: target.ordinal,
+      uploadUrl: target.uploadUrl ?? null,
+    })),
+  }));
 
   return (
     <div css={formLayoutStyles}>
@@ -258,6 +314,12 @@ export default function ViewSessionRoute() {
           </div>
         </form>
       </Card>
+
+      <RecordingsCard
+        sessionId={session.id}
+        recordings={normalizedRecordings}
+        onRefresh={() => setRefreshKey((key) => key + 1)}
+      />
 
       <Card title="Laps">
         {session.laps.length === 0 ? (

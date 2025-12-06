@@ -239,6 +239,8 @@ export function toLapEventPayload(lapEvent: LapEventRecord, repositories: Reposi
 }
 
 export function toTrackRecordingPayload(recording: TrackRecordingRecord, repositories: Repositories) {
+  const loadTargets = () => repositories.trackRecordingSources.findByRecordingId?.(recording.id) ?? [];
+
   return {
     id: recording.id,
     session: () => {
@@ -253,6 +255,36 @@ export function toTrackRecordingPayload(recording: TrackRecordingRecord, reposit
     mediaId: recording.mediaId,
     lapOneOffset: recording.lapOneOffset,
     description: recording.description,
+    status: recording.status.toUpperCase(),
+    error: recording.error,
+    sizeBytes: recording.sizeBytes,
+    durationMs: recording.durationMs,
+    fps: recording.fps,
+    combineProgress: recording.combineProgress,
+    uploadProgress: () => {
+      const targets = loadTargets();
+      const uploadedBytes = targets.reduce((sum, target) => sum + (target.uploadedBytes ?? 0), 0);
+      const totalBytes = targets.some((target) => target.sizeBytes == null)
+        ? null
+        : targets.reduce((sum, target) => sum + (target.sizeBytes ?? 0), 0);
+      return { uploadedBytes, totalBytes };
+    },
+    uploadTargets: (args: { first?: number }) => {
+      const limit = typeof args?.first === "number" ? args.first : 10;
+      const targets = loadTargets();
+      return targets.slice(0, limit).map((target) => ({
+        id: target.id,
+        fileName: target.fileName,
+        sizeBytes: target.sizeBytes,
+        uploadedBytes: target.uploadedBytes,
+        status: target.status.toUpperCase(),
+        ordinal: target.ordinal,
+        uploadUrl:
+          target.status === "uploaded"
+            ? null
+            : `/uploads/recordings/${target.id}?token=${encodeURIComponent(target.uploadToken)}`,
+      }));
+    },
     createdAt: new Date(recording.createdAt).toISOString(),
     updatedAt: new Date(recording.updatedAt).toISOString(),
   };

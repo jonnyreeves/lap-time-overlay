@@ -6,6 +6,7 @@ import { circuitResolvers } from "./resolvers/circuit.js";
 import {
   trackSessionResolvers
 } from "./resolvers/trackSession.js";
+import { trackRecordingResolvers } from "./resolvers/trackRecording.js";
 import { viewerResolvers } from "./resolvers/viewer.js";
 
 const schemaFileContents = readFileSync(
@@ -25,4 +26,6 @@ export const rootValue = {
   createCircuit: circuitResolvers.createCircuit,
   createTrackSession: trackSessionResolvers.createTrackSession,
   updateTrackSession: trackSessionResolvers.updateTrackSession,
+  startTrackRecordingUpload: trackRecordingResolvers.startTrackRecordingUpload,
+  deleteTrackRecording: trackRecordingResolvers.deleteTrackRecording,
 };

@@ -6,6 +6,10 @@ import {
   type TrackRecordingRepository,
 } from "../../db/track_recordings.js";
 import {
+  trackRecordingSourcesRepository,
+  type TrackRecordingSourceRepository,
+} from "../../db/track_recording_sources.js";
+import {
   trackSessionsRepository,
   type TrackSessionRepository,
 } from "../../db/track_sessions.js";
@@ -16,6 +20,7 @@ export interface Repositories {
   laps: LapRepository;
   lapEvents: LapEventRepository;
   trackRecordings: TrackRecordingRepository;
+  trackRecordingSources: TrackRecordingSourceRepository;
 }
 
 export function createRepositories(): Repositories {
@@ -25,5 +30,6 @@ export function createRepositories(): Repositories {
     laps: lapsRepository,
     lapEvents: lapEventsRepository,
     trackRecordings: trackRecordingsRepository,
+    trackRecordingSources: trackRecordingSourcesRepository,
   };
 }

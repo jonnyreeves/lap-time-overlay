@@ -6,23 +6,22 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const projectRoot = path.resolve(__dirname, "../..");
 export const publicDir = path.join(projectRoot, "public");
-export const uploadsDir = path.join(projectRoot, "work/uploads");
-export const rendersDir = path.join(projectRoot, "work/renders");
-export const previewsDir = path.join(projectRoot, "work/previews");
 
-export const CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
-export const UPLOAD_RETENTION_MS = 24 * 60 * 60 * 1000;
-export const RENDER_RETENTION_MS = 24 * 60 * 60 * 1000;
-export const PREVIEW_RETENTION_MS = 6 * 60 * 60 * 1000;
+export const sessionRecordingsDir = path.join(projectRoot, "work/media/session_recordings");
+export const sessionRecordingStagingDir = path.join(
+  projectRoot,
+  "work/media/session_recordings/staging"
+);
 
-export const cleanupTargets = [
-  { dir: uploadsDir, maxAgeMs: UPLOAD_RETENTION_MS },
-  { dir: rendersDir, maxAgeMs: RENDER_RETENTION_MS },
-  { dir: previewsDir, maxAgeMs: PREVIEW_RETENTION_MS },
-];
+export const tmpUploadsDir = path.join(projectRoot, "work/temp/uploads");
+export const tmpRendersDir = path.join(projectRoot, "work/temp/renders");
+export const tmpPreviewsDir = path.join(projectRoot, "work/temp/previews");
+
 
 export async function ensureWorkDirs(): Promise<void> {
-  await fs.mkdir(uploadsDir, { recursive: true });
-  await fs.mkdir(rendersDir, { recursive: true });
-  await fs.mkdir(previewsDir, { recursive: true });
+  await fs.mkdir(sessionRecordingsDir, { recursive: true });
+  await fs.mkdir(sessionRecordingStagingDir, { recursive: true });
+  await fs.mkdir(tmpPreviewsDir, { recursive: true });
+  await fs.mkdir(tmpRendersDir, { recursive: true });
+  await fs.mkdir(tmpUploadsDir, { recursive: true });
 }

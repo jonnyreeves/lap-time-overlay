@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<70d0fb611da60d370da22a635efdc264>>
+ * @generated SignedSource<<c0ba7638c0186eb66952efdf07c79cf3>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,6 +9,8 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
+export type RecordingUploadStatus = "FAILED" | "PENDING" | "UPLOADED" | "UPLOADING" | "%future added value";
+export type TrackRecordingStatus = "COMBINING" | "FAILED" | "PENDING_UPLOAD" | "READY" | "UPLOADING" | "%future added value";
 export type viewSessionQuery$variables = {
   id: string;
 };
@@ -37,6 +39,28 @@ export type viewSessionQuery$data = {
       readonly time: number;
     }>;
     readonly notes: string | null | undefined;
+    readonly trackRecordings: ReadonlyArray<{
+      readonly combineProgress: number | null | undefined;
+      readonly createdAt: string;
+      readonly description: string | null | undefined;
+      readonly error: string | null | undefined;
+      readonly id: string;
+      readonly sizeBytes: number | null | undefined;
+      readonly status: TrackRecordingStatus;
+      readonly uploadProgress: {
+        readonly totalBytes: number | null | undefined;
+        readonly uploadedBytes: number;
+      };
+      readonly uploadTargets: ReadonlyArray<{
+        readonly fileName: string;
+        readonly id: string;
+        readonly ordinal: number;
+        readonly sizeBytes: number | null | undefined;
+        readonly status: RecordingUploadStatus;
+        readonly uploadUrl: string | null | undefined;
+        readonly uploadedBytes: number;
+      }>;
+    }>;
     readonly updatedAt: string;
   };
 };
@@ -70,7 +94,42 @@ v2 = [
     "storageKey": null
   }
 ],
-v3 = [
+v3 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "createdAt",
+  "storageKey": null
+},
+v4 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "status",
+  "storageKey": null
+},
+v5 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "sizeBytes",
+  "storageKey": null
+},
+v6 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "uploadedBytes",
+  "storageKey": null
+},
+v7 = [
+  {
+    "kind": "Literal",
+    "name": "first",
+    "value": 50
+  }
+],
+v8 = [
   {
     "alias": null,
     "args": [
@@ -131,13 +190,7 @@ v3 = [
         "selections": (v2/*: any*/),
         "storageKey": null
       },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "createdAt",
-        "storageKey": null
-      },
+      (v3/*: any*/),
       {
         "alias": null,
         "args": null,
@@ -151,9 +204,100 @@ v3 = [
           {
             "kind": "Literal",
             "name": "first",
-            "value": 50
+            "value": 20
           }
         ],
+        "concreteType": "TrackRecording",
+        "kind": "LinkedField",
+        "name": "trackRecordings",
+        "plural": true,
+        "selections": [
+          (v1/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "description",
+            "storageKey": null
+          },
+          (v4/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "error",
+            "storageKey": null
+          },
+          (v5/*: any*/),
+          (v3/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "combineProgress",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "RecordingUploadProgress",
+            "kind": "LinkedField",
+            "name": "uploadProgress",
+            "plural": false,
+            "selections": [
+              (v6/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "totalBytes",
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": (v7/*: any*/),
+            "concreteType": "RecordingUploadTarget",
+            "kind": "LinkedField",
+            "name": "uploadTargets",
+            "plural": true,
+            "selections": [
+              (v1/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "fileName",
+                "storageKey": null
+              },
+              (v5/*: any*/),
+              (v6/*: any*/),
+              (v4/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "ordinal",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "uploadUrl",
+                "storageKey": null
+              }
+            ],
+            "storageKey": "uploadTargets(first:50)"
+          }
+        ],
+        "storageKey": "trackRecordings(first:20)"
+      },
+      {
+        "alias": null,
+        "args": (v7/*: any*/),
         "concreteType": "Lap",
         "kind": "LinkedField",
         "name": "laps",
@@ -209,7 +353,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "viewSessionQuery",
-    "selections": (v3/*: any*/),
+    "selections": (v8/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -218,19 +362,19 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "viewSessionQuery",
-    "selections": (v3/*: any*/)
+    "selections": (v8/*: any*/)
   },
   "params": {
-    "cacheID": "5d359ef674dbf6cf008ee995c3a8d911",
+    "cacheID": "88530732112780f20d43fd678ed6ab9d",
     "id": null,
     "metadata": {},
     "name": "viewSessionQuery",
     "operationKind": "query",
-    "text": "query viewSessionQuery(\n  $id: ID!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    classification\n    conditions\n    notes\n    circuit {\n      id\n      name\n    }\n    createdAt\n    updatedAt\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents {\n        id\n      }\n    }\n  }\n  circuits {\n    id\n    name\n  }\n}\n"
+    "text": "query viewSessionQuery(\n  $id: ID!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    classification\n    conditions\n    notes\n    circuit {\n      id\n      name\n    }\n    createdAt\n    updatedAt\n    trackRecordings(first: 20) {\n      id\n      description\n      status\n      error\n      sizeBytes\n      createdAt\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n      uploadTargets(first: 50) {\n        id\n        fileName\n        sizeBytes\n        uploadedBytes\n        status\n        ordinal\n        uploadUrl\n      }\n    }\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents {\n        id\n      }\n    }\n  }\n  circuits {\n    id\n    name\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "fc35eb52b1ef92de41d406c2c749a9d2";
+(node as any).hash = "347b6a868ae079604e390723ee87d0ec";
 
 export default node;

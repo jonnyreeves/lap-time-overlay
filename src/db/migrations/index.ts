@@ -15,4 +15,5 @@ export const migrations: Migration[] = [
   (await import("./06_create_lap_events.js")).migration,
   (await import("./07_create_track_recordings.js")).migration,
   (await import("./08_add_track_session_conditions.js")).migration,
+  (await import("./09_extend_track_recordings.js")).migration,
 ];

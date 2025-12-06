@@ -53,6 +53,27 @@ type UpdateTrackSessionPayload {
   trackSession: TrackSession!
 }
 
+input RecordingSourceInput {
+  fileName: String!
+  sizeBytes: Float
+}
+
+input StartTrackRecordingUploadInput {
+  sessionId: ID!
+  description: String
+  lapOneOffset: Float
+  sources: [RecordingSourceInput!]!
+}
+
+type StartTrackRecordingUploadPayload {
+  recording: TrackRecording!
+  uploadTargets: [RecordingUploadTarget!]!
+}
+
+type DeleteTrackRecordingPayload {
+  success: Boolean!
+}
+
 type Mutation {
   register(input: AuthInput!): AuthPayload!
   login(input: AuthInput!): AuthPayload!
@@ -60,6 +81,10 @@ type Mutation {
   createCircuit(input: CreateCircuitInput!): CreateCircuitPayload!
   createTrackSession(input: CreateTrackSessionInput!): CreateTrackSessionPayload!
   updateTrackSession(input: UpdateTrackSessionInput!): UpdateTrackSessionPayload!
+  startTrackRecordingUpload(
+    input: StartTrackRecordingUploadInput!
+  ): StartTrackRecordingUploadPayload!
+  deleteTrackRecording(id: ID!): DeleteTrackRecordingPayload!
 }
 
 input AuthInput {
@@ -144,12 +169,50 @@ type LapEvent {
   updatedAt: String!
 }
 
+enum TrackRecordingStatus {
+  PENDING_UPLOAD
+  UPLOADING
+  COMBINING
+  READY
+  FAILED
+}
+
+enum RecordingUploadStatus {
+  PENDING
+  UPLOADING
+  UPLOADED
+  FAILED
+}
+
+type RecordingUploadTarget {
+  id: ID!
+  fileName: String!
+  sizeBytes: Float
+  uploadedBytes: Float!
+  status: RecordingUploadStatus!
+  ordinal: Int!
+  uploadUrl: String
+}
+
+type RecordingUploadProgress {
+  uploadedBytes: Float!
+  totalBytes: Float
+}
+
 type TrackRecording {
   id: ID!
   session: TrackSession!
   mediaId: String!
   lapOneOffset: Float!
   description: String
+  status: TrackRecordingStatus!
+  error: String
+  sizeBytes: Float
+  durationMs: Float
+  fps: Float
+  combineProgress: Float
+  uploadProgress: RecordingUploadProgress!
+  uploadTargets(first: Int = 10): [RecordingUploadTarget!]!
   createdAt: String!
   updatedAt: String!
 }
