@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<c0ba7638c0186eb66952efdf07c79cf3>>
+ * @generated SignedSource<<24cd2f784117e368f28ced48708fc9c9>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -43,8 +43,11 @@ export type viewSessionQuery$data = {
       readonly combineProgress: number | null | undefined;
       readonly createdAt: string;
       readonly description: string | null | undefined;
+      readonly durationMs: number | null | undefined;
       readonly error: string | null | undefined;
+      readonly fps: number | null | undefined;
       readonly id: string;
+      readonly lapOneOffset: number;
       readonly sizeBytes: number | null | undefined;
       readonly status: TrackRecordingStatus;
       readonly uploadProgress: {
@@ -229,6 +232,27 @@ v8 = [
             "storageKey": null
           },
           (v5/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "lapOneOffset",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "durationMs",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "fps",
+            "storageKey": null
+          },
           (v3/*: any*/),
           {
             "alias": null,
@@ -365,16 +389,16 @@ return {
     "selections": (v8/*: any*/)
   },
   "params": {
-    "cacheID": "88530732112780f20d43fd678ed6ab9d",
+    "cacheID": "00480c23546f30300a7f3cceb9cf17bc",
     "id": null,
     "metadata": {},
     "name": "viewSessionQuery",
     "operationKind": "query",
-    "text": "query viewSessionQuery(\n  $id: ID!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    classification\n    conditions\n    notes\n    circuit {\n      id\n      name\n    }\n    createdAt\n    updatedAt\n    trackRecordings(first: 20) {\n      id\n      description\n      status\n      error\n      sizeBytes\n      createdAt\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n      uploadTargets(first: 50) {\n        id\n        fileName\n        sizeBytes\n        uploadedBytes\n        status\n        ordinal\n        uploadUrl\n      }\n    }\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents {\n        id\n      }\n    }\n  }\n  circuits {\n    id\n    name\n  }\n}\n"
+    "text": "query viewSessionQuery(\n  $id: ID!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    classification\n    conditions\n    notes\n    circuit {\n      id\n      name\n    }\n    createdAt\n    updatedAt\n    trackRecordings(first: 20) {\n      id\n      description\n      status\n      error\n      sizeBytes\n      lapOneOffset\n      durationMs\n      fps\n      createdAt\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n      uploadTargets(first: 50) {\n        id\n        fileName\n        sizeBytes\n        uploadedBytes\n        status\n        ordinal\n        uploadUrl\n      }\n    }\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents {\n        id\n      }\n    }\n  }\n  circuits {\n    id\n    name\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "347b6a868ae079604e390723ee87d0ec";
+(node as any).hash = "1e326b3e9e08c8165b57b8f4f053f79d";
 
 export default node;

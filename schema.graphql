@@ -70,6 +70,15 @@ type StartTrackRecordingUploadPayload {
   uploadTargets: [RecordingUploadTarget!]!
 }
 
+input UpdateTrackRecordingInput {
+  id: ID!
+  lapOneOffset: Float!
+}
+
+type UpdateTrackRecordingPayload {
+  recording: TrackRecording!
+}
+
 type DeleteTrackRecordingPayload {
   success: Boolean!
 }
@@ -84,6 +93,7 @@ type Mutation {
   startTrackRecordingUpload(
     input: StartTrackRecordingUploadInput!
   ): StartTrackRecordingUploadPayload!
+  updateTrackRecording(input: UpdateTrackRecordingInput!): UpdateTrackRecordingPayload!
   deleteTrackRecording(id: ID!): DeleteTrackRecordingPayload!
 }
 

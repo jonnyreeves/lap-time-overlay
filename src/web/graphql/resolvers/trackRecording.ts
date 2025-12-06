@@ -1,5 +1,5 @@
 import { GraphQLError } from "graphql";
-import { findTrackRecordingById } from "../../../db/track_recordings.js";
+import { findTrackRecordingById, updateTrackRecording } from "../../../db/track_recordings.js";
 import type { GraphQLContext } from "../context.js";
 import { RecordingUploadError, startRecordingUploadSession, deleteRecordingAndFiles } from "../../recordings/service.js";
 import { toTrackRecordingPayload } from "./trackSession.js";
@@ -80,6 +80,48 @@ export const trackRecordingResolvers = {
     } catch (err) {
       throw toUploadError(err);
     }
+  },
+  updateTrackRecording: async (
+    args: { input?: { id?: string; lapOneOffset?: number | null } },
+    context: GraphQLContext
+  ) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+    const input = args.input;
+    if (!input?.id) {
+      throw new GraphQLError("id is required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    const lapOneOffset = Number(input.lapOneOffset);
+    if (!Number.isFinite(lapOneOffset) || lapOneOffset < 0) {
+      throw new GraphQLError("lapOneOffset must be a non-negative number", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const recording = findTrackRecordingById(input.id);
+    if (!recording) {
+      throw new GraphQLError("Recording not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+    if (recording.userId !== context.currentUser.id) {
+      throw new GraphQLError("You do not have access to this recording", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+    if (recording.status !== "ready") {
+      throw new GraphQLError("Recording is not ready for lap offset updates", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const updated = updateTrackRecording(recording.id, { lapOneOffset }) ?? recording;
+    return { recording: toTrackRecordingPayload(updated, context.repositories) };
   },
   deleteTrackRecording: async (args: { id?: string }, context: GraphQLContext) => {
     if (!context.currentUser) {

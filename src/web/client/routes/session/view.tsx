@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { Link, useParams } from "react-router-dom";
 import { Card } from "../../components/Card.js";
@@ -79,6 +79,27 @@ const lapRowStyles = css`
   background: #f8fafc;
 `;
 
+const lapActionButtonStyles = css`
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #d7deed;
+  background: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  font-size: 0.95rem;
+
+  &:hover {
+    background: #eef2ff;
+    border-color: #cbd5e1;
+  }
+
+  &:disabled {
+    background: #e2e8f4;
+    color: #94a3b8;
+    cursor: not-allowed;
+  }
+`;
+
 const SessionQuery = graphql`
   query viewSessionQuery($id: ID!) {
     trackSession(id: $id) {
@@ -100,6 +121,9 @@ const SessionQuery = graphql`
         status
         error
         sizeBytes
+        lapOneOffset
+        durationMs
+        fps
         createdAt
         combineProgress
         uploadProgress {
@@ -155,6 +179,7 @@ export default function ViewSessionRoute() {
   const [classification, setClassification] = useState("");
   const [notes, setNotes] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
+  const recordingVideoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
 
   const data = useLazyLoadQuery<viewSessionQuery>(
     SessionQuery,
@@ -167,6 +192,8 @@ export default function ViewSessionRoute() {
   );
 
   const session = data.trackSession;
+  const trackRecordings = session?.trackRecordings ?? [];
+  const laps = session?.laps ?? [];
 
   useEffect(() => {
     if (!session) return;
@@ -186,7 +213,70 @@ export default function ViewSessionRoute() {
     if (!hasPending) return;
     const timer = window.setInterval(() => setRefreshKey((key) => key + 1), 3000);
     return () => window.clearInterval(timer);
-  }, [data.trackSession.trackRecordings, setRefreshKey]);
+  }, [data.trackSession?.trackRecordings, setRefreshKey]);
+
+  const normalizedRecordings = useMemo(
+    () =>
+      trackRecordings.map((recording) => ({
+        id: recording.id,
+        description: recording.description ?? null,
+        sizeBytes: recording.sizeBytes ?? null,
+        lapOneOffset: recording.lapOneOffset ?? 0,
+        durationMs: recording.durationMs ?? null,
+        fps: recording.fps ?? null,
+        createdAt: recording.createdAt,
+        status: recording.status,
+        error: recording.error ?? null,
+        combineProgress: recording.combineProgress ?? 0,
+        uploadProgress: {
+          uploadedBytes: recording.uploadProgress.uploadedBytes ?? 0,
+          totalBytes: recording.uploadProgress.totalBytes ?? null,
+        },
+        uploadTargets: recording.uploadTargets.map((target) => ({
+          id: target.id,
+          fileName: target.fileName,
+          sizeBytes: target.sizeBytes ?? null,
+          uploadedBytes: target.uploadedBytes,
+          status: target.status,
+          ordinal: target.ordinal,
+          uploadUrl: target.uploadUrl ?? null,
+        })),
+      })),
+    [trackRecordings]
+  );
+
+  const lapsWithStart = useMemo(() => {
+    const sorted = [...laps].sort((a, b) => a.lapNumber - b.lapNumber);
+    let elapsed = 0;
+    return sorted.map((lap) => {
+      const start = elapsed;
+      const lapTime = Number.isFinite(lap.time) ? lap.time : 0;
+      elapsed += lapTime;
+      return { ...lap, start };
+    });
+  }, [laps]);
+
+  const primaryRecordingForJump = useMemo(() => {
+    return [...normalizedRecordings]
+      .filter((rec) => rec.status === "READY" && rec.lapOneOffset > 0)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+  }, [normalizedRecordings]);
+
+  function jumpToLapStart(lapStart: number) {
+    if (!primaryRecordingForJump) return;
+    const video = recordingVideoRefs.current[primaryRecordingForJump.id];
+    if (!video) return;
+    const target = Math.max(0, primaryRecordingForJump.lapOneOffset + lapStart);
+    const seek = () => {
+      video.pause();
+      video.currentTime = target;
+    };
+    if (video.readyState >= 1) {
+      seek();
+    } else {
+      video.addEventListener("loadedmetadata", seek, { once: true });
+    }
+  }
 
   if (!sessionId) {
     return <p>Missing session id.</p>;
@@ -195,29 +285,6 @@ export default function ViewSessionRoute() {
   if (!session) {
     return <p>Session not found.</p>;
   }
-
-  const normalizedRecordings = session.trackRecordings.map((recording) => ({
-    id: recording.id,
-    description: recording.description ?? null,
-    sizeBytes: recording.sizeBytes ?? null,
-    createdAt: recording.createdAt,
-    status: recording.status,
-    error: recording.error ?? null,
-    combineProgress: recording.combineProgress ?? 0,
-    uploadProgress: {
-      uploadedBytes: recording.uploadProgress.uploadedBytes ?? 0,
-      totalBytes: recording.uploadProgress.totalBytes ?? null,
-    },
-    uploadTargets: recording.uploadTargets.map((target) => ({
-      id: target.id,
-      fileName: target.fileName,
-      sizeBytes: target.sizeBytes ?? null,
-      uploadedBytes: target.uploadedBytes,
-      status: target.status,
-      ordinal: target.ordinal,
-      uploadUrl: target.uploadUrl ?? null,
-    })),
-  }));
 
   return (
     <div css={formLayoutStyles}>
@@ -318,20 +385,50 @@ export default function ViewSessionRoute() {
       <RecordingsCard
         sessionId={session.id}
         recordings={normalizedRecordings}
+        videoRefs={recordingVideoRefs}
         onRefresh={() => setRefreshKey((key) => key + 1)}
       />
 
       <Card title="Laps">
-        {session.laps.length === 0 ? (
+        {lapsWithStart.length === 0 ? (
           <p>No laps recorded for this session.</p>
         ) : (
           <div css={lapsListStyles}>
-            {session.laps.map((lap) => (
-              <div key={lap.id} css={lapRowStyles}>
-                <span>Lap {lap.lapNumber}</span>
-                <span>{formatLapTimeSeconds(lap.time)}s</span>
-              </div>
-            ))}
+            {lapsWithStart.map((lap) => {
+              const hasAnchor = Boolean(
+                primaryRecordingForJump && recordingVideoRefs.current[primaryRecordingForJump.id]
+              );
+              return (
+                <div key={lap.id} css={lapRowStyles}>
+                  <div>
+                    <span>Lap {lap.lapNumber}</span>
+                    <div>{formatLapTimeSeconds(lap.time)}s</div>
+                  </div>
+                  <button
+                    css={lapActionButtonStyles}
+                    type="button"
+                    disabled={!hasAnchor}
+                    onClick={() => jumpToLapStart(lap.start)}
+                    title={
+                      hasAnchor
+                        ? "Jump the video to the start of this lap"
+                        : "Set Lap 1 start on the video to enable jumping"
+                    }
+                  >
+                    Jump to start
+                  </button>
+                </div>
+              );
+            })}
+            {!primaryRecordingForJump && (
+              <p>
+                Set the Lap 1 start time in the Video card to enable jumping to lap starts.
+              </p>
+            )}
+            {primaryRecordingForJump &&
+              !recordingVideoRefs.current[primaryRecordingForJump.id] && (
+                <p>Load the video preview to enable lap jump controls.</p>
+              )}
           </div>
         )}
       </Card>

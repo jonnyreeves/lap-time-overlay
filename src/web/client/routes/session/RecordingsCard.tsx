@@ -1,8 +1,9 @@
 import { css } from "@emotion/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { graphql, useMutation } from "react-relay";
 import type { RecordingsCardStartUploadMutation } from "../../__generated__/RecordingsCardStartUploadMutation.graphql.js";
 import type { RecordingsCardDeleteRecordingMutation } from "../../__generated__/RecordingsCardDeleteRecordingMutation.graphql.js";
+import type { RecordingsCardUpdateRecordingMutation } from "../../__generated__/RecordingsCardUpdateRecordingMutation.graphql.js";
 import { Card } from "../../components/Card.js";
 
 type UploadTarget = {
@@ -19,6 +20,9 @@ type Recording = {
   id: string;
   description: string | null;
   sizeBytes: number | null;
+  lapOneOffset: number;
+  durationMs: number | null;
+  fps: number | null;
   createdAt: string;
   status: string;
   error: string | null;
@@ -31,6 +35,7 @@ type Props = {
   sessionId: string;
   recordings: readonly Recording[];
   onRefresh: () => void;
+  videoRefs?: MutableRefObject<Record<string, HTMLVideoElement | null>>;
 };
 
 const uploadControlsStyles = css`
@@ -160,6 +165,29 @@ const previewStyles = css`
   }
 `;
 
+const lapOffsetControlsStyles = css`
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid #e2e8f4;
+  border-radius: 10px;
+  background: #f8fafc;
+  margin-top: 8px;
+
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .hint {
+    color: #475569;
+    font-size: 0.95rem;
+  }
+`;
+
 const buttonStyles = css`
   padding: 8px 12px;
   border-radius: 8px;
@@ -236,6 +264,19 @@ const DeleteRecordingMutation = graphql`
   }
 `;
 
+const UpdateRecordingMutation = graphql`
+  mutation RecordingsCardUpdateRecordingMutation($input: UpdateTrackRecordingInput!) {
+    updateTrackRecording(input: $input) {
+      recording {
+        id
+        lapOneOffset
+        fps
+        updatedAt
+      }
+    }
+  }
+`;
+
 function formatBytes(bytes: number | null | undefined): string {
   if (bytes == null) return "—";
   if (bytes < 1024) return `${bytes} B`;
@@ -257,6 +298,11 @@ function percent(value: number | null | undefined): number {
   return Math.max(0, Math.min(100, Math.round(value * 100)));
 }
 
+function formatSeconds(value: number | null | undefined): string {
+  if (value == null || Number.isNaN(value)) return "0.000";
+  return value.toFixed(3);
+}
+
 function nextId(): string {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -266,20 +312,24 @@ function nextId(): string {
 
 type FileEntry = { id: string; file: File };
 
-export function RecordingsCard({ sessionId, recordings, onRefresh }: Props) {
+export function RecordingsCard({ sessionId, recordings, onRefresh, videoRefs: externalVideoRefs }: Props) {
   const [fileEntries, setFileEntries] = useState<FileEntry[]>([]);
   const [description, setDescription] = useState("");
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [resumeSelections, setResumeSelections] = useState<Record<string, File[]>>({});
   const [isDragging, setIsDragging] = useState(false);
+  const [lapOffsetErrors, setLapOffsetErrors] = useState<Record<string, string | null>>({});
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const videoRefs = externalVideoRefs ?? useRef<Record<string, HTMLVideoElement | null>>({});
   const [startUpload, isStartInFlight] = useMutation<RecordingsCardStartUploadMutation>(
     StartUploadMutation
   );
   const [deleteRecording, isDeleteInFlight] = useMutation<RecordingsCardDeleteRecordingMutation>(
     DeleteRecordingMutation
   );
+  const [updateLapOffset, isUpdateLapOffsetInFlight] =
+    useMutation<RecordingsCardUpdateRecordingMutation>(UpdateRecordingMutation);
 
   const hasPendingRecording = useMemo(
     () => recordings.some((recording) => recording.status !== "READY"),
@@ -380,6 +430,47 @@ export function RecordingsCard({ sessionId, recordings, onRefresh }: Props) {
     } finally {
       setIsUploading(false);
     }
+  }
+
+  function frameDuration(recording: Recording): number | null {
+    if (!recording.fps || recording.fps <= 0) return null;
+    return 1 / recording.fps;
+  }
+
+  function nudgeFrame(recording: Recording, direction: -1 | 1) {
+    const video = videoRefs.current[recording.id];
+    const step = frameDuration(recording);
+    if (!video || !step) return;
+    const duration = Number.isFinite(video.duration) ? video.duration : null;
+    const current = Number.isFinite(video.currentTime) ? video.currentTime : 0;
+    const nextTime = Math.max(0, current + direction * step);
+    const clamped = duration != null ? Math.min(duration, nextTime) : nextTime;
+    video.currentTime = clamped;
+  }
+
+  function markLapOneStart(recording: Recording) {
+    if (isUpdateLapOffsetInFlight) return;
+    const video = videoRefs.current[recording.id];
+    if (!video) {
+      setLapOffsetErrors((current) => ({
+        ...current,
+        [recording.id]: "Load the video before marking the Lap 1 start.",
+      }));
+      return;
+    }
+
+    const offset = Math.max(0, Number.isFinite(video.currentTime) ? video.currentTime : 0);
+    setLapOffsetErrors((current) => ({ ...current, [recording.id]: null }));
+    updateLapOffset({
+      variables: { input: { id: recording.id, lapOneOffset: offset } },
+      onCompleted: () => {
+        setLapOffsetErrors((current) => ({ ...current, [recording.id]: null }));
+        onRefresh();
+      },
+      onError: (err) => {
+        setLapOffsetErrors((current) => ({ ...current, [recording.id]: err.message }));
+      },
+    });
   }
 
   async function uploadToTargets(targets: UploadTarget[], sources: File[]) {
@@ -587,6 +678,7 @@ export function RecordingsCard({ sessionId, recordings, onRefresh }: Props) {
             const uploadPercent = total ? Math.min(100, Math.round((uploaded / total) * 100)) : 0;
             const combinePercent = percent(recording.combineProgress ?? 0);
             const isFinished = recording.status === "READY";
+            const frameStep = frameDuration(recording);
             return (
               <div key={recording.id} css={recordingRowStyles}>
                 <div className="header">
@@ -607,8 +699,58 @@ export function RecordingsCard({ sessionId, recordings, onRefresh }: Props) {
                       muted
                       playsInline
                       controls
+                      ref={(node) => {
+                        videoRefs.current[recording.id] = node;
+                      }}
                       aria-label="Recording preview"
                     />
+                  </div>
+                )}
+                {isFinished && (
+                  <div css={lapOffsetControlsStyles}>
+                    <div className="row">
+                      <div>
+                        <strong>Lap 1 start</strong>
+                        <div className="hint">
+                          Offset: {formatSeconds(recording.lapOneOffset)}s
+                          {recording.fps ? ` • ${Math.round(recording.fps)} fps` : ""}
+                        </div>
+                      </div>
+                      <div className="row">
+                        <button
+                          css={buttonStyles}
+                          type="button"
+                          onClick={() => nudgeFrame(recording, -1)}
+                          disabled={!frameStep || isUpdateLapOffsetInFlight}
+                        >
+                          -1 frame
+                        </button>
+                        <button
+                          css={buttonStyles}
+                          type="button"
+                          onClick={() => nudgeFrame(recording, 1)}
+                          disabled={!frameStep || isUpdateLapOffsetInFlight}
+                        >
+                          +1 frame
+                        </button>
+                        <button
+                          css={buttonStyles}
+                          type="button"
+                          onClick={() => markLapOneStart(recording)}
+                          disabled={isUpdateLapOffsetInFlight}
+                        >
+                          {isUpdateLapOffsetInFlight ? "Saving..." : "Mark start from here"}
+                        </button>
+                      </div>
+                    </div>
+                    {lapOffsetErrors[recording.id] && (
+                      <div className="error">{lapOffsetErrors[recording.id]}</div>
+                    )}
+                    {!frameStep && (
+                      <div className="hint">
+                        Frame stepping uses the video FPS. Scrub the video, then mark the start.
+                      </div>
+                    )}
                   </div>
                 )}
                 {recording.error && <div className="error">{recording.error}</div>}

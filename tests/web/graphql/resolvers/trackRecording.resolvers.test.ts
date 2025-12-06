@@ -104,6 +104,67 @@ describe("trackRecording resolvers", () => {
     expect(result.recording.id).toBe("rec1");
   });
 
+  it("updates lap one offset on a ready recording", async () => {
+    const recording: recordingsDb.TrackRecordingRecord = {
+      id: "rec-ready",
+      sessionId: "s1",
+      userId: "user-1",
+      mediaId: "media/path",
+      lapOneOffset: 0,
+      description: null,
+      status: "ready",
+      error: null,
+      sizeBytes: null,
+      durationMs: null,
+      fps: null,
+      combineProgress: 1,
+      createdAt: 0,
+      updatedAt: 0,
+    };
+    vi.spyOn(recordingsDb, "findTrackRecordingById").mockReturnValue(recording);
+    vi.spyOn(recordingsDb, "updateTrackRecording").mockReturnValue({
+      ...recording,
+      lapOneOffset: 1.25,
+    });
+
+    const result = await trackRecordingResolvers.updateTrackRecording(
+      { input: { id: recording.id, lapOneOffset: 1.25 } },
+      context
+    );
+
+    expect(recordingsDb.updateTrackRecording).toHaveBeenCalledWith(recording.id, {
+      lapOneOffset: 1.25,
+    });
+    expect(result.recording.lapOneOffset).toBe(1.25);
+  });
+
+  it("rejects lap offset updates when recording is not ready", async () => {
+    const recording: recordingsDb.TrackRecordingRecord = {
+      id: "rec-uploading",
+      sessionId: "s1",
+      userId: "user-1",
+      mediaId: "media/path",
+      lapOneOffset: 0,
+      description: null,
+      status: "uploading",
+      error: null,
+      sizeBytes: null,
+      durationMs: null,
+      fps: null,
+      combineProgress: 0.2,
+      createdAt: 0,
+      updatedAt: 0,
+    };
+    vi.spyOn(recordingsDb, "findTrackRecordingById").mockReturnValue(recording);
+
+    await expect(
+      trackRecordingResolvers.updateTrackRecording(
+        { input: { id: recording.id, lapOneOffset: 0.5 } },
+        context
+      )
+    ).rejects.toThrowError("Recording is not ready for lap offset updates");
+  });
+
   it("maps service errors to GraphQL errors", async () => {
     vi.mocked(startRecordingUploadSession).mockRejectedValue(
       new RecordingUploadError("boom", 404)
