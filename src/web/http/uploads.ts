@@ -115,9 +115,47 @@ export async function handleRecordingDownloadRequest(
     if (!stats.isFile()) {
       throw new Error("Not a file");
     }
+    const totalSize = stats.size;
+    const rangeHeader = typeof req.headers.range === "string" ? req.headers.range : null;
+
+    if (rangeHeader) {
+      const match = rangeHeader.match(/^bytes=(\d*)-(\d*)$/);
+      if (!match) {
+        res.writeHead(416, { "Content-Range": `bytes */${totalSize}` });
+        res.end();
+        return true;
+      }
+
+      const start = match[1] ? Number.parseInt(match[1], 10) : 0;
+      const requestedEnd = match[2] ? Number.parseInt(match[2], 10) : totalSize - 1;
+      const end = Math.min(requestedEnd, totalSize - 1);
+
+      if (
+        !Number.isFinite(start) ||
+        !Number.isFinite(end) ||
+        start < 0 ||
+        end < start ||
+        start >= totalSize
+      ) {
+        res.writeHead(416, { "Content-Range": `bytes */${totalSize}` });
+        res.end();
+        return true;
+      }
+
+      res.writeHead(206, {
+        "Content-Type": contentTypeFor(targetPath),
+        "Content-Length": end - start + 1,
+        "Content-Range": `bytes ${start}-${end}/${totalSize}`,
+        "Accept-Ranges": "bytes",
+      });
+      createReadStream(targetPath, { start, end }).pipe(res);
+      return true;
+    }
+
     res.writeHead(200, {
       "Content-Type": contentTypeFor(targetPath),
-      "Content-Length": stats.size,
+      "Content-Length": totalSize,
+      "Accept-Ranges": "bytes",
     });
     createReadStream(targetPath).pipe(res);
   } catch (err) {
