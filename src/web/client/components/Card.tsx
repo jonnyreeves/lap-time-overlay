@@ -40,6 +40,7 @@ const cardHeaderStyles = css`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 12px;
 `;
 
 export function Card({
