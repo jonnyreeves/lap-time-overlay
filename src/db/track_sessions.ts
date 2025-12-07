@@ -267,6 +267,58 @@ export function updateTrackSession({
   return next;
 }
 
+export function replaceLapsForSession(
+  sessionId: string,
+  laps: TrackSessionLapInput[],
+  now = Date.now()
+): LapRecord[] {
+  const db = getDb();
+  const insertLap = db.prepare(
+    `INSERT INTO laps (id, session_id, lap_number, time, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?)`
+  );
+  const insertLapEvent = db.prepare(
+    `INSERT INTO lap_events (id, lap_id, offset, event, value, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`
+  );
+  const created: LapRecord[] = [];
+
+  db.transaction(() => {
+    db.prepare(
+      `DELETE FROM lap_events WHERE lap_id IN (SELECT id FROM laps WHERE session_id = ?)`
+    ).run(sessionId);
+    db.prepare(`DELETE FROM laps WHERE session_id = ?`).run(sessionId);
+
+    for (const lap of laps) {
+      const lapId = randomUUID();
+      insertLap.run(lapId, sessionId, lap.lapNumber, lap.time, now, now);
+      created.push({
+        id: lapId,
+        sessionId,
+        lapNumber: lap.lapNumber,
+        time: lap.time,
+        createdAt: now,
+        updatedAt: now,
+      });
+      if (lap.lapEvents?.length) {
+        for (const lapEvent of lap.lapEvents) {
+          insertLapEvent.run(
+            randomUUID(),
+            lapId,
+            lapEvent.offset,
+            lapEvent.event,
+            lapEvent.value,
+            now,
+            now
+          );
+        }
+      }
+    }
+  })();
+
+  return created;
+}
+
 export interface TrackSessionRepository {
   findById: (id: string) => TrackSessionRecord | null;
   findByCircuitId: (circuitId: string) => TrackSessionRecord[];
@@ -292,6 +344,7 @@ export interface TrackSessionRepository {
     notes?: string | null;
     now?: number;
   }) => TrackSessionRecord | null;
+  replaceLapsForSession: (sessionId: string, laps: TrackSessionLapInput[], now?: number) => LapRecord[];
 }
 
 export const trackSessionsRepository: TrackSessionRepository = {
@@ -300,4 +353,5 @@ export const trackSessionsRepository: TrackSessionRepository = {
   findByUserId: findTrackSessionsByUserId,
   createWithLaps: createTrackSessionWithLaps,
   update: updateTrackSession,
+  replaceLapsForSession,
 };

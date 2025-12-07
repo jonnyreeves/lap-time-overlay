@@ -140,4 +140,45 @@ describe("trackSession resolvers", () => {
     expect(result.trackSession.format).toBe("Practice");
     expect(result.trackSession.classification).toBe(1);
   });
+
+  it("updateTrackSessionLaps validates auth and id", () => {
+    expect(() => rootValue.updateTrackSessionLaps({ input: {} }, context)).toThrowError(
+      "id is required"
+    );
+    expect(() =>
+      rootValue.updateTrackSessionLaps(
+        { input: { id: "s1", laps: [] } },
+        { ...context, currentUser: null }
+      )
+    ).toThrowError("Authentication required");
+  });
+
+  it("updateTrackSessionLaps replaces laps and bumps updatedAt", () => {
+    repositories.trackSessions.findById.mockReturnValue(mockSession);
+    repositories.trackSessions.replaceLapsForSession.mockReturnValue([
+      { id: "lap-1", sessionId: "s1", lapNumber: 1, time: 70, createdAt: 0, updatedAt: 0 },
+    ]);
+    repositories.trackSessions.update.mockReturnValue({ ...mockSession, updatedAt: 123 });
+    repositories.laps.findBySessionId.mockReturnValue([
+      { id: "lap-1", sessionId: "s1", lapNumber: 1, time: 70, createdAt: 0, updatedAt: 0 },
+    ]);
+    repositories.lapEvents.findByLapId.mockReturnValue([]);
+    repositories.trackRecordings.findBySessionId.mockReturnValue([]);
+    repositories.circuits.findById.mockReturnValue(mockCircuit);
+
+    const result = rootValue.updateTrackSessionLaps(
+      { input: { id: "s1", laps: [{ lapNumber: 1, time: 70.5 }] } },
+      context
+    );
+
+    expect(repositories.trackSessions.replaceLapsForSession).toHaveBeenCalledWith(
+      "s1",
+      [{ lapNumber: 1, time: 70.5 }],
+      expect.any(Number)
+    );
+    expect(repositories.trackSessions.update).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "s1", now: expect.any(Number) })
+    );
+    expect(result.trackSession.laps({ first: 10 })).toHaveLength(1);
+  });
 });

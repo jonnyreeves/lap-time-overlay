@@ -5,6 +5,8 @@ import { Card } from "./Card.js";
 type Props = {
   laps: LapFormRow[];
   disabled: boolean;
+  renderCard?: boolean;
+  title?: string;
   onAddLap: () => void;
   onChangeLap: (id: string, field: "lapNumber" | "time", value: string) => void;
   onRemoveLap: (id: string) => void;
@@ -27,6 +29,20 @@ const lapHeaderStyles = css`
     color: #4a5568;
     line-height: 1.5;
   }
+`;
+
+const lapHeaderRowStyles = css`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+`;
+
+const addLapFooterStyles = css`
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
 `;
 
 const addLapButtonStyles = css`
@@ -119,6 +135,12 @@ const lapEventsHeaderStyles = css`
   }
 `;
 
+const addLapEventFooterStyles = css`
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+`;
+
 const addLapEventButtonStyles = css`
   padding: 7px 12px;
   border-radius: 10px;
@@ -205,6 +227,8 @@ const lapEmptyStateStyles = css`
 export function LapInputsCard({
   laps,
   disabled,
+  renderCard = true,
+  title = "Lap times",
   onAddLap,
   onChangeLap,
   onRemoveLap,
@@ -213,26 +237,11 @@ export function LapInputsCard({
   onRemoveLapEvent,
   fieldStyles,
 }: Props) {
-  return (
-    <Card
-      title="Lap times"
-      rightComponent={
-        <button
-          type="button"
-          css={addLapButtonStyles}
-          onClick={onAddLap}
-          disabled={disabled}
-        >
-          Add lap
-        </button>
-      }
-    >
-      <div css={lapHeaderStyles}>
-        <p>Optional: log lap numbers and times now so we can surface PBs later.</p>
-      </div>
+  const content = (
+    <>
       {laps.length === 0 ? (
         <div css={lapEmptyStateStyles}>
-          <p>No laps yet. Hit "Add lap" to drop your first one.</p>
+          <p>No laps recorded.</p>
         </div>
       ) : (
         <div css={lapRowsStyles}>
@@ -270,25 +279,18 @@ export function LapInputsCard({
                   css={removeLapButtonStyles}
                   onClick={() => onRemoveLap(lap.id)}
                   disabled={disabled}
+                  aria-label="Remove lap"
                 >
-                  Remove
+                  🗑️
                 </button>
               </div>
               <div>
                 <div css={lapEventsHeaderStyles}>
                   <h4>Lap events</h4>
-                  <button
-                    type="button"
-                    css={addLapEventButtonStyles}
-                    onClick={() => onAddLapEvent(lap.id)}
-                    disabled={disabled}
-                  >
-                    Add event
-                  </button>
                 </div>
                 {lap.events.length === 0 ? (
                   <div css={lapEventsEmptyStateStyles}>
-                    <p>Track offsets inside the lap so we can overlay stuff later.</p>
+                    <p>No lap events</p>
                   </div>
                 ) : (
                   <div css={lapEventsListStyles}>
@@ -342,18 +344,51 @@ export function LapInputsCard({
                           css={removeLapEventButtonStyles}
                           onClick={() => onRemoveLapEvent(lap.id, event.id)}
                           disabled={disabled}
+                          aria-label="Remove event"
                         >
-                          Remove
+                          🗑️
                         </button>
                       </div>
                     ))}
                   </div>
                 )}
+                <div css={addLapEventFooterStyles}>
+                  <button
+                    type="button"
+                    css={addLapEventButtonStyles}
+                    onClick={() => onAddLapEvent(lap.id)}
+                    disabled={disabled}
+                  >
+                    + Add lap event
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
       )}
+      <div css={addLapFooterStyles}>
+        <button
+          type="button"
+          css={addLapButtonStyles}
+          onClick={onAddLap}
+          disabled={disabled}
+        >
+          + Add lap
+        </button>
+      </div>
+    </>
+  );
+
+  if (!renderCard) {
+    return content;
+  }
+
+  return (
+    <Card
+      title={title}
+    >
+      {content}
     </Card>
   );
 }

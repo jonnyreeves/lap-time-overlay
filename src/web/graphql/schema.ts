@@ -26,6 +26,7 @@ export const rootValue = {
   createCircuit: circuitResolvers.createCircuit,
   createTrackSession: trackSessionResolvers.createTrackSession,
   updateTrackSession: trackSessionResolvers.updateTrackSession,
+  updateTrackSessionLaps: trackSessionResolvers.updateTrackSessionLaps,
   startTrackRecordingUpload: trackRecordingResolvers.startTrackRecordingUpload,
   markPrimaryTrackRecording: trackRecordingResolvers.markPrimaryTrackRecording,
   updateTrackRecording: trackRecordingResolvers.updateTrackRecording,

@@ -53,6 +53,15 @@ type UpdateTrackSessionPayload {
   trackSession: TrackSession!
 }
 
+input UpdateTrackSessionLapsInput {
+  id: ID!
+  laps: [LapInput!]!
+}
+
+type UpdateTrackSessionLapsPayload {
+  trackSession: TrackSession!
+}
+
 input RecordingSourceInput {
   fileName: String!
   sizeBytes: Float
@@ -94,6 +103,7 @@ type Mutation {
   createCircuit(input: CreateCircuitInput!): CreateCircuitPayload!
   createTrackSession(input: CreateTrackSessionInput!): CreateTrackSessionPayload!
   updateTrackSession(input: UpdateTrackSessionInput!): UpdateTrackSessionPayload!
+  updateTrackSessionLaps(input: UpdateTrackSessionLapsInput!): UpdateTrackSessionLapsPayload!
   startTrackRecordingUpload(
     input: StartTrackRecordingUploadInput!
   ): StartTrackRecordingUploadPayload!

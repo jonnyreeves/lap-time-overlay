@@ -38,6 +38,13 @@ export type UpdateTrackSessionInputArgs = {
   };
 };
 
+export type UpdateTrackSessionLapsInputArgs = {
+  input?: {
+    id?: string;
+    laps?: LapInputArg[] | null;
+  };
+};
+
 export type TrackSessionArgs = {
   id?: string;
 };
@@ -469,5 +476,41 @@ export const trackSessionResolvers = {
     }
 
     return { trackSession: toTrackSessionPayload(updated, repositories) };
+  },
+  updateTrackSessionLaps: (args: UpdateTrackSessionLapsInputArgs, context: GraphQLContext) => {
+    const { repositories } = context;
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+
+    const input = args.input;
+    if (!input?.id) {
+      throw new GraphQLError("id is required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const existingSession = repositories.trackSessions.findById(input.id);
+    if (!existingSession) {
+      throw new GraphQLError(`Track session with ID ${input.id} not found`, {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    if (existingSession.userId !== context.currentUser.id) {
+      throw new GraphQLError("You do not have access to this session", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+
+    const laps = parseLapInputs(input.laps);
+    const now = Date.now();
+    repositories.trackSessions.replaceLapsForSession(existingSession.id, laps, now);
+    const updatedSession =
+      repositories.trackSessions.update({ id: existingSession.id, now }) ?? existingSession;
+
+    return { trackSession: toTrackSessionPayload(updatedSession, repositories) };
   },
 };

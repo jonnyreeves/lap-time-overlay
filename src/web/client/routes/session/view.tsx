@@ -251,11 +251,13 @@ export default function ViewSessionRoute() {
         />
 
         <LapsCard
+          sessionId={session.id}
           laps={lapsWithStart}
           onJumpToStart={jumpToLapStart}
           jumpEnabled={lapJumpEnabled}
           jumpTitle={lapJumpTitle}
           statusMessages={lapJumpMessages}
+          onRefresh={() => setRefreshKey((key) => key + 1)}
         />
       </div>
 
