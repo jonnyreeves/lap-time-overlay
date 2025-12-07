@@ -4,6 +4,7 @@ import { graphql, useMutation } from "react-relay";
 import type { PrimaryRecordingCardUpdateRecordingMutation } from "../../__generated__/PrimaryRecordingCardUpdateRecordingMutation.graphql.js";
 import { Card } from "../Card.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
+import { buildLapRanges, resolveLapAtTime } from "../../hooks/useLapPositionSync.js";
 
 type Recording = {
   id: string;
@@ -349,7 +350,6 @@ const lapHintStyles = css`
   color: #94a3b8;
   font-size: 0.95rem;
 `;
-
 const UpdateRecordingMutation = graphql`
   mutation PrimaryRecordingCardUpdateRecordingMutation($input: UpdateTrackRecordingInput!) {
     updateTrackRecording(input: $input) {
@@ -370,6 +370,7 @@ function formatSeconds(value: number | null | undefined): string {
 
 const LAP_EPSILON = 0.05;
 
+
 export function PrimaryRecordingCard({ recording, onRefresh, videoRefs, laps }: Props) {
   const [updateLapOffset, isUpdateLapOffsetInFlight] =
     useMutation<PrimaryRecordingCardUpdateRecordingMutation>(UpdateRecordingMutation);
@@ -378,8 +379,9 @@ export function PrimaryRecordingCard({ recording, onRefresh, videoRefs, laps }: 
   const [expandedStartTime, setExpandedStartTime] = useState(0);
   const [activeLapId, setActiveLapId] = useState<string | null>(null);
   const [activeIsPastEnd, setActiveIsPastEnd] = useState(false);
-  const lastJumpLapIdRef = useRef<string | null>(null);
-  const lastJumpAtRef = useRef<number>(0);
+  const [previewLapId, setPreviewLapId] = useState<string | null>(null);
+  const [previewIsPastEnd, setPreviewIsPastEnd] = useState(false);
+  const lastJumpRef = useRef<{ id: string | null; at: number }>({ id: null, at: 0 });
   const expandedVideoRef = useRef<HTMLVideoElement | null>(null);
   const frameStep = useMemo(() => {
     if (!recording?.fps || recording.fps <= 0) return null;
@@ -448,10 +450,11 @@ export function PrimaryRecordingCard({ recording, onRefresh, videoRefs, laps }: 
 function jumpToLapStart(lapStart: number, lapId?: string) {
   if (!recording || recording.status !== "READY" || recording.lapOneOffset <= 0) return;
   if (lapId) {
-    lastJumpLapIdRef.current = lapId;
-    lastJumpAtRef.current = performance.now();
+    lastJumpRef.current = { id: lapId, at: performance.now() };
     setPreviewLapId(lapId);
     setActiveLapId((current) => current ?? lapId);
+  } else {
+    lastJumpRef.current = { id: null, at: performance.now() };
   }
   const target = Math.max(0, recording.lapOneOffset + lapStart);
   const videos: Array<HTMLVideoElement | null> = [
@@ -512,16 +515,10 @@ function jumpToLapStart(lapStart: number, lapId?: string) {
     return null;
   })();
 
-  const lapRanges = useMemo(() => {
-    if (!recording || !laps?.length) return [];
-    const baseOffset = Math.max(0, recording.lapOneOffset);
-    return laps.map((lap) => {
-      const lapTime = Number.isFinite(lap.time) && lap.time > 0 ? lap.time : 0;
-      const start = Math.max(0, baseOffset + lap.start);
-      const end = lapTime > 0 ? start + lapTime : start + 0.001;
-      return { id: lap.id, start, end };
-    });
-  }, [laps, recording]);
+  const lapRanges = useMemo(
+    () => buildLapRanges(laps ?? [], recording?.lapOneOffset ?? 0),
+    [laps, recording?.lapOneOffset]
+  );
 
   const lapLookup = useMemo(() => {
     return new Map((laps ?? []).map((lap) => [lap.id, lap]));
@@ -531,23 +528,6 @@ function jumpToLapStart(lapStart: number, lapId?: string) {
     [lapRanges]
   );
 
-function resolveLapAtTime(
-  ranges: { id: string; start: number; end: number }[],
-  current: number
-): { id: string; start: number; end: number } | null {
-  if (ranges.length === 0) return null;
-  const exact = ranges.find(
-    (lap) => current + LAP_EPSILON >= lap.start && current <= lap.end + LAP_EPSILON
-  );
-  if (exact) return exact;
-  if (current < ranges[0].start - LAP_EPSILON) return null;
-  for (let idx = ranges.length - 1; idx >= 0; idx -= 1) {
-    if (current + LAP_EPSILON >= ranges[idx]?.start) {
-      return ranges[idx];
-    }
-  }
-  return null;
-}
   const canJumpToLaps = lapJumpMessage == null;
 
   useEffect(() => {
@@ -566,14 +546,15 @@ function resolveLapAtTime(
     const updateActiveLap = () => {
       const current = Number.isFinite(video.currentTime) ? video.currentTime : 0;
       const now = performance.now();
-      const recentJump = lastJumpLapIdRef.current && now - lastJumpAtRef.current < 600;
-      if (recentJump && lapLookup.has(lastJumpLapIdRef.current!)) {
-        setActiveLapId(lastJumpLapIdRef.current);
+      const recentJump = lastJumpRef.current.id && now - lastJumpRef.current.at < 600;
+      if (recentJump && lapLookup.has(lastJumpRef.current.id!)) {
+        setActiveLapId(lastJumpRef.current.id);
         setActiveIsPastEnd(false);
         return;
       }
       const match = resolveLapAtTime(lapRanges, current);
-      const lastEnd = orderedLapRanges.length ? orderedLapRanges[orderedLapRanges.length - 1].end : null;
+      const lastEnd =
+        orderedLapRanges.length > 0 ? orderedLapRanges[orderedLapRanges.length - 1].end : null;
       const isPastEnd = lastEnd != null && current > lastEnd + LAP_EPSILON;
       setActiveLapId(match?.id ?? null);
       setActiveIsPastEnd(isPastEnd);
@@ -586,19 +567,6 @@ function resolveLapAtTime(
     };
   }, [isExpanded, lapRanges, orderedLapRanges, lapLookup]);
 
-  const statusContent = (() => {
-    if (!recording) {
-      return <p>No primary recording yet. Upload a video and mark it as primary.</p>;
-    }
-    if (recording.status !== "READY") {
-      return <p>Primary recording is {recording.status.toLowerCase()}… Player will appear once ready.</p>;
-    }
-    return null;
-  })();
-
-  const [previewLapId, setPreviewLapId] = useState<string | null>(null);
-  const [previewIsPastEnd, setPreviewIsPastEnd] = useState(false);
-
   useEffect(() => {
     if (!recording || recording.status !== "READY" || recording.lapOneOffset <= 0) {
       setPreviewLapId(null);
@@ -606,7 +574,7 @@ function resolveLapAtTime(
       return;
     }
     const video = videoRefs.current[recording.id];
-    if (!video || lapRanges.length === 0) {
+    if (!video || orderedLapRanges.length === 0) {
       setPreviewLapId(null);
       setPreviewIsPastEnd(false);
       return;
@@ -615,14 +583,15 @@ function resolveLapAtTime(
     const updateActiveLap = () => {
       const current = Number.isFinite(video.currentTime) ? video.currentTime : 0;
       const now = performance.now();
-      const recentJump = lastJumpLapIdRef.current && now - lastJumpAtRef.current < 600;
-      if (recentJump && lapLookup.has(lastJumpLapIdRef.current!)) {
-        setPreviewLapId(lastJumpLapIdRef.current);
+      const recentJump = lastJumpRef.current.id && now - lastJumpRef.current.at < 600;
+      if (recentJump && lapLookup.has(lastJumpRef.current.id!)) {
+        setPreviewLapId(lastJumpRef.current.id);
         setPreviewIsPastEnd(false);
         return;
       }
-      const match = resolveLapAtTime(lapRanges, current);
-      const lastEnd = orderedLapRanges.length ? orderedLapRanges[orderedLapRanges.length - 1].end : null;
+      const match = resolveLapAtTime(orderedLapRanges, current);
+      const lastEnd =
+        orderedLapRanges.length > 0 ? orderedLapRanges[orderedLapRanges.length - 1].end : null;
       const isPastEnd = lastEnd != null && current > lastEnd + LAP_EPSILON;
       setPreviewLapId(match?.id ?? null);
       setPreviewIsPastEnd(isPastEnd);
@@ -633,7 +602,17 @@ function resolveLapAtTime(
     return () => {
       video.removeEventListener("timeupdate", updateActiveLap);
     };
-  }, [lapRanges, orderedLapRanges, recording, videoRefs, lapLookup]);
+  }, [orderedLapRanges, recording, videoRefs, lapLookup]);
+
+  const statusContent = (() => {
+    if (!recording) {
+      return <p>No primary recording yet. Upload a video and mark it as primary.</p>;
+    }
+    if (recording.status !== "READY") {
+      return <p>Primary recording is {recording.status.toLowerCase()}… Player will appear once ready.</p>;
+    }
+    return null;
+  })();
 
   const currentLapIndex = orderedLapRanges.findIndex((lap) => lap.id === previewLapId);
   const currentLap =
@@ -819,7 +798,7 @@ function resolveLapAtTime(
                               css={lapJumpButtonStyles}
                               type="button"
                               disabled={!canJumpToLaps}
-                              onClick={() => jumpToLapStart(lap.start)}
+                              onClick={() => jumpToLapStart(lap.start, lap.id)}
                             >
                               Jump
                             </button>
