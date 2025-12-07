@@ -1,10 +1,11 @@
 import { css } from "@emotion/react";
-import { useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import { graphql, useMutation } from "react-relay";
 import type { PrimaryRecordingCardUpdateRecordingMutation } from "../../__generated__/PrimaryRecordingCardUpdateRecordingMutation.graphql.js";
 import { Card } from "../Card.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 import { buildLapRanges, resolveLapAtTime } from "../../hooks/useLapPositionSync.js";
+import { LapOverlay } from "./LapOverlay.js";
 
 type Recording = {
   id: string;
@@ -31,6 +32,56 @@ type Props = {
   laps?: LapWithStart[];
 };
 
+function useFullscreenToggle(targetRef: MutableRefObject<HTMLElement | null>) {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handler = () => {
+      setIsFullscreen(document.fullscreenElement === targetRef.current);
+    };
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, [targetRef]);
+
+  const toggleFullscreen = useCallback(() => {
+    const node = targetRef.current;
+    if (!node) return;
+    if (document.fullscreenElement === node) {
+      void document.exitFullscreen();
+      return;
+    }
+    if (node.requestFullscreen) {
+      void node.requestFullscreen();
+    }
+  }, [targetRef]);
+
+  return { isFullscreen, toggleFullscreen };
+}
+
+function useAutohideControls(delayMs = 2500) {
+  const [visible, setVisible] = useState(true);
+  const timerRef = useRef<number | null>(null);
+
+  const clearTimer = useCallback(() => {
+    if (timerRef.current != null) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  const bump = useCallback(() => {
+    setVisible(true);
+    clearTimer();
+    timerRef.current = window.setTimeout(() => setVisible(false), delayMs);
+  }, [clearTimer, delayMs]);
+
+  useEffect(() => {
+    return () => clearTimer();
+  }, [clearTimer]);
+
+  return { visible, bump };
+}
+
 const cardBodyStyles = css`
   display: grid;
   gap: 12px;
@@ -43,6 +94,8 @@ const previewStyles = css`
   border: 1px solid #e2e8f4;
   overflow: hidden;
   background: #0b1021;
+  position: relative;
+  isolation: isolate;
 
   video {
     width: 100%;
@@ -50,6 +103,22 @@ const previewStyles = css`
     max-height: 320px;
     object-fit: cover;
     background: #0f172a;
+  }
+
+  &:fullscreen,
+  &:-webkit-full-screen {
+    background: #000;
+    border: 0;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    video {
+      max-height: 100vh;
+      max-width: 100vw;
+      object-fit: contain;
+    }
   }
 `;
 
@@ -186,8 +255,10 @@ const expandedVideoStyles = css`
   border-radius: 12px;
   border: 1px solid #1f2937;
   overflow: hidden;
-  background: linear-gradient(135deg, #0b1021, #0f172a);
+  background: #000;
   box-shadow: 0 10px 40px rgba(15, 23, 42, 0.4);
+  position: relative;
+  isolation: isolate;
 
   video {
     width: 100%;
@@ -196,7 +267,24 @@ const expandedVideoStyles = css`
     max-height: 70vh;
     display: block;
     object-fit: contain;
-    background: #0f172a;
+    background: #000;
+  }
+
+  &:fullscreen,
+  &:-webkit-full-screen {
+    background: #000;
+    border: 0;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    video {
+      max-height: 100vh;
+      max-width: 100vw;
+      object-fit: contain;
+      background: #000;
+    }
   }
 `;
 
@@ -350,6 +438,83 @@ const lapHintStyles = css`
   color: #94a3b8;
   font-size: 0.95rem;
 `;
+
+const fullscreenButtonStyles = css`
+  ${buttonStyles};
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  background: rgba(15, 23, 42, 0.75);
+  color: #e2e8f0;
+  border-color: #1f2937;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.95;
+  transition: opacity 0.25s ease;
+
+  &:hover {
+    background: rgba(15, 23, 42, 0.9);
+    opacity: 1;
+  }
+
+  &[data-visible="false"] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &:focus-visible {
+    opacity: 1;
+  }
+`;
+
+const fullscreenNavStyles = css`
+  position: absolute;
+  top: 52px;
+  left: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+
+  &[data-visible="false"] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  button {
+    pointer-events: auto;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid #1f2937;
+    background: rgba(15, 23, 42, 0.78);
+    color: #e2e8f0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+
+    &:hover:enabled {
+      background: rgba(15, 23, 42, 0.95);
+      border-color: #334155;
+    }
+
+    &:disabled {
+      color: #94a3b8;
+      border-color: #334155;
+      background: rgba(15, 23, 42, 0.5);
+      cursor: not-allowed;
+    }
+  }
+`;
 const UpdateRecordingMutation = graphql`
   mutation PrimaryRecordingCardUpdateRecordingMutation($input: UpdateTrackRecordingInput!) {
     updateTrackRecording(input: $input) {
@@ -383,10 +548,24 @@ export function PrimaryRecordingCard({ recording, onRefresh, videoRefs, laps }: 
   const [previewIsPastEnd, setPreviewIsPastEnd] = useState(false);
   const lastJumpRef = useRef<{ id: string | null; at: number }>({ id: null, at: 0 });
   const expandedVideoRef = useRef<HTMLVideoElement | null>(null);
+  const previewContainerRef = useRef<HTMLDivElement | null>(null);
+  const expandedContainerRef = useRef<HTMLDivElement | null>(null);
   const frameStep = useMemo(() => {
     if (!recording?.fps || recording.fps <= 0) return null;
     return 1 / recording.fps;
   }, [recording?.fps]);
+  const { isFullscreen: isPreviewFullscreen, toggleFullscreen: togglePreviewFullscreen } =
+    useFullscreenToggle(previewContainerRef);
+  const { isFullscreen: isExpandedFullscreen, toggleFullscreen: toggleExpandedFullscreen } =
+    useFullscreenToggle(expandedContainerRef);
+  const {
+    visible: previewControlsVisible,
+    bump: bumpPreviewControls,
+  } = useAutohideControls();
+  const {
+    visible: expandedControlsVisible,
+    bump: bumpExpandedControls,
+  } = useAutohideControls();
 
   function nudgeFrame(direction: -1 | 1) {
     if (!recording || !frameStep) return;
@@ -427,6 +606,7 @@ export function PrimaryRecordingCard({ recording, onRefresh, videoRefs, laps }: 
       preview && Number.isFinite(preview.currentTime) ? preview.currentTime : 0;
     setExpandedStartTime(startTime);
     setIsExpanded(true);
+    bumpExpandedControls();
   }
 
   function closeExpanded() {
@@ -527,6 +707,133 @@ function jumpToLapStart(lapStart: number, lapId?: string) {
     () => [...lapRanges].sort((a, b) => a.start - b.start),
     [lapRanges]
   );
+  const buildNavState = useCallback(
+    (lapId: string | null, isPastEnd: boolean) => {
+      const lastIndex = orderedLapRanges.length - 1;
+      if (lastIndex < 0) {
+        return { hasPrev: false, hasNext: false, prevIndex: 0, nextIndex: 0 };
+      }
+      const index = orderedLapRanges.findIndex((lap) => lap.id === lapId);
+      const fallbackIndex = isPastEnd ? lastIndex : 0;
+      const effectiveIndex = index >= 0 ? index : fallbackIndex;
+      const prevIndex = Math.max(0, effectiveIndex - 1);
+      const nextIndex = Math.min(lastIndex, effectiveIndex + 1);
+      const hasPrev = effectiveIndex > 0;
+      const hasNext = !isPastEnd && effectiveIndex < lastIndex;
+      return { hasPrev, hasNext, prevIndex, nextIndex };
+    },
+    [orderedLapRanges]
+  );
+  const previewNav = useMemo(
+    () => buildNavState(previewLapId, previewIsPastEnd),
+    [buildNavState, previewLapId, previewIsPastEnd]
+  );
+  const expandedNav = useMemo(
+    () => buildNavState(activeLapId, activeIsPastEnd),
+    [buildNavState, activeLapId, activeIsPastEnd]
+  );
+
+  const lapOverlayEnabled = Boolean(
+    recording?.status === "READY" &&
+      (recording?.lapOneOffset ?? 0) > 0 &&
+      orderedLapRanges.length > 0
+  );
+  const getPreviewVideo = useCallback(
+    () => (recording ? videoRefs.current[recording.id] ?? null : null),
+    [recording, videoRefs]
+  );
+  const getExpandedVideo = useCallback(() => expandedVideoRef.current, [expandedVideoRef]);
+  const getActiveVideo = useCallback(() => {
+    const expanded = isExpanded ? getExpandedVideo() : null;
+    if (expanded) return expanded;
+    return getPreviewVideo();
+  }, [getExpandedVideo, getPreviewVideo, isExpanded]);
+  const overlayFullscreenLabel = (isFullscreen: boolean) =>
+    isFullscreen ? "Exit fullscreen" : "Fullscreen";
+  const previewButtonVisible = previewControlsVisible;
+  const expandedButtonVisible = expandedControlsVisible;
+  const showPreviewFullscreenNav =
+    isPreviewFullscreen && lapOverlayEnabled && orderedLapRanges.length > 0;
+  const showExpandedFullscreenNav =
+    isExpanded &&
+    isExpandedFullscreen &&
+    lapOverlayEnabled &&
+    orderedLapRanges.length > 0;
+
+  useEffect(() => {
+    if (isPreviewFullscreen) bumpPreviewControls();
+  }, [bumpPreviewControls, isPreviewFullscreen]);
+
+  useEffect(() => {
+    if (isExpandedFullscreen) bumpExpandedControls();
+  }, [bumpExpandedControls, isExpandedFullscreen]);
+
+  useEffect(() => {
+    if (recording?.status === "READY") {
+      bumpPreviewControls();
+    }
+  }, [bumpPreviewControls, recording?.status]);
+
+  useEffect(() => {
+    const handleSpaceToggle = (event: KeyboardEvent) => {
+      if (event.code !== "Space" && event.key !== " ") return;
+      const target = event.target as HTMLElement | null;
+      if (target) {
+        const tag = target.tagName.toLowerCase();
+        const isFormField =
+          tag === "input" || tag === "textarea" || tag === "select" || target.isContentEditable;
+        if (isFormField) return;
+      }
+      const activeElement = document.activeElement as HTMLElement | null;
+      if (activeElement && activeElement.tagName.toLowerCase() !== "video") {
+        activeElement.blur();
+      }
+      const video = getActiveVideo();
+      if (!video) return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (video.paused) {
+        void video.play();
+      } else {
+        video.pause();
+      }
+    };
+
+    window.addEventListener("keydown", handleSpaceToggle, { capture: true });
+    return () => window.removeEventListener("keydown", handleSpaceToggle, { capture: true });
+  }, [getActiveVideo]);
+
+  useEffect(() => {
+    const handleArrowStep = (event: KeyboardEvent) => {
+      if (event.code !== "ArrowLeft" && event.code !== "ArrowRight") return;
+      const target = event.target as HTMLElement | null;
+      if (target) {
+        const tag = target.tagName.toLowerCase();
+        const isFormField =
+          tag === "input" || tag === "textarea" || tag === "select" || target.isContentEditable;
+        if (isFormField) return;
+      }
+
+      const allowFrameStep = isExpanded || isPreviewFullscreen || isExpandedFullscreen;
+      if (!allowFrameStep || !frameStep) return;
+
+      const video = getActiveVideo();
+      if (!video || !video.paused) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const direction = event.code === "ArrowRight" ? 1 : -1;
+      const duration = Number.isFinite(video.duration) ? video.duration : null;
+      const current = Number.isFinite(video.currentTime) ? video.currentTime : 0;
+      const nextTime = current + direction * frameStep;
+      const clamped = duration != null ? Math.min(Math.max(0, nextTime), duration) : Math.max(0, nextTime);
+      video.currentTime = clamped;
+    };
+
+    window.addEventListener("keydown", handleArrowStep, { capture: true });
+    return () => window.removeEventListener("keydown", handleArrowStep, { capture: true });
+  }, [frameStep, getActiveVideo, isExpanded, isExpandedFullscreen, isPreviewFullscreen]);
 
   const canJumpToLaps = lapJumpMessage == null;
 
@@ -646,18 +953,75 @@ function jumpToLapStart(lapStart: number, lapId?: string) {
         {statusContent}
         {recording && recording.status === "READY" && (
           <>
-            <div css={previewStyles}>
+            <div
+              css={previewStyles}
+              ref={previewContainerRef}
+              onMouseMove={bumpPreviewControls}
+              onFocus={bumpPreviewControls}
+            >
+              <button
+                type="button"
+                css={fullscreenButtonStyles}
+                onClick={togglePreviewFullscreen}
+                aria-label="Toggle fullscreen for primary preview"
+                data-visible={previewButtonVisible}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M4 10h2V6h4V4H4v6zm0 10h6v-2H6v-4H4v6zm16-6h-2v4h-4v2h6v-6zm-6-8v2h4v4h2V6h-6z"
+                    fill="currentColor"
+                  />
+                </svg>
+                {overlayFullscreenLabel(isPreviewFullscreen)}
+              </button>
+              <LapOverlay
+                enabled={lapOverlayEnabled}
+                getVideo={getPreviewVideo}
+                lapRanges={orderedLapRanges}
+                lapLookup={lapLookup}
+                lastJumpRef={lastJumpRef}
+              />
               <video
                 src={`/recordings/${recording.id}`}
                 preload="metadata"
                 muted
                 playsInline
                 controls
+                controlsList="nofullscreen"
                 ref={(node) => {
                   videoRefs.current[recording.id] = node;
                 }}
                 aria-label="Primary recording preview"
               />
+              {showPreviewFullscreenNav ? (
+                <div
+                  css={fullscreenNavStyles}
+                  data-visible={previewControlsVisible}
+                  aria-label="Fullscreen lap navigation"
+                >
+                  <button
+                    type="button"
+                    onClick={() => jumpToLapByIndex(previewNav.prevIndex)}
+                    disabled={!previewNav.hasPrev}
+                  >
+                    ← Prev lap
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => jumpToLapByIndex(previewNav.nextIndex)}
+                    disabled={!previewNav.hasNext}
+                  >
+                    Next lap →
+                  </button>
+                </div>
+              ) : null}
             </div>
             {recording.lapOneOffset > 0 && laps?.length ? (
               <div css={lapNavigatorStyles}>
@@ -748,16 +1112,73 @@ function jumpToLapStart(lapStart: number, lapId?: string) {
               </button>
             </div>
             <div css={expandedLayoutStyles}>
-              <div css={expandedVideoStyles}>
+              <div
+                css={expandedVideoStyles}
+                ref={expandedContainerRef}
+                onMouseMove={bumpExpandedControls}
+                onFocus={bumpExpandedControls}
+              >
+                <button
+                  type="button"
+                  css={fullscreenButtonStyles}
+                  onClick={toggleExpandedFullscreen}
+                  aria-label="Toggle fullscreen for expanded primary video"
+                  data-visible={expandedButtonVisible}
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M4 10h2V6h4V4H4v6zm0 10h6v-2H6v-4H4v6zm16-6h-2v4h-4v2h6v-6zm-6-8v2h4v4h2V6h-6z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                  {overlayFullscreenLabel(isExpandedFullscreen)}
+                </button>
+                <LapOverlay
+                  enabled={lapOverlayEnabled && isExpanded}
+                  getVideo={getExpandedVideo}
+                  lapRanges={orderedLapRanges}
+                  lapLookup={lapLookup}
+                  lastJumpRef={lastJumpRef}
+                />
                 <video
                   src={`/recordings/${recording.id}`}
                   preload="metadata"
                   muted
                   playsInline
                   controls
+                  controlsList="nofullscreen"
                   ref={expandedVideoRef}
                   aria-label="Expanded primary recording"
                 />
+                {showExpandedFullscreenNav ? (
+                  <div
+                    css={fullscreenNavStyles}
+                    data-visible={expandedControlsVisible}
+                    aria-label="Fullscreen lap navigation"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => jumpToLapByIndex(expandedNav.prevIndex)}
+                      disabled={!expandedNav.hasPrev}
+                    >
+                      ← Prev lap
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => jumpToLapByIndex(expandedNav.nextIndex)}
+                      disabled={!expandedNav.hasNext}
+                    >
+                      Next lap →
+                    </button>
+                  </div>
+                ) : null}
               </div>
               <div css={lapsPanelStyles}>
                 <div css={lapsHeaderStyles}>

@@ -25,10 +25,12 @@ export function buildLapRanges(laps: LapForSync[], lapOneOffset: number): LapRan
 
 export function resolveLapAtTime(ranges: LapRange[], current: number): LapRange | null {
   if (ranges.length === 0) return null;
-  const exact = ranges.find(
-    (lap) => current + LAP_EPSILON >= lap.start && current <= lap.end + LAP_EPSILON
-  );
-  if (exact) return exact;
+  for (let idx = ranges.length - 1; idx >= 0; idx -= 1) {
+    const lap = ranges[idx];
+    if (current + LAP_EPSILON >= lap.start && current <= lap.end + LAP_EPSILON) {
+      return lap;
+    }
+  }
   if (current < ranges[0].start - LAP_EPSILON) return null;
   const lastEnd = ranges[ranges.length - 1]?.end;
   if (lastEnd != null && current > lastEnd + LAP_EPSILON) {
@@ -42,7 +44,7 @@ export function resolveLapAtTime(ranges: LapRange[], current: number): LapRange 
   return null;
 }
 
-function computeLapPosition(
+export function computeLapPosition(
   ranges: LapRange[],
   current: number,
   lastJump: { id: string | null; at: number }

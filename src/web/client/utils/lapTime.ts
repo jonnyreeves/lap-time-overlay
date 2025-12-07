@@ -12,6 +12,16 @@ export function formatLapTimeSeconds(durationSeconds: number): string {
   return seconds.toFixed(3);
 }
 
+export function formatStopwatchTime(durationSeconds: number): string {
+  if (!Number.isFinite(durationSeconds) || durationSeconds < 0) return "0:00.000";
+
+  const minutes = Math.floor(durationSeconds / 60);
+  const seconds = durationSeconds - minutes * 60;
+  const secondsStr = seconds.toFixed(3).padStart(6, "0");
+
+  return `${minutes}:${secondsStr}`;
+}
+
 export function parseLapTimeString(value: string): number | null {
   const trimmed = value.trim();
   if (!trimmed) return null;

@@ -25,4 +25,9 @@ describe("useLapPositionSync helpers", () => {
     expect(resolveLapAtTime(ranges, 74.99)).toMatchObject({ id: "lap-2" });
     expect(resolveLapAtTime(ranges, 200)).toBeNull();
   });
+
+  it("resolveLapAtTime prefers the later lap on boundary overlap", () => {
+    const ranges = buildLapRanges(sampleLaps, 1);
+    expect(resolveLapAtTime(ranges, 61)).toMatchObject({ id: "lap-2" });
+  });
 });
