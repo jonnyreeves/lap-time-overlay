@@ -1,4 +1,3 @@
-import { css } from "@emotion/react";
 import { useEffect, useState } from "react";
 import { graphql, useMutation } from "react-relay";
 import type { LapsCardUpdateTrackSessionLapsMutation } from "../../__generated__/LapsCardUpdateTrackSessionLapsMutation.graphql.js";
@@ -32,6 +31,11 @@ import {
   lapToggleStyles,
   lapsListStyles,
 } from "./lapsStyles.js";
+import {
+  actionsRowStyles,
+  primaryButtonStyles,
+  secondaryButtonStyles,
+} from "./sessionOverviewStyles.js";
 
 type LapEvent = {
   id: string;
@@ -183,30 +187,32 @@ export function LapsCard({
     <Card
       title="Laps"
       rightComponent={
-        isEditing ? (
-          <div css={css`display: flex; gap: 10px; align-items: center;`}>
-            <button
-              type="button"
-              css={lapActionButtonStyles}
-              onClick={handleCancel}
-              disabled={isSaving}
-            >
-              Cancel
+        <div css={actionsRowStyles}>
+          {isEditing ? (
+            <>
+              <button
+                type="button"
+                css={secondaryButtonStyles}
+                onClick={handleCancel}
+                disabled={isSaving}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form={`laps-form-${sessionId}`}
+                css={primaryButtonStyles}
+                disabled={isSaving}
+              >
+                {isSaving ? "Saving..." : "Save"}
+              </button>
+            </>
+          ) : (
+            <button type="button" css={secondaryButtonStyles} onClick={handleEdit}>
+              Edit
             </button>
-            <button
-              type="submit"
-              form={`laps-form-${sessionId}`}
-              css={lapActionButtonStyles}
-              disabled={isSaving}
-            >
-              {isSaving ? "Saving..." : "Save"}
-            </button>
-          </div>
-        ) : (
-          <button type="button" css={lapActionButtonStyles} onClick={handleEdit}>
-            Edit
-          </button>
-        )
+          )}
+        </div>
       }
     >
       {isEditing ? (

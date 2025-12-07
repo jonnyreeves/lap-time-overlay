@@ -102,6 +102,30 @@ const buttonStyles = css`
   }
 `;
 
+const lapNavigatorStyles = css`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0 4px;
+
+  .current {
+    font-weight: 700;
+    color: #0f172a;
+    min-width: 80px;
+    text-align: center;
+  }
+`;
+
+const lapNavigatorButtonStyles = css`
+  ${buttonStyles};
+  min-width: 110px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+`;
+
 const expandButtonStyles = css`
   font-weight: 700;
   padding: 8px 14px;
@@ -344,6 +368,8 @@ function formatSeconds(value: number | null | undefined): string {
   return value.toFixed(3);
 }
 
+const LAP_EPSILON = 0.05;
+
 export function PrimaryRecordingCard({ recording, onRefresh, videoRefs, laps }: Props) {
   const [updateLapOffset, isUpdateLapOffsetInFlight] =
     useMutation<PrimaryRecordingCardUpdateRecordingMutation>(UpdateRecordingMutation);
@@ -351,6 +377,9 @@ export function PrimaryRecordingCard({ recording, onRefresh, videoRefs, laps }: 
   const [isExpanded, setIsExpanded] = useState(false);
   const [expandedStartTime, setExpandedStartTime] = useState(0);
   const [activeLapId, setActiveLapId] = useState<string | null>(null);
+  const [activeIsPastEnd, setActiveIsPastEnd] = useState(false);
+  const lastJumpLapIdRef = useRef<string | null>(null);
+  const lastJumpAtRef = useRef<number>(0);
   const expandedVideoRef = useRef<HTMLVideoElement | null>(null);
   const frameStep = useMemo(() => {
     if (!recording?.fps || recording.fps <= 0) return null;
@@ -416,27 +445,44 @@ export function PrimaryRecordingCard({ recording, onRefresh, videoRefs, laps }: 
     setIsExpanded(false);
   }
 
-  function jumpToLapStart(lapStart: number) {
-    if (!recording || recording.status !== "READY" || recording.lapOneOffset <= 0) return;
-    const target = Math.max(0, recording.lapOneOffset + lapStart);
-    const videos: Array<HTMLVideoElement | null> = [
-      expandedVideoRef.current,
-      videoRefs.current[recording.id],
-    ];
-
-    videos.forEach((video) => {
-      if (!video) return;
-      const seek = () => {
-        video.pause();
-        video.currentTime = target;
-      };
-      if (video.readyState >= 1) {
-        seek();
-      } else {
-        video.addEventListener("loadedmetadata", seek, { once: true });
-      }
-    });
+function jumpToLapStart(lapStart: number, lapId?: string) {
+  if (!recording || recording.status !== "READY" || recording.lapOneOffset <= 0) return;
+  if (lapId) {
+    lastJumpLapIdRef.current = lapId;
+    lastJumpAtRef.current = performance.now();
+    setPreviewLapId(lapId);
+    setActiveLapId((current) => current ?? lapId);
   }
+  const target = Math.max(0, recording.lapOneOffset + lapStart);
+  const videos: Array<HTMLVideoElement | null> = [
+    expandedVideoRef.current,
+    videoRefs.current[recording.id],
+  ];
+
+  const seekVideo = (video: HTMLVideoElement) => {
+    const performSeek = () => {
+      video.pause();
+      video.currentTime = target;
+    };
+    if (video.readyState >= 1) {
+      performSeek();
+      return;
+    }
+    const handler = () => {
+      performSeek();
+      video.removeEventListener("loadedmetadata", handler);
+      video.removeEventListener("loadeddata", handler);
+    };
+    video.addEventListener("loadedmetadata", handler);
+    video.addEventListener("loadeddata", handler);
+    video.load();
+  };
+
+  videos.forEach((video) => {
+    if (!video) return;
+    seekVideo(video);
+  });
+}
 
   useEffect(() => {
     if (!isExpanded) return;
@@ -476,32 +522,61 @@ export function PrimaryRecordingCard({ recording, onRefresh, videoRefs, laps }: 
       return { id: lap.id, start, end };
     });
   }, [laps, recording]);
+
+  const lapLookup = useMemo(() => {
+    return new Map((laps ?? []).map((lap) => [lap.id, lap]));
+  }, [laps]);
+  const orderedLapRanges = useMemo(
+    () => [...lapRanges].sort((a, b) => a.start - b.start),
+    [lapRanges]
+  );
+
+function resolveLapAtTime(
+  ranges: { id: string; start: number; end: number }[],
+  current: number
+): { id: string; start: number; end: number } | null {
+  if (ranges.length === 0) return null;
+  const exact = ranges.find(
+    (lap) => current + LAP_EPSILON >= lap.start && current <= lap.end + LAP_EPSILON
+  );
+  if (exact) return exact;
+  if (current < ranges[0].start - LAP_EPSILON) return null;
+  for (let idx = ranges.length - 1; idx >= 0; idx -= 1) {
+    if (current + LAP_EPSILON >= ranges[idx]?.start) {
+      return ranges[idx];
+    }
+  }
+  return null;
+}
   const canJumpToLaps = lapJumpMessage == null;
 
   useEffect(() => {
     if (!isExpanded) {
       setActiveLapId(null);
+      setActiveIsPastEnd(false);
       return;
     }
     const video = expandedVideoRef.current;
     if (!video || lapRanges.length === 0) {
       setActiveLapId(null);
+      setActiveIsPastEnd(false);
       return;
     }
 
     const updateActiveLap = () => {
       const current = Number.isFinite(video.currentTime) ? video.currentTime : 0;
-      const match =
-        lapRanges.find((lap) => current >= lap.start && current < lap.end) ??
-        (() => {
-          for (let idx = lapRanges.length - 1; idx >= 0; idx -= 1) {
-            if (current >= lapRanges[idx]?.start) {
-              return lapRanges[idx];
-            }
-          }
-          return null;
-        })();
+      const now = performance.now();
+      const recentJump = lastJumpLapIdRef.current && now - lastJumpAtRef.current < 600;
+      if (recentJump && lapLookup.has(lastJumpLapIdRef.current!)) {
+        setActiveLapId(lastJumpLapIdRef.current);
+        setActiveIsPastEnd(false);
+        return;
+      }
+      const match = resolveLapAtTime(lapRanges, current);
+      const lastEnd = orderedLapRanges.length ? orderedLapRanges[orderedLapRanges.length - 1].end : null;
+      const isPastEnd = lastEnd != null && current > lastEnd + LAP_EPSILON;
       setActiveLapId(match?.id ?? null);
+      setActiveIsPastEnd(isPastEnd);
     };
 
     updateActiveLap();
@@ -509,7 +584,7 @@ export function PrimaryRecordingCard({ recording, onRefresh, videoRefs, laps }: 
     return () => {
       video.removeEventListener("timeupdate", updateActiveLap);
     };
-  }, [isExpanded, lapRanges]);
+  }, [isExpanded, lapRanges, orderedLapRanges, lapLookup]);
 
   const statusContent = (() => {
     if (!recording) {
@@ -520,6 +595,62 @@ export function PrimaryRecordingCard({ recording, onRefresh, videoRefs, laps }: 
     }
     return null;
   })();
+
+  const [previewLapId, setPreviewLapId] = useState<string | null>(null);
+  const [previewIsPastEnd, setPreviewIsPastEnd] = useState(false);
+
+  useEffect(() => {
+    if (!recording || recording.status !== "READY" || recording.lapOneOffset <= 0) {
+      setPreviewLapId(null);
+      setPreviewIsPastEnd(false);
+      return;
+    }
+    const video = videoRefs.current[recording.id];
+    if (!video || lapRanges.length === 0) {
+      setPreviewLapId(null);
+      setPreviewIsPastEnd(false);
+      return;
+    }
+
+    const updateActiveLap = () => {
+      const current = Number.isFinite(video.currentTime) ? video.currentTime : 0;
+      const now = performance.now();
+      const recentJump = lastJumpLapIdRef.current && now - lastJumpAtRef.current < 600;
+      if (recentJump && lapLookup.has(lastJumpLapIdRef.current!)) {
+        setPreviewLapId(lastJumpLapIdRef.current);
+        setPreviewIsPastEnd(false);
+        return;
+      }
+      const match = resolveLapAtTime(lapRanges, current);
+      const lastEnd = orderedLapRanges.length ? orderedLapRanges[orderedLapRanges.length - 1].end : null;
+      const isPastEnd = lastEnd != null && current > lastEnd + LAP_EPSILON;
+      setPreviewLapId(match?.id ?? null);
+      setPreviewIsPastEnd(isPastEnd);
+    };
+
+    updateActiveLap();
+    video.addEventListener("timeupdate", updateActiveLap);
+    return () => {
+      video.removeEventListener("timeupdate", updateActiveLap);
+    };
+  }, [lapRanges, orderedLapRanges, recording, videoRefs, lapLookup]);
+
+  const currentLapIndex = orderedLapRanges.findIndex((lap) => lap.id === previewLapId);
+  const currentLap =
+    currentLapIndex >= 0 ? lapLookup.get(orderedLapRanges[currentLapIndex].id) : null;
+  const hasPrevLap = currentLapIndex > 0;
+  const hasNextLap =
+    orderedLapRanges.length > 0 &&
+    (currentLapIndex === -1 || currentLapIndex < orderedLapRanges.length - 1);
+  const isPastLastLap = previewIsPastEnd;
+
+  function jumpToLapByIndex(targetIndex: number) {
+    const targetRange = orderedLapRanges[targetIndex];
+    const targetLap = targetRange ? lapLookup.get(targetRange.id) : null;
+    if (!targetLap) return;
+    setPreviewLapId(targetLap.id);
+    jumpToLapStart(targetLap.start, targetLap.id);
+  }
 
   return (
     <Card
@@ -549,6 +680,33 @@ export function PrimaryRecordingCard({ recording, onRefresh, videoRefs, laps }: 
                 aria-label="Primary recording preview"
               />
             </div>
+            {recording.lapOneOffset > 0 && laps?.length ? (
+              <div css={lapNavigatorStyles}>
+                <button
+                  type="button"
+                  css={lapNavigatorButtonStyles}
+                  onClick={() => jumpToLapByIndex(Math.max(0, currentLapIndex - 1))}
+                  disabled={!hasPrevLap}
+                >
+                  ← Prev lap
+                </button>
+                <span className="current">
+                  {isPastLastLap
+                    ? "Session end"
+                    : currentLap
+                      ? `Lap ${currentLap.lapNumber}`
+                      : "Session start"}
+                </span>
+                <button
+                  type="button"
+                  css={lapNavigatorButtonStyles}
+                  onClick={() => jumpToLapByIndex(Math.min(orderedLapRanges.length - 1, currentLapIndex + 1))}
+                  disabled={!hasNextLap}
+                >
+                  Next lap →
+                </button>
+              </div>
+            ) : null}
             <div css={lapOffsetControlsStyles}>
               <div className="row">
                 <div>

@@ -91,6 +91,7 @@ export default function ViewSessionRoute() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [uploadInProgress, setUploadInProgress] = useState(false);
   const recordingVideoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
+  const [jumpAnchorReady, setJumpAnchorReady] = useState(false);
 
   const data = useLazyLoadQuery<viewSessionQuery>(
     SessionQuery,
@@ -197,11 +198,29 @@ export default function ViewSessionRoute() {
     return primaryRecording;
   }, [primaryRecording]);
 
+  useEffect(() => {
+    setJumpAnchorReady(false);
+    if (!primaryRecordingForJump) return;
+    const existing = recordingVideoRefs.current[primaryRecordingForJump.id];
+    if (existing) {
+      setJumpAnchorReady(true);
+      return;
+    }
+    const timer = window.setInterval(() => {
+      if (recordingVideoRefs.current[primaryRecordingForJump.id]) {
+        setJumpAnchorReady(true);
+        window.clearInterval(timer);
+      }
+    }, 200);
+    return () => window.clearInterval(timer);
+  }, [primaryRecordingForJump]);
+
   function jumpToLapStart(lapStart: number) {
     if (!primaryRecordingForJump) return;
     const video = recordingVideoRefs.current[primaryRecordingForJump.id];
     if (!video) return;
     const target = Math.max(0, primaryRecordingForJump.lapOneOffset + lapStart);
+    video.scrollIntoView({ behavior: "smooth", block: "center" });
     const seek = () => {
       video.pause();
       video.currentTime = target;
@@ -214,7 +233,7 @@ export default function ViewSessionRoute() {
   }
 
   const lapJumpAnchorLoaded = Boolean(
-    primaryRecordingForJump && recordingVideoRefs.current[primaryRecordingForJump.id]
+    primaryRecordingForJump && jumpAnchorReady
   );
   const lapJumpEnabled = lapJumpAnchorLoaded;
   const lapJumpMessages: string[] = [];
