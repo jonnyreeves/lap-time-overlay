@@ -1,5 +1,5 @@
 import { css } from "@emotion/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { graphql, useMutation } from "react-relay";
 import type { UploadRecordingModalStartUploadMutation } from "../../__generated__/UploadRecordingModalStartUploadMutation.graphql.js";
 
@@ -11,7 +11,7 @@ import {
   type UploadTarget,
 } from "./recordingShared.js";
 
-type FileEntry = { id: string; file: File };
+type FileEntry = File;
 
 type Props = {
   sessionId: string;
@@ -24,6 +24,12 @@ const uploadControlsStyles = css`
   display: flex;
   flex-direction: column;
   gap: 12px;
+`;
+
+const rightColumnStyles = css`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 `;
 
 const fileListStyles = css`
@@ -142,14 +148,27 @@ export function UploadRecordingModal({
   isOpen,
   onClose,
 }: Props) {
-  const [fileEntries, setFileEntries] = useState<FileEntry[]>([]);
+  const [fileEntries, setFileEntries] = useState<File[]>([]);
+
   const [description, setDescription] = useState("");
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const allObjectUrls = useRef<string[]>([]);
   const [startUpload, isStartInFlight] =
     useMutation<UploadRecordingModalStartUploadMutation>(StartUploadMutation);
+
+  // New state for video preview
+  const [videoFiles, setVideoFiles] = useState<File[]>([]);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [videoPlayerSrc, setVideoPlayerSrc] = useState<string | null>(null);
+
+  // Combine fileEntries (non-video) and videoFiles for upload
+  const allFiles = useMemo(
+    () => [...fileEntries.map((entry) => entry.file), ...videoFiles],
+    [fileEntries, videoFiles]
+  );
 
   const shouldShowBusyState = useMemo(
     () => isStartInFlight || isUploading,
@@ -176,16 +195,59 @@ export function UploadRecordingModal({
       setUploadError(null);
       setIsUploading(false);
       setIsDragging(false);
+      setVideoFiles([]);
+      setCurrentVideoIndex(0);
+      if (videoPlayerSrc) {
+        URL.revokeObjectURL(videoPlayerSrc);
+        setVideoPlayerSrc(null);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, videoPlayerSrc]);
+
+  useEffect(() => {
+    if (videoPlayerSrc) {
+      URL.revokeObjectURL(videoPlayerSrc);
+    }
+
+    if (videoFiles.length > 0 && currentVideoIndex >= 0 && currentVideoIndex < videoFiles.length) {
+      const file = videoFiles[currentVideoIndex];
+      const url = URL.createObjectURL(file);
+      setVideoPlayerSrc(url);
+      allObjectUrls.current.push(url);
+    } else {
+      setVideoPlayerSrc(null);
+    }
+  }, [videoFiles, currentVideoIndex]);
+
+  // Effect for component unmount cleanup
+  useEffect(() => {
+    return () => {
+      allObjectUrls.current.forEach(URL.revokeObjectURL);
+      allObjectUrls.current = []; // Clear the ref
+    };
+  }, []);
 
   function onFilesSelected(list: FileList | null) {
     if (!list || shouldShowBusyState) return;
-    const next: FileEntry[] = [...fileEntries];
+
+    const newVideoFiles: File[] = [];
+    const newOtherFiles: File[] = [];
+
     for (const file of Array.from(list)) {
-      next.push({ id: nextId(), file });
+      if (file.type.startsWith("video/")) {
+        newVideoFiles.push(file);
+      } else {
+        newOtherFiles.push(file);
+      }
     }
-    setFileEntries(next);
+
+    if (newVideoFiles.length > 0) {
+      setVideoFiles((current) => [...current, ...newVideoFiles]);
+      setCurrentVideoIndex(0); // Reset to the first video when new ones are added
+    }
+    if (newOtherFiles.length > 0) {
+      setFileEntries((current) => [...current, ...newOtherFiles]);
+    }
   }
 
   function onDropFiles(event: React.DragEvent) {
@@ -210,7 +272,7 @@ export function UploadRecordingModal({
     fileInputRef.current?.click();
   }
 
-  function moveFile(idx: number, direction: -1 | 1) {
+  function moveFileEntry(idx: number, direction: -1 | 1) {
     const target = idx + direction;
     if (target < 0 || target >= fileEntries.length) return;
     const next = [...fileEntries];
@@ -218,24 +280,62 @@ export function UploadRecordingModal({
     setFileEntries(next);
   }
 
-  function removeFile(id: string) {
-    setFileEntries((current) => current.filter((entry) => entry.id !== id));
+  function moveVideoFile(idx: number, direction: -1 | 1) {
+    const target = idx + direction;
+    if (target < 0 || target >= videoFiles.length) return;
+    const next = [...videoFiles];
+    [next[idx], next[target]] = [next[target], next[idx]];
+    setVideoFiles(next);
   }
 
-  function setBusy(next: boolean) {
+  function removeFileEntry(fileToRemove: File) {
+    setFileEntries((current) => current.filter((file) => file !== fileToRemove));
   }
+
+  function removeVideoFile(fileToRemove: File) {
+    setVideoFiles((current) => current.filter((file) => file !== fileToRemove));
+    setCurrentVideoIndex(0); // Reset to the first video when a video is removed
+  }
+
+  useEffect(() => {
+    if (videoFiles.length > 0 && currentVideoIndex >= 0 && currentVideoIndex < videoFiles.length) {
+      const file = videoFiles[currentVideoIndex];
+      const url = URL.createObjectURL(file);
+      allObjectUrls.current.push(url); // Store all created URLs for cleanup
+      setVideoPlayerSrc(url);
+    } else {
+      setVideoPlayerSrc(null);
+    }
+
+    // Cleanup function for this specific effect
+    return () => {
+      // If videoPlayerSrc is still pointing to a valid URL, revoke it.
+      // This handles cases where currentVideoIndex or videoFiles change.
+      if (videoPlayerSrc) {
+        URL.revokeObjectURL(videoPlayerSrc);
+      }
+    };
+  }, [videoFiles, currentVideoIndex]); // Depend on videoFiles and currentVideoIndex
+
+  // Effect for component unmount cleanup
+  useEffect(() => {
+    return () => {
+      allObjectUrls.current.forEach(URL.revokeObjectURL);
+      allObjectUrls.current = []; // Clear the ref
+    };
+  }, []);
 
   function beginUpload() {
-    if (fileEntries.length === 0) {
+    if (allFiles.length === 0) {
       setUploadError("Select at least one file to upload.");
       return;
     }
     if (shouldShowBusyState) return;
-    const selectedFiles = fileEntries.map((entry) => entry.file);
+    const selectedFiles = allFiles; // Use allFiles
     setFileEntries([]);
+    setVideoFiles([]); // Clear video files as well
     setUploadError(null);
     setIsUploading(true);
-    setBusy(true);
     onClose();
 
     startUpload({
@@ -266,21 +366,24 @@ export function UploadRecordingModal({
             setUploadError(err instanceof Error ? err.message : "Upload failed");
           } finally {
             setIsUploading(false);
-            setBusy(false);
           }
         })();
       },
       onError: (err) => {
         setUploadError(err.message);
         setIsUploading(false);
-        setBusy(false);
       },
     });
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Upload Footage">
-      <div css={uploadControlsStyles}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Upload Footage"
+      maxWidth={videoFiles.length > 0 ? "1200px" : undefined}
+    >
+      <div>
         {isUploading || isStartInFlight ? (
           <div
             css={css`
@@ -295,113 +398,224 @@ export function UploadRecordingModal({
               Sit tight while your files are streaming. This card will update as we receive progress.
             </p>
           </div>
-        ) : false ? (
-          <div
-            css={css`
-              padding: 12px;
-              border: 1px solid #d7deed;
-              border-radius: 10px;
-              background: #f8fafc;
-              color: #475569;
-            `}
-          >
-            Another upload is running. You can add more files once it finishes.
-          </div>
         ) : (
           <>
             <input
               ref={fileInputRef}
               type="file"
               multiple
-              accept="video/*"
+              accept="video/*,image/*,audio/*"
               onChange={(e) => onFilesSelected(e.target.files)}
               disabled={shouldShowBusyState}
               css={css`
                 display: none;
               `}
             />
-            <div
-              css={[
-                dropZoneStyles,
-                isDragging &&
-                css`
-                    border-color: #4f46e5;
-                    background: #eef2ff;
-                  `,
-              ]}
-              onClick={triggerFilePicker}
-              onDrop={onDropFiles}
-              onDragOver={onDragOver}
-              onDragLeave={onDragLeave}
-            >
-              <strong>Drag & drop video files</strong>
-              <span>…or click to choose files to attach to this session.</span>
-              <button
-                css={recordingButtonStyles}
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  triggerFilePicker();
-                }}
-                disabled={shouldShowBusyState}
-              >
-                Choose files
-              </button>
-            </div>
-            <label>
-              <span>Description</span>
-              <input
-                type="text"
-                placeholder="Optional description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                disabled={shouldShowBusyState}
-                css={css`
-                  width: 100%;
-                  padding: 10px 12px;
-                  border-radius: 8px;
-                  border: 1px solid #e2e8f4;
-                  margin-top: 6px;
-                `}
-              />
-            </label>
-            {fileEntries.length > 0 && (
-              <div css={fileListStyles}>
-                {fileEntries.map((entry, idx) => (
-                  <div key={entry.id} css={fileRowStyles}>
-                    <div className="meta">
-                      <strong>
-                        {idx + 1}. {entry.file.name}
-                      </strong>
-                      <span>{formatBytes(entry.file.size)}</span>
+
+            {videoFiles.length > 0 ? (
+              <div css={css`display: grid; grid-template-columns: 2fr 1fr; gap: 20px;`}>
+                <div css={css`position: relative; width: 100%; padding-bottom: 62.5%; background: black; border-radius: 8px; overflow: hidden;`}>
+                  {videoPlayerSrc && (
+                    <video
+                      key={videoPlayerSrc} // Key helps re-render video element when src changes
+                      src={videoPlayerSrc}
+                      controls
+                      autoPlay
+                      onEnded={() => {
+                        if (currentVideoIndex < videoFiles.length - 1) {
+                          setCurrentVideoIndex(currentVideoIndex + 1);
+                        }
+                      }}
+                      css={css`position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;`}
+                    />
+                  )}
+                  {!videoPlayerSrc && (
+                    <div css={css`position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; color: white; font-size: 1.2rem;`}>
+                      No video selected or available.
                     </div>
-                    <div className="actions">
-                      <button
-                        css={recordingButtonStyles}
-                        onClick={() => moveFile(idx, -1)}
-                        disabled={idx === 0}
-                        type="button"
-                      >
-                        ↑
-                      </button>
-                      <button
-                        css={recordingButtonStyles}
-                        onClick={() => moveFile(idx, 1)}
-                        disabled={idx === fileEntries.length - 1}
-                        type="button"
-                      >
-                        ↓
-                      </button>
-                      <button
-                        css={recordingButtonStyles}
-                        onClick={() => removeFile(entry.id)}
-                        type="button"
-                      >
-                        Remove
-                      </button>
+                  )}
+                </div>
+
+                <div css={rightColumnStyles}>
+                  <div css={css`display: flex; flex-direction: column; gap: 10px;`}>
+                    <h4>Video Files ({videoFiles.length})</h4>
+                    <div css={fileListStyles}>
+                      {videoFiles.map((file, idx) => (
+                        <div
+                          key={idx}
+                          css={[
+                            fileRowStyles,
+                            idx === currentVideoIndex && css`background: #eef2ff; border-color: #6366f1;`,
+                          ]}
+                        >
+                          <div className="meta">
+                            <strong>
+                              {idx + 1}. {file.name}
+                            </strong>
+                            <span>{formatBytes(file.size)}</span>
+                          </div>
+                          <div className="actions">
+                            <button
+                              css={recordingButtonStyles}
+                              onClick={() => moveVideoFile(idx, -1)}
+                              disabled={idx === 0 || shouldShowBusyState}
+                              type="button"
+                            >
+                              ↑
+                            </button>
+                            <button
+                              css={recordingButtonStyles}
+                              onClick={() => moveVideoFile(idx, 1)}
+                              disabled={idx === videoFiles.length - 1 || shouldShowBusyState}
+                              type="button"
+                            >
+                              ↓
+                            </button>
+                            <button
+                              css={recordingButtonStyles}
+                              onClick={() => setCurrentVideoIndex(idx)}
+                              disabled={idx === currentVideoIndex || shouldShowBusyState}
+                              type="button"
+                            >
+                              Play
+                            </button>
+                            <button
+                              css={recordingButtonStyles}
+                              onClick={() => removeVideoFile(file)}
+                              disabled={shouldShowBusyState}
+                              type="button"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
+
+                  {fileEntries.length > 0 && (
+                    <div css={css`display: flex; flex-direction: column; gap: 10px;`}>
+                      <h4>Other Files ({fileEntries.length})</h4>
+                      <div css={fileListStyles}>
+                        {fileEntries.map((file, idx) => (
+                          <div key={idx} css={fileRowStyles}>
+                            <div className="meta">
+                              <strong>
+                                {idx + 1}. {file.name}
+                              </strong>
+                              <span>{formatBytes(file.size)}</span>
+                            </div>
+                            <div className="actions">
+                              <button
+                                css={recordingButtonStyles}
+                                onClick={() => moveFileEntry(idx, -1)}
+                                disabled={idx === 0 || shouldShowBusyState}
+                                type="button"
+                              >
+                                ↑
+                              </button>
+                              <button
+                                css={recordingButtonStyles}
+                                onClick={() => moveFileEntry(idx, 1)}
+                                disabled={idx === fileEntries.length - 1 || shouldShowBusyState}
+                                type="button"
+                              >
+                                ↓
+                              </button>
+                              <button
+                                css={recordingButtonStyles}
+                                onClick={() => removeFileEntry(file)}
+                                disabled={shouldShowBusyState}
+                                type="button"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div css={css`display: flex; justify-content: flex-end; width: 100%;`}>
+                    <button
+                      css={recordingButtonStyles}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        triggerFilePicker();
+                      }}
+                      disabled={shouldShowBusyState}
+                    >
+                      Add files
+                    </button>
+                  </div>
+                  <label>
+                    <span>Footage Description</span>
+                    <input
+                      type="text"
+                      placeholder="Optional description"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      disabled={shouldShowBusyState}
+                      css={css`
+                        width: 100%;
+                        padding: 10px 12px;
+                        border-radius: 8px;
+                        border: 1px solid #e2e8f4;
+                        margin-top: 6px;
+                      `}
+                    />
+                  </label>
+                </div>
+              </div>
+            ) : (
+              <div css={uploadControlsStyles}>
+                <div
+                  css={[
+                    dropZoneStyles,
+                    isDragging &&
+                    css`
+                        border-color: #4f46e5;
+                        background: #eef2ff;
+                      `,
+                  ]}
+                  onClick={triggerFilePicker}
+                  onDrop={onDropFiles}
+                  onDragOver={onDragOver}
+                  onDragLeave={onDragLeave}
+                >
+                  <strong>Drag & drop video files</strong>
+                  <span>…or click to choose files to attach to this session.</span>
+                  <button
+                    css={recordingButtonStyles}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      triggerFilePicker();
+                    }}
+                    disabled={shouldShowBusyState}
+                  >
+                    Choose files
+                  </button>
+                </div>
+                <label>
+                  <span>Footage Description</span>
+                  <input
+                    type="text"
+                    placeholder="Optional description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    disabled={shouldShowBusyState}
+                    css={css`
+                      width: 100%;
+                      padding: 10px 12px;
+                      border-radius: 8px;
+                      border: 1px solid #e2e8f4;
+                      margin-top: 6px;
+                    `}
+                  />
+                </label>
               </div>
             )}
           </>
@@ -415,7 +629,7 @@ export function UploadRecordingModal({
         <button
           css={primaryButtonStyles}
           onClick={beginUpload}
-          disabled={shouldShowBusyState || fileEntries.length === 0}
+          disabled={shouldShowBusyState || allFiles.length === 0}
           type="button"
         >
           {shouldShowBusyState ? "Uploading…" : "Upload footage"}

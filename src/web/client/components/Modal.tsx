@@ -7,6 +7,7 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  maxWidth?: string;
 }
 
 const modalOverlayStyles = css`
@@ -22,12 +23,12 @@ const modalOverlayStyles = css`
   z-index: 1000;
 `;
 
-const modalContentStyles = css`
+const modalContentStyles = (maxWidth?: string) => css`
   background: white;
   padding: 30px;
   border-radius: 10px;
   width: 90%;
-  max-width: 600px; /* Slightly wider for upload content */
+  max-width: ${maxWidth || '600px'};
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   position: relative;
   display: flex;
@@ -56,12 +57,12 @@ const modalHeaderStyles = css`
   }
 `;
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, maxWidth }: ModalProps) {
   if (!isOpen) return null;
 
   return ReactDOM.createPortal(
     <div css={modalOverlayStyles} onClick={onClose}>
-      <div css={modalContentStyles} onClick={(e) => e.stopPropagation()}>
+      <div css={modalContentStyles(maxWidth)} onClick={(e) => e.stopPropagation()}>
         <div css={modalHeaderStyles}>
           <h2>{title}</h2>
           <button onClick={onClose}>&times;</button>
