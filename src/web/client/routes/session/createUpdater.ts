@@ -27,11 +27,19 @@ export function prependCreatedSessionToRecentSessions(
   if (!payload) return;
 
   const edge = ConnectionHandler.createEdge(store, connection, payload, "TrackSessionEdge");
+  const existingEdges = connection.getLinkedRecords("edges") ?? [];
+  const newId = payload.getValue("id");
+  const filteredEdges = existingEdges.filter((existingEdge) => {
+    const node = existingEdge?.getLinkedRecord("node");
+    return node?.getValue("id") !== newId;
+  });
+
   ConnectionHandler.insertEdgeBefore(connection, edge);
 
-  const edges = connection.getLinkedRecords("edges");
-  if (edges && edges.length > maxItems) {
-    connection.setLinkedRecords(edges.slice(0, maxItems), "edges");
+  const nextEdges = connection.getLinkedRecords("edges");
+  if (nextEdges) {
+    const deduped = [nextEdges[0], ...filteredEdges].slice(0, maxItems);
+    connection.setLinkedRecords(deduped, "edges");
   }
 }
 

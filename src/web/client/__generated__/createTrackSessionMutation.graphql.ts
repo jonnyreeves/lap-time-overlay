@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<e0b7ce02b2107864bb17ba15a34b3627>>
+ * @generated SignedSource<<eec493541a6a6e4088cb7407433fdaa3>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -41,6 +41,8 @@ export type createTrackSessionMutation$data = {
         readonly id: string;
         readonly name: string;
         readonly personalBest: number | null | undefined;
+        readonly personalBestDry: number | null | undefined;
+        readonly personalBestWet: number | null | undefined;
       };
       readonly classification: number;
       readonly conditions: string;
@@ -148,7 +150,21 @@ v10 = {
       "name": "heroImage",
       "storageKey": null
     },
-    (v9/*: any*/)
+    (v9/*: any*/),
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "personalBestDry",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "personalBestWet",
+      "storageKey": null
+    }
   ],
   "storageKey": null
 },
@@ -308,16 +324,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "df045c27bc81661f33517ea70c61efd6",
+    "cacheID": "dc8d126b1b4389c12d0a48e0ff01fbf2",
     "id": null,
     "metadata": {},
     "name": "createTrackSessionMutation",
     "operationKind": "mutation",
-    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      conditions\n      circuit {\n        id\n        name\n        heroImage\n        personalBest\n      }\n      notes\n      laps(first: 1) {\n        personalBest\n        id\n      }\n    }\n  }\n}\n"
+    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      conditions\n      circuit {\n        id\n        name\n        heroImage\n        personalBest\n        personalBestDry\n        personalBestWet\n      }\n      notes\n      laps(first: 1) {\n        personalBest\n        id\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "ee0e33f99a4eecd610e64c2cb325a3a7";
+(node as any).hash = "4b510edfbb29f86aee2f1ffac85bf816";
 
 export default node;

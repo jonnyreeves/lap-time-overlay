@@ -2,6 +2,7 @@ import { css } from "@emotion/react";
 import { graphql, useFragment } from "react-relay";
 import { type RecentCircuitsCard_viewer$key } from "../__generated__/RecentCircuitsCard_viewer.graphql.js";
 import { Card } from "./Card.js";
+import { formatStopwatchTime } from "../utils/lapTime.js";
 
 const RecentCircuitsCardFragment = graphql`
   fragment RecentCircuitsCard_viewer on User {
@@ -14,6 +15,8 @@ const RecentCircuitsCardFragment = graphql`
           name
           heroImage
           personalBest
+          personalBestDry
+          personalBestWet
         }
       }
     }
@@ -72,10 +75,47 @@ const circuitNameStyles = css`
 `;
 
 const circuitPbStyles = css`
-  margin: 4px 0 0;
-  font-size: 0.95rem;
-  color: #6b7280;
-  font-weight: 600;
+  margin-top: 6px;
+  display: grid;
+  gap: 6px;
+  width: 100%;
+`;
+
+const pbRowStyles = css`
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f4;
+  background: #f8fafc;
+  color: #475569;
+  text-align: left;
+`;
+
+const pbEmojiStyles = css`
+  font-size: 1.1rem;
+  width: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const pbValueStyles = css`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+`;
+
+const pbLabelStyles = css`
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
 `;
 
 function getInitials(name: string): string {
@@ -89,6 +129,16 @@ function getInitials(name: string): string {
     .map((word) => word[0])
     .join("")
     .toUpperCase();
+}
+
+function formatPersonalBest(time: number | null | undefined): string | null {
+  if (typeof time !== "number" || time <= 0 || Number.isNaN(time)) {
+    return null;
+  }
+  const formatted = formatStopwatchTime(time);
+  const [minutes, rest] = formatted.split(":");
+  if (!rest) return formatted;
+  return `${minutes.padStart(2, "0")}:${rest}`;
 }
 
 export function RecentCircuitsCard({
@@ -115,9 +165,24 @@ export function RecentCircuitsCard({
             </div>
             <div css={circuitNameStyles}>{circuit.name}</div>
             <div css={circuitPbStyles}>
-              {typeof circuit.personalBest === "number"
-                ? `PB ${circuit.personalBest.toFixed(3)}s`
-                : "No laps yet"}
+              <div css={pbRowStyles}>
+                <span css={pbEmojiStyles} aria-hidden>
+                  ☀️
+                </span>
+                <span css={pbValueStyles}>
+                  <span css={pbLabelStyles}>PB</span>
+                  <span>{formatPersonalBest(circuit.personalBestDry) ?? "—"}</span>
+                </span>
+              </div>
+              <div css={pbRowStyles}>
+                <span css={pbEmojiStyles} aria-hidden>
+                  🌧️
+                </span>
+                <span css={pbValueStyles}>
+                  <span css={pbLabelStyles}>PB</span>
+                  <span>{formatPersonalBest(circuit.personalBestWet) ?? "—"}</span>
+                </span>
+              </div>
             </div>
           </div>
         ))}

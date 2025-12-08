@@ -9,7 +9,7 @@ describe("circuit resolver", () => {
     vi.clearAllMocks();
   });
 
-  it("returns the fastest lap per circuit or null when no laps", async () => {
+  it("returns the fastest lap per circuit and per conditions or null when no laps", async () => {
     repositories.circuits.findAll.mockReturnValue([
       {
         id: "c1",
@@ -42,6 +42,18 @@ describe("circuit resolver", () => {
             createdAt: 0,
             updatedAt: 0,
           },
+          {
+            id: "s2",
+            date: "2024-02-01",
+            format: "Practice",
+            classification: 5,
+            conditions: "Wet",
+            circuitId: "c1",
+            userId: "user-2",
+            notes: null,
+            createdAt: 0,
+            updatedAt: 0,
+          },
         ];
       }
       return [];
@@ -54,6 +66,12 @@ describe("circuit resolver", () => {
           { id: "l2", sessionId: "s1", lapNumber: 2, time: 74.987, createdAt: 0, updatedAt: 0 },
         ];
       }
+      if (sessionId === "s2") {
+        return [
+          { id: "l3", sessionId: "s2", lapNumber: 1, time: 82.123, createdAt: 0, updatedAt: 0 },
+          { id: "l4", sessionId: "s2", lapNumber: 2, time: 79.5, createdAt: 0, updatedAt: 0 },
+        ];
+      }
       return [];
     });
 
@@ -61,7 +79,11 @@ describe("circuit resolver", () => {
     expect(circuits).toHaveLength(2);
 
     expect(await circuits[0]?.personalBest()).toBeCloseTo(74.987, 3);
+    expect(await circuits[0]?.personalBestDry()).toBeCloseTo(74.987, 3);
+    expect(await circuits[0]?.personalBestWet()).toBeCloseTo(79.5, 3);
     expect(await circuits[1]?.personalBest()).toBeNull();
+    expect(await circuits[1]?.personalBestDry()).toBeNull();
+    expect(await circuits[1]?.personalBestWet()).toBeNull();
   });
 
   it("createCircuit rejects unauthenticated requests", () => {

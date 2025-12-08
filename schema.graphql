@@ -130,6 +130,8 @@ type Circuit {
   name: String!
   heroImage: String
   personalBest: Float
+  personalBestDry: Float
+  personalBestWet: Float
 }
 
 type CircuitEdge {

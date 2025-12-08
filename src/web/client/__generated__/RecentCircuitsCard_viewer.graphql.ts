@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<9d2a9436dd9998540bed894d17ed2321>>
+ * @generated SignedSource<<581f4b3fd1dc1a14433e1c49b44359b1>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -19,6 +19,8 @@ export type RecentCircuitsCard_viewer$data = {
         readonly id: string;
         readonly name: string;
         readonly personalBest: number | null | undefined;
+        readonly personalBestDry: number | null | undefined;
+        readonly personalBestWet: number | null | undefined;
       };
     }>;
   };
@@ -105,6 +107,20 @@ return {
                   "alias": null,
                   "args": null,
                   "kind": "ScalarField",
+                  "name": "personalBestDry",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "personalBestWet",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
                   "name": "__typename",
                   "storageKey": null
                 }
@@ -155,6 +171,6 @@ return {
 };
 })();
 
-(node as any).hash = "4bffe05bca3fac65b7f12a276ad444de";
+(node as any).hash = "4ce830057fb0ea4ba95aefce110e31c2";
 
 export default node;

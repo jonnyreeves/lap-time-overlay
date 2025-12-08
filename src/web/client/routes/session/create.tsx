@@ -33,7 +33,8 @@ const inputFieldStyles = css`
   input[type="time"],
   input[type="text"],
   input[type="number"],
-  select {
+  select,
+  textarea {
     width: 100%;
     padding: 10px;
     border: 1px solid #e2e8f4;
@@ -48,6 +49,11 @@ const inputFieldStyles = css`
       outline: none;
       box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
     }
+  }
+
+  textarea {
+    min-height: 96px;
+    resize: vertical;
   }
 `;
 
@@ -64,16 +70,24 @@ const twoColumnRowStyles = css`
 const AddCircuitButtonStyles = css`
   margin-left: 10px;
   padding: 8px 12px;
-  background-color: #6366f1;
-  color: white;
-  border: none;
+  background-color: #e2e8f4;
+  color: #0b1021;
+  border: 1px solid #d7deed;
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.9rem;
   transition: background-color 0.2s ease-in-out;
 
   &:hover {
-    background-color: #4f46e5;
+    background-color: #cbd5e1;
+    border-color: #cbd5e1;
+  }
+
+  &:disabled {
+    background-color: #e2e8f4;
+    color: #94a3b8;
+    border-color: #d7deed;
+    cursor: not-allowed;
   }
 `;
 
@@ -169,6 +183,8 @@ const CreateTrackSessionMutation = graphql`
           name
           heroImage
           personalBest
+          personalBestDry
+          personalBestWet
         }
         notes
         laps(first: 1) {
@@ -196,6 +212,7 @@ export default function CreateSessionRoute() {
   const [time, setTime] = useState("");
   const [circuitId, setCircuitId] = useState("");
   const [classification, setClassification] = useState("");
+  const [notes, setNotes] = useState("");
 
   const navigate = useNavigate();
   const {
@@ -285,6 +302,7 @@ export default function CreateSessionRoute() {
           classification: parsedClassification,
           circuitId,
           conditions,
+          notes: notes.trim() ? notes.trim() : null,
           ...(lapInput.length ? { laps: lapInput } : {}),
         },
         connections: [viewerConnectionId],
@@ -340,7 +358,7 @@ export default function CreateSessionRoute() {
         rightComponent={
           <button
             type="button"
-            css={secondaryButtonStyles}
+            css={primaryButtonStyles}
             onClick={() => setShowImportSessionModal(true)}
             disabled={isInFlight}
           >
@@ -432,6 +450,16 @@ export default function CreateSessionRoute() {
               value={classification}
               onChange={(e) => setClassification(e.target.value)}
               placeholder="e.g. 1 for P1"
+              disabled={isInFlight}
+            />
+          </div>
+          <div css={inputFieldStyles}>
+            <label htmlFor="session-notes">Session Notes</label>
+            <textarea
+              id="session-notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add notes about this session"
               disabled={isInFlight}
             />
           </div>

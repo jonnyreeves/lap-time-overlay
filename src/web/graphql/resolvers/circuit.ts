@@ -1,18 +1,23 @@
 import { GraphQLError } from "graphql";
 import type { CircuitRecord } from "../../../db/circuits.js";
+import type { TrackSessionConditions } from "../../../db/track_sessions.js";
 import type { GraphQLContext } from "../context.js";
 import type { Repositories } from "../repositories.js";
 
 export function getCircuitPersonalBest(
   circuitId: string,
   repositories: Repositories,
-  userId?: string
+  userId?: string,
+  conditions?: TrackSessionConditions
 ) {
   const sessions = userId
     ? repositories.trackSessions.findByUserId(userId).filter((session) => session.circuitId === circuitId)
     : repositories.trackSessions.findByCircuitId(circuitId);
+  const filteredSessions = conditions
+    ? sessions.filter((session) => session.conditions === conditions)
+    : sessions;
   const lapTimes: number[] = [];
-  for (const session of sessions) {
+  for (const session of filteredSessions) {
     const laps = repositories.laps.findBySessionId(session.id);
     lapTimes.push(...laps.map((lap) => lap.time));
   }
@@ -32,6 +37,8 @@ export function toCircuitPayload(
     name: circuit.name,
     heroImage: circuit.heroImage,
     personalBest: () => getCircuitPersonalBest(circuit.id, repositories, userId),
+    personalBestDry: () => getCircuitPersonalBest(circuit.id, repositories, userId, "Dry"),
+    personalBestWet: () => getCircuitPersonalBest(circuit.id, repositories, userId, "Wet"),
   };
 }
 

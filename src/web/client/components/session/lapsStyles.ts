@@ -198,8 +198,15 @@ export const lapEventsEmptyStyles = css`
 `;
 
 export const lapHelperTextStyles = css`
-  margin: 8px 0 0;
-  color: #475569;
+  margin: 12px 0 0;
+  color: #334155;
+  background-color: #eef2ff;
+  border: 1px solid #cbd5e1;
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `;
 
 export const errorStyles = css`

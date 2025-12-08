@@ -3,8 +3,8 @@ import { graphql, useMutation } from "react-relay";
 import type { LapsCardUpdateTrackSessionLapsMutation } from "../../__generated__/LapsCardUpdateTrackSessionLapsMutation.graphql.js";
 import { useLapRows, type LapInputPayload } from "../../hooks/useLapRows.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
-import { LapInputsCard } from "../LapInputsCard.js";
 import { Card } from "../Card.js";
+import { LapInputsCard } from "../LapInputsCard.js";
 import {
   chevronOpenStyles,
   chevronStyles,
@@ -24,12 +24,12 @@ import {
   lapEventsPanelStyles,
   lapEventsPillStyles,
   lapHeaderStyles,
-  lapHelperTextStyles,
   lapRowStyles,
   lapTimeRowStyles,
   lapTitleRowStyles,
   lapToggleStyles,
   lapsListStyles,
+  lapHelperTextStyles,
 } from "./lapsStyles.js";
 import {
   actionsRowStyles,
@@ -233,6 +233,12 @@ export function LapsCard({
         </form>
       ) : (
         <>
+          {statusMessages.map((message, idx) => (
+            <p key={`${message}-${idx}`} css={lapHelperTextStyles}>
+              <span>ℹ️</span>
+              <span>{message}</span>
+            </p>
+          ))}
           <div css={lapsListStyles}>
             {laps.length === 0 ? (
               <p>No laps recorded for this session.</p>
@@ -306,11 +312,6 @@ export function LapsCard({
               })
             )}
           </div>
-          {statusMessages.map((message, idx) => (
-            <p key={`${message}-${idx}`} css={lapHelperTextStyles}>
-              {message}
-            </p>
-          ))}
         </>
       )}
     </Card>
