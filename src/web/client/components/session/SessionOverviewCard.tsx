@@ -3,6 +3,7 @@ import { graphql, useMutation } from "react-relay";
 import type { SessionOverviewCardUpdateTrackSessionMutation } from "../../__generated__/SessionOverviewCardUpdateTrackSessionMutation.graphql.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 import { Card } from "../Card.js";
+import { IconButton } from "../IconButton.js";
 import type { LapWithEvents } from "./LapsCard.js";
 import {
   actionsRowStyles,
@@ -215,9 +216,14 @@ export function SessionOverviewCard({ session, laps, circuits }: Props) {
               </button>
             </>
           ) : (
-            <button type="button" css={secondaryButtonStyles} onClick={handleEdit}>
+            <IconButton
+              type="button"
+              css={secondaryButtonStyles}
+              onClick={handleEdit}
+              icon="✏️"
+            >
               Edit
-            </button>
+            </IconButton>
           )}
         </div>
       }

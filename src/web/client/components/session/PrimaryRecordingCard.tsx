@@ -3,6 +3,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, type MutableRefObjec
 import { graphql, useMutation } from "react-relay";
 import type { PrimaryRecordingCardUpdateRecordingMutation } from "../../__generated__/PrimaryRecordingCardUpdateRecordingMutation.graphql.js";
 import { Card } from "../Card.js";
+import { IconButton } from "../IconButton.js";
+import { secondaryButtonStyles } from "./sessionOverviewStyles.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 import { buildLapRanges, resolveLapAtTime } from "../../hooks/useLapPositionSync.js";
 import { LapOverlay } from "./LapOverlay.js";
@@ -943,9 +945,14 @@ function jumpToLapStart(lapStart: number, lapId?: string) {
       title="Primary Video"
       rightComponent={
         recording?.status === "READY" ? (
-          <button css={[buttonStyles, expandButtonStyles]} type="button" onClick={openExpanded}>
+          <IconButton
+            css={secondaryButtonStyles}
+            type="button"
+            onClick={openExpanded}
+            icon="↔️"
+          >
             Expand
-          </button>
+          </IconButton>
         ) : null
       }
     >

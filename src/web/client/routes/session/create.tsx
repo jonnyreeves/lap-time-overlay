@@ -7,6 +7,7 @@ import { type create_tsxCircuitsQuery } from "../../__generated__/create_tsxCirc
 import { createTrackSessionMutation } from "../../__generated__/createTrackSessionMutation.graphql.js";
 import { Card } from "../../components/Card.js";
 import { CreateCircuitModal } from "../../components/CreateCircuitModal.js";
+import { IconButton } from "../../components/IconButton.js";
 import { ImportSessionModal } from "../../components/ImportSessionModal.js";
 import { LapInputsCard } from "../../components/LapInputsCard.js";
 import { type SessionImportSelection } from "../../utils/sessionImportTypes.js";
@@ -356,14 +357,26 @@ export default function CreateSessionRoute() {
       <Card
         title="Session Details"
         rightComponent={
-          <button
-            type="button"
-            css={primaryButtonStyles}
-            onClick={() => setShowImportSessionModal(true)}
-            disabled={isInFlight}
-          >
-            Import
-          </button>
+          <div css={css`display: flex; gap: 8px;`}>
+            <IconButton
+              type="button"
+              css={secondaryButtonStyles}
+              onClick={() => setShowImportSessionModal(true)}
+              disabled={isInFlight}
+              icon="📥"
+            >
+              Import
+            </IconButton>
+            <IconButton
+              type="submit"
+              form="create-session-form"
+              css={primaryButtonStyles}
+              disabled={isCreateDisabled}
+              icon="💾"
+            >
+              {isInFlight ? "Creating..." : "Create Session"}
+            </IconButton>
+          </div>
         }
       >
         <form id="create-session-form" onSubmit={handleSubmit}>
@@ -481,14 +494,15 @@ export default function CreateSessionRoute() {
           />
         </div>
         <div css={formActionsStyles}>
-          <button
+          <IconButton
             type="submit"
             form="create-session-form"
             css={primaryButtonStyles}
             disabled={isCreateDisabled}
+            icon="💾"
           >
             {isInFlight ? "Creating..." : "Create Session"}
-          </button>
+          </IconButton>
         </div>
       </div>
 

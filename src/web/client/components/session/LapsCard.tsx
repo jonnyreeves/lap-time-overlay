@@ -4,6 +4,7 @@ import type { LapsCardUpdateTrackSessionLapsMutation } from "../../__generated__
 import { useLapRows, type LapInputPayload } from "../../hooks/useLapRows.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 import { Card } from "../Card.js";
+import { IconButton } from "../IconButton.js";
 import { LapInputsCard } from "../LapInputsCard.js";
 import {
   chevronOpenStyles,
@@ -208,9 +209,14 @@ export function LapsCard({
               </button>
             </>
           ) : (
-            <button type="button" css={secondaryButtonStyles} onClick={handleEdit}>
+            <IconButton
+              type="button"
+              css={secondaryButtonStyles}
+              onClick={handleEdit}
+              icon="✏️"
+            >
               Edit
-            </button>
+            </IconButton>
           )}
         </div>
       }
