@@ -1,8 +1,9 @@
 import { css } from "@emotion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { graphql, useMutation } from "react-relay";
-import type { UploadRecordingCardStartUploadMutation } from "../../__generated__/UploadRecordingCardStartUploadMutation.graphql.js";
-import { Card } from "../Card.js";
+import type { UploadRecordingModalStartUploadMutation } from "../../__generated__/UploadRecordingModalStartUploadMutation.graphql.js";
+
+import { Modal } from "../Modal"; // Assuming a Modal component exists or will be created
 import {
   formatBytes,
   recordingButtonStyles,
@@ -15,8 +16,8 @@ type FileEntry = { id: string; file: File };
 type Props = {
   sessionId: string;
   onRefresh: () => void;
-  uploadInProgress: boolean;
-  onUploadStateChange?: (inProgress: boolean) => void;
+  isOpen: boolean;
+  onClose: () => void;
 };
 
 const uploadControlsStyles = css`
@@ -99,10 +100,11 @@ const footerStyles = css`
   display: flex;
   justify-content: flex-end;
   margin-top: 10px;
+  gap: 10px;
 `;
 
 const StartUploadMutation = graphql`
-  mutation UploadRecordingCardStartUploadMutation($input: StartTrackRecordingUploadInput!) {
+  mutation UploadRecordingModalStartUploadMutation($input: StartTrackRecordingUploadInput!) {
     startTrackRecordingUpload(input: $input) {
       recording {
         id
@@ -134,11 +136,11 @@ function nextId(): string {
   return Math.random().toString(36).slice(2);
 }
 
-export function UploadRecordingCard({
+export function UploadRecordingModal({
   sessionId,
   onRefresh,
-  uploadInProgress,
-  onUploadStateChange,
+  isOpen,
+  onClose,
 }: Props) {
   const [fileEntries, setFileEntries] = useState<FileEntry[]>([]);
   const [description, setDescription] = useState("");
@@ -147,11 +149,11 @@ export function UploadRecordingCard({
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [startUpload, isStartInFlight] =
-    useMutation<UploadRecordingCardStartUploadMutation>(StartUploadMutation);
+    useMutation<UploadRecordingModalStartUploadMutation>(StartUploadMutation);
 
   const shouldShowBusyState = useMemo(
-    () => uploadInProgress || isStartInFlight || isUploading,
-    [isStartInFlight, isUploading, uploadInProgress]
+    () => isStartInFlight || isUploading,
+    [isStartInFlight, isUploading]
   );
 
   useEffect(() => {
@@ -165,6 +167,17 @@ export function UploadRecordingCard({
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
   }, [fileEntries.length, isStartInFlight, isUploading]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      // Reset state when modal closes
+      setFileEntries([]);
+      setDescription("");
+      setUploadError(null);
+      setIsUploading(false);
+      setIsDragging(false);
+    }
+  }, [isOpen]);
 
   function onFilesSelected(list: FileList | null) {
     if (!list || shouldShowBusyState) return;
@@ -210,7 +223,6 @@ export function UploadRecordingCard({
   }
 
   function setBusy(next: boolean) {
-    onUploadStateChange?.(next);
   }
 
   function beginUpload() {
@@ -224,6 +236,7 @@ export function UploadRecordingCard({
     setUploadError(null);
     setIsUploading(true);
     setBusy(true);
+    onClose();
 
     startUpload({
       variables: {
@@ -244,10 +257,11 @@ export function UploadRecordingCard({
               throw new Error("Upload session was not created");
             }
             onRefresh();
-            const targets = (session.uploadTargets ?? []).map((target) => ({ ...target }));
+            const targets = (session.uploadTargets ?? []).map((target: UploadTarget) => ({ ...target }));
             await uploadToTargets(targets as UploadTarget[], selectedFiles);
             setDescription("");
             onRefresh();
+            onClose(); // Close modal on successful upload
           } catch (err) {
             setUploadError(err instanceof Error ? err.message : "Upload failed");
           } finally {
@@ -265,7 +279,7 @@ export function UploadRecordingCard({
   }
 
   return (
-    <Card title="Upload Footage">
+    <Modal isOpen={isOpen} onClose={onClose} title="Upload Footage">
       <div css={uploadControlsStyles}>
         {isUploading || isStartInFlight ? (
           <div
@@ -281,7 +295,7 @@ export function UploadRecordingCard({
               Sit tight while your files are streaming. This card will update as we receive progress.
             </p>
           </div>
-        ) : uploadInProgress ? (
+        ) : false ? (
           <div
             css={css`
               padding: 12px;
@@ -310,7 +324,7 @@ export function UploadRecordingCard({
               css={[
                 dropZoneStyles,
                 isDragging &&
-                  css`
+                css`
                     border-color: #4f46e5;
                     background: #eef2ff;
                   `,
@@ -395,15 +409,18 @@ export function UploadRecordingCard({
         {uploadError && <div css={css`color: #b91c1c;`}>{uploadError}</div>}
       </div>
       <div css={footerStyles}>
+        <button css={recordingButtonStyles} onClick={onClose} disabled={shouldShowBusyState}>
+          Cancel
+        </button>
         <button
           css={primaryButtonStyles}
           onClick={beginUpload}
-          disabled={shouldShowBusyState}
+          disabled={shouldShowBusyState || fileEntries.length === 0}
           type="button"
         >
           {shouldShowBusyState ? "Uploading…" : "Upload footage"}
         </button>
       </div>
-    </Card>
+    </Modal>
   );
 }

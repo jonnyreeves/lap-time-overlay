@@ -943,7 +943,7 @@ function jumpToLapStart(lapStart: number, lapId?: string) {
   return (
     <Card
       title="Primary Video"
-      rightComponent={
+      rightHeaderContent={
         recording?.status === "READY" ? (
           <IconButton
             css={secondaryButtonStyles}

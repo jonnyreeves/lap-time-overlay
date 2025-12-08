@@ -194,7 +194,7 @@ export function SessionOverviewCard({ session, laps, circuits }: Props) {
   return (
     <Card
       title="Session Overview"
-      rightComponent={
+      rightHeaderContent={
         <div css={actionsRowStyles}>
           {isEditing ? (
             <>

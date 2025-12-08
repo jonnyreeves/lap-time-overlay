@@ -1,36 +1,13 @@
-// src/web/client/components/CreateCircuitModal.tsx
 import { css } from "@emotion/react";
 import { useState } from "react";
 import { graphql, useMutation } from "react-relay";
+import { Modal } from "./Modal";
 
 interface CreateCircuitModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCircuitCreated: () => void;
 }
-
-const modalOverlayStyles = css`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-`;
-
-const modalContentStyles = css`
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  position: relative;
-`;
 
 const inputFieldStyles = css`
   margin-bottom: 15px;
@@ -140,50 +117,47 @@ export function CreateCircuitModal({ isOpen, onClose, onCircuitCreated }: Create
   if (!isOpen) return null;
 
   return (
-    <div css={modalOverlayStyles} onClick={onClose}>
-      <div css={modalContentStyles} onClick={(e) => e.stopPropagation()}>
-        <h2>Create New Circuit</h2>
-        <form onSubmit={handleSubmit}>
-          <div css={inputFieldStyles}>
-            <label htmlFor="circuit-name">Circuit Name</label>
-            <input
-              id="circuit-name"
-              type="text"
-              value={circuitName}
-              onChange={(e) => setCircuitName(e.target.value)}
-              required
-              disabled={isInFlight}
-            />
-          </div>
-          <div css={inputFieldStyles}>
-            <label htmlFor="hero-image">Hero Image URL (Optional)</label>
-            <input
-              id="hero-image"
-              type="text"
-              value={heroImage}
-              onChange={(e) => setHeroImage(e.target.value)}
-              disabled={isInFlight}
-            />
-          </div>
-          <div css={buttonGroupStyles}>
-            <button
-              type="button"
-              css={secondaryButtonStyles}
-              onClick={onClose}
-              disabled={isInFlight}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              css={primaryButtonStyles}
-              disabled={isInFlight || !circuitName}
-            >
-              {isInFlight ? "Creating..." : "Create Circuit"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <Modal isOpen={isOpen} onClose={onClose} title="Create New Circuit">
+      <form onSubmit={handleSubmit}>
+        <div css={inputFieldStyles}>
+          <label htmlFor="circuit-name">Circuit Name</label>
+          <input
+            id="circuit-name"
+            type="text"
+            value={circuitName}
+            onChange={(e) => setCircuitName(e.target.value)}
+            required
+            disabled={isInFlight}
+          />
+        </div>
+        <div css={inputFieldStyles}>
+          <label htmlFor="hero-image">Hero Image URL (Optional)</label>
+          <input
+            id="hero-image"
+            type="text"
+            value={heroImage}
+            onChange={(e) => setHeroImage(e.target.value)}
+            disabled={isInFlight}
+          />
+        </div>
+        <div css={buttonGroupStyles}>
+          <button
+            type="button"
+            css={secondaryButtonStyles}
+            onClick={onClose}
+            disabled={isInFlight}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            css={primaryButtonStyles}
+            disabled={isInFlight || !circuitName}
+          >
+            {isInFlight ? "Creating..." : "Create Circuit"}
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 }

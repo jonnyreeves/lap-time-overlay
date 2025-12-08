@@ -356,7 +356,7 @@ export default function CreateSessionRoute() {
     <div css={formLayoutStyles}>
       <Card
         title="Session Details"
-        rightComponent={
+        rightHeaderContent={
           <div css={css`display: flex; gap: 8px;`}>
             <IconButton
               type="button"

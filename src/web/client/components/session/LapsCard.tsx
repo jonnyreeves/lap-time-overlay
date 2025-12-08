@@ -187,7 +187,7 @@ export function LapsCard({
   return (
     <Card
       title="Laps"
-      rightComponent={
+      rightHeaderContent={
         <div css={actionsRowStyles}>
           {isEditing ? (
             <>

@@ -4,12 +4,15 @@ import { graphql, useMutation } from "react-relay";
 import type { RecordingsCardDeleteRecordingMutation } from "../../__generated__/RecordingsCardDeleteRecordingMutation.graphql.js";
 import type { RecordingsCardMarkPrimaryRecordingMutation } from "../../__generated__/RecordingsCardMarkPrimaryRecordingMutation.graphql.js";
 import { Card } from "../Card.js";
+import { IconButton } from "../IconButton.js";
+import { UploadRecordingModal } from "./UploadRecordingModal.js";
 import {
   formatBytes,
   recordingButtonStyles,
   uploadToTargets,
   type UploadTarget,
 } from "./recordingShared.js";
+import { actionsRowStyles, secondaryButtonStyles } from "./sessionOverviewStyles";
 
 type Recording = {
   id: string;
@@ -28,10 +31,9 @@ type Recording = {
 };
 
 type Props = {
+  sessionId: string; // Add sessionId prop
   recordings: readonly Recording[];
   onRefresh: () => void;
-  uploadInProgress: boolean;
-  onUploadStateChange?: (inProgress: boolean) => void;
 };
 
 const recordingsListStyles = css`
@@ -124,14 +126,14 @@ function percent(value: number | null | undefined): number {
 }
 
 export function RecordingsCard({
+  sessionId, // Destructure sessionId
   recordings,
   onRefresh,
-  uploadInProgress,
-  onUploadStateChange,
 }: Props) {
   const [resumeSelections, setResumeSelections] = useState<Record<string, File[]>>({});
   const [actionError, setActionError] = useState<string | null>(null);
   const [isResuming, setIsResuming] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false); // State for modal visibility
   const [deleteRecording, isDeleteInFlight] =
     useMutation<RecordingsCardDeleteRecordingMutation>(DeleteRecordingMutation);
   const [markPrimary, isMarkPrimaryInFlight] =
@@ -175,7 +177,7 @@ export function RecordingsCard({
     const pendingTargets = recording.uploadTargets.filter(
       (target) => target.uploadUrl && target.status !== "UPLOADED"
     );
-    if (pendingTargets.length === 0 || uploadInProgress || isResuming) return;
+    if (pendingTargets.length === 0 || isResuming) return;
     const selected = resumeSelections[recording.id] ?? [];
     if (selected.length !== pendingTargets.length) {
       setActionError(
@@ -185,7 +187,6 @@ export function RecordingsCard({
     }
     setActionError(null);
     setIsResuming(true);
-    onUploadStateChange?.(true);
     try {
       await uploadToTargets(pendingTargets as UploadTarget[], selected);
       onRefresh();
@@ -193,7 +194,6 @@ export function RecordingsCard({
       setActionError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setIsResuming(false);
-      onUploadStateChange?.(false);
     }
   }
 
@@ -219,7 +219,21 @@ export function RecordingsCard({
   }
 
   return (
-    <Card title="Recordings">
+    <Card
+      title="Recordings"
+      rightHeaderContent={
+        <div css={actionsRowStyles}>
+          <IconButton
+            icon="+"
+            css={secondaryButtonStyles}
+            onClick={() => setIsUploadModalOpen(true)}
+            disabled={hasPendingRecording}
+          >
+            Upload
+          </IconButton>
+        </div>
+      }
+    >
       {actionError && <div css={css`color: #b91c1c; margin-bottom: 8px;`}>{actionError}</div>}
 
       <div css={recordingsListStyles}>
@@ -291,58 +305,47 @@ export function RecordingsCard({
                     disabled={isDeleteInFlight}
                     type="button"
                   >
-                    Delete
+                    {isFinished ? "Delete" : "Cancel"}
                   </button>
                 </div>
                 {recording.status === "FAILED" &&
                   recording.uploadTargets.some((target) => target.uploadUrl) && (
-                  <div>
-                    <strong>Resume upload</strong>
-                    <div css={controlsRowStyles}>
-                      <input
-                        type="file"
-                        multiple
-                        accept="video/*"
-                        onChange={(e) => onResumeFilesSelected(recording.id, e.target.files)}
-                        disabled={uploadInProgress || isResuming}
-                      />
-                      <button
-                        css={recordingButtonStyles}
-                        onClick={() => resumeRecordingUpload(recording)}
-                        disabled={uploadInProgress || isResuming}
-                        type="button"
-                      >
-                        {isResuming ? "Resuming…" : "Resume"}
-                      </button>
+                    <div>
+                      <strong>Resume upload</strong>
+                      <div css={controlsRowStyles}>
+                        <input
+                          type="file"
+                          multiple
+                          accept="video/*"
+                          onChange={(e) => onResumeFilesSelected(recording.id, e.target.files)}
+                          disabled={hasPendingRecording || isResuming}
+                        />
+                        <button
+                          css={recordingButtonStyles}
+                          onClick={() => resumeRecordingUpload(recording)}
+                          disabled={hasPendingRecording || isResuming}
+                          type="button"
+                        >
+                          {isResuming ? "Resuming…" : "Resume"}
+                        </button>
+                      </div>
+                      <p css={css`margin: 6px 0 0; color: #475569;`}>
+                        Select the original source files in order to continue uploading the pending parts.
+                      </p>
                     </div>
-                    <p css={css`margin: 6px 0 0; color: #475569;`}>
-                      Select the original source files in order to continue uploading the pending parts.
-                    </p>
-                  </div>
-                )}
-                {recording.uploadTargets.length > 0 && !isFinished && (
-                  <div>
-                    <strong>Sources</strong>
-                    <ul>
-                      {recording.uploadTargets.map((target) => (
-                        <li key={target.id}>
-                          {target.ordinal}. {target.fileName} — {target.status.toLowerCase()} (
-                          {formatBytes(target.uploadedBytes)} / {formatBytes(target.sizeBytes)})
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                  )}
               </div>
             );
           })
         )}
       </div>
-      {hasPendingRecording && (
-        <p css={css`margin-top: 10px; color: #475569;`}>
-          Uploads and combines run in the background. This view refreshes automatically.
-        </p>
-      )}
+
+      <UploadRecordingModal
+        sessionId={sessionId}
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onRefresh={onRefresh}
+      />
     </Card>
   );
 }

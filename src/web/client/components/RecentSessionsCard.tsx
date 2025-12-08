@@ -267,7 +267,7 @@ export function RecentSessionsCard({ viewer }: Props) {
   return (
     <Card
       title="Recent sessions"
-      rightComponent={
+      rightHeaderContent={
         <button css={addSessionButtonStyles} onClick={() => navigate("/session/create")}>
           Add session
         </button>

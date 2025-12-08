@@ -2,12 +2,11 @@ import { css } from "@emotion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { useParams } from "react-router-dom";
+import { type viewSessionQuery } from "../../__generated__/viewSessionQuery.graphql.js";
 import { LapsCard, type LapWithEvents } from "../../components/session/LapsCard.js";
 import { PrimaryRecordingCard } from "../../components/session/PrimaryRecordingCard.js";
 import { RecordingsCard } from "../../components/session/RecordingsCard.js";
-import { UploadRecordingCard } from "../../components/session/UploadRecordingCard.js";
 import { SessionOverviewCard } from "../../components/session/SessionOverviewCard.js";
-import { type viewSessionQuery } from "../../__generated__/viewSessionQuery.graphql.js";
 
 const pageGridStyles = css`
   display: grid;
@@ -89,7 +88,6 @@ const SessionQuery = graphql`
 export default function ViewSessionRoute() {
   const { sessionId } = useParams();
   const [refreshKey, setRefreshKey] = useState(0);
-  const [uploadInProgress, setUploadInProgress] = useState(false);
   const recordingVideoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
   const [jumpAnchorReady, setJumpAnchorReady] = useState(false);
 
@@ -289,17 +287,9 @@ export default function ViewSessionRoute() {
         />
 
         <RecordingsCard
+          sessionId={session.id}
           recordings={normalizedRecordings}
           onRefresh={() => setRefreshKey((key) => key + 1)}
-          uploadInProgress={uploadInProgress}
-          onUploadStateChange={setUploadInProgress}
-        />
-
-        <UploadRecordingCard
-          sessionId={session.id}
-          onRefresh={() => setRefreshKey((key) => key + 1)}
-          uploadInProgress={uploadInProgress}
-          onUploadStateChange={setUploadInProgress}
         />
       </div>
     </div>

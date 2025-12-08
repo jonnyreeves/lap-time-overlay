@@ -6,7 +6,7 @@ interface CardProps {
   title?: string;
   className?: string;
   children: ReactNode;
-  rightComponent?: ReactNode;
+  rightHeaderContent?: ReactNode;
 }
 
 const cardStyles = css`
@@ -47,17 +47,17 @@ export function Card({
   title,
   className,
   children,
-  rightComponent,
+  rightHeaderContent,
 }: CardProps) {
   const classes = ["card", className].filter(Boolean).join(" ");
-  const hasHeader = title || rightComponent;
+  const hasHeader = title || rightHeaderContent;
 
   return (
     <section className={classes} css={cardStyles}>
       {hasHeader && (
         <div css={cardHeaderStyles}>
           {title ? <p className="title">{title}</p> : <div />}
-          {rightComponent}
+          {rightHeaderContent}
         </div>
       )}
       {children}
