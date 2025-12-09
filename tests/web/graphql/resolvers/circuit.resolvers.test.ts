@@ -41,6 +41,7 @@ describe("circuit resolver", () => {
             notes: null,
             createdAt: 0,
             updatedAt: 0,
+            kartId: null,
           },
           {
             id: "s2",
@@ -53,6 +54,7 @@ describe("circuit resolver", () => {
             notes: null,
             createdAt: 0,
             updatedAt: 0,
+            kartId: null,
           },
         ];
       }

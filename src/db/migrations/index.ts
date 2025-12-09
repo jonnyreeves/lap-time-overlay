@@ -17,4 +17,7 @@ export const migrations: Migration[] = [
   (await import("./08_add_track_session_conditions.js")).migration,
   (await import("./09_extend_track_recordings.js")).migration,
   (await import("./10_add_primary_track_recording.js")).migration,
+  (await import("./11_create_karts.js")).migration,
+  (await import("./12_create_circuit_karts.js")).migration,
+  (await import("./13_add_kart_to_track_sessions.js")).migration,
 ];

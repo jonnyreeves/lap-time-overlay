@@ -18,6 +18,7 @@ const mockSession = {
   notes: null,
   createdAt: 0,
   updatedAt: 0,
+  kartId: null,
 };
 
 const mockCircuit = {

@@ -16,6 +16,7 @@ const mockSessions = [
     notes: null,
     createdAt: 0,
     updatedAt: 0,
+    kartId: null,
   },
   {
     id: "s2",
@@ -28,6 +29,7 @@ const mockSessions = [
     notes: "fun",
     createdAt: 0,
     updatedAt: 0,
+    kartId: null,
   },
   {
     id: "s3",
@@ -40,6 +42,7 @@ const mockSessions = [
     notes: null,
     createdAt: 0,
     updatedAt: 0,
+    kartId: null,
   },
 ];
 

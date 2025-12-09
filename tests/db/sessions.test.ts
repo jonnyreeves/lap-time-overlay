@@ -1,23 +1,21 @@
 import assert from "assert";
-import { describe, it, beforeEach } from "vitest";
-import { getDb, setDb } from "../../src/db/client.js";
+import { describe, it, beforeEach, afterEach } from "vitest";
+import { setupTestDb, teardownTestDb } from "../db/test_setup.js";
 import { createUser, type UserRecord } from "../../src/db/users.js";
 import { createSession, getSession, deleteSession, slideSession, purgeExpired } from "../../src/db/sessions.js";
-import Database from "better-sqlite3";
-import { migration as userMigration } from "../../src/db/migrations/01_create_users.js";
-import { migration as sessionMigration } from "../../src/db/migrations/02_create_sessions.js";
+import { getDb } from "../../src/db/client.js";
 
 
 describe("sessions", () => {
   let user: UserRecord;
-  let db: Database.Database;
 
   beforeEach(() => {
-    db = new Database(":memory:");
-    setDb(db);
-    userMigration.up(db); // Apply user migration
-    sessionMigration.up(db); // Apply session migration
+    setupTestDb();
     user = createUser("testuser", "hashedpassword");
+  });
+
+  afterEach(() => {
+    teardownTestDb();
   });
 
   it("can create and retrieve a session", () => {

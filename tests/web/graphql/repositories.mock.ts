@@ -31,6 +31,16 @@ export function createMockRepositories() {
       findByRecordingId: vi.fn(() => []),
       findById: vi.fn(),
     },
+    karts: {
+      findById: vi.fn(),
+      findAll: vi.fn(),
+      create: vi.fn(),
+    },
+    circuitKarts: {
+      addKartToCircuit: vi.fn(),
+      removeKartFromCircuit: vi.fn(),
+      findKartsForCircuit: vi.fn(),
+    },
   } satisfies Repositories;
 
   return repositories;

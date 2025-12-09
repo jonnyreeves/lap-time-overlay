@@ -1,12 +1,6 @@
 import assert from "assert";
-import { describe, it, beforeEach } from "vitest";
-import { getDb, setDb } from "../../src/db/client.js";
-import Database from "better-sqlite3";
-import { migration as userMigration } from "../../src/db/migrations/01_create_users.js";
-import { migration as circuitMigration } from "../../src/db/migrations/03_create_circuits.js";
-import { migration as trackSessionMigration } from "../../src/db/migrations/04_create_track_sessions.js";
-import { migration as lapMigration } from "../../src/db/migrations/05_create_laps.js";
-import { migration as trackSessionConditionsMigration } from "../../src/db/migrations/08_add_track_session_conditions.js";
+import { describe, it, beforeEach, afterEach } from "vitest";
+import { setupTestDb, teardownTestDb } from "../db/test_setup.js";
 import { createUser, type UserRecord } from "../../src/db/users.js";
 import { createCircuit, type CircuitRecord } from "../../src/db/circuits.js";
 import { createTrackSession, type TrackSessionRecord } from "../../src/db/track_sessions.js";
@@ -22,16 +16,9 @@ describe("laps", () => {
   let user: UserRecord;
   let circuit: CircuitRecord;
   let trackSession: TrackSessionRecord;
-  let db: Database.Database;
 
   beforeEach(() => {
-    db = new Database(":memory:");
-    setDb(db);
-    userMigration.up(db);
-    circuitMigration.up(db);
-    trackSessionMigration.up(db);
-    trackSessionConditionsMigration.up(db);
-    lapMigration.up(db);
+    setupTestDb();
     user = createUser("testuser", "hashedpassword");
     circuit = createCircuit("Test Circuit");
     trackSession = createTrackSession(
@@ -41,6 +28,10 @@ describe("laps", () => {
       circuit.id,
       user.id
     );
+  });
+
+  afterEach(() => {
+    teardownTestDb();
   });
 
   it("can create and retrieve a lap", () => {

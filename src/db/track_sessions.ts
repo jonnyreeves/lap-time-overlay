@@ -21,6 +21,7 @@ export interface TrackSessionRecord {
   notes: string | null;
   createdAt: number;
   updatedAt: number;
+  kartId: string | null;
 }
 
 interface TrackSessionRow {
@@ -34,6 +35,7 @@ interface TrackSessionRow {
   notes: string | null;
   created_at: number;
   updated_at: number;
+  kart_id: string | null;
 }
 
 function mapRow(row: TrackSessionRow): TrackSessionRecord {
@@ -48,6 +50,7 @@ function mapRow(row: TrackSessionRow): TrackSessionRecord {
     notes: row.notes,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    kartId: row.kart_id,
   };
 }
 
@@ -55,7 +58,7 @@ export function findTrackSessionById(id: string): TrackSessionRecord | null {
   const db = getDb();
   const row = db
     .prepare<unknown[], TrackSessionRow>(
-      `SELECT id, date, format, classification, conditions, circuit_id, user_id, notes, created_at, updated_at
+      `SELECT id, date, format, classification, conditions, circuit_id, user_id, notes, created_at, updated_at, kart_id
        FROM track_sessions WHERE id = ? LIMIT 1`
     )
     .get(id);
@@ -66,7 +69,7 @@ export function findTrackSessionsByCircuitId(circuitId: string): TrackSessionRec
   const db = getDb();
   const rows = db
     .prepare<unknown[], TrackSessionRow>(
-      `SELECT id, date, format, classification, conditions, circuit_id, user_id, notes, created_at, updated_at
+      `SELECT id, date, format, classification, conditions, circuit_id, user_id, notes, created_at, updated_at, kart_id
        FROM track_sessions WHERE circuit_id = ? ORDER BY date DESC`
     )
     .all(circuitId);
@@ -77,9 +80,8 @@ export function findTrackSessionsByUserId(userId: string): TrackSessionRecord[] 
   const db = getDb();
   const rows = db
     .prepare<unknown[], TrackSessionRow>(
-      `SELECT id, date, format, classification, conditions, circuit_id, user_id, notes, created_at, updated_at
-       FROM track_sessions WHERE user_id = ? ORDER BY date DESC`
-    )
+            `SELECT id, date, format, classification, conditions, circuit_id, user_id, notes, created_at, updated_at, kart_id
+                 FROM track_sessions WHERE user_id = ? ORDER BY date DESC`    )
     .all(userId);
   return rows.map(mapRow);
 }
@@ -98,6 +100,7 @@ export function createTrackSessionWithLaps({
   notes = null,
   laps = [],
   now = Date.now(),
+  kartId = null,
 }: {
   date: string;
   format: string;
@@ -108,12 +111,13 @@ export function createTrackSessionWithLaps({
   notes?: string | null;
   laps?: TrackSessionLapInput[];
   now?: number;
+  kartId?: string | null;
 }): { trackSession: TrackSessionRecord; laps: LapRecord[] } {
   const db = getDb();
   const sessionId = randomUUID();
   const insertSession = db.prepare(
-    `INSERT INTO track_sessions (id, date, format, classification, conditions, circuit_id, user_id, notes, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO track_sessions (id, date, format, classification, conditions, circuit_id, user_id, notes, created_at, updated_at, kart_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const insertLap =
     laps.length > 0
@@ -142,7 +146,8 @@ export function createTrackSessionWithLaps({
       userId,
       notes,
       now,
-      now
+      now,
+      kartId
     );
     if (insertLap) {
       for (const lap of laps) {
@@ -184,6 +189,7 @@ export function createTrackSessionWithLaps({
     notes: notes ?? null,
     createdAt: now,
     updatedAt: now,
+    kartId: kartId ?? null,
   };
 
   return { trackSession, laps: createdLaps };
@@ -197,7 +203,8 @@ export function createTrackSession(
   userId: string,
   notes: string | null = null,
   now = Date.now(),
-  conditions: TrackSessionConditions = "Dry"
+  conditions: TrackSessionConditions = "Dry",
+  kartId: string | null = null
 ): TrackSessionRecord {
   return createTrackSessionWithLaps({
     date,
@@ -209,6 +216,7 @@ export function createTrackSession(
     conditions,
     now,
     laps: [],
+    kartId,
   }).trackSession;
 }
 
@@ -221,6 +229,7 @@ export function updateTrackSession({
   conditions,
   notes,
   now = Date.now(),
+  kartId,
 }: {
   id: string;
   date?: string;
@@ -230,6 +239,7 @@ export function updateTrackSession({
   conditions?: TrackSessionConditions;
   notes?: string | null;
   now?: number;
+  kartId?: string | null;
 }): TrackSessionRecord | null {
   const db = getDb();
   const current = findTrackSessionById(id);
@@ -247,11 +257,12 @@ export function updateTrackSession({
     conditions: conditions ?? current.conditions,
     notes: notes === undefined ? current.notes : notes,
     updatedAt: now,
+    kartId: kartId === undefined ? current.kartId : kartId,
   };
 
   db.prepare(
     `UPDATE track_sessions
-     SET date = ?, format = ?, classification = ?, conditions = ?, circuit_id = ?, notes = ?, updated_at = ?
+     SET date = ?, format = ?, classification = ?, conditions = ?, circuit_id = ?, notes = ?, updated_at = ?, kart_id = ?
      WHERE id = ?`
   ).run(
     next.date,
@@ -261,6 +272,7 @@ export function updateTrackSession({
     next.circuitId,
     next.notes,
     next.updatedAt,
+    next.kartId,
     id
   );
 
@@ -333,6 +345,7 @@ export interface TrackSessionRepository {
     notes?: string | null;
     laps?: TrackSessionLapInput[];
     now?: number;
+    kartId?: string | null;
   }) => { trackSession: TrackSessionRecord; laps: LapRecord[] };
   update: (input: {
     id: string;
@@ -343,6 +356,7 @@ export interface TrackSessionRepository {
     conditions?: TrackSessionConditions;
     notes?: string | null;
     now?: number;
+    kartId?: string | null;
   }) => TrackSessionRecord | null;
   replaceLapsForSession: (sessionId: string, laps: TrackSessionLapInput[], now?: number) => LapRecord[];
 }

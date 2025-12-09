@@ -1,17 +1,15 @@
 import assert from "assert";
-import { describe, it, beforeEach } from "vitest";
-import { getDb, setDb } from "../../src/db/client.js";
-import Database from "better-sqlite3";
-import { migration as circuitMigration } from "../../src/db/migrations/03_create_circuits.js";
+import { describe, it, beforeEach, afterEach } from "vitest";
+import { setupTestDb, teardownTestDb } from "../db/test_setup.js";
 import { createCircuit, findAllCircuits, findCircuitById, type CircuitRecord } from "../../src/db/circuits.js";
 
 describe("circuits", () => {
-  let db: Database.Database;
-
   beforeEach(() => {
-    db = new Database(":memory:");
-    setDb(db);
-    circuitMigration.up(db);
+    setupTestDb();
+  });
+
+  afterEach(() => {
+    teardownTestDb();
   });
 
   it("can create a circuit", () => {

@@ -1,4 +1,6 @@
 import { circuitsRepository, type CircuitRepository } from "../../db/circuits.js";
+import { kartsRepository, type KartsRepository } from "../../db/karts.js";
+import { circuitKartsRepository, type CircuitKartsRepository } from "../../db/circuit_karts.js";
 import { lapEventsRepository, type LapEventRepository } from "../../db/lap_events.js";
 import { lapsRepository, type LapRepository } from "../../db/laps.js";
 import {
@@ -21,6 +23,8 @@ export interface Repositories {
   lapEvents: LapEventRepository;
   trackRecordings: TrackRecordingRepository;
   trackRecordingSources: TrackRecordingSourceRepository;
+  karts: KartsRepository;
+  circuitKarts: CircuitKartsRepository;
 }
 
 export function createRepositories(): Repositories {
@@ -31,5 +35,7 @@ export function createRepositories(): Repositories {
     lapEvents: lapEventsRepository,
     trackRecordings: trackRecordingsRepository,
     trackRecordingSources: trackRecordingSourcesRepository,
+    karts: kartsRepository,
+    circuitKarts: circuitKartsRepository,
   };
 }

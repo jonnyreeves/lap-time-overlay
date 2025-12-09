@@ -1,17 +1,15 @@
 import assert from "assert";
-import { describe, it, beforeEach } from "vitest";
-import { getDb, setDb } from "../../src/db/client.js";
+import { describe, it, beforeEach, afterEach } from "vitest";
+import { setupTestDb, teardownTestDb } from "../db/test_setup.js";
 import { createUser, findUserById, findUserByUsername, normalizeUsername, type UserRecord } from "../../src/db/users.js";
-import Database from "better-sqlite3";
-import { migration } from "../../src/db/migrations/01_create_users.js";
 
 describe("users", () => {
-  let db: Database.Database;
-
   beforeEach(() => {
-    db = new Database(":memory:");
-    setDb(db);
-    migration.up(db); // Apply user migration
+    setupTestDb();
+  });
+
+  afterEach(() => {
+    teardownTestDb();
   });
 
   it("can create a user", () => {
