@@ -166,7 +166,7 @@ export function UploadRecordingModal({
 
   // Combine fileEntries (non-video) and videoFiles for upload
   const allFiles = useMemo(
-    () => [...fileEntries.map((entry) => entry.file), ...videoFiles],
+    () => [...fileEntries.map((entry) => entry), ...videoFiles],
     [fileEntries, videoFiles]
   );
 
