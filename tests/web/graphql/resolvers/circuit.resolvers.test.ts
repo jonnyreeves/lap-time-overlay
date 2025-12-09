@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createMockGraphQLContext } from "../context.mock.js";
 import { rootValue } from "../../../../src/web/graphql/schema.js";
+import { createMockGraphQLContext } from "../context.mock.js";
 
 const { context: baseContext, repositories } = createMockGraphQLContext();
 
@@ -125,7 +125,7 @@ describe("circuit resolver by id", () => {
       updatedAt: 0,
     });
 
-    const circuit = rootValue.circuit(null, { id: "c1" }, baseContext as never);
+    const circuit = rootValue.circuit({ id: "c1" }, baseContext);
 
     expect(circuit).toMatchObject({
       id: "c1",
@@ -138,12 +138,12 @@ describe("circuit resolver by id", () => {
     repositories.circuits.findById.mockReturnValue(null);
 
     expect(() =>
-      rootValue.circuit(null, { id: "non-existent" }, baseContext as never),
+      rootValue.circuit({ id: "non-existent" }, baseContext),
     ).toThrowError("Circuit not found");
   });
 
   it("returns a GraphQLError if circuit ID is not provided", () => {
-    expect(() => rootValue.circuit(null, {}, baseContext as never)).toThrowError(
+    expect(() => rootValue.circuit({}, baseContext)).toThrowError(
       "Circuit ID is required",
     );
   });
