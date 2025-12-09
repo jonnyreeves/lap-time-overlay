@@ -20,6 +20,7 @@ export const rootValue = {
   viewer: viewerResolvers.viewer,
   circuits: circuitResolvers.circuits,
   trackSession: trackSessionResolvers.trackSession,
+  circuit: circuitResolvers.circuit,
   register: authResolvers.register,
   login: authResolvers.login,
   logout: authResolvers.logout,

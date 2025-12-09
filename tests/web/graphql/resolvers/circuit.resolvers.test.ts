@@ -110,3 +110,41 @@ describe("circuit resolver", () => {
     expect(result.circuit).toMatchObject({ id: "c1", name: "Spa", heroImage: "img" });
   });
 });
+
+describe("circuit resolver by id", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns a circuit by ID", async () => {
+    repositories.circuits.findById.mockReturnValue({
+      id: "c1",
+      name: "Spa",
+      heroImage: "spa.jpg",
+      createdAt: 0,
+      updatedAt: 0,
+    });
+
+    const circuit = rootValue.circuit(null, { id: "c1" }, baseContext as never);
+
+    expect(circuit).toMatchObject({
+      id: "c1",
+      name: "Spa",
+      heroImage: "spa.jpg",
+    });
+  });
+
+  it("returns a GraphQLError if circuit is not found", () => {
+    repositories.circuits.findById.mockReturnValue(null);
+
+    expect(() =>
+      rootValue.circuit(null, { id: "non-existent" }, baseContext as never),
+    ).toThrowError("Circuit not found");
+  });
+
+  it("returns a GraphQLError if circuit ID is not provided", () => {
+    expect(() => rootValue.circuit(null, {}, baseContext as never)).toThrowError(
+      "Circuit ID is required",
+    );
+  });
+});

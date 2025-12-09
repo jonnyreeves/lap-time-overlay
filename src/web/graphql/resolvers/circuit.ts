@@ -43,6 +43,26 @@ export function toCircuitPayload(
 }
 
 export const circuitResolvers = {
+  circuit: (
+    args: { id?: string },
+    context: GraphQLContext,
+  ) => {
+    const { repositories } = context;
+    const userId = context.currentUser?.id;
+    const circuitId = args.id;
+    if (!circuitId) {
+      throw new GraphQLError("Circuit ID is required", {
+        extensions: { code: "BAD_USER_INPUT" },
+      });
+    }
+    const circuit = repositories.circuits.findById(circuitId);
+    if (!circuit) {
+      throw new GraphQLError("Circuit not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+    return toCircuitPayload(circuit, repositories, userId);
+  },
   circuits: (_args: unknown, context: GraphQLContext) => {
     const { repositories } = context;
     const userId = context.currentUser?.id;

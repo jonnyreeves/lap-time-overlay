@@ -3,6 +3,7 @@ import { graphql, useFragment } from "react-relay";
 import { type RecentCircuitsCard_viewer$key } from "../__generated__/RecentCircuitsCard_viewer.graphql.js";
 import { Card } from "./Card.js";
 import { formatStopwatchTime } from "../utils/lapTime.js";
+import { useNavigate } from "react-router-dom";
 
 const RecentCircuitsCardFragment = graphql`
   fragment RecentCircuitsCard_viewer on User {
@@ -43,6 +44,7 @@ const circuitItemStyles = css`
   align-items: center;
   text-align: center;
   padding: 10px;
+  cursor: pointer;
 `;
 
 const heroImageContainerStyles = css`
@@ -150,12 +152,17 @@ export function RecentCircuitsCard({
   const circuits = (data.recentCircuits?.edges ?? [])
     .map((edge) => edge?.node)
     .filter(Boolean);
+  const navigate = useNavigate();
 
   return (
     <Card title="Recent Circuits">
       <div css={circuitsContainerStyles}>
         {circuits.map((circuit) => (
-          <div key={circuit.id} css={circuitItemStyles}>
+          <div
+            key={circuit.id}
+            css={circuitItemStyles}
+            onClick={() => navigate(`/circuits/view/${circuit.id}`)}
+          >
             <div css={heroImageContainerStyles}>
               {circuit.heroImage ? (
                 <img src={circuit.heroImage} alt={circuit.name} />

@@ -7,6 +7,7 @@ import { NotFoundPage } from "./routes/not-found/index.js";
 import { RequireAuth } from "./routes/RequireAuth.js";
 import CreateSessionRoute from "./routes/session/create.js";
 import ViewSessionRoute from "./routes/session/view.js";
+import CircuitViewPage from "./routes/circuit/CircuitViewPage.js";
 
 export const router = createBrowserRouter([
   {
@@ -22,6 +23,7 @@ export const router = createBrowserRouter([
       { path: "/", element: <HomePage /> },
       { path: "/session/create", element: <CreateSessionRoute /> },
       { path: "/session/:sessionId", element: <ViewSessionRoute /> },
+      { path: "/circuits/view/:circuitId", element: <CircuitViewPage /> },
       { path: "*", element: <NotFoundPage /> },
     ],
   },

@@ -2,6 +2,7 @@ type Query {
   viewer: User
   circuits: [Circuit!]!
   trackSession(id: ID!): TrackSession!
+  circuit(id: ID!): Circuit
 }
 
 input CreateCircuitInput {
