@@ -32,4 +32,9 @@ export const rootValue = {
   markPrimaryTrackRecording: trackRecordingResolvers.markPrimaryTrackRecording,
   updateTrackRecording: trackRecordingResolvers.updateTrackRecording,
   deleteTrackRecording: trackRecordingResolvers.deleteTrackRecording,
+  createKart: circuitResolvers.createKart,
+  updateKart: circuitResolvers.updateKart,
+  deleteKart: circuitResolvers.deleteKart,
+  addKartToCircuit: circuitResolvers.addKartToCircuit,
+  removeKartFromCircuit: circuitResolvers.removeKartFromCircuit,
 };

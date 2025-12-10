@@ -111,6 +111,11 @@ type Mutation {
   markPrimaryTrackRecording(id: ID!): MarkPrimaryTrackRecordingPayload!
   updateTrackRecording(input: UpdateTrackRecordingInput!): UpdateTrackRecordingPayload!
   deleteTrackRecording(id: ID!): DeleteTrackRecordingPayload!
+  createKart(input: CreateKartInput!): CreateKartPayload!
+  updateKart(input: UpdateKartInput!): UpdateKartPayload!
+  deleteKart(id: ID!): DeleteKartPayload!
+  addKartToCircuit(circuitId: ID!, kartId: ID!): AddKartToCircuitPayload!
+  removeKartFromCircuit(circuitId: ID!, kartId: ID!): RemoveKartFromCircuitPayload!
 }
 
 input AuthInput {
@@ -133,6 +138,14 @@ type Circuit {
   personalBest: Float
   personalBestDry: Float
   personalBestWet: Float
+  karts: [Kart!]!
+}
+
+type Kart {
+  id: ID!
+  name: String!
+  createdAt: String!
+  updatedAt: String!
 }
 
 type CircuitEdge {
@@ -253,4 +266,35 @@ type AuthPayload {
 
 type LogoutResult {
   success: Boolean!
+}
+
+input CreateKartInput {
+  name: String!
+}
+
+type CreateKartPayload {
+  kart: Kart!
+}
+
+input UpdateKartInput {
+  id: ID!
+  name: String!
+}
+
+type UpdateKartPayload {
+  kart: Kart!
+}
+
+type DeleteKartPayload {
+  success: Boolean!
+}
+
+type AddKartToCircuitPayload {
+  circuit: Circuit!
+  kart: Kart!
+}
+
+type RemoveKartFromCircuitPayload {
+  circuit: Circuit!
+  kart: Kart!
 }

@@ -12,7 +12,8 @@ import {
   uploadToTargets,
   type UploadTarget,
 } from "./recordingShared.js";
-import { actionsRowStyles, secondaryButtonStyles } from "./sessionOverviewStyles";
+import { actionsRowStyles } from "./sessionOverviewStyles";
+import { inlineActionButtonStyles } from "../inlineActionButtons.ts";
 
 type Recording = {
   id: string;
@@ -225,7 +226,7 @@ export function RecordingsCard({
         <div css={actionsRowStyles}>
           <IconButton
             icon="+"
-            css={secondaryButtonStyles}
+            css={inlineActionButtonStyles}
             onClick={() => setIsUploadModalOpen(true)}
             disabled={hasPendingRecording}
           >

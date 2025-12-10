@@ -12,11 +12,11 @@ import {
   inputStyles,
   notesStyles,
   primaryButtonStyles,
-  secondaryButtonStyles,
   sessionCardLayoutStyles,
   sessionInfoGridStyles,
   textareaStyles,
 } from "./sessionOverviewStyles.js";
+import { inlineActionButtonStyles } from "../inlineActionButtons.ts";
 import {
   conditionsOptions,
   formatOptions,
@@ -200,7 +200,7 @@ export function SessionOverviewCard({ session, laps, circuits }: Props) {
             <>
               <button
                 type="button"
-                css={secondaryButtonStyles}
+                css={inlineActionButtonStyles}
                 onClick={handleCancel}
                 disabled={isSaving}
               >
@@ -218,7 +218,7 @@ export function SessionOverviewCard({ session, laps, circuits }: Props) {
           ) : (
             <IconButton
               type="button"
-              css={secondaryButtonStyles}
+              css={inlineActionButtonStyles}
               onClick={handleEdit}
               icon="✏️"
             >

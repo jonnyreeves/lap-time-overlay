@@ -62,14 +62,39 @@ export function createKart(name: string, now = Date.now()): KartRecord {
   };
 }
 
+export function updateKart(id: string, name: string, now = Date.now()): KartRecord | null {
+  const db = getDb();
+  const current = findKartById(id);
+  if (!current) {
+    return null;
+  }
+  db.prepare(
+    `UPDATE karts
+     SET name = ?, updated_at = ?
+     WHERE id = ?`
+  ).run(name, now, id);
+
+  return { ...current, name, updatedAt: now };
+}
+
+export function deleteKart(id: string): boolean {
+  const db = getDb();
+  const result = db.prepare(`DELETE FROM karts WHERE id = ?`).run(id);
+  return result.changes > 0;
+}
+
 export interface KartsRepository {
   findById: (id: string) => KartRecord | null;
   findAll: () => KartRecord[];
   create: (name: string) => KartRecord;
+  update: (id: string, name: string) => KartRecord | null;
+  delete: (id: string) => boolean;
 }
 
 export const kartsRepository: KartsRepository = {
   findById: findKartById,
   findAll: findAllKarts,
   create: createKart,
+  update: updateKart,
+  delete: deleteKart,
 };

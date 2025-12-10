@@ -39,6 +39,7 @@ export function toCircuitPayload(
     personalBest: () => getCircuitPersonalBest(circuit.id, repositories, userId),
     personalBestDry: () => getCircuitPersonalBest(circuit.id, repositories, userId, "Dry"),
     personalBestWet: () => getCircuitPersonalBest(circuit.id, repositories, userId, "Wet"),
+    karts: () => repositories.circuitKarts.findKartsForCircuit(circuit.id),
   };
 }
 
@@ -84,5 +85,120 @@ export const circuitResolvers = {
     }
     const newCircuit = context.repositories.circuits.create(input.name, input.heroImage);
     return { circuit: newCircuit };
+  },
+
+  createKart: (args: { input?: { name?: string } }, context: GraphQLContext) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+    const input = args.input;
+    if (!input?.name) {
+      throw new GraphQLError("Kart name is required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    const newKart = context.repositories.karts.create(input.name);
+    return { kart: newKart };
+  },
+
+  updateKart: (args: { input?: { id?: string; name?: string } }, context: GraphQLContext) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+    const input = args.input;
+    if (!input?.id || !input?.name) {
+      throw new GraphQLError("Kart ID and name are required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    const updatedKart = context.repositories.karts.update(input.id, input.name);
+    if (!updatedKart) {
+      throw new GraphQLError("Kart not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+    return { kart: updatedKart };
+  },
+
+  deleteKart: (args: { id?: string }, context: GraphQLContext) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+    const kartId = args.id;
+    if (!kartId) {
+      throw new GraphQLError("Kart ID is required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    const success = context.repositories.karts.delete(kartId);
+    return { success };
+  },
+
+  addKartToCircuit: (
+    args: { circuitId?: string; kartId?: string },
+    context: GraphQLContext
+  ) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+    const { circuitId, kartId } = args;
+    if (!circuitId || !kartId) {
+      throw new GraphQLError("Circuit ID and Kart ID are required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    const circuit = context.repositories.circuits.findById(circuitId);
+    if (!circuit) {
+      throw new GraphQLError("Circuit not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+    const kart = context.repositories.karts.findById(kartId);
+    if (!kart) {
+      throw new GraphQLError("Kart not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+    context.repositories.circuitKarts.addKartToCircuit(circuitId, kartId);
+    return { circuit: toCircuitPayload(circuit, context.repositories, context.currentUser.id), kart };
+  },
+
+  removeKartFromCircuit: (
+    args: { circuitId?: string; kartId?: string },
+    context: GraphQLContext
+  ) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+    const { circuitId, kartId } = args;
+    if (!circuitId || !kartId) {
+      throw new GraphQLError("Circuit ID and Kart ID are required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    const circuit = context.repositories.circuits.findById(circuitId);
+    if (!circuit) {
+      throw new GraphQLError("Circuit not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+    const kart = context.repositories.karts.findById(kartId);
+    if (!kart) {
+      throw new GraphQLError("Kart not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+    context.repositories.circuitKarts.removeKartFromCircuit(circuitId, kartId);
+    return { circuit: toCircuitPayload(circuit, context.repositories, context.currentUser.id), kart };
   },
 };

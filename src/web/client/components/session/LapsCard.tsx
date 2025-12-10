@@ -35,8 +35,8 @@ import {
 import {
   actionsRowStyles,
   primaryButtonStyles,
-  secondaryButtonStyles,
 } from "./sessionOverviewStyles.js";
+import { inlineActionButtonStyles } from "../inlineActionButtons.ts";
 
 type LapEvent = {
   id: string;
@@ -193,7 +193,7 @@ export function LapsCard({
             <>
               <button
                 type="button"
-                css={secondaryButtonStyles}
+                css={inlineActionButtonStyles}
                 onClick={handleCancel}
                 disabled={isSaving}
               >
@@ -211,7 +211,7 @@ export function LapsCard({
           ) : (
             <IconButton
               type="button"
-              css={secondaryButtonStyles}
+              css={inlineActionButtonStyles}
               onClick={handleEdit}
               icon="✏️"
             >

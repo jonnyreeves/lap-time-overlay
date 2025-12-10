@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<01b6cf5ee8315abcb3c00b62e9c5cfd1>>
+ * @generated SignedSource<<cf296f141ffe3bd7f04759aaf3daac95>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,6 +9,7 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
+import { FragmentRefs } from "relay-runtime";
 export type CircuitViewPageQuery$variables = {
   circuitId: string;
 };
@@ -16,6 +17,7 @@ export type CircuitViewPageQuery$data = {
   readonly circuit: {
     readonly id: string;
     readonly name: string;
+    readonly " $fragmentSpreads": FragmentRefs<"CircuitKartsCard_circuit">;
   } | null | undefined;
 };
 export type CircuitViewPageQuery = {
@@ -33,44 +35,51 @@ var v0 = [
 ],
 v1 = [
   {
-    "alias": null,
-    "args": [
-      {
-        "kind": "Variable",
-        "name": "id",
-        "variableName": "circuitId"
-      }
-    ],
-    "concreteType": "Circuit",
-    "kind": "LinkedField",
-    "name": "circuit",
-    "plural": false,
-    "selections": [
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "id",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "name",
-        "storageKey": null
-      }
-    ],
-    "storageKey": null
+    "kind": "Variable",
+    "name": "id",
+    "variableName": "circuitId"
   }
-];
+],
+v2 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "id",
+  "storageKey": null
+},
+v3 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "name",
+  "storageKey": null
+};
 return {
   "fragment": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
     "name": "CircuitViewPageQuery",
-    "selections": (v1/*: any*/),
+    "selections": [
+      {
+        "alias": null,
+        "args": (v1/*: any*/),
+        "concreteType": "Circuit",
+        "kind": "LinkedField",
+        "name": "circuit",
+        "plural": false,
+        "selections": [
+          (v2/*: any*/),
+          (v3/*: any*/),
+          {
+            "args": null,
+            "kind": "FragmentSpread",
+            "name": "CircuitKartsCard_circuit"
+          }
+        ],
+        "storageKey": null
+      }
+    ],
     "type": "Query",
     "abstractKey": null
   },
@@ -79,19 +88,46 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "CircuitViewPageQuery",
-    "selections": (v1/*: any*/)
+    "selections": [
+      {
+        "alias": null,
+        "args": (v1/*: any*/),
+        "concreteType": "Circuit",
+        "kind": "LinkedField",
+        "name": "circuit",
+        "plural": false,
+        "selections": [
+          (v2/*: any*/),
+          (v3/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "Kart",
+            "kind": "LinkedField",
+            "name": "karts",
+            "plural": true,
+            "selections": [
+              (v2/*: any*/),
+              (v3/*: any*/)
+            ],
+            "storageKey": null
+          }
+        ],
+        "storageKey": null
+      }
+    ]
   },
   "params": {
-    "cacheID": "7b513df85d0bf68f64d08a712002452a",
+    "cacheID": "c37f921ff8f2f806f881e565a098df41",
     "id": null,
     "metadata": {},
     "name": "CircuitViewPageQuery",
     "operationKind": "query",
-    "text": "query CircuitViewPageQuery(\n  $circuitId: ID!\n) {\n  circuit(id: $circuitId) {\n    id\n    name\n  }\n}\n"
+    "text": "query CircuitViewPageQuery(\n  $circuitId: ID!\n) {\n  circuit(id: $circuitId) {\n    id\n    name\n    ...CircuitKartsCard_circuit\n  }\n}\n\nfragment CircuitKartsCard_circuit on Circuit {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "e0696c26f36dd4cf30357444edf35a7c";
+(node as any).hash = "8fce069ad559c569ddc6bff665866a1f";
 
 export default node;

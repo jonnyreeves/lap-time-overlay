@@ -90,20 +90,6 @@ export const primaryButtonStyles = css`
   }
 `;
 
-export const secondaryButtonStyles = css`
-  padding: 8px 12px;
-  background: #e2e8f4;
-  color: #0f172a;
-  border: 1px solid #d7deed;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-`;
 
 export const inlineHelpStyles = css`
   margin: 0;

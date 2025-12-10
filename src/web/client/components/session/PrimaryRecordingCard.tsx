@@ -4,7 +4,7 @@ import { graphql, useMutation } from "react-relay";
 import type { PrimaryRecordingCardUpdateRecordingMutation } from "../../__generated__/PrimaryRecordingCardUpdateRecordingMutation.graphql.js";
 import { Card } from "../Card.js";
 import { IconButton } from "../IconButton.js";
-import { secondaryButtonStyles } from "./sessionOverviewStyles.js";
+import { inlineActionButtonStyles } from "../inlineActionButtons.ts";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 import { buildLapRanges, resolveLapAtTime } from "../../hooks/useLapPositionSync.js";
 import { LapOverlay } from "./LapOverlay.js";
@@ -946,7 +946,7 @@ function jumpToLapStart(lapStart: number, lapId?: string) {
       rightHeaderContent={
         recording?.status === "READY" ? (
           <IconButton
-            css={secondaryButtonStyles}
+            css={inlineActionButtonStyles}
             type="button"
             onClick={openExpanded}
             icon="↔️"
