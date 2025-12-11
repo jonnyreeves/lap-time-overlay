@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<95a08dbc0d954ab19fba3d7b487d437c>>
+ * @generated SignedSource<<8dc4e42c87cc757fd9a57b1ca815efed>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,19 +10,19 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type CircuitViewPageQuery$variables = {
-  circuitId: string;
+export type TrackViewPageQuery$variables = {
+  trackId: string;
 };
-export type CircuitViewPageQuery$data = {
+export type TrackViewPageQuery$data = {
   readonly track: {
     readonly id: string;
     readonly name: string;
     readonly " $fragmentSpreads": FragmentRefs<"CircuitKartsCard_circuit">;
   } | null | undefined;
 };
-export type CircuitViewPageQuery = {
-  response: CircuitViewPageQuery$data;
-  variables: CircuitViewPageQuery$variables;
+export type TrackViewPageQuery = {
+  response: TrackViewPageQuery$data;
+  variables: TrackViewPageQuery$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -30,14 +30,14 @@ var v0 = [
   {
     "defaultValue": null,
     "kind": "LocalArgument",
-    "name": "circuitId"
+    "name": "trackId"
   }
 ],
 v1 = [
   {
     "kind": "Variable",
     "name": "id",
-    "variableName": "circuitId"
+    "variableName": "trackId"
   }
 ],
 v2 = {
@@ -59,7 +59,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "CircuitViewPageQuery",
+    "name": "TrackViewPageQuery",
     "selections": [
       {
         "alias": "track",
@@ -87,7 +87,7 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "CircuitViewPageQuery",
+    "name": "TrackViewPageQuery",
     "selections": [
       {
         "alias": "track",
@@ -118,16 +118,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "2728c921f0aa5f3efc0731c37ae51bbe",
+    "cacheID": "5fb1067e37c86479224882d34446f82b",
     "id": null,
     "metadata": {},
-    "name": "CircuitViewPageQuery",
+    "name": "TrackViewPageQuery",
     "operationKind": "query",
-    "text": "query CircuitViewPageQuery(\n  $circuitId: ID!\n) {\n  track: circuit(id: $circuitId) {\n    id\n    name\n    ...CircuitKartsCard_circuit\n  }\n}\n\nfragment CircuitKartsCard_circuit on Circuit {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n"
+    "text": "query TrackViewPageQuery(\n  $trackId: ID!\n) {\n  track: circuit(id: $trackId) {\n    id\n    name\n    ...CircuitKartsCard_circuit\n  }\n}\n\nfragment CircuitKartsCard_circuit on Circuit {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "86fda8aa7149ad039554233fe13bd91c";
+(node as any).hash = "cf12eef6b7f820b4ece63aad5afb0dc7";
 
 export default node;
