@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<92d3c13edd532d69b86cb5d632fd3374>>
+ * @generated SignedSource<<e3cce0ae563b17ec9e318a87025aa71e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -17,7 +17,7 @@ export type TrackViewPageQuery$data = {
   readonly track: {
     readonly id: string;
     readonly name: string;
-    readonly " $fragmentSpreads": FragmentRefs<"CircuitKartsCard_circuit" | "CircuitTrackLayoutsCard_circuit">;
+    readonly " $fragmentSpreads": FragmentRefs<"TrackKartsCard_circuit" | "TrackLayoutCard_circuit">;
   } | null | undefined;
 };
 export type TrackViewPageQuery = {
@@ -78,12 +78,12 @@ return {
           {
             "args": null,
             "kind": "FragmentSpread",
-            "name": "CircuitKartsCard_circuit"
+            "name": "TrackKartsCard_circuit"
           },
           {
             "args": null,
             "kind": "FragmentSpread",
-            "name": "CircuitTrackLayoutsCard_circuit"
+            "name": "TrackLayoutCard_circuit"
           }
         ],
         "storageKey": null
@@ -134,16 +134,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "77d89df7499ec0b36ce1c8161825dd20",
+    "cacheID": "60372da2b227b02212a710e771dd7d65",
     "id": null,
     "metadata": {},
     "name": "TrackViewPageQuery",
     "operationKind": "query",
-    "text": "query TrackViewPageQuery(\n  $trackId: ID!\n) {\n  track: circuit(id: $trackId) {\n    id\n    name\n    ...CircuitKartsCard_circuit\n    ...CircuitTrackLayoutsCard_circuit\n  }\n}\n\nfragment CircuitKartsCard_circuit on Circuit {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n\nfragment CircuitTrackLayoutsCard_circuit on Circuit {\n  id\n  name\n  trackLayouts {\n    id\n    name\n  }\n}\n"
+    "text": "query TrackViewPageQuery(\n  $trackId: ID!\n) {\n  track: circuit(id: $trackId) {\n    id\n    name\n    ...TrackKartsCard_circuit\n    ...TrackLayoutCard_circuit\n  }\n}\n\nfragment TrackKartsCard_circuit on Circuit {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n\nfragment TrackLayoutCard_circuit on Circuit {\n  id\n  name\n  trackLayouts {\n    id\n    name\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "7b29a8f0af86ce529261ddf7a52887bd";
+(node as any).hash = "91e9ed8d64d8cf3535bcf14db02500f6";
 
 export default node;

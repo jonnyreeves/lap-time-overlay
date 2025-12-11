@@ -4,8 +4,8 @@ import { css } from "@emotion/react";
 import { Modal } from "./Modal.tsx";
 import { inputStyles, primaryButtonStyles } from "./session/sessionOverviewStyles.ts";
 import { inlineActionButtonStyles } from "./inlineActionButtons.ts";
-import type { CircuitKartEditModalCreateKartMutation } from "src/web/client/__generated__/CircuitKartEditModalCreateKartMutation.graphql.ts";
-import type { CircuitKartEditModalUpdateKartMutation } from "src/web/client/__generated__/CircuitKartEditModalUpdateKartMutation.graphql.ts";
+import type { TrackKartEditModalCreateKartMutation } from "src/web/client/__generated__/TrackKartEditModalCreateKartMutation.graphql.ts";
+import type { TrackKartEditModalUpdateKartMutation } from "src/web/client/__generated__/TrackKartEditModalUpdateKartMutation.graphql.ts";
 
 type Props = {
   circuitId: string;
@@ -15,7 +15,7 @@ type Props = {
 };
 
 const CreateKartMutation = graphql`
-  mutation CircuitKartEditModalCreateKartMutation($input: CreateKartInput!) {
+  mutation TrackKartEditModalCreateKartMutation($input: CreateKartInput!) {
     createKart(input: $input) {
       kart {
         id
@@ -26,7 +26,7 @@ const CreateKartMutation = graphql`
 `;
 
 const UpdateKartMutation = graphql`
-  mutation CircuitKartEditModalUpdateKartMutation($input: UpdateKartInput!) {
+  mutation TrackKartEditModalUpdateKartMutation($input: UpdateKartInput!) {
     updateKart(input: $input) {
       kart {
         id
@@ -49,14 +49,14 @@ const modalActionsStyles = css`
   margin-top: 20px;
 `;
 
-export function CircuitKartEditModal({ circuitId, kart, onClose, onKartCreated }: Props) {
+export function TrackKartEditModal({ circuitId, kart, onClose, onKartCreated }: Props) {
   const [kartName, setKartName] = useState(kart?.name || "");
   const [actionError, setActionError] = useState<string | null>(null);
 
   const [commitCreateKart, isCreatingKart] =
-    useMutation<CircuitKartEditModalCreateKartMutation>(CreateKartMutation);
+    useMutation<TrackKartEditModalCreateKartMutation>(CreateKartMutation);
   const [commitUpdateKart, isUpdatingKart] =
-    useMutation<CircuitKartEditModalUpdateKartMutation>(UpdateKartMutation);
+    useMutation<TrackKartEditModalUpdateKartMutation>(UpdateKartMutation);
 
   const isSaving = isCreatingKart || isUpdatingKart;
 

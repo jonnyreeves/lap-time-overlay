@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<2c40d2a3095d8bc987409ed6a08e35b3>>
+ * @generated SignedSource<<7a0e4e446a84fb0168b9b16eb7003f73>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,12 +9,12 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type CircuitKartsCardRemoveKartFromCircuitMutation$variables = {
+export type TrackKartsCardAddKartToCircuitMutation$variables = {
   circuitId: string;
   kartId: string;
 };
-export type CircuitKartsCardRemoveKartFromCircuitMutation$data = {
-  readonly removeKartFromCircuit: {
+export type TrackKartsCardAddKartToCircuitMutation$data = {
+  readonly addKartToCircuit: {
     readonly circuit: {
       readonly id: string;
       readonly karts: ReadonlyArray<{
@@ -27,9 +27,9 @@ export type CircuitKartsCardRemoveKartFromCircuitMutation$data = {
     };
   };
 };
-export type CircuitKartsCardRemoveKartFromCircuitMutation = {
-  response: CircuitKartsCardRemoveKartFromCircuitMutation$data;
-  variables: CircuitKartsCardRemoveKartFromCircuitMutation$variables;
+export type TrackKartsCardAddKartToCircuitMutation = {
+  response: TrackKartsCardAddKartToCircuitMutation$data;
+  variables: TrackKartsCardAddKartToCircuitMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -67,9 +67,9 @@ v2 = [
         "variableName": "kartId"
       }
     ],
-    "concreteType": "RemoveKartFromCircuitPayload",
+    "concreteType": "AddKartToCircuitPayload",
     "kind": "LinkedField",
-    "name": "removeKartFromCircuit",
+    "name": "addKartToCircuit",
     "plural": false,
     "selections": [
       {
@@ -124,7 +124,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "CircuitKartsCardRemoveKartFromCircuitMutation",
+    "name": "TrackKartsCardAddKartToCircuitMutation",
     "selections": (v2/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -133,20 +133,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "CircuitKartsCardRemoveKartFromCircuitMutation",
+    "name": "TrackKartsCardAddKartToCircuitMutation",
     "selections": (v2/*: any*/)
   },
   "params": {
-    "cacheID": "4df2bfe8c6b37cdf8defc6f3bcfa1f63",
+    "cacheID": "7660755f27f13c198fbc0611ba2ba5b9",
     "id": null,
     "metadata": {},
-    "name": "CircuitKartsCardRemoveKartFromCircuitMutation",
+    "name": "TrackKartsCardAddKartToCircuitMutation",
     "operationKind": "mutation",
-    "text": "mutation CircuitKartsCardRemoveKartFromCircuitMutation(\n  $circuitId: ID!\n  $kartId: ID!\n) {\n  removeKartFromCircuit(circuitId: $circuitId, kartId: $kartId) {\n    circuit {\n      id\n      karts {\n        id\n        name\n      }\n    }\n    kart {\n      id\n    }\n  }\n}\n"
+    "text": "mutation TrackKartsCardAddKartToCircuitMutation(\n  $circuitId: ID!\n  $kartId: ID!\n) {\n  addKartToCircuit(circuitId: $circuitId, kartId: $kartId) {\n    circuit {\n      id\n      karts {\n        id\n        name\n      }\n    }\n    kart {\n      id\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "ea8c592d2ae04a4ba1b9f1d5b127ec00";
+(node as any).hash = "670b29d89708b6f07f38a8acd2c8395f";
 
 export default node;

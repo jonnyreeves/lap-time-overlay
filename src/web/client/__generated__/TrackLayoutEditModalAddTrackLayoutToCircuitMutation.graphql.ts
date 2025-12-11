@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<55668ea2cdd3f3ee9750dab8b2cc4333>>
+ * @generated SignedSource<<1fc00e9d380b34046057805d0398838d>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,12 +9,15 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation$variables = {
-  circuitId: string;
-  trackLayoutId: string;
+export type CreateTrackLayoutInput = {
+  name: string;
 };
-export type CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation$data = {
-  readonly removeTrackLayoutFromCircuit: {
+export type TrackLayoutEditModalAddTrackLayoutToCircuitMutation$variables = {
+  circuitId: string;
+  input: CreateTrackLayoutInput;
+};
+export type TrackLayoutEditModalAddTrackLayoutToCircuitMutation$data = {
+  readonly addTrackLayoutToCircuit: {
     readonly circuit: {
       readonly id: string;
       readonly trackLayouts: ReadonlyArray<{
@@ -28,9 +31,9 @@ export type CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation$data = {
     };
   };
 };
-export type CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation = {
-  response: CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation$data;
-  variables: CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation$variables;
+export type TrackLayoutEditModalAddTrackLayoutToCircuitMutation = {
+  response: TrackLayoutEditModalAddTrackLayoutToCircuitMutation$data;
+  variables: TrackLayoutEditModalAddTrackLayoutToCircuitMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -43,7 +46,7 @@ var v0 = [
   {
     "defaultValue": null,
     "kind": "LocalArgument",
-    "name": "trackLayoutId"
+    "name": "input"
   }
 ],
 v1 = {
@@ -74,13 +77,13 @@ v3 = [
       },
       {
         "kind": "Variable",
-        "name": "trackLayoutId",
-        "variableName": "trackLayoutId"
+        "name": "input",
+        "variableName": "input"
       }
     ],
-    "concreteType": "RemoveTrackLayoutFromCircuitPayload",
+    "concreteType": "AddTrackLayoutToCircuitPayload",
     "kind": "LinkedField",
-    "name": "removeTrackLayoutFromCircuit",
+    "name": "addTrackLayoutToCircuit",
     "plural": false,
     "selections": [
       {
@@ -124,7 +127,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation",
+    "name": "TrackLayoutEditModalAddTrackLayoutToCircuitMutation",
     "selections": (v3/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -133,20 +136,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation",
+    "name": "TrackLayoutEditModalAddTrackLayoutToCircuitMutation",
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "89187cbc1c0865e2bb8b7d36a712a2f1",
+    "cacheID": "49c9d9d3de3e29496bccb469f3d140c2",
     "id": null,
     "metadata": {},
-    "name": "CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation",
+    "name": "TrackLayoutEditModalAddTrackLayoutToCircuitMutation",
     "operationKind": "mutation",
-    "text": "mutation CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation(\n  $circuitId: ID!\n  $trackLayoutId: ID!\n) {\n  removeTrackLayoutFromCircuit(circuitId: $circuitId, trackLayoutId: $trackLayoutId) {\n    circuit {\n      id\n      trackLayouts {\n        id\n        name\n      }\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n"
+    "text": "mutation TrackLayoutEditModalAddTrackLayoutToCircuitMutation(\n  $circuitId: ID!\n  $input: CreateTrackLayoutInput!\n) {\n  addTrackLayoutToCircuit(circuitId: $circuitId, input: $input) {\n    circuit {\n      id\n      trackLayouts {\n        id\n        name\n      }\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "207e7bfbdfa3042f3fc58327e63d3d38";
+(node as any).hash = "f4ea6df605290b052f65b28a509ad350";
 
 export default node;

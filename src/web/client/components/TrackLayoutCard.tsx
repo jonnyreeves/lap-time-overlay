@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
-import type { CircuitTrackLayoutsCard_circuit$key } from "src/web/client/__generated__/CircuitTrackLayoutsCard_circuit.graphql.ts";
-import type { CircuitTrackLayoutsCardUpdateTrackLayoutMutation } from "src/web/client/__generated__/CircuitTrackLayoutsCardUpdateTrackLayoutMutation.graphql.ts";
-import type { CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation } from "src/web/client/__generated__/CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation.graphql.ts";
+import type { TrackLayoutCard_circuit$key } from "src/web/client/__generated__/TrackLayoutCard_circuit.graphql.ts";
+import type { TrackLayoutCardUpdateTrackLayoutMutation } from "src/web/client/__generated__/TrackLayoutCardUpdateTrackLayoutMutation.graphql.ts";
+import type { TrackLayoutCardRemoveTrackLayoutFromCircuitMutation } from "src/web/client/__generated__/TrackLayoutCardRemoveTrackLayoutFromCircuitMutation.graphql.ts";
 import { Card } from "./Card.tsx";
 import { IconButton } from "./IconButton.tsx";
 import { actionsRowStyles, primaryButtonStyles } from "./session/sessionOverviewStyles.ts";
@@ -12,10 +12,10 @@ import {
   kartRowStyles,
   largeInlineActionButtonStyles,
 } from "./inlineActionButtons.ts";
-import { CircuitTrackLayoutEditModal } from "./CircuitTrackLayoutEditModal.js";
+import { TrackLayoutEditModal } from "./TrackLayoutEditModal.js";
 
 const TrackLayoutsFragment = graphql`
-  fragment CircuitTrackLayoutsCard_circuit on Circuit {
+  fragment TrackLayoutCard_circuit on Circuit {
     id
     name
     trackLayouts {
@@ -26,7 +26,7 @@ const TrackLayoutsFragment = graphql`
 `;
 
 const UpdateTrackLayoutMutation = graphql`
-  mutation CircuitTrackLayoutsCardUpdateTrackLayoutMutation($input: UpdateTrackLayoutInput!) {
+  mutation TrackLayoutCardUpdateTrackLayoutMutation($input: UpdateTrackLayoutInput!) {
     updateTrackLayout(input: $input) {
       trackLayout {
         id
@@ -40,7 +40,7 @@ const UpdateTrackLayoutMutation = graphql`
 `;
 
 const RemoveTrackLayoutFromCircuitMutation = graphql`
-  mutation CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation(
+  mutation TrackLayoutCardRemoveTrackLayoutFromCircuitMutation(
     $circuitId: ID!
     $trackLayoutId: ID!
   ) {
@@ -61,10 +61,10 @@ const RemoveTrackLayoutFromCircuitMutation = graphql`
 `;
 
 type Props = {
-  circuit: CircuitTrackLayoutsCard_circuit$key;
+  circuit: TrackLayoutCard_circuit$key;
 };
 
-export function CircuitTrackLayoutsCard({ circuit: circuitKey }: Props) {
+export function TrackLayoutCard({ circuit: circuitKey }: Props) {
   const circuit = useFragment(TrackLayoutsFragment, circuitKey);
   const [isEditing, setIsEditing] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -82,12 +82,12 @@ export function CircuitTrackLayoutsCard({ circuit: circuitKey }: Props) {
   }, [circuit.trackLayouts, isEditing]);
 
   const [commitUpdateLayout, isUpdatingLayout] =
-    useMutation<CircuitTrackLayoutsCardUpdateTrackLayoutMutation>(UpdateTrackLayoutMutation);
+    useMutation<TrackLayoutCardUpdateTrackLayoutMutation>(UpdateTrackLayoutMutation);
   const [commitRemoveLayout, isRemovingLayout] =
-    useMutation<CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation>(RemoveTrackLayoutFromCircuitMutation);
+    useMutation<TrackLayoutCardRemoveTrackLayoutFromCircuitMutation>(RemoveTrackLayoutFromCircuitMutation);
 
   const isSaving = isUpdatingLayout || isRemovingLayout;
-  const formId = "circuit-track-layouts-form";
+  const formId = "track-layouts-form";
 
   function handleEdit() {
     setIsEditing(true);
@@ -278,7 +278,7 @@ export function CircuitTrackLayoutsCard({ circuit: circuitKey }: Props) {
       </form>
 
       {showAddLayoutModal && (
-        <CircuitTrackLayoutEditModal
+        <TrackLayoutEditModal
           circuitId={circuit.id}
           onClose={handleCloseModal}
           onTrackLayoutCreated={handleLayoutCreated}

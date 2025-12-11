@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
-import type { CircuitKartsCard_circuit$key } from "src/web/client/__generated__/CircuitKartsCard_circuit.graphql.ts";
-import type { CircuitKartsCardAddKartToCircuitMutation } from "src/web/client/__generated__/CircuitKartsCardAddKartToCircuitMutation.graphql.ts";
-import type { CircuitKartsCardRemoveKartFromCircuitMutation } from "src/web/client/__generated__/CircuitKartsCardRemoveKartFromCircuitMutation.graphql.ts";
-import type { CircuitKartsCardDeleteKartMutation } from "src/web/client/__generated__/CircuitKartsCardDeleteKartMutation.graphql.ts";
-import type { CircuitKartsCardUpdateKartNameMutation } from "src/web/client/__generated__/CircuitKartsCardUpdateKartNameMutation.graphql.ts";
+import type { TrackKartsCard_circuit$key } from "src/web/client/__generated__/TrackKartsCard_circuit.graphql.ts";
+import type { TrackKartsCardAddKartToCircuitMutation } from "src/web/client/__generated__/TrackKartsCardAddKartToCircuitMutation.graphql.ts";
+import type { TrackKartsCardRemoveKartFromCircuitMutation } from "src/web/client/__generated__/TrackKartsCardRemoveKartFromCircuitMutation.graphql.ts";
+import type { TrackKartsCardDeleteKartMutation } from "src/web/client/__generated__/TrackKartsCardDeleteKartMutation.graphql.ts";
+import type { TrackKartsCardUpdateKartNameMutation } from "src/web/client/__generated__/TrackKartsCardUpdateKartNameMutation.graphql.ts";
 import { Card } from "./Card.tsx";
 import { IconButton } from "./IconButton.tsx";
-import { CircuitKartEditModal } from "./CircuitKartEditModal.js";
+import { TrackKartEditModal } from "./TrackKartEditModal.js";
 import { actionsRowStyles, primaryButtonStyles } from "./session/sessionOverviewStyles.ts";
 import { inlineActionButtonStyles, dangerInlineActionButtonStyles, kartListStyles, kartRowStyles, largeInlineActionButtonStyles } from "./inlineActionButtons.ts";
 
-const CircuitKartsCardCircuitFragment = graphql`
-  fragment CircuitKartsCard_circuit on Circuit {
+const TrackKartsCardCircuitFragment = graphql`
+  fragment TrackKartsCard_circuit on Circuit {
     id
     name
     karts {
@@ -23,7 +23,7 @@ const CircuitKartsCardCircuitFragment = graphql`
 `;
 
 const AddKartToCircuitMutation = graphql`
-  mutation CircuitKartsCardAddKartToCircuitMutation($circuitId: ID!, $kartId: ID!) {
+  mutation TrackKartsCardAddKartToCircuitMutation($circuitId: ID!, $kartId: ID!) {
     addKartToCircuit(circuitId: $circuitId, kartId: $kartId) {
       circuit {
         id
@@ -40,7 +40,7 @@ const AddKartToCircuitMutation = graphql`
 `;
 
 const RemoveKartFromCircuitMutation = graphql`
-  mutation CircuitKartsCardRemoveKartFromCircuitMutation($circuitId: ID!, $kartId: ID!) {
+  mutation TrackKartsCardRemoveKartFromCircuitMutation($circuitId: ID!, $kartId: ID!) {
     removeKartFromCircuit(circuitId: $circuitId, kartId: $kartId) {
       circuit {
         id
@@ -57,7 +57,7 @@ const RemoveKartFromCircuitMutation = graphql`
 `;
 
 const DeleteKartMutation = graphql`
-  mutation CircuitKartsCardDeleteKartMutation($id: ID!) {
+  mutation TrackKartsCardDeleteKartMutation($id: ID!) {
     deleteKart(id: $id) {
       success
     }
@@ -65,7 +65,7 @@ const DeleteKartMutation = graphql`
 `;
 
 const UpdateKartNameMutation = graphql`
-  mutation CircuitKartsCardUpdateKartNameMutation($input: UpdateKartInput!) {
+  mutation TrackKartsCardUpdateKartNameMutation($input: UpdateKartInput!) {
     updateKart(input: $input) {
       kart {
         id
@@ -76,11 +76,11 @@ const UpdateKartNameMutation = graphql`
 `;
 
 type Props = {
-  circuit: CircuitKartsCard_circuit$key;
+  circuit: TrackKartsCard_circuit$key;
 };
 
-export function CircuitKartsCard({ circuit: circuitKey }: Props) {
-  const circuit = useFragment(CircuitKartsCardCircuitFragment, circuitKey);
+export function TrackKartsCard({ circuit: circuitKey }: Props) {
+  const circuit = useFragment(TrackKartsCardCircuitFragment, circuitKey);
   const [isEditing, setIsEditing] = useState(false);
   const [showAddEditKartModal, setShowAddEditKartModal] = useState(false);
   const [kartToEdit, setKartToEdit] = useState<{ id: string; name: string } | null>(null);
@@ -97,16 +97,16 @@ export function CircuitKartsCard({ circuit: circuitKey }: Props) {
   }, [isEditing, circuit.karts]);
 
   const karts = circuit.karts;
-  const formId = "circuit-karts-form";
+  const formId = "track-karts-form";
 
   const [commitAddKartToCircuit, isAddingKartToCircuit] =
-    useMutation<CircuitKartsCardAddKartToCircuitMutation>(AddKartToCircuitMutation);
+    useMutation<TrackKartsCardAddKartToCircuitMutation>(AddKartToCircuitMutation);
   const [commitRemoveKartFromCircuit, isRemovingKartFromCircuit] =
-    useMutation<CircuitKartsCardRemoveKartFromCircuitMutation>(RemoveKartFromCircuitMutation);
+    useMutation<TrackKartsCardRemoveKartFromCircuitMutation>(RemoveKartFromCircuitMutation);
   const [commitDeleteKart, isDeletingKart] =
-    useMutation<CircuitKartsCardDeleteKartMutation>(DeleteKartMutation);
+    useMutation<TrackKartsCardDeleteKartMutation>(DeleteKartMutation);
   const [commitUpdateKartName, isUpdatingKartName] =
-    useMutation<CircuitKartsCardUpdateKartNameMutation>(UpdateKartNameMutation);
+    useMutation<TrackKartsCardUpdateKartNameMutation>(UpdateKartNameMutation);
 
   const isSaving = isAddingKartToCircuit || isRemovingKartFromCircuit || isDeletingKart || isUpdatingKartName;
 
@@ -227,7 +227,7 @@ export function CircuitKartsCard({ circuit: circuitKey }: Props) {
     setActionError(null);
   }
 
-  // Callback from CircuitKartEditModal when a new kart is created
+  // Callback from TrackKartEditModal when a new kart is created
   const onKartCreated = (newKartId: string, newKartName: string) => {
     if (!newKartId) return;
 
@@ -342,7 +342,7 @@ export function CircuitKartsCard({ circuit: circuitKey }: Props) {
       </Card>
 
       {showAddEditKartModal && (
-        <CircuitKartEditModal
+        <TrackKartEditModal
           circuitId={circuit.id}
           kart={kartToEdit}
           onClose={handleCloseModal}

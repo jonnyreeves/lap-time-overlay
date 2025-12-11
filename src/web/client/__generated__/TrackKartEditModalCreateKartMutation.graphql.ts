@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<e03e51af24a68bad493c126686e33f91>>
+ * @generated SignedSource<<6b95b0189b246095b9b64a70216daec9>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,24 +9,23 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type UpdateKartInput = {
-  id: string;
+export type CreateKartInput = {
   name: string;
 };
-export type CircuitKartEditModalUpdateKartMutation$variables = {
-  input: UpdateKartInput;
+export type TrackKartEditModalCreateKartMutation$variables = {
+  input: CreateKartInput;
 };
-export type CircuitKartEditModalUpdateKartMutation$data = {
-  readonly updateKart: {
+export type TrackKartEditModalCreateKartMutation$data = {
+  readonly createKart: {
     readonly kart: {
       readonly id: string;
       readonly name: string;
     };
   };
 };
-export type CircuitKartEditModalUpdateKartMutation = {
-  response: CircuitKartEditModalUpdateKartMutation$data;
-  variables: CircuitKartEditModalUpdateKartMutation$variables;
+export type TrackKartEditModalCreateKartMutation = {
+  response: TrackKartEditModalCreateKartMutation$data;
+  variables: TrackKartEditModalCreateKartMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -47,9 +46,9 @@ v1 = [
         "variableName": "input"
       }
     ],
-    "concreteType": "UpdateKartPayload",
+    "concreteType": "CreateKartPayload",
     "kind": "LinkedField",
-    "name": "updateKart",
+    "name": "createKart",
     "plural": false,
     "selections": [
       {
@@ -86,7 +85,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "CircuitKartEditModalUpdateKartMutation",
+    "name": "TrackKartEditModalCreateKartMutation",
     "selections": (v1/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -95,20 +94,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "CircuitKartEditModalUpdateKartMutation",
+    "name": "TrackKartEditModalCreateKartMutation",
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "0d6330a92d95bd5de05cf05b0bc3cad3",
+    "cacheID": "e833ea6e6018749e97ff70a422c0522c",
     "id": null,
     "metadata": {},
-    "name": "CircuitKartEditModalUpdateKartMutation",
+    "name": "TrackKartEditModalCreateKartMutation",
     "operationKind": "mutation",
-    "text": "mutation CircuitKartEditModalUpdateKartMutation(\n  $input: UpdateKartInput!\n) {\n  updateKart(input: $input) {\n    kart {\n      id\n      name\n    }\n  }\n}\n"
+    "text": "mutation TrackKartEditModalCreateKartMutation(\n  $input: CreateKartInput!\n) {\n  createKart(input: $input) {\n    kart {\n      id\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "74cf5df8f024ed1eaf23990232315a60";
+(node as any).hash = "e6339e73bf4c907771793df1f8dacd06";
 
 export default node;

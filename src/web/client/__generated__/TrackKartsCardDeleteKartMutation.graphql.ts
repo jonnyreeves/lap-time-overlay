@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<42506b6109c6b10241547766358713bb>>
+ * @generated SignedSource<<9493ddaa769a2f439d9f5cf767a71896>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,17 +9,17 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type CircuitKartsCardDeleteKartMutation$variables = {
+export type TrackKartsCardDeleteKartMutation$variables = {
   id: string;
 };
-export type CircuitKartsCardDeleteKartMutation$data = {
+export type TrackKartsCardDeleteKartMutation$data = {
   readonly deleteKart: {
     readonly success: boolean;
   };
 };
-export type CircuitKartsCardDeleteKartMutation = {
-  response: CircuitKartsCardDeleteKartMutation$data;
-  variables: CircuitKartsCardDeleteKartMutation$variables;
+export type TrackKartsCardDeleteKartMutation = {
+  response: TrackKartsCardDeleteKartMutation$data;
+  variables: TrackKartsCardDeleteKartMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -61,7 +61,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "CircuitKartsCardDeleteKartMutation",
+    "name": "TrackKartsCardDeleteKartMutation",
     "selections": (v1/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -70,20 +70,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "CircuitKartsCardDeleteKartMutation",
+    "name": "TrackKartsCardDeleteKartMutation",
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "400f4551320449b615f3d84506b2b14b",
+    "cacheID": "0306c1bb9e854c1969ca923f01d4b816",
     "id": null,
     "metadata": {},
-    "name": "CircuitKartsCardDeleteKartMutation",
+    "name": "TrackKartsCardDeleteKartMutation",
     "operationKind": "mutation",
-    "text": "mutation CircuitKartsCardDeleteKartMutation(\n  $id: ID!\n) {\n  deleteKart(id: $id) {\n    success\n  }\n}\n"
+    "text": "mutation TrackKartsCardDeleteKartMutation(\n  $id: ID!\n) {\n  deleteKart(id: $id) {\n    success\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "220cff190f8f3eff62e90d42aca334c9";
+(node as any).hash = "c2e70fdbd00363771af6c73c8b649240";
 
 export default node;

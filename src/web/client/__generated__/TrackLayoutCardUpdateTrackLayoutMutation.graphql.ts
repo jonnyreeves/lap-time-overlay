@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<a22c3c0c0b8bdcef6e48213630c39387>>
+ * @generated SignedSource<<cd08f824b895ed273319e17e78f492d7>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,10 +13,10 @@ export type UpdateTrackLayoutInput = {
   id: string;
   name: string;
 };
-export type CircuitTrackLayoutsCardUpdateTrackLayoutMutation$variables = {
+export type TrackLayoutCardUpdateTrackLayoutMutation$variables = {
   input: UpdateTrackLayoutInput;
 };
-export type CircuitTrackLayoutsCardUpdateTrackLayoutMutation$data = {
+export type TrackLayoutCardUpdateTrackLayoutMutation$data = {
   readonly updateTrackLayout: {
     readonly trackLayout: {
       readonly circuit: {
@@ -27,9 +27,9 @@ export type CircuitTrackLayoutsCardUpdateTrackLayoutMutation$data = {
     };
   };
 };
-export type CircuitTrackLayoutsCardUpdateTrackLayoutMutation = {
-  response: CircuitTrackLayoutsCardUpdateTrackLayoutMutation$data;
-  variables: CircuitTrackLayoutsCardUpdateTrackLayoutMutation$variables;
+export type TrackLayoutCardUpdateTrackLayoutMutation = {
+  response: TrackLayoutCardUpdateTrackLayoutMutation$data;
+  variables: TrackLayoutCardUpdateTrackLayoutMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -102,7 +102,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "CircuitTrackLayoutsCardUpdateTrackLayoutMutation",
+    "name": "TrackLayoutCardUpdateTrackLayoutMutation",
     "selections": (v2/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -111,20 +111,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "CircuitTrackLayoutsCardUpdateTrackLayoutMutation",
+    "name": "TrackLayoutCardUpdateTrackLayoutMutation",
     "selections": (v2/*: any*/)
   },
   "params": {
-    "cacheID": "d9c9747dae77ed9f4c8ddd8337d4bc6c",
+    "cacheID": "37c76247b26bbbf44f95b97df49c048c",
     "id": null,
     "metadata": {},
-    "name": "CircuitTrackLayoutsCardUpdateTrackLayoutMutation",
+    "name": "TrackLayoutCardUpdateTrackLayoutMutation",
     "operationKind": "mutation",
-    "text": "mutation CircuitTrackLayoutsCardUpdateTrackLayoutMutation(\n  $input: UpdateTrackLayoutInput!\n) {\n  updateTrackLayout(input: $input) {\n    trackLayout {\n      id\n      name\n      circuit {\n        id\n      }\n    }\n  }\n}\n"
+    "text": "mutation TrackLayoutCardUpdateTrackLayoutMutation(\n  $input: UpdateTrackLayoutInput!\n) {\n  updateTrackLayout(input: $input) {\n    trackLayout {\n      id\n      name\n      circuit {\n        id\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "4e5d89e7dab24646de20ec00b10bce3d";
+(node as any).hash = "0fe18e01ee9523219a8c9239ab6a820f";
 
 export default node;

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<5d65065e7c7b5e3e6f9584586ab7cbe3>>
+ * @generated SignedSource<<282792457a4929d4aadb31c7b472095e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,18 +10,18 @@
 
 import { ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type CircuitKartsCard_circuit$data = {
+export type TrackLayoutCard_circuit$data = {
   readonly id: string;
-  readonly karts: ReadonlyArray<{
+  readonly name: string;
+  readonly trackLayouts: ReadonlyArray<{
     readonly id: string;
     readonly name: string;
   }>;
-  readonly name: string;
-  readonly " $fragmentType": "CircuitKartsCard_circuit";
+  readonly " $fragmentType": "TrackLayoutCard_circuit";
 };
-export type CircuitKartsCard_circuit$key = {
-  readonly " $data"?: CircuitKartsCard_circuit$data;
-  readonly " $fragmentSpreads": FragmentRefs<"CircuitKartsCard_circuit">;
+export type TrackLayoutCard_circuit$key = {
+  readonly " $data"?: TrackLayoutCard_circuit$data;
+  readonly " $fragmentSpreads": FragmentRefs<"TrackLayoutCard_circuit">;
 };
 
 const node: ReaderFragment = (function(){
@@ -43,16 +43,16 @@ return {
   "argumentDefinitions": [],
   "kind": "Fragment",
   "metadata": null,
-  "name": "CircuitKartsCard_circuit",
+  "name": "TrackLayoutCard_circuit",
   "selections": [
     (v0/*: any*/),
     (v1/*: any*/),
     {
       "alias": null,
       "args": null,
-      "concreteType": "Kart",
+      "concreteType": "TrackLayout",
       "kind": "LinkedField",
-      "name": "karts",
+      "name": "trackLayouts",
       "plural": true,
       "selections": [
         (v0/*: any*/),
@@ -66,6 +66,6 @@ return {
 };
 })();
 
-(node as any).hash = "d82270a8d6474bdec7e8dc1783fdf3c5";
+(node as any).hash = "20dbb5566e34f995770886026d4bcc64";
 
 export default node;

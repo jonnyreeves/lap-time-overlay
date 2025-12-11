@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<b0e5b7fb91115204324bb8c023b56f90>>
+ * @generated SignedSource<<1d54d1dbf5dc5d843e21003a743e680a>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,15 +9,12 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type CreateTrackLayoutInput = {
-  name: string;
-};
-export type CircuitTrackLayoutEditModalAddTrackLayoutToCircuitMutation$variables = {
+export type TrackLayoutCardRemoveTrackLayoutFromCircuitMutation$variables = {
   circuitId: string;
-  input: CreateTrackLayoutInput;
+  trackLayoutId: string;
 };
-export type CircuitTrackLayoutEditModalAddTrackLayoutToCircuitMutation$data = {
-  readonly addTrackLayoutToCircuit: {
+export type TrackLayoutCardRemoveTrackLayoutFromCircuitMutation$data = {
+  readonly removeTrackLayoutFromCircuit: {
     readonly circuit: {
       readonly id: string;
       readonly trackLayouts: ReadonlyArray<{
@@ -31,9 +28,9 @@ export type CircuitTrackLayoutEditModalAddTrackLayoutToCircuitMutation$data = {
     };
   };
 };
-export type CircuitTrackLayoutEditModalAddTrackLayoutToCircuitMutation = {
-  response: CircuitTrackLayoutEditModalAddTrackLayoutToCircuitMutation$data;
-  variables: CircuitTrackLayoutEditModalAddTrackLayoutToCircuitMutation$variables;
+export type TrackLayoutCardRemoveTrackLayoutFromCircuitMutation = {
+  response: TrackLayoutCardRemoveTrackLayoutFromCircuitMutation$data;
+  variables: TrackLayoutCardRemoveTrackLayoutFromCircuitMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -46,7 +43,7 @@ var v0 = [
   {
     "defaultValue": null,
     "kind": "LocalArgument",
-    "name": "input"
+    "name": "trackLayoutId"
   }
 ],
 v1 = {
@@ -77,13 +74,13 @@ v3 = [
       },
       {
         "kind": "Variable",
-        "name": "input",
-        "variableName": "input"
+        "name": "trackLayoutId",
+        "variableName": "trackLayoutId"
       }
     ],
-    "concreteType": "AddTrackLayoutToCircuitPayload",
+    "concreteType": "RemoveTrackLayoutFromCircuitPayload",
     "kind": "LinkedField",
-    "name": "addTrackLayoutToCircuit",
+    "name": "removeTrackLayoutFromCircuit",
     "plural": false,
     "selections": [
       {
@@ -127,7 +124,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "CircuitTrackLayoutEditModalAddTrackLayoutToCircuitMutation",
+    "name": "TrackLayoutCardRemoveTrackLayoutFromCircuitMutation",
     "selections": (v3/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -136,20 +133,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "CircuitTrackLayoutEditModalAddTrackLayoutToCircuitMutation",
+    "name": "TrackLayoutCardRemoveTrackLayoutFromCircuitMutation",
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "4fd01ddb75977fe86b47e0ce0bd0baf2",
+    "cacheID": "c72bc7c500ea507b2ba9ba117153462c",
     "id": null,
     "metadata": {},
-    "name": "CircuitTrackLayoutEditModalAddTrackLayoutToCircuitMutation",
+    "name": "TrackLayoutCardRemoveTrackLayoutFromCircuitMutation",
     "operationKind": "mutation",
-    "text": "mutation CircuitTrackLayoutEditModalAddTrackLayoutToCircuitMutation(\n  $circuitId: ID!\n  $input: CreateTrackLayoutInput!\n) {\n  addTrackLayoutToCircuit(circuitId: $circuitId, input: $input) {\n    circuit {\n      id\n      trackLayouts {\n        id\n        name\n      }\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n"
+    "text": "mutation TrackLayoutCardRemoveTrackLayoutFromCircuitMutation(\n  $circuitId: ID!\n  $trackLayoutId: ID!\n) {\n  removeTrackLayoutFromCircuit(circuitId: $circuitId, trackLayoutId: $trackLayoutId) {\n    circuit {\n      id\n      trackLayouts {\n        id\n        name\n      }\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "6289aa72368f3b78c7db1ec6b2bafee0";
+(node as any).hash = "48ae9917eac432987c9a29206ffcd8bd";
 
 export default node;

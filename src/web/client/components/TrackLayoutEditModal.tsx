@@ -4,7 +4,7 @@ import { css } from "@emotion/react";
 import { Modal } from "./Modal.tsx";
 import { inputStyles, primaryButtonStyles } from "./session/sessionOverviewStyles.ts";
 import { inlineActionButtonStyles } from "./inlineActionButtons.ts";
-import type { CircuitTrackLayoutEditModalAddTrackLayoutToCircuitMutation } from "src/web/client/__generated__/CircuitTrackLayoutEditModalAddTrackLayoutToCircuitMutation.graphql.ts";
+import type { TrackLayoutEditModalAddTrackLayoutToCircuitMutation } from "src/web/client/__generated__/TrackLayoutEditModalAddTrackLayoutToCircuitMutation.graphql.ts";
 
 type Props = {
   circuitId: string;
@@ -13,7 +13,7 @@ type Props = {
 };
 
 const AddTrackLayoutToCircuitMutation = graphql`
-  mutation CircuitTrackLayoutEditModalAddTrackLayoutToCircuitMutation(
+  mutation TrackLayoutEditModalAddTrackLayoutToCircuitMutation(
     $circuitId: ID!
     $input: CreateTrackLayoutInput!
   ) {
@@ -46,12 +46,12 @@ const modalActionsStyles = css`
   margin-top: 16px;
 `;
 
-export function CircuitTrackLayoutEditModal({ circuitId, onClose, onTrackLayoutCreated }: Props) {
+export function TrackLayoutEditModal({ circuitId, onClose, onTrackLayoutCreated }: Props) {
   const [layoutName, setLayoutName] = useState("");
   const [actionError, setActionError] = useState<string | null>(null);
 
   const [commitAddTrackLayout, isAddingTrackLayout] =
-    useMutation<CircuitTrackLayoutEditModalAddTrackLayoutToCircuitMutation>(AddTrackLayoutToCircuitMutation);
+    useMutation<TrackLayoutEditModalAddTrackLayoutToCircuitMutation>(AddTrackLayoutToCircuitMutation);
 
   const isSaving = isAddingTrackLayout;
 
