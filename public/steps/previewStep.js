@@ -2,7 +2,13 @@ import { requestPreview, startRender } from "../api.js";
 import { setStatus } from "../status.js";
 import { html, render } from "../template.js";
 
-const TEXT_SIZE_OPTIONS = [16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 64];
+const TEXT_SIZE_OPTIONS = [16, 18, 20, 24, 28, 32, 36, 40, 48, 56, 64, 72, 80, 96, 112, 128];
+
+const renderSizeOptions = (sizes = TEXT_SIZE_OPTIONS) => html`
+  ${sizes.map(
+  size => html`<option value=${size}>${size}px</option>`
+)}
+`;
 
 export function renderPreviewStep(root) {
   const section = document.createElement("section");
@@ -126,17 +132,7 @@ export function renderPreviewStep(root) {
               <label class="field">
                 <span>Text size</span>
                 <select id="textSize">
-                  <option value="16">16px</option>
-                  <option value="18">18px</option>
-                  <option value="20">20px</option>
-                  <option value="24">24px</option>
-                  <option value="28">28px</option>
-                  <option value="32">32px</option>
-                  <option value="36">36px</option>
-                  <option value="40">40px</option>
-                  <option value="48">48px</option>
-                  <option value="56">56px</option>
-                  <option value="64">64px</option>
+                  ${renderSizeOptions()}
                 </select>
                 <div class="field__hint">Applies to lap info and timer.</div>
               </label>

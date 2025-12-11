@@ -97,7 +97,7 @@ function parseTeamsportLapText(text, driverName) {
     throw new Error("Header row not found or invalid for teamsport format");
   }
 
-  const driverCells = headerCells.slice(1);
+  const driverCells = headerCells.slice(0);
   const driverIndex = driverCells.findIndex(
     (name) => name.toLowerCase() === driverName.toLowerCase()
   );
@@ -227,12 +227,12 @@ function normalizePositionChanges(changes, durationS, fallbackPosition = 0) {
     Number(fallbackPosition) > 0;
   const withFallback = hasFallback
     ? [
-        {
-          atS: 0,
-          position: Math.max(0, Math.round(Number(fallbackPosition))),
-          idx: -1,
-        },
-      ]
+      {
+        atS: 0,
+        position: Math.max(0, Math.round(Number(fallbackPosition))),
+        idx: -1,
+      },
+    ]
     : filtered;
   const withZero =
     withFallback.length > 0 && (withFallback[0]?.atS ?? 0) > 0
@@ -505,7 +505,7 @@ export function initOffsetsStep(options) {
     onMark: (frame, seconds) => handleMarkAt(frame, seconds),
   });
 
-  const setAlignmentStatus = () => {};
+  const setAlignmentStatus = () => { };
 
   const updateMarkButtonLabel = () => {
     if (!els.markStartBtn) return;
@@ -652,8 +652,8 @@ export function initOffsetsStep(options) {
         ${laps.length === 0
           ? html`<p class="muted lap-list__empty">
               ${hasSessionStart()
-                ? "No laps yet. Add manually or import."
-                : "No laps yet. Set the session start time before adding lap times."}
+              ? "No laps yet. Add manually or import."
+              : "No laps yet. Set the session start time before adding lap times."}
             </p>`
           : html`<div class="lap-rows">
               ${laps.map(
@@ -702,9 +702,9 @@ export function initOffsetsStep(options) {
                           </button>
                         </div>
                         ${lap.positionChanges?.length
-          ? html`<div class="position-list">
+                  ? html`<div class="position-list">
                               ${lap.positionChanges.map(
-            (change, changeIdx) => html`
+                    (change, changeIdx) => html`
                                   <div class="position-row">
                                     <label class="field position-row__field">
                                       <span>Time in lap</span>
@@ -741,9 +741,9 @@ export function initOffsetsStep(options) {
                                     </button>
                                   </div>
                                 `
-          )}
+                  )}
                             </div>`
-          : html`<p class="muted lap-row__positions-empty">
+                  : html`<p class="muted lap-row__positions-empty">
                             No position changes yet.
                           </p>`}
                       </div>
@@ -756,8 +756,8 @@ export function initOffsetsStep(options) {
                           aria-label="Jump to lap ${lap.number}"
                         >
                           Starts at ${lapAnchor != null
-          ? formatTime((lap.startS ?? 0) + lapAnchor)
-          : "Lap 1 start not set"}
+                  ? formatTime((lap.startS ?? 0) + lapAnchor)
+                  : "Lap 1 start not set"}
                         </button>
                         <button
                           class="upload__control upload__control--danger"

@@ -2,6 +2,9 @@ import ffmpeg from "fluent-ffmpeg";
 import { totalSessionDuration, type Lap } from "../laps.js";
 import { DEFAULT_OVERLAY_STYLE, type RenderContext } from "./types.js";
 
+export const MIN_FONT_SIZE = 16;
+export const MAX_FONT_SIZE = 128;
+
 function normalizeHexColor(input: string | undefined, fallback: string): string {
   const match = input?.match(/^#?[0-9a-fA-F]{6}$/);
   if (!match) return fallback;
@@ -121,8 +124,8 @@ function buildPositionTimeline(
     segments.length > 0
       ? segments[segments.length - 1].position
       : startPosition > 0
-      ? startPosition
-      : carryPosition;
+        ? startPosition
+        : carryPosition;
 
   return { segments, lastPosition };
 }
@@ -227,7 +230,7 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
   const boxWidth = Math.floor(width * boxWidthRatio);
   const fontSize =
     Number.isFinite(style.textSize) && style.textSize > 0
-      ? Math.min(64, Math.max(16, Math.round(style.textSize)))
+      ? Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, Math.round(style.textSize)))
       : DEFAULT_OVERLAY_STYLE.textSize;
   const lineSpacing = 8;
   const paddingY = 10;
@@ -273,13 +276,13 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
     const infoSegments =
       infoLineIndex !== null
         ? buildInfoSegments({
-            lap,
-            lapCount: laps.length,
-            lapStart,
-            showLapCounter,
-            showPosition,
-            positionSegments: timeline.segments,
-          })
+          lap,
+          lapCount: laps.length,
+          lapStart,
+          showLapCounter,
+          showPosition,
+          positionSegments: timeline.segments,
+        })
         : [];
 
     if (infoLineIndex !== null && infoSegments.length) {

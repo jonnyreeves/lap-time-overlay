@@ -1,3 +1,4 @@
+import ffmpeg from "fluent-ffmpeg";
 import { randomUUID } from "node:crypto";
 import { createReadStream, createWriteStream } from "node:fs";
 import fs from "node:fs/promises";
@@ -5,15 +6,14 @@ import http from "node:http";
 import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
-import ffmpeg from "fluent-ffmpeg";
+import { normalizeLapInputs, parseLapText, type LapFormat } from "../laps.js";
+import type { Lap, LapInput } from "../lapTypes.js";
+import { buildDrawtextFilterGraph, MAX_FONT_SIZE, MIN_FONT_SIZE } from "../renderers/ffmpegDrawtext.js";
 import {
   DEFAULT_OVERLAY_STYLE,
   getRenderer,
   type OverlayStyle,
 } from "../renderers/index.js";
-import { buildDrawtextFilterGraph } from "../renderers/ffmpegDrawtext.js";
-import { normalizeLapInputs, parseLapText, type LapFormat } from "../laps.js";
-import type { Lap, LapInput } from "../lapTypes.js";
 import { computeStartOffsetSeconds, parseStartTimestamp } from "../time.js";
 import { probeVideoInfo } from "../videoInfo.js";
 
@@ -641,7 +641,7 @@ function resolveOverlayStyle(body: RenderRequestBody): OverlayStyle {
       : DEFAULT_OVERLAY_STYLE.boxOpacity;
   const textSize =
     body.overlayTextSize != null && Number.isFinite(body.overlayTextSize)
-      ? Math.min(64, Math.max(16, Number(body.overlayTextSize)))
+      ? Math.min(MAX_FONT_SIZE, Math.max(MIN_FONT_SIZE, Number(body.overlayTextSize)))
       : DEFAULT_OVERLAY_STYLE.textSize;
   const boxWidthRatio =
     body.overlayWidthRatio != null && Number.isFinite(body.overlayWidthRatio)
@@ -671,9 +671,9 @@ function resolveOverlayStyle(body: RenderRequestBody): OverlayStyle {
     boxWidthRatio,
     overlayPosition:
       body.overlayPosition &&
-      ["bottom-left", "top-left", "top-right", "bottom-right"].includes(
-        body.overlayPosition
-      )
+        ["bottom-left", "top-left", "top-right", "bottom-right"].includes(
+          body.overlayPosition
+        )
         ? body.overlayPosition
         : DEFAULT_OVERLAY_STYLE.overlayPosition,
   };
