@@ -48,6 +48,7 @@ const mockLayout = {
 describe("trackSession resolvers", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
   });
 
   it("rejects unauthenticated trackSession query", async () => {
@@ -259,6 +260,7 @@ describe("trackSession resolvers", () => {
         format: "Practice",
         classification: undefined,
         trackId: "c1",
+        kartId: "k1",
         conditions: undefined,
         trackLayoutId: "l1",
         notes: undefined,
@@ -278,6 +280,21 @@ describe("trackSession resolvers", () => {
         context
       )
     ).toThrowError("trackLayoutId is required when changing track");
+  });
+
+  it("updateTrackSession rejects when kart is not available for selected track", () => {
+    repositories.trackSessions.findById.mockReturnValue(mockSession);
+    repositories.tracks.findById.mockReturnValue(mockTrack);
+    repositories.trackLayouts.findById.mockReturnValue(mockLayout);
+    repositories.karts.findById.mockReturnValue(mockKart);
+    repositories.trackKarts.findKartsForTrack.mockReturnValue([]);
+
+    expect(() =>
+      rootValue.updateTrackSession(
+        { input: { id: "s1", kartId: "k1" } },
+        context
+      )
+    ).toThrowError("Kart is not available at the selected track");
   });
 
   it("updateTrackSessionLaps validates auth and id", () => {

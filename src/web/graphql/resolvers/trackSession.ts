@@ -38,6 +38,7 @@ export type UpdateTrackSessionInputArgs = {
     conditions?: string | null;
     circuitId?: string | null;
     trackId?: string | null;
+    kartId?: string | null;
     trackLayoutId?: string | null;
     notes?: string | null;
   };
@@ -549,6 +550,33 @@ export const trackSessionResolvers = {
       targetTrackLayoutId = layout.id;
     }
 
+    const kartIdProvided = Object.prototype.hasOwnProperty.call(input, "kartId");
+    let targetKartId = existingSession.kartId;
+    if (kartIdProvided) {
+      if (!input.kartId) {
+        throw new GraphQLError("kartId cannot be empty", {
+          extensions: { code: "VALIDATION_FAILED" },
+        });
+      }
+      const kart = repositories.karts.findById(input.kartId);
+      if (!kart) {
+        throw new GraphQLError(`Kart with ID ${input.kartId} not found`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      targetKartId = kart.id;
+    }
+
+    if (targetKartId) {
+      const availableKarts = repositories.trackKarts.findKartsForTrack(targetTrackId) ?? [];
+      const kartIsOnTrack = availableKarts.some((candidate) => candidate.id === targetKartId);
+      if (!kartIsOnTrack) {
+        throw new GraphQLError("Kart is not available at the selected track", {
+          extensions: { code: "VALIDATION_FAILED" },
+        });
+      }
+    }
+
     const notesProvided = Object.prototype.hasOwnProperty.call(input, "notes");
     const classificationProvided = Object.prototype.hasOwnProperty.call(input, "classification");
     const conditionsProvided = Object.prototype.hasOwnProperty.call(input, "conditions");
@@ -577,6 +605,7 @@ export const trackSessionResolvers = {
       trackId: targetTrackId,
       conditions,
       notes,
+      kartId: targetKartId,
       trackLayoutId: targetTrackLayoutId,
     });
 

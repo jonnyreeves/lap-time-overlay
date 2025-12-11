@@ -89,6 +89,10 @@ const SessionQuery = graphql`
     tracks: circuits {
       id
       name
+      karts {
+        id
+        name
+      }
       trackLayouts {
         id
         name

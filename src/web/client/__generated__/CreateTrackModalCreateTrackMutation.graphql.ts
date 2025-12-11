@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<6391355a27514dc2a1a262f7a33f20b8>>
+ * @generated SignedSource<<9e51f414f18bd5b3f1cc77897e93fefe>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -27,7 +27,6 @@ export type CreateTrackModalCreateTrackMutation$variables = {
 export type CreateTrackModalCreateTrackMutation$data = {
   readonly createTrack: {
     readonly track: {
-      readonly heroImage: string | null | undefined;
       readonly id: string;
       readonly karts: ReadonlyArray<{
         readonly id: string;
@@ -100,13 +99,6 @@ v4 = [
           {
             "alias": null,
             "args": null,
-            "kind": "ScalarField",
-            "name": "heroImage",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
             "concreteType": "Kart",
             "kind": "LinkedField",
             "name": "karts",
@@ -149,16 +141,16 @@ return {
     "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "6b1e937ba159544e9113b321aa13d274",
+    "cacheID": "cc57d5d9d2818aacc5a38494da10bce9",
     "id": null,
     "metadata": {},
     "name": "CreateTrackModalCreateTrackMutation",
     "operationKind": "mutation",
-    "text": "mutation CreateTrackModalCreateTrackMutation(\n  $input: CreateCircuitInput!\n) {\n  createTrack: createCircuit(input: $input) {\n    track: circuit {\n      id\n      name\n      heroImage\n      karts {\n        id\n        name\n      }\n      trackLayouts {\n        id\n        name\n      }\n    }\n  }\n}\n"
+    "text": "mutation CreateTrackModalCreateTrackMutation(\n  $input: CreateCircuitInput!\n) {\n  createTrack: createCircuit(input: $input) {\n    track: circuit {\n      id\n      name\n      karts {\n        id\n        name\n      }\n      trackLayouts {\n        id\n        name\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "0dd737c06ff4ea6497d54179f3c161dd";
+(node as any).hash = "4aeda83a03c6caabfc7d4bce6f52bfc5";
 
 export default node;

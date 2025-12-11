@@ -4,6 +4,7 @@ export const conditionsOptions = ["Dry", "Wet"] as const;
 export type SessionOverviewFormState = {
   trackId: string;
   trackLayoutId: string;
+  kartId: string;
   format: string;
   date: string;
   time: string;
@@ -42,6 +43,10 @@ export function validateSessionOverviewForm(formValues: SessionOverviewFormState
     return { error: "Please select a track layout." } as const;
   }
 
+  if (!formValues.kartId) {
+    return { error: "Please select a kart." } as const;
+  }
+
   if (!formatOptions.includes(formValues.format as (typeof formatOptions)[number])) {
     return { error: "Please select a session format." } as const;
   }
@@ -64,6 +69,7 @@ export function validateSessionOverviewForm(formValues: SessionOverviewFormState
       classification,
       conditions: formValues.conditions,
       trackLayoutId: formValues.trackLayoutId,
+      kartId: formValues.kartId,
       notes: trimmedNotes,
     },
   } as const;

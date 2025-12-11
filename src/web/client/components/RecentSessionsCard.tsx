@@ -23,6 +23,14 @@ const RecentSessionsCardFragment = graphql`
           name
           id
         }
+        trackLayout {
+          id
+          name
+        }
+        kart {
+          id
+          name
+        }
           laps(first: 1) {
             personalBest
             id
@@ -75,7 +83,7 @@ const sessionRowStyles = css`
 
 const sessionGridStyles = css`
   display: grid;
-  grid-template-columns: 1.25fr 0.9fr 0.55fr 0.8fr 1.1fr 0.8fr;
+  grid-template-columns: 1.2fr 1fr 1fr 0.9fr 0.55fr 0.8fr 1.05fr 0.85fr;
   align-items: center;
   gap: 10px 14px;
 
@@ -129,6 +137,16 @@ const sessionTypeStyles = css`
   color: #3730a3;
   font-weight: 700;
   letter-spacing: -0.01em;
+`;
+
+const detailValueStyles = css`
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+`;
+
+const mutedValueStyles = css`
+  color: #94a3b8;
 `;
 
 const conditionsEmojiStyles = css`
@@ -292,6 +310,10 @@ export function RecentSessionsCard({ viewer }: Props) {
             const formattedTime = format(new Date(session.date), "p");
             const trackName = session.track?.name ?? "Unknown track";
             const sessionType = session.format ?? "—";
+            const trackLayoutName = session.trackLayout?.name ?? "Not set";
+            const kartName = session.kart?.name ?? "Not set";
+            const hasTrackLayout = Boolean(session.trackLayout?.name);
+            const hasKartName = Boolean(session.kart?.name);
 
             return (
               <div key={session.id} css={sessionRowStyles}>
@@ -301,6 +323,18 @@ export function RecentSessionsCard({ viewer }: Props) {
                     <Link to={`/session/${session.id}`} css={trackLinkStyles}>
                       {trackName}
                     </Link>
+                  </div>
+                  <div css={fieldStackStyles}>
+                    <span css={fieldLabelStyles}>Track Layout</span>
+                    <span css={[detailValueStyles, !hasTrackLayout && mutedValueStyles]}>
+                      {trackLayoutName}
+                    </span>
+                  </div>
+                  <div css={fieldStackStyles}>
+                    <span css={fieldLabelStyles}>Kart Type</span>
+                    <span css={[detailValueStyles, !hasKartName && mutedValueStyles]}>
+                      {kartName}
+                    </span>
                   </div>
                   <div css={fieldStackStyles}>
                     <span css={fieldLabelStyles}>Session Type</span>

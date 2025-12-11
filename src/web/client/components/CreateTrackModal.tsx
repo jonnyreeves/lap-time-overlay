@@ -134,6 +134,11 @@ const primaryButtonStyles = css`
   &:hover {
     background-color: #4f46e5;
   }
+
+  &:disabled {
+    background-color: #a5b4fc;
+    cursor: not-allowed;
+  }
 `;
 
 const secondaryButtonStyles = css`
@@ -152,7 +157,6 @@ const CreateTrackMutation = graphql`
       track: circuit {
         id
         name
-        heroImage
         karts {
           id
           name
@@ -168,7 +172,6 @@ const CreateTrackMutation = graphql`
 
 export function CreateTrackModal({ isOpen, onClose, onTrackCreated }: CreateTrackModalProps) {
   const [trackName, setTrackName] = useState("");
-  const [heroImage, setHeroImage] = useState(""); // Assuming heroImage is a URL string for now
   const [kartNames, setKartNames] = useState<string[]>([""]);
   const [trackLayoutNames, setTrackLayoutNames] = useState<string[]>([""]);
   const [formError, setFormError] = useState<string | null>(null);
@@ -246,20 +249,17 @@ export function CreateTrackModal({ isOpen, onClose, onTrackCreated }: CreateTrac
       return;
     }
 
-    const trimmedHeroImage = heroImage.trim();
 
     commit({
       variables: {
         input: {
           name: trackName.trim(),
-          heroImage: trimmedHeroImage || null, // Pass null if empty string
           karts: trimmedKartNames.map((name) => ({ name })),
           trackLayouts: trimmedTrackLayoutNames.map((name) => ({ name })),
         },
       },
       onCompleted: () => {
         setTrackName("");
-        setHeroImage("");
         setKartNames([""]);
         setTrackLayoutNames([""]);
         setFormError(null);
@@ -291,16 +291,6 @@ export function CreateTrackModal({ isOpen, onClose, onTrackCreated }: CreateTrac
           />
         </div>
         <div css={inputFieldStyles}>
-          <label htmlFor="hero-image">Hero Image URL (Optional)</label>
-          <input
-            id="hero-image"
-            type="text"
-            value={heroImage}
-            onChange={(e) => setHeroImage(e.target.value)}
-            disabled={isInFlight}
-          />
-        </div>
-        <div css={inputFieldStyles}>
           <label htmlFor="kart-names">Kart Types</label>
           <div css={kartListStyles}>
             {kartNames.map((name, index) => (
@@ -326,7 +316,7 @@ export function CreateTrackModal({ isOpen, onClose, onTrackCreated }: CreateTrac
             ))}
             <div css={{ display: "flex", justifyContent: "flex-end" }}>
               <button type="button" css={addKartButtonStyles} onClick={handleAddKart} disabled={isInFlight}>
-                Add Kart
+                Add Kart Type
               </button>
             </div>
           </div>

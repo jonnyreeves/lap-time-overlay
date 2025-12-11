@@ -7,6 +7,7 @@ import {
 const baseForm: SessionOverviewFormState = {
   trackId: "c1",
   trackLayoutId: "l1",
+  kartId: "k1",
   format: "Practice",
   date: "2024-01-01",
   time: "10:00",
@@ -26,6 +27,7 @@ describe("validateSessionOverviewForm", () => {
       classification: 1,
       conditions: "Dry",
       trackLayoutId: "l1",
+      kartId: "k1",
       notes: "Notes",
     });
   });
@@ -38,5 +40,10 @@ describe("validateSessionOverviewForm", () => {
   it("rejects when date or time is missing", () => {
     const result = validateSessionOverviewForm({ ...baseForm, time: "" });
     expect(result.error).toBe("Please provide both date and start time.");
+  });
+
+  it("rejects when kart is missing", () => {
+    const result = validateSessionOverviewForm({ ...baseForm, kartId: "" });
+    expect(result.error).toBe("Please select a kart.");
   });
 });

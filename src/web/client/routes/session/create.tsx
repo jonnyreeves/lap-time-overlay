@@ -1,8 +1,8 @@
 import { css } from "@emotion/react";
 import { useEffect, useState } from "react"; // Import hooks
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
-import { ConnectionHandler } from "relay-runtime";
 import { useNavigate, useOutletContext } from "react-router-dom";
+import { ConnectionHandler } from "relay-runtime";
 import { type create_tsxTracksQuery } from "../../__generated__/create_tsxTracksQuery.graphql.js";
 import { createTrackSessionMutation } from "../../__generated__/createTrackSessionMutation.graphql.js";
 import { Card } from "../../components/Card.js";
@@ -10,8 +10,8 @@ import { CreateTrackModal } from "../../components/CreateTrackModal.js";
 import { IconButton } from "../../components/IconButton.js";
 import { ImportSessionModal } from "../../components/ImportSessionModal.js";
 import { LapInputsCard } from "../../components/LapInputsCard.js";
-import { type SessionImportSelection } from "../../utils/sessionImportTypes.js";
 import { useLapRows, type LapInputPayload } from "../../hooks/useLapRows.js";
+import { type SessionImportSelection } from "../../utils/sessionImportTypes.js";
 import { prependCreatedSessionToRecentSessions, prependTrackForCreatedSession } from "./createUpdater.js";
 
 const formLayoutStyles = css`
@@ -508,35 +508,37 @@ export default function CreateSessionRoute() {
               </button>
             </div>
           </div>
-          <div css={inputFieldStyles}>
-            <label htmlFor="session-kart">Kart</label>
-            <select
-              id="session-kart"
-              value={kartId}
-              onChange={(e) => setKartId(e.target.value)}
-              disabled={isInFlight || selectedTrackKarts.length === 0}
-            >
-              {selectedTrackKarts.map((kart) => (
-                <option key={kart.id} value={kart.id}>
-                  {kart.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div css={inputFieldStyles}>
-            <label htmlFor="session-track-layout">Track layout</label>
-            <select
-              id="session-track-layout"
-              value={trackLayoutId}
-              onChange={(e) => setTrackLayoutId(e.target.value)}
-              disabled={isInFlight || selectedTrackLayouts.length === 0}
-            >
-              {selectedTrackLayouts.map((layout) => (
-                <option key={layout.id} value={layout.id}>
-                  {layout.name}
-                </option>
-              ))}
-            </select>
+          <div css={twoColumnRowStyles}>
+            <div css={inputFieldStyles}>
+              <label htmlFor="session-kart">Kart Type</label>
+              <select
+                id="session-kart"
+                value={kartId}
+                onChange={(e) => setKartId(e.target.value)}
+                disabled={isInFlight || selectedTrackKarts.length === 0}
+              >
+                {selectedTrackKarts.map((kart) => (
+                  <option key={kart.id} value={kart.id}>
+                    {kart.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div css={inputFieldStyles}>
+              <label htmlFor="session-track-layout">Track layout</label>
+              <select
+                id="session-track-layout"
+                value={trackLayoutId}
+                onChange={(e) => setTrackLayoutId(e.target.value)}
+                disabled={isInFlight || selectedTrackLayouts.length === 0}
+              >
+                {selectedTrackLayouts.map((layout) => (
+                  <option key={layout.id} value={layout.id}>
+                    {layout.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <div css={twoColumnRowStyles}>
             <div css={inputFieldStyles}>

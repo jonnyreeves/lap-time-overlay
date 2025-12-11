@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<1c06f0902ea11b3d14d156c04ada5f4d>>
+ * @generated SignedSource<<4c57cfe2b1e00b1a2ea0356b8967a468>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -16,6 +16,7 @@ export type UpdateTrackSessionInput = {
   date?: string | null | undefined;
   format?: string | null | undefined;
   id: string;
+  kartId?: string | null | undefined;
   notes?: string | null | undefined;
   trackId?: string | null | undefined;
   trackLayoutId?: string | null | undefined;

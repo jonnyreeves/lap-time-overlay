@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<07541b97b3642c7ceac23a3f0948a63b>>
+ * @generated SignedSource<<7b594eaabbd4d00060f17c38dbd5bee4>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -20,12 +20,20 @@ export type RecentSessionsCard_viewer$data = {
         readonly date: string;
         readonly format: string;
         readonly id: string;
+        readonly kart: {
+          readonly id: string;
+          readonly name: string;
+        } | null | undefined;
         readonly laps: ReadonlyArray<{
           readonly id: string;
           readonly personalBest: number | null | undefined;
         }>;
         readonly notes: string | null | undefined;
         readonly track: {
+          readonly id: string;
+          readonly name: string;
+        };
+        readonly trackLayout: {
           readonly id: string;
           readonly name: string;
         };
@@ -46,7 +54,18 @@ var v0 = {
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
-};
+},
+v1 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "name",
+  "storageKey": null
+},
+v2 = [
+  (v0/*: any*/),
+  (v1/*: any*/)
+];
 return {
   "argumentDefinitions": [],
   "kind": "Fragment",
@@ -133,15 +152,29 @@ return {
                   "name": "circuit",
                   "plural": false,
                   "selections": [
-                    {
-                      "alias": null,
-                      "args": null,
-                      "kind": "ScalarField",
-                      "name": "name",
-                      "storageKey": null
-                    },
+                    (v1/*: any*/),
                     (v0/*: any*/)
                   ],
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "concreteType": "TrackLayout",
+                  "kind": "LinkedField",
+                  "name": "trackLayout",
+                  "plural": false,
+                  "selections": (v2/*: any*/),
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "concreteType": "Kart",
+                  "kind": "LinkedField",
+                  "name": "kart",
+                  "plural": false,
+                  "selections": (v2/*: any*/),
                   "storageKey": null
                 },
                 {
@@ -223,6 +256,6 @@ return {
 };
 })();
 
-(node as any).hash = "c495aed0d408367bd7d03d2c5729856f";
+(node as any).hash = "1d0e98cf41dbca73f0663d92af51dc75";
 
 export default node;

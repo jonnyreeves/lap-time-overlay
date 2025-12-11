@@ -45,6 +45,7 @@ type Props = {
   tracks: readonly {
     id: string;
     name: string;
+    karts: readonly { id: string; name: string }[];
     trackLayouts: readonly { id: string; name: string }[];
   }[];
 };
@@ -84,6 +85,7 @@ function toFormState(session: SessionDetails): FormState {
   return {
     trackId: session.track.id,
     trackLayoutId: session.trackLayout?.id ?? "",
+    kartId: session.kart?.id ?? "",
     format: session.format || "Practice",
     date,
     time,
@@ -117,6 +119,7 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
     session.id,
     session.notes,
     session.trackLayout?.id,
+    session.kart?.id,
   ]);
 
   const { date: sessionDate, time: sessionTime } = splitDateTime(session.date);
@@ -144,12 +147,14 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
             id: session.track.id,
             name: session.track.name,
             trackLayouts: session.trackLayout ? [session.trackLayout] : [],
+            karts: session.kart ? [session.kart] : [],
           },
         ];
   const selectedTrack = trackOptions.find((option) => option.id === formValues.trackId);
   const selectedTrackLayouts =
     selectedTrack?.trackLayouts ??
     (session.trackLayout ? [session.trackLayout] : []);
+  const selectedTrackKarts = selectedTrack?.karts ?? (session.kart ? [session.kart] : []);
 
   function handleEdit() {
     setActionError(null);
@@ -165,6 +170,20 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
       setFormValues((current) => ({ ...current, trackLayoutId: availableLayouts[0].id }));
     }
   }, [isEditing, selectedTrackLayouts, formValues.trackLayoutId]);
+
+  useEffect(() => {
+    if (!isEditing) return;
+    const availableKarts = selectedTrackKarts;
+    if (availableKarts.length === 0) {
+      if (formValues.kartId !== "") {
+        setFormValues((current) => ({ ...current, kartId: "" }));
+      }
+      return;
+    }
+    if (!availableKarts.some((kart) => kart.id === formValues.kartId)) {
+      setFormValues((current) => ({ ...current, kartId: availableKarts[0].id }));
+    }
+  }, [isEditing, selectedTrackKarts, formValues.kartId]);
 
   function handleCancel() {
     setActionError(null);
@@ -189,15 +208,19 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
     const nextLayout =
       selectedTrackLayouts.find((layout) => layout.id === payload.trackLayoutId) ??
       (session.trackLayout ? { id: session.trackLayout.id, name: session.trackLayout.name } : null);
+    const nextKart =
+      selectedTrackKarts.find((kart) => kart.id === payload.kartId) ??
+      (session.kart ? { id: session.kart.id, name: session.kart.name } : null);
 
     commitUpdate({
-          variables: {
-            input: {
-              id: session.id,
-              trackId: payload.trackId,
-              trackLayoutId: payload.trackLayoutId,
-              format: payload.format,
-              date: payload.date,
+      variables: {
+        input: {
+          id: session.id,
+          trackId: payload.trackId,
+          trackLayoutId: payload.trackLayoutId,
+          kartId: payload.kartId,
+          format: payload.format,
+          date: payload.date,
           classification: payload.classification,
           conditions: payload.conditions,
           notes: payload.notes,
@@ -217,6 +240,9 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
               name: nextTrackName,
               __typename: "Circuit",
             },
+            kart: nextKart
+              ? { id: nextKart.id, name: nextKart.name, __typename: "Kart" }
+              : null,
             trackLayout: nextLayout
               ? { id: nextLayout.id, name: nextLayout.name, __typename: "TrackLayout" }
               : null,
@@ -282,13 +308,17 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
               <select
                 css={inputStyles}
                 value={formValues.trackId}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const nextTrackId = e.target.value;
+                  const nextTrack = trackOptions.find((track) => track.id === nextTrackId);
+                  const nextKartId = nextTrack?.karts[0]?.id ?? "";
                   setFormValues((current) => ({
                     ...current,
-                    trackId: e.target.value,
+                    trackId: nextTrackId,
                     trackLayoutId: "",
-                  }))
-                }
+                    kartId: nextKartId,
+                  }));
+                }}
                 disabled={isSaving}
               >
                 {trackOptions.map((track) => (
@@ -345,7 +375,27 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
           </div>
           <div css={infoTileStyles}>
             <p className="label">Kart</p>
-            <p className="value">{kartName}</p>
+            {isEditing ? (
+              <select
+                css={inputStyles}
+                value={formValues.kartId}
+                onChange={(e) =>
+                  setFormValues((current) => ({ ...current, kartId: e.target.value }))
+                }
+                disabled={isSaving || selectedTrackKarts.length === 0}
+              >
+                {selectedTrackKarts.length === 0 ? (
+                  <option value="">No karts available</option>
+                ) : null}
+                {selectedTrackKarts.map((kart) => (
+                  <option key={kart.id} value={kart.id}>
+                    {kart.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <p className="value">{kartName}</p>
+            )}
           </div>
           <div css={infoTileStyles}>
             <p className="label">Session date</p>

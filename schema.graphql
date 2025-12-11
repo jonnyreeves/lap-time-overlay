@@ -53,6 +53,7 @@ input UpdateTrackSessionInput {
   conditions: String
   circuitId: ID
   trackId: ID
+  kartId: ID
   trackLayoutId: ID
   notes: String
 }
