@@ -91,11 +91,11 @@ describe("circuit resolver", () => {
 
   it("createCircuit rejects unauthenticated requests", () => {
     expect(() =>
-      rootValue.createCircuit({ input: { name: "Spa" } }, baseContext as never)
+      rootValue.createCircuit({ input: { name: "Spa", karts: [{ name: "Sodi" }] } }, baseContext as never)
     ).toThrowError("Authentication required");
   });
 
-  it("createCircuit validates name and returns new circuit", () => {
+  it("createCircuit validates name and returns new circuit", async () => {
     repositories.circuits.create.mockReturnValue({
       id: "c1",
       name: "Spa",
@@ -104,13 +104,49 @@ describe("circuit resolver", () => {
       updatedAt: 0,
     });
 
+    repositories.karts.create
+      .mockReturnValueOnce({ id: "k1", name: "Rotax", createdAt: 0, updatedAt: 0 })
+      .mockReturnValueOnce({ id: "k2", name: "Sodi", createdAt: 0, updatedAt: 0 });
+    repositories.circuitKarts.addKartToCircuit.mockImplementation(() => {});
+    repositories.circuitKarts.findKartsForCircuit.mockReturnValue([
+      { id: "k1", name: "Rotax", createdAt: 0, updatedAt: 0 },
+      { id: "k2", name: "Sodi", createdAt: 0, updatedAt: 0 },
+    ]);
+
     const result = rootValue.createCircuit(
-      { input: { name: "Spa", heroImage: "img" } },
+      {
+        input: {
+          name: "Spa",
+          heroImage: "img",
+          karts: [{ name: "Rotax" }, { name: "Sodi" }],
+        },
+      },
       authenticatedContext as never
     );
 
     expect(repositories.circuits.create).toHaveBeenCalledWith("Spa", "img");
+    expect(repositories.karts.create).toHaveBeenCalledTimes(2);
+    expect(repositories.circuitKarts.addKartToCircuit).toHaveBeenCalledWith("c1", "k1");
+    expect(repositories.circuitKarts.addKartToCircuit).toHaveBeenCalledWith("c1", "k2");
+
     expect(result.circuit).toMatchObject({ id: "c1", name: "Spa", heroImage: "img" });
+    expect(result.circuit.karts).toBeTypeOf("function");
+    expect(await result.circuit.karts()).toHaveLength(2);
+  });
+
+  it("createCircuit requires at least one kart name", () => {
+    expect(() =>
+      rootValue.createCircuit(
+        { input: { name: "Spa", heroImage: "img", karts: [] } },
+        authenticatedContext as never
+      )
+    ).toThrowError("At least one kart name is required");
+    expect(() =>
+      rootValue.createCircuit(
+        { input: { name: "Spa", heroImage: "img", karts: [{ name: "" }] } },
+        authenticatedContext as never
+      )
+    ).toThrowError("At least one kart name is required");
   });
 });
 

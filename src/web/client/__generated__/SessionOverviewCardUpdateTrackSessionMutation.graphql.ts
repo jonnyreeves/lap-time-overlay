@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<b4d6935a1c5f1c268823a29f33cc4858>>
+ * @generated SignedSource<<4c57acfe630ce3086aaba4bf30a56bd1>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -33,6 +33,10 @@ export type SessionOverviewCardUpdateTrackSessionMutation$data = {
       readonly date: string;
       readonly format: string;
       readonly id: string;
+      readonly kart: {
+        readonly id: string;
+        readonly name: string;
+      } | null | undefined;
       readonly notes: string | null | undefined;
       readonly updatedAt: string;
     };
@@ -59,6 +63,16 @@ v1 = {
   "storageKey": null
 },
 v2 = [
+  (v1/*: any*/),
+  {
+    "alias": null,
+    "args": null,
+    "kind": "ScalarField",
+    "name": "name",
+    "storageKey": null
+  }
+],
+v3 = [
   {
     "alias": null,
     "args": [
@@ -124,16 +138,17 @@ v2 = [
             "kind": "LinkedField",
             "name": "circuit",
             "plural": false,
-            "selections": [
-              (v1/*: any*/),
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "name",
-                "storageKey": null
-              }
-            ],
+            "selections": (v2/*: any*/),
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "Kart",
+            "kind": "LinkedField",
+            "name": "kart",
+            "plural": false,
+            "selections": (v2/*: any*/),
             "storageKey": null
           },
           {
@@ -156,7 +171,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "SessionOverviewCardUpdateTrackSessionMutation",
-    "selections": (v2/*: any*/),
+    "selections": (v3/*: any*/),
     "type": "Mutation",
     "abstractKey": null
   },
@@ -165,19 +180,19 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "SessionOverviewCardUpdateTrackSessionMutation",
-    "selections": (v2/*: any*/)
+    "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "6185858ddfbb8e9eff1278911433503d",
+    "cacheID": "bce9ff3673a87c0119c7326711fbe1e0",
     "id": null,
     "metadata": {},
     "name": "SessionOverviewCardUpdateTrackSessionMutation",
     "operationKind": "mutation",
-    "text": "mutation SessionOverviewCardUpdateTrackSessionMutation(\n  $input: UpdateTrackSessionInput!\n) {\n  updateTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      conditions\n      notes\n      circuit {\n        id\n        name\n      }\n      updatedAt\n    }\n  }\n}\n"
+    "text": "mutation SessionOverviewCardUpdateTrackSessionMutation(\n  $input: UpdateTrackSessionInput!\n) {\n  updateTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      conditions\n      notes\n      circuit {\n        id\n        name\n      }\n      kart {\n        id\n        name\n      }\n      updatedAt\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "3f1d808323f5e2ae35b655171b1028bd";
+(node as any).hash = "3c41f629f74d458a234092f61063a88b";
 
 export default node;

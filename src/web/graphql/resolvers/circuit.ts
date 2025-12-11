@@ -71,7 +71,10 @@ export const circuitResolvers = {
       .findAll()
       .map((circuit) => toCircuitPayload(circuit, repositories, userId));
   },
-  createCircuit: (args: { input?: { name?: string; heroImage?: string } }, context: GraphQLContext) => {
+  createCircuit: (
+    args: { input?: { name?: string; heroImage?: string | null; karts?: { name?: string }[] } },
+    context: GraphQLContext
+  ) => {
     if (!context.currentUser) {
       throw new GraphQLError("Authentication required", {
         extensions: { code: "UNAUTHENTICATED" },
@@ -83,8 +86,24 @@ export const circuitResolvers = {
         extensions: { code: "VALIDATION_FAILED" },
       });
     }
-    const newCircuit = context.repositories.circuits.create(input.name, input.heroImage);
-    return { circuit: newCircuit };
+    const kartInputs = input.karts ?? [];
+    const kartNames = kartInputs
+      .map((kart) => kart?.name?.trim())
+      .filter((name): name is string => Boolean(name));
+
+    if (!kartInputs.length || kartNames.length !== kartInputs.length) {
+      throw new GraphQLError("At least one kart name is required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const uniqueKartNames = Array.from(new Set(kartNames));
+
+    const newCircuit = context.repositories.circuits.create(input.name, input.heroImage ?? null);
+    const createdKarts = uniqueKartNames.map((name) => context.repositories.karts.create(name));
+    createdKarts.forEach((kart) => context.repositories.circuitKarts.addKartToCircuit(newCircuit.id, kart.id));
+
+    return { circuit: toCircuitPayload(newCircuit, context.repositories, context.currentUser.id) };
   },
 
   createKart: (args: { input?: { name?: string } }, context: GraphQLContext) => {

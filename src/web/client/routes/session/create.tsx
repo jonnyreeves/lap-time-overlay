@@ -154,6 +154,10 @@ const CreateSessionRouteCircuitsQuery = graphql`
     circuits {
       id
       name
+      karts {
+        id
+        name
+      }
     }
   }
 `;
@@ -175,6 +179,10 @@ const CreateTrackSessionMutation = graphql`
         format
         classification
         conditions
+        kart {
+          id
+          name
+        }
         circuit
           @prependNode(
             connections: $circuitConnections
@@ -212,6 +220,7 @@ export default function CreateSessionRoute() {
   const [date, setDate] = useState(today);
   const [time, setTime] = useState("");
   const [circuitId, setCircuitId] = useState("");
+  const [kartId, setKartId] = useState("");
   const [classification, setClassification] = useState("");
   const [notes, setNotes] = useState("");
 
@@ -232,7 +241,7 @@ export default function CreateSessionRoute() {
     CreateTrackSessionMutation,
   );
   const isCreateDisabled =
-    isInFlight || !date || !sessionFormat || !circuitId || classification.trim() === "";
+    isInFlight || !date || !sessionFormat || !circuitId || !kartId || classification.trim() === "";
   const viewerConnectionId = ConnectionHandler.getConnectionID(
     viewer.__id ?? viewer.id,
     "RecentSessionsCard_recentTrackSessions"
@@ -253,19 +262,37 @@ export default function CreateSessionRoute() {
     }
   );
 
+  const selectedCircuit = data.circuits.find((circuit) => circuit.id === circuitId);
+  const selectedCircuitKarts = selectedCircuit?.karts ?? [];
+
   useEffect(() => {
     if (data.circuits.length === 0) {
       if (circuitId !== "") {
         setCircuitId("");
       }
+      if (kartId !== "") {
+        setKartId("");
+      }
       return;
     }
 
-    const circuitStillExists = data.circuits.some((circuit) => circuit.id === circuitId);
-    if (!circuitStillExists) {
-      setCircuitId(data.circuits[0].id);
+    const selected = data.circuits.find((circuit) => circuit.id === circuitId) ?? data.circuits[0];
+    if (selected.id !== circuitId) {
+      setCircuitId(selected.id);
     }
-  }, [circuitId, data.circuits]);
+
+    const availableKartIds = selected.karts.map((kart) => kart.id);
+    if (availableKartIds.length === 0) {
+      if (kartId !== "") {
+        setKartId("");
+      }
+      return;
+    }
+
+    if (!availableKartIds.includes(kartId)) {
+      setKartId(availableKartIds[0]);
+    }
+  }, [circuitId, kartId, data.circuits]);
 
   const handleCircuitCreated = () => {
     // Increment the key to force useLazyLoadQuery to refetch
@@ -277,6 +304,10 @@ export default function CreateSessionRoute() {
 
     if (!circuitId) {
       alert("Please select a circuit.");
+      return;
+    }
+    if (!kartId) {
+      alert("Please select a kart.");
       return;
     }
 
@@ -302,6 +333,7 @@ export default function CreateSessionRoute() {
           format: sessionFormat,
           classification: parsedClassification,
           circuitId,
+          kartId,
           conditions,
           notes: notes.trim() ? notes.trim() : null,
           ...(lapInput.length ? { laps: lapInput } : {}),
@@ -326,6 +358,16 @@ export default function CreateSessionRoute() {
         alert(`Error creating session: ${error.message}`);
       },
     });
+  };
+
+  const handleCircuitChange = (newCircuitId: string) => {
+    setCircuitId(newCircuitId);
+    const circuit = data.circuits.find((c) => c.id === newCircuitId);
+    if (circuit?.karts?.length) {
+      setKartId(circuit.karts[0].id);
+    } else {
+      setKartId("");
+    }
   };
 
   const handleImportEmail = (importResult: SessionImportSelection) => {
@@ -408,7 +450,7 @@ export default function CreateSessionRoute() {
               <select
                 id="session-circuit"
                 value={circuitId}
-                onChange={(e) => setCircuitId(e.target.value)}
+                onChange={(e) => handleCircuitChange(e.target.value)}
                 disabled={isInFlight}
               >
                 {data.circuits.map((circuit) => (
@@ -426,6 +468,21 @@ export default function CreateSessionRoute() {
                 Add
               </button>
             </div>
+          </div>
+          <div css={inputFieldStyles}>
+            <label htmlFor="session-kart">Kart</label>
+            <select
+              id="session-kart"
+              value={kartId}
+              onChange={(e) => setKartId(e.target.value)}
+              disabled={isInFlight || selectedCircuitKarts.length === 0}
+            >
+              {selectedCircuitKarts.map((kart) => (
+                <option key={kart.id} value={kart.id}>
+                  {kart.name}
+                </option>
+              ))}
+            </select>
           </div>
           <div css={twoColumnRowStyles}>
             <div css={inputFieldStyles}>

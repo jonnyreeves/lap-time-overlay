@@ -18,13 +18,20 @@ const mockSession = {
   notes: null,
   createdAt: 0,
   updatedAt: 0,
-  kartId: null,
+  kartId: "k1",
 };
 
 const mockCircuit = {
   id: "c1",
   name: "Spa",
   heroImage: null,
+  createdAt: 0,
+  updatedAt: 0,
+};
+
+const mockKart = {
+  id: "k1",
+  name: "Sodi",
   createdAt: 0,
   updatedAt: 0,
 };
@@ -62,7 +69,7 @@ describe("trackSession resolvers", () => {
 
   it("createTrackSession validates required fields", async () => {
     expect(() => rootValue.createTrackSession({ input: {} }, context)).toThrowError(
-      "Date, format, circuitId, and classification are required"
+      "Date, format, circuitId, kartId, and classification are required"
     );
   });
 
@@ -70,7 +77,7 @@ describe("trackSession resolvers", () => {
     repositories.circuits.findById.mockReturnValueOnce(null);
     expect(() =>
       rootValue.createTrackSession(
-        { input: { date: "2024-02-01", format: "Race", classification: 5, circuitId: "missing" } },
+        { input: { date: "2024-02-01", format: "Race", classification: 5, circuitId: "missing", kartId: "k1" } },
         context
       )
     ).toThrowError("Circuit with ID missing not found");
@@ -79,6 +86,8 @@ describe("trackSession resolvers", () => {
   it("createTrackSession forwards parsed input", async () => {
     repositories.trackSessions.createWithLaps.mockReturnValue({ trackSession: mockSession, laps: [] });
     repositories.circuits.findById.mockReturnValue(mockCircuit);
+    repositories.karts.findById.mockReturnValue(mockKart);
+    repositories.circuitKarts.findKartsForCircuit.mockReturnValue([mockKart]);
 
     const result = rootValue.createTrackSession(
       {
@@ -89,6 +98,7 @@ describe("trackSession resolvers", () => {
           circuitId: "c1",
           conditions: "Wet",
           notes: "fun",
+          kartId: "k1",
           laps: [{ lapNumber: 1, time: 74.5 }],
         },
       },
@@ -104,9 +114,51 @@ describe("trackSession resolvers", () => {
       conditions: "Wet",
       notes: "fun",
       laps: [{ lapNumber: 1, time: 74.5 }],
+      kartId: "k1",
     });
     expect(result.trackSession.id).toBe("s1");
     expect(result.trackSession.classification).toBe(1);
+  });
+
+  it("createTrackSession rejects when kart does not exist", async () => {
+    repositories.circuits.findById.mockReturnValue(mockCircuit);
+    repositories.karts.findById.mockReturnValue(null);
+
+    expect(() =>
+      rootValue.createTrackSession(
+        {
+          input: {
+            date: "2024-02-01",
+            format: "Race",
+            classification: 2,
+            circuitId: "c1",
+            kartId: "missing",
+          },
+        },
+        context
+      )
+    ).toThrowError("Kart with ID missing not found");
+  });
+
+  it("createTrackSession rejects when kart not on circuit", async () => {
+    repositories.circuits.findById.mockReturnValue(mockCircuit);
+    repositories.karts.findById.mockReturnValue(mockKart);
+    repositories.circuitKarts.findKartsForCircuit.mockReturnValue([]);
+
+    expect(() =>
+      rootValue.createTrackSession(
+        {
+          input: {
+            date: "2024-02-01",
+            format: "Race",
+            classification: 2,
+            circuitId: "c1",
+            kartId: "k1",
+          },
+        },
+        context
+      )
+    ).toThrowError("Kart is not available at the selected circuit");
   });
 
   it("updateTrackSession validates presence of id and auth", async () => {

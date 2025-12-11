@@ -21,6 +21,7 @@ export type CreateTrackSessionInputArgs = {
     classification?: number | null;
     conditions?: string;
     circuitId?: string;
+    kartId?: string;
     notes?: string;
     laps?: LapInputArg[] | null;
   };
@@ -179,6 +180,20 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
       }
       return toCircuitPayload(circuit, repositories, session.userId);
     },
+    kart: session.kartId
+      ? () => {
+          const kart = repositories.karts.findById(session.kartId as string);
+          if (!kart) {
+            return null;
+          }
+          return {
+            id: kart.id,
+            name: kart.name,
+            createdAt: new Date(kart.createdAt).toISOString(),
+            updatedAt: new Date(kart.updatedAt).toISOString(),
+          };
+        }
+      : null,
     notes: session.notes,
     createdAt: new Date(session.createdAt).toISOString(),
     updatedAt: new Date(session.updatedAt).toISOString(),
@@ -340,8 +355,8 @@ export const trackSessionResolvers = {
       });
     }
     const input = args.input;
-    if (!input?.date || !input?.format || !input?.circuitId || input.classification == null) {
-      throw new GraphQLError("Date, format, circuitId, and classification are required", {
+    if (!input?.date || !input?.format || !input?.circuitId || !input?.kartId || input.classification == null) {
+      throw new GraphQLError("Date, format, circuitId, kartId, and classification are required", {
         extensions: { code: "VALIDATION_FAILED" },
       });
     }
@@ -350,6 +365,21 @@ export const trackSessionResolvers = {
     if (!circuit) {
       throw new GraphQLError(`Circuit with ID ${input.circuitId} not found`, {
         extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    const kart = repositories.karts.findById(input.kartId);
+    if (!kart) {
+      throw new GraphQLError(`Kart with ID ${input.kartId} not found`, {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    const availableKarts = repositories.circuitKarts.findKartsForCircuit(input.circuitId) ?? [];
+    const kartIsOnCircuit = availableKarts.some((candidate) => candidate.id === kart.id);
+    if (!kartIsOnCircuit) {
+      throw new GraphQLError("Kart is not available at the selected circuit", {
+        extensions: { code: "VALIDATION_FAILED" },
       });
     }
 
@@ -365,6 +395,7 @@ export const trackSessionResolvers = {
       conditions,
       notes: input.notes,
       laps,
+      kartId: input.kartId,
     });
     return { trackSession: toTrackSessionPayload(trackSession, repositories) };
   },

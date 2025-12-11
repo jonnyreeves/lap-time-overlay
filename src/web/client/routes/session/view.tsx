@@ -38,6 +38,10 @@ const SessionQuery = graphql`
         id
         name
       }
+      kart {
+        id
+        name
+      }
       createdAt
       updatedAt
       trackRecordings(first: 20) {

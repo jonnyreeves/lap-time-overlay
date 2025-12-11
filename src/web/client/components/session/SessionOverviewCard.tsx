@@ -33,6 +33,7 @@ type SessionDetails = {
   conditions?: string | null;
   notes?: string | null;
   circuit: { id: string; name: string };
+  kart?: { id: string; name: string } | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -54,6 +55,10 @@ const UpdateTrackSessionMutation = graphql`
         conditions
         notes
         circuit {
+          id
+          name
+        }
+        kart {
           id
           name
         }
@@ -116,6 +121,7 @@ export function SessionOverviewCard({ session, laps, circuits }: Props) {
     fastestLap && Number.isFinite(fastestLap.time) && fastestLap.time > 0
       ? `${formatLapTimeSeconds(fastestLap.time)}s`
       : null;
+  const kartName = session.kart?.name ?? "Not set";
   const notesText = (isEditing ? formValues.notes : session.notes)?.trim() ?? "";
   const conditionsIcon = /wet/i.test(conditionsLabel) ? "🌧️" : "☀️";
   const circuitOptions =
@@ -272,6 +278,10 @@ export function SessionOverviewCard({ session, laps, circuits }: Props) {
             ) : (
               <p className="value">{session.format || "—"}</p>
             )}
+          </div>
+          <div css={infoTileStyles}>
+            <p className="label">Kart</p>
+            <p className="value">{kartName}</p>
           </div>
           <div css={infoTileStyles}>
             <p className="label">Session date</p>

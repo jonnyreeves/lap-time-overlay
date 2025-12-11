@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<a7c2331cd0233146517dba5d4f16ad3b>>
+ * @generated SignedSource<<6247cda330ffd43bb337ba6a6f561096>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,6 +13,10 @@ export type create_tsxCircuitsQuery$variables = Record<PropertyKey, never>;
 export type create_tsxCircuitsQuery$data = {
   readonly circuits: ReadonlyArray<{
     readonly id: string;
+    readonly karts: ReadonlyArray<{
+      readonly id: string;
+      readonly name: string;
+    }>;
     readonly name: string;
   }>;
 };
@@ -22,7 +26,21 @@ export type create_tsxCircuitsQuery = {
 };
 
 const node: ConcreteRequest = (function(){
-var v0 = [
+var v0 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "id",
+  "storageKey": null
+},
+v1 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "name",
+  "storageKey": null
+},
+v2 = [
   {
     "alias": null,
     "args": null,
@@ -31,18 +49,19 @@ var v0 = [
     "name": "circuits",
     "plural": true,
     "selections": [
+      (v0/*: any*/),
+      (v1/*: any*/),
       {
         "alias": null,
         "args": null,
-        "kind": "ScalarField",
-        "name": "id",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "name",
+        "concreteType": "Kart",
+        "kind": "LinkedField",
+        "name": "karts",
+        "plural": true,
+        "selections": [
+          (v0/*: any*/),
+          (v1/*: any*/)
+        ],
         "storageKey": null
       }
     ],
@@ -55,7 +74,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "create_tsxCircuitsQuery",
-    "selections": (v0/*: any*/),
+    "selections": (v2/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -64,19 +83,19 @@ return {
     "argumentDefinitions": [],
     "kind": "Operation",
     "name": "create_tsxCircuitsQuery",
-    "selections": (v0/*: any*/)
+    "selections": (v2/*: any*/)
   },
   "params": {
-    "cacheID": "a271b1f240aae5464a2adb3e4539d894",
+    "cacheID": "e493dcacb9cde4b1d01b4027c09cac4a",
     "id": null,
     "metadata": {},
     "name": "create_tsxCircuitsQuery",
     "operationKind": "query",
-    "text": "query create_tsxCircuitsQuery {\n  circuits {\n    id\n    name\n  }\n}\n"
+    "text": "query create_tsxCircuitsQuery {\n  circuits {\n    id\n    name\n    karts {\n      id\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "3b816087f5f9b67c9c4d4747b53f0479";
+(node as any).hash = "c9b6da573c6b940d797bfe5e8484b71c";
 
 export default node;

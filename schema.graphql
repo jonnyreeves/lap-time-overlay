@@ -8,6 +8,7 @@ type Query {
 input CreateCircuitInput {
   name: String!
   heroImage: String
+  karts: [CreateKartInput!]!
 }
 
 type CreateCircuitPayload {
@@ -32,6 +33,7 @@ input CreateTrackSessionInput {
   classification: Int!
   conditions: String
   circuitId: ID!
+  kartId: ID!
   notes: String
   laps: [LapInput!]
 }
@@ -165,6 +167,7 @@ type TrackSession {
   classification: Int!
   conditions: String!
   circuit: Circuit!
+  kart: Kart
   notes: String
   createdAt: String!
   updatedAt: String!

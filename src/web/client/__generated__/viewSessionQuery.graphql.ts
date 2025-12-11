@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<2641ae419db7313d2025b5e108c46a2d>>
+ * @generated SignedSource<<6d875b154659930670c950d7ef76998c>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -30,6 +30,10 @@ export type viewSessionQuery$data = {
     readonly date: string;
     readonly format: string;
     readonly id: string;
+    readonly kart: {
+      readonly id: string;
+      readonly name: string;
+    } | null | undefined;
     readonly laps: ReadonlyArray<{
       readonly id: string;
       readonly lapEvents: ReadonlyArray<{
@@ -193,6 +197,16 @@ v8 = [
         "concreteType": "Circuit",
         "kind": "LinkedField",
         "name": "circuit",
+        "plural": false,
+        "selections": (v2/*: any*/),
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "concreteType": "Kart",
+        "kind": "LinkedField",
+        "name": "kart",
         "plural": false,
         "selections": (v2/*: any*/),
         "storageKey": null
@@ -421,16 +435,16 @@ return {
     "selections": (v8/*: any*/)
   },
   "params": {
-    "cacheID": "8dd93aa50a31d143329758236fbc00de",
+    "cacheID": "e1c5a1550fde394ac701a9d718247c95",
     "id": null,
     "metadata": {},
     "name": "viewSessionQuery",
     "operationKind": "query",
-    "text": "query viewSessionQuery(\n  $id: ID!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    classification\n    conditions\n    notes\n    circuit {\n      id\n      name\n    }\n    createdAt\n    updatedAt\n    trackRecordings(first: 20) {\n      id\n      description\n      status\n      error\n      sizeBytes\n      isPrimary\n      lapOneOffset\n      durationMs\n      fps\n      createdAt\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n      uploadTargets(first: 50) {\n        id\n        fileName\n        sizeBytes\n        uploadedBytes\n        status\n        ordinal\n        uploadUrl\n      }\n    }\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents(first: 50) {\n        id\n        offset\n        event\n        value\n      }\n    }\n  }\n  circuits {\n    id\n    name\n  }\n}\n"
+    "text": "query viewSessionQuery(\n  $id: ID!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    classification\n    conditions\n    notes\n    circuit {\n      id\n      name\n    }\n    kart {\n      id\n      name\n    }\n    createdAt\n    updatedAt\n    trackRecordings(first: 20) {\n      id\n      description\n      status\n      error\n      sizeBytes\n      isPrimary\n      lapOneOffset\n      durationMs\n      fps\n      createdAt\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n      uploadTargets(first: 50) {\n        id\n        fileName\n        sizeBytes\n        uploadedBytes\n        status\n        ordinal\n        uploadUrl\n      }\n    }\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents(first: 50) {\n        id\n        offset\n        event\n        value\n      }\n    }\n  }\n  circuits {\n    id\n    name\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "a92d781e544ef60cc8d47cadcab9678e";
+(node as any).hash = "6943a6967a3626df790bdefe5056a312";
 
 export default node;

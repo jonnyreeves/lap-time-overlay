@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<eec493541a6a6e4088cb7407433fdaa3>>
+ * @generated SignedSource<<bb93f4f5352e641afcedc4c64304a647>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,6 +15,7 @@ export type CreateTrackSessionInput = {
   conditions?: string | null | undefined;
   date: string;
   format: string;
+  kartId: string;
   laps?: ReadonlyArray<LapInput> | null | undefined;
   notes?: string | null | undefined;
 };
@@ -49,6 +50,10 @@ export type createTrackSessionMutation$data = {
       readonly date: string;
       readonly format: string;
       readonly id: string;
+      readonly kart: {
+        readonly id: string;
+        readonly name: string;
+      } | null | undefined;
       readonly laps: ReadonlyArray<{
         readonly id: string;
         readonly personalBest: number | null | undefined;
@@ -124,10 +129,30 @@ v9 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "personalBest",
+  "name": "name",
   "storageKey": null
 },
 v10 = {
+  "alias": null,
+  "args": null,
+  "concreteType": "Kart",
+  "kind": "LinkedField",
+  "name": "kart",
+  "plural": false,
+  "selections": [
+    (v4/*: any*/),
+    (v9/*: any*/)
+  ],
+  "storageKey": null
+},
+v11 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "personalBest",
+  "storageKey": null
+},
+v12 = {
   "alias": null,
   "args": null,
   "concreteType": "Circuit",
@@ -136,13 +161,7 @@ v10 = {
   "plural": false,
   "selections": [
     (v4/*: any*/),
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "name",
-      "storageKey": null
-    },
+    (v9/*: any*/),
     {
       "alias": null,
       "args": null,
@@ -150,7 +169,7 @@ v10 = {
       "name": "heroImage",
       "storageKey": null
     },
-    (v9/*: any*/),
+    (v11/*: any*/),
     {
       "alias": null,
       "args": null,
@@ -168,14 +187,14 @@ v10 = {
   ],
   "storageKey": null
 },
-v11 = {
+v13 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "notes",
   "storageKey": null
 },
-v12 = {
+v14 = {
   "alias": null,
   "args": [
     {
@@ -189,7 +208,7 @@ v12 = {
   "name": "laps",
   "plural": true,
   "selections": [
-    (v9/*: any*/),
+    (v11/*: any*/),
     (v4/*: any*/)
   ],
   "storageKey": "laps(first:1)"
@@ -227,8 +246,9 @@ return {
               (v7/*: any*/),
               (v8/*: any*/),
               (v10/*: any*/),
-              (v11/*: any*/),
-              (v12/*: any*/)
+              (v12/*: any*/),
+              (v13/*: any*/),
+              (v14/*: any*/)
             ],
             "storageKey": null
           }
@@ -271,6 +291,7 @@ return {
               (v7/*: any*/),
               (v8/*: any*/),
               (v10/*: any*/),
+              (v12/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -292,8 +313,8 @@ return {
                   }
                 ]
               },
-              (v11/*: any*/),
-              (v12/*: any*/)
+              (v13/*: any*/),
+              (v14/*: any*/)
             ],
             "storageKey": null
           },
@@ -324,16 +345,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "dc8d126b1b4389c12d0a48e0ff01fbf2",
+    "cacheID": "8fbd88fb04ce5ed3adcae2ad963eaec8",
     "id": null,
     "metadata": {},
     "name": "createTrackSessionMutation",
     "operationKind": "mutation",
-    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      conditions\n      circuit {\n        id\n        name\n        heroImage\n        personalBest\n        personalBestDry\n        personalBestWet\n      }\n      notes\n      laps(first: 1) {\n        personalBest\n        id\n      }\n    }\n  }\n}\n"
+    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      conditions\n      kart {\n        id\n        name\n      }\n      circuit {\n        id\n        name\n        heroImage\n        personalBest\n        personalBestDry\n        personalBestWet\n      }\n      notes\n      laps(first: 1) {\n        personalBest\n        id\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "4b510edfbb29f86aee2f1ffac85bf816";
+(node as any).hash = "f5945c65d569160219b223e98d6c0233";
 
 export default node;

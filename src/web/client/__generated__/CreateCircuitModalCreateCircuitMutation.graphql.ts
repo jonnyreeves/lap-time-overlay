@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<bc6fd68532278992147f3904cee06a3b>>
+ * @generated SignedSource<<b1a202f80ae31df03ce6c612a80056d8>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,6 +11,10 @@
 import { ConcreteRequest } from 'relay-runtime';
 export type CreateCircuitInput = {
   heroImage?: string | null | undefined;
+  karts: ReadonlyArray<CreateKartInput>;
+  name: string;
+};
+export type CreateKartInput = {
   name: string;
 };
 export type CreateCircuitModalCreateCircuitMutation$variables = {
@@ -21,6 +25,10 @@ export type CreateCircuitModalCreateCircuitMutation$data = {
     readonly circuit: {
       readonly heroImage: string | null | undefined;
       readonly id: string;
+      readonly karts: ReadonlyArray<{
+        readonly id: string;
+        readonly name: string;
+      }>;
       readonly name: string;
     };
   };
@@ -38,7 +46,21 @@ var v0 = [
     "name": "input"
   }
 ],
-v1 = [
+v1 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "id",
+  "storageKey": null
+},
+v2 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "name",
+  "storageKey": null
+},
+v3 = [
   {
     "alias": null,
     "args": [
@@ -61,25 +83,26 @@ v1 = [
         "name": "circuit",
         "plural": false,
         "selections": [
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "id",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "name",
-            "storageKey": null
-          },
+          (v1/*: any*/),
+          (v2/*: any*/),
           {
             "alias": null,
             "args": null,
             "kind": "ScalarField",
             "name": "heroImage",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "Kart",
+            "kind": "LinkedField",
+            "name": "karts",
+            "plural": true,
+            "selections": [
+              (v1/*: any*/),
+              (v2/*: any*/)
+            ],
             "storageKey": null
           }
         ],
@@ -95,7 +118,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "CreateCircuitModalCreateCircuitMutation",
-    "selections": (v1/*: any*/),
+    "selections": (v3/*: any*/),
     "type": "Mutation",
     "abstractKey": null
   },
@@ -104,19 +127,19 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "CreateCircuitModalCreateCircuitMutation",
-    "selections": (v1/*: any*/)
+    "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "82364c556389d53ba07acd482ec4e2c4",
+    "cacheID": "d182083398649ceb81b7f00b91c1296a",
     "id": null,
     "metadata": {},
     "name": "CreateCircuitModalCreateCircuitMutation",
     "operationKind": "mutation",
-    "text": "mutation CreateCircuitModalCreateCircuitMutation(\n  $input: CreateCircuitInput!\n) {\n  createCircuit(input: $input) {\n    circuit {\n      id\n      name\n      heroImage\n    }\n  }\n}\n"
+    "text": "mutation CreateCircuitModalCreateCircuitMutation(\n  $input: CreateCircuitInput!\n) {\n  createCircuit(input: $input) {\n    circuit {\n      id\n      name\n      heroImage\n      karts {\n        id\n        name\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "0566c2d2e4cb0defb5405f62b7711e84";
+(node as any).hash = "ba1082d55c7e6ff318c961459c7c1d72";
 
 export default node;
