@@ -9,6 +9,7 @@ input CreateCircuitInput {
   name: String!
   heroImage: String
   karts: [CreateKartInput!]!
+  trackLayouts: [CreateTrackLayoutInput!]!
 }
 
 type CreateCircuitPayload {
@@ -32,8 +33,10 @@ input CreateTrackSessionInput {
   format: String!
   classification: Int!
   conditions: String
-  circuitId: ID!
+  circuitId: ID
+  trackId: ID
   kartId: ID!
+  trackLayoutId: ID!
   notes: String
   laps: [LapInput!]
 }
@@ -49,6 +52,8 @@ input UpdateTrackSessionInput {
   classification: Int
   conditions: String
   circuitId: ID
+  trackId: ID
+  trackLayoutId: ID
   notes: String
 }
 
@@ -141,11 +146,20 @@ type Circuit {
   personalBestDry: Float
   personalBestWet: Float
   karts: [Kart!]!
+  trackLayouts: [TrackLayout!]!
 }
 
 type Kart {
   id: ID!
   name: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type TrackLayout {
+  id: ID!
+  name: String!
+  circuit: Circuit!
   createdAt: String!
   updatedAt: String!
 }
@@ -167,6 +181,7 @@ type TrackSession {
   classification: Int!
   conditions: String!
   circuit: Circuit!
+  trackLayout: TrackLayout!
   kart: Kart
   notes: String
   createdAt: String!
@@ -272,6 +287,10 @@ type LogoutResult {
 }
 
 input CreateKartInput {
+  name: String!
+}
+
+input CreateTrackLayoutInput {
   name: String!
 }
 

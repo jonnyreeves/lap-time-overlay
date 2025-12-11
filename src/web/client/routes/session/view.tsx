@@ -31,10 +31,14 @@ const SessionQuery = graphql`
       id
       date
       format
-      classification
-      conditions
-      notes
-      circuit {
+    classification
+    conditions
+    notes
+    track: circuit {
+      id
+      name
+    }
+      trackLayout {
         id
         name
       }
@@ -82,9 +86,13 @@ const SessionQuery = graphql`
         }
       }
     }
-    circuits {
+    tracks: circuits {
       id
       name
+      trackLayouts {
+        id
+        name
+      }
     }
   }
 `;
@@ -106,7 +114,7 @@ export default function ViewSessionRoute() {
   );
 
   const session = data.trackSession;
-  const circuits = data.circuits ?? [];
+  const tracks = data.tracks ?? [];
   const trackRecordings = session?.trackRecordings ?? [];
   const laps = session?.laps ?? [];
 
@@ -268,7 +276,7 @@ export default function ViewSessionRoute() {
         <SessionOverviewCard
           session={session}
           laps={lapsWithStart}
-          circuits={circuits}
+          tracks={tracks}
         />
 
         <LapsCard

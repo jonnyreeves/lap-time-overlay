@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<6d875b154659930670c950d7ef76998c>>
+ * @generated SignedSource<<9f86f3bc702d2393a7483cbdca9bb82a>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,15 +15,7 @@ export type viewSessionQuery$variables = {
   id: string;
 };
 export type viewSessionQuery$data = {
-  readonly circuits: ReadonlyArray<{
-    readonly id: string;
-    readonly name: string;
-  }>;
   readonly trackSession: {
-    readonly circuit: {
-      readonly id: string;
-      readonly name: string;
-    };
     readonly classification: number;
     readonly conditions: string;
     readonly createdAt: string;
@@ -46,6 +38,14 @@ export type viewSessionQuery$data = {
       readonly time: number;
     }>;
     readonly notes: string | null | undefined;
+    readonly track: {
+      readonly id: string;
+      readonly name: string;
+    };
+    readonly trackLayout: {
+      readonly id: string;
+      readonly name: string;
+    };
     readonly trackRecordings: ReadonlyArray<{
       readonly combineProgress: number | null | undefined;
       readonly createdAt: string;
@@ -74,6 +74,14 @@ export type viewSessionQuery$data = {
     }>;
     readonly updatedAt: string;
   };
+  readonly tracks: ReadonlyArray<{
+    readonly id: string;
+    readonly name: string;
+    readonly trackLayouts: ReadonlyArray<{
+      readonly id: string;
+      readonly name: string;
+    }>;
+  }>;
 };
 export type viewSessionQuery = {
   response: viewSessionQuery$data;
@@ -95,52 +103,53 @@ v1 = {
   "name": "id",
   "storageKey": null
 },
-v2 = [
+v2 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "name",
+  "storageKey": null
+},
+v3 = [
   (v1/*: any*/),
-  {
-    "alias": null,
-    "args": null,
-    "kind": "ScalarField",
-    "name": "name",
-    "storageKey": null
-  }
+  (v2/*: any*/)
 ],
-v3 = {
+v4 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "createdAt",
   "storageKey": null
 },
-v4 = {
+v5 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "status",
   "storageKey": null
 },
-v5 = {
+v6 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "sizeBytes",
   "storageKey": null
 },
-v6 = {
+v7 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "uploadedBytes",
   "storageKey": null
 },
-v7 = [
+v8 = [
   {
     "kind": "Literal",
     "name": "first",
     "value": 50
   }
 ],
-v8 = [
+v9 = [
   {
     "alias": null,
     "args": [
@@ -192,13 +201,23 @@ v8 = [
         "storageKey": null
       },
       {
-        "alias": null,
+        "alias": "track",
         "args": null,
         "concreteType": "Circuit",
         "kind": "LinkedField",
         "name": "circuit",
         "plural": false,
-        "selections": (v2/*: any*/),
+        "selections": (v3/*: any*/),
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "concreteType": "TrackLayout",
+        "kind": "LinkedField",
+        "name": "trackLayout",
+        "plural": false,
+        "selections": (v3/*: any*/),
         "storageKey": null
       },
       {
@@ -208,10 +227,10 @@ v8 = [
         "kind": "LinkedField",
         "name": "kart",
         "plural": false,
-        "selections": (v2/*: any*/),
+        "selections": (v3/*: any*/),
         "storageKey": null
       },
-      (v3/*: any*/),
+      (v4/*: any*/),
       {
         "alias": null,
         "args": null,
@@ -241,7 +260,7 @@ v8 = [
             "name": "description",
             "storageKey": null
           },
-          (v4/*: any*/),
+          (v5/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -249,7 +268,7 @@ v8 = [
             "name": "error",
             "storageKey": null
           },
-          (v5/*: any*/),
+          (v6/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -278,7 +297,7 @@ v8 = [
             "name": "fps",
             "storageKey": null
           },
-          (v3/*: any*/),
+          (v4/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -294,7 +313,7 @@ v8 = [
             "name": "uploadProgress",
             "plural": false,
             "selections": [
-              (v6/*: any*/),
+              (v7/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -307,7 +326,7 @@ v8 = [
           },
           {
             "alias": null,
-            "args": (v7/*: any*/),
+            "args": (v8/*: any*/),
             "concreteType": "RecordingUploadTarget",
             "kind": "LinkedField",
             "name": "uploadTargets",
@@ -321,9 +340,9 @@ v8 = [
                 "name": "fileName",
                 "storageKey": null
               },
-              (v5/*: any*/),
               (v6/*: any*/),
-              (v4/*: any*/),
+              (v7/*: any*/),
+              (v5/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -346,7 +365,7 @@ v8 = [
       },
       {
         "alias": null,
-        "args": (v7/*: any*/),
+        "args": (v8/*: any*/),
         "concreteType": "Lap",
         "kind": "LinkedField",
         "name": "laps",
@@ -369,7 +388,7 @@ v8 = [
           },
           {
             "alias": null,
-            "args": (v7/*: any*/),
+            "args": (v8/*: any*/),
             "concreteType": "LapEvent",
             "kind": "LinkedField",
             "name": "lapEvents",
@@ -407,13 +426,26 @@ v8 = [
     "storageKey": null
   },
   {
-    "alias": null,
+    "alias": "tracks",
     "args": null,
     "concreteType": "Circuit",
     "kind": "LinkedField",
     "name": "circuits",
     "plural": true,
-    "selections": (v2/*: any*/),
+    "selections": [
+      (v1/*: any*/),
+      (v2/*: any*/),
+      {
+        "alias": null,
+        "args": null,
+        "concreteType": "TrackLayout",
+        "kind": "LinkedField",
+        "name": "trackLayouts",
+        "plural": true,
+        "selections": (v3/*: any*/),
+        "storageKey": null
+      }
+    ],
     "storageKey": null
   }
 ];
@@ -423,7 +455,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "viewSessionQuery",
-    "selections": (v8/*: any*/),
+    "selections": (v9/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -432,19 +464,19 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "viewSessionQuery",
-    "selections": (v8/*: any*/)
+    "selections": (v9/*: any*/)
   },
   "params": {
-    "cacheID": "e1c5a1550fde394ac701a9d718247c95",
+    "cacheID": "a30cc076c579d065276594593ed2d7b7",
     "id": null,
     "metadata": {},
     "name": "viewSessionQuery",
     "operationKind": "query",
-    "text": "query viewSessionQuery(\n  $id: ID!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    classification\n    conditions\n    notes\n    circuit {\n      id\n      name\n    }\n    kart {\n      id\n      name\n    }\n    createdAt\n    updatedAt\n    trackRecordings(first: 20) {\n      id\n      description\n      status\n      error\n      sizeBytes\n      isPrimary\n      lapOneOffset\n      durationMs\n      fps\n      createdAt\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n      uploadTargets(first: 50) {\n        id\n        fileName\n        sizeBytes\n        uploadedBytes\n        status\n        ordinal\n        uploadUrl\n      }\n    }\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents(first: 50) {\n        id\n        offset\n        event\n        value\n      }\n    }\n  }\n  circuits {\n    id\n    name\n  }\n}\n"
+    "text": "query viewSessionQuery(\n  $id: ID!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    classification\n    conditions\n    notes\n    track: circuit {\n      id\n      name\n    }\n    trackLayout {\n      id\n      name\n    }\n    kart {\n      id\n      name\n    }\n    createdAt\n    updatedAt\n    trackRecordings(first: 20) {\n      id\n      description\n      status\n      error\n      sizeBytes\n      isPrimary\n      lapOneOffset\n      durationMs\n      fps\n      createdAt\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n      uploadTargets(first: 50) {\n        id\n        fileName\n        sizeBytes\n        uploadedBytes\n        status\n        ordinal\n        uploadUrl\n      }\n    }\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents(first: 50) {\n        id\n        offset\n        event\n        value\n      }\n    }\n  }\n  tracks: circuits {\n    id\n    name\n    trackLayouts {\n      id\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "6943a6967a3626df790bdefe5056a312";
+(node as any).hash = "31b6ee576896449d0f7b8affe740c42e";
 
 export default node;

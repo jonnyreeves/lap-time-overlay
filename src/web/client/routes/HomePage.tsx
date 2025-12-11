@@ -3,14 +3,14 @@ import { Suspense } from "react";
 import { graphql, useFragment } from "react-relay";
 import { useOutletContext } from "react-router-dom";
 import type { HomePage_viewer$key } from "../__generated__/HomePage_viewer.graphql.js";
-import { RecentCircuitsCard } from "../components/RecentCircuitsCard.js";
+import { RecentTracksCard } from "../components/RecentTracksCard.js";
 import { RecentSessionsCard } from "../components/RecentSessionsCard.js";
 
 const HomePageFragment = graphql`
   fragment HomePage_viewer on User {
     id
     username
-    ...RecentCircuitsCard_viewer
+    ...RecentTracksCard_viewer
     ...RecentSessionsCard_viewer
   }
 `;
@@ -37,10 +37,9 @@ export function HomePage() {
       <Suspense fallback={<p>Loading recent sessions...</p>}>
         <RecentSessionsCard viewer={data} />
       </Suspense>
-      <Suspense fallback={<p>Loading recent circuits...</p>}>
-        <RecentCircuitsCard viewer={data} />
+      <Suspense fallback={<p>Loading recent tracks...</p>}>
+        <RecentTracksCard viewer={data} />
       </Suspense>
     </div>
   );
 }
-

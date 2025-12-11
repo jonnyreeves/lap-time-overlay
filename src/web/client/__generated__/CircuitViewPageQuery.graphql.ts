@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<cf296f141ffe3bd7f04759aaf3daac95>>
+ * @generated SignedSource<<95a08dbc0d954ab19fba3d7b487d437c>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -14,7 +14,7 @@ export type CircuitViewPageQuery$variables = {
   circuitId: string;
 };
 export type CircuitViewPageQuery$data = {
-  readonly circuit: {
+  readonly track: {
     readonly id: string;
     readonly name: string;
     readonly " $fragmentSpreads": FragmentRefs<"CircuitKartsCard_circuit">;
@@ -62,7 +62,7 @@ return {
     "name": "CircuitViewPageQuery",
     "selections": [
       {
-        "alias": null,
+        "alias": "track",
         "args": (v1/*: any*/),
         "concreteType": "Circuit",
         "kind": "LinkedField",
@@ -90,7 +90,7 @@ return {
     "name": "CircuitViewPageQuery",
     "selections": [
       {
-        "alias": null,
+        "alias": "track",
         "args": (v1/*: any*/),
         "concreteType": "Circuit",
         "kind": "LinkedField",
@@ -118,16 +118,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "c37f921ff8f2f806f881e565a098df41",
+    "cacheID": "2728c921f0aa5f3efc0731c37ae51bbe",
     "id": null,
     "metadata": {},
     "name": "CircuitViewPageQuery",
     "operationKind": "query",
-    "text": "query CircuitViewPageQuery(\n  $circuitId: ID!\n) {\n  circuit(id: $circuitId) {\n    id\n    name\n    ...CircuitKartsCard_circuit\n  }\n}\n\nfragment CircuitKartsCard_circuit on Circuit {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n"
+    "text": "query CircuitViewPageQuery(\n  $circuitId: ID!\n) {\n  track: circuit(id: $circuitId) {\n    id\n    name\n    ...CircuitKartsCard_circuit\n  }\n}\n\nfragment CircuitKartsCard_circuit on Circuit {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "8fce069ad559c569ddc6bff665866a1f";
+(node as any).hash = "86fda8aa7149ad039554233fe13bd91c";
 
 export default node;

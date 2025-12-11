@@ -3,10 +3,10 @@ import { useState } from "react";
 import { graphql, useMutation } from "react-relay";
 import { Modal } from "./Modal";
 
-interface CreateCircuitModalProps {
+interface CreateTrackModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCircuitCreated: () => void;
+  onTrackCreated: () => void;
 }
 
 const inputFieldStyles = css`
@@ -146,14 +146,18 @@ const secondaryButtonStyles = css`
   }
 `;
 
-const CreateCircuitMutation = graphql`
-  mutation CreateCircuitModalCreateCircuitMutation($input: CreateCircuitInput!) {
-    createCircuit(input: $input) {
-      circuit {
+const CreateTrackMutation = graphql`
+  mutation CreateTrackModalCreateTrackMutation($input: CreateCircuitInput!) {
+    createTrack: createCircuit(input: $input) {
+      track: circuit {
         id
         name
         heroImage
         karts {
+          id
+          name
+        }
+        trackLayouts {
           id
           name
         }
@@ -162,13 +166,14 @@ const CreateCircuitMutation = graphql`
   }
 `;
 
-export function CreateCircuitModal({ isOpen, onClose, onCircuitCreated }: CreateCircuitModalProps) {
-  const [circuitName, setCircuitName] = useState("");
+export function CreateTrackModal({ isOpen, onClose, onTrackCreated }: CreateTrackModalProps) {
+  const [trackName, setTrackName] = useState("");
   const [heroImage, setHeroImage] = useState(""); // Assuming heroImage is a URL string for now
   const [kartNames, setKartNames] = useState<string[]>([""]);
+  const [trackLayoutNames, setTrackLayoutNames] = useState<string[]>([""]);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const [commit, isInFlight] = useMutation(CreateCircuitMutation);
+  const [commit, isInFlight] = useMutation(CreateTrackMutation);
 
   const handleClose = () => {
     setFormError(null);
@@ -176,7 +181,9 @@ export function CreateCircuitModal({ isOpen, onClose, onCircuitCreated }: Create
   };
 
   const hasKartNames = kartNames.length > 0 && kartNames.every((name) => name.trim().length > 0);
-  const isCreateDisabled = isInFlight || !circuitName.trim() || !hasKartNames;
+  const hasLayoutNames =
+    trackLayoutNames.length > 0 && trackLayoutNames.every((name) => name.trim().length > 0);
+  const isCreateDisabled = isInFlight || !trackName.trim() || !hasKartNames || !hasLayoutNames;
 
   const handleAddKart = () => {
     setKartNames((current) => [...current, ""]);
@@ -196,6 +203,24 @@ export function CreateCircuitModal({ isOpen, onClose, onCircuitCreated }: Create
     }
   };
 
+  const handleAddTrackLayout = () => {
+    setTrackLayoutNames((current) => [...current, ""]);
+    setFormError(null);
+  };
+
+  const handleRemoveTrackLayout = (index: number) => {
+    if (trackLayoutNames.length === 1) return;
+    setTrackLayoutNames((current) => current.filter((_, idx) => idx !== index));
+    setFormError(null);
+  };
+
+  const handleTrackLayoutNameChange = (index: number, value: string) => {
+    setTrackLayoutNames((current) => current.map((name, idx) => (idx === index ? value : name)));
+    if (formError) {
+      setFormError(null);
+    }
+  };
+
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -203,11 +228,21 @@ export function CreateCircuitModal({ isOpen, onClose, onCircuitCreated }: Create
 
     const trimmedKartNames = kartNames.map((name) => name.trim());
     if (trimmedKartNames.some((name) => !name)) {
-      setFormError("Add a name for each kart at this circuit.");
+      setFormError("Add a name for each kart at this track.");
       return;
     }
     if (trimmedKartNames.length === 0) {
-      setFormError("Add at least one kart for this circuit.");
+      setFormError("Add at least one kart for this track.");
+      return;
+    }
+
+    const trimmedTrackLayoutNames = trackLayoutNames.map((name) => name.trim());
+    if (trimmedTrackLayoutNames.some((name) => !name)) {
+      setFormError("Add a name for each track layout at this track.");
+      return;
+    }
+    if (trimmedTrackLayoutNames.length === 0) {
+      setFormError("Add at least one track layout for this track.");
       return;
     }
 
@@ -216,21 +251,23 @@ export function CreateCircuitModal({ isOpen, onClose, onCircuitCreated }: Create
     commit({
       variables: {
         input: {
-          name: circuitName.trim(),
+          name: trackName.trim(),
           heroImage: trimmedHeroImage || null, // Pass null if empty string
           karts: trimmedKartNames.map((name) => ({ name })),
+          trackLayouts: trimmedTrackLayoutNames.map((name) => ({ name })),
         },
       },
       onCompleted: () => {
-        setCircuitName("");
+        setTrackName("");
         setHeroImage("");
         setKartNames([""]);
+        setTrackLayoutNames([""]);
         setFormError(null);
-        onCircuitCreated();
+        onTrackCreated();
         handleClose();
       },
       onError: (error) => {
-        console.error("Error creating circuit:", error);
+        console.error("Error creating track:", error);
         setFormError(error.message);
       },
     });
@@ -239,16 +276,16 @@ export function CreateCircuitModal({ isOpen, onClose, onCircuitCreated }: Create
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Create New Circuit">
+    <Modal isOpen={isOpen} onClose={handleClose} title="Create New Track">
       <form onSubmit={handleSubmit}>
         {formError ? <p css={{ color: "#b91c1c", marginBottom: 10 }}>{formError}</p> : null}
         <div css={inputFieldStyles}>
-          <label htmlFor="circuit-name">Circuit Name</label>
+          <label htmlFor="track-name">Track Name</label>
           <input
-            id="circuit-name"
+            id="track-name"
             type="text"
-            value={circuitName}
-            onChange={(e) => setCircuitName(e.target.value)}
+            value={trackName}
+            onChange={(e) => setTrackName(e.target.value)}
             required
             disabled={isInFlight}
           />
@@ -294,6 +331,42 @@ export function CreateCircuitModal({ isOpen, onClose, onCircuitCreated }: Create
             </div>
           </div>
         </div>
+        <div css={inputFieldStyles}>
+          <label htmlFor="track-layout-names">Track Layouts</label>
+          <div css={kartListStyles}>
+            {trackLayoutNames.map((name, index) => (
+              <div key={`layout-${index}`} css={kartRowStyles}>
+                <input
+                  id={index === 0 ? "track-layout-names" : undefined}
+                  type="text"
+                  css={kartNameInputStyles}
+                  value={name}
+                  onChange={(e) => handleTrackLayoutNameChange(index, e.target.value)}
+                  placeholder="e.g. GP Layout"
+                  disabled={isInFlight}
+                />
+                <button
+                  type="button"
+                  css={removeKartButtonStyles}
+                  onClick={() => handleRemoveTrackLayout(index)}
+                  disabled={isInFlight || trackLayoutNames.length === 1}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <div css={{ display: "flex", justifyContent: "flex-end" }}>
+              <button
+                type="button"
+                css={addKartButtonStyles}
+                onClick={handleAddTrackLayout}
+                disabled={isInFlight}
+              >
+                Add Track Layout
+              </button>
+            </div>
+          </div>
+        </div>
         <div css={buttonGroupStyles}>
           <button
             type="button"
@@ -308,7 +381,7 @@ export function CreateCircuitModal({ isOpen, onClose, onCircuitCreated }: Create
             css={primaryButtonStyles}
             disabled={isCreateDisabled}
           >
-            {isInFlight ? "Creating..." : "Create Circuit"}
+            {isInFlight ? "Creating..." : "Create Track"}
           </button>
         </div>
       </form>

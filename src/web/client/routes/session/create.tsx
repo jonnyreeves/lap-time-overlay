@@ -3,16 +3,16 @@ import { useEffect, useState } from "react"; // Import hooks
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 import { ConnectionHandler } from "relay-runtime";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { type create_tsxCircuitsQuery } from "../../__generated__/create_tsxCircuitsQuery.graphql.js";
+import { type create_tsxTracksQuery } from "../../__generated__/create_tsxTracksQuery.graphql.js";
 import { createTrackSessionMutation } from "../../__generated__/createTrackSessionMutation.graphql.js";
 import { Card } from "../../components/Card.js";
-import { CreateCircuitModal } from "../../components/CreateCircuitModal.js";
+import { CreateTrackModal } from "../../components/CreateTrackModal.js";
 import { IconButton } from "../../components/IconButton.js";
 import { ImportSessionModal } from "../../components/ImportSessionModal.js";
 import { LapInputsCard } from "../../components/LapInputsCard.js";
 import { type SessionImportSelection } from "../../utils/sessionImportTypes.js";
 import { useLapRows, type LapInputPayload } from "../../hooks/useLapRows.js";
-import { prependCircuitForCreatedSession, prependCreatedSessionToRecentSessions } from "./createUpdater.js";
+import { prependCreatedSessionToRecentSessions, prependTrackForCreatedSession } from "./createUpdater.js";
 
 const formLayoutStyles = css`
   display: grid;
@@ -68,7 +68,7 @@ const twoColumnRowStyles = css`
   }
 `;
 
-const AddCircuitButtonStyles = css`
+const AddTrackButtonStyles = css`
   margin-left: 10px;
   padding: 8px 12px;
   background-color: #e2e8f4;
@@ -149,12 +149,16 @@ const rightColumnStyles = css`
   gap: 12px;
 `;
 
-const CreateSessionRouteCircuitsQuery = graphql`
-  query create_tsxCircuitsQuery {
-    circuits {
+const CreateSessionRouteTracksQuery = graphql`
+  query create_tsxTracksQuery {
+    tracks: circuits {
       id
       name
       karts {
+        id
+        name
+      }
+      trackLayouts {
         id
         name
       }
@@ -166,7 +170,7 @@ const CreateTrackSessionMutation = graphql`
   mutation createTrackSessionMutation(
     $input: CreateTrackSessionInput!
     $connections: [ID!]!
-    $circuitConnections: [ID!]!
+    $trackConnections: [ID!]!
   ) {
     createTrackSession(input: $input) {
       trackSession
@@ -179,13 +183,17 @@ const CreateTrackSessionMutation = graphql`
         format
         classification
         conditions
+        trackLayout {
+          id
+          name
+        }
         kart {
           id
           name
         }
-        circuit
+        track: circuit
           @prependNode(
-            connections: $circuitConnections
+            connections: $trackConnections
             edgeTypeName: "CircuitEdge"
           ) {
           id
@@ -211,7 +219,7 @@ type OutletContext = {
 
 export default function CreateSessionRoute() {
   const { viewer } = useOutletContext<OutletContext>();
-  const [showCreateCircuitModal, setShowCreateCircuitModal] = useState(false);
+  const [showCreateTrackModal, setShowCreateTrackModal] = useState(false);
   const [showImportSessionModal, setShowImportSessionModal] = useState(false);
   const [refetchKey, setRefetchKey] = useState(0); // Key to force refetch
   const [sessionFormat, setSessionFormat] = useState("Practice");
@@ -219,8 +227,9 @@ export default function CreateSessionRoute() {
   const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
   const [date, setDate] = useState(today);
   const [time, setTime] = useState("");
-  const [circuitId, setCircuitId] = useState("");
+  const [trackId, setTrackId] = useState("");
   const [kartId, setKartId] = useState("");
+  const [trackLayoutId, setTrackLayoutId] = useState("");
   const [classification, setClassification] = useState("");
   const [notes, setNotes] = useState("");
 
@@ -241,18 +250,24 @@ export default function CreateSessionRoute() {
     CreateTrackSessionMutation,
   );
   const isCreateDisabled =
-    isInFlight || !date || !sessionFormat || !circuitId || !kartId || classification.trim() === "";
+    isInFlight ||
+    !date ||
+    !sessionFormat ||
+    !trackId ||
+    !kartId ||
+    !trackLayoutId ||
+    classification.trim() === "";
   const viewerConnectionId = ConnectionHandler.getConnectionID(
     viewer.__id ?? viewer.id,
     "RecentSessionsCard_recentTrackSessions"
   );
-  const viewerCircuitConnectionId = ConnectionHandler.getConnectionID(
+  const viewerTrackConnectionId = ConnectionHandler.getConnectionID(
     viewer.__id ?? viewer.id,
-    "RecentCircuitsCard_recentCircuits"
+    "RecentTracksCard_recentTracks"
   );
 
-  const data = useLazyLoadQuery<create_tsxCircuitsQuery>(
-    CreateSessionRouteCircuitsQuery,
+  const data = useLazyLoadQuery<create_tsxTracksQuery>(
+    CreateSessionRouteTracksQuery,
     {},
     {
       fetchPolicy: "store-and-network",
@@ -262,23 +277,27 @@ export default function CreateSessionRoute() {
     }
   );
 
-  const selectedCircuit = data.circuits.find((circuit) => circuit.id === circuitId);
-  const selectedCircuitKarts = selectedCircuit?.karts ?? [];
+  const selectedTrack = data.tracks.find((track) => track.id === trackId);
+  const selectedTrackKarts = selectedTrack?.karts ?? [];
+  const selectedTrackLayouts = selectedTrack?.trackLayouts ?? [];
 
   useEffect(() => {
-    if (data.circuits.length === 0) {
-      if (circuitId !== "") {
-        setCircuitId("");
+    if (data.tracks.length === 0) {
+      if (trackId !== "") {
+        setTrackId("");
       }
       if (kartId !== "") {
         setKartId("");
       }
+      if (trackLayoutId !== "") {
+        setTrackLayoutId("");
+      }
       return;
     }
 
-    const selected = data.circuits.find((circuit) => circuit.id === circuitId) ?? data.circuits[0];
-    if (selected.id !== circuitId) {
-      setCircuitId(selected.id);
+    const selected = data.tracks.find((track) => track.id === trackId) ?? data.tracks[0];
+    if (selected.id !== trackId) {
+      setTrackId(selected.id);
     }
 
     const availableKartIds = selected.karts.map((kart) => kart.id);
@@ -292,9 +311,19 @@ export default function CreateSessionRoute() {
     if (!availableKartIds.includes(kartId)) {
       setKartId(availableKartIds[0]);
     }
-  }, [circuitId, kartId, data.circuits]);
+    const availableLayoutIds = selected.trackLayouts.map((layout) => layout.id);
+    if (availableLayoutIds.length === 0) {
+      if (trackLayoutId !== "") {
+        setTrackLayoutId("");
+      }
+      return;
+    }
+    if (!availableLayoutIds.includes(trackLayoutId)) {
+      setTrackLayoutId(availableLayoutIds[0]);
+    }
+  }, [trackId, kartId, trackLayoutId, data.tracks]);
 
-  const handleCircuitCreated = () => {
+  const handleTrackCreated = () => {
     // Increment the key to force useLazyLoadQuery to refetch
     setRefetchKey((prevKey) => prevKey + 1);
   };
@@ -302,12 +331,16 @@ export default function CreateSessionRoute() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!circuitId) {
-      alert("Please select a circuit.");
+    if (!trackId) {
+      alert("Please select a track.");
       return;
     }
     if (!kartId) {
       alert("Please select a kart.");
+      return;
+    }
+    if (!trackLayoutId) {
+      alert("Please select a track layout.");
       return;
     }
 
@@ -332,19 +365,20 @@ export default function CreateSessionRoute() {
           date: time ? `${date}T${time}` : date,
           format: sessionFormat,
           classification: parsedClassification,
-          circuitId,
+          trackId,
+          trackLayoutId,
           kartId,
           conditions,
           notes: notes.trim() ? notes.trim() : null,
           ...(lapInput.length ? { laps: lapInput } : {}),
         },
         connections: [viewerConnectionId],
-        circuitConnections: [viewerCircuitConnectionId],
+        trackConnections: [viewerTrackConnectionId],
       },
       updater: (store) => {
         const viewerId = viewer.__id ?? viewer.id;
         prependCreatedSessionToRecentSessions(store, viewerId);
-        prependCircuitForCreatedSession(store, viewerId);
+        prependTrackForCreatedSession(store, viewerId);
       },
       onCompleted: (response) => {
         const newSessionId = response.createTrackSession?.trackSession?.id;
@@ -360,13 +394,18 @@ export default function CreateSessionRoute() {
     });
   };
 
-  const handleCircuitChange = (newCircuitId: string) => {
-    setCircuitId(newCircuitId);
-    const circuit = data.circuits.find((c) => c.id === newCircuitId);
-    if (circuit?.karts?.length) {
-      setKartId(circuit.karts[0].id);
+  const handleTrackChange = (newTrackId: string) => {
+    setTrackId(newTrackId);
+    const track = data.tracks.find((t) => t.id === newTrackId);
+    if (track?.karts?.length) {
+      setKartId(track.karts[0].id);
     } else {
       setKartId("");
+    }
+    if (track?.trackLayouts?.length) {
+      setTrackLayoutId(track.trackLayouts[0].id);
+    } else {
+      setTrackLayoutId("");
     }
   };
 
@@ -445,27 +484,27 @@ export default function CreateSessionRoute() {
             </div>
           </div>
           <div css={inputFieldStyles}>
-            <label htmlFor="session-circuit">Circuit</label>
+            <label htmlFor="session-track">Track</label>
             <div css={css`display: flex; align-items: center;`}>
               <select
-                id="session-circuit"
-                value={circuitId}
-                onChange={(e) => handleCircuitChange(e.target.value)}
+                id="session-track"
+                value={trackId}
+                onChange={(e) => handleTrackChange(e.target.value)}
                 disabled={isInFlight}
               >
-                {data.circuits.map((circuit) => (
-                  <option key={circuit.id} value={circuit.id}>
-                    {circuit.name}
+                {data.tracks.map((track) => (
+                  <option key={track.id} value={track.id}>
+                    {track.name}
                   </option>
                 ))}
               </select>
               <button
                 type="button"
-                css={AddCircuitButtonStyles}
-                onClick={() => setShowCreateCircuitModal(true)}
+                css={AddTrackButtonStyles}
+                onClick={() => setShowCreateTrackModal(true)}
                 disabled={isInFlight}
               >
-                Add
+                Add Track
               </button>
             </div>
           </div>
@@ -475,11 +514,26 @@ export default function CreateSessionRoute() {
               id="session-kart"
               value={kartId}
               onChange={(e) => setKartId(e.target.value)}
-              disabled={isInFlight || selectedCircuitKarts.length === 0}
+              disabled={isInFlight || selectedTrackKarts.length === 0}
             >
-              {selectedCircuitKarts.map((kart) => (
+              {selectedTrackKarts.map((kart) => (
                 <option key={kart.id} value={kart.id}>
                   {kart.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div css={inputFieldStyles}>
+            <label htmlFor="session-track-layout">Track layout</label>
+            <select
+              id="session-track-layout"
+              value={trackLayoutId}
+              onChange={(e) => setTrackLayoutId(e.target.value)}
+              disabled={isInFlight || selectedTrackLayouts.length === 0}
+            >
+              {selectedTrackLayouts.map((layout) => (
+                <option key={layout.id} value={layout.id}>
+                  {layout.name}
                 </option>
               ))}
             </select>
@@ -563,10 +617,10 @@ export default function CreateSessionRoute() {
         </div>
       </div>
 
-      <CreateCircuitModal
-        isOpen={showCreateCircuitModal}
-        onClose={() => setShowCreateCircuitModal(false)}
-        onCircuitCreated={handleCircuitCreated}
+      <CreateTrackModal
+        isOpen={showCreateTrackModal}
+        onClose={() => setShowCreateTrackModal(false)}
+        onTrackCreated={handleTrackCreated}
       />
       <ImportSessionModal
         isOpen={showImportSessionModal}

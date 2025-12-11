@@ -21,7 +21,9 @@ export type CreateTrackSessionInputArgs = {
     classification?: number | null;
     conditions?: string;
     circuitId?: string;
+    trackId?: string;
     kartId?: string;
+    trackLayoutId?: string;
     notes?: string;
     laps?: LapInputArg[] | null;
   };
@@ -35,6 +37,8 @@ export type UpdateTrackSessionInputArgs = {
     classification?: number | null;
     conditions?: string | null;
     circuitId?: string | null;
+    trackId?: string | null;
+    trackLayoutId?: string | null;
     notes?: string | null;
   };
 };
@@ -172,13 +176,34 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
     classification: session.classification,
     conditions: session.conditions,
     circuit: () => {
-      const circuit = repositories.circuits.findById(session.circuitId);
+      const circuit = repositories.tracks.findById(session.trackId);
       if (!circuit) {
-        throw new GraphQLError(`Circuit with ID ${session.circuitId} not found`, {
+        throw new GraphQLError(`Track with ID ${session.trackId} not found`, {
           extensions: { code: "NOT_FOUND" },
         });
       }
       return toCircuitPayload(circuit, repositories, session.userId);
+    },
+    trackLayout: () => {
+      const layout = repositories.trackLayouts.findById(session.trackLayoutId);
+      if (!layout) {
+        throw new GraphQLError(`Track layout with ID ${session.trackLayoutId} not found`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      const circuit = repositories.tracks.findById(layout.trackId);
+      if (!circuit) {
+        throw new GraphQLError(`Track with ID ${layout.trackId} not found`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      return {
+        id: layout.id,
+        name: layout.name,
+        circuit: toCircuitPayload(circuit, repositories, session.userId),
+        createdAt: new Date(layout.createdAt).toISOString(),
+        updatedAt: new Date(layout.updatedAt).toISOString(),
+      };
     },
     kart: session.kartId
       ? () => {
@@ -355,15 +380,16 @@ export const trackSessionResolvers = {
       });
     }
     const input = args.input;
-    if (!input?.date || !input?.format || !input?.circuitId || !input?.kartId || input.classification == null) {
-      throw new GraphQLError("Date, format, circuitId, kartId, and classification are required", {
+    const trackId = input?.trackId ?? input?.circuitId;
+    if (!input?.date || !input?.format || !trackId || !input?.kartId || !input?.trackLayoutId || input.classification == null) {
+      throw new GraphQLError("Date, format, trackId (or circuitId), trackLayoutId, kartId, and classification are required", {
         extensions: { code: "VALIDATION_FAILED" },
       });
     }
 
-    const circuit = repositories.circuits.findById(input.circuitId);
+    const circuit = repositories.tracks.findById(trackId);
     if (!circuit) {
-      throw new GraphQLError(`Circuit with ID ${input.circuitId} not found`, {
+      throw new GraphQLError(`Track with ID ${trackId} not found`, {
         extensions: { code: "NOT_FOUND" },
       });
     }
@@ -375,10 +401,23 @@ export const trackSessionResolvers = {
       });
     }
 
-    const availableKarts = repositories.circuitKarts.findKartsForCircuit(input.circuitId) ?? [];
+    const availableKarts = repositories.trackKarts.findKartsForTrack(trackId) ?? [];
     const kartIsOnCircuit = availableKarts.some((candidate) => candidate.id === kart.id);
     if (!kartIsOnCircuit) {
-      throw new GraphQLError("Kart is not available at the selected circuit", {
+      throw new GraphQLError("Kart is not available at the selected track", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const trackLayout = repositories.trackLayouts.findById(input.trackLayoutId);
+    if (!trackLayout) {
+      throw new GraphQLError(`Track layout with ID ${input.trackLayoutId} not found`, {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    if (trackLayout.trackId !== trackId) {
+      throw new GraphQLError("Track layout is not available at the selected track", {
         extensions: { code: "VALIDATION_FAILED" },
       });
     }
@@ -390,12 +429,13 @@ export const trackSessionResolvers = {
       date: input.date,
       format: input.format,
       classification,
-      circuitId: input.circuitId,
+      trackId,
       userId: context.currentUser.id,
       conditions,
       notes: input.notes,
       laps,
       kartId: input.kartId,
+      trackLayoutId: input.trackLayoutId,
     });
     return { trackSession: toTrackSessionPayload(trackSession, repositories) };
   },
@@ -427,22 +467,25 @@ export const trackSessionResolvers = {
       });
     }
 
-    const circuitIdProvided = Object.prototype.hasOwnProperty.call(input, "circuitId");
-    let targetCircuitId = existingSession.circuitId;
-    if (circuitIdProvided && input.circuitId) {
-      targetCircuitId = input.circuitId;
+    const trackIdProvided =
+      Object.prototype.hasOwnProperty.call(input, "trackId") ||
+      Object.prototype.hasOwnProperty.call(input, "circuitId");
+    let targetTrackId = existingSession.trackId;
+    const nextTrackId = input.trackId ?? input.circuitId;
+    if (trackIdProvided && nextTrackId) {
+      targetTrackId = nextTrackId;
     }
 
-    if (circuitIdProvided && input.circuitId === "") {
-      throw new GraphQLError("circuitId cannot be empty", {
+    if (trackIdProvided && nextTrackId === "") {
+      throw new GraphQLError("trackId cannot be empty", {
         extensions: { code: "VALIDATION_FAILED" },
       });
     }
 
-    if (circuitIdProvided && input.circuitId) {
-      const newCircuit = repositories.circuits.findById(input.circuitId);
-      if (!newCircuit) {
-        throw new GraphQLError(`Circuit with ID ${input.circuitId} not found`, {
+    if (trackIdProvided && nextTrackId) {
+      const newTrack = repositories.tracks.findById(nextTrackId);
+      if (!newTrack) {
+        throw new GraphQLError(`Track with ID ${nextTrackId} not found`, {
           extensions: { code: "NOT_FOUND" },
         });
       }
@@ -470,6 +513,42 @@ export const trackSessionResolvers = {
       });
     }
 
+    const trackLayoutIdProvided = Object.prototype.hasOwnProperty.call(input, "trackLayoutId");
+    let targetTrackLayoutId = existingSession.trackLayoutId;
+    if (trackLayoutIdProvided && input.trackLayoutId === "") {
+      throw new GraphQLError("trackLayoutId cannot be empty", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const currentLayout = repositories.trackLayouts.findById(existingSession.trackLayoutId);
+    if (
+      trackIdProvided &&
+      nextTrackId &&
+      currentLayout &&
+      currentLayout.trackId !== nextTrackId &&
+      !trackLayoutIdProvided
+    ) {
+      throw new GraphQLError("trackLayoutId is required when changing track", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    if (trackLayoutIdProvided && input.trackLayoutId) {
+      const layout = repositories.trackLayouts.findById(input.trackLayoutId);
+      if (!layout) {
+        throw new GraphQLError(`Track layout with ID ${input.trackLayoutId} not found`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      if (layout.trackId !== targetTrackId) {
+        throw new GraphQLError("Track layout is not available at the selected track", {
+          extensions: { code: "VALIDATION_FAILED" },
+        });
+      }
+      targetTrackLayoutId = layout.id;
+    }
+
     const notesProvided = Object.prototype.hasOwnProperty.call(input, "notes");
     const classificationProvided = Object.prototype.hasOwnProperty.call(input, "classification");
     const conditionsProvided = Object.prototype.hasOwnProperty.call(input, "conditions");
@@ -495,9 +574,10 @@ export const trackSessionResolvers = {
       date: nextDate,
       format: nextFormat,
       classification,
-      circuitId: targetCircuitId,
+      trackId: targetTrackId,
       conditions,
       notes,
+      trackLayoutId: targetTrackLayoutId,
     });
 
     if (!updated) {

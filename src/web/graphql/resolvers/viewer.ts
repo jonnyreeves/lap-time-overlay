@@ -27,10 +27,10 @@ export const viewerResolvers = {
         const seen = new Set<string>();
         const uniqueCircuits: ReturnType<typeof toCircuitPayload>[] = [];
         for (const session of sessions) {
-          if (seen.has(session.circuitId)) continue;
-          const circuit = repositories.circuits.findById(session.circuitId);
+          if (seen.has(session.trackId)) continue;
+          const circuit = repositories.tracks.findById(session.trackId);
           if (circuit) {
-            seen.add(session.circuitId);
+            seen.add(session.trackId);
             uniqueCircuits.push(toCircuitPayload(circuit, repositories, user.id));
           }
         }

@@ -6,7 +6,7 @@ import {
   RecordSource,
   Store,
 } from "relay-runtime";
-import { prependCircuitForCreatedSession } from "../../../../src/web/client/routes/session/createUpdater.js";
+import { prependTrackForCreatedSession } from "../../../../src/web/client/routes/session/createUpdater.js";
 
 function buildEnvironment() {
   return new Environment({
@@ -15,12 +15,12 @@ function buildEnvironment() {
   });
 }
 
-describe("prependCircuitForCreatedSession", () => {
-  it("moves the circuit to the front without duplicating and trims to five", () => {
+describe("prependTrackForCreatedSession", () => {
+  it("moves the track to the front without duplicating and trims to five", () => {
     const environment = buildEnvironment();
     const connectionId = ConnectionHandler.getConnectionID(
       "user:1",
-      "RecentCircuitsCard_recentCircuits"
+      "RecentTracksCard_recentTracks"
     );
 
     environment.commitUpdate((store) => {
@@ -32,14 +32,14 @@ describe("prependCircuitForCreatedSession", () => {
       const connection = store.create(connectionId, "CircuitConnection");
       const edges = [];
       for (let i = 0; i < 5; i++) {
-        const circuit = store.create(`circuit:${i}`, "Circuit");
-        circuit.setValue(`circuit:${i}`, "id");
-        circuit.setValue(`Circuit ${i}`, "name");
-        const edge = ConnectionHandler.createEdge(store, connection, circuit, "CircuitEdge");
+        const track = store.create(`circuit:${i}`, "Circuit");
+        track.setValue(`circuit:${i}`, "id");
+        track.setValue(`Track ${i}`, "name");
+        const edge = ConnectionHandler.createEdge(store, connection, track, "CircuitEdge");
         edges.push(edge);
       }
       connection.setLinkedRecords(edges, "edges");
-      viewer.setLinkedRecord(connection, "__RecentCircuitsCard_recentCircuits_connection");
+      viewer.setLinkedRecord(connection, "__RecentTracksCard_recentTracks_connection");
     });
 
     environment.commitUpdate((store) => {
@@ -47,18 +47,18 @@ describe("prependCircuitForCreatedSession", () => {
       const newSession = store.create("session:new", "TrackSession");
       const circuit = store.get("circuit:2");
       if (!circuit) throw new Error("circuit not seeded");
-      circuit.setValue("Updated Circuit", "name");
-      newSession.setLinkedRecord(circuit, "circuit");
+      circuit.setValue("Updated Track", "name");
+      newSession.setLinkedRecord(circuit, "track");
       payload.setLinkedRecord(newSession, "trackSession");
       store.getRoot().setLinkedRecord(payload, "createTrackSession");
 
-      prependCircuitForCreatedSession(store, "user:1");
+      prependTrackForCreatedSession(store, "user:1");
     });
 
     environment.commitUpdate((store) => {
       const viewer = store.get("user:1");
       const connection = viewer
-        ? ConnectionHandler.getConnection(viewer, "RecentCircuitsCard_recentCircuits")
+        ? ConnectionHandler.getConnection(viewer, "RecentTracksCard_recentTracks")
         : null;
       const edges = connection?.getLinkedRecords("edges") ?? [];
       const ids = edges

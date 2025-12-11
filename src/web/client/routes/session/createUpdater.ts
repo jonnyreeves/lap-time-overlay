@@ -43,7 +43,7 @@ export function prependCreatedSessionToRecentSessions(
   }
 }
 
-export function prependCircuitForCreatedSession(
+export function prependTrackForCreatedSession(
   store: RecordSourceSelectorProxy | RecordSourceProxy,
   viewerRecordId: string,
   maxItems = 5
@@ -53,7 +53,7 @@ export function prependCircuitForCreatedSession(
 
   const connection = ConnectionHandler.getConnection(
     viewerProxy,
-    "RecentCircuitsCard_recentCircuits"
+    "RecentTracksCard_recentTracks"
   );
   if (!connection) return;
 
@@ -62,17 +62,17 @@ export function prependCircuitForCreatedSession(
       ? store.getRootField("createTrackSession")
       : store.getRoot().getLinkedRecord("createTrackSession");
 
-  const circuit = createTrackSessionPayload?.getLinkedRecord("trackSession")?.getLinkedRecord("circuit");
-  if (!circuit) return;
+  const track = createTrackSessionPayload?.getLinkedRecord("trackSession")?.getLinkedRecord("track");
+  if (!track) return;
 
-  const newCircuitId = circuit.getValue("id");
+  const newTrackId = track.getValue("id");
   const existingEdges = connection.getLinkedRecords("edges") ?? [];
   const filteredEdges = existingEdges.filter((edge) => {
     const node = edge?.getLinkedRecord("node");
-    return node?.getValue("id") !== newCircuitId;
+    return node?.getValue("id") !== newTrackId;
   });
 
-  const edge = ConnectionHandler.createEdge(store, connection, circuit, "CircuitEdge");
+  const edge = ConnectionHandler.createEdge(store, connection, track, "CircuitEdge");
   const nextEdges = [edge, ...filteredEdges].slice(0, maxItems);
   connection.setLinkedRecords(nextEdges, "edges");
 }

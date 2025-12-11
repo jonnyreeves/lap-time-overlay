@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<b1a202f80ae31df03ce6c612a80056d8>>
+ * @generated SignedSource<<6391355a27514dc2a1a262f7a33f20b8>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,16 +13,20 @@ export type CreateCircuitInput = {
   heroImage?: string | null | undefined;
   karts: ReadonlyArray<CreateKartInput>;
   name: string;
+  trackLayouts: ReadonlyArray<CreateTrackLayoutInput>;
 };
 export type CreateKartInput = {
   name: string;
 };
-export type CreateCircuitModalCreateCircuitMutation$variables = {
+export type CreateTrackLayoutInput = {
+  name: string;
+};
+export type CreateTrackModalCreateTrackMutation$variables = {
   input: CreateCircuitInput;
 };
-export type CreateCircuitModalCreateCircuitMutation$data = {
-  readonly createCircuit: {
-    readonly circuit: {
+export type CreateTrackModalCreateTrackMutation$data = {
+  readonly createTrack: {
+    readonly track: {
       readonly heroImage: string | null | undefined;
       readonly id: string;
       readonly karts: ReadonlyArray<{
@@ -30,12 +34,16 @@ export type CreateCircuitModalCreateCircuitMutation$data = {
         readonly name: string;
       }>;
       readonly name: string;
+      readonly trackLayouts: ReadonlyArray<{
+        readonly id: string;
+        readonly name: string;
+      }>;
     };
   };
 };
-export type CreateCircuitModalCreateCircuitMutation = {
-  response: CreateCircuitModalCreateCircuitMutation$data;
-  variables: CreateCircuitModalCreateCircuitMutation$variables;
+export type CreateTrackModalCreateTrackMutation = {
+  response: CreateTrackModalCreateTrackMutation$data;
+  variables: CreateTrackModalCreateTrackMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -61,8 +69,12 @@ v2 = {
   "storageKey": null
 },
 v3 = [
+  (v1/*: any*/),
+  (v2/*: any*/)
+],
+v4 = [
   {
-    "alias": null,
+    "alias": "createTrack",
     "args": [
       {
         "kind": "Variable",
@@ -76,7 +88,7 @@ v3 = [
     "plural": false,
     "selections": [
       {
-        "alias": null,
+        "alias": "track",
         "args": null,
         "concreteType": "Circuit",
         "kind": "LinkedField",
@@ -99,10 +111,17 @@ v3 = [
             "kind": "LinkedField",
             "name": "karts",
             "plural": true,
-            "selections": [
-              (v1/*: any*/),
-              (v2/*: any*/)
-            ],
+            "selections": (v3/*: any*/),
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "TrackLayout",
+            "kind": "LinkedField",
+            "name": "trackLayouts",
+            "plural": true,
+            "selections": (v3/*: any*/),
             "storageKey": null
           }
         ],
@@ -117,8 +136,8 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "CreateCircuitModalCreateCircuitMutation",
-    "selections": (v3/*: any*/),
+    "name": "CreateTrackModalCreateTrackMutation",
+    "selections": (v4/*: any*/),
     "type": "Mutation",
     "abstractKey": null
   },
@@ -126,20 +145,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "CreateCircuitModalCreateCircuitMutation",
-    "selections": (v3/*: any*/)
+    "name": "CreateTrackModalCreateTrackMutation",
+    "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "d182083398649ceb81b7f00b91c1296a",
+    "cacheID": "6b1e937ba159544e9113b321aa13d274",
     "id": null,
     "metadata": {},
-    "name": "CreateCircuitModalCreateCircuitMutation",
+    "name": "CreateTrackModalCreateTrackMutation",
     "operationKind": "mutation",
-    "text": "mutation CreateCircuitModalCreateCircuitMutation(\n  $input: CreateCircuitInput!\n) {\n  createCircuit(input: $input) {\n    circuit {\n      id\n      name\n      heroImage\n      karts {\n        id\n        name\n      }\n    }\n  }\n}\n"
+    "text": "mutation CreateTrackModalCreateTrackMutation(\n  $input: CreateCircuitInput!\n) {\n  createTrack: createCircuit(input: $input) {\n    track: circuit {\n      id\n      name\n      heroImage\n      karts {\n        id\n        name\n      }\n      trackLayouts {\n        id\n        name\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "ba1082d55c7e6ff318c961459c7c1d72";
+(node as any).hash = "0dd737c06ff4ea6497d54179f3c161dd";
 
 export default node;

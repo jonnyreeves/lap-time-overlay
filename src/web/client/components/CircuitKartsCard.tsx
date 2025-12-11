@@ -288,7 +288,7 @@ export function CircuitKartsCard({ circuit: circuitKey }: Props) {
           {actionError ? <p css={{ color: "red" }}>{actionError}</p> : null}
           <form id={formId} onSubmit={handleSubmit}>
             {karts.length === 0 ? (
-              <p>No karts added to this circuit yet.</p>
+              <p>No karts added to this track yet.</p>
             ) : (
               <ul css={kartListStyles}>
                 {karts.map((kart: { id: string; name: string }) => (

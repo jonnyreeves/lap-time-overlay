@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { getDb } from "../db/client.js"; // Adjust path if needed
 
-export interface CircuitRecord {
+export interface TrackRecord {
   id: string;
   name: string;
   heroImage: string | null;
@@ -9,7 +9,7 @@ export interface CircuitRecord {
   updatedAt: number;
 }
 
-interface CircuitRow {
+interface TrackRow {
   id: string;
   name: string;
   hero_image: string | null;
@@ -17,7 +17,7 @@ interface CircuitRow {
   updated_at: number;
 }
 
-function mapRow(row: CircuitRow): CircuitRecord {
+function mapRow(row: TrackRow): TrackRecord {
   return {
     id: row.id,
     name: row.name,
@@ -27,37 +27,37 @@ function mapRow(row: CircuitRow): CircuitRecord {
   };
 }
 
-export function findCircuitById(id: string): CircuitRecord | null {
+export function findTrackById(id: string): TrackRecord | null {
   const db = getDb();
   const row = db
-    .prepare<unknown[], CircuitRow>(
+    .prepare<unknown[], TrackRow>(
       `SELECT id, name, hero_image, created_at, updated_at
-       FROM circuits WHERE id = ? LIMIT 1`
+       FROM tracks WHERE id = ? LIMIT 1`
     )
     .get(id);
   return row ? mapRow(row) : null;
 }
 
-export function findAllCircuits(): CircuitRecord[] {
+export function findAllTracks(): TrackRecord[] {
   const db = getDb();
   const rows = db
-    .prepare<unknown[], CircuitRow>(
+    .prepare<unknown[], TrackRow>(
       `SELECT id, name, hero_image, created_at, updated_at
-       FROM circuits ORDER BY created_at DESC`
+       FROM tracks ORDER BY created_at DESC`
     )
     .all();
   return rows.map(mapRow);
 }
 
-export function createCircuit(
+export function createTrack(
   name: string,
   heroImage: string | null = null,
   now = Date.now()
-): CircuitRecord {
+): TrackRecord {
   const db = getDb();
   const id = randomUUID();
   db.prepare(
-    `INSERT INTO circuits (id, name, hero_image, created_at, updated_at)
+    `INSERT INTO tracks (id, name, hero_image, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?)`
   ).run(id, name, heroImage, now, now);
 
@@ -70,14 +70,14 @@ export function createCircuit(
   };
 }
 
-export interface CircuitRepository {
-  findById: (id: string) => CircuitRecord | null;
-  findAll: () => CircuitRecord[];
-  create: (name: string, heroImage?: string | null) => CircuitRecord;
+export interface TrackRepository {
+  findById: (id: string) => TrackRecord | null;
+  findAll: () => TrackRecord[];
+  create: (name: string, heroImage?: string | null) => TrackRecord;
 }
 
-export const circuitsRepository: CircuitRepository = {
-  findById: findCircuitById,
-  findAll: findAllCircuits,
-  create: createCircuit,
+export const tracksRepository: TrackRepository = {
+  findById: findTrackById,
+  findAll: findAllTracks,
+  create: createTrack,
 };

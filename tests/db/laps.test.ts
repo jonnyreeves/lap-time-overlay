@@ -2,8 +2,9 @@ import assert from "assert";
 import { describe, it, beforeEach, afterEach } from "vitest";
 import { setupTestDb, teardownTestDb } from "../db/test_setup.js";
 import { createUser, type UserRecord } from "../../src/db/users.js";
-import { createCircuit, type CircuitRecord } from "../../src/db/circuits.js";
+import { createTrack, type TrackRecord } from "../../src/db/tracks.js";
 import { createTrackSession, type TrackSessionRecord } from "../../src/db/track_sessions.js";
+import { createTrackLayout, type TrackLayoutRecord } from "../../src/db/track_layouts.js";
 import {
   createLap,
   findLapById,
@@ -14,19 +15,26 @@ import {
 
 describe("laps", () => {
   let user: UserRecord;
-  let circuit: CircuitRecord;
+  let track: TrackRecord;
+  let layout: TrackLayoutRecord;
   let trackSession: TrackSessionRecord;
 
   beforeEach(() => {
     setupTestDb();
     user = createUser("testuser", "hashedpassword");
-    circuit = createCircuit("Test Circuit");
+    track = createTrack("Test Circuit");
+    layout = createTrackLayout(track.id, "GP");
     trackSession = createTrackSession(
       "2023-11-29T10:00:00Z",
       "Practice",
       3,
-      circuit.id,
-      user.id
+      track.id,
+      user.id,
+      null,
+      Date.now(),
+      "Dry",
+      null,
+      layout.id
     );
   });
 
@@ -62,8 +70,13 @@ describe("laps", () => {
       "2023-11-29T13:00:00Z",
       "Race",
       4,
-      circuit.id,
-      user.id
+      track.id,
+      user.id,
+      null,
+      now,
+      "Dry",
+      null,
+      layout.id
     );
     createLap(anotherTrackSession.id, 1, 65.0, now + 200);
 

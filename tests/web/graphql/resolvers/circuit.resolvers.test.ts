@@ -11,7 +11,7 @@ describe("circuit resolver", () => {
   });
 
   it("returns the fastest lap per circuit and per conditions or null when no laps", async () => {
-    repositories.circuits.findAll.mockReturnValue([
+    repositories.tracks.findAll.mockReturnValue([
       {
         id: "c1",
         name: "Spa",
@@ -28,8 +28,8 @@ describe("circuit resolver", () => {
       },
     ]);
 
-    repositories.trackSessions.findByCircuitId.mockImplementation((circuitId: string) => {
-      if (circuitId === "c1") {
+    repositories.trackSessions.findByTrackId.mockImplementation((trackId: string) => {
+      if (trackId === "c1") {
         return [
           {
             id: "s1",
@@ -37,12 +37,13 @@ describe("circuit resolver", () => {
             format: "Race",
             classification: 2,
             conditions: "Dry",
-            circuitId: "c1",
+            trackId: "c1",
             userId: "user-1",
             notes: null,
             createdAt: 0,
             updatedAt: 0,
             kartId: null,
+            trackLayoutId: "l1",
           },
           {
             id: "s2",
@@ -50,12 +51,13 @@ describe("circuit resolver", () => {
             format: "Practice",
             classification: 5,
             conditions: "Wet",
-            circuitId: "c1",
+            trackId: "c1",
             userId: "user-2",
             notes: null,
             createdAt: 0,
             updatedAt: 0,
             kartId: null,
+            trackLayoutId: "l1",
           },
         ];
       }
@@ -91,12 +93,15 @@ describe("circuit resolver", () => {
 
   it("createCircuit rejects unauthenticated requests", () => {
     expect(() =>
-      rootValue.createCircuit({ input: { name: "Spa", karts: [{ name: "Sodi" }] } }, baseContext as never)
+      rootValue.createCircuit(
+        { input: { name: "Spa", karts: [{ name: "Sodi" }], trackLayouts: [{ name: "GP" }] } },
+        baseContext as never
+      )
     ).toThrowError("Authentication required");
   });
 
   it("createCircuit validates name and returns new circuit", async () => {
-    repositories.circuits.create.mockReturnValue({
+    repositories.tracks.create.mockReturnValue({
       id: "c1",
       name: "Spa",
       heroImage: "img",
@@ -107,10 +112,17 @@ describe("circuit resolver", () => {
     repositories.karts.create
       .mockReturnValueOnce({ id: "k1", name: "Rotax", createdAt: 0, updatedAt: 0 })
       .mockReturnValueOnce({ id: "k2", name: "Sodi", createdAt: 0, updatedAt: 0 });
-    repositories.circuitKarts.addKartToCircuit.mockImplementation(() => {});
-    repositories.circuitKarts.findKartsForCircuit.mockReturnValue([
+    repositories.trackKarts.addKartToTrack.mockImplementation(() => {});
+    repositories.trackKarts.findKartsForTrack.mockReturnValue([
       { id: "k1", name: "Rotax", createdAt: 0, updatedAt: 0 },
       { id: "k2", name: "Sodi", createdAt: 0, updatedAt: 0 },
+    ]);
+    repositories.trackLayouts.create
+      .mockReturnValueOnce({ id: "l1", trackId: "c1", name: "GP", createdAt: 0, updatedAt: 0 })
+      .mockReturnValueOnce({ id: "l2", trackId: "c1", name: "Indy", createdAt: 0, updatedAt: 0 });
+    repositories.trackLayouts.findByTrackId.mockReturnValue([
+      { id: "l1", trackId: "c1", name: "GP", createdAt: 0, updatedAt: 0 },
+      { id: "l2", trackId: "c1", name: "Indy", createdAt: 0, updatedAt: 0 },
     ]);
 
     const result = rootValue.createCircuit(
@@ -119,19 +131,22 @@ describe("circuit resolver", () => {
           name: "Spa",
           heroImage: "img",
           karts: [{ name: "Rotax" }, { name: "Sodi" }],
+          trackLayouts: [{ name: "GP" }, { name: "Indy" }],
         },
       },
       authenticatedContext as never
     );
 
-    expect(repositories.circuits.create).toHaveBeenCalledWith("Spa", "img");
+    expect(repositories.tracks.create).toHaveBeenCalledWith("Spa", "img");
     expect(repositories.karts.create).toHaveBeenCalledTimes(2);
-    expect(repositories.circuitKarts.addKartToCircuit).toHaveBeenCalledWith("c1", "k1");
-    expect(repositories.circuitKarts.addKartToCircuit).toHaveBeenCalledWith("c1", "k2");
+    expect(repositories.trackKarts.addKartToTrack).toHaveBeenCalledWith("c1", "k1");
+    expect(repositories.trackKarts.addKartToTrack).toHaveBeenCalledWith("c1", "k2");
+    expect(repositories.trackLayouts.create).toHaveBeenCalledTimes(2);
 
     expect(result.circuit).toMatchObject({ id: "c1", name: "Spa", heroImage: "img" });
     expect(result.circuit.karts).toBeTypeOf("function");
     expect(await result.circuit.karts()).toHaveLength(2);
+    expect(await result.circuit.trackLayouts()).toHaveLength(2);
   });
 
   it("createCircuit requires at least one kart name", () => {
@@ -148,6 +163,28 @@ describe("circuit resolver", () => {
       )
     ).toThrowError("At least one kart name is required");
   });
+
+  it("createCircuit requires at least one track layout name", () => {
+    expect(() =>
+      rootValue.createCircuit(
+        { input: { name: "Spa", heroImage: "img", karts: [{ name: "Sodi" }], trackLayouts: [] } },
+        authenticatedContext as never
+      )
+    ).toThrowError("At least one track layout name is required");
+    expect(() =>
+      rootValue.createCircuit(
+        {
+          input: {
+            name: "Spa",
+            heroImage: "img",
+            karts: [{ name: "Sodi" }],
+            trackLayouts: [{ name: "" }],
+          },
+        },
+        authenticatedContext as never
+      )
+    ).toThrowError("At least one track layout name is required");
+  });
 });
 
 describe("circuit resolver by id", () => {
@@ -156,7 +193,7 @@ describe("circuit resolver by id", () => {
   });
 
   it("returns a circuit by ID", async () => {
-    repositories.circuits.findById.mockReturnValue({
+    repositories.tracks.findById.mockReturnValue({
       id: "c1",
       name: "Spa",
       heroImage: "spa.jpg",
@@ -174,7 +211,7 @@ describe("circuit resolver by id", () => {
   });
 
   it("returns a GraphQLError if circuit is not found", () => {
-    repositories.circuits.findById.mockReturnValue(null);
+    repositories.tracks.findById.mockReturnValue(null);
 
     expect(() =>
       rootValue.circuit({ id: "non-existent" }, baseContext),
@@ -206,13 +243,13 @@ describe("kart resolvers", () => {
       { id: "k1", name: "Kart 1", createdAt: 0, updatedAt: 0 },
       { id: "k2", name: "Kart 2", createdAt: 0, updatedAt: 0 },
     ];
-    repositories.circuits.findById.mockReturnValue(mockCircuit);
-    repositories.circuitKarts.findKartsForCircuit.mockReturnValue(mockKarts);
+    repositories.tracks.findById.mockReturnValue(mockCircuit);
+    repositories.trackKarts.findKartsForTrack.mockReturnValue(mockKarts);
 
     const circuit = rootValue.circuit({ id: "c1" }, baseContext);
     const karts = await circuit.karts();
 
-    expect(repositories.circuitKarts.findKartsForCircuit).toHaveBeenCalledWith("c1");
+    expect(repositories.trackKarts.findKartsForTrack).toHaveBeenCalledWith("c1");
     expect(karts).toEqual(mockKarts);
   });
 
@@ -322,7 +359,7 @@ describe("kart resolvers", () => {
   });
 
   it("addKartToCircuit returns GraphQLError if circuit not found", () => {
-    repositories.circuits.findById.mockReturnValue(null);
+    repositories.tracks.findById.mockReturnValue(null);
 
     expect(() =>
       rootValue.addKartToCircuit({ circuitId: "c99", kartId: "k1" }, authenticatedContext as never)
@@ -330,7 +367,7 @@ describe("kart resolvers", () => {
   });
 
   it("addKartToCircuit returns GraphQLError if kart not found", () => {
-    repositories.circuits.findById.mockReturnValue({ id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 });
+    repositories.tracks.findById.mockReturnValue({ id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 });
     repositories.karts.findById.mockReturnValue(null);
 
     expect(() =>
@@ -341,17 +378,17 @@ describe("kart resolvers", () => {
   it("addKartToCircuit adds kart to circuit and returns payload", async () => {
     const mockCircuit = { id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 };
     const mockKart = { id: "k1", name: "Kart 1", createdAt: 0, updatedAt: 0 };
-    repositories.circuits.findById.mockReturnValue(mockCircuit);
+    repositories.tracks.findById.mockReturnValue(mockCircuit);
     repositories.karts.findById.mockReturnValue(mockKart);
-    repositories.circuitKarts.addKartToCircuit.mockImplementation(() => {});
-    repositories.circuitKarts.findKartsForCircuit.mockReturnValueOnce([mockKart]); // for the circuit payload resolver
+    repositories.trackKarts.addKartToTrack.mockImplementation(() => {});
+    repositories.trackKarts.findKartsForTrack.mockReturnValueOnce([mockKart]); // for the circuit payload resolver
 
     const result = await rootValue.addKartToCircuit(
       { circuitId: "c1", kartId: "k1" },
       authenticatedContext as never
     );
 
-    expect(repositories.circuitKarts.addKartToCircuit).toHaveBeenCalledWith("c1", "k1");
+    expect(repositories.trackKarts.addKartToTrack).toHaveBeenCalledWith("c1", "k1");
     expect(result.circuit).toMatchObject({ id: "c1" });
     expect(result.kart).toMatchObject({ id: "k1" });
   });
@@ -373,7 +410,7 @@ describe("kart resolvers", () => {
   });
 
   it("removeKartFromCircuit returns GraphQLError if circuit not found", () => {
-    repositories.circuits.findById.mockReturnValue(null);
+    repositories.tracks.findById.mockReturnValue(null);
 
     expect(() =>
       rootValue.removeKartFromCircuit({ circuitId: "c99", kartId: "k1" }, authenticatedContext as never)
@@ -381,7 +418,7 @@ describe("kart resolvers", () => {
   });
 
   it("removeKartFromCircuit returns GraphQLError if kart not found", () => {
-    repositories.circuits.findById.mockReturnValue({ id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 });
+    repositories.tracks.findById.mockReturnValue({ id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 });
     repositories.karts.findById.mockReturnValue(null);
 
     expect(() =>
@@ -392,17 +429,17 @@ describe("kart resolvers", () => {
   it("removeKartFromCircuit removes kart from circuit and returns payload", async () => {
     const mockCircuit = { id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 };
     const mockKart = { id: "k1", name: "Kart 1", createdAt: 0, updatedAt: 0 };
-    repositories.circuits.findById.mockReturnValue(mockCircuit);
+    repositories.tracks.findById.mockReturnValue(mockCircuit);
     repositories.karts.findById.mockReturnValue(mockKart);
-    repositories.circuitKarts.removeKartFromCircuit.mockImplementation(() => {});
-    repositories.circuitKarts.findKartsForCircuit.mockReturnValueOnce([]); // for the circuit payload resolver
+    repositories.trackKarts.removeKartFromTrack.mockImplementation(() => {});
+    repositories.trackKarts.findKartsForTrack.mockReturnValueOnce([]); // for the circuit payload resolver
 
     const result = await rootValue.removeKartFromCircuit(
       { circuitId: "c1", kartId: "k1" },
       authenticatedContext as never
     );
 
-    expect(repositories.circuitKarts.removeKartFromCircuit).toHaveBeenCalledWith("c1", "k1");
+    expect(repositories.trackKarts.removeKartFromTrack).toHaveBeenCalledWith("c1", "k1");
     expect(result.circuit).toMatchObject({ id: "c1" });
     expect(result.kart).toMatchObject({ id: "k1" });
   });

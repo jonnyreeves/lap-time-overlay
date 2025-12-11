@@ -11,12 +11,13 @@ const mockSessions = [
     format: "Race",
     classification: 1,
     conditions: "Dry" as const,
-    circuitId: "c1",
+    trackId: "c1",
     userId: user.id,
     notes: null,
     createdAt: 0,
     updatedAt: 0,
     kartId: null,
+    trackLayoutId: "l1",
   },
   {
     id: "s2",
@@ -24,12 +25,13 @@ const mockSessions = [
     format: "Race",
     classification: 2,
     conditions: "Wet" as const,
-    circuitId: "c2",
+    trackId: "c2",
     userId: user.id,
     notes: "fun",
     createdAt: 0,
     updatedAt: 0,
     kartId: null,
+    trackLayoutId: "l2",
   },
   {
     id: "s3",
@@ -37,16 +39,17 @@ const mockSessions = [
     format: "Practice",
     classification: 3,
     conditions: "Dry" as const,
-    circuitId: "c1",
+    trackId: "c1",
     userId: user.id,
     notes: null,
     createdAt: 0,
     updatedAt: 0,
     kartId: null,
+    trackLayoutId: "l1",
   },
 ];
 
-const circuits = {
+const tracks = {
   c1: { id: "c1", name: "Monza", heroImage: null, createdAt: 0, updatedAt: 0 },
   c2: { id: "c2", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 },
 };
@@ -57,7 +60,12 @@ describe("viewer resolver", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     repositories.trackSessions.findByUserId.mockReturnValue(mockSessions);
-    repositories.circuits.findById.mockImplementation((id: string) => circuits[id as keyof typeof circuits] ?? null);
+    repositories.tracks.findById.mockImplementation((id: string) => tracks[id as keyof typeof tracks] ?? null);
+    repositories.trackLayouts.findById.mockImplementation((id: string) => {
+      if (id === "l1") return { id, trackId: "c1", name: "GP", createdAt: 0, updatedAt: 0 };
+      if (id === "l2") return { id, trackId: "c2", name: "Full", createdAt: 0, updatedAt: 0 };
+      return null;
+    });
     repositories.laps.findBySessionId.mockReturnValue([]);
   });
 

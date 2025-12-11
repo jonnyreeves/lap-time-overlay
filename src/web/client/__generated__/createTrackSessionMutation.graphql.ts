@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<bb93f4f5352e641afcedc4c64304a647>>
+ * @generated SignedSource<<537e03a89fbbf1defa5b6b33ca7a8f8e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,7 +10,7 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 export type CreateTrackSessionInput = {
-  circuitId: string;
+  circuitId?: string | null | undefined;
   classification: number;
   conditions?: string | null | undefined;
   date: string;
@@ -18,6 +18,8 @@ export type CreateTrackSessionInput = {
   kartId: string;
   laps?: ReadonlyArray<LapInput> | null | undefined;
   notes?: string | null | undefined;
+  trackId?: string | null | undefined;
+  trackLayoutId: string;
 };
 export type LapInput = {
   lapEvents?: ReadonlyArray<LapEventInput> | null | undefined;
@@ -30,21 +32,13 @@ export type LapEventInput = {
   value: string;
 };
 export type createTrackSessionMutation$variables = {
-  circuitConnections: ReadonlyArray<string>;
   connections: ReadonlyArray<string>;
   input: CreateTrackSessionInput;
+  trackConnections: ReadonlyArray<string>;
 };
 export type createTrackSessionMutation$data = {
   readonly createTrackSession: {
     readonly trackSession: {
-      readonly circuit: {
-        readonly heroImage: string | null | undefined;
-        readonly id: string;
-        readonly name: string;
-        readonly personalBest: number | null | undefined;
-        readonly personalBestDry: number | null | undefined;
-        readonly personalBestWet: number | null | undefined;
-      };
       readonly classification: number;
       readonly conditions: string;
       readonly date: string;
@@ -59,6 +53,18 @@ export type createTrackSessionMutation$data = {
         readonly personalBest: number | null | undefined;
       }>;
       readonly notes: string | null | undefined;
+      readonly track: {
+        readonly heroImage: string | null | undefined;
+        readonly id: string;
+        readonly name: string;
+        readonly personalBest: number | null | undefined;
+        readonly personalBestDry: number | null | undefined;
+        readonly personalBestWet: number | null | undefined;
+      };
+      readonly trackLayout: {
+        readonly id: string;
+        readonly name: string;
+      };
     };
   };
 };
@@ -71,17 +77,17 @@ const node: ConcreteRequest = (function(){
 var v0 = {
   "defaultValue": null,
   "kind": "LocalArgument",
-  "name": "circuitConnections"
+  "name": "connections"
 },
 v1 = {
   "defaultValue": null,
   "kind": "LocalArgument",
-  "name": "connections"
+  "name": "input"
 },
 v2 = {
   "defaultValue": null,
   "kind": "LocalArgument",
-  "name": "input"
+  "name": "trackConnections"
 },
 v3 = [
   {
@@ -132,28 +138,39 @@ v9 = {
   "name": "name",
   "storageKey": null
 },
-v10 = {
+v10 = [
+  (v4/*: any*/),
+  (v9/*: any*/)
+],
+v11 = {
+  "alias": null,
+  "args": null,
+  "concreteType": "TrackLayout",
+  "kind": "LinkedField",
+  "name": "trackLayout",
+  "plural": false,
+  "selections": (v10/*: any*/),
+  "storageKey": null
+},
+v12 = {
   "alias": null,
   "args": null,
   "concreteType": "Kart",
   "kind": "LinkedField",
   "name": "kart",
   "plural": false,
-  "selections": [
-    (v4/*: any*/),
-    (v9/*: any*/)
-  ],
+  "selections": (v10/*: any*/),
   "storageKey": null
 },
-v11 = {
+v13 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "personalBest",
   "storageKey": null
 },
-v12 = {
-  "alias": null,
+v14 = {
+  "alias": "track",
   "args": null,
   "concreteType": "Circuit",
   "kind": "LinkedField",
@@ -169,7 +186,7 @@ v12 = {
       "name": "heroImage",
       "storageKey": null
     },
-    (v11/*: any*/),
+    (v13/*: any*/),
     {
       "alias": null,
       "args": null,
@@ -187,14 +204,14 @@ v12 = {
   ],
   "storageKey": null
 },
-v13 = {
+v15 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "notes",
   "storageKey": null
 },
-v14 = {
+v16 = {
   "alias": null,
   "args": [
     {
@@ -208,7 +225,7 @@ v14 = {
   "name": "laps",
   "plural": true,
   "selections": [
-    (v11/*: any*/),
+    (v13/*: any*/),
     (v4/*: any*/)
   ],
   "storageKey": "laps(first:1)"
@@ -245,10 +262,11 @@ return {
               (v6/*: any*/),
               (v7/*: any*/),
               (v8/*: any*/),
-              (v10/*: any*/),
+              (v11/*: any*/),
               (v12/*: any*/),
-              (v13/*: any*/),
-              (v14/*: any*/)
+              (v14/*: any*/),
+              (v15/*: any*/),
+              (v16/*: any*/)
             ],
             "storageKey": null
           }
@@ -262,9 +280,9 @@ return {
   "kind": "Request",
   "operation": {
     "argumentDefinitions": [
-      (v2/*: any*/),
       (v1/*: any*/),
-      (v0/*: any*/)
+      (v0/*: any*/),
+      (v2/*: any*/)
     ],
     "kind": "Operation",
     "name": "createTrackSessionMutation",
@@ -290,10 +308,11 @@ return {
               (v6/*: any*/),
               (v7/*: any*/),
               (v8/*: any*/),
-              (v10/*: any*/),
+              (v11/*: any*/),
               (v12/*: any*/),
+              (v14/*: any*/),
               {
-                "alias": null,
+                "alias": "track",
                 "args": null,
                 "filters": null,
                 "handle": "prependNode",
@@ -304,7 +323,7 @@ return {
                   {
                     "kind": "Variable",
                     "name": "connections",
-                    "variableName": "circuitConnections"
+                    "variableName": "trackConnections"
                   },
                   {
                     "kind": "Literal",
@@ -313,8 +332,8 @@ return {
                   }
                 ]
               },
-              (v13/*: any*/),
-              (v14/*: any*/)
+              (v15/*: any*/),
+              (v16/*: any*/)
             ],
             "storageKey": null
           },
@@ -345,16 +364,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "8fbd88fb04ce5ed3adcae2ad963eaec8",
+    "cacheID": "fca3894efcb3a95c5f9631ad146c0ff3",
     "id": null,
     "metadata": {},
     "name": "createTrackSessionMutation",
     "operationKind": "mutation",
-    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      conditions\n      kart {\n        id\n        name\n      }\n      circuit {\n        id\n        name\n        heroImage\n        personalBest\n        personalBestDry\n        personalBestWet\n      }\n      notes\n      laps(first: 1) {\n        personalBest\n        id\n      }\n    }\n  }\n}\n"
+    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      conditions\n      trackLayout {\n        id\n        name\n      }\n      kart {\n        id\n        name\n      }\n      track: circuit {\n        id\n        name\n        heroImage\n        personalBest\n        personalBestDry\n        personalBestWet\n      }\n      notes\n      laps(first: 1) {\n        personalBest\n        id\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "f5945c65d569160219b223e98d6c0233";
+(node as any).hash = "b767dc75050c74f46b2b31eff36f136f";
 
 export default node;

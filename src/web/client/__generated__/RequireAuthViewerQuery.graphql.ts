@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<47a17ca6fb2c5734b01ca0d7c00a7889>>
+ * @generated SignedSource<<c0aa713e3dd0bb7d183b2ef231836eb9>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -144,7 +144,7 @@ return {
             "storageKey": null
           },
           {
-            "alias": null,
+            "alias": "recentTracks",
             "args": (v1/*: any*/),
             "concreteType": "CircuitConnection",
             "kind": "LinkedField",
@@ -204,11 +204,11 @@ return {
             "storageKey": "recentCircuits(first:5)"
           },
           {
-            "alias": null,
+            "alias": "recentTracks",
             "args": (v1/*: any*/),
             "filters": null,
             "handle": "connection",
-            "key": "RecentCircuitsCard_recentCircuits",
+            "key": "RecentTracksCard_recentTracks",
             "kind": "LinkedHandle",
             "name": "recentCircuits"
           },
@@ -273,7 +273,7 @@ return {
                         "storageKey": null
                       },
                       {
-                        "alias": null,
+                        "alias": "track",
                         "args": null,
                         "concreteType": "Circuit",
                         "kind": "LinkedField",
@@ -331,12 +331,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "c19f76c4b7271d3eb19133b20917bd25",
+    "cacheID": "7b194df2430604c06e26b2dd11138113",
     "id": null,
     "metadata": {},
     "name": "RequireAuthViewerQuery",
     "operationKind": "query",
-    "text": "query RequireAuthViewerQuery {\n  viewer {\n    ...HomePage_viewer\n    ...SiteHeader_viewer\n    id\n  }\n}\n\nfragment HomePage_viewer on User {\n  id\n  username\n  ...RecentCircuitsCard_viewer\n  ...RecentSessionsCard_viewer\n}\n\nfragment RecentCircuitsCard_viewer on User {\n  id\n  recentCircuits(first: 5) {\n    edges {\n      node {\n        id\n        name\n        heroImage\n        personalBest\n        personalBestDry\n        personalBestWet\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment RecentSessionsCard_viewer on User {\n  id\n  recentTrackSessions(first: 5) {\n    edges {\n      node {\n        id\n        date\n        format\n        classification\n        conditions\n        notes\n        circuit {\n          name\n          id\n        }\n        laps(first: 1) {\n          personalBest\n          id\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment SiteHeader_viewer on User {\n  id\n  username\n}\n"
+    "text": "query RequireAuthViewerQuery {\n  viewer {\n    ...HomePage_viewer\n    ...SiteHeader_viewer\n    id\n  }\n}\n\nfragment HomePage_viewer on User {\n  id\n  username\n  ...RecentTracksCard_viewer\n  ...RecentSessionsCard_viewer\n}\n\nfragment RecentSessionsCard_viewer on User {\n  id\n  recentTrackSessions(first: 5) {\n    edges {\n      node {\n        id\n        date\n        format\n        classification\n        conditions\n        notes\n        track: circuit {\n          name\n          id\n        }\n        laps(first: 1) {\n          personalBest\n          id\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment RecentTracksCard_viewer on User {\n  id\n  recentTracks: recentCircuits(first: 5) {\n    edges {\n      node {\n        id\n        name\n        heroImage\n        personalBest\n        personalBestDry\n        personalBestWet\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment SiteHeader_viewer on User {\n  id\n  username\n}\n"
   }
 };
 })();

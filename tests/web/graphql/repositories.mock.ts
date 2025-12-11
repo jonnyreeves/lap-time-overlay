@@ -1,16 +1,17 @@
 import { vi } from "vitest";
 import type { Repositories } from "../../../src/web/graphql/repositories.js";
+import type { TrackLayoutsRepository } from "../../../src/db/track_layouts.js";
 
 export function createMockRepositories() {
   const repositories = {
-    circuits: {
+    tracks: {
       findById: vi.fn(),
       findAll: vi.fn(),
       create: vi.fn(),
     },
     trackSessions: {
       findById: vi.fn(),
-      findByCircuitId: vi.fn(),
+      findByTrackId: vi.fn(),
       findByUserId: vi.fn(),
       createWithLaps: vi.fn(),
       update: vi.fn(),
@@ -38,10 +39,15 @@ export function createMockRepositories() {
       update: vi.fn(),
       delete: vi.fn(),
     },
-    circuitKarts: {
-      addKartToCircuit: vi.fn(),
-      removeKartFromCircuit: vi.fn(),
-      findKartsForCircuit: vi.fn(),
+    trackKarts: {
+      addKartToTrack: vi.fn(),
+      removeKartFromTrack: vi.fn(),
+      findKartsForTrack: vi.fn(),
+    },
+    trackLayouts: {
+      findById: vi.fn<[string], ReturnType<TrackLayoutsRepository["findById"]>>(),
+      findByTrackId: vi.fn<[string], ReturnType<TrackLayoutsRepository["findByTrackId"]>>(() => []),
+      create: vi.fn<[string, string], ReturnType<TrackLayoutsRepository["create"]>>(),
     },
   } satisfies Repositories;
 

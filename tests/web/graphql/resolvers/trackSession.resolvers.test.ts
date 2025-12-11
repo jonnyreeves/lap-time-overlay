@@ -13,15 +13,16 @@ const mockSession = {
   format: "Race",
   classification: 1,
   conditions: "Dry" as const,
-  circuitId: "c1",
+  trackId: "c1",
   userId: "user-1",
   notes: null,
   createdAt: 0,
   updatedAt: 0,
   kartId: "k1",
+  trackLayoutId: "l1",
 };
 
-const mockCircuit = {
+const mockTrack = {
   id: "c1",
   name: "Spa",
   heroImage: null,
@@ -32,6 +33,14 @@ const mockCircuit = {
 const mockKart = {
   id: "k1",
   name: "Sodi",
+  createdAt: 0,
+  updatedAt: 0,
+};
+
+const mockLayout = {
+  id: "l1",
+  name: "GP",
+  trackId: "c1",
   createdAt: 0,
   updatedAt: 0,
 };
@@ -54,9 +63,10 @@ describe("trackSession resolvers", () => {
     );
   });
 
-  it("returns session payload with laps and circuit on happy path", async () => {
+  it("returns session payload with laps and track on happy path", async () => {
     repositories.trackSessions.findById.mockReturnValue(mockSession);
-    repositories.circuits.findById.mockReturnValue(mockCircuit);
+    repositories.tracks.findById.mockReturnValue(mockTrack);
+    repositories.trackLayouts.findById.mockReturnValue(mockLayout);
     repositories.laps.findBySessionId.mockReturnValue([
       { id: "l1", sessionId: "s1", lapNumber: 1, time: 75.123, createdAt: 0, updatedAt: 0 },
     ]);
@@ -69,25 +79,35 @@ describe("trackSession resolvers", () => {
 
   it("createTrackSession validates required fields", async () => {
     expect(() => rootValue.createTrackSession({ input: {} }, context)).toThrowError(
-      "Date, format, circuitId, kartId, and classification are required"
+      "Date, format, trackId (or circuitId), trackLayoutId, kartId, and classification are required"
     );
   });
 
-  it("createTrackSession rejects when circuit is missing", async () => {
-    repositories.circuits.findById.mockReturnValueOnce(null);
+  it("createTrackSession rejects when track is missing", async () => {
+    repositories.tracks.findById.mockReturnValueOnce(null);
     expect(() =>
       rootValue.createTrackSession(
-        { input: { date: "2024-02-01", format: "Race", classification: 5, circuitId: "missing", kartId: "k1" } },
+        {
+          input: {
+            date: "2024-02-01",
+            format: "Race",
+            classification: 5,
+            trackId: "missing",
+            kartId: "k1",
+            trackLayoutId: "l1",
+          },
+        },
         context
       )
-    ).toThrowError("Circuit with ID missing not found");
+    ).toThrowError("Track with ID missing not found");
   });
 
   it("createTrackSession forwards parsed input", async () => {
     repositories.trackSessions.createWithLaps.mockReturnValue({ trackSession: mockSession, laps: [] });
-    repositories.circuits.findById.mockReturnValue(mockCircuit);
+    repositories.tracks.findById.mockReturnValue(mockTrack);
     repositories.karts.findById.mockReturnValue(mockKart);
-    repositories.circuitKarts.findKartsForCircuit.mockReturnValue([mockKart]);
+    repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
+    repositories.trackLayouts.findById.mockReturnValue(mockLayout);
 
     const result = rootValue.createTrackSession(
       {
@@ -95,9 +115,10 @@ describe("trackSession resolvers", () => {
           date: "2024-02-01",
           format: "Race",
           classification: 2,
-          circuitId: "c1",
+          trackId: "c1",
           conditions: "Wet",
           notes: "fun",
+          trackLayoutId: "l1",
           kartId: "k1",
           laps: [{ lapNumber: 1, time: 74.5 }],
         },
@@ -109,11 +130,12 @@ describe("trackSession resolvers", () => {
       date: "2024-02-01",
       format: "Race",
       classification: 2,
-      circuitId: "c1",
+      trackId: "c1",
       userId: "user-1",
       conditions: "Wet",
       notes: "fun",
       laps: [{ lapNumber: 1, time: 74.5 }],
+      trackLayoutId: "l1",
       kartId: "k1",
     });
     expect(result.trackSession.id).toBe("s1");
@@ -121,7 +143,7 @@ describe("trackSession resolvers", () => {
   });
 
   it("createTrackSession rejects when kart does not exist", async () => {
-    repositories.circuits.findById.mockReturnValue(mockCircuit);
+    repositories.tracks.findById.mockReturnValue(mockTrack);
     repositories.karts.findById.mockReturnValue(null);
 
     expect(() =>
@@ -131,8 +153,9 @@ describe("trackSession resolvers", () => {
             date: "2024-02-01",
             format: "Race",
             classification: 2,
-            circuitId: "c1",
+            trackId: "c1",
             kartId: "missing",
+            trackLayoutId: "l1",
           },
         },
         context
@@ -140,10 +163,11 @@ describe("trackSession resolvers", () => {
     ).toThrowError("Kart with ID missing not found");
   });
 
-  it("createTrackSession rejects when kart not on circuit", async () => {
-    repositories.circuits.findById.mockReturnValue(mockCircuit);
+  it("createTrackSession rejects when kart not on track", async () => {
+    repositories.tracks.findById.mockReturnValue(mockTrack);
     repositories.karts.findById.mockReturnValue(mockKart);
-    repositories.circuitKarts.findKartsForCircuit.mockReturnValue([]);
+    repositories.trackKarts.findKartsForTrack.mockReturnValue([]);
+    repositories.trackLayouts.findById.mockReturnValue(mockLayout);
 
     expect(() =>
       rootValue.createTrackSession(
@@ -152,13 +176,60 @@ describe("trackSession resolvers", () => {
             date: "2024-02-01",
             format: "Race",
             classification: 2,
-            circuitId: "c1",
+            trackId: "c1",
+            trackLayoutId: "l1",
             kartId: "k1",
           },
         },
         context
       )
-    ).toThrowError("Kart is not available at the selected circuit");
+    ).toThrowError("Kart is not available at the selected track");
+  });
+
+  it("createTrackSession rejects when track layout does not exist", async () => {
+    repositories.tracks.findById.mockReturnValue(mockTrack);
+    repositories.karts.findById.mockReturnValue(mockKart);
+    repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
+    repositories.trackLayouts.findById.mockReturnValue(null);
+
+    expect(() =>
+      rootValue.createTrackSession(
+        {
+          input: {
+            date: "2024-02-01",
+            format: "Race",
+            classification: 2,
+            trackId: "c1",
+            trackLayoutId: "missing",
+            kartId: "k1",
+          },
+        },
+        context
+      )
+    ).toThrowError("Track layout with ID missing not found");
+  });
+
+  it("createTrackSession rejects when track layout not on track", async () => {
+    repositories.tracks.findById.mockReturnValue(mockTrack);
+    repositories.karts.findById.mockReturnValue(mockKart);
+    repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
+    repositories.trackLayouts.findById.mockReturnValue({ ...mockLayout, trackId: "other" });
+
+    expect(() =>
+      rootValue.createTrackSession(
+        {
+          input: {
+            date: "2024-02-01",
+            format: "Race",
+            classification: 2,
+            trackId: "c1",
+            trackLayoutId: "l1",
+            kartId: "k1",
+          },
+        },
+        context
+      )
+    ).toThrowError("Track layout is not available at the selected track");
   });
 
   it("updateTrackSession validates presence of id and auth", async () => {
@@ -173,6 +244,8 @@ describe("trackSession resolvers", () => {
     repositories.trackSessions.update.mockReturnValue({ ...mockSession, format: "Practice" });
     repositories.lapEvents.findByLapId.mockReturnValue([]);
     repositories.trackRecordings.findBySessionId.mockReturnValue([]);
+    repositories.trackLayouts.findById.mockReturnValue(mockLayout);
+    repositories.tracks.findById.mockReturnValue(mockTrack);
 
     const result = rootValue.updateTrackSession(
       { input: { id: "s1", format: "Practice" } },
@@ -185,13 +258,26 @@ describe("trackSession resolvers", () => {
         date: undefined,
         format: "Practice",
         classification: undefined,
-        circuitId: "c1",
+        trackId: "c1",
         conditions: undefined,
+        trackLayoutId: "l1",
         notes: undefined,
       })
     );
     expect(result.trackSession.format).toBe("Practice");
     expect(result.trackSession.classification).toBe(1);
+  });
+
+  it("updateTrackSession requires trackLayoutId when track changes", () => {
+    repositories.trackSessions.findById.mockReturnValue(mockSession);
+    repositories.tracks.findById.mockReturnValue({ ...mockTrack, id: "new-track" });
+    repositories.trackLayouts.findById.mockReturnValue({ ...mockLayout, trackId: "c1" });
+    expect(() =>
+      rootValue.updateTrackSession(
+        { input: { id: "s1", trackId: "new-track" } },
+        context
+      )
+    ).toThrowError("trackLayoutId is required when changing track");
   });
 
   it("updateTrackSessionLaps validates auth and id", () => {
@@ -217,7 +303,8 @@ describe("trackSession resolvers", () => {
     ]);
     repositories.lapEvents.findByLapId.mockReturnValue([]);
     repositories.trackRecordings.findBySessionId.mockReturnValue([]);
-    repositories.circuits.findById.mockReturnValue(mockCircuit);
+    repositories.tracks.findById.mockReturnValue(mockTrack);
+    repositories.trackLayouts.findById.mockReturnValue(mockLayout);
 
     const result = rootValue.updateTrackSessionLaps(
       { input: { id: "s1", laps: [{ lapNumber: 1, time: 70.5 }] } },

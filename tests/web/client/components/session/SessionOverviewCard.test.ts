@@ -5,7 +5,8 @@ import {
 } from "../../../../../src/web/client/components/session/sessionOverviewForm.js";
 
 const baseForm: SessionOverviewFormState = {
-  circuitId: "c1",
+  trackId: "c1",
+  trackLayoutId: "l1",
   format: "Practice",
   date: "2024-01-01",
   time: "10:00",
@@ -19,11 +20,12 @@ describe("validateSessionOverviewForm", () => {
     const result = validateSessionOverviewForm(baseForm);
     expect(result.error).toBeNull();
     expect(result.payload).toEqual({
-      circuitId: "c1",
+      trackId: "c1",
       format: "Practice",
       date: "2024-01-01T10:00",
       classification: 1,
       conditions: "Dry",
+      trackLayoutId: "l1",
       notes: "Notes",
     });
   });

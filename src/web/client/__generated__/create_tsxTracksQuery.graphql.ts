@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<6247cda330ffd43bb337ba6a6f561096>>
+ * @generated SignedSource<<dcf25197c8b8dae26218c03e86f1c509>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,20 +9,24 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type create_tsxCircuitsQuery$variables = Record<PropertyKey, never>;
-export type create_tsxCircuitsQuery$data = {
-  readonly circuits: ReadonlyArray<{
+export type create_tsxTracksQuery$variables = Record<PropertyKey, never>;
+export type create_tsxTracksQuery$data = {
+  readonly tracks: ReadonlyArray<{
     readonly id: string;
     readonly karts: ReadonlyArray<{
       readonly id: string;
       readonly name: string;
     }>;
     readonly name: string;
+    readonly trackLayouts: ReadonlyArray<{
+      readonly id: string;
+      readonly name: string;
+    }>;
   }>;
 };
-export type create_tsxCircuitsQuery = {
-  response: create_tsxCircuitsQuery$data;
-  variables: create_tsxCircuitsQuery$variables;
+export type create_tsxTracksQuery = {
+  response: create_tsxTracksQuery$data;
+  variables: create_tsxTracksQuery$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -41,8 +45,12 @@ v1 = {
   "storageKey": null
 },
 v2 = [
+  (v0/*: any*/),
+  (v1/*: any*/)
+],
+v3 = [
   {
-    "alias": null,
+    "alias": "tracks",
     "args": null,
     "concreteType": "Circuit",
     "kind": "LinkedField",
@@ -58,10 +66,17 @@ v2 = [
         "kind": "LinkedField",
         "name": "karts",
         "plural": true,
-        "selections": [
-          (v0/*: any*/),
-          (v1/*: any*/)
-        ],
+        "selections": (v2/*: any*/),
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "concreteType": "TrackLayout",
+        "kind": "LinkedField",
+        "name": "trackLayouts",
+        "plural": true,
+        "selections": (v2/*: any*/),
         "storageKey": null
       }
     ],
@@ -73,8 +88,8 @@ return {
     "argumentDefinitions": [],
     "kind": "Fragment",
     "metadata": null,
-    "name": "create_tsxCircuitsQuery",
-    "selections": (v2/*: any*/),
+    "name": "create_tsxTracksQuery",
+    "selections": (v3/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -82,20 +97,20 @@ return {
   "operation": {
     "argumentDefinitions": [],
     "kind": "Operation",
-    "name": "create_tsxCircuitsQuery",
-    "selections": (v2/*: any*/)
+    "name": "create_tsxTracksQuery",
+    "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "e493dcacb9cde4b1d01b4027c09cac4a",
+    "cacheID": "eb8fd7a2ec63fcc608c34264dd523077",
     "id": null,
     "metadata": {},
-    "name": "create_tsxCircuitsQuery",
+    "name": "create_tsxTracksQuery",
     "operationKind": "query",
-    "text": "query create_tsxCircuitsQuery {\n  circuits {\n    id\n    name\n    karts {\n      id\n      name\n    }\n  }\n}\n"
+    "text": "query create_tsxTracksQuery {\n  tracks: circuits {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "c9b6da573c6b940d797bfe5e8484b71c";
+(node as any).hash = "03851b9df60f446cfdfd3fcfaceb3343";
 
 export default node;

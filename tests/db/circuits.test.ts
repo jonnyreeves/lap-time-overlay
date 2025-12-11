@@ -1,9 +1,9 @@
 import assert from "assert";
 import { describe, it, beforeEach, afterEach } from "vitest";
 import { setupTestDb, teardownTestDb } from "../db/test_setup.js";
-import { createCircuit, findAllCircuits, findCircuitById, type CircuitRecord } from "../../src/db/circuits.js";
+import { createTrack, findAllTracks, findTrackById, type TrackRecord } from "../../src/db/tracks.js";
 
-describe("circuits", () => {
+describe("tracks", () => {
   beforeEach(() => {
     setupTestDb();
   });
@@ -12,40 +12,40 @@ describe("circuits", () => {
     teardownTestDb();
   });
 
-  it("can create a circuit", () => {
-    const circuit = createCircuit("Test Circuit", "http://example.com/hero.jpg");
-    assert.strictEqual(circuit.name, "Test Circuit");
-    assert.strictEqual(circuit.heroImage, "http://example.com/hero.jpg");
-    assert.ok(circuit.id);
-    assert.ok(circuit.createdAt);
-    assert.ok(circuit.updatedAt);
+  it("can create a track", () => {
+    const track = createTrack("Test Circuit", "http://example.com/hero.jpg");
+    assert.strictEqual(track.name, "Test Circuit");
+    assert.strictEqual(track.heroImage, "http://example.com/hero.jpg");
+    assert.ok(track.id);
+    assert.ok(track.createdAt);
+    assert.ok(track.updatedAt);
   });
 
-  it("can create a circuit with null heroImage", () => {
-    const circuit = createCircuit("Circuit without Hero");
-    assert.strictEqual(circuit.heroImage, null);
+  it("can create a track with null heroImage", () => {
+    const track = createTrack("Circuit without Hero");
+    assert.strictEqual(track.heroImage, null);
   });
 
-  it("can find a circuit by id", () => {
-    const createdCircuit = createCircuit("Findable Circuit");
-    const foundCircuit = findCircuitById(createdCircuit.id);
+  it("can find a track by id", () => {
+    const createdCircuit = createTrack("Findable Circuit");
+    const foundCircuit = findTrackById(createdCircuit.id);
 
     assert.deepStrictEqual(foundCircuit, createdCircuit);
   });
 
-  it("returns null if circuit by id is not found", () => {
-    const foundCircuit = findCircuitById("non-existent-id");
+  it("returns null if track by id is not found", () => {
+    const foundCircuit = findTrackById("non-existent-id");
     assert.strictEqual(foundCircuit, null);
   });
 
-  it("returns all circuits ordered by creation time", () => {
+  it("returns all tracks ordered by creation time", () => {
     const now = Date.now();
-    const circuit1 = createCircuit("Older Circuit", null, now - 1000);
-    const circuit2 = createCircuit("Newer Circuit", null, now);
+    const track1 = createTrack("Older Circuit", null, now - 1000);
+    const track2 = createTrack("Newer Circuit", null, now);
 
-    const circuits: CircuitRecord[] = findAllCircuits();
-    assert.strictEqual(circuits.length, 2);
-    assert.deepStrictEqual(circuits[0], circuit2);
-    assert.deepStrictEqual(circuits[1], circuit1);
+    const tracks: TrackRecord[] = findAllTracks();
+    assert.strictEqual(tracks.length, 2);
+    assert.deepStrictEqual(tracks[0], track2);
+    assert.deepStrictEqual(tracks[1], track1);
   });
 });

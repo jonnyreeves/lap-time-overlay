@@ -8,7 +8,7 @@ import { titleStyles } from "../../styles/typography.js";
 
 export const CIRCUIT_VIEW_QUERY = graphql`
   query CircuitViewPageQuery($circuitId: ID!) {
-    circuit(id: $circuitId) {
+    track: circuit(id: $circuitId) {
       id
       name
       ...CircuitKartsCard_circuit
@@ -17,28 +17,28 @@ export const CIRCUIT_VIEW_QUERY = graphql`
 `;
 
 export default function CircuitViewPage(): React.ReactNode {
-  const { circuitId } = useParams();
+  const { circuitId, trackId } = useParams();
   const data = useLazyLoadQuery<CircuitViewPageQueryType>(
     CIRCUIT_VIEW_QUERY,
-    { circuitId: circuitId ?? "" },
+    { circuitId: trackId ?? circuitId ?? "" },
   );
 
-  if (!data.circuit) {
+  if (!data.track) {
     return (
       <Card>
-        <p css={titleStyles}>Circuit not found</p>
+        <p css={titleStyles}>Track not found</p>
       </Card>
     );
   }
 
-  const { name } = data.circuit;
+  const { name } = data.track;
 
   return (
     <>
       <Card>
         <p css={titleStyles}>{name}</p>
       </Card>
-      <CircuitKartsCard circuit={data.circuit} />
+      <CircuitKartsCard circuit={data.track} />
     </>
   );
 }

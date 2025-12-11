@@ -1,18 +1,18 @@
 import { GraphQLError } from "graphql";
-import type { CircuitRecord } from "../../../db/circuits.js";
+import type { TrackRecord } from "../../../db/tracks.js";
 import type { TrackSessionConditions } from "../../../db/track_sessions.js";
 import type { GraphQLContext } from "../context.js";
 import type { Repositories } from "../repositories.js";
 
 export function getCircuitPersonalBest(
-  circuitId: string,
+  trackId: string,
   repositories: Repositories,
   userId?: string,
   conditions?: TrackSessionConditions
 ) {
   const sessions = userId
-    ? repositories.trackSessions.findByUserId(userId).filter((session) => session.circuitId === circuitId)
-    : repositories.trackSessions.findByCircuitId(circuitId);
+    ? repositories.trackSessions.findByUserId(userId).filter((session) => session.trackId === trackId)
+    : repositories.trackSessions.findByTrackId(trackId);
   const filteredSessions = conditions
     ? sessions.filter((session) => session.conditions === conditions)
     : sessions;
@@ -28,18 +28,26 @@ export function getCircuitPersonalBest(
 }
 
 export function toCircuitPayload(
-  circuit: CircuitRecord,
+  track: TrackRecord,
   repositories: Repositories,
   userId?: string
 ) {
   return {
-    id: circuit.id,
-    name: circuit.name,
-    heroImage: circuit.heroImage,
-    personalBest: () => getCircuitPersonalBest(circuit.id, repositories, userId),
-    personalBestDry: () => getCircuitPersonalBest(circuit.id, repositories, userId, "Dry"),
-    personalBestWet: () => getCircuitPersonalBest(circuit.id, repositories, userId, "Wet"),
-    karts: () => repositories.circuitKarts.findKartsForCircuit(circuit.id),
+    id: track.id,
+    name: track.name,
+    heroImage: track.heroImage,
+    personalBest: () => getCircuitPersonalBest(track.id, repositories, userId),
+    personalBestDry: () => getCircuitPersonalBest(track.id, repositories, userId, "Dry"),
+    personalBestWet: () => getCircuitPersonalBest(track.id, repositories, userId, "Wet"),
+    karts: () => repositories.trackKarts.findKartsForTrack(track.id),
+    trackLayouts: () =>
+      repositories.trackLayouts.findByTrackId(track.id).map((layout) => ({
+        id: layout.id,
+        name: layout.name,
+        circuit: () => toCircuitPayload(track, repositories, userId),
+        createdAt: new Date(layout.createdAt).toISOString(),
+        updatedAt: new Date(layout.updatedAt).toISOString(),
+      })),
   };
 }
 
@@ -56,7 +64,7 @@ export const circuitResolvers = {
         extensions: { code: "BAD_USER_INPUT" },
       });
     }
-    const circuit = repositories.circuits.findById(circuitId);
+    const circuit = repositories.tracks.findById(circuitId);
     if (!circuit) {
       throw new GraphQLError("Circuit not found", {
         extensions: { code: "NOT_FOUND" },
@@ -67,12 +75,12 @@ export const circuitResolvers = {
   circuits: (_args: unknown, context: GraphQLContext) => {
     const { repositories } = context;
     const userId = context.currentUser?.id;
-    return repositories.circuits
+    return repositories.tracks
       .findAll()
       .map((circuit) => toCircuitPayload(circuit, repositories, userId));
   },
   createCircuit: (
-    args: { input?: { name?: string; heroImage?: string | null; karts?: { name?: string }[] } },
+    args: { input?: { name?: string; heroImage?: string | null; karts?: { name?: string }[]; trackLayouts?: { name?: string }[] } },
     context: GraphQLContext
   ) => {
     if (!context.currentUser) {
@@ -87,8 +95,12 @@ export const circuitResolvers = {
       });
     }
     const kartInputs = input.karts ?? [];
+    const layoutInputs = input.trackLayouts ?? [];
     const kartNames = kartInputs
       .map((kart) => kart?.name?.trim())
+      .filter((name): name is string => Boolean(name));
+    const layoutNames = layoutInputs
+      .map((layout) => layout?.name?.trim())
       .filter((name): name is string => Boolean(name));
 
     if (!kartInputs.length || kartNames.length !== kartInputs.length) {
@@ -97,11 +109,20 @@ export const circuitResolvers = {
       });
     }
 
-    const uniqueKartNames = Array.from(new Set(kartNames));
+    if (!layoutInputs.length || layoutNames.length !== layoutInputs.length) {
+      throw new GraphQLError("At least one track layout name is required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
 
-    const newCircuit = context.repositories.circuits.create(input.name, input.heroImage ?? null);
+    const uniqueKartNames = Array.from(new Set(kartNames));
+    const uniqueLayoutNames = Array.from(new Set(layoutNames));
+
+    const newCircuit = context.repositories.tracks.create(input.name, input.heroImage ?? null);
     const createdKarts = uniqueKartNames.map((name) => context.repositories.karts.create(name));
-    createdKarts.forEach((kart) => context.repositories.circuitKarts.addKartToCircuit(newCircuit.id, kart.id));
+    createdKarts.forEach((kart) => context.repositories.trackKarts.addKartToTrack(newCircuit.id, kart.id));
+
+    uniqueLayoutNames.forEach((name) => context.repositories.trackLayouts.create(newCircuit.id, name));
 
     return { circuit: toCircuitPayload(newCircuit, context.repositories, context.currentUser.id) };
   },
@@ -174,7 +195,7 @@ export const circuitResolvers = {
         extensions: { code: "VALIDATION_FAILED" },
       });
     }
-    const circuit = context.repositories.circuits.findById(circuitId);
+    const circuit = context.repositories.tracks.findById(circuitId);
     if (!circuit) {
       throw new GraphQLError("Circuit not found", {
         extensions: { code: "NOT_FOUND" },
@@ -186,7 +207,7 @@ export const circuitResolvers = {
         extensions: { code: "NOT_FOUND" },
       });
     }
-    context.repositories.circuitKarts.addKartToCircuit(circuitId, kartId);
+    context.repositories.trackKarts.addKartToTrack(circuitId, kartId);
     return { circuit: toCircuitPayload(circuit, context.repositories, context.currentUser.id), kart };
   },
 
@@ -205,7 +226,7 @@ export const circuitResolvers = {
         extensions: { code: "VALIDATION_FAILED" },
       });
     }
-    const circuit = context.repositories.circuits.findById(circuitId);
+    const circuit = context.repositories.tracks.findById(circuitId);
     if (!circuit) {
       throw new GraphQLError("Circuit not found", {
         extensions: { code: "NOT_FOUND" },
@@ -217,7 +238,7 @@ export const circuitResolvers = {
         extensions: { code: "NOT_FOUND" },
       });
     }
-    context.repositories.circuitKarts.removeKartFromCircuit(circuitId, kartId);
+    context.repositories.trackKarts.removeKartFromTrack(circuitId, kartId);
     return { circuit: toCircuitPayload(circuit, context.repositories, context.currentUser.id), kart };
   },
 };

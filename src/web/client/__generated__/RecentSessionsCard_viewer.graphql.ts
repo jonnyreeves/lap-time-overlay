@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<9fb093c07364f862884bddde11105cd9>>
+ * @generated SignedSource<<07541b97b3642c7ceac23a3f0948a63b>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,10 +15,6 @@ export type RecentSessionsCard_viewer$data = {
   readonly recentTrackSessions: {
     readonly edges: ReadonlyArray<{
       readonly node: {
-        readonly circuit: {
-          readonly id: string;
-          readonly name: string;
-        };
         readonly classification: number;
         readonly conditions: string;
         readonly date: string;
@@ -29,6 +25,10 @@ export type RecentSessionsCard_viewer$data = {
           readonly personalBest: number | null | undefined;
         }>;
         readonly notes: string | null | undefined;
+        readonly track: {
+          readonly id: string;
+          readonly name: string;
+        };
       };
     }>;
   };
@@ -126,7 +126,7 @@ return {
                   "storageKey": null
                 },
                 {
-                  "alias": null,
+                  "alias": "track",
                   "args": null,
                   "concreteType": "Circuit",
                   "kind": "LinkedField",
@@ -223,6 +223,6 @@ return {
 };
 })();
 
-(node as any).hash = "4760f50c28523c6b000461d5342c639f";
+(node as any).hash = "c495aed0d408367bd7d03d2c5729856f";
 
 export default node;

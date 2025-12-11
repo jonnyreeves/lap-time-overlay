@@ -16,13 +16,13 @@ const RecentSessionsCardFragment = graphql`
           id
           date
           format
-          classification
-          conditions
-          notes
-          circuit {
-            name
-            id
-          }
+        classification
+        conditions
+        notes
+        track: circuit {
+          name
+          id
+        }
           laps(first: 1) {
             personalBest
             id
@@ -290,7 +290,7 @@ export function RecentSessionsCard({ viewer }: Props) {
             const classificationLabel = finishingPosition ? `P${finishingPosition}` : "—";
             const formattedDate = format(new Date(session.date), "do MMM yyyy");
             const formattedTime = format(new Date(session.date), "p");
-            const trackName = session.circuit?.name ?? "Unknown track";
+            const trackName = session.track?.name ?? "Unknown track";
             const sessionType = session.format ?? "—";
 
             return (

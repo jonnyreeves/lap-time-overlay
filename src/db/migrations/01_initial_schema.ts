@@ -26,13 +26,25 @@ export const migration = {
       CREATE INDEX IF NOT EXISTS sessions_user_id_idx
         ON sessions(user_id);
 
-      CREATE TABLE IF NOT EXISTS circuits (
+      CREATE TABLE IF NOT EXISTS tracks (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         hero_image TEXT,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL
       );
+
+      CREATE TABLE IF NOT EXISTS track_layouts (
+        id TEXT PRIMARY KEY,
+        track_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE CASCADE
+      );
+
+      CREATE INDEX IF NOT EXISTS track_layouts_track_id_idx
+        ON track_layouts(track_id);
 
       CREATE TABLE IF NOT EXISTS karts (
         id TEXT PRIMARY KEY,
@@ -47,19 +59,21 @@ export const migration = {
         format TEXT NOT NULL,
         classification INTEGER NOT NULL,
         conditions TEXT NOT NULL DEFAULT 'Dry',
-        circuit_id TEXT NOT NULL,
+        track_id TEXT NOT NULL,
         user_id TEXT NOT NULL,
         notes TEXT,
         created_at INTEGER NOT NULL,
         updated_at INTEGER NOT NULL,
         kart_id TEXT,
+        track_layout_id TEXT NOT NULL,
         FOREIGN KEY (kart_id) REFERENCES karts(id) ON DELETE SET NULL,
-        FOREIGN KEY (circuit_id) REFERENCES circuits(id) ON DELETE CASCADE,
+        FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE CASCADE,
+        FOREIGN KEY (track_layout_id) REFERENCES track_layouts(id) ON DELETE RESTRICT,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
 
-      CREATE INDEX IF NOT EXISTS track_sessions_circuit_id_idx
-        ON track_sessions(circuit_id);
+      CREATE INDEX IF NOT EXISTS track_sessions_track_id_idx
+        ON track_sessions(track_id);
 
       CREATE INDEX IF NOT EXISTS track_sessions_user_id_idx
         ON track_sessions(user_id);
@@ -138,11 +152,11 @@ export const migration = {
       CREATE INDEX IF NOT EXISTS track_recording_sources_recording_id_idx
         ON track_recording_sources(recording_id);
 
-      CREATE TABLE IF NOT EXISTS circuit_karts (
-        circuit_id TEXT NOT NULL,
+      CREATE TABLE IF NOT EXISTS track_karts (
+        track_id TEXT NOT NULL,
         kart_id TEXT NOT NULL,
-        PRIMARY KEY (circuit_id, kart_id),
-        FOREIGN KEY (circuit_id) REFERENCES circuits(id) ON DELETE CASCADE,
+        PRIMARY KEY (track_id, kart_id),
+        FOREIGN KEY (track_id) REFERENCES tracks(id) ON DELETE CASCADE,
         FOREIGN KEY (kart_id) REFERENCES karts(id) ON DELETE CASCADE
       );
     `);

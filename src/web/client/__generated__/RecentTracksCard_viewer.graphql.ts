@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<581f4b3fd1dc1a14433e1c49b44359b1>>
+ * @generated SignedSource<<0896e9d4b7cd353ec44b2c5e82cebdad>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,9 +10,9 @@
 
 import { ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type RecentCircuitsCard_viewer$data = {
+export type RecentTracksCard_viewer$data = {
   readonly id: string;
-  readonly recentCircuits: {
+  readonly recentTracks: {
     readonly edges: ReadonlyArray<{
       readonly node: {
         readonly heroImage: string | null | undefined;
@@ -24,11 +24,11 @@ export type RecentCircuitsCard_viewer$data = {
       };
     }>;
   };
-  readonly " $fragmentType": "RecentCircuitsCard_viewer";
+  readonly " $fragmentType": "RecentTracksCard_viewer";
 };
-export type RecentCircuitsCard_viewer$key = {
-  readonly " $data"?: RecentCircuitsCard_viewer$data;
-  readonly " $fragmentSpreads": FragmentRefs<"RecentCircuitsCard_viewer">;
+export type RecentTracksCard_viewer$key = {
+  readonly " $data"?: RecentTracksCard_viewer$data;
+  readonly " $fragmentSpreads": FragmentRefs<"RecentTracksCard_viewer">;
 };
 
 const node: ReaderFragment = (function(){
@@ -49,20 +49,20 @@ return {
         "cursor": null,
         "direction": "forward",
         "path": [
-          "recentCircuits"
+          "recentTracks"
         ]
       }
     ]
   },
-  "name": "RecentCircuitsCard_viewer",
+  "name": "RecentTracksCard_viewer",
   "selections": [
     (v0/*: any*/),
     {
-      "alias": "recentCircuits",
+      "alias": "recentTracks",
       "args": null,
       "concreteType": "CircuitConnection",
       "kind": "LinkedField",
-      "name": "__RecentCircuitsCard_recentCircuits_connection",
+      "name": "__RecentTracksCard_recentTracks_connection",
       "plural": false,
       "selections": [
         {
@@ -171,6 +171,6 @@ return {
 };
 })();
 
-(node as any).hash = "4ce830057fb0ea4ba95aefce110e31c2";
+(node as any).hash = "c675e9c0fb57d89f0dbc23dcd1c6055d";
 
 export default node;

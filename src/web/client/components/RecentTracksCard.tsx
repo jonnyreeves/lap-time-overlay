@@ -1,15 +1,15 @@
 import { css } from "@emotion/react";
 import { graphql, useFragment } from "react-relay";
-import { type RecentCircuitsCard_viewer$key } from "../__generated__/RecentCircuitsCard_viewer.graphql.js";
+import { type RecentTracksCard_viewer$key } from "../__generated__/RecentTracksCard_viewer.graphql.js";
 import { Card } from "./Card.js";
 import { formatStopwatchTime } from "../utils/lapTime.js";
 import { useNavigate } from "react-router-dom";
 
-const RecentCircuitsCardFragment = graphql`
-  fragment RecentCircuitsCard_viewer on User {
+const RecentTracksCardFragment = graphql`
+  fragment RecentTracksCard_viewer on User {
     id
-    recentCircuits(first: 5)
-      @connection(key: "RecentCircuitsCard_recentCircuits") {
+    recentTracks: recentCircuits(first: 5)
+      @connection(key: "RecentTracksCard_recentTracks") {
       edges {
         node {
           id
@@ -24,7 +24,7 @@ const RecentCircuitsCardFragment = graphql`
   }
 `;
 
-const circuitsContainerStyles = css`
+const tracksContainerStyles = css`
   display: flex;
   overflow-x: auto;
   gap: 20px;
@@ -36,7 +36,7 @@ const circuitsContainerStyles = css`
   }
 `;
 
-const circuitItemStyles = css`
+const trackItemStyles = css`
   flex-shrink: 0; /* Prevent items from shrinking */
   width: 150px; /* Fixed width for each item */
   display: flex;
@@ -69,14 +69,14 @@ const heroImageContainerStyles = css`
   }
 `;
 
-const circuitNameStyles = css`
+const trackNameStyles = css`
   font-size: 1.1rem;
   font-weight: 600;
   color: #333;
   margin-top: 5px;
 `;
 
-const circuitPbStyles = css`
+const trackPbStyles = css`
   margin-top: 6px;
   display: grid;
   gap: 6px;
@@ -143,42 +143,38 @@ function formatPersonalBest(time: number | null | undefined): string | null {
   return `${minutes.padStart(2, "0")}:${rest}`;
 }
 
-export function RecentCircuitsCard({
-  viewer,
-}: {
-  viewer: RecentCircuitsCard_viewer$key;
-}) {
-  const data = useFragment(RecentCircuitsCardFragment, viewer);
-  const circuits = (data.recentCircuits?.edges ?? [])
+export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$key }) {
+  const data = useFragment(RecentTracksCardFragment, viewer);
+  const tracks = (data.recentTracks?.edges ?? [])
     .map((edge) => edge?.node)
     .filter(Boolean);
   const navigate = useNavigate();
 
   return (
-    <Card title="Recent Circuits">
-      <div css={circuitsContainerStyles}>
-        {circuits.map((circuit) => (
+    <Card title="Recent Tracks">
+      <div css={tracksContainerStyles}>
+        {tracks.map((track) => (
           <div
-            key={circuit.id}
-            css={circuitItemStyles}
-            onClick={() => navigate(`/circuits/view/${circuit.id}`)}
+            key={track.id}
+            css={trackItemStyles}
+            onClick={() => navigate(`/tracks/view/${track.id}`)}
           >
             <div css={heroImageContainerStyles}>
-              {circuit.heroImage ? (
-                <img src={circuit.heroImage} alt={circuit.name} />
+              {track.heroImage ? (
+                <img src={track.heroImage} alt={track.name} />
               ) : (
-                <span>{getInitials(circuit.name)}</span>
+                <span>{getInitials(track.name)}</span>
               )}
             </div>
-            <div css={circuitNameStyles}>{circuit.name}</div>
-            <div css={circuitPbStyles}>
+            <div css={trackNameStyles}>{track.name}</div>
+            <div css={trackPbStyles}>
               <div css={pbRowStyles}>
                 <span css={pbEmojiStyles} aria-hidden>
                   ☀️
                 </span>
                 <span css={pbValueStyles}>
                   <span css={pbLabelStyles}>PB</span>
-                  <span>{formatPersonalBest(circuit.personalBestDry) ?? "—"}</span>
+                  <span>{formatPersonalBest(track.personalBestDry) ?? "—"}</span>
                 </span>
               </div>
               <div css={pbRowStyles}>
@@ -187,7 +183,7 @@ export function RecentCircuitsCard({
                 </span>
                 <span css={pbValueStyles}>
                   <span css={pbLabelStyles}>PB</span>
-                  <span>{formatPersonalBest(circuit.personalBestWet) ?? "—"}</span>
+                  <span>{formatPersonalBest(track.personalBestWet) ?? "—"}</span>
                 </span>
               </div>
             </div>

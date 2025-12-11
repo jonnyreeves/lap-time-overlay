@@ -2,7 +2,8 @@ export const formatOptions = ["Practice", "Qualifying", "Race"] as const;
 export const conditionsOptions = ["Dry", "Wet"] as const;
 
 export type SessionOverviewFormState = {
-  circuitId: string;
+  trackId: string;
+  trackLayoutId: string;
   format: string;
   date: string;
   time: string;
@@ -33,8 +34,12 @@ export function validateSessionOverviewForm(formValues: SessionOverviewFormState
   const trimmedTime = formValues.time.trim();
   const trimmedNotes = formValues.notes.trim();
 
-  if (!formValues.circuitId) {
-    return { error: "Please select a circuit." } as const;
+  if (!formValues.trackId) {
+    return { error: "Please select a track." } as const;
+  }
+
+  if (!formValues.trackLayoutId) {
+    return { error: "Please select a track layout." } as const;
   }
 
   if (!formatOptions.includes(formValues.format as (typeof formatOptions)[number])) {
@@ -53,11 +58,12 @@ export function validateSessionOverviewForm(formValues: SessionOverviewFormState
   return {
     error: null,
     payload: {
-      circuitId: formValues.circuitId,
+      trackId: formValues.trackId,
       format: formValues.format,
       date: combineDateTime(trimmedDate, trimmedTime),
       classification,
       conditions: formValues.conditions,
+      trackLayoutId: formValues.trackLayoutId,
       notes: trimmedNotes,
     },
   } as const;

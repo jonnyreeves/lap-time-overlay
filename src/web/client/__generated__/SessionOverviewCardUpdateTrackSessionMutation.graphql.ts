@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<4c57acfe630ce3086aaba4bf30a56bd1>>
+ * @generated SignedSource<<1c06f0902ea11b3d14d156c04ada5f4d>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -17,6 +17,8 @@ export type UpdateTrackSessionInput = {
   format?: string | null | undefined;
   id: string;
   notes?: string | null | undefined;
+  trackId?: string | null | undefined;
+  trackLayoutId?: string | null | undefined;
 };
 export type SessionOverviewCardUpdateTrackSessionMutation$variables = {
   input: UpdateTrackSessionInput;
@@ -24,10 +26,6 @@ export type SessionOverviewCardUpdateTrackSessionMutation$variables = {
 export type SessionOverviewCardUpdateTrackSessionMutation$data = {
   readonly updateTrackSession: {
     readonly trackSession: {
-      readonly circuit: {
-        readonly id: string;
-        readonly name: string;
-      };
       readonly classification: number;
       readonly conditions: string;
       readonly date: string;
@@ -38,6 +36,14 @@ export type SessionOverviewCardUpdateTrackSessionMutation$data = {
         readonly name: string;
       } | null | undefined;
       readonly notes: string | null | undefined;
+      readonly track: {
+        readonly id: string;
+        readonly name: string;
+      };
+      readonly trackLayout: {
+        readonly id: string;
+        readonly name: string;
+      };
       readonly updatedAt: string;
     };
   };
@@ -132,7 +138,7 @@ v3 = [
             "storageKey": null
           },
           {
-            "alias": null,
+            "alias": "track",
             "args": null,
             "concreteType": "Circuit",
             "kind": "LinkedField",
@@ -147,6 +153,16 @@ v3 = [
             "concreteType": "Kart",
             "kind": "LinkedField",
             "name": "kart",
+            "plural": false,
+            "selections": (v2/*: any*/),
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "TrackLayout",
+            "kind": "LinkedField",
+            "name": "trackLayout",
             "plural": false,
             "selections": (v2/*: any*/),
             "storageKey": null
@@ -183,16 +199,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "bce9ff3673a87c0119c7326711fbe1e0",
+    "cacheID": "a555d1dc5b2d3137026ba3f31a3a1a26",
     "id": null,
     "metadata": {},
     "name": "SessionOverviewCardUpdateTrackSessionMutation",
     "operationKind": "mutation",
-    "text": "mutation SessionOverviewCardUpdateTrackSessionMutation(\n  $input: UpdateTrackSessionInput!\n) {\n  updateTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      conditions\n      notes\n      circuit {\n        id\n        name\n      }\n      kart {\n        id\n        name\n      }\n      updatedAt\n    }\n  }\n}\n"
+    "text": "mutation SessionOverviewCardUpdateTrackSessionMutation(\n  $input: UpdateTrackSessionInput!\n) {\n  updateTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      conditions\n      notes\n      track: circuit {\n        id\n        name\n      }\n      kart {\n        id\n        name\n      }\n      trackLayout {\n        id\n        name\n      }\n      updatedAt\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "3c41f629f74d458a234092f61063a88b";
+(node as any).hash = "673c58328d7ea64984368eb9700ef0c1";
 
 export default node;

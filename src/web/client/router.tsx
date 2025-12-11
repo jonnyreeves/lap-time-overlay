@@ -24,6 +24,7 @@ export const router = createBrowserRouter([
       { path: "/session/create", element: <CreateSessionRoute /> },
       { path: "/session/:sessionId", element: <ViewSessionRoute /> },
       { path: "/circuits/view/:circuitId", element: <CircuitViewPage /> },
+      { path: "/tracks/view/:trackId", element: <CircuitViewPage /> },
       { path: "*", element: <NotFoundPage /> },
     ],
   },
