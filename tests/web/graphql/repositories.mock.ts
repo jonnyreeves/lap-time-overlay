@@ -48,6 +48,8 @@ export function createMockRepositories() {
       findById: vi.fn<[string], ReturnType<TrackLayoutsRepository["findById"]>>(),
       findByTrackId: vi.fn<[string], ReturnType<TrackLayoutsRepository["findByTrackId"]>>(() => []),
       create: vi.fn<[string, string], ReturnType<TrackLayoutsRepository["create"]>>(),
+      update: vi.fn<[string, string], ReturnType<TrackLayoutsRepository["update"]>>(),
+      delete: vi.fn<[string], ReturnType<TrackLayoutsRepository["delete"]>>(),
     },
   } satisfies Repositories;
 

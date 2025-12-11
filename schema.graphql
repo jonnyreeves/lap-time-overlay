@@ -124,6 +124,9 @@ type Mutation {
   deleteKart(id: ID!): DeleteKartPayload!
   addKartToCircuit(circuitId: ID!, kartId: ID!): AddKartToCircuitPayload!
   removeKartFromCircuit(circuitId: ID!, kartId: ID!): RemoveKartFromCircuitPayload!
+  addTrackLayoutToCircuit(circuitId: ID!, input: CreateTrackLayoutInput!): AddTrackLayoutToCircuitPayload!
+  updateTrackLayout(input: UpdateTrackLayoutInput!): UpdateTrackLayoutPayload!
+  removeTrackLayoutFromCircuit(circuitId: ID!, trackLayoutId: ID!): RemoveTrackLayoutFromCircuitPayload!
 }
 
 input AuthInput {
@@ -304,8 +307,17 @@ input UpdateKartInput {
   name: String!
 }
 
+input UpdateTrackLayoutInput {
+  id: ID!
+  name: String!
+}
+
 type UpdateKartPayload {
   kart: Kart!
+}
+
+type UpdateTrackLayoutPayload {
+  trackLayout: TrackLayout!
 }
 
 type DeleteKartPayload {
@@ -320,4 +332,14 @@ type AddKartToCircuitPayload {
 type RemoveKartFromCircuitPayload {
   circuit: Circuit!
   kart: Kart!
+}
+
+type AddTrackLayoutToCircuitPayload {
+  circuit: Circuit!
+  trackLayout: TrackLayout!
+}
+
+type RemoveTrackLayoutFromCircuitPayload {
+  circuit: Circuit!
+  trackLayout: TrackLayout!
 }

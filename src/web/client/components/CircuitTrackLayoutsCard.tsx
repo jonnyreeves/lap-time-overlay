@@ -1,0 +1,289 @@
+import { useEffect, useState } from "react";
+import { graphql, useFragment, useMutation } from "react-relay";
+import type { CircuitTrackLayoutsCard_circuit$key } from "src/web/client/__generated__/CircuitTrackLayoutsCard_circuit.graphql.ts";
+import type { CircuitTrackLayoutsCardUpdateTrackLayoutMutation } from "src/web/client/__generated__/CircuitTrackLayoutsCardUpdateTrackLayoutMutation.graphql.ts";
+import type { CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation } from "src/web/client/__generated__/CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation.graphql.ts";
+import { Card } from "./Card.tsx";
+import { IconButton } from "./IconButton.tsx";
+import { actionsRowStyles, primaryButtonStyles } from "./session/sessionOverviewStyles.ts";
+import {
+  inlineActionButtonStyles,
+  kartListStyles,
+  kartRowStyles,
+  largeInlineActionButtonStyles,
+} from "./inlineActionButtons.ts";
+import { CircuitTrackLayoutEditModal } from "./CircuitTrackLayoutEditModal.js";
+
+const TrackLayoutsFragment = graphql`
+  fragment CircuitTrackLayoutsCard_circuit on Circuit {
+    id
+    name
+    trackLayouts {
+      id
+      name
+    }
+  }
+`;
+
+const UpdateTrackLayoutMutation = graphql`
+  mutation CircuitTrackLayoutsCardUpdateTrackLayoutMutation($input: UpdateTrackLayoutInput!) {
+    updateTrackLayout(input: $input) {
+      trackLayout {
+        id
+        name
+        circuit {
+          id
+        }
+      }
+    }
+  }
+`;
+
+const RemoveTrackLayoutFromCircuitMutation = graphql`
+  mutation CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation(
+    $circuitId: ID!
+    $trackLayoutId: ID!
+  ) {
+    removeTrackLayoutFromCircuit(circuitId: $circuitId, trackLayoutId: $trackLayoutId) {
+      circuit {
+        id
+        trackLayouts {
+          id
+          name
+        }
+      }
+      trackLayout {
+        id
+        name
+      }
+    }
+  }
+`;
+
+type Props = {
+  circuit: CircuitTrackLayoutsCard_circuit$key;
+};
+
+export function CircuitTrackLayoutsCard({ circuit: circuitKey }: Props) {
+  const circuit = useFragment(TrackLayoutsFragment, circuitKey);
+  const [isEditing, setIsEditing] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [editableLayoutNames, setEditableLayoutNames] = useState<Map<string, string>>(
+    () => new Map()
+  );
+  const [showAddLayoutModal, setShowAddLayoutModal] = useState(false);
+
+  useEffect(() => {
+    if (!isEditing) {
+      const names = new Map<string, string>();
+      circuit.trackLayouts.forEach((layout) => names.set(layout.id, layout.name));
+      setEditableLayoutNames(names);
+    }
+  }, [circuit.trackLayouts, isEditing]);
+
+  const [commitUpdateLayout, isUpdatingLayout] =
+    useMutation<CircuitTrackLayoutsCardUpdateTrackLayoutMutation>(UpdateTrackLayoutMutation);
+  const [commitRemoveLayout, isRemovingLayout] =
+    useMutation<CircuitTrackLayoutsCardRemoveTrackLayoutFromCircuitMutation>(RemoveTrackLayoutFromCircuitMutation);
+
+  const isSaving = isUpdatingLayout || isRemovingLayout;
+  const formId = "circuit-track-layouts-form";
+
+  function handleEdit() {
+    setIsEditing(true);
+    setActionError(null);
+  }
+
+  function handleCancel() {
+    setIsEditing(false);
+    setActionError(null);
+  }
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (isSaving) return;
+    setActionError(null);
+
+    const pending: Promise<void>[] = [];
+    for (const layout of circuit.trackLayouts) {
+      const editedName = editableLayoutNames.get(layout.id);
+      if (editedName != null && editedName !== layout.name) {
+        const trimmed = editedName.trim();
+        if (!trimmed) {
+          setActionError(`Track layout name cannot be empty for "${layout.name}".`);
+          return;
+        }
+
+        pending.push(
+          new Promise<void>((resolve, reject) => {
+            commitUpdateLayout({
+              variables: { input: { id: layout.id, name: trimmed } },
+              optimisticResponse: {
+                updateTrackLayout: {
+                  trackLayout: {
+                    id: layout.id,
+                    name: trimmed,
+                    circuit: { id: circuit.id, __typename: "Circuit" },
+                    __typename: "TrackLayout",
+                  },
+                  __typename: "UpdateTrackLayoutPayload",
+                },
+              },
+              onCompleted: () => resolve(),
+              onError: (error) => reject(error),
+            });
+          })
+        );
+      }
+    }
+
+    try {
+      if (pending.length > 0) {
+        await Promise.all(pending);
+      }
+      setIsEditing(false);
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : "Unable to update track layouts.");
+    }
+  }
+
+  function handleAddLayout() {
+    setShowAddLayoutModal(true);
+  }
+
+  function handleCloseModal() {
+    setShowAddLayoutModal(false);
+    setActionError(null);
+  }
+
+  function handleLayoutCreated(newLayoutId: string, newLayoutName: string) {
+    setEditableLayoutNames((current) => new Map(current).set(newLayoutId, newLayoutName));
+    setShowAddLayoutModal(false);
+  }
+
+  function handleDeleteLayout(trackLayoutId: string) {
+    if (isSaving) return;
+    setActionError(null);
+
+    commitRemoveLayout({
+      variables: { circuitId: circuit.id, trackLayoutId },
+      optimisticResponse: {
+        removeTrackLayoutFromCircuit: {
+          circuit: {
+            id: circuit.id,
+            trackLayouts: circuit.trackLayouts
+              .filter((layout) => layout.id !== trackLayoutId)
+              .map((layout) => ({ id: layout.id, name: layout.name, __typename: "TrackLayout" })),
+            __typename: "Circuit",
+          },
+          trackLayout: {
+            id: trackLayoutId,
+            name: editableLayoutNames.get(trackLayoutId) ?? "",
+            __typename: "TrackLayout",
+          },
+          __typename: "RemoveTrackLayoutFromCircuitPayload",
+        },
+      },
+      onError: (error) => setActionError(error.message),
+    });
+  }
+
+  return (
+    <Card
+      title="Track Layouts"
+      rightHeaderContent={
+        <div css={actionsRowStyles}>
+          {isEditing ? (
+            <>
+              <button type="button" css={inlineActionButtonStyles} onClick={handleCancel} disabled={isSaving}>
+                Cancel
+              </button>
+              <button type="submit" form={formId} css={primaryButtonStyles} disabled={isSaving}>
+                {isSaving ? "Saving..." : "Save"}
+              </button>
+            </>
+          ) : (
+            <IconButton
+              type="button"
+              css={inlineActionButtonStyles}
+              onClick={handleEdit}
+              icon="✏️"
+              disabled={isSaving}
+            >
+              Edit
+            </IconButton>
+          )}
+        </div>
+      }
+    >
+      {actionError ? <p css={{ color: "red" }}>{actionError}</p> : null}
+      <form id={formId} onSubmit={handleSubmit}>
+        {circuit.trackLayouts.length === 0 ? (
+          <p>No track layouts added to this track yet.</p>
+        ) : (
+          <ul css={kartListStyles}>
+            {circuit.trackLayouts.map((layout) => (
+              <li key={layout.id} css={kartRowStyles}>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    css={{
+                      border: "1px solid #cbd5e1",
+                      borderRadius: "8px",
+                      padding: "6px 10px",
+                      fontSize: "1rem",
+                      fontWeight: "700",
+                      color: "#0b132b",
+                      flexGrow: 1,
+                    }}
+                    value={editableLayoutNames.get(layout.id) || ""}
+                    onChange={(e) =>
+                      setEditableLayoutNames((current) => new Map(current).set(layout.id, e.target.value))
+                    }
+                    disabled={isSaving}
+                  />
+                ) : (
+                  <div className="kart-name">{layout.name}</div>
+                )}
+                {isEditing && (
+                  <div className="actions">
+                    <button
+                      css={inlineActionButtonStyles}
+                      onClick={() => handleDeleteLayout(layout.id)}
+                      disabled={isSaving}
+                      type="button"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {isEditing && (
+          <div css={{ marginTop: "14px", display: "flex", justifyContent: "flex-end" }}>
+            <IconButton
+              type="button"
+              css={largeInlineActionButtonStyles}
+              onClick={handleAddLayout}
+              icon="+"
+              disabled={isSaving}
+            >
+              Add Layout
+            </IconButton>
+          </div>
+        )}
+      </form>
+
+      {showAddLayoutModal && (
+        <CircuitTrackLayoutEditModal
+          circuitId={circuit.id}
+          onClose={handleCloseModal}
+          onTrackLayoutCreated={handleLayoutCreated}
+        />
+      )}
+    </Card>
+  );
+}

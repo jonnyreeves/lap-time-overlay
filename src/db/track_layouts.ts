@@ -72,14 +72,41 @@ export function createTrackLayout(
   };
 }
 
+export function updateTrackLayout(id: string, name: string, now = Date.now()): TrackLayoutRecord | null {
+  const existing = findTrackLayoutById(id);
+  if (!existing) {
+    return null;
+  }
+
+  const db = getDb();
+  db.prepare(
+    `UPDATE track_layouts SET name = ?, updated_at = ? WHERE id = ?`
+  ).run(name, now, id);
+
+  return { ...existing, name, updatedAt: now };
+}
+
+export function deleteTrackLayout(id: string): boolean {
+  const db = getDb();
+  const result = db.prepare(
+    `DELETE FROM track_layouts WHERE id = ?`
+  ).run(id);
+
+  return result.changes > 0;
+}
+
 export interface TrackLayoutsRepository {
   findById: (id: string) => TrackLayoutRecord | null;
   findByTrackId: (trackId: string) => TrackLayoutRecord[];
   create: (trackId: string, name: string) => TrackLayoutRecord;
+  update: (id: string, name: string) => TrackLayoutRecord | null;
+  delete: (id: string) => boolean;
 }
 
 export const trackLayoutsRepository: TrackLayoutsRepository = {
   findById: findTrackLayoutById,
   findByTrackId: findTrackLayoutsByTrackId,
   create: createTrackLayout,
+  update: updateTrackLayout,
+  delete: deleteTrackLayout,
 };

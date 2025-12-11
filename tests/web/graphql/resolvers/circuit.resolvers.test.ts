@@ -444,3 +444,158 @@ describe("kart resolvers", () => {
     expect(result.kart).toMatchObject({ id: "k1" });
   });
 });
+
+describe("track layout resolvers", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("addTrackLayoutToCircuit rejects unauthenticated requests", () => {
+    expect(() =>
+      rootValue.addTrackLayoutToCircuit({ circuitId: "c1", input: { name: "Outer" } }, baseContext as never)
+    ).toThrowError("Authentication required");
+  });
+
+  it("addTrackLayoutToCircuit validates missing circuitId or name", () => {
+    expect(() =>
+      rootValue.addTrackLayoutToCircuit({ input: { name: "Outer" } }, authenticatedContext as never)
+    ).toThrowError("Circuit ID and track layout name are required");
+    expect(() =>
+      rootValue.addTrackLayoutToCircuit({ circuitId: "c1", input: { name: "" } }, authenticatedContext as never)
+    ).toThrowError("Circuit ID and track layout name are required");
+  });
+
+  it("addTrackLayoutToCircuit returns GraphQLError if circuit not found", () => {
+    repositories.tracks.findById.mockReturnValue(null);
+
+    expect(() =>
+      rootValue.addTrackLayoutToCircuit({ circuitId: "c99", input: { name: "Outer" } }, authenticatedContext as never)
+    ).toThrowError("Circuit not found");
+  });
+
+  it("addTrackLayoutToCircuit creates layout and returns payload", () => {
+    const track = { id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 };
+    const layout = { id: "l1", trackId: "c1", name: "Outer", createdAt: 0, updatedAt: 0 };
+    repositories.tracks.findById.mockReturnValue(track);
+    repositories.trackLayouts.create.mockReturnValue(layout);
+    repositories.trackLayouts.findByTrackId.mockReturnValue([layout]);
+    repositories.trackKarts.findKartsForTrack.mockReturnValue([]);
+
+    const result = rootValue.addTrackLayoutToCircuit(
+      { circuitId: "c1", input: { name: "Outer" } },
+      authenticatedContext as never
+    );
+
+    expect(repositories.trackLayouts.create).toHaveBeenCalledWith("c1", "Outer");
+    expect(result.trackLayout).toMatchObject({ id: "l1", name: "Outer" });
+    expect(result.circuit).toMatchObject({ id: "c1" });
+  });
+
+  it("updateTrackLayout rejects unauthenticated requests", () => {
+    expect(() =>
+      rootValue.updateTrackLayout({ input: { id: "l1", name: "Outer" } }, baseContext as never)
+    ).toThrowError("Authentication required");
+  });
+
+  it("updateTrackLayout validates missing id or name", () => {
+    expect(() =>
+      rootValue.updateTrackLayout({ input: { name: "Outer" } }, authenticatedContext as never)
+    ).toThrowError("Track layout ID and name are required");
+    expect(() =>
+      rootValue.updateTrackLayout({ input: { id: "l1" } }, authenticatedContext as never)
+    ).toThrowError("Track layout ID and name are required");
+  });
+
+  it("updateTrackLayout returns GraphQLError if layout not found", () => {
+    repositories.trackLayouts.findById.mockReturnValue(null);
+
+    expect(() =>
+      rootValue.updateTrackLayout({ input: { id: "missing", name: "Outer" } }, authenticatedContext as never)
+    ).toThrowError("Track layout not found");
+  });
+
+  it("updateTrackLayout updates layout and returns payload", () => {
+    const layout = { id: "l1", trackId: "c1", name: "Outer", createdAt: 0, updatedAt: 0 };
+    const updatedLayout = { ...layout, name: "GP" };
+    repositories.trackLayouts.findById.mockReturnValue(layout);
+    repositories.trackLayouts.update.mockReturnValue(updatedLayout);
+    repositories.tracks.findById.mockReturnValue({
+      id: "c1",
+      name: "Spa",
+      heroImage: null,
+      createdAt: 0,
+      updatedAt: 0,
+    });
+    repositories.trackLayouts.findByTrackId.mockReturnValue([updatedLayout]);
+    repositories.trackKarts.findKartsForTrack.mockReturnValue([]);
+
+    const result = rootValue.updateTrackLayout(
+      { input: { id: "l1", name: "GP" } },
+      authenticatedContext as never
+    );
+
+    expect(repositories.trackLayouts.update).toHaveBeenCalledWith("l1", "GP");
+    expect(result.trackLayout).toMatchObject({ id: "l1", name: "GP" });
+  });
+
+  it("removeTrackLayoutFromCircuit rejects unauthenticated requests", () => {
+    expect(() =>
+      rootValue.removeTrackLayoutFromCircuit({ circuitId: "c1", trackLayoutId: "l1" }, baseContext as never)
+    ).toThrowError("Authentication required");
+  });
+
+  it("removeTrackLayoutFromCircuit validates missing circuitId or trackLayoutId", () => {
+    expect(() =>
+      rootValue.removeTrackLayoutFromCircuit({ trackLayoutId: "l1" }, authenticatedContext as never)
+    ).toThrowError("Circuit ID and track layout ID are required");
+    expect(() =>
+      rootValue.removeTrackLayoutFromCircuit({ circuitId: "c1" }, authenticatedContext as never)
+    ).toThrowError("Circuit ID and track layout ID are required");
+  });
+
+  it("removeTrackLayoutFromCircuit returns GraphQLError if circuit not found", () => {
+    repositories.tracks.findById.mockReturnValue(null);
+    repositories.trackLayouts.findById.mockReturnValue({ id: "l1", trackId: "c1", name: "Outer", createdAt: 0, updatedAt: 0 });
+
+    expect(() =>
+      rootValue.removeTrackLayoutFromCircuit({ circuitId: "c1", trackLayoutId: "l1" }, authenticatedContext as never)
+    ).toThrowError("Circuit not found");
+  });
+
+  it("removeTrackLayoutFromCircuit returns GraphQLError if layout not found", () => {
+    repositories.tracks.findById.mockReturnValue({ id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 });
+    repositories.trackLayouts.findById.mockReturnValue(null);
+
+    expect(() =>
+      rootValue.removeTrackLayoutFromCircuit({ circuitId: "c1", trackLayoutId: "l1" }, authenticatedContext as never)
+    ).toThrowError("Track layout not found");
+  });
+
+  it("removeTrackLayoutFromCircuit returns GraphQLError if layout belongs to another circuit", () => {
+    repositories.tracks.findById.mockReturnValue({ id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 });
+    repositories.trackLayouts.findById.mockReturnValue({ id: "l1", trackId: "other", name: "Outer", createdAt: 0, updatedAt: 0 });
+
+    expect(() =>
+      rootValue.removeTrackLayoutFromCircuit({ circuitId: "c1", trackLayoutId: "l1" }, authenticatedContext as never)
+    ).toThrowError("Track layout does not belong to this circuit");
+  });
+
+  it("removeTrackLayoutFromCircuit deletes layout and returns payload", () => {
+    const track = { id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 };
+    const layout = { id: "l1", trackId: "c1", name: "Outer", createdAt: 0, updatedAt: 0 };
+    repositories.tracks.findById.mockReturnValue(track);
+    repositories.trackLayouts.findById.mockReturnValue(layout);
+    repositories.trackLayouts.delete.mockReturnValue(true);
+    repositories.trackLayouts.findByTrackId.mockReturnValue([]);
+    repositories.trackKarts.findKartsForTrack.mockReturnValue([]);
+
+    const result = rootValue.removeTrackLayoutFromCircuit(
+      { circuitId: "c1", trackLayoutId: "l1" },
+      authenticatedContext as never
+    );
+
+    expect(repositories.trackLayouts.delete).toHaveBeenCalledWith("l1");
+    expect(result.circuit).toMatchObject({ id: "c1" });
+    expect(result.trackLayout).toMatchObject({ id: "l1" });
+  });
+});

@@ -41,13 +41,31 @@ export function toCircuitPayload(
     personalBestWet: () => getCircuitPersonalBest(track.id, repositories, userId, "Wet"),
     karts: () => repositories.trackKarts.findKartsForTrack(track.id),
     trackLayouts: () =>
-      repositories.trackLayouts.findByTrackId(track.id).map((layout) => ({
-        id: layout.id,
-        name: layout.name,
-        circuit: () => toCircuitPayload(track, repositories, userId),
-        createdAt: new Date(layout.createdAt).toISOString(),
-        updatedAt: new Date(layout.updatedAt).toISOString(),
-      })),
+      repositories.trackLayouts.findByTrackId(track.id).map((layout) =>
+        toTrackLayoutPayload(layout, repositories, userId, track)
+      ),
+  };
+}
+
+export function toTrackLayoutPayload(
+  layout: { id: string; trackId: string; name: string; createdAt: number; updatedAt: number },
+  repositories: Repositories,
+  userId?: string,
+  track?: TrackRecord | null
+) {
+  const trackRecord = track ?? repositories.tracks.findById(layout.trackId);
+  if (!trackRecord) {
+    throw new GraphQLError("Circuit not found", {
+      extensions: { code: "NOT_FOUND" },
+    });
+  }
+
+  return {
+    id: layout.id,
+    name: layout.name,
+    circuit: () => toCircuitPayload(trackRecord, repositories, userId),
+    createdAt: new Date(layout.createdAt).toISOString(),
+    updatedAt: new Date(layout.updatedAt).toISOString(),
   };
 }
 
@@ -240,5 +258,129 @@ export const circuitResolvers = {
     }
     context.repositories.trackKarts.removeKartFromTrack(circuitId, kartId);
     return { circuit: toCircuitPayload(circuit, context.repositories, context.currentUser.id), kart };
+  },
+
+  addTrackLayoutToCircuit: (
+    args: { circuitId?: string; input?: { name?: string } },
+    context: GraphQLContext
+  ) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+
+    const circuitId = args.circuitId;
+    const name = args.input?.name?.trim();
+
+    if (!circuitId || !name) {
+      throw new GraphQLError("Circuit ID and track layout name are required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const circuit = context.repositories.tracks.findById(circuitId);
+    if (!circuit) {
+      throw new GraphQLError("Circuit not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    const newLayout = context.repositories.trackLayouts.create(circuitId, name);
+
+    return {
+      circuit: toCircuitPayload(circuit, context.repositories, context.currentUser.id),
+      trackLayout: toTrackLayoutPayload(newLayout, context.repositories, context.currentUser.id, circuit),
+    };
+  },
+
+  updateTrackLayout: (
+    args: { input?: { id?: string; name?: string } },
+    context: GraphQLContext
+  ) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+
+    const layoutId = args.input?.id;
+    const layoutName = args.input?.name?.trim();
+
+    if (!layoutId || !layoutName) {
+      throw new GraphQLError("Track layout ID and name are required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const existingLayout = context.repositories.trackLayouts.findById(layoutId);
+    if (!existingLayout) {
+      throw new GraphQLError("Track layout not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    const track = context.repositories.tracks.findById(existingLayout.trackId);
+    if (!track) {
+      throw new GraphQLError("Circuit not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    const updatedLayout = context.repositories.trackLayouts.update(layoutId, layoutName);
+    if (!updatedLayout) {
+      throw new GraphQLError("Track layout not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    return {
+      trackLayout: toTrackLayoutPayload(updatedLayout, context.repositories, context.currentUser.id, track),
+    };
+  },
+
+  removeTrackLayoutFromCircuit: (
+    args: { circuitId?: string; trackLayoutId?: string },
+    context: GraphQLContext
+  ) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+
+    const { circuitId, trackLayoutId } = args;
+    if (!circuitId || !trackLayoutId) {
+      throw new GraphQLError("Circuit ID and track layout ID are required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const circuit = context.repositories.tracks.findById(circuitId);
+    if (!circuit) {
+      throw new GraphQLError("Circuit not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    const layout = context.repositories.trackLayouts.findById(trackLayoutId);
+    if (!layout) {
+      throw new GraphQLError("Track layout not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    if (layout.trackId !== circuitId) {
+      throw new GraphQLError("Track layout does not belong to this circuit", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    context.repositories.trackLayouts.delete(trackLayoutId);
+
+    return {
+      circuit: toCircuitPayload(circuit, context.repositories, context.currentUser.id),
+      trackLayout: toTrackLayoutPayload(layout, context.repositories, context.currentUser.id, circuit),
+    };
   },
 };

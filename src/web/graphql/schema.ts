@@ -37,4 +37,7 @@ export const rootValue = {
   deleteKart: circuitResolvers.deleteKart,
   addKartToCircuit: circuitResolvers.addKartToCircuit,
   removeKartFromCircuit: circuitResolvers.removeKartFromCircuit,
+  addTrackLayoutToCircuit: circuitResolvers.addTrackLayoutToCircuit,
+  updateTrackLayout: circuitResolvers.updateTrackLayout,
+  removeTrackLayoutFromCircuit: circuitResolvers.removeTrackLayoutFromCircuit,
 };
