@@ -241,6 +241,7 @@ input TrackSessionFilterInput {
   trackLayoutId: ID
   kartId: ID
   conditions: String
+  format: String
 }
 
 enum TrackRecordingStatus {

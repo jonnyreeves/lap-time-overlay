@@ -108,6 +108,9 @@ describe("viewer resolver", () => {
 
     const byConditions = viewer?.recentTrackSessions({ first: 5, filter: { conditions: "Wet" } });
     expect(byConditions?.edges.map((edge) => edge.node.id)).toEqual(["s2"]);
+
+    const byFormat = viewer?.recentTrackSessions({ first: 5, filter: { format: "Practice" } });
+    expect(byFormat?.edges.map((edge) => edge.node.id)).toEqual(["s3"]);
   });
 
   it("rejects invalid conditions filter", () => {
@@ -115,5 +118,12 @@ describe("viewer resolver", () => {
     expect(() =>
       viewer?.recentTrackSessions({ first: 5, filter: { conditions: "Snow" } })
     ).toThrowError("conditions filter must be either Dry or Wet");
+  });
+
+  it("rejects invalid format filter", () => {
+    const viewer = rootValue.viewer({}, context as never);
+    expect(() =>
+      viewer?.recentTrackSessions({ first: 5, filter: { format: "Time Attack" } })
+    ).toThrowError("format filter must be Practice, Qualifying, or Race");
   });
 });

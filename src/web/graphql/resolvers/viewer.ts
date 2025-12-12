@@ -22,6 +22,7 @@ type TrackSessionFilterArgs = {
   trackLayoutId?: string | null;
   kartId?: string | null;
   conditions?: string | null;
+  format?: string | null;
 };
 
 type RecentTrackSessionsArgs = {
@@ -37,6 +38,17 @@ function normalizeConditionsFilter(conditions?: string | null): string | undefin
     return normalized;
   }
   throw new GraphQLError("conditions filter must be either Dry or Wet", {
+    extensions: { code: "VALIDATION_FAILED" },
+  });
+}
+
+function normalizeFormatFilter(format?: string | null): string | undefined {
+  if (!format) return undefined;
+  const normalized = format.trim();
+  if (normalized === "Practice" || normalized === "Qualifying" || normalized === "Race") {
+    return normalized;
+  }
+  throw new GraphQLError("format filter must be Practice, Qualifying, or Race", {
     extensions: { code: "VALIDATION_FAILED" },
   });
 }
@@ -91,6 +103,7 @@ export const viewerResolvers = {
         const sessions = findTrackSessionsForUser(user.id, repositories);
         const filter = args.filter;
         const normalizedConditions = normalizeConditionsFilter(filter?.conditions);
+        const normalizedFormat = normalizeFormatFilter(filter?.format);
         const trackIdFilter = filter?.trackId?.trim();
         const trackLayoutIdFilter = filter?.trackLayoutId?.trim();
         const kartIdFilter = filter?.kartId?.trim();
@@ -100,6 +113,7 @@ export const viewerResolvers = {
           if (trackLayoutIdFilter && session.trackLayoutId !== trackLayoutIdFilter) return false;
           if (kartIdFilter && session.kartId !== kartIdFilter) return false;
           if (normalizedConditions && session.conditions !== normalizedConditions) return false;
+          if (normalizedFormat && session.format !== normalizedFormat) return false;
           return true;
         });
 

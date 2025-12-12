@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<4dc8b49ed94015b6f18532e35ef74400>>
+ * @generated SignedSource<<fc232f8f527e9bd9f77061dc195f039f>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,6 +12,7 @@ import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type TrackSessionFilterInput = {
   conditions?: string | null | undefined;
+  format?: string | null | undefined;
   kartId?: string | null | undefined;
   trackId?: string | null | undefined;
   trackLayoutId?: string | null | undefined;

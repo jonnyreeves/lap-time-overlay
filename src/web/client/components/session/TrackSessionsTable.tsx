@@ -25,6 +25,7 @@ type Filters = {
   trackLayoutId: string;
   kartId: string;
   conditions: string;
+  format: string;
 };
 
 const tableWrapperStyles = css`
@@ -369,6 +370,7 @@ export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Prop
     trackLayoutId: "",
     kartId: "",
     conditions: "",
+    format: "",
   });
   const tracks = data.tracks ?? [];
 
@@ -436,6 +438,7 @@ export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Prop
           ...(merged.trackLayoutId ? { trackLayoutId: merged.trackLayoutId } : null),
           ...(merged.kartId ? { kartId: merged.kartId } : null),
           ...(merged.conditions ? { conditions: merged.conditions } : null),
+          ...(merged.format ? { format: merged.format } : null),
         };
 
         refetch(
@@ -449,7 +452,7 @@ export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Prop
   );
 
   const isFilterActive = Boolean(
-    filters.trackId || filters.trackLayoutId || filters.kartId || filters.conditions
+    filters.trackId || filters.trackLayoutId || filters.kartId || filters.conditions || filters.format
   );
 
   const sessions = useMemo(
@@ -541,11 +544,30 @@ export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Prop
             <option value="Wet">Wet</option>
           </select>
         </label>
+        <label css={filterFieldStyles}>
+          <span css={subtleMetaStyles}>Format</span>
+          <select
+            css={filterSelectStyles}
+            value={filters.format}
+            onChange={(event) => applyFilter({ format: event.target.value })}
+          >
+            <option value="">All</option>
+            <option value="Practice">Practice</option>
+            <option value="Qualifying">Qualifying</option>
+            <option value="Race">Race</option>
+          </select>
+        </label>
         <button
           type="button"
           css={clearButtonStyles}
           onClick={() =>
-            applyFilter({ trackId: "", trackLayoutId: "", kartId: "", conditions: "" })
+            applyFilter({
+              trackId: "",
+              trackLayoutId: "",
+              kartId: "",
+              conditions: "",
+              format: "",
+            })
           }
           disabled={!isFilterActive}
         >
