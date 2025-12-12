@@ -199,9 +199,18 @@ const CreateTrackSessionMutation = graphql`
           id
           name
           heroImage
-          personalBest
-          personalBestDry
-          personalBestWet
+          personalBestEntries {
+            conditions
+            lapTime
+            kart {
+              id
+              name
+            }
+            trackLayout {
+              id
+              name
+            }
+          }
         }
         notes
         laps(first: 1) {

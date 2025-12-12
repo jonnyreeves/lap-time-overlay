@@ -1,30 +1,99 @@
 import { GraphQLError } from "graphql";
 import type { TrackSessionConditions } from "../../../db/track_sessions.js";
 import type { TrackRecord } from "../../../db/tracks.js";
+import type { KartRecord } from "../../../db/karts.js";
+import type { TrackLayoutRecord } from "../../../db/track_layouts.js";
 import type { GraphQLContext } from "../context.js";
 import type { Repositories } from "../repositories.js";
 
-export function getTrackPersonalBest(
-  trackId: string,
+type TrackPersonalBestEntry = {
+  kart: KartRecord;
+  trackLayout: TrackLayoutRecord;
+  conditions: TrackSessionConditions;
+  lapTime: number;
+};
+
+function toKartPayload(kart: KartRecord) {
+  return {
+    id: kart.id,
+    name: kart.name,
+    createdAt: new Date(kart.createdAt).toISOString(),
+    updatedAt: new Date(kart.updatedAt).toISOString(),
+  };
+}
+
+export function getTrackPersonalBestEntries(
+  track: TrackRecord,
   repositories: Repositories,
-  userId?: string,
-  conditions?: TrackSessionConditions
+  userId?: string
 ) {
   const sessions = userId
-    ? repositories.trackSessions.findByUserId(userId).filter((session) => session.trackId === trackId)
-    : repositories.trackSessions.findByTrackId(trackId);
-  const filteredSessions = conditions
-    ? sessions.filter((session) => session.conditions === conditions)
-    : sessions;
-  const lapTimes: number[] = [];
-  for (const session of filteredSessions) {
+    ? repositories.trackSessions.findByUserId(userId).filter((session) => session.trackId === track.id)
+    : repositories.trackSessions.findByTrackId(track.id);
+
+  const bestBySetup = new Map<string, TrackPersonalBestEntry>();
+
+  for (const session of sessions) {
+    if (!session.kartId) {
+      continue;
+    }
     const laps = repositories.laps.findBySessionId(session.id);
-    lapTimes.push(...laps.map((lap) => lap.time));
+    if (laps.length === 0) {
+      continue;
+    }
+
+    const kart = repositories.karts.findById(session.kartId);
+    if (!kart) {
+      throw new GraphQLError(`Kart with ID ${session.kartId} not found`, {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    const trackLayout = repositories.trackLayouts.findById(session.trackLayoutId);
+    if (!trackLayout) {
+      throw new GraphQLError(`Track layout with ID ${session.trackLayoutId} not found`, {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    if (trackLayout.trackId !== track.id) {
+      continue;
+    }
+
+    const bestLapTime = Math.min(...laps.map((lap) => lap.time));
+    const key = `${trackLayout.id}:${kart.id}:${session.conditions}`;
+    const existing = bestBySetup.get(key);
+
+    if (!existing || bestLapTime < existing.lapTime) {
+      bestBySetup.set(key, {
+        kart,
+        trackLayout,
+        conditions: session.conditions,
+        lapTime: bestLapTime,
+      });
+    }
   }
-  if (lapTimes.length === 0) {
-    return null;
-  }
-  return Math.min(...lapTimes);
+
+  const entries = Array.from(bestBySetup.values());
+  entries.sort((a, b) => {
+    if (a.trackLayout.name !== b.trackLayout.name) {
+      return a.trackLayout.name.localeCompare(b.trackLayout.name);
+    }
+    if (a.kart.name !== b.kart.name) {
+      return a.kart.name.localeCompare(b.kart.name);
+    }
+    if (a.conditions !== b.conditions) {
+      return a.conditions.localeCompare(b.conditions);
+    }
+    return a.lapTime - b.lapTime;
+  });
+
+  return entries.map((entry) => ({
+    kart: toKartPayload(entry.kart),
+    trackLayout: toTrackLayoutPayload(entry.trackLayout, repositories, userId, track),
+    conditions: entry.conditions,
+    lapTime: entry.lapTime,
+  }));
 }
 
 export function toTrackPayload(
@@ -36,9 +105,7 @@ export function toTrackPayload(
     id: track.id,
     name: track.name,
     heroImage: track.heroImage,
-    personalBest: () => getTrackPersonalBest(track.id, repositories, userId),
-    personalBestDry: () => getTrackPersonalBest(track.id, repositories, userId, "Dry"),
-    personalBestWet: () => getTrackPersonalBest(track.id, repositories, userId, "Wet"),
+    personalBestEntries: () => getTrackPersonalBestEntries(track, repositories, userId),
     karts: () => repositories.trackKarts.findKartsForTrack(track.id),
     trackLayouts: () =>
       repositories.trackLayouts.findByTrackId(track.id).map((layout) =>

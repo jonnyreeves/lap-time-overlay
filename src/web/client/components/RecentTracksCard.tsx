@@ -1,9 +1,12 @@
 import { css } from "@emotion/react";
 import { graphql, useFragment } from "react-relay";
-import { type RecentTracksCard_viewer$key } from "../__generated__/RecentTracksCard_viewer.graphql.js";
+import {
+  type RecentTracksCard_viewer$data,
+  type RecentTracksCard_viewer$key,
+} from "../__generated__/RecentTracksCard_viewer.graphql.js";
 import { Card } from "./Card.js";
-import { formatStopwatchTime } from "../utils/lapTime.js";
 import { useNavigate } from "react-router-dom";
+import { RecentTrackPersonalBestPill } from "./RecentTrackPersonalBestPill.js";
 
 const RecentTracksCardFragment = graphql`
   fragment RecentTracksCard_viewer on User {
@@ -14,9 +17,18 @@ const RecentTracksCardFragment = graphql`
           id
           name
           heroImage
-          personalBest
-          personalBestDry
-          personalBestWet
+          personalBestEntries {
+            conditions
+            lapTime
+            kart {
+              id
+              name
+            }
+            trackLayout {
+              id
+              name
+            }
+          }
         }
       }
     }
@@ -37,7 +49,7 @@ const tracksContainerStyles = css`
 
 const trackItemStyles = css`
   flex-shrink: 0; /* Prevent items from shrinking */
-  width: 150px; /* Fixed width for each item */
+  width: 220px; /* Fixed width for each item */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -76,47 +88,22 @@ const trackNameStyles = css`
 `;
 
 const trackPbStyles = css`
-  margin-top: 6px;
-  display: grid;
-  gap: 6px;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   width: 100%;
 `;
 
-const pbRowStyles = css`
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
+const emptyStateStyles = css`
+  margin-top: 8px;
+  padding: 10px 12px;
+  width: 100%;
   border-radius: 10px;
-  border: 1px solid #e2e8f4;
+  border: 1px dashed #cbd5e1;
   background: #f8fafc;
-  color: #475569;
-  text-align: left;
-`;
-
-const pbEmojiStyles = css`
-  font-size: 1.1rem;
-  width: 26px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const pbValueStyles = css`
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #0f172a;
-`;
-
-const pbLabelStyles = css`
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   color: #94a3b8;
+  font-weight: 600;
 `;
 
 function getInitials(name: string): string {
@@ -132,15 +119,11 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-function formatPersonalBest(time: number | null | undefined): string | null {
-  if (typeof time !== "number" || time <= 0 || Number.isNaN(time)) {
-    return null;
-  }
-  const formatted = formatStopwatchTime(time);
-  const [minutes, rest] = formatted.split(":");
-  if (!rest) return formatted;
-  return `${minutes.padStart(2, "0")}:${rest}`;
-}
+type PersonalBestEntry = NonNullable<
+  NonNullable<
+    NonNullable<RecentTracksCard_viewer$data["recentTracks"]>["edges"]
+  >[number]
+>["node"]["personalBestEntries"][number];
 
 export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$key }) {
   const data = useFragment(RecentTracksCardFragment, viewer);
@@ -167,24 +150,16 @@ export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$k
             </div>
             <div css={trackNameStyles}>{track.name}</div>
             <div css={trackPbStyles}>
-              <div css={pbRowStyles}>
-                <span css={pbEmojiStyles} aria-hidden>
-                  ☀️
-                </span>
-                <span css={pbValueStyles}>
-                  <span css={pbLabelStyles}>PB</span>
-                  <span>{formatPersonalBest(track.personalBestDry) ?? "—"}</span>
-                </span>
-              </div>
-              <div css={pbRowStyles}>
-                <span css={pbEmojiStyles} aria-hidden>
-                  🌧️
-                </span>
-                <span css={pbValueStyles}>
-                  <span css={pbLabelStyles}>PB</span>
-                  <span>{formatPersonalBest(track.personalBestWet) ?? "—"}</span>
-                </span>
-              </div>
+              {track.personalBestEntries?.length ? (
+                track.personalBestEntries.map((entry: PersonalBestEntry) => (
+                  <RecentTrackPersonalBestPill
+                    key={`${entry.trackLayout.id}-${entry.kart.id}-${entry.conditions}`}
+                    entry={entry}
+                  />
+                ))
+              ) : (
+                <div css={emptyStateStyles}>No lap data yet</div>
+              )}
             </div>
           </div>
         ))}

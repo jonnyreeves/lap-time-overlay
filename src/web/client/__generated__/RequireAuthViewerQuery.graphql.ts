@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d51cb3c8a3c9ffd2f0b803a521fd0396>>
+ * @generated SignedSource<<a8db31311c952e9fc8a8280cee727371>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -47,24 +47,48 @@ v3 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "personalBest",
+  "name": "conditions",
   "storageKey": null
 },
-v4 = {
+v4 = [
+  (v0/*: any*/),
+  (v2/*: any*/)
+],
+v5 = {
+  "alias": null,
+  "args": null,
+  "concreteType": "Kart",
+  "kind": "LinkedField",
+  "name": "kart",
+  "plural": false,
+  "selections": (v4/*: any*/),
+  "storageKey": null
+},
+v6 = {
+  "alias": null,
+  "args": null,
+  "concreteType": "TrackLayout",
+  "kind": "LinkedField",
+  "name": "trackLayout",
+  "plural": false,
+  "selections": (v4/*: any*/),
+  "storageKey": null
+},
+v7 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "__typename",
   "storageKey": null
 },
-v5 = {
+v8 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "cursor",
   "storageKey": null
 },
-v6 = {
+v9 = {
   "alias": null,
   "args": null,
   "concreteType": "PageInfo",
@@ -88,11 +112,7 @@ v6 = {
     }
   ],
   "storageKey": null
-},
-v7 = [
-  (v0/*: any*/),
-  (v2/*: any*/)
-];
+};
 return {
   "fragment": {
     "argumentDefinitions": [],
@@ -180,30 +200,36 @@ return {
                         "name": "heroImage",
                         "storageKey": null
                       },
-                      (v3/*: any*/),
                       {
                         "alias": null,
                         "args": null,
-                        "kind": "ScalarField",
-                        "name": "personalBestDry",
+                        "concreteType": "TrackPersonalBest",
+                        "kind": "LinkedField",
+                        "name": "personalBestEntries",
+                        "plural": true,
+                        "selections": [
+                          (v3/*: any*/),
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "lapTime",
+                            "storageKey": null
+                          },
+                          (v5/*: any*/),
+                          (v6/*: any*/)
+                        ],
                         "storageKey": null
                       },
-                      {
-                        "alias": null,
-                        "args": null,
-                        "kind": "ScalarField",
-                        "name": "personalBestWet",
-                        "storageKey": null
-                      },
-                      (v4/*: any*/)
+                      (v7/*: any*/)
                     ],
                     "storageKey": null
                   },
-                  (v5/*: any*/)
+                  (v8/*: any*/)
                 ],
                 "storageKey": null
               },
-              (v6/*: any*/)
+              (v9/*: any*/)
             ],
             "storageKey": "recentTracks(first:5)"
           },
@@ -262,13 +288,7 @@ return {
                         "name": "classification",
                         "storageKey": null
                       },
-                      {
-                        "alias": null,
-                        "args": null,
-                        "kind": "ScalarField",
-                        "name": "conditions",
-                        "storageKey": null
-                      },
+                      (v3/*: any*/),
                       {
                         "alias": null,
                         "args": null,
@@ -289,26 +309,8 @@ return {
                         ],
                         "storageKey": null
                       },
-                      {
-                        "alias": null,
-                        "args": null,
-                        "concreteType": "TrackLayout",
-                        "kind": "LinkedField",
-                        "name": "trackLayout",
-                        "plural": false,
-                        "selections": (v7/*: any*/),
-                        "storageKey": null
-                      },
-                      {
-                        "alias": null,
-                        "args": null,
-                        "concreteType": "Kart",
-                        "kind": "LinkedField",
-                        "name": "kart",
-                        "plural": false,
-                        "selections": (v7/*: any*/),
-                        "storageKey": null
-                      },
+                      (v6/*: any*/),
+                      (v5/*: any*/),
                       {
                         "alias": null,
                         "args": [
@@ -323,20 +325,26 @@ return {
                         "name": "laps",
                         "plural": true,
                         "selections": [
-                          (v3/*: any*/),
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "personalBest",
+                            "storageKey": null
+                          },
                           (v0/*: any*/)
                         ],
                         "storageKey": "laps(first:1)"
                       },
-                      (v4/*: any*/)
+                      (v7/*: any*/)
                     ],
                     "storageKey": null
                   },
-                  (v5/*: any*/)
+                  (v8/*: any*/)
                 ],
                 "storageKey": null
               },
-              (v6/*: any*/)
+              (v9/*: any*/)
             ],
             "storageKey": "recentTrackSessions(first:5)"
           },
@@ -355,12 +363,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "9624361351ca7bc2b7fb353ffd053e8a",
+    "cacheID": "13cc56c46d5dc18e80c179aa3d96c949",
     "id": null,
     "metadata": {},
     "name": "RequireAuthViewerQuery",
     "operationKind": "query",
-    "text": "query RequireAuthViewerQuery {\n  viewer {\n    ...HomePage_viewer\n    ...SiteHeader_viewer\n    id\n  }\n}\n\nfragment HomePage_viewer on User {\n  id\n  username\n  ...RecentTracksCard_viewer\n  ...RecentSessionsCard_viewer\n}\n\nfragment RecentSessionsCard_viewer on User {\n  id\n  recentTrackSessions(first: 5) {\n    edges {\n      node {\n        id\n        date\n        format\n        classification\n        conditions\n        notes\n        track {\n          name\n          id\n        }\n        trackLayout {\n          id\n          name\n        }\n        kart {\n          id\n          name\n        }\n        laps(first: 1) {\n          personalBest\n          id\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment RecentTracksCard_viewer on User {\n  id\n  recentTracks(first: 5) {\n    edges {\n      node {\n        id\n        name\n        heroImage\n        personalBest\n        personalBestDry\n        personalBestWet\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment SiteHeader_viewer on User {\n  id\n  username\n}\n"
+    "text": "query RequireAuthViewerQuery {\n  viewer {\n    ...HomePage_viewer\n    ...SiteHeader_viewer\n    id\n  }\n}\n\nfragment HomePage_viewer on User {\n  id\n  username\n  ...RecentTracksCard_viewer\n  ...RecentSessionsCard_viewer\n}\n\nfragment RecentSessionsCard_viewer on User {\n  id\n  recentTrackSessions(first: 5) {\n    edges {\n      node {\n        id\n        date\n        format\n        classification\n        conditions\n        notes\n        track {\n          name\n          id\n        }\n        trackLayout {\n          id\n          name\n        }\n        kart {\n          id\n          name\n        }\n        laps(first: 1) {\n          personalBest\n          id\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment RecentTracksCard_viewer on User {\n  id\n  recentTracks(first: 5) {\n    edges {\n      node {\n        id\n        name\n        heroImage\n        personalBestEntries {\n          conditions\n          lapTime\n          kart {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment SiteHeader_viewer on User {\n  id\n  username\n}\n"
   }
 };
 })();

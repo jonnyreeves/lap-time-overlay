@@ -29,3 +29,6 @@ components small/modular to stay under the 400-line guideline.
 - Tests live under `tests/web/graphql/resolvers/*`, mirroring the source filenames. Mock DB modules at the top of each test file and reset them per test. Use hoisted mocks (`vi.hoisted`) when needed to avoid import-order issues.
 - When adding fields or mutations, update the relevant resolver module and fragment/query documents, then run `npm run relay:codex` (included in `npm run check`).
 - Add targeted unit tests for new resolver behavior; avoid broad integration unless necessary. Always finish with `npm run check`.
+
+## Database and GraphQL API Migrations
+- The application is still in development - make breaking changes to the API and Database Schema as needed. You must inform the user when this has happened so they can reset their development database.

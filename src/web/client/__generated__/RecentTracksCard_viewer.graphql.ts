@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<29ad018b2a59f33deb5cab5ee475eb3a>>
+ * @generated SignedSource<<6a38aaae7b612a84b1af4e7497669a38>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -18,9 +18,18 @@ export type RecentTracksCard_viewer$data = {
         readonly heroImage: string | null | undefined;
         readonly id: string;
         readonly name: string;
-        readonly personalBest: number | null | undefined;
-        readonly personalBestDry: number | null | undefined;
-        readonly personalBestWet: number | null | undefined;
+        readonly personalBestEntries: ReadonlyArray<{
+          readonly conditions: string;
+          readonly kart: {
+            readonly id: string;
+            readonly name: string;
+          };
+          readonly lapTime: number;
+          readonly trackLayout: {
+            readonly id: string;
+            readonly name: string;
+          };
+        }>;
       };
     }>;
   };
@@ -38,7 +47,18 @@ var v0 = {
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
-};
+},
+v1 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "name",
+  "storageKey": null
+},
+v2 = [
+  (v0/*: any*/),
+  (v1/*: any*/)
+];
 return {
   "argumentDefinitions": [],
   "kind": "Fragment",
@@ -82,13 +102,7 @@ return {
               "plural": false,
               "selections": [
                 (v0/*: any*/),
-                {
-                  "alias": null,
-                  "args": null,
-                  "kind": "ScalarField",
-                  "name": "name",
-                  "storageKey": null
-                },
+                (v1/*: any*/),
                 {
                   "alias": null,
                   "args": null,
@@ -99,22 +113,46 @@ return {
                 {
                   "alias": null,
                   "args": null,
-                  "kind": "ScalarField",
-                  "name": "personalBest",
-                  "storageKey": null
-                },
-                {
-                  "alias": null,
-                  "args": null,
-                  "kind": "ScalarField",
-                  "name": "personalBestDry",
-                  "storageKey": null
-                },
-                {
-                  "alias": null,
-                  "args": null,
-                  "kind": "ScalarField",
-                  "name": "personalBestWet",
+                  "concreteType": "TrackPersonalBest",
+                  "kind": "LinkedField",
+                  "name": "personalBestEntries",
+                  "plural": true,
+                  "selections": [
+                    {
+                      "alias": null,
+                      "args": null,
+                      "kind": "ScalarField",
+                      "name": "conditions",
+                      "storageKey": null
+                    },
+                    {
+                      "alias": null,
+                      "args": null,
+                      "kind": "ScalarField",
+                      "name": "lapTime",
+                      "storageKey": null
+                    },
+                    {
+                      "alias": null,
+                      "args": null,
+                      "concreteType": "Kart",
+                      "kind": "LinkedField",
+                      "name": "kart",
+                      "plural": false,
+                      "selections": (v2/*: any*/),
+                      "storageKey": null
+                    },
+                    {
+                      "alias": null,
+                      "args": null,
+                      "concreteType": "TrackLayout",
+                      "kind": "LinkedField",
+                      "name": "trackLayout",
+                      "plural": false,
+                      "selections": (v2/*: any*/),
+                      "storageKey": null
+                    }
+                  ],
                   "storageKey": null
                 },
                 {
@@ -171,6 +209,6 @@ return {
 };
 })();
 
-(node as any).hash = "c6f653c88620e4196bc994e3bba84a52";
+(node as any).hash = "fee2b06d78fa7a9592766762dbfa392d";
 
 export default node;

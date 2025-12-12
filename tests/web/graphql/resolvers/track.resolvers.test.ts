@@ -10,7 +10,7 @@ describe("track resolver", () => {
     vi.clearAllMocks();
   });
 
-  it("returns the fastest lap per track and per conditions or null when no laps", async () => {
+  it("returns personal bests per kart, layout, and conditions for the current user", async () => {
     repositories.tracks.findAll.mockReturnValue([
       {
         id: "c1",
@@ -28,41 +28,78 @@ describe("track resolver", () => {
       },
     ]);
 
-    repositories.trackSessions.findByTrackId.mockImplementation((trackId: string) => {
-      if (trackId === "c1") {
-        return [
-          {
-            id: "s1",
-            date: "2024-01-01",
-            format: "Race",
-            classification: 2,
-            conditions: "Dry",
-            trackId: "c1",
-            userId: "user-1",
-            notes: null,
-            createdAt: 0,
-            updatedAt: 0,
-            kartId: null,
-            trackLayoutId: "l1",
-          },
-          {
-            id: "s2",
-            date: "2024-02-01",
-            format: "Practice",
-            classification: 5,
-            conditions: "Wet",
-            trackId: "c1",
-            userId: "user-2",
-            notes: null,
-            createdAt: 0,
-            updatedAt: 0,
-            kartId: null,
-            trackLayoutId: "l1",
-          },
-        ];
-      }
-      return [];
-    });
+    repositories.trackSessions.findByUserId.mockReturnValue([
+      {
+        id: "s1",
+        date: "2024-01-01",
+        format: "Race",
+        classification: 2,
+        conditions: "Dry",
+        trackId: "c1",
+        userId: "user-1",
+        notes: null,
+        createdAt: 0,
+        updatedAt: 0,
+        kartId: "k1",
+        trackLayoutId: "l1",
+      },
+      {
+        id: "s2",
+        date: "2024-02-01",
+        format: "Practice",
+        classification: 5,
+        conditions: "Wet",
+        trackId: "c1",
+        userId: "user-1",
+        notes: null,
+        createdAt: 0,
+        updatedAt: 0,
+        kartId: "k1",
+        trackLayoutId: "l1",
+      },
+      {
+        id: "s3",
+        date: "2024-02-10",
+        format: "Practice",
+        classification: 3,
+        conditions: "Dry",
+        trackId: "c1",
+        userId: "user-1",
+        notes: null,
+        createdAt: 0,
+        updatedAt: 0,
+        kartId: "k1",
+        trackLayoutId: "l1",
+      },
+      {
+        id: "s4",
+        date: "2024-03-01",
+        format: "Practice",
+        classification: 4,
+        conditions: "Dry",
+        trackId: "c1",
+        userId: "user-1",
+        notes: null,
+        createdAt: 0,
+        updatedAt: 0,
+        kartId: "k2",
+        trackLayoutId: "l2",
+      },
+      {
+        id: "s5",
+        date: "2024-04-01",
+        format: "Practice",
+        classification: 2,
+        conditions: "Dry",
+        trackId: "c2",
+        userId: "user-1",
+        notes: null,
+        createdAt: 0,
+        updatedAt: 0,
+        kartId: "k1",
+        trackLayoutId: "l3",
+      },
+    ]);
 
     repositories.laps.findBySessionId.mockImplementation((sessionId: string) => {
       if (sessionId === "s1") {
@@ -77,18 +114,93 @@ describe("track resolver", () => {
           { id: "l4", sessionId: "s2", lapNumber: 2, time: 79.5, createdAt: 0, updatedAt: 0 },
         ];
       }
+      if (sessionId === "s3") {
+        return [
+          { id: "l5", sessionId: "s3", lapNumber: 1, time: 73.2, createdAt: 0, updatedAt: 0 },
+          { id: "l6", sessionId: "s3", lapNumber: 2, time: 72.5, createdAt: 0, updatedAt: 0 },
+        ];
+      }
+      if (sessionId === "s4") {
+        return [
+          { id: "l7", sessionId: "s4", lapNumber: 1, time: 70.1, createdAt: 0, updatedAt: 0 },
+        ];
+      }
+      if (sessionId === "s5") {
+        return [
+          { id: "l8", sessionId: "s5", lapNumber: 1, time: 69.5, createdAt: 0, updatedAt: 0 },
+        ];
+      }
       return [];
     });
 
-    const tracks = rootValue.tracks({}, baseContext as never);
+    repositories.karts.findById.mockImplementation((kartId: string) => {
+      if (kartId === "k1") {
+        return { id: "k1", name: "Rotax", createdAt: 0, updatedAt: 0 };
+      }
+      if (kartId === "k2") {
+        return { id: "k2", name: "Sodi", createdAt: 0, updatedAt: 0 };
+      }
+      return null;
+    });
+
+    repositories.trackLayouts.findById.mockImplementation((layoutId: string) => {
+      if (layoutId === "l1") {
+        return { id: "l1", trackId: "c1", name: "GP", createdAt: 0, updatedAt: 0 };
+      }
+      if (layoutId === "l2") {
+        return { id: "l2", trackId: "c1", name: "Indy", createdAt: 0, updatedAt: 0 };
+      }
+      if (layoutId === "l3") {
+        return { id: "l3", trackId: "c2", name: "Full", createdAt: 0, updatedAt: 0 };
+      }
+      return null;
+    });
+
+    const tracks = rootValue.tracks({}, authenticatedContext as never);
     expect(tracks).toHaveLength(2);
 
-    expect(await tracks[0]?.personalBest()).toBeCloseTo(74.987, 3);
-    expect(await tracks[0]?.personalBestDry()).toBeCloseTo(74.987, 3);
-    expect(await tracks[0]?.personalBestWet()).toBeCloseTo(79.5, 3);
-    expect(await tracks[1]?.personalBest()).toBeNull();
-    expect(await tracks[1]?.personalBestDry()).toBeNull();
-    expect(await tracks[1]?.personalBestWet()).toBeNull();
+    const spaBests = await tracks[0]?.personalBestEntries();
+    expect(spaBests).toEqual([
+      expect.objectContaining({
+        conditions: "Dry",
+        lapTime: 72.5,
+        kart: expect.objectContaining({ id: "k1", name: "Rotax" }),
+        trackLayout: expect.objectContaining({ id: "l1", name: "GP" }),
+      }),
+      expect.objectContaining({
+        conditions: "Wet",
+        lapTime: 79.5,
+        kart: expect.objectContaining({ id: "k1", name: "Rotax" }),
+        trackLayout: expect.objectContaining({ id: "l1", name: "GP" }),
+      }),
+      expect.objectContaining({
+        conditions: "Dry",
+        lapTime: 70.1,
+        kart: expect.objectContaining({ id: "k2", name: "Sodi" }),
+        trackLayout: expect.objectContaining({ id: "l2", name: "Indy" }),
+      }),
+    ]);
+
+    const monzaBests = await tracks[1]?.personalBestEntries();
+    expect(monzaBests).toEqual([
+      expect.objectContaining({
+        conditions: "Dry",
+        lapTime: 69.5,
+        kart: expect.objectContaining({ id: "k1", name: "Rotax" }),
+        trackLayout: expect.objectContaining({ id: "l3", name: "Full" }),
+      }),
+    ]);
+  });
+
+  it("returns an empty list when no lap data exists", async () => {
+    repositories.tracks.findAll.mockReturnValue([
+      { id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 },
+    ]);
+
+    repositories.trackSessions.findByTrackId.mockReturnValue([]);
+
+    const tracks = rootValue.tracks({}, baseContext as never);
+    expect(await tracks[0]?.personalBestEntries()).toEqual([]);
   });
 
   it("createTrack rejects unauthenticated requests", () => {
