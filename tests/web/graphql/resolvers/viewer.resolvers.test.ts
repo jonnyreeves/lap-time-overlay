@@ -54,6 +54,21 @@ const tracks = {
   c2: { id: "c2", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 },
 };
 
+const lapsBySession: Record<string, Array<{ id: string; time: number }>> = {
+  s1: [
+    { id: "l1", time: 59 },
+    { id: "l2", time: 60 },
+  ],
+  s2: [
+    { id: "l3", time: 61 },
+    { id: "l4", time: 62 },
+  ],
+  s3: [
+    { id: "l5", time: 57 },
+    { id: "l6", time: 58 },
+  ],
+};
+
 describe("viewer resolver", () => {
   const { context, repositories } = createMockGraphQLContext({ currentUser: user });
 
@@ -66,7 +81,17 @@ describe("viewer resolver", () => {
       if (id === "l2") return { id, trackId: "c2", name: "Full", createdAt: 0, updatedAt: 0 };
       return null;
     });
-    repositories.laps.findBySessionId.mockReturnValue([]);
+    repositories.laps.findBySessionId.mockImplementation((sessionId: string) => {
+      const laps = lapsBySession[sessionId] ?? [];
+      return laps.map((lap, index) => ({
+        id: lap.id,
+        sessionId,
+        lapNumber: index + 1,
+        time: lap.time,
+        createdAt: 0,
+        updatedAt: 0,
+      }));
+    });
   });
 
   it("returns null when not authenticated", () => {
@@ -113,11 +138,33 @@ describe("viewer resolver", () => {
     expect(byFormat?.edges.map((edge) => edge.node.id)).toEqual(["s3"]);
   });
 
+  it("sorts recent track sessions when sort provided", () => {
+    const viewer = rootValue.viewer({}, context as never);
+    const byDateAsc = viewer?.recentTrackSessions({ first: 5, sort: "DATE_ASC" });
+    expect(byDateAsc?.edges.map((edge) => edge.node.id)).toEqual(["s1", "s2", "s3"]);
+
+    const byFastestLapAsc = viewer?.recentTrackSessions({ first: 5, sort: "FASTEST_LAP_ASC" });
+    expect(byFastestLapAsc?.edges.map((edge) => edge.node.id)).toEqual(["s3", "s1", "s2"]);
+
+    const byFastestLapDesc = viewer?.recentTrackSessions({
+      first: 5,
+      sort: "FASTEST_LAP_DESC",
+    });
+    expect(byFastestLapDesc?.edges.map((edge) => edge.node.id)).toEqual(["s2", "s1", "s3"]);
+  });
+
   it("rejects invalid conditions filter", () => {
     const viewer = rootValue.viewer({}, context as never);
     expect(() =>
       viewer?.recentTrackSessions({ first: 5, filter: { conditions: "Snow" } })
     ).toThrowError("conditions filter must be either Dry or Wet");
+  });
+
+  it("rejects invalid sort input", () => {
+    const viewer = rootValue.viewer({}, context as never);
+    expect(() =>
+      viewer?.recentTrackSessions({ first: 5, sort: "FASTEST" as never })
+    ).toThrowError("sort must be DATE_ASC, DATE_DESC, FASTEST_LAP_ASC, or FASTEST_LAP_DESC");
   });
 
   it("rejects invalid format filter", () => {

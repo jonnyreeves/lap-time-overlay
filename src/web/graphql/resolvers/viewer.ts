@@ -29,7 +29,14 @@ type RecentTrackSessionsArgs = {
   first?: number;
   after?: string;
   filter?: TrackSessionFilterArgs | null;
+  sort?: TrackSessionSort | null;
 };
+
+type TrackSessionSort =
+  | "DATE_ASC"
+  | "DATE_DESC"
+  | "FASTEST_LAP_ASC"
+  | "FASTEST_LAP_DESC";
 
 function normalizeConditionsFilter(conditions?: string | null): string | undefined {
   if (!conditions) return undefined;
@@ -50,6 +57,62 @@ function normalizeFormatFilter(format?: string | null): string | undefined {
   }
   throw new GraphQLError("format filter must be Practice, Qualifying, or Race", {
     extensions: { code: "VALIDATION_FAILED" },
+  });
+}
+
+function normalizeSort(sort?: TrackSessionSort | null): TrackSessionSort {
+  if (!sort) return "DATE_DESC";
+  if (
+    sort === "DATE_ASC" ||
+    sort === "DATE_DESC" ||
+    sort === "FASTEST_LAP_ASC" ||
+    sort === "FASTEST_LAP_DESC"
+  ) {
+    return sort;
+  }
+  throw new GraphQLError(
+    "sort must be DATE_ASC, DATE_DESC, FASTEST_LAP_ASC, or FASTEST_LAP_DESC",
+    {
+      extensions: { code: "VALIDATION_FAILED" },
+    }
+  );
+}
+
+function sortSessions(
+  sessions: ReturnType<typeof findTrackSessionsForUser>,
+  sort: TrackSessionSort,
+  repositories: GraphQLContext["repositories"]
+) {
+  if (sort === "DATE_DESC" || sort === "DATE_ASC") {
+    const multiplier = sort === "DATE_ASC" ? 1 : -1;
+    return [...sessions].sort(
+      (a, b) => multiplier * (new Date(a.date).getTime() - new Date(b.date).getTime())
+    );
+  }
+
+  const fastestLapBySession = new Map<string, number | null>();
+  const getFastestLap = (sessionId: string): number | null => {
+    if (fastestLapBySession.has(sessionId)) {
+      return fastestLapBySession.get(sessionId) ?? null;
+    }
+    const laps = repositories.laps.findBySessionId(sessionId);
+    if (!laps.length) {
+      fastestLapBySession.set(sessionId, null);
+      return null;
+    }
+    const fastest = Math.min(...laps.map((lap) => lap.time));
+    fastestLapBySession.set(sessionId, fastest);
+    return fastest;
+  };
+
+  const isAscending = sort === "FASTEST_LAP_ASC";
+  return [...sessions].sort((a, b) => {
+    const aLap = getFastestLap(a.id);
+    const bLap = getFastestLap(b.id);
+    if (aLap == null && bLap == null) return 0;
+    if (aLap == null) return 1;
+    if (bLap == null) return -1;
+    return isAscending ? aLap - bLap : bLap - aLap;
   });
 }
 
@@ -104,6 +167,7 @@ export const viewerResolvers = {
         const filter = args.filter;
         const normalizedConditions = normalizeConditionsFilter(filter?.conditions);
         const normalizedFormat = normalizeFormatFilter(filter?.format);
+        const normalizedSort = normalizeSort(args.sort);
         const trackIdFilter = filter?.trackId?.trim();
         const trackLayoutIdFilter = filter?.trackLayoutId?.trim();
         const kartIdFilter = filter?.kartId?.trim();
@@ -117,19 +181,21 @@ export const viewerResolvers = {
           return true;
         });
 
+        const sorted = sortSessions(filtered, normalizedSort, repositories);
+
         const first = typeof args.first === "number" && args.first > 0 ? args.first : 10;
         const afterId = args.after ? decodeCursor(args.after) : null;
-        const afterIndex = afterId ? filtered.findIndex((session) => session.id === afterId) : -1;
+        const afterIndex = afterId ? sorted.findIndex((session) => session.id === afterId) : -1;
         const startIndex = afterIndex >= 0 ? afterIndex + 1 : 0;
 
-        const slice = filtered.slice(startIndex, startIndex + first);
+        const slice = sorted.slice(startIndex, startIndex + first);
         const edges = slice.map((session) => ({
           cursor: encodeCursor(session.id),
           node: toTrackSessionPayload(session, repositories),
         }));
 
         const endIndex = startIndex + slice.length;
-        const hasNextPage = endIndex < filtered.length;
+        const hasNextPage = endIndex < sorted.length;
         const hasPreviousPage = startIndex > 0;
 
         return {

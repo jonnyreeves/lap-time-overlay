@@ -137,7 +137,12 @@ type User {
   username: String!
   createdAt: String!
   recentTracks(first: Int = 10, after: String): TrackConnection!
-  recentTrackSessions(first: Int = 10, after: String, filter: TrackSessionFilterInput): TrackSessionConnection!
+  recentTrackSessions(
+    first: Int = 10
+    after: String
+    filter: TrackSessionFilterInput
+    sort: TrackSessionSort = DATE_DESC
+  ): TrackSessionConnection!
 }
 
 type Track {
@@ -242,6 +247,13 @@ input TrackSessionFilterInput {
   kartId: ID
   conditions: String
   format: String
+}
+
+enum TrackSessionSort {
+  DATE_ASC
+  DATE_DESC
+  FASTEST_LAP_ASC
+  FASTEST_LAP_DESC
 }
 
 enum TrackRecordingStatus {

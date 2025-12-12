@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d405d7508bc95fb293a12692c7fef2fe>>
+ * @generated SignedSource<<afe8f63a31c4acb7999d803749382b5a>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -29,13 +29,11 @@ var v0 = [
     "name": "first"
   }
 ],
-v1 = [
-  {
-    "kind": "Variable",
-    "name": "first",
-    "variableName": "first"
-  }
-],
+v1 = {
+  "kind": "Variable",
+  "name": "first",
+  "variableName": "first"
+},
 v2 = {
   "alias": null,
   "args": null,
@@ -55,6 +53,14 @@ v4 = [
   (v3/*: any*/)
 ],
 v5 = [
+  (v1/*: any*/),
+  {
+    "kind": "Literal",
+    "name": "sort",
+    "value": "DATE_DESC"
+  }
+],
+v6 = [
   {
     "kind": "Literal",
     "name": "first",
@@ -69,7 +75,9 @@ return {
     "name": "listQuery",
     "selections": [
       {
-        "args": (v1/*: any*/),
+        "args": [
+          (v1/*: any*/)
+        ],
         "kind": "FragmentSpread",
         "name": "TrackSessionsTable_query"
       }
@@ -127,7 +135,7 @@ return {
           (v2/*: any*/),
           {
             "alias": null,
-            "args": (v1/*: any*/),
+            "args": (v5/*: any*/),
             "concreteType": "TrackSessionConnection",
             "kind": "LinkedField",
             "name": "recentTrackSessions",
@@ -217,7 +225,7 @@ return {
                       },
                       {
                         "alias": null,
-                        "args": (v5/*: any*/),
+                        "args": (v6/*: any*/),
                         "concreteType": "Lap",
                         "kind": "LinkedField",
                         "name": "laps",
@@ -236,7 +244,7 @@ return {
                       },
                       {
                         "alias": null,
-                        "args": (v5/*: any*/),
+                        "args": (v6/*: any*/),
                         "concreteType": "TrackRecording",
                         "kind": "LinkedField",
                         "name": "trackRecordings",
@@ -289,9 +297,10 @@ return {
           },
           {
             "alias": null,
-            "args": (v1/*: any*/),
+            "args": (v5/*: any*/),
             "filters": [
-              "filter"
+              "filter",
+              "sort"
             ],
             "handle": "connection",
             "key": "TrackSessionsTable_recentTrackSessions",
@@ -304,12 +313,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "556b44f2f3b5e4f0c15f1ecc03fc8854",
+    "cacheID": "7ecd7f327757efe68a6c8cfe1a2e263e",
     "id": null,
     "metadata": {},
     "name": "listQuery",
     "operationKind": "query",
-    "text": "query listQuery(\n  $first: Int = 20\n) {\n  ...TrackSessionsTable_query_3ASum4\n}\n\nfragment TrackSessionsTable_query_3ASum4 on Query {\n  tracks {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n  viewer {\n    id\n    recentTrackSessions(first: $first) {\n      edges {\n        cursor\n        node {\n          id\n          date\n          format\n          classification\n          conditions\n          track {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n          kart {\n            id\n            name\n          }\n          laps(first: 1) {\n            id\n            personalBest\n          }\n          trackRecordings(first: 1) {\n            id\n          }\n          __typename\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}\n"
+    "text": "query listQuery(\n  $first: Int = 20\n) {\n  ...TrackSessionsTable_query_3ASum4\n}\n\nfragment TrackSessionsTable_query_3ASum4 on Query {\n  tracks {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n  viewer {\n    id\n    recentTrackSessions(first: $first, sort: DATE_DESC) {\n      edges {\n        cursor\n        node {\n          id\n          date\n          format\n          classification\n          conditions\n          track {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n          kart {\n            id\n            name\n          }\n          laps(first: 1) {\n            id\n            personalBest\n          }\n          trackRecordings(first: 1) {\n            id\n          }\n          __typename\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}\n"
   }
 };
 })();

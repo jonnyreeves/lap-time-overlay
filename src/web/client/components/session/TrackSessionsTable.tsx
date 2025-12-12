@@ -9,6 +9,7 @@ import type {
 import type {
   TrackSessionsTable_query$key,
 } from "../../__generated__/TrackSessionsTable_query.graphql.js";
+import { getConditionsEmoji } from "../../utils/conditionsEmoji.js";
 import { formatStopwatchTime } from "../../utils/lapTime.js";
 import { Card } from "../Card.js";
 import { IconButton } from "../IconButton.js";
@@ -26,6 +27,13 @@ type Filters = {
   kartId: string;
   conditions: string;
   format: string;
+};
+
+type SortField = "date" | "fastestLap";
+type SortDirection = "asc" | "desc";
+type SortState = {
+  field: SortField;
+  direction: SortDirection;
 };
 
 const tableWrapperStyles = css`
@@ -267,6 +275,37 @@ const filterSelectStyles = css`
   }
 `;
 
+const sortableHeaderButtonStyles = css`
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+`;
+
+const activeSortHeaderStyles = css`
+  color: #0f172a;
+`;
+
+const sortArrowStyles = css`
+  font-size: 0.9rem;
+  color: #475569;
+`;
+
+const disabledSortArrowStyles = css`
+  color: #cbd5e1;
+`;
+
 const clearButtonStyles = css`
   justify-self: flex-end;
   padding: 9px 12px;
@@ -303,6 +342,7 @@ const TrackSessionsTableFragment = graphql`
     first: { type: "Int", defaultValue: 20 }
     after: { type: "String" }
     filter: { type: "TrackSessionFilterInput", defaultValue: null }
+    sort: { type: "TrackSessionSort", defaultValue: DATE_DESC }
   ) {
     tracks {
       id
@@ -318,8 +358,8 @@ const TrackSessionsTableFragment = graphql`
     }
     viewer {
       id
-      recentTrackSessions(first: $first, after: $after, filter: $filter)
-        @connection(key: "TrackSessionsTable_recentTrackSessions", filters: ["filter"]) {
+      recentTrackSessions(first: $first, after: $after, filter: $filter, sort: $sort)
+        @connection(key: "TrackSessionsTable_recentTrackSessions", filters: ["filter", "sort"]) {
         edges {
           cursor
           node {
@@ -372,6 +412,7 @@ export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Prop
     conditions: "",
     format: "",
   });
+  const [sortState, setSortState] = useState<SortState>({ field: "date", direction: "desc" });
   const tracks = data.tracks ?? [];
 
   const layoutToTrackId = useMemo(() => {
@@ -411,6 +452,44 @@ export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Prop
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [filters.trackId, tracks]);
 
+  const buildFilterInput = useCallback((merged: Filters) => {
+    const filterInput = {
+      ...(merged.trackId ? { trackId: merged.trackId } : null),
+      ...(merged.trackLayoutId ? { trackLayoutId: merged.trackLayoutId } : null),
+      ...(merged.kartId ? { kartId: merged.kartId } : null),
+      ...(merged.conditions ? { conditions: merged.conditions } : null),
+      ...(merged.format ? { format: merged.format } : null),
+    };
+    return Object.keys(filterInput).length ? filterInput : null;
+  }, []);
+
+  const toSortInput = useCallback(
+    (sort: SortState) =>
+      sort.field === "date"
+        ? sort.direction === "asc"
+          ? "DATE_ASC"
+          : "DATE_DESC"
+        : sort.direction === "asc"
+          ? "FASTEST_LAP_ASC"
+          : "FASTEST_LAP_DESC",
+    []
+  );
+
+  const refetchSessions = useCallback(
+    (nextFilters: Filters, nextSort: SortState) => {
+      refetch(
+        {
+          first: pageSize,
+          after: null,
+          filter: buildFilterInput(nextFilters),
+          sort: toSortInput(nextSort),
+        },
+        { fetchPolicy: "store-and-network" }
+      );
+    },
+    [buildFilterInput, pageSize, refetch, toSortInput]
+  );
+
   const applyFilter = useCallback(
     (nextPartial: Partial<Filters>) => {
       setFilters((current) => {
@@ -433,23 +512,28 @@ export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Prop
           if (!hasKart) merged.kartId = "";
         }
 
-        const filterInput = {
-          ...(merged.trackId ? { trackId: merged.trackId } : null),
-          ...(merged.trackLayoutId ? { trackLayoutId: merged.trackLayoutId } : null),
-          ...(merged.kartId ? { kartId: merged.kartId } : null),
-          ...(merged.conditions ? { conditions: merged.conditions } : null),
-          ...(merged.format ? { format: merged.format } : null),
-        };
-
-        refetch(
-          { first: pageSize, after: null, filter: Object.keys(filterInput).length ? filterInput : null },
-          { fetchPolicy: "store-and-network" }
-        );
+        refetchSessions(merged, sortState);
         return merged;
       });
     },
-    [layoutToTrackId, pageSize, refetch]
+    [layoutToTrackId, refetchSessions, sortState, tracks]
   );
+
+  const toggleSort = (field: SortField) => {
+    const defaultDirection: SortDirection = field === "fastestLap" ? "asc" : "desc";
+    const nextSort: SortState =
+      sortState.field === field
+        ? { field, direction: sortState.direction === "asc" ? "desc" : "asc" }
+        : { field, direction: defaultDirection };
+
+    setSortState(nextSort);
+    refetchSessions(filters, nextSort);
+  };
+
+  const getSortArrow = (field: SortField) => {
+    if (sortState.field !== field) return "↕";
+    return sortState.direction === "asc" ? "↑" : "↓";
+  };
 
   const isFilterActive = Boolean(
     filters.trackId || filters.trackLayoutId || filters.kartId || filters.conditions || filters.format
@@ -583,14 +667,54 @@ export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Prop
             <table css={tableStyles}>
               <thead>
                 <tr>
-                  <th style={{ minWidth: 180 }}>Date</th>
+                  <th style={{ minWidth: 180 }}>
+                    <button
+                      type="button"
+                      css={[
+                        sortableHeaderButtonStyles,
+                        sortState.field === "date" && activeSortHeaderStyles,
+                      ]}
+                      onClick={() => toggleSort("date")}
+                      aria-label={`Sort by date (${sortState.field === "date" ? sortState.direction : "desc"})`}
+                    >
+                      <span>Date</span>
+                      <span css={sortArrowStyles}>{getSortArrow("date")}</span>
+                    </button>
+                  </th>
                   <th>Track</th>
                   <th>Track Layout</th>
                   <th>Kart Type</th>
                   <th>Format</th>
-                  <th>Classification</th>
+                  <th>Pos.</th>
                   <th>Conditions</th>
-                  <th>Fastest Lap</th>
+                  <th>
+                    <button
+                      type="button"
+                      css={[
+                        sortableHeaderButtonStyles,
+                        sortState.field === "fastestLap" && activeSortHeaderStyles,
+                      ]}
+                      disabled={!filters.trackId}
+                      onClick={() => toggleSort("fastestLap")}
+                      aria-label={`Sort by fastest lap (${sortState.field === "fastestLap" ? sortState.direction : "asc"})`}
+                      title={
+                        filters.trackId
+                          ? undefined
+                          : "Select a track to enable fastest lap sorting"
+                      }
+                    >
+                      <span>Fastest Lap</span>
+                      <span
+                        css={[
+                          sortArrowStyles,
+                          !filters.trackId && disabledSortArrowStyles,
+                        ]}
+                        aria-hidden
+                      >
+                        {getSortArrow("fastestLap")}
+                      </span>
+                    </button>
+                  </th>
                   <th>Recording</th>
                 </tr>
               </thead>
@@ -607,6 +731,8 @@ export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Prop
                   const hasRecording = Boolean(session.trackRecordings?.length);
                   const formattedDate = format(new Date(session.date), "do MMM yyyy");
                   const formattedTime = format(new Date(session.date), "p");
+                  const conditionsLabel = session.conditions ?? "—";
+                  const conditionsEmoji = getConditionsEmoji(session.conditions);
 
                   return (
                     <tr key={session.id} onClick={() => navigate(`/session/${session.id}`)}>
@@ -638,8 +764,12 @@ export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Prop
                         <span css={[pillStyles, classificationPillStyles]}>{classification}</span>
                       </td>
                       <td>
-                        <span css={[pillStyles, conditionsPillStyles]}>
-                          {session.conditions ?? "—"}
+                        <span
+                          css={[pillStyles, conditionsPillStyles]}
+                          aria-label={session.conditions ?? "Conditions unknown"}
+                        >
+                          <span aria-hidden>{conditionsEmoji}</span>
+                          <span>{conditionsLabel}</span>
                         </span>
                       </td>
                       <td>

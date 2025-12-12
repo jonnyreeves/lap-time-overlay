@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<f69bae3f165aae14b5a287ff16f08f8f>>
+ * @generated SignedSource<<d02b261ffe9ff42c3a478fc6535baff7>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -116,6 +116,11 @@ return {
       "defaultValue": 20,
       "kind": "LocalArgument",
       "name": "first"
+    },
+    {
+      "defaultValue": "DATE_DESC",
+      "kind": "LocalArgument",
+      "name": "sort"
     }
   ],
   "kind": "Fragment",
@@ -192,6 +197,11 @@ return {
               "kind": "Variable",
               "name": "filter",
               "variableName": "filter"
+            },
+            {
+              "kind": "Variable",
+              "name": "sort",
+              "variableName": "sort"
             }
           ],
           "concreteType": "TrackSessionConnection",
@@ -362,6 +372,6 @@ return {
 };
 })();
 
-(node as any).hash = "24b456a823c38932a6b9f53a43a7a361";
+(node as any).hash = "4ea8fb05bb1ab22088e651c2de3ecc92";
 
 export default node;

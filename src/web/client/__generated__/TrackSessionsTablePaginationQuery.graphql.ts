@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<fc232f8f527e9bd9f77061dc195f039f>>
+ * @generated SignedSource<<d0b617041cfd9f33e1eacf4cd42a3b43>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,6 +10,7 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
+export type TrackSessionSort = "DATE_ASC" | "DATE_DESC" | "FASTEST_LAP_ASC" | "FASTEST_LAP_DESC" | "%future added value";
 export type TrackSessionFilterInput = {
   conditions?: string | null | undefined;
   format?: string | null | undefined;
@@ -21,6 +22,7 @@ export type TrackSessionsTablePaginationQuery$variables = {
   after?: string | null | undefined;
   filter?: TrackSessionFilterInput | null | undefined;
   first?: number | null | undefined;
+  sort?: TrackSessionSort | null | undefined;
 };
 export type TrackSessionsTablePaginationQuery$data = {
   readonly " $fragmentSpreads": FragmentRefs<"TrackSessionsTable_query">;
@@ -46,6 +48,11 @@ var v0 = [
     "defaultValue": 20,
     "kind": "LocalArgument",
     "name": "first"
+  },
+  {
+    "defaultValue": "DATE_DESC",
+    "kind": "LocalArgument",
+    "name": "sort"
   }
 ],
 v1 = [
@@ -63,6 +70,11 @@ v1 = [
     "kind": "Variable",
     "name": "first",
     "variableName": "first"
+  },
+  {
+    "kind": "Variable",
+    "name": "sort",
+    "variableName": "sort"
   }
 ],
 v2 = {
@@ -320,7 +332,8 @@ return {
             "alias": null,
             "args": (v1/*: any*/),
             "filters": [
-              "filter"
+              "filter",
+              "sort"
             ],
             "handle": "connection",
             "key": "TrackSessionsTable_recentTrackSessions",
@@ -333,16 +346,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "4229cea07be38e105c84a2970646f7bc",
+    "cacheID": "72270265b1188121a7962f9247cf9adc",
     "id": null,
     "metadata": {},
     "name": "TrackSessionsTablePaginationQuery",
     "operationKind": "query",
-    "text": "query TrackSessionsTablePaginationQuery(\n  $after: String\n  $filter: TrackSessionFilterInput = null\n  $first: Int = 20\n) {\n  ...TrackSessionsTable_query_G9cLv\n}\n\nfragment TrackSessionsTable_query_G9cLv on Query {\n  tracks {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n  viewer {\n    id\n    recentTrackSessions(first: $first, after: $after, filter: $filter) {\n      edges {\n        cursor\n        node {\n          id\n          date\n          format\n          classification\n          conditions\n          track {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n          kart {\n            id\n            name\n          }\n          laps(first: 1) {\n            id\n            personalBest\n          }\n          trackRecordings(first: 1) {\n            id\n          }\n          __typename\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}\n"
+    "text": "query TrackSessionsTablePaginationQuery(\n  $after: String\n  $filter: TrackSessionFilterInput = null\n  $first: Int = 20\n  $sort: TrackSessionSort = DATE_DESC\n) {\n  ...TrackSessionsTable_query_3JsJJ3\n}\n\nfragment TrackSessionsTable_query_3JsJJ3 on Query {\n  tracks {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n  viewer {\n    id\n    recentTrackSessions(first: $first, after: $after, filter: $filter, sort: $sort) {\n      edges {\n        cursor\n        node {\n          id\n          date\n          format\n          classification\n          conditions\n          track {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n          kart {\n            id\n            name\n          }\n          laps(first: 1) {\n            id\n            personalBest\n          }\n          trackRecordings(first: 1) {\n            id\n          }\n          __typename\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "24b456a823c38932a6b9f53a43a7a361";
+(node as any).hash = "4ea8fb05bb1ab22088e651c2de3ecc92";
 
 export default node;

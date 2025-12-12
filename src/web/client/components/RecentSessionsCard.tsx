@@ -4,6 +4,7 @@ import { graphql, useFragment } from "react-relay";
 import { Link, useNavigate } from "react-router-dom";
 import type { RecentSessionsCard_viewer$key } from "../__generated__/RecentSessionsCard_viewer.graphql.js";
 import { formatStopwatchTime } from "../utils/lapTime.js";
+import { getConditionsEmoji } from "../utils/conditionsEmoji.js";
 import { Card } from "./Card.js";
 import { IconButton } from "./IconButton.js";
 
@@ -80,6 +81,7 @@ const sessionRowStyles = css`
   border: 1px solid #e2e8f4;
   background: linear-gradient(135deg, #f9fbff, #f3f6ff);
   box-shadow: 0 8px 24px rgba(26, 32, 44, 0.06);
+  cursor: pointer;
 `;
 
 const sessionGridStyles = css`
@@ -283,12 +285,6 @@ const footerLinkStyles = css`
   }
 `;
 
-function getConditionsEmoji(conditions: string | null | undefined) {
-  if (conditions === "Dry") return "☀️";
-  if (conditions === "Wet") return "🌧️";
-  return "⛅️";
-}
-
 function getClassificationEmoji(classification: number | null) {
   if (classification === 1) return "🥇";
   if (classification === 2) return "🥈";
@@ -350,9 +346,22 @@ export function RecentSessionsCard({ viewer }: Props) {
             const hasKartName = Boolean(session.kart?.name);
             const trackLayoutName = session.trackLayout?.name;
             const trackLabel = trackLayoutName ? `${trackName} • ${trackLayoutName}` : trackName;
+            const sessionPath = `/session/${session.id}`;
 
             return (
-              <div key={session.id} css={sessionRowStyles}>
+              <div
+                key={session.id}
+                css={sessionRowStyles}
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate(sessionPath)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    navigate(sessionPath);
+                  }
+                }}
+              >
                 <div css={sessionGridStyles}>
                   <div css={fieldStackStyles}>
                     <span css={fieldLabelStyles}>Track Name</span>
