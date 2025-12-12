@@ -3,8 +3,8 @@ import { graphql, useFragment } from "react-relay";
 import {
   type RecentTracksCard_viewer$data,
   type RecentTracksCard_viewer$key,
-} from "../__generated__/RecentTracksCard_viewer.graphql.js";
-import { Card } from "./Card.js";
+} from "../../__generated__/RecentTracksCard_viewer.graphql.js";
+import { Card } from "../Card.js";
 import { useNavigate } from "react-router-dom";
 import { RecentTrackPersonalBestPill } from "./RecentTrackPersonalBestPill.js";
 

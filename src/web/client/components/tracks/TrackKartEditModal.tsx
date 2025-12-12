@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { graphql, useMutation } from "react-relay";
 import { css } from "@emotion/react";
-import { Modal } from "./Modal.tsx";
-import { inputStyles, primaryButtonStyles } from "./session/sessionOverviewStyles.ts";
-import { inlineActionButtonStyles } from "./inlineActionButtons.ts";
+import { Modal } from "../Modal.tsx";
+import { inputStyles, primaryButtonStyles } from "../session/sessionOverviewStyles.ts";
+import { inlineActionButtonStyles } from "../inlineActionButtons.ts";
 import type { TrackKartEditModalCreateKartMutation } from "src/web/client/__generated__/TrackKartEditModalCreateKartMutation.graphql.ts";
 import type { TrackKartEditModalUpdateKartMutation } from "src/web/client/__generated__/TrackKartEditModalUpdateKartMutation.graphql.ts";
 

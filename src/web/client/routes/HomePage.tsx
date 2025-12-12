@@ -3,8 +3,8 @@ import { Suspense } from "react";
 import { graphql, useFragment } from "react-relay";
 import { useOutletContext } from "react-router-dom";
 import type { HomePage_viewer$key } from "../__generated__/HomePage_viewer.graphql.js";
-import { RecentTracksCard } from "../components/RecentTracksCard.js";
 import { RecentSessionsCard } from "../components/RecentSessionsCard.js";
+import { RecentTracksCard } from "../components/tracks/RecentTracksCard.js";
 
 const HomePageFragment = graphql`
   fragment HomePage_viewer on User {

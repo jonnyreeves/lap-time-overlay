@@ -3,8 +3,8 @@ import { graphql, useLazyLoadQuery } from "react-relay";
 import { useParams } from "react-router-dom";
 import { TrackViewPageQuery as TrackViewPageQueryType } from "../../__generated__/TrackViewPageQuery.graphql";
 import { Card } from "../../components/Card.js";
-import { TrackKartsCard } from "../../components/TrackKartsCard.js";
-import { TrackLayoutCard } from "../../components/TrackLayoutCard.js";
+import { TrackKartsCard } from "../../components/tracks/TrackKartsCard.js";
+import { TrackLayoutCard } from "../../components/tracks/TrackLayoutCard.js";
 import { titleStyles } from "../../styles/typography.js";
 
 export const TRACK_VIEW_QUERY = graphql`

@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
-import { formatStopwatchTime } from "../utils/lapTime.js";
-import type { RecentTracksCard_viewer$data } from "../__generated__/RecentTracksCard_viewer.graphql.js";
+import { formatStopwatchTime } from "../../utils/lapTime.js";
+import type { RecentTracksCard_viewer$data } from "../../__generated__/RecentTracksCard_viewer.graphql.js";
 
 type PersonalBestEntry = NonNullable<
   NonNullable<

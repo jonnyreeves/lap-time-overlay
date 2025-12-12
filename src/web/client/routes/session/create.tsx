@@ -6,7 +6,7 @@ import { ConnectionHandler } from "relay-runtime";
 import { type create_tsxTracksQuery } from "../../__generated__/create_tsxTracksQuery.graphql.js";
 import { createTrackSessionMutation } from "../../__generated__/createTrackSessionMutation.graphql.js";
 import { Card } from "../../components/Card.js";
-import { CreateTrackModal } from "../../components/CreateTrackModal.js";
+import { CreateTrackModal } from "../../components/tracks/CreateTrackModal.js";
 import { IconButton } from "../../components/IconButton.js";
 import { ImportSessionModal } from "../../components/ImportSessionModal.js";
 import { LapInputsCard } from "../../components/LapInputsCard.js";

@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 import { useState } from "react";
 import { graphql, useMutation } from "react-relay";
-import { Modal } from "./Modal";
+import { Modal } from "../Modal";
 
 interface CreateTrackModalProps {
   isOpen: boolean;

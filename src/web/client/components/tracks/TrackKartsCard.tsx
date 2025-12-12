@@ -5,11 +5,11 @@ import type { TrackKartsCardRemoveKartFromTrackMutation } from "src/web/client/_
 import type { TrackKartsCardDeleteKartMutation } from "src/web/client/__generated__/TrackKartsCardDeleteKartMutation.graphql.ts";
 import type { TrackKartsCardUpdateKartNameMutation } from "src/web/client/__generated__/TrackKartsCardUpdateKartNameMutation.graphql.ts";
 import type { TrackKartsCard_track$key } from "src/web/client/__generated__/TrackKartsCard_track.graphql.ts";
-import { Card } from "./Card.tsx";
-import { IconButton } from "./IconButton.tsx";
+import { Card } from "../Card.tsx";
+import { IconButton } from "../IconButton.tsx";
 import { TrackKartEditModal } from "./TrackKartEditModal.js";
-import { dangerInlineActionButtonStyles, inlineActionButtonStyles, kartListStyles, kartRowStyles, largeInlineActionButtonStyles } from "./inlineActionButtons.ts";
-import { actionsRowStyles, primaryButtonStyles } from "./session/sessionOverviewStyles.ts";
+import { dangerInlineActionButtonStyles, inlineActionButtonStyles, kartListStyles, kartRowStyles, largeInlineActionButtonStyles } from "../inlineActionButtons.ts";
+import { actionsRowStyles, primaryButtonStyles } from "../session/sessionOverviewStyles.ts";
 
 const TrackKartsCardTrackFragment = graphql`
   fragment TrackKartsCard_track on Track {

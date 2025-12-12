@@ -3,11 +3,11 @@ import { graphql, useFragment, useMutation } from "react-relay";
 import type { TrackLayoutCardRemoveTrackLayoutFromTrackMutation } from "src/web/client/__generated__/TrackLayoutCardRemoveTrackLayoutFromTrackMutation.graphql.ts";
 import type { TrackLayoutCardUpdateTrackLayoutMutation } from "src/web/client/__generated__/TrackLayoutCardUpdateTrackLayoutMutation.graphql.ts";
 import type { TrackLayoutCard_track$key } from "src/web/client/__generated__/TrackLayoutCard_track.graphql.ts";
-import { Card } from "./Card.tsx";
-import { IconButton } from "./IconButton.tsx";
-import { inlineActionButtonStyles, kartListStyles, kartRowStyles, largeInlineActionButtonStyles } from "./inlineActionButtons.ts";
+import { Card } from "../Card.tsx";
+import { IconButton } from "../IconButton.tsx";
+import { inlineActionButtonStyles, kartListStyles, kartRowStyles, largeInlineActionButtonStyles } from "../inlineActionButtons.ts";
 import { TrackLayoutEditModal } from "./TrackLayoutEditModal.js";
-import { actionsRowStyles, primaryButtonStyles } from "./session/sessionOverviewStyles.ts";
+import { actionsRowStyles, primaryButtonStyles } from "../session/sessionOverviewStyles.ts";
 
 const TrackLayoutsFragment = graphql`
   fragment TrackLayoutCard_track on Track {

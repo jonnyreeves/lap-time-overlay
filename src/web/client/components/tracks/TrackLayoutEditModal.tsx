@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { graphql, useMutation } from "react-relay";
 import { css } from "@emotion/react";
-import { Modal } from "./Modal.tsx";
-import { inlineActionButtonStyles } from "./inlineActionButtons.ts";
+import { Modal } from "../Modal.tsx";
+import { inlineActionButtonStyles } from "../inlineActionButtons.ts";
 import type { TrackLayoutEditModalAddTrackLayoutToTrackMutation } from "src/web/client/__generated__/TrackLayoutEditModalAddTrackLayoutToTrackMutation.graphql.ts";
-import { inputStyles, primaryButtonStyles } from "./session/sessionOverviewStyles.ts";
+import { inputStyles, primaryButtonStyles } from "../session/sessionOverviewStyles.ts";
 
 type Props = {
   trackId: string;
