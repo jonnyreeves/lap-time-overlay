@@ -1,11 +1,11 @@
 import { css } from "@emotion/react";
 import { useEffect, useMemo, useState } from "react";
-import { parseSessionEmail } from "../utils/parseSessionEmail.js";
+import { formatLapTimeSeconds } from "../../utils/lapTime.js";
+import { parseSessionEmail } from "../../utils/parseSessionEmail.js";
 import {
   type ParsedSessionEmail,
   type SessionImportSelection,
-} from "../utils/sessionImportTypes.js";
-import { formatLapTimeSeconds } from "../utils/lapTime.js";
+} from "../../utils/sessionImportTypes.js";
 
 interface ImportSessionModalProps {
   isOpen: boolean;

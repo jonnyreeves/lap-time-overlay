@@ -1,6 +1,6 @@
 import { css, type SerializedStyles } from "@emotion/react";
-import type { LapFormRow } from "../hooks/useLapRows.js";
-import { Card } from "./Card.js";
+import type { LapFormRow } from "../../hooks/useLapRows.js";
+import { Card } from "../Card.js";
 
 type Props = {
   laps: LapFormRow[];

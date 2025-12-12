@@ -5,7 +5,8 @@ import { useLapRows, type LapInputPayload } from "../../hooks/useLapRows.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 import { Card } from "../Card.js";
 import { IconButton } from "../IconButton.js";
-import { LapInputsCard } from "../LapInputsCard.js";
+import { inlineActionButtonStyles } from "../inlineActionButtons.ts";
+import { LapInputsCard } from "./LapInputsCard.js";
 import {
   chevronOpenStyles,
   chevronStyles,
@@ -25,18 +26,17 @@ import {
   lapEventsPanelStyles,
   lapEventsPillStyles,
   lapHeaderStyles,
+  lapHelperTextStyles,
   lapRowStyles,
   lapTimeRowStyles,
   lapTitleRowStyles,
   lapToggleStyles,
   lapsListStyles,
-  lapHelperTextStyles,
 } from "./lapsStyles.js";
 import {
   actionsRowStyles,
   primaryButtonStyles,
 } from "./sessionOverviewStyles.js";
-import { inlineActionButtonStyles } from "../inlineActionButtons.ts";
 
 type LapEvent = {
   id: string;
