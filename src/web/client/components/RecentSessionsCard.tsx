@@ -261,6 +261,26 @@ const emptyStateStyles = css`
   color: #475569;
 `;
 
+const footerLinkRowStyles = css`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+`;
+
+const footerLinkStyles = css`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #536ad6;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+
+  &:hover {
+    color: #334ac0;
+  }
+`;
+
 function getConditionsEmoji(conditions: string | null | undefined) {
   if (conditions === "Dry") return "☀️";
   if (conditions === "Wet") return "🌧️";
@@ -406,6 +426,11 @@ export function RecentSessionsCard({ viewer }: Props) {
           })}
         </div>
       )}
+      <div css={footerLinkRowStyles}>
+        <Link to="/session" css={footerLinkStyles}>
+          View all sessions -&gt;
+        </Link>
+      </div>
     </Card>
   );
 }
