@@ -3,8 +3,8 @@ import { format } from "date-fns";
 import { graphql, useFragment } from "react-relay";
 import { Link, useNavigate } from "react-router-dom";
 import type { RecentSessionsCard_viewer$key } from "../__generated__/RecentSessionsCard_viewer.graphql.js";
-import { formatStopwatchTime } from "../utils/lapTime.js";
 import { getConditionsEmoji } from "../utils/conditionsEmoji.js";
+import { formatStopwatchTime } from "../utils/lapTime.js";
 import { Card } from "./Card.js";
 import { IconButton } from "./IconButton.js";
 
@@ -146,6 +146,7 @@ const kartPillStyles = css`
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
   padding: 8px 12px;
   border-radius: 10px;
   background: #f1f5fb;
@@ -427,7 +428,6 @@ export function RecentSessionsCard({ viewer }: Props) {
                     >
                       {personalBest ? (
                         <div css={pbContentStyles}>
-                          <span css={pbCaptionStyles}>Fastest lap</span>
                           <span>{personalBest}</span>
                         </div>
                       ) : (
