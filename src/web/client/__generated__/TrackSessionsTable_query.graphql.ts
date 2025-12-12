@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<98902eca825832a04934afb98829d29c>>
+ * @generated SignedSource<<f69bae3f165aae14b5a287ff16f08f8f>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,6 +11,18 @@
 import { ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type TrackSessionsTable_query$data = {
+  readonly tracks: ReadonlyArray<{
+    readonly id: string;
+    readonly karts: ReadonlyArray<{
+      readonly id: string;
+      readonly name: string;
+    }>;
+    readonly name: string;
+    readonly trackLayouts: ReadonlyArray<{
+      readonly id: string;
+      readonly name: string;
+    }>;
+  }>;
   readonly viewer: {
     readonly id: string;
     readonly recentTrackSessions: {
@@ -70,17 +82,18 @@ v1 = {
   "name": "id",
   "storageKey": null
 },
-v2 = [
-  (v1/*: any*/),
-  {
-    "alias": null,
-    "args": null,
-    "kind": "ScalarField",
-    "name": "name",
-    "storageKey": null
-  }
-],
+v2 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "name",
+  "storageKey": null
+},
 v3 = [
+  (v1/*: any*/),
+  (v2/*: any*/)
+],
+v4 = [
   {
     "kind": "Literal",
     "name": "first",
@@ -93,6 +106,11 @@ return {
       "defaultValue": null,
       "kind": "LocalArgument",
       "name": "after"
+    },
+    {
+      "defaultValue": null,
+      "kind": "LocalArgument",
+      "name": "filter"
     },
     {
       "defaultValue": 20,
@@ -128,6 +146,39 @@ return {
     {
       "alias": null,
       "args": null,
+      "concreteType": "Track",
+      "kind": "LinkedField",
+      "name": "tracks",
+      "plural": true,
+      "selections": [
+        (v1/*: any*/),
+        (v2/*: any*/),
+        {
+          "alias": null,
+          "args": null,
+          "concreteType": "Kart",
+          "kind": "LinkedField",
+          "name": "karts",
+          "plural": true,
+          "selections": (v3/*: any*/),
+          "storageKey": null
+        },
+        {
+          "alias": null,
+          "args": null,
+          "concreteType": "TrackLayout",
+          "kind": "LinkedField",
+          "name": "trackLayouts",
+          "plural": true,
+          "selections": (v3/*: any*/),
+          "storageKey": null
+        }
+      ],
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
       "concreteType": "User",
       "kind": "LinkedField",
       "name": "viewer",
@@ -136,7 +187,13 @@ return {
         (v1/*: any*/),
         {
           "alias": "recentTrackSessions",
-          "args": null,
+          "args": [
+            {
+              "kind": "Variable",
+              "name": "filter",
+              "variableName": "filter"
+            }
+          ],
           "concreteType": "TrackSessionConnection",
           "kind": "LinkedField",
           "name": "__TrackSessionsTable_recentTrackSessions_connection",
@@ -201,7 +258,7 @@ return {
                       "kind": "LinkedField",
                       "name": "track",
                       "plural": false,
-                      "selections": (v2/*: any*/),
+                      "selections": (v3/*: any*/),
                       "storageKey": null
                     },
                     {
@@ -211,7 +268,7 @@ return {
                       "kind": "LinkedField",
                       "name": "trackLayout",
                       "plural": false,
-                      "selections": (v2/*: any*/),
+                      "selections": (v3/*: any*/),
                       "storageKey": null
                     },
                     {
@@ -221,12 +278,12 @@ return {
                       "kind": "LinkedField",
                       "name": "kart",
                       "plural": false,
-                      "selections": (v2/*: any*/),
+                      "selections": (v3/*: any*/),
                       "storageKey": null
                     },
                     {
                       "alias": null,
-                      "args": (v3/*: any*/),
+                      "args": (v4/*: any*/),
                       "concreteType": "Lap",
                       "kind": "LinkedField",
                       "name": "laps",
@@ -245,7 +302,7 @@ return {
                     },
                     {
                       "alias": null,
-                      "args": (v3/*: any*/),
+                      "args": (v4/*: any*/),
                       "concreteType": "TrackRecording",
                       "kind": "LinkedField",
                       "name": "trackRecordings",
@@ -305,6 +362,6 @@ return {
 };
 })();
 
-(node as any).hash = "0bf6c5fb334a9f94d31699a6e708cc4a";
+(node as any).hash = "24b456a823c38932a6b9f53a43a7a361";
 
 export default node;

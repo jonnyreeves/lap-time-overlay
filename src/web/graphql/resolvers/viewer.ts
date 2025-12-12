@@ -1,3 +1,4 @@
+import { GraphQLError } from "graphql";
 import { toUserPayload } from "./auth.js";
 import { toTrackPayload } from "./track.js";
 import { findTrackSessionsForUser, toTrackSessionPayload } from "./trackSession.js";
@@ -14,6 +15,30 @@ function decodeCursor(cursor: string): string | null {
     console.warn("Invalid cursor provided to recentTrackSessions", err);
     return null;
   }
+}
+
+type TrackSessionFilterArgs = {
+  trackId?: string | null;
+  trackLayoutId?: string | null;
+  kartId?: string | null;
+  conditions?: string | null;
+};
+
+type RecentTrackSessionsArgs = {
+  first?: number;
+  after?: string;
+  filter?: TrackSessionFilterArgs | null;
+};
+
+function normalizeConditionsFilter(conditions?: string | null): string | undefined {
+  if (!conditions) return undefined;
+  const normalized = conditions.trim();
+  if (normalized === "Dry" || normalized === "Wet") {
+    return normalized;
+  }
+  throw new GraphQLError("conditions filter must be either Dry or Wet", {
+    extensions: { code: "VALIDATION_FAILED" },
+  });
 }
 
 export const viewerResolvers = {
@@ -62,21 +87,35 @@ export const viewerResolvers = {
           },
         };
       },
-      recentTrackSessions: (args: { first?: number; after?: string }) => {
+      recentTrackSessions: (args: RecentTrackSessionsArgs) => {
         const sessions = findTrackSessionsForUser(user.id, repositories);
+        const filter = args.filter;
+        const normalizedConditions = normalizeConditionsFilter(filter?.conditions);
+        const trackIdFilter = filter?.trackId?.trim();
+        const trackLayoutIdFilter = filter?.trackLayoutId?.trim();
+        const kartIdFilter = filter?.kartId?.trim();
+
+        const filtered = sessions.filter((session) => {
+          if (trackIdFilter && session.trackId !== trackIdFilter) return false;
+          if (trackLayoutIdFilter && session.trackLayoutId !== trackLayoutIdFilter) return false;
+          if (kartIdFilter && session.kartId !== kartIdFilter) return false;
+          if (normalizedConditions && session.conditions !== normalizedConditions) return false;
+          return true;
+        });
+
         const first = typeof args.first === "number" && args.first > 0 ? args.first : 10;
         const afterId = args.after ? decodeCursor(args.after) : null;
-        const afterIndex = afterId ? sessions.findIndex((session) => session.id === afterId) : -1;
+        const afterIndex = afterId ? filtered.findIndex((session) => session.id === afterId) : -1;
         const startIndex = afterIndex >= 0 ? afterIndex + 1 : 0;
 
-        const slice = sessions.slice(startIndex, startIndex + first);
+        const slice = filtered.slice(startIndex, startIndex + first);
         const edges = slice.map((session) => ({
           cursor: encodeCursor(session.id),
           node: toTrackSessionPayload(session, repositories),
         }));
 
         const endIndex = startIndex + slice.length;
-        const hasNextPage = endIndex < sessions.length;
+        const hasNextPage = endIndex < filtered.length;
         const hasPreviousPage = startIndex > 0;
 
         return {

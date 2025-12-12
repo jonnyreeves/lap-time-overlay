@@ -16,7 +16,7 @@ const mockSessions = [
     notes: null,
     createdAt: 0,
     updatedAt: 0,
-    kartId: null,
+    kartId: "kart-a",
     trackLayoutId: "l1",
   },
   {
@@ -30,7 +30,7 @@ const mockSessions = [
     notes: "fun",
     createdAt: 0,
     updatedAt: 0,
-    kartId: null,
+    kartId: "kart-b",
     trackLayoutId: "l2",
   },
   {
@@ -44,7 +44,7 @@ const mockSessions = [
     notes: null,
     createdAt: 0,
     updatedAt: 0,
-    kartId: null,
+    kartId: "kart-a",
     trackLayoutId: "l1",
   },
 ];
@@ -93,5 +93,27 @@ describe("viewer resolver", () => {
     const pagedSessions = await viewer?.recentTrackSessions({ first: 2, after: afterCursor });
     expect(pagedSessions?.edges.map((edge) => edge.node.id)).toEqual(["s1"]);
     expect(pagedSessions?.pageInfo).toMatchObject({ hasNextPage: false, hasPreviousPage: true });
+  });
+
+  it("filters recent track sessions by provided filters", async () => {
+    const viewer = rootValue.viewer({}, context as never);
+    const byTrack = viewer?.recentTrackSessions({ first: 5, filter: { trackId: "c1" } });
+    expect(byTrack?.edges.map((edge) => edge.node.id)).toEqual(["s3", "s1"]);
+
+    const byLayout = viewer?.recentTrackSessions({ first: 5, filter: { trackLayoutId: "l2" } });
+    expect(byLayout?.edges.map((edge) => edge.node.id)).toEqual(["s2"]);
+
+    const byKart = viewer?.recentTrackSessions({ first: 5, filter: { kartId: "kart-b" } });
+    expect(byKart?.edges.map((edge) => edge.node.id)).toEqual(["s2"]);
+
+    const byConditions = viewer?.recentTrackSessions({ first: 5, filter: { conditions: "Wet" } });
+    expect(byConditions?.edges.map((edge) => edge.node.id)).toEqual(["s2"]);
+  });
+
+  it("rejects invalid conditions filter", () => {
+    const viewer = rootValue.viewer({}, context as never);
+    expect(() =>
+      viewer?.recentTrackSessions({ first: 5, filter: { conditions: "Snow" } })
+    ).toThrowError("conditions filter must be either Dry or Wet");
   });
 });

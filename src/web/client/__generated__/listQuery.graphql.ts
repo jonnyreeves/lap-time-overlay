@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<0f3d7a869b18051ee541f710a7ec90dd>>
+ * @generated SignedSource<<d405d7508bc95fb293a12692c7fef2fe>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -43,17 +43,18 @@ v2 = {
   "name": "id",
   "storageKey": null
 },
-v3 = [
-  (v2/*: any*/),
-  {
-    "alias": null,
-    "args": null,
-    "kind": "ScalarField",
-    "name": "name",
-    "storageKey": null
-  }
-],
+v3 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "name",
+  "storageKey": null
+},
 v4 = [
+  (v2/*: any*/),
+  (v3/*: any*/)
+],
+v5 = [
   {
     "kind": "Literal",
     "name": "first",
@@ -82,6 +83,39 @@ return {
     "kind": "Operation",
     "name": "listQuery",
     "selections": [
+      {
+        "alias": null,
+        "args": null,
+        "concreteType": "Track",
+        "kind": "LinkedField",
+        "name": "tracks",
+        "plural": true,
+        "selections": [
+          (v2/*: any*/),
+          (v3/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "Kart",
+            "kind": "LinkedField",
+            "name": "karts",
+            "plural": true,
+            "selections": (v4/*: any*/),
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "TrackLayout",
+            "kind": "LinkedField",
+            "name": "trackLayouts",
+            "plural": true,
+            "selections": (v4/*: any*/),
+            "storageKey": null
+          }
+        ],
+        "storageKey": null
+      },
       {
         "alias": null,
         "args": null,
@@ -158,7 +192,7 @@ return {
                         "kind": "LinkedField",
                         "name": "track",
                         "plural": false,
-                        "selections": (v3/*: any*/),
+                        "selections": (v4/*: any*/),
                         "storageKey": null
                       },
                       {
@@ -168,7 +202,7 @@ return {
                         "kind": "LinkedField",
                         "name": "trackLayout",
                         "plural": false,
-                        "selections": (v3/*: any*/),
+                        "selections": (v4/*: any*/),
                         "storageKey": null
                       },
                       {
@@ -178,12 +212,12 @@ return {
                         "kind": "LinkedField",
                         "name": "kart",
                         "plural": false,
-                        "selections": (v3/*: any*/),
+                        "selections": (v4/*: any*/),
                         "storageKey": null
                       },
                       {
                         "alias": null,
-                        "args": (v4/*: any*/),
+                        "args": (v5/*: any*/),
                         "concreteType": "Lap",
                         "kind": "LinkedField",
                         "name": "laps",
@@ -202,7 +236,7 @@ return {
                       },
                       {
                         "alias": null,
-                        "args": (v4/*: any*/),
+                        "args": (v5/*: any*/),
                         "concreteType": "TrackRecording",
                         "kind": "LinkedField",
                         "name": "trackRecordings",
@@ -256,7 +290,9 @@ return {
           {
             "alias": null,
             "args": (v1/*: any*/),
-            "filters": null,
+            "filters": [
+              "filter"
+            ],
             "handle": "connection",
             "key": "TrackSessionsTable_recentTrackSessions",
             "kind": "LinkedHandle",
@@ -268,12 +304,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "b854089cb5fd579318d7bf5a9eda337d",
+    "cacheID": "556b44f2f3b5e4f0c15f1ecc03fc8854",
     "id": null,
     "metadata": {},
     "name": "listQuery",
     "operationKind": "query",
-    "text": "query listQuery(\n  $first: Int = 20\n) {\n  ...TrackSessionsTable_query_3ASum4\n}\n\nfragment TrackSessionsTable_query_3ASum4 on Query {\n  viewer {\n    id\n    recentTrackSessions(first: $first) {\n      edges {\n        cursor\n        node {\n          id\n          date\n          format\n          classification\n          conditions\n          track {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n          kart {\n            id\n            name\n          }\n          laps(first: 1) {\n            id\n            personalBest\n          }\n          trackRecordings(first: 1) {\n            id\n          }\n          __typename\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}\n"
+    "text": "query listQuery(\n  $first: Int = 20\n) {\n  ...TrackSessionsTable_query_3ASum4\n}\n\nfragment TrackSessionsTable_query_3ASum4 on Query {\n  tracks {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n  viewer {\n    id\n    recentTrackSessions(first: $first) {\n      edges {\n        cursor\n        node {\n          id\n          date\n          format\n          classification\n          conditions\n          track {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n          kart {\n            id\n            name\n          }\n          laps(first: 1) {\n            id\n            personalBest\n          }\n          trackRecordings(first: 1) {\n            id\n          }\n          __typename\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}\n"
   }
 };
 })();

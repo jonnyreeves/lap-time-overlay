@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import { format } from "date-fns";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { graphql, usePaginationFragment } from "react-relay";
 import { Link, useNavigate } from "react-router-dom";
 import type {
@@ -18,6 +18,13 @@ type Props = {
 };
 
 const DEFAULT_PAGE_SIZE = 20;
+
+type Filters = {
+  trackId: string;
+  trackLayoutId: string;
+  kartId: string;
+  conditions: string;
+};
 
 const tableWrapperStyles = css`
   overflow-x: auto;
@@ -196,6 +203,65 @@ const emptyStateStyles = css`
   color: #475569;
 `;
 
+const filterBarStyles = css`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+  align-items: end;
+`;
+
+const filterFieldStyles = css`
+  display: grid;
+  gap: 6px;
+`;
+
+const filterSelectStyles = css`
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f4;
+  background: #fff;
+  font-weight: 600;
+  color: #0f172a;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+
+  &:focus {
+    outline: none;
+    border-color: #5b6fe9;
+    box-shadow: 0 0 0 2px rgba(91, 111, 233, 0.15);
+  }
+
+  &:disabled {
+    background: #f8fafc;
+    color: #cbd5e1;
+    cursor: not-allowed;
+  }
+`;
+
+const clearButtonStyles = css`
+  justify-self: flex-end;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f4;
+  background: #f8fafc;
+  color: #111827;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
+
+  &:hover {
+    border-color: #cbd5e1;
+    background: #f1f5f9;
+  }
+`;
+
+const disabledHintStyles = css`
+  font-size: 0.8rem;
+  color: #94a3b8;
+`;
+
 function formatFastestLap(time: number | null | undefined): string | null {
   if (!Number.isFinite(time) || !time || time <= 0) return null;
   const formatted = formatStopwatchTime(time);
@@ -209,11 +275,24 @@ const TrackSessionsTableFragment = graphql`
   @argumentDefinitions(
     first: { type: "Int", defaultValue: 20 }
     after: { type: "String" }
+    filter: { type: "TrackSessionFilterInput", defaultValue: null }
   ) {
+    tracks {
+      id
+      name
+      karts {
+        id
+        name
+      }
+      trackLayouts {
+        id
+        name
+      }
+    }
     viewer {
       id
-      recentTrackSessions(first: $first, after: $after)
-        @connection(key: "TrackSessionsTable_recentTrackSessions") {
+      recentTrackSessions(first: $first, after: $after, filter: $filter)
+        @connection(key: "TrackSessionsTable_recentTrackSessions", filters: ["filter"]) {
         edges {
           cursor
           node {
@@ -254,10 +333,98 @@ const TrackSessionsTableFragment = graphql`
 
 export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Props) {
   const navigate = useNavigate();
-  const { data, loadNext, hasNext, isLoadingNext } = usePaginationFragment<
+  const { data, loadNext, hasNext, isLoadingNext, refetch } = usePaginationFragment<
     TrackSessionsTablePaginationQuery,
     TrackSessionsTable_query$key
   >(TrackSessionsTableFragment, query);
+
+  const [filters, setFilters] = useState<Filters>({
+    trackId: "",
+    trackLayoutId: "",
+    kartId: "",
+    conditions: "",
+  });
+  const tracks = data.tracks ?? [];
+
+  const layoutToTrackId = useMemo(() => {
+    const map = new Map<string, string>();
+    tracks.forEach((track) =>
+      (track.trackLayouts ?? []).forEach((layout) => {
+        map.set(layout.id, track.id);
+      })
+    );
+    return map;
+  }, [tracks]);
+
+  const trackOptions = useMemo(
+    () =>
+      tracks
+        .map((track) => ({ id: track.id, name: track.name }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [tracks]
+  );
+
+  const trackLayoutOptions = useMemo(() => {
+    if (!filters.trackId) return [];
+    const track = tracks.find((t) => t.id === filters.trackId);
+    return (track?.trackLayouts ?? [])
+      .map((layout) => ({
+        id: layout.id,
+        name: layout.name,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [filters.trackId, tracks]);
+
+  const kartOptions = useMemo(() => {
+    if (!filters.trackId) return [];
+    const track = tracks.find((t) => t.id === filters.trackId);
+    return (track?.karts ?? [])
+      .map((kart) => ({ id: kart.id, name: kart.name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [filters.trackId, tracks]);
+
+  const applyFilter = useCallback(
+    (nextPartial: Partial<Filters>) => {
+      setFilters((current) => {
+        const merged: Filters = { ...current, ...nextPartial };
+        const targetTrack = nextPartial.trackId ?? merged.trackId;
+        if (
+          targetTrack &&
+          merged.trackLayoutId &&
+          layoutToTrackId.get(merged.trackLayoutId) !== targetTrack
+        ) {
+          merged.trackLayoutId = "";
+        }
+        if (nextPartial.trackId !== undefined && !nextPartial.trackId) {
+          merged.trackLayoutId = "";
+          merged.kartId = "";
+        }
+        if (nextPartial.trackId && merged.kartId) {
+          const track = tracks.find((t) => t.id === nextPartial.trackId);
+          const hasKart = (track?.karts ?? []).some((kart) => kart.id === merged.kartId);
+          if (!hasKart) merged.kartId = "";
+        }
+
+        const filterInput = {
+          ...(merged.trackId ? { trackId: merged.trackId } : null),
+          ...(merged.trackLayoutId ? { trackLayoutId: merged.trackLayoutId } : null),
+          ...(merged.kartId ? { kartId: merged.kartId } : null),
+          ...(merged.conditions ? { conditions: merged.conditions } : null),
+        };
+
+        refetch(
+          { first: pageSize, after: null, filter: Object.keys(filterInput).length ? filterInput : null },
+          { fetchPolicy: "store-and-network" }
+        );
+        return merged;
+      });
+    },
+    [layoutToTrackId, pageSize, refetch]
+  );
+
+  const isFilterActive = Boolean(
+    filters.trackId || filters.trackLayoutId || filters.kartId || filters.conditions
+  );
 
   const sessions = useMemo(
     () =>
@@ -281,6 +448,80 @@ export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Prop
         </Link>
       }
     >
+      <div css={filterBarStyles}>
+        <label css={filterFieldStyles}>
+          <span css={subtleMetaStyles}>Track</span>
+          <select
+            css={filterSelectStyles}
+            value={filters.trackId}
+            onChange={(event) => applyFilter({ trackId: event.target.value })}
+          >
+            <option value="">All tracks</option>
+            {trackOptions.map((track) => (
+              <option key={track.id} value={track.id}>
+                {track.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label css={filterFieldStyles}>
+          <span css={subtleMetaStyles}>Track layout</span>
+          <select
+            css={filterSelectStyles}
+            value={filters.trackLayoutId}
+            onChange={(event) => applyFilter({ trackLayoutId: event.target.value })}
+            disabled={!filters.trackId}
+            title={filters.trackId ? undefined : "Select a track to filter by layout"}
+          >
+            <option value="">All layouts</option>
+            {trackLayoutOptions.map((layout) => (
+              <option key={layout.id} value={layout.id}>
+                {layout.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label css={filterFieldStyles}>
+          <span css={subtleMetaStyles}>Kart type</span>
+          <select
+            css={filterSelectStyles}
+            value={filters.kartId}
+            onChange={(event) => applyFilter({ kartId: event.target.value })}
+            disabled={!filters.trackId}
+            title={filters.trackId ? undefined : "Select a track to filter by kart"}
+          >
+            <option value="">All karts</option>
+            {kartOptions.map((kart) => (
+              <option key={kart.id} value={kart.id}>
+                {kart.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label css={filterFieldStyles}>
+          <span css={subtleMetaStyles}>Conditions</span>
+          <select
+            css={filterSelectStyles}
+            value={filters.conditions}
+            onChange={(event) => applyFilter({ conditions: event.target.value })}
+          >
+            <option value="">All</option>
+            <option value="Dry">Dry</option>
+            <option value="Wet">Wet</option>
+          </select>
+        </label>
+        <button
+          type="button"
+          css={clearButtonStyles}
+          onClick={() =>
+            applyFilter({ trackId: "", trackLayoutId: "", kartId: "", conditions: "" })
+          }
+          disabled={!isFilterActive}
+        >
+          Clear filters
+        </button>
+      </div>
+
       {sessions.length === 0 ? (
         <div css={emptyStateStyles}>No sessions yet. Start by adding your first one.</div>
       ) : (

@@ -137,7 +137,7 @@ type User {
   username: String!
   createdAt: String!
   recentTracks(first: Int = 10, after: String): TrackConnection!
-  recentTrackSessions(first: Int = 10, after: String): TrackSessionConnection!
+  recentTrackSessions(first: Int = 10, after: String, filter: TrackSessionFilterInput): TrackSessionConnection!
 }
 
 type Track {
@@ -234,6 +234,13 @@ type LapEvent {
   value: String!
   createdAt: String!
   updatedAt: String!
+}
+
+input TrackSessionFilterInput {
+  trackId: ID
+  trackLayoutId: ID
+  kartId: ID
+  conditions: String
 }
 
 enum TrackRecordingStatus {

@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 
 export const shellStyles = css`
-  max-width: 960px;
+  max-width: 1240px;
   margin: 0 auto;
   padding: 72px 20px 96px;
   display: flex;
