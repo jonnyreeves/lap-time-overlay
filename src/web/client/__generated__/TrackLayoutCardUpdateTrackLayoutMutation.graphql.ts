@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<cd08f824b895ed273319e17e78f492d7>>
+ * @generated SignedSource<<37a7d76562b7f8020abeef92d4cdc8b6>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -19,11 +19,11 @@ export type TrackLayoutCardUpdateTrackLayoutMutation$variables = {
 export type TrackLayoutCardUpdateTrackLayoutMutation$data = {
   readonly updateTrackLayout: {
     readonly trackLayout: {
-      readonly circuit: {
-        readonly id: string;
-      };
       readonly id: string;
       readonly name: string;
+      readonly track: {
+        readonly id: string;
+      };
     };
   };
 };
@@ -81,9 +81,9 @@ v2 = [
           {
             "alias": null,
             "args": null,
-            "concreteType": "Circuit",
+            "concreteType": "Track",
             "kind": "LinkedField",
-            "name": "circuit",
+            "name": "track",
             "plural": false,
             "selections": [
               (v1/*: any*/)
@@ -115,16 +115,16 @@ return {
     "selections": (v2/*: any*/)
   },
   "params": {
-    "cacheID": "37c76247b26bbbf44f95b97df49c048c",
+    "cacheID": "7a2521f0a18fd87b3b5a712bf038e738",
     "id": null,
     "metadata": {},
     "name": "TrackLayoutCardUpdateTrackLayoutMutation",
     "operationKind": "mutation",
-    "text": "mutation TrackLayoutCardUpdateTrackLayoutMutation(\n  $input: UpdateTrackLayoutInput!\n) {\n  updateTrackLayout(input: $input) {\n    trackLayout {\n      id\n      name\n      circuit {\n        id\n      }\n    }\n  }\n}\n"
+    "text": "mutation TrackLayoutCardUpdateTrackLayoutMutation(\n  $input: UpdateTrackLayoutInput!\n) {\n  updateTrackLayout(input: $input) {\n    trackLayout {\n      id\n      name\n      track {\n        id\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "0fe18e01ee9523219a8c9239ab6a820f";
+(node as any).hash = "74bd0dfbda489f1a5174b5794dc274b4";
 
 export default node;

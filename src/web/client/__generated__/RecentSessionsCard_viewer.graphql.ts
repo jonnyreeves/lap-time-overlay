@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<7b594eaabbd4d00060f17c38dbd5bee4>>
+ * @generated SignedSource<<d2553a0e697e8bc11c5f41d10105f277>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -145,11 +145,11 @@ return {
                   "storageKey": null
                 },
                 {
-                  "alias": "track",
+                  "alias": null,
                   "args": null,
-                  "concreteType": "Circuit",
+                  "concreteType": "Track",
                   "kind": "LinkedField",
-                  "name": "circuit",
+                  "name": "track",
                   "plural": false,
                   "selections": [
                     (v1/*: any*/),
@@ -256,6 +256,6 @@ return {
 };
 })();
 
-(node as any).hash = "1d0e98cf41dbca73f0663d92af51dc75";
+(node as any).hash = "9c2f5e3f16540b018f10adffd81da6d4";
 
 export default node;

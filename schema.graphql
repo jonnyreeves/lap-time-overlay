@@ -1,19 +1,19 @@
 type Query {
   viewer: User
-  circuits: [Circuit!]!
+  tracks: [Track!]!
   trackSession(id: ID!): TrackSession!
-  circuit(id: ID!): Circuit
+  track(id: ID!): Track
 }
 
-input CreateCircuitInput {
+input CreateTrackInput {
   name: String!
   heroImage: String
   karts: [CreateKartInput!]!
   trackLayouts: [CreateTrackLayoutInput!]!
 }
 
-type CreateCircuitPayload {
-  circuit: Circuit!
+type CreateTrackPayload {
+  track: Track!
 }
 
 input LapInput {
@@ -33,7 +33,6 @@ input CreateTrackSessionInput {
   format: String!
   classification: Int!
   conditions: String
-  circuitId: ID
   trackId: ID
   kartId: ID!
   trackLayoutId: ID!
@@ -51,7 +50,6 @@ input UpdateTrackSessionInput {
   format: String
   classification: Int
   conditions: String
-  circuitId: ID
   trackId: ID
   kartId: ID
   trackLayoutId: ID
@@ -109,7 +107,7 @@ type Mutation {
   register(input: AuthInput!): AuthPayload!
   login(input: AuthInput!): AuthPayload!
   logout: LogoutResult!
-  createCircuit(input: CreateCircuitInput!): CreateCircuitPayload!
+  createTrack(input: CreateTrackInput!): CreateTrackPayload!
   createTrackSession(input: CreateTrackSessionInput!): CreateTrackSessionPayload!
   updateTrackSession(input: UpdateTrackSessionInput!): UpdateTrackSessionPayload!
   updateTrackSessionLaps(input: UpdateTrackSessionLapsInput!): UpdateTrackSessionLapsPayload!
@@ -122,11 +120,11 @@ type Mutation {
   createKart(input: CreateKartInput!): CreateKartPayload!
   updateKart(input: UpdateKartInput!): UpdateKartPayload!
   deleteKart(id: ID!): DeleteKartPayload!
-  addKartToCircuit(circuitId: ID!, kartId: ID!): AddKartToCircuitPayload!
-  removeKartFromCircuit(circuitId: ID!, kartId: ID!): RemoveKartFromCircuitPayload!
-  addTrackLayoutToCircuit(circuitId: ID!, input: CreateTrackLayoutInput!): AddTrackLayoutToCircuitPayload!
+  addKartToTrack(trackId: ID!, kartId: ID!): AddKartToTrackPayload!
+  removeKartFromTrack(trackId: ID!, kartId: ID!): RemoveKartFromTrackPayload!
+  addTrackLayoutToTrack(trackId: ID!, input: CreateTrackLayoutInput!): AddTrackLayoutToTrackPayload!
   updateTrackLayout(input: UpdateTrackLayoutInput!): UpdateTrackLayoutPayload!
-  removeTrackLayoutFromCircuit(circuitId: ID!, trackLayoutId: ID!): RemoveTrackLayoutFromCircuitPayload!
+  removeTrackLayoutFromTrack(trackId: ID!, trackLayoutId: ID!): RemoveTrackLayoutFromTrackPayload!
 }
 
 input AuthInput {
@@ -138,11 +136,11 @@ type User {
   id: ID!
   username: String!
   createdAt: String!
-  recentCircuits(first: Int = 10, after: String): CircuitConnection!
+  recentTracks(first: Int = 10, after: String): TrackConnection!
   recentTrackSessions(first: Int = 10, after: String): TrackSessionConnection!
 }
 
-type Circuit {
+type Track {
   id: ID!
   name: String!
   heroImage: String
@@ -163,18 +161,18 @@ type Kart {
 type TrackLayout {
   id: ID!
   name: String!
-  circuit: Circuit!
+  track: Track!
   createdAt: String!
   updatedAt: String!
 }
 
-type CircuitEdge {
+type TrackEdge {
   cursor: String!
-  node: Circuit!
+  node: Track!
 }
 
-type CircuitConnection {
-  edges: [CircuitEdge!]!
+type TrackConnection {
+  edges: [TrackEdge!]!
   pageInfo: PageInfo!
 }
 
@@ -184,7 +182,7 @@ type TrackSession {
   format: String!
   classification: Int!
   conditions: String!
-  circuit: Circuit!
+  track: Track!
   trackLayout: TrackLayout!
   kart: Kart
   notes: String
@@ -324,22 +322,22 @@ type DeleteKartPayload {
   success: Boolean!
 }
 
-type AddKartToCircuitPayload {
-  circuit: Circuit!
+type AddKartToTrackPayload {
+  track: Track!
   kart: Kart!
 }
 
-type RemoveKartFromCircuitPayload {
-  circuit: Circuit!
+type RemoveKartFromTrackPayload {
+  track: Track!
   kart: Kart!
 }
 
-type AddTrackLayoutToCircuitPayload {
-  circuit: Circuit!
+type AddTrackLayoutToTrackPayload {
+  track: Track!
   trackLayout: TrackLayout!
 }
 
-type RemoveTrackLayoutFromCircuitPayload {
-  circuit: Circuit!
+type RemoveTrackLayoutFromTrackPayload {
+  track: Track!
   trackLayout: TrackLayout!
 }

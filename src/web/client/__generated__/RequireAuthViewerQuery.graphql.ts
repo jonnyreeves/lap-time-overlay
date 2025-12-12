@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<774599a02f25acaf0c746f27fba0647a>>
+ * @generated SignedSource<<d51cb3c8a3c9ffd2f0b803a521fd0396>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -148,17 +148,17 @@ return {
             "storageKey": null
           },
           {
-            "alias": "recentTracks",
+            "alias": null,
             "args": (v1/*: any*/),
-            "concreteType": "CircuitConnection",
+            "concreteType": "TrackConnection",
             "kind": "LinkedField",
-            "name": "recentCircuits",
+            "name": "recentTracks",
             "plural": false,
             "selections": [
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "CircuitEdge",
+                "concreteType": "TrackEdge",
                 "kind": "LinkedField",
                 "name": "edges",
                 "plural": true,
@@ -166,7 +166,7 @@ return {
                   {
                     "alias": null,
                     "args": null,
-                    "concreteType": "Circuit",
+                    "concreteType": "Track",
                     "kind": "LinkedField",
                     "name": "node",
                     "plural": false,
@@ -205,16 +205,16 @@ return {
               },
               (v6/*: any*/)
             ],
-            "storageKey": "recentCircuits(first:5)"
+            "storageKey": "recentTracks(first:5)"
           },
           {
-            "alias": "recentTracks",
+            "alias": null,
             "args": (v1/*: any*/),
             "filters": null,
             "handle": "connection",
             "key": "RecentTracksCard_recentTracks",
             "kind": "LinkedHandle",
-            "name": "recentCircuits"
+            "name": "recentTracks"
           },
           {
             "alias": null,
@@ -277,11 +277,11 @@ return {
                         "storageKey": null
                       },
                       {
-                        "alias": "track",
+                        "alias": null,
                         "args": null,
-                        "concreteType": "Circuit",
+                        "concreteType": "Track",
                         "kind": "LinkedField",
-                        "name": "circuit",
+                        "name": "track",
                         "plural": false,
                         "selections": [
                           (v2/*: any*/),
@@ -355,12 +355,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "dca9e6f0fabb788cce0a3069d72caa10",
+    "cacheID": "9624361351ca7bc2b7fb353ffd053e8a",
     "id": null,
     "metadata": {},
     "name": "RequireAuthViewerQuery",
     "operationKind": "query",
-    "text": "query RequireAuthViewerQuery {\n  viewer {\n    ...HomePage_viewer\n    ...SiteHeader_viewer\n    id\n  }\n}\n\nfragment HomePage_viewer on User {\n  id\n  username\n  ...RecentTracksCard_viewer\n  ...RecentSessionsCard_viewer\n}\n\nfragment RecentSessionsCard_viewer on User {\n  id\n  recentTrackSessions(first: 5) {\n    edges {\n      node {\n        id\n        date\n        format\n        classification\n        conditions\n        notes\n        track: circuit {\n          name\n          id\n        }\n        trackLayout {\n          id\n          name\n        }\n        kart {\n          id\n          name\n        }\n        laps(first: 1) {\n          personalBest\n          id\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment RecentTracksCard_viewer on User {\n  id\n  recentTracks: recentCircuits(first: 5) {\n    edges {\n      node {\n        id\n        name\n        heroImage\n        personalBest\n        personalBestDry\n        personalBestWet\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment SiteHeader_viewer on User {\n  id\n  username\n}\n"
+    "text": "query RequireAuthViewerQuery {\n  viewer {\n    ...HomePage_viewer\n    ...SiteHeader_viewer\n    id\n  }\n}\n\nfragment HomePage_viewer on User {\n  id\n  username\n  ...RecentTracksCard_viewer\n  ...RecentSessionsCard_viewer\n}\n\nfragment RecentSessionsCard_viewer on User {\n  id\n  recentTrackSessions(first: 5) {\n    edges {\n      node {\n        id\n        date\n        format\n        classification\n        conditions\n        notes\n        track {\n          name\n          id\n        }\n        trackLayout {\n          id\n          name\n        }\n        kart {\n          id\n          name\n        }\n        laps(first: 1) {\n          personalBest\n          id\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment RecentTracksCard_viewer on User {\n  id\n  recentTracks(first: 5) {\n    edges {\n      node {\n        id\n        name\n        heroImage\n        personalBest\n        personalBestDry\n        personalBestWet\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment SiteHeader_viewer on User {\n  id\n  username\n}\n"
   }
 };
 })();

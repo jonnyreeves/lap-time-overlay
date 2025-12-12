@@ -16,21 +16,21 @@ const RecentSessionsCardFragment = graphql`
           id
           date
           format
-        classification
-        conditions
-        notes
-        track: circuit {
-          name
-          id
-        }
-        trackLayout {
-          id
-          name
-        }
-        kart {
-          id
-          name
-        }
+          classification
+          conditions
+          notes
+          track {
+            name
+            id
+          }
+          trackLayout {
+            id
+            name
+          }
+          kart {
+            id
+            name
+          }
           laps(first: 1) {
             personalBest
             id

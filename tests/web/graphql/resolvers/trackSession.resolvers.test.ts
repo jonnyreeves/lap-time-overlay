@@ -74,13 +74,13 @@ describe("trackSession resolvers", () => {
 
     const payload = rootValue.trackSession({ id: "s1" }, context);
     expect(payload.id).toBe("s1");
-    expect(await payload.circuit()).toMatchObject({ id: "c1", name: "Spa" });
+    expect(await payload.track()).toMatchObject({ id: "c1", name: "Spa" });
     expect((await payload.laps({ first: 10 })).length).toBe(1);
   });
 
   it("createTrackSession validates required fields", async () => {
     expect(() => rootValue.createTrackSession({ input: {} }, context)).toThrowError(
-      "Date, format, trackId (or circuitId), trackLayoutId, kartId, and classification are required"
+      "Date, format, trackId, trackLayoutId, kartId, and classification are required"
     );
   });
 

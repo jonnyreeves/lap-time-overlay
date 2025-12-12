@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<dcf25197c8b8dae26218c03e86f1c509>>
+ * @generated SignedSource<<ff7529437614d149f22688e8b5b22bf3>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -50,11 +50,11 @@ v2 = [
 ],
 v3 = [
   {
-    "alias": "tracks",
+    "alias": null,
     "args": null,
-    "concreteType": "Circuit",
+    "concreteType": "Track",
     "kind": "LinkedField",
-    "name": "circuits",
+    "name": "tracks",
     "plural": true,
     "selections": [
       (v0/*: any*/),
@@ -101,16 +101,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "eb8fd7a2ec63fcc608c34264dd523077",
+    "cacheID": "d9a13e80b3e60ef1a06d01f1b8b30df2",
     "id": null,
     "metadata": {},
     "name": "create_tsxTracksQuery",
     "operationKind": "query",
-    "text": "query create_tsxTracksQuery {\n  tracks: circuits {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n}\n"
+    "text": "query create_tsxTracksQuery {\n  tracks {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "03851b9df60f446cfdfd3fcfaceb3343";
+(node as any).hash = "5182e98dc041c538a451f6d972971df7";
 
 export default node;

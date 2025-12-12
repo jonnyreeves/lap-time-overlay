@@ -9,11 +9,11 @@ import { titleStyles } from "../../styles/typography.js";
 
 export const TRACK_VIEW_QUERY = graphql`
   query TrackViewPageQuery($trackId: ID!) {
-    track: circuit(id: $trackId) {
+    track(id: $trackId) {
       id
       name
-      ...TrackKartsCard_circuit
-      ...TrackLayoutCard_circuit
+      ...TrackKartsCard_track
+      ...TrackLayoutCard_track
     }
   }
 `;
@@ -40,8 +40,8 @@ export default function TrackViewPage(): React.ReactNode {
       <Card>
         <p css={titleStyles}>{name}</p>
       </Card>
-      <TrackKartsCard circuit={data.track} />
-      <TrackLayoutCard circuit={data.track} />
+      <TrackKartsCard track={data.track} />
+      <TrackLayoutCard track={data.track} />
     </>
   );
 }

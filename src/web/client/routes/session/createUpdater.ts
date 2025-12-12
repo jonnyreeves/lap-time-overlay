@@ -72,7 +72,7 @@ export function prependTrackForCreatedSession(
     return node?.getValue("id") !== newTrackId;
   });
 
-  const edge = ConnectionHandler.createEdge(store, connection, track, "CircuitEdge");
+  const edge = ConnectionHandler.createEdge(store, connection, track, "TrackEdge");
   const nextEdges = [edge, ...filteredEdges].slice(0, maxItems);
   connection.setLinkedRecords(nextEdges, "edges");
 }

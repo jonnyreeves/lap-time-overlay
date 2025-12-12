@@ -2,10 +2,8 @@ import { readFileSync } from "fs";
 import { buildSchema, type GraphQLSchema } from "graphql";
 import { resolve as pathResolve } from "path";
 import { authResolvers } from "./resolvers/auth.js";
-import { circuitResolvers } from "./resolvers/circuit.js";
-import {
-  trackSessionResolvers
-} from "./resolvers/trackSession.js";
+import { trackResolvers } from "./resolvers/track.js";
+import { trackSessionResolvers } from "./resolvers/trackSession.js";
 import { trackRecordingResolvers } from "./resolvers/trackRecording.js";
 import { viewerResolvers } from "./resolvers/viewer.js";
 
@@ -18,13 +16,13 @@ export const schema: GraphQLSchema = buildSchema(schemaFileContents);
 
 export const rootValue = {
   viewer: viewerResolvers.viewer,
-  circuits: circuitResolvers.circuits,
+  tracks: trackResolvers.tracks,
   trackSession: trackSessionResolvers.trackSession,
-  circuit: circuitResolvers.circuit,
+  track: trackResolvers.track,
   register: authResolvers.register,
   login: authResolvers.login,
   logout: authResolvers.logout,
-  createCircuit: circuitResolvers.createCircuit,
+  createTrack: trackResolvers.createTrack,
   createTrackSession: trackSessionResolvers.createTrackSession,
   updateTrackSession: trackSessionResolvers.updateTrackSession,
   updateTrackSessionLaps: trackSessionResolvers.updateTrackSessionLaps,
@@ -32,12 +30,12 @@ export const rootValue = {
   markPrimaryTrackRecording: trackRecordingResolvers.markPrimaryTrackRecording,
   updateTrackRecording: trackRecordingResolvers.updateTrackRecording,
   deleteTrackRecording: trackRecordingResolvers.deleteTrackRecording,
-  createKart: circuitResolvers.createKart,
-  updateKart: circuitResolvers.updateKart,
-  deleteKart: circuitResolvers.deleteKart,
-  addKartToCircuit: circuitResolvers.addKartToCircuit,
-  removeKartFromCircuit: circuitResolvers.removeKartFromCircuit,
-  addTrackLayoutToCircuit: circuitResolvers.addTrackLayoutToCircuit,
-  updateTrackLayout: circuitResolvers.updateTrackLayout,
-  removeTrackLayoutFromCircuit: circuitResolvers.removeTrackLayoutFromCircuit,
+  createKart: trackResolvers.createKart,
+  updateKart: trackResolvers.updateKart,
+  deleteKart: trackResolvers.deleteKart,
+  addKartToTrack: trackResolvers.addKartToTrack,
+  removeKartFromTrack: trackResolvers.removeKartFromTrack,
+  addTrackLayoutToTrack: trackResolvers.addTrackLayoutToTrack,
+  updateTrackLayout: trackResolvers.updateTrackLayout,
+  removeTrackLayoutFromTrack: trackResolvers.removeTrackLayoutFromTrack,
 };

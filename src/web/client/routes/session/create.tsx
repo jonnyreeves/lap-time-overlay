@@ -151,7 +151,7 @@ const rightColumnStyles = css`
 
 const CreateSessionRouteTracksQuery = graphql`
   query create_tsxTracksQuery {
-    tracks: circuits {
+    tracks {
       id
       name
       karts {
@@ -191,10 +191,10 @@ const CreateTrackSessionMutation = graphql`
           id
           name
         }
-        track: circuit
+        track
           @prependNode(
             connections: $trackConnections
-            edgeTypeName: "CircuitEdge"
+            edgeTypeName: "TrackEdge"
           ) {
           id
           name

@@ -8,8 +8,7 @@ import { useNavigate } from "react-router-dom";
 const RecentTracksCardFragment = graphql`
   fragment RecentTracksCard_viewer on User {
     id
-    recentTracks: recentCircuits(first: 5)
-      @connection(key: "RecentTracksCard_recentTracks") {
+    recentTracks(first: 5) @connection(key: "RecentTracksCard_recentTracks") {
       edges {
         node {
           id

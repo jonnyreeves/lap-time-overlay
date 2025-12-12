@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<4c57cfe2b1e00b1a2ea0356b8967a468>>
+ * @generated SignedSource<<2ba0cd2412a2a624a7cfaf47680bc1e5>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,7 +10,6 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 export type UpdateTrackSessionInput = {
-  circuitId?: string | null | undefined;
   classification?: number | null | undefined;
   conditions?: string | null | undefined;
   date?: string | null | undefined;
@@ -139,11 +138,11 @@ v3 = [
             "storageKey": null
           },
           {
-            "alias": "track",
+            "alias": null,
             "args": null,
-            "concreteType": "Circuit",
+            "concreteType": "Track",
             "kind": "LinkedField",
-            "name": "circuit",
+            "name": "track",
             "plural": false,
             "selections": (v2/*: any*/),
             "storageKey": null
@@ -200,16 +199,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "a555d1dc5b2d3137026ba3f31a3a1a26",
+    "cacheID": "d9d6b7bd636a558dbde79393e99ecd19",
     "id": null,
     "metadata": {},
     "name": "SessionOverviewCardUpdateTrackSessionMutation",
     "operationKind": "mutation",
-    "text": "mutation SessionOverviewCardUpdateTrackSessionMutation(\n  $input: UpdateTrackSessionInput!\n) {\n  updateTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      conditions\n      notes\n      track: circuit {\n        id\n        name\n      }\n      kart {\n        id\n        name\n      }\n      trackLayout {\n        id\n        name\n      }\n      updatedAt\n    }\n  }\n}\n"
+    "text": "mutation SessionOverviewCardUpdateTrackSessionMutation(\n  $input: UpdateTrackSessionInput!\n) {\n  updateTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      conditions\n      notes\n      track {\n        id\n        name\n      }\n      kart {\n        id\n        name\n      }\n      trackLayout {\n        id\n        name\n      }\n      updatedAt\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "673c58328d7ea64984368eb9700ef0c1";
+(node as any).hash = "f100e278e280eee9e35fc155e06fe8df";
 
 export default node;

@@ -29,13 +29,13 @@ describe("prependTrackForCreatedSession", () => {
       viewer.setValue("user:1", "id");
       root.setLinkedRecord(viewer, "viewer");
 
-      const connection = store.create(connectionId, "CircuitConnection");
+      const connection = store.create(connectionId, "TrackConnection");
       const edges = [];
       for (let i = 0; i < 5; i++) {
-        const track = store.create(`circuit:${i}`, "Circuit");
-        track.setValue(`circuit:${i}`, "id");
+        const track = store.create(`track:${i}`, "Track");
+        track.setValue(`track:${i}`, "id");
         track.setValue(`Track ${i}`, "name");
-        const edge = ConnectionHandler.createEdge(store, connection, track, "CircuitEdge");
+        const edge = ConnectionHandler.createEdge(store, connection, track, "TrackEdge");
         edges.push(edge);
       }
       connection.setLinkedRecords(edges, "edges");
@@ -45,10 +45,10 @@ describe("prependTrackForCreatedSession", () => {
     environment.commitUpdate((store) => {
       const payload = store.create("payload:1", "CreateTrackSessionPayload");
       const newSession = store.create("session:new", "TrackSession");
-      const circuit = store.get("circuit:2");
-      if (!circuit) throw new Error("circuit not seeded");
-      circuit.setValue("Updated Track", "name");
-      newSession.setLinkedRecord(circuit, "track");
+      const track = store.get("track:2");
+      if (!track) throw new Error("track not seeded");
+      track.setValue("Updated Track", "name");
+      newSession.setLinkedRecord(track, "track");
       payload.setLinkedRecord(newSession, "trackSession");
       store.getRoot().setLinkedRecord(payload, "createTrackSession");
 
@@ -65,7 +65,7 @@ describe("prependTrackForCreatedSession", () => {
         .map((edge) => edge?.getLinkedRecord("node")?.getDataID())
         .filter(Boolean);
 
-      expect(ids).toEqual(["circuit:2", "circuit:0", "circuit:1", "circuit:3", "circuit:4"]);
+      expect(ids).toEqual(["track:2", "track:0", "track:1", "track:3", "track:4"]);
     });
   });
 });

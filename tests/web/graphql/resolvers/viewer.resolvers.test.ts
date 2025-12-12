@@ -74,19 +74,19 @@ describe("viewer resolver", () => {
     expect(rootValue.viewer({}, unauthContext as never)).toBeNull();
   });
 
-  it("returns viewer payload with recent circuits and sessions", async () => {
+  it("returns viewer payload with recent tracks and sessions", async () => {
     const viewer = rootValue.viewer({}, context as never);
     expect(viewer?.id).toBe("user-1");
 
-    const recentCircuits = await viewer?.recentCircuits({ first: 2 });
-    expect(recentCircuits?.edges.map((edge) => edge.node.id)).toEqual(["c1", "c2"]);
-    expect(recentCircuits?.pageInfo).toMatchObject({ hasNextPage: false, hasPreviousPage: false });
-    const circuitsAfter = await viewer?.recentCircuits({ first: 2, after: recentCircuits?.edges[1]?.cursor });
-    expect(circuitsAfter?.edges.map((edge) => edge.node.id)).toEqual([]);
+    const recentTracks = await viewer?.recentTracks({ first: 2 });
+    expect(recentTracks?.edges.map((edge) => edge.node.id)).toEqual(["c1", "c2"]);
+    expect(recentTracks?.pageInfo).toMatchObject({ hasNextPage: false, hasPreviousPage: false });
+    const tracksAfter = await viewer?.recentTracks({ first: 2, after: recentTracks?.edges[1]?.cursor });
+    expect(tracksAfter?.edges.map((edge) => edge.node.id)).toEqual([]);
 
     const recentSessions = await viewer?.recentTrackSessions({ first: 2 });
     expect(recentSessions?.edges.map((edge) => edge.node.id)).toEqual(["s3", "s2"]);
-    expect(await recentSessions?.edges[0]?.node.circuit()).toMatchObject({ id: "c1", name: "Monza" });
+    expect(await recentSessions?.edges[0]?.node.track()).toMatchObject({ id: "c1", name: "Monza" });
     expect(recentSessions?.pageInfo).toMatchObject({ hasNextPage: true, hasPreviousPage: false });
 
     const afterCursor = recentSessions?.edges[1]?.cursor;

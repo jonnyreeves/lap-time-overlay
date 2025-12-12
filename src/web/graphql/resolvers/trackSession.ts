@@ -9,7 +9,7 @@ import type {
 } from "../../../db/track_sessions.js";
 import type { GraphQLContext } from "../context.js";
 import type { Repositories } from "../repositories.js";
-import { toCircuitPayload } from "./circuit.js";
+import { toTrackPayload } from "./track.js";
 
 export type LapEventInputArg = { offset?: number; event?: string; value?: string };
 export type LapInputArg = { lapNumber?: number; time?: number; lapEvents?: LapEventInputArg[] | null };
@@ -20,7 +20,6 @@ export type CreateTrackSessionInputArgs = {
     format?: string;
     classification?: number | null;
     conditions?: string;
-    circuitId?: string;
     trackId?: string;
     kartId?: string;
     trackLayoutId?: string;
@@ -36,7 +35,6 @@ export type UpdateTrackSessionInputArgs = {
     format?: string | null;
     classification?: number | null;
     conditions?: string | null;
-    circuitId?: string | null;
     trackId?: string | null;
     kartId?: string | null;
     trackLayoutId?: string | null;
@@ -176,14 +174,14 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
     format: session.format,
     classification: session.classification,
     conditions: session.conditions,
-    circuit: () => {
-      const circuit = repositories.tracks.findById(session.trackId);
-      if (!circuit) {
+    track: () => {
+      const track = repositories.tracks.findById(session.trackId);
+      if (!track) {
         throw new GraphQLError(`Track with ID ${session.trackId} not found`, {
           extensions: { code: "NOT_FOUND" },
         });
       }
-      return toCircuitPayload(circuit, repositories, session.userId);
+      return toTrackPayload(track, repositories, session.userId);
     },
     trackLayout: () => {
       const layout = repositories.trackLayouts.findById(session.trackLayoutId);
@@ -192,8 +190,8 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
           extensions: { code: "NOT_FOUND" },
         });
       }
-      const circuit = repositories.tracks.findById(layout.trackId);
-      if (!circuit) {
+      const track = repositories.tracks.findById(layout.trackId);
+      if (!track) {
         throw new GraphQLError(`Track with ID ${layout.trackId} not found`, {
           extensions: { code: "NOT_FOUND" },
         });
@@ -201,7 +199,7 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
       return {
         id: layout.id,
         name: layout.name,
-        circuit: toCircuitPayload(circuit, repositories, session.userId),
+        track: toTrackPayload(track, repositories, session.userId),
         createdAt: new Date(layout.createdAt).toISOString(),
         updatedAt: new Date(layout.updatedAt).toISOString(),
       };
@@ -381,15 +379,15 @@ export const trackSessionResolvers = {
       });
     }
     const input = args.input;
-    const trackId = input?.trackId ?? input?.circuitId;
+    const trackId = input?.trackId;
     if (!input?.date || !input?.format || !trackId || !input?.kartId || !input?.trackLayoutId || input.classification == null) {
-      throw new GraphQLError("Date, format, trackId (or circuitId), trackLayoutId, kartId, and classification are required", {
+      throw new GraphQLError("Date, format, trackId, trackLayoutId, kartId, and classification are required", {
         extensions: { code: "VALIDATION_FAILED" },
       });
     }
 
-    const circuit = repositories.tracks.findById(trackId);
-    if (!circuit) {
+    const track = repositories.tracks.findById(trackId);
+    if (!track) {
       throw new GraphQLError(`Track with ID ${trackId} not found`, {
         extensions: { code: "NOT_FOUND" },
       });
@@ -403,8 +401,8 @@ export const trackSessionResolvers = {
     }
 
     const availableKarts = repositories.trackKarts.findKartsForTrack(trackId) ?? [];
-    const kartIsOnCircuit = availableKarts.some((candidate) => candidate.id === kart.id);
-    if (!kartIsOnCircuit) {
+    const kartIsOnTrack = availableKarts.some((candidate) => candidate.id === kart.id);
+    if (!kartIsOnTrack) {
       throw new GraphQLError("Kart is not available at the selected track", {
         extensions: { code: "VALIDATION_FAILED" },
       });
@@ -468,11 +466,9 @@ export const trackSessionResolvers = {
       });
     }
 
-    const trackIdProvided =
-      Object.prototype.hasOwnProperty.call(input, "trackId") ||
-      Object.prototype.hasOwnProperty.call(input, "circuitId");
+    const trackIdProvided = Object.prototype.hasOwnProperty.call(input, "trackId");
     let targetTrackId = existingSession.trackId;
-    const nextTrackId = input.trackId ?? input.circuitId;
+    const nextTrackId = input.trackId;
     if (trackIdProvided && nextTrackId) {
       targetTrackId = nextTrackId;
     }

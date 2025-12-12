@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<7a0e4e446a84fb0168b9b16eb7003f73>>
+ * @generated SignedSource<<5f14aeec6ea2baf363bef93af2232e42>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,78 +9,76 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type TrackKartsCardAddKartToCircuitMutation$variables = {
-  circuitId: string;
+export type TrackKartsCardAddKartToTrackMutation$variables = {
   kartId: string;
+  trackId: string;
 };
-export type TrackKartsCardAddKartToCircuitMutation$data = {
-  readonly addKartToCircuit: {
-    readonly circuit: {
+export type TrackKartsCardAddKartToTrackMutation$data = {
+  readonly addKartToTrack: {
+    readonly kart: {
+      readonly id: string;
+    };
+    readonly track: {
       readonly id: string;
       readonly karts: ReadonlyArray<{
         readonly id: string;
         readonly name: string;
       }>;
     };
-    readonly kart: {
-      readonly id: string;
-    };
   };
 };
-export type TrackKartsCardAddKartToCircuitMutation = {
-  response: TrackKartsCardAddKartToCircuitMutation$data;
-  variables: TrackKartsCardAddKartToCircuitMutation$variables;
+export type TrackKartsCardAddKartToTrackMutation = {
+  response: TrackKartsCardAddKartToTrackMutation$data;
+  variables: TrackKartsCardAddKartToTrackMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
-var v0 = [
-  {
-    "defaultValue": null,
-    "kind": "LocalArgument",
-    "name": "circuitId"
-  },
-  {
-    "defaultValue": null,
-    "kind": "LocalArgument",
-    "name": "kartId"
-  }
-],
+var v0 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
+  "name": "kartId"
+},
 v1 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
+  "name": "trackId"
+},
+v2 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
 },
-v2 = [
+v3 = [
   {
     "alias": null,
     "args": [
       {
         "kind": "Variable",
-        "name": "circuitId",
-        "variableName": "circuitId"
+        "name": "kartId",
+        "variableName": "kartId"
       },
       {
         "kind": "Variable",
-        "name": "kartId",
-        "variableName": "kartId"
+        "name": "trackId",
+        "variableName": "trackId"
       }
     ],
-    "concreteType": "AddKartToCircuitPayload",
+    "concreteType": "AddKartToTrackPayload",
     "kind": "LinkedField",
-    "name": "addKartToCircuit",
+    "name": "addKartToTrack",
     "plural": false,
     "selections": [
       {
         "alias": null,
         "args": null,
-        "concreteType": "Circuit",
+        "concreteType": "Track",
         "kind": "LinkedField",
-        "name": "circuit",
+        "name": "track",
         "plural": false,
         "selections": [
-          (v1/*: any*/),
+          (v2/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -89,7 +87,7 @@ v2 = [
             "name": "karts",
             "plural": true,
             "selections": [
-              (v1/*: any*/),
+              (v2/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -111,7 +109,7 @@ v2 = [
         "name": "kart",
         "plural": false,
         "selections": [
-          (v1/*: any*/)
+          (v2/*: any*/)
         ],
         "storageKey": null
       }
@@ -121,32 +119,38 @@ v2 = [
 ];
 return {
   "fragment": {
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": [
+      (v0/*: any*/),
+      (v1/*: any*/)
+    ],
     "kind": "Fragment",
     "metadata": null,
-    "name": "TrackKartsCardAddKartToCircuitMutation",
-    "selections": (v2/*: any*/),
+    "name": "TrackKartsCardAddKartToTrackMutation",
+    "selections": (v3/*: any*/),
     "type": "Mutation",
     "abstractKey": null
   },
   "kind": "Request",
   "operation": {
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": [
+      (v1/*: any*/),
+      (v0/*: any*/)
+    ],
     "kind": "Operation",
-    "name": "TrackKartsCardAddKartToCircuitMutation",
-    "selections": (v2/*: any*/)
+    "name": "TrackKartsCardAddKartToTrackMutation",
+    "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "7660755f27f13c198fbc0611ba2ba5b9",
+    "cacheID": "f7f0c11795150172b8b88b9b576a237d",
     "id": null,
     "metadata": {},
-    "name": "TrackKartsCardAddKartToCircuitMutation",
+    "name": "TrackKartsCardAddKartToTrackMutation",
     "operationKind": "mutation",
-    "text": "mutation TrackKartsCardAddKartToCircuitMutation(\n  $circuitId: ID!\n  $kartId: ID!\n) {\n  addKartToCircuit(circuitId: $circuitId, kartId: $kartId) {\n    circuit {\n      id\n      karts {\n        id\n        name\n      }\n    }\n    kart {\n      id\n    }\n  }\n}\n"
+    "text": "mutation TrackKartsCardAddKartToTrackMutation(\n  $trackId: ID!\n  $kartId: ID!\n) {\n  addKartToTrack(trackId: $trackId, kartId: $kartId) {\n    track {\n      id\n      karts {\n        id\n        name\n      }\n    }\n    kart {\n      id\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "670b29d89708b6f07f38a8acd2c8395f";
+(node as any).hash = "f1248cc60f9dcb486e5c0fd4beb6f5de";
 
 export default node;

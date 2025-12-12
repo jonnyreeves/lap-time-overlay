@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<9e51f414f18bd5b3f1cc77897e93fefe>>
+ * @generated SignedSource<<12e9775601ecf98ea123198b8a2fcf33>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,7 +9,7 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type CreateCircuitInput = {
+export type CreateTrackInput = {
   heroImage?: string | null | undefined;
   karts: ReadonlyArray<CreateKartInput>;
   name: string;
@@ -22,7 +22,7 @@ export type CreateTrackLayoutInput = {
   name: string;
 };
 export type CreateTrackModalCreateTrackMutation$variables = {
-  input: CreateCircuitInput;
+  input: CreateTrackInput;
 };
 export type CreateTrackModalCreateTrackMutation$data = {
   readonly createTrack: {
@@ -73,7 +73,7 @@ v3 = [
 ],
 v4 = [
   {
-    "alias": "createTrack",
+    "alias": null,
     "args": [
       {
         "kind": "Variable",
@@ -81,17 +81,17 @@ v4 = [
         "variableName": "input"
       }
     ],
-    "concreteType": "CreateCircuitPayload",
+    "concreteType": "CreateTrackPayload",
     "kind": "LinkedField",
-    "name": "createCircuit",
+    "name": "createTrack",
     "plural": false,
     "selections": [
       {
-        "alias": "track",
+        "alias": null,
         "args": null,
-        "concreteType": "Circuit",
+        "concreteType": "Track",
         "kind": "LinkedField",
-        "name": "circuit",
+        "name": "track",
         "plural": false,
         "selections": [
           (v1/*: any*/),
@@ -141,16 +141,16 @@ return {
     "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "cc57d5d9d2818aacc5a38494da10bce9",
+    "cacheID": "66c440629a67fae95246b7dac86c8538",
     "id": null,
     "metadata": {},
     "name": "CreateTrackModalCreateTrackMutation",
     "operationKind": "mutation",
-    "text": "mutation CreateTrackModalCreateTrackMutation(\n  $input: CreateCircuitInput!\n) {\n  createTrack: createCircuit(input: $input) {\n    track: circuit {\n      id\n      name\n      karts {\n        id\n        name\n      }\n      trackLayouts {\n        id\n        name\n      }\n    }\n  }\n}\n"
+    "text": "mutation CreateTrackModalCreateTrackMutation(\n  $input: CreateTrackInput!\n) {\n  createTrack(input: $input) {\n    track {\n      id\n      name\n      karts {\n        id\n        name\n      }\n      trackLayouts {\n        id\n        name\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "4aeda83a03c6caabfc7d4bce6f52bfc5";
+(node as any).hash = "a6eb0e489b252e6daf6091fd7cdd4d5a";
 
 export default node;

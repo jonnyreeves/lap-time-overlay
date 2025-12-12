@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<1d54d1dbf5dc5d843e21003a743e680a>>
+ * @generated SignedSource<<b5a22f29560ccb758de4eb6b07b87d33>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,13 +9,13 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type TrackLayoutCardRemoveTrackLayoutFromCircuitMutation$variables = {
-  circuitId: string;
+export type TrackLayoutCardRemoveTrackLayoutFromTrackMutation$variables = {
+  trackId: string;
   trackLayoutId: string;
 };
-export type TrackLayoutCardRemoveTrackLayoutFromCircuitMutation$data = {
-  readonly removeTrackLayoutFromCircuit: {
-    readonly circuit: {
+export type TrackLayoutCardRemoveTrackLayoutFromTrackMutation$data = {
+  readonly removeTrackLayoutFromTrack: {
+    readonly track: {
       readonly id: string;
       readonly trackLayouts: ReadonlyArray<{
         readonly id: string;
@@ -28,9 +28,9 @@ export type TrackLayoutCardRemoveTrackLayoutFromCircuitMutation$data = {
     };
   };
 };
-export type TrackLayoutCardRemoveTrackLayoutFromCircuitMutation = {
-  response: TrackLayoutCardRemoveTrackLayoutFromCircuitMutation$data;
-  variables: TrackLayoutCardRemoveTrackLayoutFromCircuitMutation$variables;
+export type TrackLayoutCardRemoveTrackLayoutFromTrackMutation = {
+  response: TrackLayoutCardRemoveTrackLayoutFromTrackMutation$data;
+  variables: TrackLayoutCardRemoveTrackLayoutFromTrackMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -38,7 +38,7 @@ var v0 = [
   {
     "defaultValue": null,
     "kind": "LocalArgument",
-    "name": "circuitId"
+    "name": "trackId"
   },
   {
     "defaultValue": null,
@@ -69,8 +69,8 @@ v3 = [
     "args": [
       {
         "kind": "Variable",
-        "name": "circuitId",
-        "variableName": "circuitId"
+        "name": "trackId",
+        "variableName": "trackId"
       },
       {
         "kind": "Variable",
@@ -78,17 +78,17 @@ v3 = [
         "variableName": "trackLayoutId"
       }
     ],
-    "concreteType": "RemoveTrackLayoutFromCircuitPayload",
+    "concreteType": "RemoveTrackLayoutFromTrackPayload",
     "kind": "LinkedField",
-    "name": "removeTrackLayoutFromCircuit",
+    "name": "removeTrackLayoutFromTrack",
     "plural": false,
     "selections": [
       {
         "alias": null,
         "args": null,
-        "concreteType": "Circuit",
+        "concreteType": "Track",
         "kind": "LinkedField",
-        "name": "circuit",
+        "name": "track",
         "plural": false,
         "selections": [
           (v1/*: any*/),
@@ -124,7 +124,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "TrackLayoutCardRemoveTrackLayoutFromCircuitMutation",
+    "name": "TrackLayoutCardRemoveTrackLayoutFromTrackMutation",
     "selections": (v3/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -133,20 +133,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "TrackLayoutCardRemoveTrackLayoutFromCircuitMutation",
+    "name": "TrackLayoutCardRemoveTrackLayoutFromTrackMutation",
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "c72bc7c500ea507b2ba9ba117153462c",
+    "cacheID": "0a5f32d18914aba7f7bd2bd13e75f0e1",
     "id": null,
     "metadata": {},
-    "name": "TrackLayoutCardRemoveTrackLayoutFromCircuitMutation",
+    "name": "TrackLayoutCardRemoveTrackLayoutFromTrackMutation",
     "operationKind": "mutation",
-    "text": "mutation TrackLayoutCardRemoveTrackLayoutFromCircuitMutation(\n  $circuitId: ID!\n  $trackLayoutId: ID!\n) {\n  removeTrackLayoutFromCircuit(circuitId: $circuitId, trackLayoutId: $trackLayoutId) {\n    circuit {\n      id\n      trackLayouts {\n        id\n        name\n      }\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n"
+    "text": "mutation TrackLayoutCardRemoveTrackLayoutFromTrackMutation(\n  $trackId: ID!\n  $trackLayoutId: ID!\n) {\n  removeTrackLayoutFromTrack(trackId: $trackId, trackLayoutId: $trackLayoutId) {\n    track {\n      id\n      trackLayouts {\n        id\n        name\n      }\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "48ae9917eac432987c9a29206ffcd8bd";
+(node as any).hash = "dbf14f2178460f4d9cedb7c8f8a0d9a3";
 
 export default node;

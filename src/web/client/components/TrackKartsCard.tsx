@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
-import type { TrackKartsCard_circuit$key } from "src/web/client/__generated__/TrackKartsCard_circuit.graphql.ts";
-import type { TrackKartsCardAddKartToCircuitMutation } from "src/web/client/__generated__/TrackKartsCardAddKartToCircuitMutation.graphql.ts";
-import type { TrackKartsCardRemoveKartFromCircuitMutation } from "src/web/client/__generated__/TrackKartsCardRemoveKartFromCircuitMutation.graphql.ts";
+import type { TrackKartsCardAddKartToTrackMutation } from "src/web/client/__generated__/TrackKartsCardAddKartToTrackMutation.graphql.ts";
+import type { TrackKartsCardRemoveKartFromTrackMutation } from "src/web/client/__generated__/TrackKartsCardRemoveKartFromTrackMutation.graphql.ts";
 import type { TrackKartsCardDeleteKartMutation } from "src/web/client/__generated__/TrackKartsCardDeleteKartMutation.graphql.ts";
 import type { TrackKartsCardUpdateKartNameMutation } from "src/web/client/__generated__/TrackKartsCardUpdateKartNameMutation.graphql.ts";
+import type { TrackKartsCard_track$key } from "src/web/client/__generated__/TrackKartsCard_track.graphql.ts";
 import { Card } from "./Card.tsx";
 import { IconButton } from "./IconButton.tsx";
 import { TrackKartEditModal } from "./TrackKartEditModal.js";
+import { dangerInlineActionButtonStyles, inlineActionButtonStyles, kartListStyles, kartRowStyles, largeInlineActionButtonStyles } from "./inlineActionButtons.ts";
 import { actionsRowStyles, primaryButtonStyles } from "./session/sessionOverviewStyles.ts";
-import { inlineActionButtonStyles, dangerInlineActionButtonStyles, kartListStyles, kartRowStyles, largeInlineActionButtonStyles } from "./inlineActionButtons.ts";
 
-const TrackKartsCardCircuitFragment = graphql`
-  fragment TrackKartsCard_circuit on Circuit {
+const TrackKartsCardTrackFragment = graphql`
+  fragment TrackKartsCard_track on Track {
     id
     name
     karts {
@@ -22,10 +22,10 @@ const TrackKartsCardCircuitFragment = graphql`
   }
 `;
 
-const AddKartToCircuitMutation = graphql`
-  mutation TrackKartsCardAddKartToCircuitMutation($circuitId: ID!, $kartId: ID!) {
-    addKartToCircuit(circuitId: $circuitId, kartId: $kartId) {
-      circuit {
+const AddKartToTrackMutation = graphql`
+  mutation TrackKartsCardAddKartToTrackMutation($trackId: ID!, $kartId: ID!) {
+    addKartToTrack(trackId: $trackId, kartId: $kartId) {
+      track {
         id
         karts {
           id
@@ -39,10 +39,10 @@ const AddKartToCircuitMutation = graphql`
   }
 `;
 
-const RemoveKartFromCircuitMutation = graphql`
-  mutation TrackKartsCardRemoveKartFromCircuitMutation($circuitId: ID!, $kartId: ID!) {
-    removeKartFromCircuit(circuitId: $circuitId, kartId: $kartId) {
-      circuit {
+const RemoveKartFromTrackMutation = graphql`
+  mutation TrackKartsCardRemoveKartFromTrackMutation($trackId: ID!, $kartId: ID!) {
+    removeKartFromTrack(trackId: $trackId, kartId: $kartId) {
+      track {
         id
         karts {
           id
@@ -76,11 +76,11 @@ const UpdateKartNameMutation = graphql`
 `;
 
 type Props = {
-  circuit: TrackKartsCard_circuit$key;
+  track: TrackKartsCard_track$key;
 };
 
-export function TrackKartsCard({ circuit: circuitKey }: Props) {
-  const circuit = useFragment(TrackKartsCardCircuitFragment, circuitKey);
+export function TrackKartsCard({ track: trackKey }: Props) {
+  const track = useFragment(TrackKartsCardTrackFragment, trackKey);
   const [isEditing, setIsEditing] = useState(false);
   const [showAddEditKartModal, setShowAddEditKartModal] = useState(false);
   const [kartToEdit, setKartToEdit] = useState<{ id: string; name: string } | null>(null);
@@ -89,26 +89,26 @@ export function TrackKartsCard({ circuit: circuitKey }: Props) {
 
   useEffect(() => {
     if (!isEditing) {
-      // When not editing, reset editable names to current circuit karts
+      // When not editing, reset editable names to current track karts
       const newMap = new Map();
-      circuit.karts.forEach((kart) => newMap.set(kart.id, kart.name));
+      track.karts.forEach((kart) => newMap.set(kart.id, kart.name));
       setEditableKartNames(newMap);
     }
-  }, [isEditing, circuit.karts]);
+  }, [isEditing, track.karts]);
 
-  const karts = circuit.karts;
+  const karts = track.karts;
   const formId = "track-karts-form";
 
-  const [commitAddKartToCircuit, isAddingKartToCircuit] =
-    useMutation<TrackKartsCardAddKartToCircuitMutation>(AddKartToCircuitMutation);
-  const [commitRemoveKartFromCircuit, isRemovingKartFromCircuit] =
-    useMutation<TrackKartsCardRemoveKartFromCircuitMutation>(RemoveKartFromCircuitMutation);
+  const [commitAddKartToTrack, isAddingKartToTrack] =
+    useMutation<TrackKartsCardAddKartToTrackMutation>(AddKartToTrackMutation);
+  const [commitRemoveKartFromTrack, isRemovingKartFromTrack] =
+    useMutation<TrackKartsCardRemoveKartFromTrackMutation>(RemoveKartFromTrackMutation);
   const [commitDeleteKart, isDeletingKart] =
     useMutation<TrackKartsCardDeleteKartMutation>(DeleteKartMutation);
   const [commitUpdateKartName, isUpdatingKartName] =
     useMutation<TrackKartsCardUpdateKartNameMutation>(UpdateKartNameMutation);
 
-  const isSaving = isAddingKartToCircuit || isRemovingKartFromCircuit || isDeletingKart || isUpdatingKartName;
+  const isSaving = isAddingKartToTrack || isRemovingKartFromTrack || isDeletingKart || isUpdatingKartName;
 
   function handleEdit() {
     setIsEditing(true);
@@ -117,9 +117,9 @@ export function TrackKartsCard({ circuit: circuitKey }: Props) {
 
   function handleCancel() {
     setActionError(null);
-    // Reset editable names to original circuit karts
+    // Reset editable names to original track karts
     const newMap = new Map();
-    circuit.karts.forEach((kart) => newMap.set(kart.id, kart.name));
+    track.karts.forEach((kart) => newMap.set(kart.id, kart.name));
     setEditableKartNames(newMap);
     setIsEditing(false);
   }
@@ -131,7 +131,7 @@ export function TrackKartsCard({ circuit: circuitKey }: Props) {
 
     const pendingMutations: Promise<void>[] = [];
 
-    for (const originalKart of circuit.karts) {
+    for (const originalKart of track.karts) {
       const editedName = editableKartNames.get(originalKart.id);
 
       if (editedName != null && editedName !== originalKart.name) {
@@ -183,28 +183,24 @@ export function TrackKartsCard({ circuit: circuitKey }: Props) {
     if (isSaving) return;
     setActionError(null);
 
-    // First remove from circuit
-    commitRemoveKartFromCircuit({
-      variables: { circuitId: circuit.id, kartId },
+    // First remove from track
+    commitRemoveKartFromTrack({
+      variables: { trackId: track.id, kartId },
       optimisticResponse: {
-        removeKartFromCircuit: {
-          circuit: {
-            id: circuit.id,
-            karts: circuit.karts.filter((k: { id: string }) => k.id !== kartId),
-            __typename: "Circuit",
+        removeKartFromTrack: {
+          track: {
+            id: track.id,
+            karts: track.karts.filter((k: { id: string }) => k.id !== kartId),
+            __typename: "Track",
           },
           kart: { id: kartId, __typename: "Kart" },
-          __typename: "RemoveKartFromCircuitPayload",
+          __typename: "RemoveKartFromTrackPayload",
         },
       },
       onCompleted: (response) => {
-        // Only delete kart if it's not part of any other circuit
+        // Only delete kart if it's not part of any other track
         // This logic would ideally be handled on the server, but for now we'll do a simple check
-        if (response?.removeKartFromCircuit?.kart?.id) {
-          // Check if this kart is still associated with any other circuit.
-          // This requires a new query or a way to get all circuit_karts for a kart.
-          // For simplicity, we'll just delete the kart if it's no longer in *this* circuit.
-          // A more robust solution would check if the kart is associated with ANY circuit.
+        if (response?.removeKartFromTrack?.kart?.id) {
           commitDeleteKart({
             variables: { id: kartId },
             optimisticResponse: {
@@ -231,18 +227,18 @@ export function TrackKartsCard({ circuit: circuitKey }: Props) {
   const onKartCreated = (newKartId: string, newKartName: string) => {
     if (!newKartId) return;
 
-    // Add the newly created kart to this circuit
-    commitAddKartToCircuit({
-      variables: { circuitId: circuit.id, kartId: newKartId },
+    // Add the newly created kart to this track
+    commitAddKartToTrack({
+      variables: { trackId: track.id, kartId: newKartId },
       optimisticResponse: {
-        addKartToCircuit: {
-          circuit: {
-            id: circuit.id,
-            karts: [...circuit.karts, { id: newKartId, name: newKartName, __typename: "Kart" }],
-            __typename: "Circuit",
+        addKartToTrack: {
+          track: {
+            id: track.id,
+            karts: [...track.karts, { id: newKartId, name: newKartName, __typename: "Kart" }],
+            __typename: "Track",
           },
           kart: { id: newKartId, __typename: "Kart" },
-          __typename: "AddKartToCircuitPayload",
+          __typename: "AddKartToTrackPayload",
         },
       },
       onCompleted: () => setActionError(null),
@@ -297,7 +293,6 @@ export function TrackKartsCard({ circuit: circuitKey }: Props) {
                       <input
                         type="text"
                         css={{
-                          // Minimal styling to fit within the row
                           border: "1px solid #cbd5e1",
                           borderRadius: "8px",
                           padding: "6px 10px",
@@ -343,10 +338,10 @@ export function TrackKartsCard({ circuit: circuitKey }: Props) {
 
       {showAddEditKartModal && (
         <TrackKartEditModal
-          circuitId={circuit.id}
+          trackId={track.id}
           kart={kartToEdit}
           onClose={handleCloseModal}
-          onKartCreated={onKartCreated} // Pass callback for new kart creation
+          onKartCreated={onKartCreated}
         />
       )}
     </>

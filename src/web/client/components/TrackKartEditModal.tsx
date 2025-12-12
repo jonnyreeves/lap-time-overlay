@@ -8,7 +8,7 @@ import type { TrackKartEditModalCreateKartMutation } from "src/web/client/__gene
 import type { TrackKartEditModalUpdateKartMutation } from "src/web/client/__generated__/TrackKartEditModalUpdateKartMutation.graphql.ts";
 
 type Props = {
-  circuitId: string;
+  trackId: string;
   kart?: { id: string; name: string } | null;
   onClose: () => void;
   onKartCreated?: (kartId: string, kartName: string) => void;
@@ -49,7 +49,7 @@ const modalActionsStyles = css`
   margin-top: 20px;
 `;
 
-export function TrackKartEditModal({ circuitId, kart, onClose, onKartCreated }: Props) {
+export function TrackKartEditModal({ trackId: _trackId, kart, onClose, onKartCreated }: Props) {
   const [kartName, setKartName] = useState(kart?.name || "");
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -90,8 +90,8 @@ export function TrackKartEditModal({ circuitId, kart, onClose, onKartCreated }: 
           },
         },
         onCompleted: () => {
-          // TODO: Add kart to circuit if it's not already
-          onClose();
+  // TODO: Add kart to track if it's not already
+  onClose();
         },
         onError: (error) => {
           setActionError(error.message);
@@ -115,7 +115,7 @@ export function TrackKartEditModal({ circuitId, kart, onClose, onKartCreated }: 
         },
         onCompleted: (response) => {
           if (response.createKart?.kart) {
-            // Now add this new kart to the current circuit
+            // Now add this new kart to the current track
             onKartCreated?.(response.createKart.kart.id, kartName.trim());
           }
           onClose();

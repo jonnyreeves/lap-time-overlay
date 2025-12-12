@@ -2,23 +2,23 @@ import { useState } from "react";
 import { graphql, useMutation } from "react-relay";
 import { css } from "@emotion/react";
 import { Modal } from "./Modal.tsx";
-import { inputStyles, primaryButtonStyles } from "./session/sessionOverviewStyles.ts";
 import { inlineActionButtonStyles } from "./inlineActionButtons.ts";
-import type { TrackLayoutEditModalAddTrackLayoutToCircuitMutation } from "src/web/client/__generated__/TrackLayoutEditModalAddTrackLayoutToCircuitMutation.graphql.ts";
+import type { TrackLayoutEditModalAddTrackLayoutToTrackMutation } from "src/web/client/__generated__/TrackLayoutEditModalAddTrackLayoutToTrackMutation.graphql.ts";
+import { inputStyles, primaryButtonStyles } from "./session/sessionOverviewStyles.ts";
 
 type Props = {
-  circuitId: string;
+  trackId: string;
   onClose: () => void;
   onTrackLayoutCreated?: (trackLayoutId: string, trackLayoutName: string) => void;
 };
 
-const AddTrackLayoutToCircuitMutation = graphql`
-  mutation TrackLayoutEditModalAddTrackLayoutToCircuitMutation(
-    $circuitId: ID!
+const AddTrackLayoutToTrackMutation = graphql`
+  mutation TrackLayoutEditModalAddTrackLayoutToTrackMutation(
+    $trackId: ID!
     $input: CreateTrackLayoutInput!
   ) {
-    addTrackLayoutToCircuit(circuitId: $circuitId, input: $input) {
-      circuit {
+    addTrackLayoutToTrack(trackId: $trackId, input: $input) {
+      track {
         id
         trackLayouts {
           id
@@ -46,12 +46,12 @@ const modalActionsStyles = css`
   margin-top: 16px;
 `;
 
-export function TrackLayoutEditModal({ circuitId, onClose, onTrackLayoutCreated }: Props) {
+export function TrackLayoutEditModal({ trackId, onClose, onTrackLayoutCreated }: Props) {
   const [layoutName, setLayoutName] = useState("");
   const [actionError, setActionError] = useState<string | null>(null);
 
   const [commitAddTrackLayout, isAddingTrackLayout] =
-    useMutation<TrackLayoutEditModalAddTrackLayoutToCircuitMutation>(AddTrackLayoutToCircuitMutation);
+    useMutation<TrackLayoutEditModalAddTrackLayoutToTrackMutation>(AddTrackLayoutToTrackMutation);
 
   const isSaving = isAddingTrackLayout;
 
@@ -68,22 +68,22 @@ export function TrackLayoutEditModal({ circuitId, onClose, onTrackLayoutCreated 
     const tempId = `client:newTrackLayout:${Date.now()}`;
 
     commitAddTrackLayout({
-      variables: { circuitId, input: { name: trimmedName } },
+      variables: { trackId, input: { name: trimmedName } },
       optimisticResponse: {
-        addTrackLayoutToCircuit: {
-          circuit: {
-            id: circuitId,
+        addTrackLayoutToTrack: {
+          track: {
+            id: trackId,
             trackLayouts: [
               { id: tempId, name: trimmedName, __typename: "TrackLayout" },
             ],
-            __typename: "Circuit",
+            __typename: "Track",
           },
           trackLayout: { id: tempId, name: trimmedName, __typename: "TrackLayout" },
-          __typename: "AddTrackLayoutToCircuitPayload",
+          __typename: "AddTrackLayoutToTrackPayload",
         },
       },
       onCompleted: (response) => {
-        const createdLayout = response.addTrackLayoutToCircuit?.trackLayout;
+        const createdLayout = response.addTrackLayoutToTrack?.trackLayout;
         if (createdLayout?.id && createdLayout.name) {
           onTrackLayoutCreated?.(createdLayout.id, createdLayout.name);
         }
@@ -91,15 +91,15 @@ export function TrackLayoutEditModal({ circuitId, onClose, onTrackLayoutCreated 
       },
       onError: (error) => setActionError(error.message),
       updater: (store) => {
-        const payload = store.getRootField("addTrackLayoutToCircuit");
-        const circuitRecord = payload?.getLinkedRecord("circuit");
-        if (!circuitRecord) return;
+        const payload = store.getRootField("addTrackLayoutToTrack");
+        const trackRecord = payload?.getLinkedRecord("track");
+        if (!trackRecord) return;
 
-        const existingCircuit = store.get(circuitId);
-        if (!existingCircuit) return;
+        const existingTrack = store.get(trackId);
+        if (!existingTrack) return;
 
-        existingCircuit.setLinkedRecords(
-          circuitRecord.getLinkedRecords("trackLayouts") ?? [],
+        existingTrack.setLinkedRecords(
+          trackRecord.getLinkedRecords("trackLayouts") ?? [],
           "trackLayouts"
         );
       },

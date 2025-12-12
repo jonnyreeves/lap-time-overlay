@@ -31,13 +31,13 @@ const SessionQuery = graphql`
       id
       date
       format
-    classification
-    conditions
-    notes
-    track: circuit {
-      id
-      name
-    }
+      classification
+      conditions
+      notes
+      track {
+        id
+        name
+      }
       trackLayout {
         id
         name
@@ -86,7 +86,7 @@ const SessionQuery = graphql`
         }
       }
     }
-    tracks: circuits {
+    tracks {
       id
       name
       karts {

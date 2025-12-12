@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<1fc00e9d380b34046057805d0398838d>>
+ * @generated SignedSource<<b0159e409e53a19c8d626dad325c68e8>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,13 +12,13 @@ import { ConcreteRequest } from 'relay-runtime';
 export type CreateTrackLayoutInput = {
   name: string;
 };
-export type TrackLayoutEditModalAddTrackLayoutToCircuitMutation$variables = {
-  circuitId: string;
+export type TrackLayoutEditModalAddTrackLayoutToTrackMutation$variables = {
   input: CreateTrackLayoutInput;
+  trackId: string;
 };
-export type TrackLayoutEditModalAddTrackLayoutToCircuitMutation$data = {
-  readonly addTrackLayoutToCircuit: {
-    readonly circuit: {
+export type TrackLayoutEditModalAddTrackLayoutToTrackMutation$data = {
+  readonly addTrackLayoutToTrack: {
+    readonly track: {
       readonly id: string;
       readonly trackLayouts: ReadonlyArray<{
         readonly id: string;
@@ -31,33 +31,31 @@ export type TrackLayoutEditModalAddTrackLayoutToCircuitMutation$data = {
     };
   };
 };
-export type TrackLayoutEditModalAddTrackLayoutToCircuitMutation = {
-  response: TrackLayoutEditModalAddTrackLayoutToCircuitMutation$data;
-  variables: TrackLayoutEditModalAddTrackLayoutToCircuitMutation$variables;
+export type TrackLayoutEditModalAddTrackLayoutToTrackMutation = {
+  response: TrackLayoutEditModalAddTrackLayoutToTrackMutation$data;
+  variables: TrackLayoutEditModalAddTrackLayoutToTrackMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
-var v0 = [
-  {
-    "defaultValue": null,
-    "kind": "LocalArgument",
-    "name": "circuitId"
-  },
-  {
-    "defaultValue": null,
-    "kind": "LocalArgument",
-    "name": "input"
-  }
-],
+var v0 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
+  "name": "input"
+},
 v1 = {
+  "defaultValue": null,
+  "kind": "LocalArgument",
+  "name": "trackId"
+},
+v2 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "id",
   "storageKey": null
 },
-v2 = [
-  (v1/*: any*/),
+v3 = [
+  (v2/*: any*/),
   {
     "alias": null,
     "args": null,
@@ -66,35 +64,35 @@ v2 = [
     "storageKey": null
   }
 ],
-v3 = [
+v4 = [
   {
     "alias": null,
     "args": [
       {
         "kind": "Variable",
-        "name": "circuitId",
-        "variableName": "circuitId"
+        "name": "input",
+        "variableName": "input"
       },
       {
         "kind": "Variable",
-        "name": "input",
-        "variableName": "input"
+        "name": "trackId",
+        "variableName": "trackId"
       }
     ],
-    "concreteType": "AddTrackLayoutToCircuitPayload",
+    "concreteType": "AddTrackLayoutToTrackPayload",
     "kind": "LinkedField",
-    "name": "addTrackLayoutToCircuit",
+    "name": "addTrackLayoutToTrack",
     "plural": false,
     "selections": [
       {
         "alias": null,
         "args": null,
-        "concreteType": "Circuit",
+        "concreteType": "Track",
         "kind": "LinkedField",
-        "name": "circuit",
+        "name": "track",
         "plural": false,
         "selections": [
-          (v1/*: any*/),
+          (v2/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -102,7 +100,7 @@ v3 = [
             "kind": "LinkedField",
             "name": "trackLayouts",
             "plural": true,
-            "selections": (v2/*: any*/),
+            "selections": (v3/*: any*/),
             "storageKey": null
           }
         ],
@@ -115,7 +113,7 @@ v3 = [
         "kind": "LinkedField",
         "name": "trackLayout",
         "plural": false,
-        "selections": (v2/*: any*/),
+        "selections": (v3/*: any*/),
         "storageKey": null
       }
     ],
@@ -124,32 +122,38 @@ v3 = [
 ];
 return {
   "fragment": {
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": [
+      (v0/*: any*/),
+      (v1/*: any*/)
+    ],
     "kind": "Fragment",
     "metadata": null,
-    "name": "TrackLayoutEditModalAddTrackLayoutToCircuitMutation",
-    "selections": (v3/*: any*/),
+    "name": "TrackLayoutEditModalAddTrackLayoutToTrackMutation",
+    "selections": (v4/*: any*/),
     "type": "Mutation",
     "abstractKey": null
   },
   "kind": "Request",
   "operation": {
-    "argumentDefinitions": (v0/*: any*/),
+    "argumentDefinitions": [
+      (v1/*: any*/),
+      (v0/*: any*/)
+    ],
     "kind": "Operation",
-    "name": "TrackLayoutEditModalAddTrackLayoutToCircuitMutation",
-    "selections": (v3/*: any*/)
+    "name": "TrackLayoutEditModalAddTrackLayoutToTrackMutation",
+    "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "49c9d9d3de3e29496bccb469f3d140c2",
+    "cacheID": "c06613497fe9be141e93662bda96ab31",
     "id": null,
     "metadata": {},
-    "name": "TrackLayoutEditModalAddTrackLayoutToCircuitMutation",
+    "name": "TrackLayoutEditModalAddTrackLayoutToTrackMutation",
     "operationKind": "mutation",
-    "text": "mutation TrackLayoutEditModalAddTrackLayoutToCircuitMutation(\n  $circuitId: ID!\n  $input: CreateTrackLayoutInput!\n) {\n  addTrackLayoutToCircuit(circuitId: $circuitId, input: $input) {\n    circuit {\n      id\n      trackLayouts {\n        id\n        name\n      }\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n"
+    "text": "mutation TrackLayoutEditModalAddTrackLayoutToTrackMutation(\n  $trackId: ID!\n  $input: CreateTrackLayoutInput!\n) {\n  addTrackLayoutToTrack(trackId: $trackId, input: $input) {\n    track {\n      id\n      trackLayouts {\n        id\n        name\n      }\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "f4ea6df605290b052f65b28a509ad350";
+(node as any).hash = "5a86f86a0b87266b5c726dacbedfacde";
 
 export default node;

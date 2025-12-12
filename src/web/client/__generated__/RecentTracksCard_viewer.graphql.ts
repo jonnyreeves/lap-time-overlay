@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<0896e9d4b7cd353ec44b2c5e82cebdad>>
+ * @generated SignedSource<<29ad018b2a59f33deb5cab5ee475eb3a>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -60,7 +60,7 @@ return {
     {
       "alias": "recentTracks",
       "args": null,
-      "concreteType": "CircuitConnection",
+      "concreteType": "TrackConnection",
       "kind": "LinkedField",
       "name": "__RecentTracksCard_recentTracks_connection",
       "plural": false,
@@ -68,7 +68,7 @@ return {
         {
           "alias": null,
           "args": null,
-          "concreteType": "CircuitEdge",
+          "concreteType": "TrackEdge",
           "kind": "LinkedField",
           "name": "edges",
           "plural": true,
@@ -76,7 +76,7 @@ return {
             {
               "alias": null,
               "args": null,
-              "concreteType": "Circuit",
+              "concreteType": "Track",
               "kind": "LinkedField",
               "name": "node",
               "plural": false,
@@ -171,6 +171,6 @@ return {
 };
 })();
 
-(node as any).hash = "c675e9c0fb57d89f0dbc23dcd1c6055d";
+(node as any).hash = "c6f653c88620e4196bc994e3bba84a52";
 
 export default node;

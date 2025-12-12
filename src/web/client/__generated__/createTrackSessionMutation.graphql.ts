@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<537e03a89fbbf1defa5b6b33ca7a8f8e>>
+ * @generated SignedSource<<4232bb3f08dcaec57120df4d0134a06b>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,7 +10,6 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 export type CreateTrackSessionInput = {
-  circuitId?: string | null | undefined;
   classification: number;
   conditions?: string | null | undefined;
   date: string;
@@ -170,11 +169,11 @@ v13 = {
   "storageKey": null
 },
 v14 = {
-  "alias": "track",
+  "alias": null,
   "args": null,
-  "concreteType": "Circuit",
+  "concreteType": "Track",
   "kind": "LinkedField",
-  "name": "circuit",
+  "name": "track",
   "plural": false,
   "selections": [
     (v4/*: any*/),
@@ -312,13 +311,13 @@ return {
               (v12/*: any*/),
               (v14/*: any*/),
               {
-                "alias": "track",
+                "alias": null,
                 "args": null,
                 "filters": null,
                 "handle": "prependNode",
                 "key": "",
                 "kind": "LinkedHandle",
-                "name": "circuit",
+                "name": "track",
                 "handleArgs": [
                   {
                     "kind": "Variable",
@@ -328,7 +327,7 @@ return {
                   {
                     "kind": "Literal",
                     "name": "edgeTypeName",
-                    "value": "CircuitEdge"
+                    "value": "TrackEdge"
                   }
                 ]
               },
@@ -364,16 +363,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "fca3894efcb3a95c5f9631ad146c0ff3",
+    "cacheID": "ed0c5c26226cca5224e222b931ddaaf1",
     "id": null,
     "metadata": {},
     "name": "createTrackSessionMutation",
     "operationKind": "mutation",
-    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      conditions\n      trackLayout {\n        id\n        name\n      }\n      kart {\n        id\n        name\n      }\n      track: circuit {\n        id\n        name\n        heroImage\n        personalBest\n        personalBestDry\n        personalBestWet\n      }\n      notes\n      laps(first: 1) {\n        personalBest\n        id\n      }\n    }\n  }\n}\n"
+    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      conditions\n      trackLayout {\n        id\n        name\n      }\n      kart {\n        id\n        name\n      }\n      track {\n        id\n        name\n        heroImage\n        personalBest\n        personalBestDry\n        personalBestWet\n      }\n      notes\n      laps(first: 1) {\n        personalBest\n        id\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "b767dc75050c74f46b2b31eff36f136f";
+(node as any).hash = "af95418f5c79bde7734cb97d856c9aaa";
 
 export default node;

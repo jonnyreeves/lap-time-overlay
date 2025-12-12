@@ -152,9 +152,9 @@ const secondaryButtonStyles = css`
 `;
 
 const CreateTrackMutation = graphql`
-  mutation CreateTrackModalCreateTrackMutation($input: CreateCircuitInput!) {
-    createTrack: createCircuit(input: $input) {
-      track: circuit {
+  mutation CreateTrackModalCreateTrackMutation($input: CreateTrackInput!) {
+    createTrack(input: $input) {
+      track {
         id
         name
         karts {

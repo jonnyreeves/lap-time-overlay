@@ -1,5 +1,5 @@
 import { toUserPayload } from "./auth.js";
-import { toCircuitPayload } from "./circuit.js";
+import { toTrackPayload } from "./track.js";
 import { findTrackSessionsForUser, toTrackSessionPayload } from "./trackSession.js";
 import type { GraphQLContext } from "../context.js";
 
@@ -22,34 +22,34 @@ export const viewerResolvers = {
     const user = context.currentUser;
     const { repositories } = context;
     return toUserPayload(user, {
-      recentCircuits: (args: { first?: number; after?: string }) => {
+      recentTracks: (args: { first?: number; after?: string }) => {
         const sessions = findTrackSessionsForUser(user.id, repositories);
         const seen = new Set<string>();
-        const uniqueCircuits: ReturnType<typeof toCircuitPayload>[] = [];
+        const uniqueTracks: ReturnType<typeof toTrackPayload>[] = [];
         for (const session of sessions) {
           if (seen.has(session.trackId)) continue;
-          const circuit = repositories.tracks.findById(session.trackId);
-          if (circuit) {
+          const track = repositories.tracks.findById(session.trackId);
+          if (track) {
             seen.add(session.trackId);
-            uniqueCircuits.push(toCircuitPayload(circuit, repositories, user.id));
+            uniqueTracks.push(toTrackPayload(track, repositories, user.id));
           }
         }
 
         const first = typeof args.first === "number" && args.first > 0 ? args.first : 10;
         const afterId = args.after ? decodeCursor(args.after) : null;
         const afterIndex = afterId
-          ? uniqueCircuits.findIndex((circuit) => circuit.id === afterId)
+          ? uniqueTracks.findIndex((track) => track.id === afterId)
           : -1;
         const startIndex = afterIndex >= 0 ? afterIndex + 1 : 0;
 
-        const slice = uniqueCircuits.slice(startIndex, startIndex + first);
-        const edges = slice.map((circuit) => ({
-          cursor: encodeCursor(circuit.id),
-          node: circuit,
+        const slice = uniqueTracks.slice(startIndex, startIndex + first);
+        const edges = slice.map((track) => ({
+          cursor: encodeCursor(track.id),
+          node: track,
         }));
 
         const endIndex = startIndex + slice.length;
-        const hasNextPage = endIndex < uniqueCircuits.length;
+        const hasNextPage = endIndex < uniqueTracks.length;
         const hasPreviousPage = startIndex > 0;
 
         return {

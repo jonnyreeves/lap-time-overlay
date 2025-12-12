@@ -1,21 +1,16 @@
 import { useEffect, useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
-import type { TrackLayoutCard_circuit$key } from "src/web/client/__generated__/TrackLayoutCard_circuit.graphql.ts";
+import type { TrackLayoutCardRemoveTrackLayoutFromTrackMutation } from "src/web/client/__generated__/TrackLayoutCardRemoveTrackLayoutFromTrackMutation.graphql.ts";
 import type { TrackLayoutCardUpdateTrackLayoutMutation } from "src/web/client/__generated__/TrackLayoutCardUpdateTrackLayoutMutation.graphql.ts";
-import type { TrackLayoutCardRemoveTrackLayoutFromCircuitMutation } from "src/web/client/__generated__/TrackLayoutCardRemoveTrackLayoutFromCircuitMutation.graphql.ts";
+import type { TrackLayoutCard_track$key } from "src/web/client/__generated__/TrackLayoutCard_track.graphql.ts";
 import { Card } from "./Card.tsx";
 import { IconButton } from "./IconButton.tsx";
-import { actionsRowStyles, primaryButtonStyles } from "./session/sessionOverviewStyles.ts";
-import {
-  inlineActionButtonStyles,
-  kartListStyles,
-  kartRowStyles,
-  largeInlineActionButtonStyles,
-} from "./inlineActionButtons.ts";
+import { inlineActionButtonStyles, kartListStyles, kartRowStyles, largeInlineActionButtonStyles } from "./inlineActionButtons.ts";
 import { TrackLayoutEditModal } from "./TrackLayoutEditModal.js";
+import { actionsRowStyles, primaryButtonStyles } from "./session/sessionOverviewStyles.ts";
 
 const TrackLayoutsFragment = graphql`
-  fragment TrackLayoutCard_circuit on Circuit {
+  fragment TrackLayoutCard_track on Track {
     id
     name
     trackLayouts {
@@ -31,7 +26,7 @@ const UpdateTrackLayoutMutation = graphql`
       trackLayout {
         id
         name
-        circuit {
+        track {
           id
         }
       }
@@ -39,13 +34,13 @@ const UpdateTrackLayoutMutation = graphql`
   }
 `;
 
-const RemoveTrackLayoutFromCircuitMutation = graphql`
-  mutation TrackLayoutCardRemoveTrackLayoutFromCircuitMutation(
-    $circuitId: ID!
+const RemoveTrackLayoutFromTrackMutation = graphql`
+  mutation TrackLayoutCardRemoveTrackLayoutFromTrackMutation(
+    $trackId: ID!
     $trackLayoutId: ID!
   ) {
-    removeTrackLayoutFromCircuit(circuitId: $circuitId, trackLayoutId: $trackLayoutId) {
-      circuit {
+    removeTrackLayoutFromTrack(trackId: $trackId, trackLayoutId: $trackLayoutId) {
+      track {
         id
         trackLayouts {
           id
@@ -61,11 +56,11 @@ const RemoveTrackLayoutFromCircuitMutation = graphql`
 `;
 
 type Props = {
-  circuit: TrackLayoutCard_circuit$key;
+  track: TrackLayoutCard_track$key;
 };
 
-export function TrackLayoutCard({ circuit: circuitKey }: Props) {
-  const circuit = useFragment(TrackLayoutsFragment, circuitKey);
+export function TrackLayoutCard({ track: trackKey }: Props) {
+  const track = useFragment(TrackLayoutsFragment, trackKey);
   const [isEditing, setIsEditing] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [editableLayoutNames, setEditableLayoutNames] = useState<Map<string, string>>(
@@ -76,15 +71,15 @@ export function TrackLayoutCard({ circuit: circuitKey }: Props) {
   useEffect(() => {
     if (!isEditing) {
       const names = new Map<string, string>();
-      circuit.trackLayouts.forEach((layout) => names.set(layout.id, layout.name));
+      track.trackLayouts.forEach((layout) => names.set(layout.id, layout.name));
       setEditableLayoutNames(names);
     }
-  }, [circuit.trackLayouts, isEditing]);
+  }, [track.trackLayouts, isEditing]);
 
   const [commitUpdateLayout, isUpdatingLayout] =
     useMutation<TrackLayoutCardUpdateTrackLayoutMutation>(UpdateTrackLayoutMutation);
   const [commitRemoveLayout, isRemovingLayout] =
-    useMutation<TrackLayoutCardRemoveTrackLayoutFromCircuitMutation>(RemoveTrackLayoutFromCircuitMutation);
+    useMutation<TrackLayoutCardRemoveTrackLayoutFromTrackMutation>(RemoveTrackLayoutFromTrackMutation);
 
   const isSaving = isUpdatingLayout || isRemovingLayout;
   const formId = "track-layouts-form";
@@ -105,7 +100,7 @@ export function TrackLayoutCard({ circuit: circuitKey }: Props) {
     setActionError(null);
 
     const pending: Promise<void>[] = [];
-    for (const layout of circuit.trackLayouts) {
+    for (const layout of track.trackLayouts) {
       const editedName = editableLayoutNames.get(layout.id);
       if (editedName != null && editedName !== layout.name) {
         const trimmed = editedName.trim();
@@ -123,7 +118,7 @@ export function TrackLayoutCard({ circuit: circuitKey }: Props) {
                   trackLayout: {
                     id: layout.id,
                     name: trimmed,
-                    circuit: { id: circuit.id, __typename: "Circuit" },
+                    track: { id: track.id, __typename: "Track" },
                     __typename: "TrackLayout",
                   },
                   __typename: "UpdateTrackLayoutPayload",
@@ -166,22 +161,22 @@ export function TrackLayoutCard({ circuit: circuitKey }: Props) {
     setActionError(null);
 
     commitRemoveLayout({
-      variables: { circuitId: circuit.id, trackLayoutId },
+      variables: { trackId: track.id, trackLayoutId },
       optimisticResponse: {
-        removeTrackLayoutFromCircuit: {
-          circuit: {
-            id: circuit.id,
-            trackLayouts: circuit.trackLayouts
+        removeTrackLayoutFromTrack: {
+          track: {
+            id: track.id,
+            trackLayouts: track.trackLayouts
               .filter((layout) => layout.id !== trackLayoutId)
               .map((layout) => ({ id: layout.id, name: layout.name, __typename: "TrackLayout" })),
-            __typename: "Circuit",
+            __typename: "Track",
           },
           trackLayout: {
             id: trackLayoutId,
             name: editableLayoutNames.get(trackLayoutId) ?? "",
             __typename: "TrackLayout",
           },
-          __typename: "RemoveTrackLayoutFromCircuitPayload",
+          __typename: "RemoveTrackLayoutFromTrackPayload",
         },
       },
       onError: (error) => setActionError(error.message),
@@ -218,11 +213,11 @@ export function TrackLayoutCard({ circuit: circuitKey }: Props) {
     >
       {actionError ? <p css={{ color: "red" }}>{actionError}</p> : null}
       <form id={formId} onSubmit={handleSubmit}>
-        {circuit.trackLayouts.length === 0 ? (
+        {track.trackLayouts.length === 0 ? (
           <p>No track layouts added to this track yet.</p>
         ) : (
           <ul css={kartListStyles}>
-            {circuit.trackLayouts.map((layout) => (
+            {track.trackLayouts.map((layout) => (
               <li key={layout.id} css={kartRowStyles}>
                 {isEditing ? (
                   <input
@@ -279,7 +274,7 @@ export function TrackLayoutCard({ circuit: circuitKey }: Props) {
 
       {showAddLayoutModal && (
         <TrackLayoutEditModal
-          circuitId={circuit.id}
+          trackId={track.id}
           onClose={handleCloseModal}
           onTrackLayoutCreated={handleLayoutCreated}
         />

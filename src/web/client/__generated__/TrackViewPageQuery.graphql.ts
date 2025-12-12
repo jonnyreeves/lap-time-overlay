@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<e3cce0ae563b17ec9e318a87025aa71e>>
+ * @generated SignedSource<<78e5c19b1559671e57b78da6afa1daed>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -17,7 +17,7 @@ export type TrackViewPageQuery$data = {
   readonly track: {
     readonly id: string;
     readonly name: string;
-    readonly " $fragmentSpreads": FragmentRefs<"TrackKartsCard_circuit" | "TrackLayoutCard_circuit">;
+    readonly " $fragmentSpreads": FragmentRefs<"TrackKartsCard_track" | "TrackLayoutCard_track">;
   } | null | undefined;
 };
 export type TrackViewPageQuery = {
@@ -66,11 +66,11 @@ return {
     "name": "TrackViewPageQuery",
     "selections": [
       {
-        "alias": "track",
+        "alias": null,
         "args": (v1/*: any*/),
-        "concreteType": "Circuit",
+        "concreteType": "Track",
         "kind": "LinkedField",
-        "name": "circuit",
+        "name": "track",
         "plural": false,
         "selections": [
           (v2/*: any*/),
@@ -78,12 +78,12 @@ return {
           {
             "args": null,
             "kind": "FragmentSpread",
-            "name": "TrackKartsCard_circuit"
+            "name": "TrackKartsCard_track"
           },
           {
             "args": null,
             "kind": "FragmentSpread",
-            "name": "TrackLayoutCard_circuit"
+            "name": "TrackLayoutCard_track"
           }
         ],
         "storageKey": null
@@ -99,11 +99,11 @@ return {
     "name": "TrackViewPageQuery",
     "selections": [
       {
-        "alias": "track",
+        "alias": null,
         "args": (v1/*: any*/),
-        "concreteType": "Circuit",
+        "concreteType": "Track",
         "kind": "LinkedField",
-        "name": "circuit",
+        "name": "track",
         "plural": false,
         "selections": [
           (v2/*: any*/),
@@ -134,16 +134,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "60372da2b227b02212a710e771dd7d65",
+    "cacheID": "faec56fa45eb64e9dd71bec6360c3efe",
     "id": null,
     "metadata": {},
     "name": "TrackViewPageQuery",
     "operationKind": "query",
-    "text": "query TrackViewPageQuery(\n  $trackId: ID!\n) {\n  track: circuit(id: $trackId) {\n    id\n    name\n    ...TrackKartsCard_circuit\n    ...TrackLayoutCard_circuit\n  }\n}\n\nfragment TrackKartsCard_circuit on Circuit {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n\nfragment TrackLayoutCard_circuit on Circuit {\n  id\n  name\n  trackLayouts {\n    id\n    name\n  }\n}\n"
+    "text": "query TrackViewPageQuery(\n  $trackId: ID!\n) {\n  track(id: $trackId) {\n    id\n    name\n    ...TrackKartsCard_track\n    ...TrackLayoutCard_track\n  }\n}\n\nfragment TrackKartsCard_track on Track {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n\nfragment TrackLayoutCard_track on Track {\n  id\n  name\n  trackLayouts {\n    id\n    name\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "91e9ed8d64d8cf3535bcf14db02500f6";
+(node as any).hash = "3200e7e331860b84588c96e4b0b0bc64";
 
 export default node;

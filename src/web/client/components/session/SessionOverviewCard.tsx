@@ -60,7 +60,7 @@ const UpdateTrackSessionMutation = graphql`
         classification
         conditions
         notes
-        track: circuit {
+        track {
           id
           name
         }
@@ -238,7 +238,7 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
             track: {
               id: payload.trackId,
               name: nextTrackName,
-              __typename: "Circuit",
+              __typename: "Track",
             },
             kart: nextKart
               ? { id: nextKart.id, name: nextKart.name, __typename: "Kart" }
