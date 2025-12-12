@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<78e5c19b1559671e57b78da6afa1daed>>
+ * @generated SignedSource<<20e069d6299291888a93073b6261156c>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -17,7 +17,7 @@ export type TrackViewPageQuery$data = {
   readonly track: {
     readonly id: string;
     readonly name: string;
-    readonly " $fragmentSpreads": FragmentRefs<"TrackKartsCard_track" | "TrackLayoutCard_track">;
+    readonly " $fragmentSpreads": FragmentRefs<"TrackKartsCard_track" | "TrackLayoutCard_track" | "TrackPersonalBestsCard_track">;
   } | null | undefined;
 };
 export type TrackViewPageQuery = {
@@ -84,6 +84,11 @@ return {
             "args": null,
             "kind": "FragmentSpread",
             "name": "TrackLayoutCard_track"
+          },
+          {
+            "args": null,
+            "kind": "FragmentSpread",
+            "name": "TrackPersonalBestsCard_track"
           }
         ],
         "storageKey": null
@@ -127,6 +132,58 @@ return {
             "plural": true,
             "selections": (v4/*: any*/),
             "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "TrackPersonalBest",
+            "kind": "LinkedField",
+            "name": "personalBestEntries",
+            "plural": true,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "trackSessionId",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "conditions",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "lapTime",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "Kart",
+                "kind": "LinkedField",
+                "name": "kart",
+                "plural": false,
+                "selections": (v4/*: any*/),
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "TrackLayout",
+                "kind": "LinkedField",
+                "name": "trackLayout",
+                "plural": false,
+                "selections": (v4/*: any*/),
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
           }
         ],
         "storageKey": null
@@ -134,16 +191,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "faec56fa45eb64e9dd71bec6360c3efe",
+    "cacheID": "061de10e3b3393decd8c0a3ddb47c571",
     "id": null,
     "metadata": {},
     "name": "TrackViewPageQuery",
     "operationKind": "query",
-    "text": "query TrackViewPageQuery(\n  $trackId: ID!\n) {\n  track(id: $trackId) {\n    id\n    name\n    ...TrackKartsCard_track\n    ...TrackLayoutCard_track\n  }\n}\n\nfragment TrackKartsCard_track on Track {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n\nfragment TrackLayoutCard_track on Track {\n  id\n  name\n  trackLayouts {\n    id\n    name\n  }\n}\n"
+    "text": "query TrackViewPageQuery(\n  $trackId: ID!\n) {\n  track(id: $trackId) {\n    id\n    name\n    ...TrackKartsCard_track\n    ...TrackLayoutCard_track\n    ...TrackPersonalBestsCard_track\n  }\n}\n\nfragment TrackKartsCard_track on Track {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n\nfragment TrackLayoutCard_track on Track {\n  id\n  name\n  trackLayouts {\n    id\n    name\n  }\n}\n\nfragment TrackPersonalBestsCard_track on Track {\n  id\n  personalBestEntries {\n    trackSessionId\n    conditions\n    lapTime\n    kart {\n      id\n      name\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "3200e7e331860b84588c96e4b0b0bc64";
+(node as any).hash = "3601068d4c57daf61e3773b055002660";
 
 export default node;

@@ -1,12 +1,11 @@
 import { css } from "@emotion/react";
 import { graphql, useFragment } from "react-relay";
 import {
-  type RecentTracksCard_viewer$data,
   type RecentTracksCard_viewer$key,
 } from "../../__generated__/RecentTracksCard_viewer.graphql.js";
 import { Card } from "../Card.js";
 import { useNavigate } from "react-router-dom";
-import { RecentTrackPersonalBestPill } from "./RecentTrackPersonalBestPill.js";
+import { TrackPersonalBestPill, type TrackPersonalBestEntry } from "./TrackPersonalBestPill.js";
 
 const RecentTracksCardFragment = graphql`
   fragment RecentTracksCard_viewer on User {
@@ -134,11 +133,7 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-type PersonalBestEntry = NonNullable<
-  NonNullable<
-    NonNullable<RecentTracksCard_viewer$data["recentTracks"]>["edges"]
-  >[number]
->["node"]["personalBestEntries"][number];
+type PersonalBestEntry = TrackPersonalBestEntry;
 
 export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$key }) {
   const data = useFragment(RecentTracksCardFragment, viewer);
@@ -179,7 +174,7 @@ export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$k
             <div css={trackPbStyles}>
               {track.personalBestEntries?.length ? (
                 track.personalBestEntries.map((entry: PersonalBestEntry) => (
-                  <RecentTrackPersonalBestPill
+                  <TrackPersonalBestPill
                     key={`${entry.trackLayout.id}-${entry.kart.id}-${entry.conditions}`}
                     entry={entry}
                     onClick={() => handleSessionNavigate(entry.trackSessionId)}

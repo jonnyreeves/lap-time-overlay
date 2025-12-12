@@ -2,7 +2,8 @@ import { formatLapTimeSeconds } from "./lapTime.js";
 import { parseSessionFormat } from "./sessionImportShared.js";
 import { type ParsedDaytonaEmail, type ParsedLap } from "./sessionImportTypes.js";
 
-const LAP_LINE_RE = /^\s*(\d+)\s+(\d+):(\d+):(\d+)\s+\[(\d+)\]\s*$/; // 01 0:57:755 [11]
+// Matches a single lap entry like `01 0:57:755 [11]` and can appear multiple times on a line.
+const LAP_ENTRY_RE = /(\d+)\s+(\d+):(\d+):(\d+)\s+\[(\d+)\]/g;
 const TIME_STARTED_RE = /time\s*started\s*(?::|\-)?\s*(.+)/i;
 
 export function parseDaytonaEmail(text: string): ParsedDaytonaEmail {
@@ -16,30 +17,39 @@ export function parseDaytonaEmail(text: string): ParsedDaytonaEmail {
     const line = lineRaw.trim();
     if (!line || line.startsWith("#")) continue;
 
-    const m = line.match(LAP_LINE_RE);
-    if (!m) {
-      continue;
+    const matches = [...line.matchAll(LAP_ENTRY_RE)];
+    if (!matches.length) continue;
+
+    for (const m of matches) {
+      const lapNum = parseInt(m[1], 10);
+      const mm = parseInt(m[2], 10);
+      const ss = parseInt(m[3], 10);
+      const ms = parseInt(m[4], 10);
+      const pos = parseInt(m[5], 10);
+
+      if (![lapNum, mm, ss, ms, pos].every(Number.isFinite)) continue;
+      finalPosition = pos;
+
+      const durationS = mm * 60 + ss + ms / 1000;
+      laps.push({
+        lapNumber: lapNum,
+        timeSeconds: durationS,
+        displayTime: formatLapTimeSeconds(durationS),
+        lapEvents: [{ offset: 0, event: "position", value: String(pos) }],
+      });
     }
-
-    const lapNum = parseInt(m[1], 10);
-    const mm = parseInt(m[2], 10);
-    const ss = parseInt(m[3], 10);
-    const ms = parseInt(m[4], 10);
-    const pos = parseInt(m[5], 10);
-
-    if (![lapNum, mm, ss, ms, pos].every(Number.isFinite)) continue;
-    finalPosition = pos;
-
-    const durationS = mm * 60 + ss + ms / 1000;
-    laps.push({
-      lapNumber: lapNum,
-      timeSeconds: durationS,
-      displayTime: formatLapTimeSeconds(durationS),
-      lapEvents: [{ offset: 0, event: "position", value: String(pos) }],
-    });
   }
 
   laps.sort((a, b) => a.lapNumber - b.lapNumber);
+
+  const lastLap = laps[laps.length - 1];
+  const lastLapPosition = lastLap?.lapEvents?.find((event) => event.event === "position");
+  if (lastLapPosition) {
+    const parsed = Number.parseInt(lastLapPosition.value, 10);
+    if (Number.isFinite(parsed)) {
+      finalPosition = parsed;
+    }
+  }
 
   return {
     provider: "daytona",

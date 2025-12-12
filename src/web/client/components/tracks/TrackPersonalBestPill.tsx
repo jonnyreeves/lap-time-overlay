@@ -1,12 +1,13 @@
 import { css } from "@emotion/react";
 import { formatStopwatchTime } from "../../utils/lapTime.js";
-import type { RecentTracksCard_viewer$data } from "../../__generated__/RecentTracksCard_viewer.graphql.js";
 
-type PersonalBestEntry = NonNullable<
-  NonNullable<
-    NonNullable<RecentTracksCard_viewer$data["recentTracks"]>["edges"]
-  >[number]
->["node"]["personalBestEntries"][number];
+export type TrackPersonalBestEntry = {
+  readonly trackSessionId: string;
+  readonly conditions: string;
+  readonly lapTime: number | null | undefined;
+  readonly kart: { readonly id: string; readonly name: string };
+  readonly trackLayout: { readonly id: string; readonly name: string };
+};
 
 const pillContainerStyles = css`
   display: flex;
@@ -87,12 +88,12 @@ function getConditionMeta(condition: string) {
   return { emoji: "⛅️", label: condition };
 }
 
-export function RecentTrackPersonalBestPill({
+export function TrackPersonalBestPill({
   entry,
   onClick,
 }: {
-  entry: PersonalBestEntry;
-  onClick?: (entry: PersonalBestEntry) => void;
+  entry: TrackPersonalBestEntry;
+  onClick?: (entry: TrackPersonalBestEntry) => void;
 }) {
   const { emoji, label } = getConditionMeta(entry.conditions);
   const formattedTime = formatPersonalBest(entry.lapTime) ?? "—";
