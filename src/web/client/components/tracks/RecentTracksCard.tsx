@@ -1,10 +1,11 @@
 import { css } from "@emotion/react";
 import { graphql, useFragment } from "react-relay";
+import { useNavigate } from "react-router-dom";
 import {
   type RecentTracksCard_viewer$key,
 } from "../../__generated__/RecentTracksCard_viewer.graphql.js";
 import { Card } from "../Card.js";
-import { useNavigate } from "react-router-dom";
+import { TrackAvatar } from "./TrackAvatar.js";
 import { TrackPersonalBestPill } from "./TrackPersonalBestPill.js";
 import { groupPersonalBestEntries } from "./personalBestGrouping.js";
 
@@ -70,26 +71,11 @@ const trackLinkButtonStyles = css`
   cursor: pointer;
 `;
 
-const heroImageContainerStyles = css`
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  overflow: hidden;
+const avatarButtonStyles = css`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #e2e8f4; /* Light background for initials */
-  color: #6366f1; /* Accent color for initials */
-  font-size: 2rem;
-  font-weight: bold;
   margin-bottom: 10px;
-  border: 1px solid #e0e0e0; /* Subtle border */
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
 `;
 
 const trackNameStyles = css`
@@ -121,19 +107,6 @@ const emptyStateStyles = css`
   font-weight: 600;
 `;
 
-function getInitials(name: string): string {
-  if (!name) return "";
-  const words = name.split(" ");
-  if (words.length === 1) {
-    return name.substring(0, 2).toUpperCase();
-  }
-  return words
-    .filter((word) => word.length > 0) // Filter out empty strings from multiple spaces
-    .map((word) => word[0])
-    .join("")
-    .toUpperCase();
-}
-
 export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$key }) {
   const data = useFragment(RecentTracksCardFragment, viewer);
   const tracks = (data.recentTracks?.edges ?? [])
@@ -153,15 +126,11 @@ export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$k
           >
             <button
               type="button"
-              css={[trackLinkButtonStyles, heroImageContainerStyles]}
+              css={[trackLinkButtonStyles, avatarButtonStyles]}
               onClick={() => handleTrackNavigate(track.id)}
               aria-label={`View ${track.name}`}
             >
-              {track.heroImage ? (
-                <img src={track.heroImage} alt={track.name} />
-              ) : (
-                <span>{getInitials(track.name)}</span>
-              )}
+              <TrackAvatar name={track.name} heroImage={track.heroImage} size={100} />
             </button>
             <button
               type="button"
@@ -177,7 +146,7 @@ export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$k
                     <TrackPersonalBestPill
                       key={key}
                       entry={fastestEntry}
-                      topEntries={topEntries}
+                      topEntries={[]}
                       onClick={(entry) => handleSessionNavigate(entry.trackSessionId)}
                     />
                   )

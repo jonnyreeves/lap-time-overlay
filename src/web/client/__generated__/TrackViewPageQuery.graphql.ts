@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<20e069d6299291888a93073b6261156c>>
+ * @generated SignedSource<<d0f575db2fd0de567a3ef55169b7c22f>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,6 +15,7 @@ export type TrackViewPageQuery$variables = {
 };
 export type TrackViewPageQuery$data = {
   readonly track: {
+    readonly heroImage: string | null | undefined;
     readonly id: string;
     readonly name: string;
     readonly " $fragmentSpreads": FragmentRefs<"TrackKartsCard_track" | "TrackLayoutCard_track" | "TrackPersonalBestsCard_track">;
@@ -54,7 +55,14 @@ v3 = {
   "name": "name",
   "storageKey": null
 },
-v4 = [
+v4 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "heroImage",
+  "storageKey": null
+},
+v5 = [
   (v2/*: any*/),
   (v3/*: any*/)
 ];
@@ -75,6 +83,7 @@ return {
         "selections": [
           (v2/*: any*/),
           (v3/*: any*/),
+          (v4/*: any*/),
           {
             "args": null,
             "kind": "FragmentSpread",
@@ -113,6 +122,7 @@ return {
         "selections": [
           (v2/*: any*/),
           (v3/*: any*/),
+          (v4/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -120,7 +130,7 @@ return {
             "kind": "LinkedField",
             "name": "karts",
             "plural": true,
-            "selections": (v4/*: any*/),
+            "selections": (v5/*: any*/),
             "storageKey": null
           },
           {
@@ -130,7 +140,7 @@ return {
             "kind": "LinkedField",
             "name": "trackLayouts",
             "plural": true,
-            "selections": (v4/*: any*/),
+            "selections": (v5/*: any*/),
             "storageKey": null
           },
           {
@@ -169,7 +179,7 @@ return {
                 "kind": "LinkedField",
                 "name": "kart",
                 "plural": false,
-                "selections": (v4/*: any*/),
+                "selections": (v5/*: any*/),
                 "storageKey": null
               },
               {
@@ -179,7 +189,7 @@ return {
                 "kind": "LinkedField",
                 "name": "trackLayout",
                 "plural": false,
-                "selections": (v4/*: any*/),
+                "selections": (v5/*: any*/),
                 "storageKey": null
               }
             ],
@@ -191,16 +201,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "061de10e3b3393decd8c0a3ddb47c571",
+    "cacheID": "0606107b312a13e2f4d4fb1ddf76ea11",
     "id": null,
     "metadata": {},
     "name": "TrackViewPageQuery",
     "operationKind": "query",
-    "text": "query TrackViewPageQuery(\n  $trackId: ID!\n) {\n  track(id: $trackId) {\n    id\n    name\n    ...TrackKartsCard_track\n    ...TrackLayoutCard_track\n    ...TrackPersonalBestsCard_track\n  }\n}\n\nfragment TrackKartsCard_track on Track {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n\nfragment TrackLayoutCard_track on Track {\n  id\n  name\n  trackLayouts {\n    id\n    name\n  }\n}\n\nfragment TrackPersonalBestsCard_track on Track {\n  id\n  personalBestEntries {\n    trackSessionId\n    conditions\n    lapTime\n    kart {\n      id\n      name\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n"
+    "text": "query TrackViewPageQuery(\n  $trackId: ID!\n) {\n  track(id: $trackId) {\n    id\n    name\n    heroImage\n    ...TrackKartsCard_track\n    ...TrackLayoutCard_track\n    ...TrackPersonalBestsCard_track\n  }\n}\n\nfragment TrackKartsCard_track on Track {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n\nfragment TrackLayoutCard_track on Track {\n  id\n  name\n  trackLayouts {\n    id\n    name\n  }\n}\n\nfragment TrackPersonalBestsCard_track on Track {\n  id\n  name\n  heroImage\n  personalBestEntries {\n    trackSessionId\n    conditions\n    lapTime\n    kart {\n      id\n      name\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "3601068d4c57daf61e3773b055002660";
+(node as any).hash = "7490c9d91f1b0728d869af569dab5781";
 
 export default node;

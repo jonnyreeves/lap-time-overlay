@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<34f5d51f70390dc75747e218a88d4c24>>
+ * @generated SignedSource<<31e741114a2f471a295e3524d4e2583b>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -11,7 +11,9 @@
 import { ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type TrackPersonalBestsCard_track$data = {
+  readonly heroImage: string | null | undefined;
   readonly id: string;
+  readonly name: string;
   readonly personalBestEntries: ReadonlyArray<{
     readonly conditions: string;
     readonly kart: {
@@ -40,15 +42,16 @@ var v0 = {
   "name": "id",
   "storageKey": null
 },
-v1 = [
+v1 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "name",
+  "storageKey": null
+},
+v2 = [
   (v0/*: any*/),
-  {
-    "alias": null,
-    "args": null,
-    "kind": "ScalarField",
-    "name": "name",
-    "storageKey": null
-  }
+  (v1/*: any*/)
 ];
 return {
   "argumentDefinitions": [],
@@ -57,6 +60,14 @@ return {
   "name": "TrackPersonalBestsCard_track",
   "selections": [
     (v0/*: any*/),
+    (v1/*: any*/),
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "heroImage",
+      "storageKey": null
+    },
     {
       "alias": null,
       "args": null,
@@ -93,7 +104,7 @@ return {
           "kind": "LinkedField",
           "name": "kart",
           "plural": false,
-          "selections": (v1/*: any*/),
+          "selections": (v2/*: any*/),
           "storageKey": null
         },
         {
@@ -103,7 +114,7 @@ return {
           "kind": "LinkedField",
           "name": "trackLayout",
           "plural": false,
-          "selections": (v1/*: any*/),
+          "selections": (v2/*: any*/),
           "storageKey": null
         }
       ],
@@ -115,6 +126,6 @@ return {
 };
 })();
 
-(node as any).hash = "7301ce59014ce71b404d6372182631ee";
+(node as any).hash = "fba8f61e059dbc983336f7108eebe10d";
 
 export default node;

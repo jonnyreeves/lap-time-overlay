@@ -138,7 +138,7 @@ export function TrackPersonalBestPill({
   onClick?: (entry: TrackPersonalBestEntry) => void;
 }) {
   const { emoji, label } = getConditionMeta(entry.conditions);
-  const lapsToDisplay = (topEntries?.length ? topEntries : [entry]).slice(0, 3);
+  const lapsToDisplay = (topEntries?.length ? topEntries : []).slice(0, 3);
   const formattedTime = formatPersonalBest(entry.lapTime) ?? "—";
 
   return (
@@ -155,7 +155,7 @@ export function TrackPersonalBestPill({
           <span>{label}</span>
         </span>
       </div>
-      <div css={lapListStyles}>
+      {lapsToDisplay.length > 0 && (<div css={lapListStyles}>
         {lapsToDisplay.map((lapEntry, index) => (
           <button
             type="button"
@@ -167,7 +167,7 @@ export function TrackPersonalBestPill({
             <span css={lapTimeStyles}>{formatPersonalBest(lapEntry.lapTime) ?? "—"}</span>
           </button>
         ))}
-      </div>
+      </div>)}
     </div>
   );
 }

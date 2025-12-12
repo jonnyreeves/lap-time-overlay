@@ -5,7 +5,7 @@ import type { TrackLayoutCardUpdateTrackLayoutMutation } from "src/web/client/__
 import type { TrackLayoutCard_track$key } from "src/web/client/__generated__/TrackLayoutCard_track.graphql.ts";
 import { Card } from "../Card.tsx";
 import { IconButton } from "../IconButton.tsx";
-import { inlineActionButtonStyles, kartListStyles, kartRowStyles, largeInlineActionButtonStyles } from "../inlineActionButtons.ts";
+import { dangerInlineActionButtonStyles, inlineActionButtonStyles, kartListStyles, kartRowStyles, largeInlineActionButtonStyles } from "../inlineActionButtons.ts";
 import { TrackLayoutEditModal } from "./TrackLayoutEditModal.js";
 import { actionsRowStyles, primaryButtonStyles } from "../session/sessionOverviewStyles.ts";
 
@@ -243,7 +243,7 @@ export function TrackLayoutCard({ track: trackKey }: Props) {
                 {isEditing && (
                   <div className="actions">
                     <button
-                      css={inlineActionButtonStyles}
+                      css={dangerInlineActionButtonStyles}
                       onClick={() => handleDeleteLayout(layout.id)}
                       disabled={isSaving}
                       type="button"

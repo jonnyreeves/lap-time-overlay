@@ -2,13 +2,17 @@ import { css } from "@emotion/react";
 import { graphql, useFragment } from "react-relay";
 import { useNavigate } from "react-router-dom";
 import type { TrackPersonalBestsCard_track$key } from "../../__generated__/TrackPersonalBestsCard_track.graphql.js";
+import { titleStyles } from "../../styles/typography.js";
 import { Card } from "../Card.js";
+import { TrackAvatar } from "./TrackAvatar.js";
 import { TrackPersonalBestPill, type TrackPersonalBestEntry } from "./TrackPersonalBestPill.js";
 import { groupPersonalBestEntries } from "./personalBestGrouping.js";
 
 const TrackPersonalBestsFragment = graphql`
   fragment TrackPersonalBestsCard_track on Track {
     id
+    name
+    heroImage
     personalBestEntries {
       trackSessionId
       conditions
@@ -42,11 +46,26 @@ const emptyStateStyles = css`
   text-align: center;
 `;
 
+const trackHeaderStyles = css`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+`;
+
+const trackTitleStyles = css`
+  ${titleStyles};
+  font-size: 2.4rem;
+  margin: 0;
+  cursor: default;
+`;
+
 type Props = {
   track: TrackPersonalBestsCard_track$key;
+  showTrackHeader?: boolean;
 };
 
-export function TrackPersonalBestsCard({ track }: Props) {
+export function TrackPersonalBestsCard({ track, showTrackHeader = false }: Props) {
   const data = useFragment(TrackPersonalBestsFragment, track);
   const navigate = useNavigate();
   const personalBestEntries = data.personalBestEntries ?? [];
@@ -57,7 +76,13 @@ export function TrackPersonalBestsCard({ track }: Props) {
   }
 
   return (
-    <Card title="Personal Bests">
+    <Card title="">
+      {showTrackHeader ? (
+        <div css={trackHeaderStyles}>
+          <TrackAvatar name={data.name ?? ""} heroImage={data.heroImage} size={84} />
+          <p css={trackTitleStyles}>{data.name}</p>
+        </div>
+      ) : null}
       {groupedEntries.length ? (
         <div css={pillGridStyles}>
           {groupedEntries.map(({ key, fastestEntry, topEntries }) => (

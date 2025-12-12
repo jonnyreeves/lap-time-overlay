@@ -7,7 +7,6 @@ import { Card } from "../../components/Card.js";
 import { TrackKartsCard } from "../../components/tracks/TrackKartsCard.js";
 import { TrackLayoutCard } from "../../components/tracks/TrackLayoutCard.js";
 import { TrackPersonalBestsCard } from "../../components/tracks/TrackPersonalBestsCard.js";
-import { titleStyles } from "../../styles/typography.js";
 
 const sideBySideStyles = css`
   display: grid;
@@ -20,6 +19,7 @@ export const TRACK_VIEW_QUERY = graphql`
     track(id: $trackId) {
       id
       name
+      heroImage
       ...TrackKartsCard_track
       ...TrackLayoutCard_track
       ...TrackPersonalBestsCard_track
@@ -37,19 +37,14 @@ export default function TrackViewPage(): React.ReactNode {
   if (!data.track) {
     return (
       <Card>
-        <p css={titleStyles}>Track not found</p>
+        <p>Track not found</p>
       </Card>
     );
   }
 
-  const { name } = data.track;
-
   return (
     <>
-      <Card>
-        <p css={titleStyles}>{name}</p>
-      </Card>
-      <TrackPersonalBestsCard track={data.track} />
+      <TrackPersonalBestsCard track={data.track} showTrackHeader />
       <div css={sideBySideStyles}>
         <TrackKartsCard track={data.track} />
         <TrackLayoutCard track={data.track} />

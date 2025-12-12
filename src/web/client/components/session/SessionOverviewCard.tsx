@@ -1,5 +1,7 @@
+import { css } from "@emotion/react";
 import { useEffect, useState } from "react";
 import { graphql, useMutation } from "react-relay";
+import { Link } from "react-router-dom";
 import type { SessionOverviewCardUpdateTrackSessionMutation } from "../../__generated__/SessionOverviewCardUpdateTrackSessionMutation.graphql.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 import { Card } from "../Card.js";
@@ -49,6 +51,25 @@ type Props = {
     trackLayouts: readonly { id: string; name: string }[];
   }[];
 };
+
+const trackLinkStyles = css`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    color: #4338ca;
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+`;
 
 const UpdateTrackSessionMutation = graphql`
   mutation SessionOverviewCardUpdateTrackSessionMutation($input: UpdateTrackSessionInput!) {
@@ -328,7 +349,13 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
                 ))}
               </select>
             ) : (
-              <p className="value">{session.track.name}</p>
+              <Link
+                to={`/tracks/view/${session.track.id}`}
+                className="value"
+                css={trackLinkStyles}
+              >
+                {session.track.name}
+              </Link>
             )}
           </div>
           <div css={infoTileStyles}>
