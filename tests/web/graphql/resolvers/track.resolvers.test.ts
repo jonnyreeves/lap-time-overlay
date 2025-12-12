@@ -164,18 +164,21 @@ describe("track resolver", () => {
       expect.objectContaining({
         conditions: "Dry",
         lapTime: 72.5,
+        trackSessionId: "s3",
         kart: expect.objectContaining({ id: "k1", name: "Rotax" }),
         trackLayout: expect.objectContaining({ id: "l1", name: "GP" }),
       }),
       expect.objectContaining({
         conditions: "Wet",
         lapTime: 79.5,
+        trackSessionId: "s2",
         kart: expect.objectContaining({ id: "k1", name: "Rotax" }),
         trackLayout: expect.objectContaining({ id: "l1", name: "GP" }),
       }),
       expect.objectContaining({
         conditions: "Dry",
         lapTime: 70.1,
+        trackSessionId: "s4",
         kart: expect.objectContaining({ id: "k2", name: "Sodi" }),
         trackLayout: expect.objectContaining({ id: "l2", name: "Indy" }),
       }),
@@ -186,6 +189,7 @@ describe("track resolver", () => {
       expect.objectContaining({
         conditions: "Dry",
         lapTime: 69.5,
+        trackSessionId: "s5",
         kart: expect.objectContaining({ id: "k1", name: "Rotax" }),
         trackLayout: expect.objectContaining({ id: "l3", name: "Full" }),
       }),

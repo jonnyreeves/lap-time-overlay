@@ -19,6 +19,7 @@ const pillContainerStyles = css`
   color: #475569;
   text-align: center;
   align-items: center;
+  cursor: pointer;
 `;
 
 const pbLabelStyles = css`
@@ -86,12 +87,29 @@ function getConditionMeta(condition: string) {
   return { emoji: "⛅️", label: condition };
 }
 
-export function RecentTrackPersonalBestPill({ entry }: { entry: PersonalBestEntry }) {
+export function RecentTrackPersonalBestPill({
+  entry,
+  onClick,
+}: {
+  entry: PersonalBestEntry;
+  onClick?: (entry: PersonalBestEntry) => void;
+}) {
   const { emoji, label } = getConditionMeta(entry.conditions);
   const formattedTime = formatPersonalBest(entry.lapTime) ?? "—";
 
   return (
-    <div css={pillContainerStyles}>
+    <div
+      css={pillContainerStyles}
+      role="button"
+      tabIndex={0}
+      onClick={() => onClick?.(entry)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick?.(entry);
+        }
+      }}
+    >
       <div css={pbHeaderStyles}>
         <span css={pbLabelStyles}>PB</span>
         <span css={pbValueStyles}>{formattedTime}</span>

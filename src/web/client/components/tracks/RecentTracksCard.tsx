@@ -18,6 +18,7 @@ const RecentTracksCardFragment = graphql`
           name
           heroImage
           personalBestEntries {
+            trackSessionId
             conditions
             lapTime
             kart {
@@ -55,6 +56,17 @@ const trackItemStyles = css`
   align-items: center;
   text-align: center;
   padding: 10px;
+  gap: 0;
+`;
+
+const trackLinkButtonStyles = css`
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
   cursor: pointer;
 `;
 
@@ -84,7 +96,10 @@ const trackNameStyles = css`
   font-size: 1.1rem;
   font-weight: 600;
   color: #333;
-  margin-top: 5px;
+  margin-top: 0;
+  display: inline-flex;
+  justify-content: center;
+  width: 100%;
 `;
 
 const trackPbStyles = css`
@@ -131,6 +146,8 @@ export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$k
     .map((edge) => edge?.node)
     .filter(Boolean);
   const navigate = useNavigate();
+  const handleTrackNavigate = (trackId: string) => navigate(`/tracks/view/${trackId}`);
+  const handleSessionNavigate = (sessionId: string) => navigate(`/session/${sessionId}`);
 
   return (
     <Card title="Recent Tracks">
@@ -139,22 +156,33 @@ export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$k
           <div
             key={track.id}
             css={trackItemStyles}
-            onClick={() => navigate(`/tracks/view/${track.id}`)}
           >
-            <div css={heroImageContainerStyles}>
+            <button
+              type="button"
+              css={[trackLinkButtonStyles, heroImageContainerStyles]}
+              onClick={() => handleTrackNavigate(track.id)}
+              aria-label={`View ${track.name}`}
+            >
               {track.heroImage ? (
                 <img src={track.heroImage} alt={track.name} />
               ) : (
                 <span>{getInitials(track.name)}</span>
               )}
-            </div>
-            <div css={trackNameStyles}>{track.name}</div>
+            </button>
+            <button
+              type="button"
+              css={[trackLinkButtonStyles, trackNameStyles]}
+              onClick={() => handleTrackNavigate(track.id)}
+            >
+              {track.name}
+            </button>
             <div css={trackPbStyles}>
               {track.personalBestEntries?.length ? (
                 track.personalBestEntries.map((entry: PersonalBestEntry) => (
                   <RecentTrackPersonalBestPill
                     key={`${entry.trackLayout.id}-${entry.kart.id}-${entry.conditions}`}
                     entry={entry}
+                    onClick={() => handleSessionNavigate(entry.trackSessionId)}
                   />
                 ))
               ) : (

@@ -200,6 +200,7 @@ const CreateTrackSessionMutation = graphql`
           name
           heroImage
           personalBestEntries {
+            trackSessionId
             conditions
             lapTime
             kart {

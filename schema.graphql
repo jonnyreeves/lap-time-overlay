@@ -152,6 +152,7 @@ type Track {
 type TrackPersonalBest {
   kart: Kart!
   trackLayout: TrackLayout!
+  trackSessionId: ID!
   conditions: String!
   lapTime: Float!
 }

@@ -11,6 +11,7 @@ type TrackPersonalBestEntry = {
   trackLayout: TrackLayoutRecord;
   conditions: TrackSessionConditions;
   lapTime: number;
+  trackSessionId: string;
 };
 
 function toKartPayload(kart: KartRecord) {
@@ -70,6 +71,7 @@ export function getTrackPersonalBestEntries(
         trackLayout,
         conditions: session.conditions,
         lapTime: bestLapTime,
+        trackSessionId: session.id,
       });
     }
   }
@@ -91,6 +93,7 @@ export function getTrackPersonalBestEntries(
   return entries.map((entry) => ({
     kart: toKartPayload(entry.kart),
     trackLayout: toTrackLayoutPayload(entry.trackLayout, repositories, userId, track),
+    trackSessionId: entry.trackSessionId,
     conditions: entry.conditions,
     lapTime: entry.lapTime,
   }));

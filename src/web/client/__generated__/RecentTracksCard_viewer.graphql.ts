@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<6a38aaae7b612a84b1af4e7497669a38>>
+ * @generated SignedSource<<5347b66b6d25066fd0c92c46616fd8be>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -29,6 +29,7 @@ export type RecentTracksCard_viewer$data = {
             readonly id: string;
             readonly name: string;
           };
+          readonly trackSessionId: string;
         }>;
       };
     }>;
@@ -122,6 +123,13 @@ return {
                       "alias": null,
                       "args": null,
                       "kind": "ScalarField",
+                      "name": "trackSessionId",
+                      "storageKey": null
+                    },
+                    {
+                      "alias": null,
+                      "args": null,
+                      "kind": "ScalarField",
                       "name": "conditions",
                       "storageKey": null
                     },
@@ -209,6 +217,6 @@ return {
 };
 })();
 
-(node as any).hash = "fee2b06d78fa7a9592766762dbfa392d";
+(node as any).hash = "f39c39f29f2581f28b6016e376822f3b";
 
 export default node;
