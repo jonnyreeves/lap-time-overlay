@@ -1,4 +1,5 @@
 import { css } from "@emotion/react";
+import { format } from "date-fns";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { useParams } from "react-router-dom";
@@ -7,6 +8,7 @@ import { LapsCard, type LapWithEvents } from "../../components/session/LapsCard.
 import { PrimaryRecordingCard } from "../../components/session/PrimaryRecordingCard.js";
 import { RecordingsCard } from "../../components/session/RecordingsCard.js";
 import { SessionOverviewCard } from "../../components/session/SessionOverviewCard.js";
+import { useBreadcrumbs, type BreadcrumbItem } from "../../hooks/useBreadcrumbs.js";
 
 const pageGridStyles = css`
   display: grid;
@@ -106,6 +108,7 @@ export default function ViewSessionRoute() {
   const [refreshKey, setRefreshKey] = useState(0);
   const recordingVideoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
   const [jumpAnchorReady, setJumpAnchorReady] = useState(false);
+  const { setBreadcrumbs } = useBreadcrumbs();
 
   const data = useLazyLoadQuery<viewSessionQuery>(
     SessionQuery,
@@ -121,6 +124,20 @@ export default function ViewSessionRoute() {
   const tracks = data.tracks ?? [];
   const trackRecordings = session?.trackRecordings ?? [];
   const laps = session?.laps ?? [];
+
+  useEffect(() => {
+    const crumbs: BreadcrumbItem[] = [{ label: "Sessions", to: "/session" }];
+    if (session) {
+      const trackName = session.track?.name ?? "Session";
+      const formattedDate = session.date ? format(new Date(session.date), "MMM do") : null;
+      const detailLabel = formattedDate ? `${trackName} • ${formattedDate}` : trackName;
+      crumbs.push({ label: detailLabel });
+    } else if (sessionId) {
+      crumbs.push({ label: "Session not found" });
+    }
+    setBreadcrumbs(crumbs);
+    return () => setBreadcrumbs([]);
+  }, [session, sessionId, setBreadcrumbs]);
 
   useEffect(() => {
     const recordings = data.trackSession?.trackRecordings ?? [];

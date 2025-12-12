@@ -13,6 +13,7 @@ import { CreateTrackModal } from "../../components/tracks/CreateTrackModal.js";
 import { useLapRows, type LapInputPayload } from "../../hooks/useLapRows.js";
 import { type SessionImportSelection } from "../../utils/sessionImportTypes.js";
 import { prependCreatedSessionToRecentSessions, prependTrackForCreatedSession } from "./createUpdater.js";
+import { useBreadcrumbs } from "../../hooks/useBreadcrumbs.js";
 
 const formLayoutStyles = css`
   display: grid;
@@ -295,6 +296,7 @@ export default function CreateSessionRoute() {
   const selectedTrack = data.tracks.find((track) => track.id === trackId);
   const selectedTrackKarts = selectedTrack?.karts ?? [];
   const selectedTrackLayouts = selectedTrack?.trackLayouts ?? [];
+  const { setBreadcrumbs } = useBreadcrumbs();
 
   useEffect(() => {
     if (data.tracks.length === 0) {
@@ -337,6 +339,14 @@ export default function CreateSessionRoute() {
       setTrackLayoutId(availableLayoutIds[0]);
     }
   }, [trackId, kartId, trackLayoutId, data.tracks]);
+
+  useEffect(() => {
+    setBreadcrumbs([
+      { label: "Sessions", to: "/session" },
+      { label: "Add session" },
+    ]);
+    return () => setBreadcrumbs([]);
+  }, [setBreadcrumbs]);
 
   const handleTrackCreated = () => {
     // Increment the key to force useLazyLoadQuery to refetch
