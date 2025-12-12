@@ -32,7 +32,7 @@ export function getTrackPersonalBestEntries(
     ? repositories.trackSessions.findByUserId(userId).filter((session) => session.trackId === track.id)
     : repositories.trackSessions.findByTrackId(track.id);
 
-  const bestBySetup = new Map<string, TrackPersonalBestEntry>();
+  const bestBySetup = new Map<string, TrackPersonalBestEntry[]>();
 
   for (const session of sessions) {
     if (!session.kartId) {
@@ -63,20 +63,23 @@ export function getTrackPersonalBestEntries(
 
     const bestLapTime = Math.min(...laps.map((lap) => lap.time));
     const key = `${trackLayout.id}:${kart.id}:${session.conditions}`;
-    const existing = bestBySetup.get(key);
+    const entriesForSetup = bestBySetup.get(key) ?? [];
 
-    if (!existing || bestLapTime < existing.lapTime) {
-      bestBySetup.set(key, {
-        kart,
-        trackLayout,
-        conditions: session.conditions,
-        lapTime: bestLapTime,
-        trackSessionId: session.id,
-      });
-    }
+    entriesForSetup.push({
+      kart,
+      trackLayout,
+      conditions: session.conditions,
+      lapTime: bestLapTime,
+      trackSessionId: session.id,
+    });
+
+    bestBySetup.set(key, entriesForSetup);
   }
 
-  const entries = Array.from(bestBySetup.values());
+  const entries = Array.from(bestBySetup.values()).flatMap((setupEntries) =>
+    setupEntries.sort((a, b) => a.lapTime - b.lapTime).slice(0, 3)
+  );
+
   entries.sort((a, b) => {
     if (a.trackLayout.name !== b.trackLayout.name) {
       return a.trackLayout.name.localeCompare(b.trackLayout.name);

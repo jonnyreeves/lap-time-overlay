@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import type { TrackPersonalBestsCard_track$key } from "../../__generated__/TrackPersonalBestsCard_track.graphql.js";
 import { Card } from "../Card.js";
 import { TrackPersonalBestPill, type TrackPersonalBestEntry } from "./TrackPersonalBestPill.js";
+import { groupPersonalBestEntries } from "./personalBestGrouping.js";
 
 const TrackPersonalBestsFragment = graphql`
   fragment TrackPersonalBestsCard_track on Track {
@@ -49,6 +50,7 @@ export function TrackPersonalBestsCard({ track }: Props) {
   const data = useFragment(TrackPersonalBestsFragment, track);
   const navigate = useNavigate();
   const personalBestEntries = data.personalBestEntries ?? [];
+  const groupedEntries = groupPersonalBestEntries(personalBestEntries, 3);
 
   function handleNavigate(entry: TrackPersonalBestEntry) {
     navigate(`/session/${entry.trackSessionId}`);
@@ -56,12 +58,13 @@ export function TrackPersonalBestsCard({ track }: Props) {
 
   return (
     <Card title="Personal Bests">
-      {personalBestEntries.length ? (
+      {groupedEntries.length ? (
         <div css={pillGridStyles}>
-          {personalBestEntries.map((entry) => (
+          {groupedEntries.map(({ key, fastestEntry, topEntries }) => (
             <TrackPersonalBestPill
-              key={entry.trackSessionId}
-              entry={entry}
+              key={key}
+              entry={fastestEntry}
+              topEntries={topEntries}
               onClick={handleNavigate}
             />
           ))}

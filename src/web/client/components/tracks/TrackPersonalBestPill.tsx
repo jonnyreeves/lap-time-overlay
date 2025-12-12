@@ -13,6 +13,7 @@ const pillContainerStyles = css`
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: min(100%, 360px);
   padding: 12px 14px;
   border-radius: 10px;
   border: 1px solid #e2e8f4;
@@ -20,7 +21,7 @@ const pillContainerStyles = css`
   color: #475569;
   text-align: center;
   align-items: center;
-  cursor: pointer;
+  margin: 0 auto;
 `;
 
 const pbLabelStyles = css`
@@ -68,6 +69,45 @@ const conditionPillStyles = css`
   color: #4338ca;
 `;
 
+const lapListStyles = css`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+`;
+
+const lapButtonStyles = css`
+  ${pillStyles};
+  width: fit-content;
+  min-width: 120px;
+  justify-content: space-between;
+  background: #fff;
+  border: 1px solid #e2e8f4;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+  }
+`;
+
+const lapRankStyles = css`
+  ${pbLabelStyles};
+  color: #0f172a;
+`;
+
+const lapTimeStyles = css`
+  font-weight: 700;
+  color: #0f172a;
+`;
+
 function formatPersonalBest(time: number | null | undefined): string | null {
   if (typeof time !== "number" || time <= 0 || Number.isNaN(time)) {
     return null;
@@ -90,27 +130,19 @@ function getConditionMeta(condition: string) {
 
 export function TrackPersonalBestPill({
   entry,
+  topEntries,
   onClick,
 }: {
   entry: TrackPersonalBestEntry;
+  topEntries?: ReadonlyArray<TrackPersonalBestEntry>;
   onClick?: (entry: TrackPersonalBestEntry) => void;
 }) {
   const { emoji, label } = getConditionMeta(entry.conditions);
+  const lapsToDisplay = (topEntries?.length ? topEntries : [entry]).slice(0, 3);
   const formattedTime = formatPersonalBest(entry.lapTime) ?? "—";
 
   return (
-    <div
-      css={pillContainerStyles}
-      role="button"
-      tabIndex={0}
-      onClick={() => onClick?.(entry)}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          onClick?.(entry);
-        }
-      }}
-    >
+    <div css={pillContainerStyles}>
       <div css={pbHeaderStyles}>
         <span css={pbLabelStyles}>PB</span>
         <span css={pbValueStyles}>{formattedTime}</span>
@@ -122,6 +154,19 @@ export function TrackPersonalBestPill({
           <span aria-hidden>{emoji}</span>
           <span>{label}</span>
         </span>
+      </div>
+      <div css={lapListStyles}>
+        {lapsToDisplay.map((lapEntry, index) => (
+          <button
+            type="button"
+            css={lapButtonStyles}
+            key={`${lapEntry.trackSessionId}-${index}`}
+            onClick={() => onClick?.(lapEntry)}
+          >
+            <span css={lapRankStyles}>#{index + 1}</span>
+            <span css={lapTimeStyles}>{formatPersonalBest(lapEntry.lapTime) ?? "—"}</span>
+          </button>
+        ))}
       </div>
     </div>
   );

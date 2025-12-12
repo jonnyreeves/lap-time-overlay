@@ -86,6 +86,34 @@ describe("track resolver", () => {
         trackLayoutId: "l2",
       },
       {
+        id: "s6",
+        date: "2024-03-10",
+        format: "Practice",
+        classification: 3,
+        conditions: "Dry",
+        trackId: "c1",
+        userId: "user-1",
+        notes: null,
+        createdAt: 0,
+        updatedAt: 0,
+        kartId: "k1",
+        trackLayoutId: "l1",
+      },
+      {
+        id: "s7",
+        date: "2024-03-15",
+        format: "Practice",
+        classification: 3,
+        conditions: "Dry",
+        trackId: "c1",
+        userId: "user-1",
+        notes: null,
+        createdAt: 0,
+        updatedAt: 0,
+        kartId: "k1",
+        trackLayoutId: "l1",
+      },
+      {
         id: "s5",
         date: "2024-04-01",
         format: "Practice",
@@ -123,6 +151,17 @@ describe("track resolver", () => {
       if (sessionId === "s4") {
         return [
           { id: "l7", sessionId: "s4", lapNumber: 1, time: 70.1, createdAt: 0, updatedAt: 0 },
+        ];
+      }
+      if (sessionId === "s6") {
+        return [
+          { id: "l9", sessionId: "s6", lapNumber: 1, time: 71.9, createdAt: 0, updatedAt: 0 },
+          { id: "l10", sessionId: "s6", lapNumber: 2, time: 72.2, createdAt: 0, updatedAt: 0 },
+        ];
+      }
+      if (sessionId === "s7") {
+        return [
+          { id: "l11", sessionId: "s7", lapNumber: 1, time: 75.5, createdAt: 0, updatedAt: 0 },
         ];
       }
       if (sessionId === "s5") {
@@ -163,8 +202,22 @@ describe("track resolver", () => {
     expect(spaBests).toEqual([
       expect.objectContaining({
         conditions: "Dry",
+        lapTime: 71.9,
+        trackSessionId: "s6",
+        kart: expect.objectContaining({ id: "k1", name: "Rotax" }),
+        trackLayout: expect.objectContaining({ id: "l1", name: "GP" }),
+      }),
+      expect.objectContaining({
+        conditions: "Dry",
         lapTime: 72.5,
         trackSessionId: "s3",
+        kart: expect.objectContaining({ id: "k1", name: "Rotax" }),
+        trackLayout: expect.objectContaining({ id: "l1", name: "GP" }),
+      }),
+      expect.objectContaining({
+        conditions: "Dry",
+        lapTime: 74.987,
+        trackSessionId: "s1",
         kart: expect.objectContaining({ id: "k1", name: "Rotax" }),
         trackLayout: expect.objectContaining({ id: "l1", name: "GP" }),
       }),

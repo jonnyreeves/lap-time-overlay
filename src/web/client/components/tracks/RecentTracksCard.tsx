@@ -5,7 +5,8 @@ import {
 } from "../../__generated__/RecentTracksCard_viewer.graphql.js";
 import { Card } from "../Card.js";
 import { useNavigate } from "react-router-dom";
-import { TrackPersonalBestPill, type TrackPersonalBestEntry } from "./TrackPersonalBestPill.js";
+import { TrackPersonalBestPill } from "./TrackPersonalBestPill.js";
+import { groupPersonalBestEntries } from "./personalBestGrouping.js";
 
 const RecentTracksCardFragment = graphql`
   fragment RecentTracksCard_viewer on User {
@@ -133,8 +134,6 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-type PersonalBestEntry = TrackPersonalBestEntry;
-
 export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$key }) {
   const data = useFragment(RecentTracksCardFragment, viewer);
   const tracks = (data.recentTracks?.edges ?? [])
@@ -173,13 +172,16 @@ export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$k
             </button>
             <div css={trackPbStyles}>
               {track.personalBestEntries?.length ? (
-                track.personalBestEntries.map((entry: PersonalBestEntry) => (
-                  <TrackPersonalBestPill
-                    key={`${entry.trackLayout.id}-${entry.kart.id}-${entry.conditions}`}
-                    entry={entry}
-                    onClick={() => handleSessionNavigate(entry.trackSessionId)}
-                  />
-                ))
+                groupPersonalBestEntries(track.personalBestEntries ?? [], 1).map(
+                  ({ key, fastestEntry, topEntries }) => (
+                    <TrackPersonalBestPill
+                      key={key}
+                      entry={fastestEntry}
+                      topEntries={topEntries}
+                      onClick={(entry) => handleSessionNavigate(entry.trackSessionId)}
+                    />
+                  )
+                )
               ) : (
                 <div css={emptyStateStyles}>No lap data yet</div>
               )}
