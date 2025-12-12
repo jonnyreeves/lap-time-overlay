@@ -39,19 +39,12 @@ const RecentTracksCardFragment = graphql`
 
 const tracksContainerStyles = css`
   display: flex;
-  overflow-x: auto;
-  gap: 20px;
-  padding-bottom: 10px; /* For scrollbar visibility */
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-  scrollbar-width: none; /* Hide scrollbar for Firefox */
-  &::-webkit-scrollbar {
-    display: none; /* Hide scrollbar for Chrome, Safari, Opera */
-  }
+  flex-direction: column;
+  gap: 16px;
 `;
 
 const trackItemStyles = css`
-  flex-shrink: 0; /* Prevent items from shrinking */
-  width: 220px; /* Fixed width for each item */
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;

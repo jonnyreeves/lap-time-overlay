@@ -11,6 +11,7 @@ import type {
 } from "../../__generated__/TrackSessionsTable_query.graphql.js";
 import { formatStopwatchTime } from "../../utils/lapTime.js";
 import { Card } from "../Card.js";
+import { IconButton } from "../IconButton.js";
 
 type Props = {
   query: TrackSessionsTable_query$key;
@@ -186,6 +187,31 @@ const loadMoreButtonStyles = css`
   &:hover:enabled {
     transform: translateY(-1px);
     box-shadow: 0 10px 18px rgba(91, 111, 233, 0.25);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+const addSessionButtonStyles = css`
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid #5b6fe9;
+  background: linear-gradient(140deg, #5b6fe9, #7487ff);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+
+  &:hover:enabled {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgba(91, 111, 233, 0.25);
+  }
+
+  &:active:enabled {
+    transform: translateY(0);
   }
 
   &:disabled {
@@ -443,9 +469,14 @@ export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Prop
     <Card
       title="All sessions"
       rightHeaderContent={
-        <Link to="/session/create" css={loadMoreButtonStyles}>
+        <IconButton
+          type="button"
+          icon="+"
+          css={addSessionButtonStyles}
+          onClick={() => navigate("/session/create")}
+        >
           Add session
-        </Link>
+        </IconButton>
       }
     >
       <div css={filterBarStyles}>

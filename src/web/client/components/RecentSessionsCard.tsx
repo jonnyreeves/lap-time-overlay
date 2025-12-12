@@ -1,10 +1,11 @@
 import { css } from "@emotion/react";
 import { format } from "date-fns";
-import { Link, useNavigate } from "react-router-dom";
-import { Card } from "./Card.js";
 import { graphql, useFragment } from "react-relay";
+import { Link, useNavigate } from "react-router-dom";
 import type { RecentSessionsCard_viewer$key } from "../__generated__/RecentSessionsCard_viewer.graphql.js";
 import { formatStopwatchTime } from "../utils/lapTime.js";
+import { Card } from "./Card.js";
+import { IconButton } from "./IconButton.js";
 
 const RecentSessionsCardFragment = graphql`
   fragment RecentSessionsCard_viewer on User {
@@ -272,6 +273,7 @@ const footerLinkStyles = css`
   align-items: center;
   gap: 8px;
   color: #536ad6;
+  margin-top: 8px;
   font-weight: 700;
   text-decoration: none;
   letter-spacing: -0.01em;
@@ -315,9 +317,14 @@ export function RecentSessionsCard({ viewer }: Props) {
     <Card
       title="Recent sessions"
       rightHeaderContent={
-        <button css={addSessionButtonStyles} onClick={() => navigate("/session/create")}>
+        <IconButton
+          type="button"
+          icon="+"
+          css={addSessionButtonStyles}
+          onClick={() => navigate("/session/create")}
+        >
           Add session
-        </button>
+        </IconButton>
       }
     >
       {sessions.length === 0 ? (
@@ -428,7 +435,7 @@ export function RecentSessionsCard({ viewer }: Props) {
       )}
       <div css={footerLinkRowStyles}>
         <Link to="/session" css={footerLinkStyles}>
-          View all sessions -&gt;
+          View all sessions →
         </Link>
       </div>
     </Card>

@@ -16,8 +16,13 @@ import { prependCreatedSessionToRecentSessions, prependTrackForCreatedSession } 
 
 const formLayoutStyles = css`
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   gap: 20px;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const inputFieldStyles = css`

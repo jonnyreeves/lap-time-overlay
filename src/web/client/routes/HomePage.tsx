@@ -18,6 +18,7 @@ const HomePageFragment = graphql`
 const homePageLayoutStyles = css`
   display: grid;
   gap: 20px;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
