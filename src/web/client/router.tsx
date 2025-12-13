@@ -8,6 +8,7 @@ import { RequireAuth } from "./routes/RequireAuth.js";
 import CreateSessionRoute from "./routes/session/create.js";
 import TrackSessionsListRoute from "./routes/session/list.js";
 import ViewSessionRoute from "./routes/session/view.js";
+import TracksListRoute from "./routes/track/list.js";
 import TrackViewPage from "./routes/track/TrackViewPage.js";
 
 export const router = createBrowserRouter([
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
       { path: "/session", element: <TrackSessionsListRoute /> },
       { path: "/session/create", element: <CreateSessionRoute /> },
       { path: "/session/:sessionId", element: <ViewSessionRoute /> },
+      { path: "/tracks", element: <TracksListRoute /> },
       { path: "/tracks/view/:trackId", element: <TrackViewPage /> },
       { path: "*", element: <NotFoundPage /> },
     ],

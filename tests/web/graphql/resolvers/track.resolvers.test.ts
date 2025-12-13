@@ -197,6 +197,33 @@ describe("track resolver", () => {
 
     const tracks = rootValue.tracks({}, authenticatedContext as never);
     expect(tracks).toHaveLength(2);
+    expect(tracks[0]).toMatchObject({
+      id: "c1",
+      timesRaced: 6,
+      lastVisit: new Date("2024-03-15").toISOString(),
+    });
+    expect(tracks[1]).toMatchObject({
+      id: "c2",
+      timesRaced: 1,
+      lastVisit: new Date("2024-04-01").toISOString(),
+    });
+
+    const spaStats = await tracks[0]?.sessionStats();
+    expect(spaStats).toEqual({
+      totalSessions: 6,
+      byKart: [
+        { kart: expect.objectContaining({ id: "k1", name: "Rotax" }), count: 5 },
+        { kart: expect.objectContaining({ id: "k2", name: "Sodi" }), count: 1 },
+      ],
+      byTrackLayout: [
+        { trackLayout: expect.objectContaining({ id: "l1", name: "GP" }), count: 5 },
+        { trackLayout: expect.objectContaining({ id: "l2", name: "Indy" }), count: 1 },
+      ],
+      byCondition: [
+        { conditions: "Dry", count: 5 },
+        { conditions: "Wet", count: 1 },
+      ],
+    });
 
     const spaBests = await tracks[0]?.personalBestEntries();
     expect(spaBests).toEqual([
@@ -257,6 +284,7 @@ describe("track resolver", () => {
     repositories.trackSessions.findByTrackId.mockReturnValue([]);
 
     const tracks = rootValue.tracks({}, baseContext as never);
+    expect(tracks[0]).toMatchObject({ timesRaced: 0, lastVisit: null });
     expect(await tracks[0]?.personalBestEntries()).toEqual([]);
   });
 

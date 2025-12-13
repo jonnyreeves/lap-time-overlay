@@ -1,3 +1,4 @@
+import { css } from "@emotion/react";
 import { Outlet } from "react-router-dom";
 import { Breadcrumbs } from "../components/Breadcrumbs.js";
 import { SiteHeader } from "../components/SiteHeader.js";
@@ -21,9 +22,16 @@ function ShellContent({ viewer }: Props) {
 
   return (
     <main className="shell" css={shellStyles}>
-      <SiteHeader viewer={viewer} />
-      <Breadcrumbs items={items} />
+      <div css={headerGroupStyles}>
+        <SiteHeader viewer={viewer} />
+        <Breadcrumbs items={items} />
+      </div>
       <Outlet context={{ viewer }} />
     </main>
   );
 }
+
+const headerGroupStyles = css`
+  display: grid;
+  gap: 6px;
+`;

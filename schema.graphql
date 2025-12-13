@@ -149,9 +149,34 @@ type Track {
   id: ID!
   name: String!
   heroImage: String
+  timesRaced: Int!
+  lastVisit: String
+  sessionStats: TrackSessionStats!
   personalBestEntries: [TrackPersonalBest!]!
   karts: [Kart!]!
   trackLayouts: [TrackLayout!]!
+}
+
+type TrackSessionStats {
+  totalSessions: Int!
+  byKart: [TrackSessionKartStat!]!
+  byTrackLayout: [TrackSessionLayoutStat!]!
+  byCondition: [TrackSessionConditionStat!]!
+}
+
+type TrackSessionKartStat {
+  kart: Kart
+  count: Int!
+}
+
+type TrackSessionLayoutStat {
+  trackLayout: TrackLayout!
+  count: Int!
+}
+
+type TrackSessionConditionStat {
+  conditions: String!
+  count: Int!
 }
 
 type TrackPersonalBest {

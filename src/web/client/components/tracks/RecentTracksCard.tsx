@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import { graphql, useFragment } from "react-relay";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   type RecentTracksCard_viewer$key,
 } from "../../__generated__/RecentTracksCard_viewer.graphql.js";
@@ -100,6 +100,23 @@ const emptyStateStyles = css`
   font-weight: 600;
 `;
 
+const footerLinkRowStyles = css`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+`;
+
+const footerLinkStyles = css`
+  font-weight: 700;
+  color: #4f46e5;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+
+  &:hover {
+    color: #312e81;
+  }
+`;
+
 export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$key }) {
   const data = useFragment(RecentTracksCardFragment, viewer);
   const tracks = (data.recentTracks?.edges ?? [])
@@ -150,6 +167,11 @@ export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$k
             </div>
           </div>
         ))}
+      </div>
+      <div css={footerLinkRowStyles}>
+        <Link to="/tracks" css={footerLinkStyles}>
+          View all tracks →
+        </Link>
       </div>
     </Card>
   );

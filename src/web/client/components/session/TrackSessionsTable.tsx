@@ -1,6 +1,6 @@
 import { css } from "@emotion/react";
 import { format } from "date-fns";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { graphql, usePaginationFragment } from "react-relay";
 import { Link, useNavigate } from "react-router-dom";
 import type {
@@ -14,20 +14,22 @@ import { formatStopwatchTime } from "../../utils/lapTime.js";
 import { Card } from "../Card.js";
 import { IconButton } from "../IconButton.js";
 
-type Props = {
-  query: TrackSessionsTable_query$key;
-  pageSize?: number;
-};
-
-const DEFAULT_PAGE_SIZE = 20;
-
-type Filters = {
+export type TrackSessionFilters = {
   trackId: string;
   trackLayoutId: string;
   kartId: string;
   conditions: string;
   format: string;
 };
+
+type Props = {
+  query: TrackSessionsTable_query$key;
+  pageSize?: number;
+  initialFilters?: Partial<TrackSessionFilters>;
+  onFiltersChange?: (filters: TrackSessionFilters) => void;
+};
+
+const DEFAULT_PAGE_SIZE = 20;
 
 type SortField = "date" | "fastestLap";
 type SortDirection = "asc" | "desc";
@@ -335,6 +337,31 @@ function formatFastestLap(time: number | null | undefined): string | null {
   return rest ? `${minutes.padStart(2, "0")}:${rest}` : formatted;
 }
 
+const defaultFilters: TrackSessionFilters = {
+  trackId: "",
+  trackLayoutId: "",
+  kartId: "",
+  conditions: "",
+  format: "",
+};
+
+function normalizeFilters(partial?: Partial<TrackSessionFilters>): TrackSessionFilters {
+  return {
+    ...defaultFilters,
+    ...partial,
+  };
+}
+
+function areFiltersEqual(a: TrackSessionFilters, b: TrackSessionFilters) {
+  return (
+    a.trackId === b.trackId &&
+    a.trackLayoutId === b.trackLayoutId &&
+    a.kartId === b.kartId &&
+    a.conditions === b.conditions &&
+    a.format === b.format
+  );
+}
+
 const TrackSessionsTableFragment = graphql`
   fragment TrackSessionsTable_query on Query
   @refetchable(queryName: "TrackSessionsTablePaginationQuery")
@@ -398,20 +425,30 @@ const TrackSessionsTableFragment = graphql`
   }
 `;
 
-export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Props) {
+export function TrackSessionsTable({
+  query,
+  pageSize = DEFAULT_PAGE_SIZE,
+  initialFilters,
+  onFiltersChange,
+}: Props) {
   const navigate = useNavigate();
   const { data, loadNext, hasNext, isLoadingNext, refetch } = usePaginationFragment<
     TrackSessionsTablePaginationQuery,
     TrackSessionsTable_query$key
   >(TrackSessionsTableFragment, query);
 
-  const [filters, setFilters] = useState<Filters>({
-    trackId: "",
-    trackLayoutId: "",
-    kartId: "",
-    conditions: "",
-    format: "",
-  });
+  const normalizedInitialFilters = useMemo(
+    () => normalizeFilters(initialFilters),
+    [
+      initialFilters?.trackId,
+      initialFilters?.trackLayoutId,
+      initialFilters?.kartId,
+      initialFilters?.conditions,
+      initialFilters?.format,
+    ]
+  );
+
+  const [filters, setFilters] = useState<TrackSessionFilters>(normalizedInitialFilters);
   const [sortState, setSortState] = useState<SortState>({ field: "date", direction: "desc" });
   const tracks = data.tracks ?? [];
 
@@ -452,7 +489,7 @@ export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Prop
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [filters.trackId, tracks]);
 
-  const buildFilterInput = useCallback((merged: Filters) => {
+  const buildFilterInput = useCallback((merged: TrackSessionFilters) => {
     const filterInput = {
       ...(merged.trackId ? { trackId: merged.trackId } : null),
       ...(merged.trackLayoutId ? { trackLayoutId: merged.trackLayoutId } : null),
@@ -476,7 +513,7 @@ export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Prop
   );
 
   const refetchSessions = useCallback(
-    (nextFilters: Filters, nextSort: SortState) => {
+    (nextFilters: TrackSessionFilters, nextSort: SortState) => {
       refetch(
         {
           first: pageSize,
@@ -490,10 +527,26 @@ export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Prop
     [buildFilterInput, pageSize, refetch, toSortInput]
   );
 
+  useEffect(() => {
+    let didUpdate = false;
+    setFilters((current) => {
+      if (areFiltersEqual(current, normalizedInitialFilters)) {
+        return current;
+      }
+      didUpdate = true;
+      return normalizedInitialFilters;
+    });
+    if (didUpdate) {
+      refetchSessions(normalizedInitialFilters, sortState);
+      onFiltersChange?.(normalizedInitialFilters);
+    }
+  }, [normalizedInitialFilters, onFiltersChange, refetchSessions, sortState]);
+
   const applyFilter = useCallback(
-    (nextPartial: Partial<Filters>) => {
+    (nextPartial: Partial<TrackSessionFilters>) => {
+      let nextFiltersRef: TrackSessionFilters | null = null;
       setFilters((current) => {
-        const merged: Filters = { ...current, ...nextPartial };
+        const merged: TrackSessionFilters = { ...current, ...nextPartial };
         const targetTrack = nextPartial.trackId ?? merged.trackId;
         if (
           targetTrack &&
@@ -512,11 +565,15 @@ export function TrackSessionsTable({ query, pageSize = DEFAULT_PAGE_SIZE }: Prop
           if (!hasKart) merged.kartId = "";
         }
 
-        refetchSessions(merged, sortState);
+        nextFiltersRef = merged;
         return merged;
       });
+      if (nextFiltersRef) {
+        refetchSessions(nextFiltersRef, sortState);
+        onFiltersChange?.(nextFiltersRef);
+      }
     },
-    [layoutToTrackId, refetchSessions, sortState, tracks]
+    [layoutToTrackId, onFiltersChange, refetchSessions, sortState, tracks]
   );
 
   const toggleSort = (field: SortField) => {

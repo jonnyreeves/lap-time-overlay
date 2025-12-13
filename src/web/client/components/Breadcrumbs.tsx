@@ -12,7 +12,7 @@ const breadcrumbBarStyles = css`
   gap: 10px;
   color: #475569;
   font-size: 0.95rem;
-  padding: 6px 2px 2px;
+  padding: 2px 2px 0;
   letter-spacing: 0.01em;
 `;
 

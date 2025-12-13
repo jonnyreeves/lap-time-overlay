@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { css } from "@emotion/react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { useParams } from "react-router-dom";
@@ -7,11 +7,20 @@ import { Card } from "../../components/Card.js";
 import { TrackKartsCard } from "../../components/tracks/TrackKartsCard.js";
 import { TrackLayoutCard } from "../../components/tracks/TrackLayoutCard.js";
 import { TrackPersonalBestsCard } from "../../components/tracks/TrackPersonalBestsCard.js";
+import { TrackVisitStatsCard } from "../../components/tracks/TrackVisitStatsCard.js";
+import { type BreadcrumbItem, useBreadcrumbs } from "../../hooks/useBreadcrumbs.js";
 
 const sideBySideStyles = css`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 14px;
+`;
+
+const overviewGridStyles = css`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 14px;
+  align-items: start;
 `;
 
 export const TRACK_VIEW_QUERY = graphql`
@@ -23,16 +32,29 @@ export const TRACK_VIEW_QUERY = graphql`
       ...TrackKartsCard_track
       ...TrackLayoutCard_track
       ...TrackPersonalBestsCard_track
+      ...TrackVisitStatsCard_track
     }
   }
 `;
 
 export default function TrackViewPage(): React.ReactNode {
   const { trackId } = useParams();
+  const { setBreadcrumbs } = useBreadcrumbs();
   const data = useLazyLoadQuery<TrackViewPageQueryType>(
     TRACK_VIEW_QUERY,
     { trackId: trackId ?? "" },
   );
+
+  useEffect(() => {
+    const crumbs: BreadcrumbItem[] = [{ label: "Tracks", to: "/tracks" }];
+    if (data.track) {
+      crumbs.push({ label: data.track.name });
+    } else if (trackId) {
+      crumbs.push({ label: "Track not found" });
+    }
+    setBreadcrumbs(crumbs);
+    return () => setBreadcrumbs([]);
+  }, [data.track, setBreadcrumbs, trackId]);
 
   if (!data.track) {
     return (
@@ -44,7 +66,10 @@ export default function TrackViewPage(): React.ReactNode {
 
   return (
     <>
-      <TrackPersonalBestsCard track={data.track} showTrackHeader />
+      <div css={overviewGridStyles}>
+        <TrackPersonalBestsCard track={data.track} showTrackHeader />
+        <TrackVisitStatsCard track={data.track} />
+      </div>
       <div css={sideBySideStyles}>
         <TrackKartsCard track={data.track} />
         <TrackLayoutCard track={data.track} />

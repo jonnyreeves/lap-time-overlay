@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d0f575db2fd0de567a3ef55169b7c22f>>
+ * @generated SignedSource<<16ca61ecbbebc649b8a689f71138652a>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -18,7 +18,7 @@ export type TrackViewPageQuery$data = {
     readonly heroImage: string | null | undefined;
     readonly id: string;
     readonly name: string;
-    readonly " $fragmentSpreads": FragmentRefs<"TrackKartsCard_track" | "TrackLayoutCard_track" | "TrackPersonalBestsCard_track">;
+    readonly " $fragmentSpreads": FragmentRefs<"TrackKartsCard_track" | "TrackLayoutCard_track" | "TrackPersonalBestsCard_track" | "TrackVisitStatsCard_track">;
   } | null | undefined;
 };
 export type TrackViewPageQuery = {
@@ -65,7 +65,41 @@ v4 = {
 v5 = [
   (v2/*: any*/),
   (v3/*: any*/)
-];
+],
+v6 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "conditions",
+  "storageKey": null
+},
+v7 = {
+  "alias": null,
+  "args": null,
+  "concreteType": "Kart",
+  "kind": "LinkedField",
+  "name": "kart",
+  "plural": false,
+  "selections": (v5/*: any*/),
+  "storageKey": null
+},
+v8 = {
+  "alias": null,
+  "args": null,
+  "concreteType": "TrackLayout",
+  "kind": "LinkedField",
+  "name": "trackLayout",
+  "plural": false,
+  "selections": (v5/*: any*/),
+  "storageKey": null
+},
+v9 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "count",
+  "storageKey": null
+};
 return {
   "fragment": {
     "argumentDefinitions": (v0/*: any*/),
@@ -98,6 +132,11 @@ return {
             "args": null,
             "kind": "FragmentSpread",
             "name": "TrackPersonalBestsCard_track"
+          },
+          {
+            "args": null,
+            "kind": "FragmentSpread",
+            "name": "TrackVisitStatsCard_track"
           }
         ],
         "storageKey": null
@@ -158,13 +197,7 @@ return {
                 "name": "trackSessionId",
                 "storageKey": null
               },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "conditions",
-                "storageKey": null
-              },
+              (v6/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -172,24 +205,63 @@ return {
                 "name": "lapTime",
                 "storageKey": null
               },
+              (v7/*: any*/),
+              (v8/*: any*/)
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "TrackSessionStats",
+            "kind": "LinkedField",
+            "name": "sessionStats",
+            "plural": false,
+            "selections": [
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "Kart",
-                "kind": "LinkedField",
-                "name": "kart",
-                "plural": false,
-                "selections": (v5/*: any*/),
+                "kind": "ScalarField",
+                "name": "totalSessions",
                 "storageKey": null
               },
               {
                 "alias": null,
                 "args": null,
-                "concreteType": "TrackLayout",
+                "concreteType": "TrackSessionKartStat",
                 "kind": "LinkedField",
-                "name": "trackLayout",
-                "plural": false,
-                "selections": (v5/*: any*/),
+                "name": "byKart",
+                "plural": true,
+                "selections": [
+                  (v9/*: any*/),
+                  (v7/*: any*/)
+                ],
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "TrackSessionLayoutStat",
+                "kind": "LinkedField",
+                "name": "byTrackLayout",
+                "plural": true,
+                "selections": [
+                  (v9/*: any*/),
+                  (v8/*: any*/)
+                ],
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "TrackSessionConditionStat",
+                "kind": "LinkedField",
+                "name": "byCondition",
+                "plural": true,
+                "selections": [
+                  (v6/*: any*/),
+                  (v9/*: any*/)
+                ],
                 "storageKey": null
               }
             ],
@@ -201,16 +273,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "0606107b312a13e2f4d4fb1ddf76ea11",
+    "cacheID": "cd2342362ac804cc6be520e1214d5aa1",
     "id": null,
     "metadata": {},
     "name": "TrackViewPageQuery",
     "operationKind": "query",
-    "text": "query TrackViewPageQuery(\n  $trackId: ID!\n) {\n  track(id: $trackId) {\n    id\n    name\n    heroImage\n    ...TrackKartsCard_track\n    ...TrackLayoutCard_track\n    ...TrackPersonalBestsCard_track\n  }\n}\n\nfragment TrackKartsCard_track on Track {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n\nfragment TrackLayoutCard_track on Track {\n  id\n  name\n  trackLayouts {\n    id\n    name\n  }\n}\n\nfragment TrackPersonalBestsCard_track on Track {\n  id\n  name\n  heroImage\n  personalBestEntries {\n    trackSessionId\n    conditions\n    lapTime\n    kart {\n      id\n      name\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n"
+    "text": "query TrackViewPageQuery(\n  $trackId: ID!\n) {\n  track(id: $trackId) {\n    id\n    name\n    heroImage\n    ...TrackKartsCard_track\n    ...TrackLayoutCard_track\n    ...TrackPersonalBestsCard_track\n    ...TrackVisitStatsCard_track\n  }\n}\n\nfragment TrackKartsCard_track on Track {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n\nfragment TrackLayoutCard_track on Track {\n  id\n  name\n  trackLayouts {\n    id\n    name\n  }\n}\n\nfragment TrackPersonalBestsCard_track on Track {\n  id\n  name\n  heroImage\n  personalBestEntries {\n    trackSessionId\n    conditions\n    lapTime\n    kart {\n      id\n      name\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n\nfragment TrackVisitStatsCard_track on Track {\n  id\n  name\n  sessionStats {\n    totalSessions\n    byKart {\n      count\n      kart {\n        id\n        name\n      }\n    }\n    byTrackLayout {\n      count\n      trackLayout {\n        id\n        name\n      }\n    }\n    byCondition {\n      conditions\n      count\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "7490c9d91f1b0728d869af569dab5781";
+(node as any).hash = "9a2d9f3c2e62c7002cf0695983ae6f0c";
 
 export default node;

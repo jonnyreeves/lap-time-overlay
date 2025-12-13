@@ -1,5 +1,5 @@
 import { GraphQLError } from "graphql";
-import type { TrackSessionConditions } from "../../../db/track_sessions.js";
+import type { TrackSessionConditions, TrackSessionRecord } from "../../../db/track_sessions.js";
 import type { TrackRecord } from "../../../db/tracks.js";
 import type { KartRecord } from "../../../db/karts.js";
 import type { TrackLayoutRecord } from "../../../db/track_layouts.js";
@@ -23,14 +23,25 @@ function toKartPayload(kart: KartRecord) {
   };
 }
 
-export function getTrackPersonalBestEntries(
+function getTrackSessionsForTrack(
   track: TrackRecord,
   repositories: Repositories,
   userId?: string
-) {
+): TrackSessionRecord[] {
   const sessions = userId
-    ? repositories.trackSessions.findByUserId(userId).filter((session) => session.trackId === track.id)
-    : repositories.trackSessions.findByTrackId(track.id);
+    ? repositories.trackSessions.findByUserId(userId) ?? []
+    : repositories.trackSessions.findByTrackId(track.id) ?? [];
+
+  return userId ? sessions.filter((session) => session.trackId === track.id) : sessions;
+}
+
+export function getTrackPersonalBestEntries(
+  track: TrackRecord,
+  repositories: Repositories,
+  userId?: string,
+  sessionsOverride?: TrackSessionRecord[]
+) {
+  const sessions = sessionsOverride ?? getTrackSessionsForTrack(track, repositories, userId);
 
   const bestBySetup = new Map<string, TrackPersonalBestEntry[]>();
 
@@ -102,16 +113,122 @@ export function getTrackPersonalBestEntries(
   }));
 }
 
+function getTrackStatsFromSessions(sessions: TrackSessionRecord[]) {
+  const lastVisitTimestamp = sessions.reduce<number | null>((latest, session) => {
+    const timestamp = Date.parse(session.date);
+    if (Number.isNaN(timestamp)) {
+      return latest;
+    }
+    if (latest === null || timestamp > latest) {
+      return timestamp;
+    }
+    return latest;
+  }, null);
+
+  return {
+    timesRaced: sessions.length,
+    lastVisit: lastVisitTimestamp ? new Date(lastVisitTimestamp).toISOString() : null,
+  };
+}
+
+function getTrackSessionStats(
+  track: TrackRecord,
+  repositories: Repositories,
+  userId?: string,
+  sessionsOverride?: TrackSessionRecord[]
+) {
+  const sessions = sessionsOverride ?? getTrackSessionsForTrack(track, repositories, userId);
+  const kartCounts = new Map<string | null, { kart: KartRecord | null; count: number }>();
+  const layoutCounts = new Map<string, { trackLayout: TrackLayoutRecord; count: number }>();
+  const conditionCounts = new Map<TrackSessionConditions, number>();
+
+  for (const session of sessions) {
+    conditionCounts.set(session.conditions, (conditionCounts.get(session.conditions) ?? 0) + 1);
+
+    if (session.kartId) {
+      const kart = repositories.karts.findById(session.kartId);
+      if (!kart) {
+        throw new GraphQLError(`Kart with ID ${session.kartId} not found`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      const kartStat = kartCounts.get(session.kartId) ?? { kart, count: 0 };
+      kartStat.kart = kart;
+      kartStat.count += 1;
+      kartCounts.set(session.kartId, kartStat);
+    } else {
+      const kartStat = kartCounts.get(null) ?? { kart: null, count: 0 };
+      kartStat.count += 1;
+      kartCounts.set(null, kartStat);
+    }
+
+    const trackLayout = repositories.trackLayouts.findById(session.trackLayoutId);
+    if (!trackLayout) {
+      throw new GraphQLError(`Track layout with ID ${session.trackLayoutId} not found`, {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+    if (trackLayout.trackId !== track.id) {
+      continue;
+    }
+    const layoutStat = layoutCounts.get(trackLayout.id) ?? { trackLayout, count: 0 };
+    layoutStat.trackLayout = trackLayout;
+    layoutStat.count += 1;
+    layoutCounts.set(trackLayout.id, layoutStat);
+  }
+
+  const byKart = Array.from(kartCounts.values())
+    .sort((a, b) => {
+      if (a.kart && b.kart) {
+        return a.kart.name.localeCompare(b.kart.name);
+      }
+      if (a.kart && !b.kart) return -1;
+      if (!a.kart && b.kart) return 1;
+      return 0;
+    })
+    .map(({ kart, count }) => ({
+      kart: kart ? toKartPayload(kart) : null,
+      count,
+    }));
+
+  const byTrackLayout = Array.from(layoutCounts.values())
+    .sort((a, b) => a.trackLayout.name.localeCompare(b.trackLayout.name))
+    .map(({ trackLayout, count }) => ({
+      trackLayout: toTrackLayoutPayload(trackLayout, repositories, userId, track),
+      count,
+    }));
+
+  const byCondition = Array.from(conditionCounts.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([conditions, count]) => ({
+      conditions,
+      count,
+    }));
+
+  return {
+    totalSessions: sessions.length,
+    byKart,
+    byTrackLayout,
+    byCondition,
+  };
+}
+
 export function toTrackPayload(
   track: TrackRecord,
   repositories: Repositories,
   userId?: string
 ) {
+  const sessions = getTrackSessionsForTrack(track, repositories, userId);
+  const { timesRaced, lastVisit } = getTrackStatsFromSessions(sessions);
+
   return {
     id: track.id,
     name: track.name,
     heroImage: track.heroImage,
-    personalBestEntries: () => getTrackPersonalBestEntries(track, repositories, userId),
+    timesRaced,
+    lastVisit,
+    sessionStats: () => getTrackSessionStats(track, repositories, userId, sessions),
+    personalBestEntries: () => getTrackPersonalBestEntries(track, repositories, userId, sessions),
     karts: () => repositories.trackKarts.findKartsForTrack(track.id),
     trackLayouts: () =>
       repositories.trackLayouts.findByTrackId(track.id).map((layout) =>
