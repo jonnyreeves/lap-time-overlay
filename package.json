@@ -1,7 +1,7 @@
 {
-  "name": "lap-info-overlay",
+  "name": "racecraft",
   "version": "1.0.0",
-  "description": "Overlay lap info with ffmpeg drawtext.",
+  "description": "Karting session manager.",
   "main": "index.js",
   "scripts": {
     "web": "node --import ./register-ts-node.js src/web/server.ts",
