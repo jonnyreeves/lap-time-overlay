@@ -1,28 +1,30 @@
 import { css } from "@emotion/react";
 import { useMemo, useRef, useState, type MouseEvent } from "react";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
+import {
+  computeConsistencyStats,
+  type ConsistencyLap,
+  type ConsistencyStats,
+  type ExcludedReason,
+} from "../../../shared/consistency.js";
 import { Card } from "../Card.js";
 import type { LapWithEvents } from "./LapsCard.js";
 
-type ConsistencyLap = {
-  id: string;
-  lapNumber: number;
-  time: number;
-};
+type ServerExclusionReason = "INVALID" | "OUT_LAP" | "OUTLIER" | "%future added value";
 
-type ExcludedReason = "invalid" | "out-lap" | "outlier";
-
-type ConsistencyStats = {
-  score: number | null;
+type ServerConsistency = {
+  score: number | null | undefined;
   label: string;
-  mean: number | null;
-  stdDev: number | null;
-  cvPct: number | null;
-  median: number | null;
-  windowPct: number | null;
-  usableLaps: ConsistencyLap[];
-  excluded: (ConsistencyLap & { reason: ExcludedReason })[];
-  totalValid: number;
+  mean: number | null | undefined;
+  stdDev: number | null | undefined;
+  cvPct: number | null | undefined;
+  median: number | null | undefined;
+  windowPct: number | null | undefined;
+  cleanLapCount?: number | null;
+  excludedLapCount?: number | null;
+  totalValidLapCount: number | null | undefined;
+  usableLapNumbers?: ReadonlyArray<number> | null;
+  excludedLaps?: ReadonlyArray<{ lapNumber: number; reason: ServerExclusionReason }> | null;
 };
 
 const cardGridStyles = css`
@@ -185,6 +187,59 @@ const emptyStateStyles = css`
   text-align: center;
 `;
 
+function mapExclusionReason(reason: ServerExclusionReason): ExcludedReason {
+  if (reason === "OUT_LAP") return "out-lap";
+  if (reason === "OUTLIER") return "outlier";
+  return "invalid";
+}
+
+function hydrateConsistency(
+  consistency: ServerConsistency | null | undefined,
+  laps: LapWithEvents[]
+): ConsistencyStats | null {
+  if (!consistency) return null;
+  const lapByNumber = new Map<number, LapWithEvents>();
+  laps.forEach((lap) => {
+    lapByNumber.set(lap.lapNumber, lap);
+  });
+
+  const usableLaps: ConsistencyLap[] = [];
+  const usableLapNumbers = consistency.usableLapNumbers ?? [];
+  usableLapNumbers.forEach((lapNumber) => {
+    const lap = lapByNumber.get(lapNumber);
+    if (!lap) return;
+    usableLaps.push({
+      id: lap.id,
+      lapNumber: lap.lapNumber,
+      time: Number.isFinite(lap.time) ? lap.time : 0,
+    });
+  });
+
+  const excluded: (ConsistencyLap & { reason: ExcludedReason })[] = [];
+  (consistency.excludedLaps ?? []).forEach((excludedLap) => {
+    const lap = lapByNumber.get(excludedLap.lapNumber);
+    if (!lap) return;
+    excluded.push({
+      id: lap.id,
+      lapNumber: lap.lapNumber,
+      time: Number.isFinite(lap.time) ? lap.time : 0,
+      reason: mapExclusionReason(excludedLap.reason),
+    });
+  });
+
+  return {
+    score: consistency.score ?? null,
+    label: consistency.label,
+    mean: consistency.mean ?? null,
+    stdDev: consistency.stdDev ?? null,
+    cvPct: consistency.cvPct ?? null,
+    median: consistency.median ?? null,
+    windowPct: consistency.windowPct ?? null,
+    usableLaps,
+    excluded,
+    totalValid: consistency.totalValidLapCount ?? 0,
+  };
+}
 function median(values: number[]): number | null {
   if (values.length === 0) return null;
   const sorted = [...values].sort((a, b) => a - b);
@@ -193,134 +248,6 @@ function median(values: number[]): number | null {
     return (sorted[mid - 1] + sorted[mid]) / 2;
   }
   return sorted[mid];
-}
-
-function mean(values: number[]): number | null {
-  if (values.length === 0) return null;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
-}
-
-function stdDev(values: number[], avg: number | null): number | null {
-  if (values.length === 0 || avg == null) return null;
-  const variance =
-    values.reduce((sum, value) => sum + (value - avg) ** 2, 0) / values.length;
-  return Math.sqrt(variance);
-}
-
-function classifyLabel(cvPct: number | null, stdDev: number | null): string {
-  if (cvPct == null || stdDev == null) return "Need more clean laps";
-  if (stdDev <= 0.12 && cvPct <= 2) return "Elite consistency";
-  if (stdDev <= 0.2 && cvPct <= 3) return "Very consistent";
-  if (stdDev <= 0.35 && cvPct <= 5) return "Consistent";
-  if (stdDev <= 0.8 && cvPct <= 8) return "Variable";
-  return "Inconsistent";
-}
-
-function clampScore(score: number | null): number | null {
-  if (score == null || Number.isNaN(score)) return null;
-  return Math.min(100, Math.max(30, Math.round(score)));
-}
-
-export function computeConsistencyStats(laps: LapWithEvents[]): ConsistencyStats {
-  const valid: ConsistencyLap[] = [];
-  const excluded: (ConsistencyLap & { reason: ExcludedReason })[] = [];
-
-  laps.forEach((lap) => {
-    const lapTime = Number.isFinite(lap.time) ? lap.time : null;
-    if (lapTime && lapTime > 0) {
-      valid.push({ id: lap.id, lapNumber: lap.lapNumber, time: lapTime });
-    } else {
-      excluded.push({
-        id: lap.id,
-        lapNumber: lap.lapNumber,
-        time: lap.time,
-        reason: "invalid",
-      });
-    }
-  });
-
-  if (valid.length === 0) {
-    return {
-      score: null,
-      label: "Add lap times to see consistency",
-      mean: null,
-      stdDev: null,
-      cvPct: null,
-      median: null,
-      windowPct: null,
-      usableLaps: [],
-      excluded,
-      totalValid: 0,
-    };
-  }
-
-  const sorted = [...valid].sort((a, b) => a.lapNumber - b.lapNumber);
-  const outLap = sorted.filter((lap) => lap.lapNumber === 1);
-  const candidates =
-    sorted.length > outLap.length ? sorted.filter((lap) => lap.lapNumber !== 1) : sorted;
-
-  outLap.forEach((lap) => excluded.push({ ...lap, reason: "out-lap" }));
-
-  const med = median(candidates.map((lap) => lap.time));
-  if (med == null) {
-    return {
-      score: null,
-      label: "Need more clean laps",
-      mean: null,
-      stdDev: null,
-      cvPct: null,
-      median: null,
-      windowPct: null,
-      usableLaps: [],
-      excluded,
-      totalValid: candidates.length,
-    };
-  }
-
-  const baseWindow = candidates.length >= 10 ? 0.05 : 0.06;
-  const windowPct = candidates.length < 5 ? 0.08 : baseWindow;
-  const lowerBound = med * (1 - windowPct);
-  const upperBound = med * (1 + windowPct);
-
-  const usable = candidates.filter(
-    (lap) => lap.time >= lowerBound && lap.time <= upperBound
-  );
-  const outliers = candidates.filter(
-    (lap) => lap.time < lowerBound || lap.time > upperBound
-  );
-  outliers.forEach((lap) => excluded.push({ ...lap, reason: "outlier" }));
-
-  const usableTimes = usable.map((lap) => lap.time);
-  const canScore = usable.length >= 2;
-  const avg = mean(usableTimes);
-  const sigma = canScore ? stdDev(usableTimes, avg) : null;
-  const cv = canScore && avg && sigma != null ? sigma / avg : null;
-  const cvPct = cv != null ? cv * 100 : null;
-  const maxCvForScale = 0.07; // slightly relaxed scaling for elite consistency
-  const maxStdForScale = 0.8;
-  const normalizedCv = cv != null ? Math.min(cv / maxCvForScale, 1) : null;
-  const normalizedStd = sigma != null ? Math.min(sigma / maxStdForScale, 1) : null;
-  const normalized =
-    normalizedCv != null && normalizedStd != null
-      ? Math.max(normalizedCv, normalizedStd)
-      : normalizedCv ?? normalizedStd;
-  const score =
-    normalized != null ? clampScore(100 - normalized * 70) : null;
-
-  const label = canScore ? classifyLabel(cvPct, sigma) : "Need more clean laps";
-
-  return {
-    score: canScore ? score : null,
-    label,
-    mean: avg,
-    stdDev: sigma,
-    cvPct,
-    median: med,
-    windowPct,
-    usableLaps: usable,
-    excluded,
-    totalValid: candidates.length,
-  };
 }
 
 function Sparkline({
@@ -590,8 +517,14 @@ type Props = {
   laps: LapWithEvents[];
 };
 
-export function ConsistencyCard({ laps }: Props) {
-  const stats = useMemo(() => computeConsistencyStats(laps), [laps]);
+type ConsistencyCardProps = Props & { consistency?: ServerConsistency | null };
+
+export function ConsistencyCard({ laps, consistency }: ConsistencyCardProps) {
+  const stats = useMemo(() => {
+    const fromServer = hydrateConsistency(consistency, laps);
+    if (fromServer) return fromServer;
+    return computeConsistencyStats(laps);
+  }, [consistency, laps]);
   const cleanCount = stats.usableLaps.length;
   const excludedCount = stats.excluded.length;
   const outlapCount = stats.excluded.filter((lap) => lap.reason === "out-lap").length;

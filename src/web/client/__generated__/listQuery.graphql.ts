@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<e5e4f80e5185d2c59c64741153d927dd>>
+ * @generated SignedSource<<1fe0c8fcfa0e4b998de9e5e5211d4011>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,7 +10,7 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type TrackSessionSort = "DATE_ASC" | "DATE_DESC" | "FASTEST_LAP_ASC" | "FASTEST_LAP_DESC" | "%future added value";
+export type TrackSessionSort = "CONSISTENCY_ASC" | "CONSISTENCY_DESC" | "DATE_ASC" | "DATE_DESC" | "FASTEST_LAP_ASC" | "FASTEST_LAP_DESC" | "%future added value";
 export type TrackSessionFilterInput = {
   conditions?: string | null | undefined;
   format?: string | null | undefined;
@@ -253,6 +253,13 @@ return {
                       },
                       {
                         "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "consistencyScore",
+                        "storageKey": null
+                      },
+                      {
+                        "alias": null,
                         "args": (v7/*: any*/),
                         "concreteType": "Lap",
                         "kind": "LinkedField",
@@ -341,12 +348,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "769f22b79a37b6c35e8bf92f89ba0861",
+    "cacheID": "2ae3e20c2cb5a314645fb4536f0261c3",
     "id": null,
     "metadata": {},
     "name": "listQuery",
     "operationKind": "query",
-    "text": "query listQuery(\n  $first: Int = 20\n  $filter: TrackSessionFilterInput\n  $sort: TrackSessionSort = DATE_DESC\n) {\n  ...TrackSessionsTable_query_1bvy9D\n}\n\nfragment TrackSessionsTable_query_1bvy9D on Query {\n  tracks {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n  viewer {\n    id\n    recentTrackSessions(first: $first, filter: $filter, sort: $sort) {\n      edges {\n        cursor\n        node {\n          id\n          date\n          format\n          classification\n          conditions\n          track {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n          kart {\n            id\n            name\n          }\n          laps(first: 1) {\n            id\n            personalBest\n          }\n          trackRecordings(first: 1) {\n            id\n          }\n          __typename\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}\n"
+    "text": "query listQuery(\n  $first: Int = 20\n  $filter: TrackSessionFilterInput\n  $sort: TrackSessionSort = DATE_DESC\n) {\n  ...TrackSessionsTable_query_1bvy9D\n}\n\nfragment TrackSessionsTable_query_1bvy9D on Query {\n  tracks {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n  viewer {\n    id\n    recentTrackSessions(first: $first, filter: $filter, sort: $sort) {\n      edges {\n        cursor\n        node {\n          id\n          date\n          format\n          classification\n          conditions\n          track {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n          kart {\n            id\n            name\n          }\n          consistencyScore\n          laps(first: 1) {\n            id\n            personalBest\n          }\n          trackRecordings(first: 1) {\n            id\n          }\n          __typename\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}\n"
   }
 };
 })();

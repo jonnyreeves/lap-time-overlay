@@ -1,4 +1,5 @@
 import { GraphQLError } from "graphql";
+import { computeConsistencyStats } from "../../shared/consistency.js";
 import { toUserPayload } from "./auth.js";
 import { toTrackPayload } from "./track.js";
 import { findTrackSessionsForUser, toTrackSessionPayload } from "./trackSession.js";
@@ -36,7 +37,9 @@ type TrackSessionSort =
   | "DATE_ASC"
   | "DATE_DESC"
   | "FASTEST_LAP_ASC"
-  | "FASTEST_LAP_DESC";
+  | "FASTEST_LAP_DESC"
+  | "CONSISTENCY_ASC"
+  | "CONSISTENCY_DESC";
 
 function normalizeConditionsFilter(conditions?: string | null): string | undefined {
   if (!conditions) return undefined;
@@ -66,12 +69,14 @@ function normalizeSort(sort?: TrackSessionSort | null): TrackSessionSort {
     sort === "DATE_ASC" ||
     sort === "DATE_DESC" ||
     sort === "FASTEST_LAP_ASC" ||
-    sort === "FASTEST_LAP_DESC"
+    sort === "FASTEST_LAP_DESC" ||
+    sort === "CONSISTENCY_ASC" ||
+    sort === "CONSISTENCY_DESC"
   ) {
     return sort;
   }
   throw new GraphQLError(
-    "sort must be DATE_ASC, DATE_DESC, FASTEST_LAP_ASC, or FASTEST_LAP_DESC",
+    "sort must be DATE_ASC, DATE_DESC, FASTEST_LAP_ASC, FASTEST_LAP_DESC, CONSISTENCY_ASC, or CONSISTENCY_DESC",
     {
       extensions: { code: "VALIDATION_FAILED" },
     }
@@ -105,15 +110,45 @@ function sortSessions(
     return fastest;
   };
 
-  const isAscending = sort === "FASTEST_LAP_ASC";
-  return [...sessions].sort((a, b) => {
-    const aLap = getFastestLap(a.id);
-    const bLap = getFastestLap(b.id);
-    if (aLap == null && bLap == null) return 0;
-    if (aLap == null) return 1;
-    if (bLap == null) return -1;
-    return isAscending ? aLap - bLap : bLap - aLap;
-  });
+  const consistencyScoreBySession = new Map<string, number | null>();
+  const getConsistencyScore = (sessionId: string): number | null => {
+    if (consistencyScoreBySession.has(sessionId)) {
+      return consistencyScoreBySession.get(sessionId) ?? null;
+    }
+    const laps = repositories.laps.findBySessionId(sessionId);
+    const stats = computeConsistencyStats(
+      laps.map((lap) => ({ id: lap.id, lapNumber: lap.lapNumber, time: lap.time }))
+    );
+    const score = stats.score ?? null;
+    consistencyScoreBySession.set(sessionId, score);
+    return score;
+  };
+
+  if (sort === "FASTEST_LAP_ASC" || sort === "FASTEST_LAP_DESC") {
+    const isAscending = sort === "FASTEST_LAP_ASC";
+    return [...sessions].sort((a, b) => {
+      const aLap = getFastestLap(a.id);
+      const bLap = getFastestLap(b.id);
+      if (aLap == null && bLap == null) return 0;
+      if (aLap == null) return 1;
+      if (bLap == null) return -1;
+      return isAscending ? aLap - bLap : bLap - aLap;
+    });
+  }
+
+  const isConsistencyAscending = sort === "CONSISTENCY_ASC";
+  if (sort === "CONSISTENCY_ASC" || sort === "CONSISTENCY_DESC") {
+    return [...sessions].sort((a, b) => {
+      const aScore = getConsistencyScore(a.id);
+      const bScore = getConsistencyScore(b.id);
+      if (aScore == null && bScore == null) return 0;
+      if (aScore == null) return 1;
+      if (bScore == null) return -1;
+      return isConsistencyAscending ? aScore - bScore : bScore - aScore;
+    });
+  }
+
+  return sessions;
 }
 
 export const viewerResolvers = {

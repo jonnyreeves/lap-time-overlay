@@ -49,6 +49,24 @@ const SessionQuery = graphql`
         id
         name
       }
+      consistencyScore
+      consistency {
+        score
+        label
+        mean
+        stdDev
+        cvPct
+        median
+        windowPct
+        cleanLapCount
+        excludedLapCount
+        totalValidLapCount
+        usableLapNumbers
+        excludedLaps {
+          lapNumber
+          reason
+        }
+      }
       createdAt
       updatedAt
       trackRecordings(first: 20) {
@@ -125,6 +143,7 @@ export default function ViewSessionRoute() {
   const tracks = data.tracks ?? [];
   const trackRecordings = session?.trackRecordings ?? [];
   const laps = session?.laps ?? [];
+  const sessionConsistency = session?.consistency ?? null;
 
   useEffect(() => {
     const crumbs: BreadcrumbItem[] = [{ label: "Sessions", to: "/session" }];
@@ -320,7 +339,7 @@ export default function ViewSessionRoute() {
           onRefresh={() => setRefreshKey((key) => key + 1)}
         />
 
-        <ConsistencyCard laps={lapsWithStart} />
+        <ConsistencyCard laps={lapsWithStart} consistency={sessionConsistency} />
 
         <RecordingsCard
           sessionId={session.id}

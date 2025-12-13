@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockGraphQLContext } from "../context.mock.js";
 import { rootValue } from "../../../../src/web/graphql/schema.js";
+import { computeConsistencyStats } from "../../../../src/web/shared/consistency.js";
 
 const user = { id: "user-1", username: "sam", createdAt: 1700000000000 };
 
@@ -58,14 +59,17 @@ const lapsBySession: Record<string, Array<{ id: string; time: number }>> = {
   s1: [
     { id: "l1", time: 59 },
     { id: "l2", time: 60 },
+    { id: "l3", time: 60.2 },
   ],
   s2: [
-    { id: "l3", time: 61 },
-    { id: "l4", time: 62 },
+    { id: "l4", time: 61 },
+    { id: "l5", time: 65 },
+    { id: "l6", time: 62 },
   ],
   s3: [
-    { id: "l5", time: 57 },
-    { id: "l6", time: 58 },
+    { id: "l7", time: 57 },
+    { id: "l8", time: 57.2 },
+    { id: "l9", time: 57.1 },
   ],
 };
 
@@ -151,6 +155,39 @@ describe("viewer resolver", () => {
       sort: "FASTEST_LAP_DESC",
     });
     expect(byFastestLapDesc?.edges.map((edge) => edge.node.id)).toEqual(["s2", "s1", "s3"]);
+
+    const byConsistencyDesc = viewer?.recentTrackSessions({
+      first: 5,
+      sort: "CONSISTENCY_DESC",
+    });
+    expect(byConsistencyDesc?.edges.map((edge) => edge.node.id)).toEqual(["s3", "s1", "s2"]);
+
+    const byConsistencyAsc = viewer?.recentTrackSessions({
+      first: 5,
+      sort: "CONSISTENCY_ASC",
+    });
+    expect(byConsistencyAsc?.edges.map((edge) => edge.node.id)).toEqual(["s2", "s1", "s3"]);
+  });
+
+  it("returns consistency score and breakdown for recent sessions", () => {
+    const viewer = rootValue.viewer({}, context as never);
+    const sessions = viewer?.recentTrackSessions({ first: 1 });
+    const node = sessions?.edges[0]?.node;
+    const stats = computeConsistencyStats(
+      (lapsBySession.s3 ?? []).map((lap, index) => ({
+        id: lap.id,
+        lapNumber: index + 1,
+        time: lap.time,
+      }))
+    );
+
+    const score = typeof node?.consistencyScore === "function" ? node.consistencyScore() : node?.consistencyScore;
+    expect(score).toBe(stats.score);
+    const consistency = typeof node?.consistency === "function" ? node.consistency() : node?.consistency;
+    expect(consistency).toMatchObject({
+      score: stats.score,
+      usableLapNumbers: stats.usableLaps.map((lap) => lap.lapNumber),
+    });
   });
 
   it("rejects invalid conditions filter", () => {
@@ -164,7 +201,9 @@ describe("viewer resolver", () => {
     const viewer = rootValue.viewer({}, context as never);
     expect(() =>
       viewer?.recentTrackSessions({ first: 5, sort: "FASTEST" as never })
-    ).toThrowError("sort must be DATE_ASC, DATE_DESC, FASTEST_LAP_ASC, or FASTEST_LAP_DESC");
+    ).toThrowError(
+      "sort must be DATE_ASC, DATE_DESC, FASTEST_LAP_ASC, FASTEST_LAP_DESC, CONSISTENCY_ASC, or CONSISTENCY_DESC"
+    );
   });
 
   it("rejects invalid format filter", () => {

@@ -31,7 +31,7 @@ type Props = {
 
 const DEFAULT_PAGE_SIZE = 20;
 
-type SortField = "date" | "fastestLap";
+type SortField = "date" | "fastestLap" | "consistency";
 type SortDirection = "asc" | "desc";
 type SortState = {
   field: SortField;
@@ -173,6 +173,20 @@ const lapBadgeStyles = css`
   background: #e0e7ff;
   border: 1px solid #c7d2fe;
   color: #111827;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+`;
+
+const consistencyBadgeStyles = css`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #ecfeff;
+  border: 1px solid #bae6fd;
+  color: #0f172a;
   font-weight: 800;
   letter-spacing: -0.01em;
 `;
@@ -407,6 +421,7 @@ const TrackSessionsTableFragment = graphql`
               id
               name
             }
+            consistencyScore
             laps(first: 1) {
               id
               personalBest
@@ -501,14 +516,15 @@ export function TrackSessionsTable({
   }, []);
 
   const toSortInput = useCallback(
-    (sort: SortState) =>
-      sort.field === "date"
-        ? sort.direction === "asc"
-          ? "DATE_ASC"
-          : "DATE_DESC"
-        : sort.direction === "asc"
-          ? "FASTEST_LAP_ASC"
-          : "FASTEST_LAP_DESC",
+    (sort: SortState) => {
+      if (sort.field === "date") {
+        return sort.direction === "asc" ? "DATE_ASC" : "DATE_DESC";
+      }
+      if (sort.field === "fastestLap") {
+        return sort.direction === "asc" ? "FASTEST_LAP_ASC" : "FASTEST_LAP_DESC";
+      }
+      return sort.direction === "asc" ? "CONSISTENCY_ASC" : "CONSISTENCY_DESC";
+    },
     []
   );
 
@@ -772,6 +788,22 @@ export function TrackSessionsTable({
                       </span>
                     </button>
                   </th>
+                  <th>
+                    <button
+                      type="button"
+                      css={[
+                        sortableHeaderButtonStyles,
+                        sortState.field === "consistency" && activeSortHeaderStyles,
+                      ]}
+                      onClick={() => toggleSort("consistency")}
+                      aria-label={`Sort by consistency (${sortState.field === "consistency" ? sortState.direction : "desc"})`}
+                    >
+                      <span>Consistency</span>
+                      <span css={sortArrowStyles} aria-hidden>
+                        {getSortArrow("consistency")}
+                      </span>
+                    </button>
+                  </th>
                   <th>Recording</th>
                 </tr>
               </thead>
@@ -786,6 +818,7 @@ export function TrackSessionsTable({
                     ? `P${session.classification}`
                     : "—";
                   const hasRecording = Boolean(session.trackRecordings?.length);
+                  const consistencyScore = session.consistencyScore ?? null;
                   const formattedDate = format(new Date(session.date), "do MMM yyyy");
                   const formattedTime = format(new Date(session.date), "p");
                   const conditionsLabel = session.conditions ?? "—";
@@ -831,6 +864,9 @@ export function TrackSessionsTable({
                       </td>
                       <td>
                         <span css={lapBadgeStyles}>{personalBest ?? "—"}</span>
+                      </td>
+                      <td>
+                        <span css={consistencyBadgeStyles}>{consistencyScore ?? "—"}</span>
                       </td>
                       <td>
                         <span

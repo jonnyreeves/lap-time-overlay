@@ -9,6 +9,11 @@ import type {
 } from "../../../db/track_sessions.js";
 import type { GraphQLContext } from "../context.js";
 import type { Repositories } from "../repositories.js";
+import {
+  computeConsistencyStats,
+  type ConsistencyStats,
+  type ExcludedReason,
+} from "../../shared/consistency.js";
 import { toTrackPayload } from "./track.js";
 
 export type LapEventInputArg = { offset?: number; event?: string; value?: string };
@@ -168,6 +173,44 @@ export function parseLapInputs(laps: LapInputArg[] | null | undefined): TrackSes
 }
 
 export function toTrackSessionPayload(session: TrackSessionRecord, repositories: Repositories) {
+  const loadLaps = () => repositories.laps.findBySessionId(session.id);
+  let cachedConsistency: ConsistencyStats | null = null;
+
+  const getConsistency = () => {
+    if (cachedConsistency) return cachedConsistency;
+    const laps = loadLaps();
+    cachedConsistency = computeConsistencyStats(
+      laps.map((lap) => ({ id: lap.id, lapNumber: lap.lapNumber, time: lap.time }))
+    );
+    return cachedConsistency;
+  };
+
+  const toConsistencyPayload = () => {
+    const stats = getConsistency();
+    const reasonMap: Record<ExcludedReason, "INVALID" | "OUT_LAP" | "OUTLIER"> = {
+      invalid: "INVALID",
+      "out-lap": "OUT_LAP",
+      outlier: "OUTLIER",
+    };
+    return {
+      score: stats.score,
+      label: stats.label,
+      mean: stats.mean,
+      stdDev: stats.stdDev,
+      cvPct: stats.cvPct,
+      median: stats.median,
+      windowPct: stats.windowPct,
+      cleanLapCount: stats.usableLaps.length,
+      excludedLapCount: stats.excluded.length,
+      totalValidLapCount: stats.totalValid,
+      usableLapNumbers: stats.usableLaps.map((lap) => lap.lapNumber),
+      excludedLaps: stats.excluded.map((lap) => ({
+        lapNumber: lap.lapNumber,
+        reason: reasonMap[lap.reason],
+      })),
+    };
+  };
+
   return {
     id: session.id,
     date: session.date,
@@ -218,11 +261,13 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
           };
         }
       : null,
+    consistencyScore: () => getConsistency().score,
+    consistency: toConsistencyPayload,
     notes: session.notes,
     createdAt: new Date(session.createdAt).toISOString(),
     updatedAt: new Date(session.updatedAt).toISOString(),
     laps: (args: { first: number }) => {
-      const laps = repositories.laps.findBySessionId(session.id);
+      const laps = loadLaps();
       return laps.slice(0, args.first).map((lap) => toLapPayload(lap, repositories));
     },
     trackRecordings: (args: { first: number }) => {

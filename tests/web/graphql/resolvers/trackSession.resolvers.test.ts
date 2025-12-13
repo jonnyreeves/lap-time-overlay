@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { createMockGraphQLContext } from "../context.mock.js";
+import { computeConsistencyStats } from "../../../../src/web/shared/consistency.js";
 import { rootValue } from "../../../../src/web/graphql/schema.js";
 
 const { context, repositories } = createMockGraphQLContext({
@@ -76,6 +77,31 @@ describe("trackSession resolvers", () => {
     expect(payload.id).toBe("s1");
     expect(await payload.track()).toMatchObject({ id: "c1", name: "Spa" });
     expect((await payload.laps({ first: 10 })).length).toBe(1);
+  });
+
+  it("exposes consistency score and breakdown derived from laps", async () => {
+    repositories.trackSessions.findById.mockReturnValue(mockSession);
+    repositories.tracks.findById.mockReturnValue(mockTrack);
+    repositories.trackLayouts.findById.mockReturnValue(mockLayout);
+    repositories.laps.findBySessionId.mockReturnValue([
+      { id: "l1", sessionId: "s1", lapNumber: 1, time: 75, createdAt: 0, updatedAt: 0 },
+      { id: "l2", sessionId: "s1", lapNumber: 2, time: 70, createdAt: 0, updatedAt: 0 },
+      { id: "l3", sessionId: "s1", lapNumber: 3, time: 90, createdAt: 0, updatedAt: 0 },
+    ]);
+
+    const expected = computeConsistencyStats([
+      { id: "l1", lapNumber: 1, time: 75 },
+      { id: "l2", lapNumber: 2, time: 70 },
+      { id: "l3", lapNumber: 3, time: 90 },
+    ]);
+
+    const payload = rootValue.trackSession({ id: "s1" }, context);
+    expect(payload.consistencyScore()).toBe(expected.score);
+    expect(payload.consistency()).toMatchObject({
+      score: expected.score,
+      usableLapNumbers: expected.usableLaps.map((lap) => lap.lapNumber),
+      excludedLaps: expected.excluded.map((lap) => ({ lapNumber: lap.lapNumber })),
+    });
   });
 
   it("createTrackSession validates required fields", async () => {

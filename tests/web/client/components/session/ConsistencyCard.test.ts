@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeConsistencyStats } from "../../../../../src/web/client/components/session/ConsistencyCard.js";
+import { computeConsistencyStats } from "../../../../../src/web/shared/consistency.js";
 import type { LapWithEvents } from "../../../../../src/web/client/components/session/LapsCard.js";
 
 function buildLap(lapNumber: number, time: number): LapWithEvents {
