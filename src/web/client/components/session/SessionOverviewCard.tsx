@@ -32,6 +32,7 @@ type SessionDetails = {
   date: string;
   format: string;
   classification?: number | string | null;
+  fastestLap?: number | null;
   conditions?: string | null;
   notes?: string | null;
   track: { id: string; name: string };
@@ -79,6 +80,7 @@ const UpdateTrackSessionMutation = graphql`
         date
         format
         classification
+        fastestLap
         conditions
         notes
         track {
@@ -115,6 +117,10 @@ function toFormState(session: SessionDetails): FormState {
       session.classification != null && session.classification !== ""
         ? String(session.classification)
         : "",
+    fastestLap:
+      session.fastestLap != null && session.fastestLap > 0
+        ? formatLapTimeSeconds(session.fastestLap)
+        : "",
     notes: session.notes ?? "",
   };
 }
@@ -134,6 +140,7 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
     isEditing,
     session.track.id,
     session.classification,
+    session.fastestLap,
     session.conditions,
     session.date,
     session.format,
@@ -150,6 +157,11 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
     classificationValue != null && classificationValue !== ""
       ? `P${classificationValue}`
       : "Not classified";
+  const sessionFastestLapValue = session.fastestLap;
+  const sessionFastestLapLabel =
+    sessionFastestLapValue != null && sessionFastestLapValue > 0
+      ? `${formatLapTimeSeconds(sessionFastestLapValue)}s`
+      : "Not set";
   const lapsCount = laps.length;
   const fastestLap = laps.find((lap) => lap.isFastest);
   const fastestLapTime =
@@ -243,6 +255,7 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
           format: payload.format,
           date: payload.date,
           classification: payload.classification,
+          fastestLap: payload.fastestLap,
           conditions: payload.conditions,
           notes: payload.notes,
         },
@@ -459,7 +472,7 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
           <div css={infoTileStyles}>
             <p className="label">Laps completed</p>
             <p className="value">{lapsCount}</p>
-            {fastestLapTime ? <p className="note">Fastest lap {fastestLapTime}</p> : null}
+            {fastestLapTime ? <p className="note">Fastest recorded lap {fastestLapTime}</p> : null}
           </div>
           <div css={infoTileStyles}>
             <p className="label">Conditions</p>
@@ -499,6 +512,23 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
               />
             ) : (
               <p className="value">{classificationLabel}</p>
+            )}
+          </div>
+          <div css={infoTileStyles}>
+            <p className="label">Session fastest lap</p>
+            {isEditing ? (
+              <input
+                type="text"
+                css={inputStyles}
+                value={formValues.fastestLap}
+                onChange={(e) =>
+                  setFormValues((current) => ({ ...current, fastestLap: e.target.value }))
+                }
+                placeholder="e.g. 1:03.076"
+                disabled={isSaving}
+              />
+            ) : (
+              <p className="value">{sessionFastestLapLabel}</p>
             )}
           </div>
         </div>

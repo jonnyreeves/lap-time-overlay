@@ -59,6 +59,7 @@ export function parseTeamsportEmail(text: string): ParsedTeamsportEmail | null {
   const classifications = parseClassifications(lines, detailIdx);
   const lapsByDriver = new Map<string, ParsedLap[]>();
   driverNames.forEach((name) => lapsByDriver.set(name, []));
+  let sessionFastestLapSeconds: number | null = null;
 
   const headerLineIdx = lines.indexOf(headerLine);
   for (let i = headerLineIdx + 1; i < lines.length; i++) {
@@ -73,6 +74,10 @@ export function parseTeamsportEmail(text: string): ParsedTeamsportEmail | null {
       const rawTime = columns[idx + 1];
       const timeSeconds = rawTime ? parseLapTimeString(rawTime) : null;
       if (timeSeconds == null) return;
+
+      if (sessionFastestLapSeconds == null || timeSeconds < sessionFastestLapSeconds) {
+        sessionFastestLapSeconds = timeSeconds;
+      }
 
       const driverLaps = lapsByDriver.get(name);
       if (!driverLaps) return;
@@ -99,6 +104,7 @@ export function parseTeamsportEmail(text: string): ParsedTeamsportEmail | null {
     sessionFormat: parseSessionFormat(text),
     sessionDate: null,
     sessionTime: null,
+    sessionFastestLapSeconds,
     drivers,
   };
 }

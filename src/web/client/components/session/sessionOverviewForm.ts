@@ -1,3 +1,5 @@
+import { parseLapTimeString } from "../../utils/lapTime.js";
+
 export const formatOptions = ["Practice", "Qualifying", "Race"] as const;
 export const conditionsOptions = ["Dry", "Wet"] as const;
 
@@ -10,6 +12,7 @@ export type SessionOverviewFormState = {
   time: string;
   conditions: string;
   classification: string;
+  fastestLap: string;
   notes: string;
 };
 
@@ -34,6 +37,7 @@ export function validateSessionOverviewForm(formValues: SessionOverviewFormState
   const trimmedDate = formValues.date.trim();
   const trimmedTime = formValues.time.trim();
   const trimmedNotes = formValues.notes.trim();
+  const trimmedFastestLap = formValues.fastestLap.trim();
 
   if (!formValues.trackId) {
     return { error: "Please select a track." } as const;
@@ -60,6 +64,11 @@ export function validateSessionOverviewForm(formValues: SessionOverviewFormState
     return { error: "Classification must be 1 or higher." } as const;
   }
 
+  const fastestLap = trimmedFastestLap ? parseLapTimeString(trimmedFastestLap) : null;
+  if (trimmedFastestLap && fastestLap == null) {
+    return { error: "Fastest lap must be a valid time (e.g. 1:03.076)." } as const;
+  }
+
   return {
     error: null,
     payload: {
@@ -71,6 +80,7 @@ export function validateSessionOverviewForm(formValues: SessionOverviewFormState
       trackLayoutId: formValues.trackLayoutId,
       kartId: formValues.kartId,
       notes: trimmedNotes,
+      fastestLap,
     },
   } as const;
 }

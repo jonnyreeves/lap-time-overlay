@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<2ba0cd2412a2a624a7cfaf47680bc1e5>>
+ * @generated SignedSource<<5f11606021a91be7c832b0a540dece9a>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,6 +13,7 @@ export type UpdateTrackSessionInput = {
   classification?: number | null | undefined;
   conditions?: string | null | undefined;
   date?: string | null | undefined;
+  fastestLap?: number | null | undefined;
   format?: string | null | undefined;
   id: string;
   kartId?: string | null | undefined;
@@ -29,6 +30,7 @@ export type SessionOverviewCardUpdateTrackSessionMutation$data = {
       readonly classification: number;
       readonly conditions: string;
       readonly date: string;
+      readonly fastestLap: number | null | undefined;
       readonly format: string;
       readonly id: string;
       readonly kart: {
@@ -127,6 +129,13 @@ v3 = [
             "alias": null,
             "args": null,
             "kind": "ScalarField",
+            "name": "fastestLap",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
             "name": "conditions",
             "storageKey": null
           },
@@ -199,16 +208,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "d9d6b7bd636a558dbde79393e99ecd19",
+    "cacheID": "c24ac8720291169caf40c13fffd759b2",
     "id": null,
     "metadata": {},
     "name": "SessionOverviewCardUpdateTrackSessionMutation",
     "operationKind": "mutation",
-    "text": "mutation SessionOverviewCardUpdateTrackSessionMutation(\n  $input: UpdateTrackSessionInput!\n) {\n  updateTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      conditions\n      notes\n      track {\n        id\n        name\n      }\n      kart {\n        id\n        name\n      }\n      trackLayout {\n        id\n        name\n      }\n      updatedAt\n    }\n  }\n}\n"
+    "text": "mutation SessionOverviewCardUpdateTrackSessionMutation(\n  $input: UpdateTrackSessionInput!\n) {\n  updateTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      fastestLap\n      conditions\n      notes\n      track {\n        id\n        name\n      }\n      kart {\n        id\n        name\n      }\n      trackLayout {\n        id\n        name\n      }\n      updatedAt\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "f100e278e280eee9e35fc155e06fe8df";
+(node as any).hash = "0d518f8cac290a3b9f63d6b30722fc00";
 
 export default node;

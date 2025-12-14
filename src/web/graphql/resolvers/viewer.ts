@@ -95,10 +95,16 @@ function sortSessions(
     );
   }
 
+  const sessionById = new Map(sessions.map((session) => [session.id, session]));
   const fastestLapBySession = new Map<string, number | null>();
   const getFastestLap = (sessionId: string): number | null => {
     if (fastestLapBySession.has(sessionId)) {
       return fastestLapBySession.get(sessionId) ?? null;
+    }
+    const session = sessionById.get(sessionId);
+    if (session?.fastestLap != null) {
+      fastestLapBySession.set(sessionId, session.fastestLap);
+      return session.fastestLap;
     }
     const laps = repositories.laps.findBySessionId(sessionId);
     if (!laps.length) {

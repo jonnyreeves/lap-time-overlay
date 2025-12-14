@@ -13,6 +13,7 @@ const mockSession = {
   date: "2024-02-01",
   format: "Race",
   classification: 1,
+  fastestLap: null,
   conditions: "Dry" as const,
   trackId: "c1",
   userId: "user-1",
@@ -164,6 +165,7 @@ describe("trackSession resolvers", () => {
       laps: [{ lapNumber: 1, time: 74.5 }],
       trackLayoutId: "l1",
       kartId: "k1",
+      fastestLap: null,
     });
     expect(result.trackSession.id).toBe("s1");
     expect(result.trackSession.classification).toBe(1);

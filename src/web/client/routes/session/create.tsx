@@ -11,6 +11,7 @@ import { ImportSessionModal } from "../../components/session/ImportSessionModal.
 import { LapInputsCard } from "../../components/session/LapInputsCard.js";
 import { CreateTrackModal } from "../../components/tracks/CreateTrackModal.js";
 import { useLapRows, type LapInputPayload } from "../../hooks/useLapRows.js";
+import { formatLapTimeSeconds, parseLapTimeString } from "../../utils/lapTime.js";
 import { type SessionImportSelection } from "../../utils/sessionImportTypes.js";
 import { prependCreatedSessionToRecentSessions, prependTrackForCreatedSession } from "./createUpdater.js";
 import { useBreadcrumbs } from "../../hooks/useBreadcrumbs.js";
@@ -188,6 +189,7 @@ const CreateTrackSessionMutation = graphql`
         date
         format
         classification
+        fastestLap
         conditions
         trackLayout {
           id
@@ -247,6 +249,7 @@ export default function CreateSessionRoute() {
   const [kartId, setKartId] = useState("");
   const [trackLayoutId, setTrackLayoutId] = useState("");
   const [classification, setClassification] = useState("");
+  const [fastestLap, setFastestLap] = useState("");
   const [notes, setNotes] = useState("");
 
   const navigate = useNavigate();
@@ -384,6 +387,13 @@ export default function CreateSessionRoute() {
       return;
     }
 
+    const trimmedFastestLap = fastestLap.trim();
+    const parsedFastestLap = trimmedFastestLap ? parseLapTimeString(trimmedFastestLap) : null;
+    if (trimmedFastestLap && parsedFastestLap == null) {
+      alert("Please enter a valid fastest lap (e.g. 1:03.076).");
+      return;
+    }
+
     commitMutation({
       variables: {
         input: {
@@ -395,6 +405,7 @@ export default function CreateSessionRoute() {
           kartId,
           conditions,
           notes: notes.trim() ? notes.trim() : null,
+          ...(parsedFastestLap != null ? { fastestLap: parsedFastestLap } : {}),
           ...(lapInput.length ? { laps: lapInput } : {}),
         },
         connections: [viewerConnectionId],
@@ -446,6 +457,11 @@ export default function CreateSessionRoute() {
     }
     setClassification(
       importResult.classification != null ? String(importResult.classification) : ""
+    );
+    setFastestLap(
+      importResult.sessionFastestLapSeconds != null
+        ? formatLapTimeSeconds(importResult.sessionFastestLapSeconds)
+        : ""
     );
     if (importResult.laps.length) {
       setLapRowsFromImport(
@@ -601,6 +617,17 @@ export default function CreateSessionRoute() {
               value={classification}
               onChange={(e) => setClassification(e.target.value)}
               placeholder="e.g. 1 for P1"
+              disabled={isInFlight}
+            />
+          </div>
+          <div css={inputFieldStyles}>
+            <label htmlFor="session-fastest-lap">Session fastest lap (optional)</label>
+            <input
+              type="text"
+              id="session-fastest-lap"
+              value={fastestLap}
+              onChange={(e) => setFastestLap(e.target.value)}
+              placeholder="e.g. 1:03.076"
               disabled={isInFlight}
             />
           </div>

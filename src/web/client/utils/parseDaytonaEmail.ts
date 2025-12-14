@@ -1,21 +1,35 @@
-import { formatLapTimeSeconds } from "./lapTime.js";
+import { formatLapTimeSeconds, parseLapTimeString } from "./lapTime.js";
 import { parseSessionFormat } from "./sessionImportShared.js";
 import { type ParsedDaytonaEmail, type ParsedLap } from "./sessionImportTypes.js";
 
 // Matches a single lap entry like `01 0:57:755 [11]` and can appear multiple times on a line.
 const LAP_ENTRY_RE = /(\d+)\s+(\d+):(\d+):(\d+)\s+\[(\d+)\]/g;
 const TIME_STARTED_RE = /time\s*started\s*(?::|\-)?\s*(.+)/i;
+const FASTEST_DRIVER_RE = /fastest\s+driver\s+(.+)/i;
 
 export function parseDaytonaEmail(text: string): ParsedDaytonaEmail {
   const lines = text.split(/\r?\n/);
   const { date: sessionDate, time: sessionTime } = parseTimeStarted(text);
   let finalPosition: number | null = null;
+  let sessionFastestLapSeconds: number | null = null;
 
   const laps: ParsedLap[] = [];
 
   for (const lineRaw of lines) {
     const line = lineRaw.trim();
     if (!line || line.startsWith("#")) continue;
+
+    if (sessionFastestLapSeconds == null) {
+      const fastestMatch = line.match(FASTEST_DRIVER_RE);
+      if (fastestMatch) {
+        const fastestRaw = fastestMatch[1];
+        const timeMatch = fastestRaw.match(/(\d+:\d{2}:\d{3})/);
+        const parsedTime = timeMatch ? parseLapTimeString(timeMatch[1]) : null;
+        if (parsedTime != null) {
+          sessionFastestLapSeconds = parsedTime;
+        }
+      }
+    }
 
     const matches = [...line.matchAll(LAP_ENTRY_RE)];
     if (!matches.length) continue;
@@ -57,6 +71,7 @@ export function parseDaytonaEmail(text: string): ParsedDaytonaEmail {
     sessionDate,
     sessionTime,
     classification: finalPosition,
+    sessionFastestLapSeconds,
     laps,
   };
 }

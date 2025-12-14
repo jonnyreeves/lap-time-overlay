@@ -52,6 +52,35 @@ describe("parseTeamsportEmail", () => {
     expect(jonny?.laps[0].timeSeconds).toBeCloseTo(70.171, 3);
     expect(jonny?.laps[1].timeSeconds).toBeCloseTo(49.872, 3);
     expect(jonny?.laps[13].timeSeconds).toBeCloseTo(47.131, 3);
+    expect(parsed?.sessionFastestLapSeconds).toBeCloseTo(44.639, 3);
+  });
+
+  it("captures the overall fastest lap across all drivers", () => {
+    const text = `
+    Driver names
+    Detailed results
+    \tJonny\tlee lockley\tHER\tMax R***\tBen Reeves\tgeorge lockley\tRaife Heritage
+    1\t1:04.136\t1:07.506\t1:07.839\t1:15.599\t1:17.134\t1:14.189\t1:12.725
+    2\t49.012\t49.563\t47.543\t56.870\t1:05.805\t1:02.320\t2:00.887
+    3\t47.197\t46.890\t47.807\t57.055\t1:00.401\t1:01.223\t1:05.708
+    4\t46.933\t46.049\t47.362\t57.773\t1:03.934\t1:00.504\t1:20.365
+    5\t46.469\t47.982\t48.105\t1:12.118\t1:14.060\t1:17.227\t1:03.823
+    6\t56.111\t59.919\t1:06.627\t57.254\t1:04.271\t1:02.251\t1:39.087
+    7\t50.896\t47.227\t48.807\t1:23.021\t1:16.723\t1:13.664\t1:09.627
+    8\t49.626\t48.593\t49.585\t56.777\t1:05.899\t1:00.960\t1:05.299
+    9\t53.770\t1:02.692\t53.211\t1:00.562\t1:03.512\t1:01.269\t1:06.686
+    10\t46.971\t47.807\t47.697\t56.463\t1:01.172\t1:01.763\t1:04.172
+    11\t56.117\t53.797\t53.829\t57.699\t1:02.785\t1:00.423\t1:19.253
+    12\t47.829\t48.032\t48.305\t56.757\t1:11.398\t1:01.955\t
+    13\t46.396\t48.351\t47.952\t1:09.057\t\t1:07.773\t
+    14\t45.913\t47.736\t48.747\t\t\t\t
+    15\t47.023\t46.964\t47.032\t\t\t\t
+    16\t50.838\t53.997\t57.799\t\t\t\t
+    `;
+
+    const parsed = parseTeamsportEmail(text);
+
+    expect(parsed?.sessionFastestLapSeconds).toBeCloseTo(45.913, 3);
   });
 
   it("prefers teamsport in the entrypoint", () => {

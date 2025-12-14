@@ -9,6 +9,8 @@ describe("parseDaytonaEmail", () => {
 
     Time Started: 15/02/2024 19:30
 
+    Fastest Driver\t01:03:076 by Mark Khametov
+
     (By Best Lap Time)
     01 0:57:755 [11]
     02 0:52:798 [10]
@@ -25,6 +27,7 @@ describe("parseDaytonaEmail", () => {
       lapEvents: [{ offset: 0, event: "position", value: "11" }],
     });
     expect(result.laps[2]).toMatchObject({ lapNumber: 3, timeSeconds: 51.258 });
+    expect(result.sessionFastestLapSeconds).toBeCloseTo(63.076, 3);
     expect(result.classification).toBe(11);
   });
 

@@ -8,4 +8,5 @@ export interface Migration {
 // Add new migrations here; keep order stable.
 export const migrations: Migration[] = [
   (await import("./01_initial_schema.js")).migration,
+  (await import("./02_add_fastest_lap_to_track_sessions.js")).migration,
 ];

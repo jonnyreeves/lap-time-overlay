@@ -35,6 +35,7 @@ const SessionQuery = graphql`
       date
       format
       classification
+      fastestLap
       conditions
       notes
       track {

@@ -13,6 +13,7 @@ export type ParsedDaytonaEmail = {
   sessionDate: string | null;
   sessionTime: string | null;
   classification: number | null;
+  sessionFastestLapSeconds: number | null;
   laps: ParsedLap[];
 };
 
@@ -27,6 +28,7 @@ export type ParsedTeamsportEmail = {
   sessionFormat: SessionFormat | null;
   sessionDate: string | null;
   sessionTime: string | null;
+  sessionFastestLapSeconds: number | null;
   drivers: { name: string; laps: ParsedLap[]; classification: number | null }[];
 };
 
@@ -39,4 +41,5 @@ export type SessionImportSelection = {
   classification: number | null;
   laps: ParsedLap[];
   driverName?: string;
+  sessionFastestLapSeconds: number | null;
 };

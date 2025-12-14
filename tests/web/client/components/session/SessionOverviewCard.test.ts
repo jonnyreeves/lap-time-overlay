@@ -13,6 +13,7 @@ const baseForm: SessionOverviewFormState = {
   time: "10:00",
   conditions: "Dry",
   classification: "1",
+  fastestLap: "",
   notes: "Notes",
 };
 
@@ -29,6 +30,7 @@ describe("validateSessionOverviewForm", () => {
       trackLayoutId: "l1",
       kartId: "k1",
       notes: "Notes",
+      fastestLap: null,
     });
   });
 

@@ -201,6 +201,7 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
       classification: getSelectedClassification(parsed, selectedDriver),
       laps,
       driverName: parsed.provider === "teamsport" ? selectedDriver || parsed.drivers[0]?.name : undefined,
+      sessionFastestLapSeconds: parsed.sessionFastestLapSeconds ?? null,
     });
     handleClose();
   };
@@ -230,6 +231,7 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
   const previewClassification = parsed
     ? getSelectedClassification(parsed, selectedDriver)
     : null;
+  const previewFastestLap = parsed?.sessionFastestLapSeconds ?? null;
 
   const importDisabled = !emailContent.trim() || !(previewLaps?.length ?? 0);
 
@@ -273,6 +275,12 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
                   <div>
                     <strong>Classification:</strong>{" "}
                     {previewClassification ?? "Not found"}
+                  </div>
+                  <div>
+                    <strong>Session fastest lap:</strong>{" "}
+                    {previewFastestLap != null
+                      ? `${formatLapTimeSeconds(previewFastestLap)}s`
+                      : "Not found"}
                   </div>
                   {parsed.provider === "teamsport" ? (
                     <div css={selectStyles}>

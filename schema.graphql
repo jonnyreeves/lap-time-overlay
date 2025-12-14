@@ -38,6 +38,7 @@ input CreateTrackSessionInput {
   trackLayoutId: ID!
   notes: String
   laps: [LapInput!]
+  fastestLap: Float
 }
 
 type CreateTrackSessionPayload {
@@ -54,6 +55,7 @@ input UpdateTrackSessionInput {
   kartId: ID
   trackLayoutId: ID
   notes: String
+  fastestLap: Float
 }
 
 type UpdateTrackSessionPayload {
@@ -217,6 +219,7 @@ type TrackSession {
   date: String!
   format: String!
   classification: Int!
+  fastestLap: Float
   conditions: String!
   track: Track!
   trackLayout: TrackLayout!

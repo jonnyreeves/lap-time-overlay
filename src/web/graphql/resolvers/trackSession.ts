@@ -30,6 +30,7 @@ export type CreateTrackSessionInputArgs = {
     trackLayoutId?: string;
     notes?: string;
     laps?: LapInputArg[] | null;
+    fastestLap?: number | null;
   };
 };
 
@@ -44,6 +45,7 @@ export type UpdateTrackSessionInputArgs = {
     kartId?: string | null;
     trackLayoutId?: string | null;
     notes?: string | null;
+    fastestLap?: number | null;
   };
 };
 
@@ -88,6 +90,21 @@ export function parseClassification(classification: number | string | null | und
     });
   }
 
+  return parsed;
+}
+
+export function parseFastestLap(
+  fastestLap: number | string | null | undefined
+): number | null {
+  if (fastestLap === undefined) return null;
+  if (fastestLap === null || fastestLap === "") return null;
+
+  const parsed = typeof fastestLap === "string" ? Number(fastestLap) : fastestLap;
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    throw new GraphQLError("fastestLap must be a positive number of seconds", {
+      extensions: { code: "VALIDATION_FAILED" },
+    });
+  }
   return parsed;
 }
 
@@ -216,6 +233,7 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
     date: session.date,
     format: session.format,
     classification: session.classification,
+    fastestLap: session.fastestLap,
     conditions: session.conditions,
     track: () => {
       const track = repositories.tracks.findById(session.trackId);
@@ -469,6 +487,7 @@ export const trackSessionResolvers = {
     const laps = parseLapInputs(input.laps);
     const classification = parseClassification(input.classification);
     const conditions = parseConditions(input.conditions);
+    const fastestLap = parseFastestLap(input.fastestLap);
     const { trackSession } = repositories.trackSessions.createWithLaps({
       date: input.date,
       format: input.format,
@@ -480,6 +499,7 @@ export const trackSessionResolvers = {
       laps,
       kartId: input.kartId,
       trackLayoutId: input.trackLayoutId,
+      fastestLap,
     });
     return { trackSession: toTrackSessionPayload(trackSession, repositories) };
   },
@@ -621,6 +641,7 @@ export const trackSessionResolvers = {
     const notesProvided = Object.prototype.hasOwnProperty.call(input, "notes");
     const classificationProvided = Object.prototype.hasOwnProperty.call(input, "classification");
     const conditionsProvided = Object.prototype.hasOwnProperty.call(input, "conditions");
+    const fastestLapProvided = Object.prototype.hasOwnProperty.call(input, "fastestLap");
 
     if (classificationProvided && input.classification === null) {
       throw new GraphQLError("classification cannot be null", {
@@ -637,6 +658,10 @@ export const trackSessionResolvers = {
       conditionsProvided && input.conditions !== null && input.conditions !== undefined
         ? parseConditions(input.conditions)
         : undefined;
+    const fastestLap =
+      fastestLapProvided && input.fastestLap !== undefined
+        ? parseFastestLap(input.fastestLap)
+        : undefined;
 
     const updated = repositories.trackSessions.update({
       id: input.id,
@@ -648,6 +673,7 @@ export const trackSessionResolvers = {
       notes,
       kartId: targetKartId,
       trackLayoutId: targetTrackLayoutId,
+      fastestLap,
     });
 
     if (!updated) {
