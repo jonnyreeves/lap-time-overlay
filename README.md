@@ -52,22 +52,22 @@ The web UI always uses the ffmpeg renderer.
 colima start --arch x86_64
 
 ## build
-docker build --platform=linux/amd64 -t lap-timer .
+docker build --platform=linux/amd64 -t racecraft .
 
 ## debug
-docker run -it --rm lap-timer sh
+docker run -it --rm racecraft sh
 
 ## run locally from the root of the repo on http://localhost:3008
 docker run -it --rm \
   -p 3008:3000 \
   -v $(pwd)/work:/app/work \
-  --name lap-timer \
-  jonnyreeves83/lap-timer:latest
+  --name racecraft \
+  jonnyreeves83/racecraft:latest
 
 ## tag
-docker tag lap-timer jonnyreeves83/lap-timer:latest
+docker tag racecraft jonnyreeves83/racecraft:latest
 
 ## publish
-docker push jonnyreeves83/lap-timer:latest
+docker push jonnyreeves83/racecraft:latest
 
 ```
