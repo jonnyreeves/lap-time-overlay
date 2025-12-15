@@ -1,10 +1,17 @@
+import ffmpeg from "fluent-ffmpeg";
+import { randomUUID } from "node:crypto";
+import { once } from "node:events";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
-import path from "node:path";
-import { once } from "node:events";
-import ffmpeg from "fluent-ffmpeg";
 import type http from "node:http";
-import { randomUUID } from "node:crypto";
+import path from "node:path";
+import {
+  createTrackRecordingSource,
+  findTrackRecordingSourceById,
+  findTrackRecordingSourcesByRecordingId,
+  updateTrackRecordingSource,
+  type TrackRecordingSourceRecord,
+} from "../../db/track_recording_sources.js";
 import {
   createTrackRecording,
   deleteTrackRecording,
@@ -13,17 +20,10 @@ import {
   updateTrackRecording,
   type TrackRecordingRecord,
 } from "../../db/track_recordings.js";
-import {
-  createTrackRecordingSource,
-  findTrackRecordingSourceById,
-  findTrackRecordingSourcesByRecordingId,
-  updateTrackRecordingSource,
-  type TrackRecordingSourceRecord,
-} from "../../db/track_recording_sources.js";
 import { findTrackSessionById } from "../../db/track_sessions.js";
 import {
-  sessionRecordingStagingDir,
   sessionRecordingsDir,
+  tmpUploadsDir,
 } from "../config.js";
 
 export interface RecordingSourcePlan {
@@ -52,7 +52,7 @@ function toPlannedMediaId(recordingId: string, sessionId: string, firstFileName:
 }
 
 function stagingDirForRecording(sessionId: string, recordingId: string): string {
-  return path.join(sessionRecordingStagingDir, sessionId, recordingId);
+  return path.join(tmpUploadsDir, sessionId, recordingId);
 }
 
 async function writeUploadToDisk(
