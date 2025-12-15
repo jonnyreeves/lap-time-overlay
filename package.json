@@ -16,7 +16,7 @@
     "relay": "relay-compiler",
     "relay:codex": "/bin/zsh -lc 'PATH=\"/Users/jonny/.nvm/versions/node/v22.18.0/bin:/usr/bin:/bin:/usr/sbin:/sbin\" npx relay-compiler'",
     "relay:watch": "relay-compiler --watch",
-    "test": "vitest run --exclude **/overlay.integration.test.ts",
+    "test": "TEMP_DIR=$(node scripts/get-tmp.js) vitest run --exclude **/overlay.integration.test.ts",
     "test:integration": "npm run type-check && vitest run tests/ffmpeg/overlay.integration.test.ts",
     "test:update-overlay-fixture": "UPDATE_OVERLAY_FIXTURE=1 npm run test:integration"
   },

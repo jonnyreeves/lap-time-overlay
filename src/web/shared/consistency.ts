@@ -122,12 +122,8 @@ export function computeConsistencyStats(laps: ConsistencyLapInput[]): Consistenc
   const lowerBound = med * (1 - windowPct);
   const upperBound = med * (1 + windowPct);
 
-  const usable = candidates.filter(
-    (lap) => lap.time >= lowerBound && lap.time <= upperBound
-  );
-  const outliers = candidates.filter(
-    (lap) => lap.time < lowerBound || lap.time > upperBound
-  );
+  const usable = candidates.filter((lap) => lap.time <= upperBound);
+  const outliers = candidates.filter((lap) => lap.time > upperBound);
   outliers.forEach((lap) => excluded.push({ ...lap, reason: "outlier" }));
 
   const usableTimes = usable.map((lap) => lap.time);
