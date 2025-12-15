@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 import { useEffect, useState } from "react";
 import { graphql, useMutation } from "react-relay";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { SessionOverviewCardUpdateTrackSessionMutation } from "../../__generated__/SessionOverviewCardUpdateTrackSessionMutation.graphql.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 import { Card } from "../Card.js";
@@ -14,11 +14,12 @@ import {
   inputStyles,
   notesStyles,
   primaryButtonStyles,
+  dangerButtonStyles,
   sessionCardLayoutStyles,
   sessionInfoGridStyles,
   textareaStyles,
 } from "./sessionOverviewStyles.js";
-import { inlineActionButtonStyles } from "../inlineActionButtons.ts";
+import { inlineActionButtonStyles, dangerInlineActionButtonStyles } from "../inlineActionButtons.ts";
 import {
   conditionsOptions,
   formatOptions,
@@ -26,6 +27,8 @@ import {
   splitDateTime,
   validateSessionOverviewForm,
 } from "./sessionOverviewForm.js";
+import { Modal } from "../Modal.js";
+import type { SessionOverviewCardDeleteTrackSessionMutation } from "../../__generated__/SessionOverviewCardDeleteTrackSessionMutation.graphql.js";
 
 type SessionDetails = {
   id: string;
@@ -101,6 +104,14 @@ const UpdateTrackSessionMutation = graphql`
   }
 `;
 
+const DeleteTrackSessionMutation = graphql`
+  mutation SessionOverviewCardDeleteTrackSessionMutation($id: ID!) {
+    deleteTrackSession(id: $id) {
+      success
+    }
+  }
+`;
+
 type FormState = SessionOverviewFormState;
 
 function toFormState(session: SessionDetails): FormState {
@@ -128,10 +139,14 @@ function toFormState(session: SessionDetails): FormState {
 export function SessionOverviewCard({ session, laps, tracks }: Props) {
   const formId = `session-overview-${session.id}`;
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [formValues, setFormValues] = useState<FormState>(() => toFormState(session));
   const [actionError, setActionError] = useState<string | null>(null);
   const [commitUpdate, isSaving] =
     useMutation<SessionOverviewCardUpdateTrackSessionMutation>(UpdateTrackSessionMutation);
+  const [commitDelete, isDeleting] =
+    useMutation<SessionOverviewCardDeleteTrackSessionMutation>(DeleteTrackSessionMutation);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isEditing) return;
@@ -222,6 +237,18 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
     setActionError(null);
     setFormValues(toFormState(session));
     setIsEditing(false);
+  }
+
+  function handleDelete() {
+    commitDelete({
+      variables: { id: session.id },
+      onCompleted: () => {
+        navigate("/sessions");
+      },
+      updater: (store) => {
+        store.delete(session.id);
+      },
+    });
   }
 
   function handleSubmit(event?: React.FormEvent<HTMLFormElement>) {
@@ -321,14 +348,25 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
               </button>
             </>
           ) : (
-            <IconButton
-              type="button"
-              css={inlineActionButtonStyles}
-              onClick={handleEdit}
-              icon="✏️"
-            >
-              Edit
-            </IconButton>
+            <>
+              <IconButton
+                type="button"
+                css={dangerInlineActionButtonStyles}
+                onClick={() => setIsDeleteModalOpen(true)}
+                icon="🗑️"
+                disabled={isDeleting}
+              >
+                Delete
+              </IconButton>
+              <IconButton
+                type="button"
+                css={inlineActionButtonStyles}
+                onClick={handleEdit}
+                icon="✏️"
+              >
+                Edit
+              </IconButton>
+            </>
           )}
         </div>
       }
@@ -552,6 +590,31 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
           )}
         </div>
       </form>
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        title="Delete Session"
+      >
+        <p>Are you sure you want to delete this session? This action cannot be undone.</p>
+        <div css={actionsRowStyles}>
+          <button
+            type="button"
+            css={inlineActionButtonStyles}
+            onClick={() => setIsDeleteModalOpen(false)}
+            disabled={isDeleting}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            css={dangerButtonStyles}
+            onClick={handleDelete}
+            disabled={isDeleting}
+          >
+            {isDeleting ? "Deleting..." : "Delete"}
+          </button>
+        </div>
+      </Modal>
     </Card>
   );
 }

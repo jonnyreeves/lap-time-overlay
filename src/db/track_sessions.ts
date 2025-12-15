@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { getDb } from "./client.js";
 import type { LapRecord } from "./laps.js";
+import { safeUnlink } from "../web/shared/fs.js";
 
 export interface TrackSessionLapEventInput {
   offset: number;
@@ -357,6 +358,59 @@ export function replaceLapsForSession(
   return created;
 }
 
+interface RecordingFilePathRow {
+  storage_path: string;
+}
+
+export async function deleteTrackSession(
+  id: string,
+  userId: string,
+): Promise<boolean> {
+  const db = getDb();
+  const session = findTrackSessionById(id);
+
+  if (!session) {
+    return false;
+  }
+
+  if (session.userId !== userId) {
+    return false;
+  }
+
+  const recordingFilePaths = db
+    .prepare<[string], RecordingFilePathRow>(
+      `SELECT trs.storage_path FROM track_recordings tr JOIN track_recording_sources trs ON tr.id = trs.recording_id WHERE tr.session_id = ?`
+    )
+    .all(id);
+
+  db.transaction(() => {
+    // Delete lap events
+    db.prepare(
+      `DELETE FROM lap_events WHERE lap_id IN (SELECT id FROM laps WHERE session_id = ?)`
+    ).run(id);
+
+    // Delete laps
+    db.prepare(`DELETE FROM laps WHERE session_id = ?`).run(id);
+
+    // Delete track recording sources
+    db.prepare(
+      `DELETE FROM track_recording_sources WHERE recording_id IN (SELECT id FROM track_recordings WHERE session_id = ?)`
+    ).run(id);
+
+    // Delete track recordings
+    db.prepare(`DELETE FROM track_recordings WHERE session_id = ?`).run(id);
+
+    // Delete track session
+    db.prepare(`DELETE FROM track_sessions WHERE id = ?`).run(id);
+  })();
+
+  for (const { storage_path } of recordingFilePaths) {
+    await safeUnlink(storage_path);
+  }
+
+  return true;
+}
+
 export interface TrackSessionRepository {
   findById: (id: string) => TrackSessionRecord | null;
   findByTrackId: (trackId: string) => TrackSessionRecord[];
@@ -389,6 +443,7 @@ export interface TrackSessionRepository {
     fastestLap?: number | null;
   }) => TrackSessionRecord | null;
   replaceLapsForSession: (sessionId: string, laps: TrackSessionLapInput[], now?: number) => LapRecord[];
+  delete: (id: string, userId: string) => Promise<boolean>;
 }
 
 export const trackSessionsRepository: TrackSessionRepository = {
@@ -398,4 +453,5 @@ export const trackSessionsRepository: TrackSessionRepository = {
   createWithLaps: createTrackSessionWithLaps,
   update: updateTrackSession,
   replaceLapsForSession,
+  delete: deleteTrackSession,
 };

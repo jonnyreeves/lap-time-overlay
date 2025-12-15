@@ -21,20 +21,21 @@ export const inlineActionButtonStyles = css`
 
 export const dangerInlineActionButtonStyles = css`
   padding: 8px 12px;
-  background: #fee2e2;
-  color: #ef4444;
-  border: 1px solid #fecaca;
+  background: #dc2626;
+  color: #fff;
+  border: 1px solid #c11212;
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
 
   &:hover {
-    background: #fca5a5;
-    color: #b91c1c;
+    background: #c11212;
+    color: #fff;
   }
 
   &:disabled {
     opacity: 0.7;
+    background: #ef4444;
     cursor: not-allowed;
   }
 `;

@@ -1,20 +1,25 @@
 import assert from "assert";
-import { describe, it, beforeEach, afterEach } from "vitest";
-import { setupTestDb, teardownTestDb } from "../db/test_setup.js";
-import { createUser, type UserRecord } from "../../src/db/users.js";
-import { createTrack, type TrackRecord } from "../../src/db/tracks.js";
-import { createTrackLayout, type TrackLayoutRecord } from "../../src/db/track_layouts.js";
-import { findLapsBySessionId } from "../../src/db/laps.js";
+import { existsSync, mkdirSync, unlinkSync, writeFileSync } from "fs";
+import { join } from "path";
+import { afterEach, beforeEach, describe, it } from "vitest";
+import { getDb } from "../../src/db/client.js";
 import { findLapEventsByLapId } from "../../src/db/lap_events.js";
+import { findLapsBySessionId } from "../../src/db/laps.js";
+import { createTrackLayout, type TrackLayoutRecord } from "../../src/db/track_layouts.js";
+import { createTrackRecordingSource } from "../../src/db/track_recording_sources.js";
+import { createTrackRecording } from "../../src/db/track_recordings.js";
 import {
   createTrackSession,
   createTrackSessionWithLaps,
+  deleteTrackSession,
   findTrackSessionById,
   findTrackSessionsByTrackId,
   findTrackSessionsByUserId,
-  updateTrackSession,
-  type TrackSessionRecord,
+  updateTrackSession
 } from "../../src/db/track_sessions.js";
+import { createTrack, type TrackRecord } from "../../src/db/tracks.js";
+import { createUser, type UserRecord } from "../../src/db/users.js";
+import { setupTestDb, teardownTestDb } from "../db/test_setup.js";
 
 describe("track_sessions", () => {
   let user: UserRecord;
@@ -266,5 +271,135 @@ describe("track_sessions", () => {
 
     const persisted = findTrackSessionById(session.id);
     assert.deepStrictEqual(persisted, updated);
+  });
+
+  describe("deleteTrackSession", () => {
+    let recordingFilePath1: string;
+    let recordingFilePath2: string;
+    let tempDir: string;
+
+    beforeEach(() => {
+      tempDir = join(process.env.TEMP_DIR!, "track_sessions_test");
+      mkdirSync(tempDir, { recursive: true });
+      // Create dummy files for recordings
+      recordingFilePath1 = join(tempDir, "recording1.txt");
+      recordingFilePath2 = join(tempDir, "recording2.txt");
+      writeFileSync(recordingFilePath1, "dummy content 1");
+      writeFileSync(recordingFilePath2, "dummy content 2");
+    });
+
+    afterEach(() => {
+      // Clean up dummy files
+      if (existsSync(recordingFilePath1)) {
+        unlinkSync(recordingFilePath1);
+      }
+      if (existsSync(recordingFilePath2)) {
+        unlinkSync(recordingFilePath2);
+      }
+    });
+
+    it("successfully deletes a track session and its dependent data", async () => {
+      const now = Date.now();
+      const { trackSession, laps } = createTrackSessionWithLaps({
+        date: "2023-11-29T12:00:00Z",
+        format: "Race",
+        classification: 4,
+        conditions: "Wet",
+        trackId: track.id,
+        userId: user.id,
+        notes: "with laps",
+        laps: [
+          {
+            lapNumber: 1,
+            time: 60.1,
+            lapEvents: [{ offset: 5.5, event: "position", value: "P1" }],
+          },
+          { lapNumber: 2, time: 59.5 },
+        ],
+        now,
+        trackLayoutId: layout.id,
+      });
+
+      const recording1 = createTrackRecording({
+        sessionId: trackSession.id,
+        userId: user.id,
+        mediaId: "media1",
+        isPrimary: true,
+        lapOneOffset: 0,
+      });
+
+      const recording2 = createTrackRecording({
+        sessionId: trackSession.id,
+        userId: user.id,
+        mediaId: "media2",
+        isPrimary: false,
+        lapOneOffset: 0,
+      });
+
+      createTrackRecordingSource({
+        recordingId: recording1.id,
+        fileName: "file1.mp4",
+        sizeBytes: 100,
+        ordinal: 0,
+        uploadToken: "token1",
+        storagePath: recordingFilePath1,
+      });
+
+      createTrackRecordingSource({
+        recordingId: recording2.id,
+        fileName: "file2.mp4",
+        sizeBytes: 200,
+        ordinal: 0,
+        uploadToken: "token2",
+        storagePath: recordingFilePath2,
+      });
+
+      const success = await deleteTrackSession(trackSession.id, user.id);
+      assert.strictEqual(success, true);
+
+      assert.strictEqual(findTrackSessionById(trackSession.id), null);
+      assert.deepStrictEqual(findLapsBySessionId(trackSession.id), []);
+      assert.deepStrictEqual(findLapEventsByLapId(laps[0].id), []);
+
+      const db = getDb();
+      const recordings = db
+        .prepare(`SELECT * FROM track_recordings WHERE session_id = ?`)
+        .all(trackSession.id);
+      assert.strictEqual(recordings.length, 0);
+
+      const recordingSources = db
+        .prepare(`SELECT * FROM track_recording_sources WHERE recording_id IN (?, ?)`)
+        .all(recording1.id, recording2.id);
+      assert.strictEqual(recordingSources.length, 0);
+
+      assert.strictEqual(existsSync(recordingFilePath1), false);
+      assert.strictEqual(existsSync(recordingFilePath2), false);
+    });
+
+    it("returns false for unauthorized deletion", async () => {
+      const otherUser = createUser("otheruser", "hashedpassword");
+      const trackSession = createTrackSession(
+        "2023-11-29T10:00:00Z",
+        "Practice",
+        5,
+        track.id,
+        user.id,
+        "Some notes",
+        Date.now(),
+        "Dry",
+        null,
+        layout.id
+      );
+
+      const success = await deleteTrackSession(trackSession.id, otherUser.id);
+      assert.strictEqual(success, false);
+
+      assert.ok(findTrackSessionById(trackSession.id));
+    });
+
+    it("returns false for deleting a non-existent session", async () => {
+      const success = await deleteTrackSession("non-existent-id", user.id);
+      assert.strictEqual(success, false);
+    });
   });
 });

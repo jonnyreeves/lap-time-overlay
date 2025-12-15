@@ -256,12 +256,14 @@ function Sparkline({
   medianTime,
   meanTime,
   stdDevTime,
+  sessionFastestLap,
 }: {
   usable: ConsistencyLap[];
   excluded: (ConsistencyLap & { reason: ExcludedReason })[];
   medianTime: number | null;
   meanTime: number | null;
   stdDevTime: number | null;
+  sessionFastestLap?: number | null;
 }) {
   const width = 340;
   const height = 160;
@@ -280,10 +282,10 @@ function Sparkline({
   const excludedPlotted =
     baselineMedian != null
       ? excludedRenderable.filter(
-        (lap) =>
-          lap.time >= baselineMedian * (1 - maxPlotDeviation) &&
-          lap.time <= baselineMedian * (1 + maxPlotDeviation)
-      )
+          (lap) =>
+            lap.time >= baselineMedian * (1 - maxPlotDeviation) &&
+            lap.time <= baselineMedian * (1 + maxPlotDeviation)
+        )
       : excludedRenderable;
   const combinedOrder = [...usable, ...excludedPlotted].sort(
     (a, b) => a.lapNumber - b.lapNumber
@@ -298,6 +300,9 @@ function Sparkline({
   const domainTimes = domainTimesSource
     .map((lap) => lap.time)
     .filter((time) => Number.isFinite(time));
+  if (sessionFastestLap && Number.isFinite(sessionFastestLap)) {
+    domainTimes.push(sessionFastestLap);
+  }
   if (domainTimes.length === 0) return null;
   const minTime = Math.min(...domainTimes);
   const maxTime = Math.max(...domainTimes);
@@ -336,8 +341,8 @@ function Sparkline({
     usablePoints.length === 0
       ? ""
       : usablePoints
-        .map((point, idx) => `${idx === 0 ? "M" : "L"}${point.x},${point.y}`)
-        .join(" ");
+          .map((point, idx) => `${idx === 0 ? "M" : "L"}${point.x},${point.y}`)
+          .join(" ");
 
   const band = (() => {
     if (meanTime == null || stdDevTime == null) return null;
@@ -379,6 +384,22 @@ function Sparkline({
             <span className="hollow" />
             Excluded
           </span>
+          {sessionFastestLap ? (
+            <span>
+              <svg height="10" width="10" viewBox="0 0 10 10">
+                <line
+                  x1="0"
+                  y1="5"
+                  x2="10"
+                  y2="5"
+                  stroke="#a78bfa"
+                  strokeWidth="2"
+                  strokeDasharray="2 2"
+                />
+              </svg>
+              Session Best
+            </span>
+          ) : null}
         </div>
       </div>
       <svg
@@ -413,6 +434,17 @@ function Sparkline({
             fill="rgba(96, 165, 250, 0.2)"
           />
         ) : null}
+        {sessionFastestLap ? (
+          <line
+            x1={padLeft}
+            y1={scaleY(sessionFastestLap)}
+            x2={width - padRight}
+            y2={scaleY(sessionFastestLap)}
+            stroke="#a78bfa"
+            strokeWidth={1.5}
+            strokeDasharray="4 3"
+          />
+        ) : null}
         {pathD ? (
           <path
             d={pathD}
@@ -439,8 +471,7 @@ function Sparkline({
               )
             }
             onMouseLeave={hideTooltip}
-          >
-          </circle>
+          ></circle>
         ))}
         {excludedRenderable.map((lap, idx) => (
           <circle
@@ -455,14 +486,17 @@ function Sparkline({
             onMouseEnter={(event) =>
               showTooltip(
                 event,
-                `Lap ${lap.lapNumber}: ${formatLapTimeSeconds(lap.time)}s (excluded: ${lap.reason === "out-lap" ? "out lap" : lap.reason
+                `Lap ${lap.lapNumber}: ${formatLapTimeSeconds(lap.time)}s (excluded: ${
+                  lap.reason === "out-lap" ? "out lap" : lap.reason
                 })`
               )
             }
             onMouseLeave={hideTooltip}
           >
             <title>
-              {`Lap ${lap.lapNumber} excluded (${lap.reason === "out-lap" ? "out lap" : lap.reason})`}
+              {`Lap ${
+                lap.lapNumber
+              } excluded (${lap.reason === "out-lap" ? "out lap" : lap.reason})`}
             </title>
           </circle>
         ))}
@@ -517,9 +551,16 @@ type Props = {
   laps: LapWithEvents[];
 };
 
-type ConsistencyCardProps = Props & { consistency?: ServerConsistency | null };
+type ConsistencyCardProps = Props & {
+  consistency?: ServerConsistency | null;
+  sessionFastestLap?: number | null;
+};
 
-export function ConsistencyCard({ laps, consistency }: ConsistencyCardProps) {
+export function ConsistencyCard({
+  laps,
+  consistency,
+  sessionFastestLap,
+}: ConsistencyCardProps) {
   const stats = useMemo(() => {
     const fromServer = hydrateConsistency(consistency, laps);
     if (fromServer) return fromServer;
@@ -542,11 +583,13 @@ export function ConsistencyCard({ laps, consistency }: ConsistencyCardProps) {
   const windowLabel =
     stats.windowPct && stats.median
       ? `±${(stats.windowPct * 100).toFixed(1)}% of median (${formatLapTimeSeconds(
-        stats.median
-      )}s)`
+          stats.median
+        )}s)`
       : "Awaiting more laps";
   const spreadLabel =
-    stats.stdDev != null ? `±${stats.stdDev.toFixed(3)}s σ • CV ${stats.cvPct?.toFixed(1) ?? "—"}%` : "Need more clean laps";
+    stats.stdDev != null
+      ? `±${stats.stdDev.toFixed(3)}s σ • CV ${stats.cvPct?.toFixed(1) ?? "—"}%`
+      : "Need more clean laps";
   const cleanLabel =
     cleanCount > 0
       ? `${cleanCount} clean lap${cleanCount === 1 ? "" : "s"}`
@@ -589,6 +632,7 @@ export function ConsistencyCard({ laps, consistency }: ConsistencyCardProps) {
           medianTime={stats.median}
           meanTime={stats.mean}
           stdDevTime={stats.stdDev}
+          sessionFastestLap={sessionFastestLap}
         />
       </div>
     </Card>

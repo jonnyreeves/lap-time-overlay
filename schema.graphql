@@ -105,6 +105,10 @@ type DeleteTrackRecordingPayload {
   success: Boolean!
 }
 
+type DeleteTrackSessionPayload {
+  success: Boolean!
+}
+
 type Mutation {
   register(input: AuthInput!): AuthPayload!
   login(input: AuthInput!): AuthPayload!
@@ -113,6 +117,7 @@ type Mutation {
   createTrackSession(input: CreateTrackSessionInput!): CreateTrackSessionPayload!
   updateTrackSession(input: UpdateTrackSessionInput!): UpdateTrackSessionPayload!
   updateTrackSessionLaps(input: UpdateTrackSessionLapsInput!): UpdateTrackSessionLapsPayload!
+  deleteTrackSession(id: ID!): DeleteTrackSessionPayload!
   startTrackRecordingUpload(
     input: StartTrackRecordingUploadInput!
   ): StartTrackRecordingUploadPayload!

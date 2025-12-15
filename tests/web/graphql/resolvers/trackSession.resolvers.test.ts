@@ -366,4 +366,33 @@ describe("trackSession resolvers", () => {
     );
     expect(result.trackSession.laps({ first: 10 })).toHaveLength(1);
   });
+
+  describe("deleteTrackSession", () => {
+    it("deletes a session", async () => {
+      repositories.trackSessions.delete.mockResolvedValue(true);
+
+      const result = await rootValue.deleteTrackSession({ id: "s1" }, context);
+
+      expect(result).toEqual({ success: true });
+      expect(repositories.trackSessions.delete).toHaveBeenCalledWith(
+        "s1",
+        "user-1"
+      );
+    });
+
+    it("rejects when session not owned by user", async () => {
+      repositories.trackSessions.findById.mockReturnValue({ ...mockSession, userId: "another-user" });
+      repositories.trackSessions.delete.mockResolvedValue(false);
+
+      const result = await rootValue.deleteTrackSession({ id: "s1" }, context);
+
+      expect(result).toEqual({ success: false });
+    });
+
+    it("rejects unauthenticated requests", async () => {
+      await expect(
+        rootValue.deleteTrackSession({ id: "s1" }, { ...context, currentUser: null })
+      ).rejects.toThrowError("Authentication required");
+    });
+  });
 });

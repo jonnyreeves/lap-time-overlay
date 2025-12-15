@@ -16,6 +16,7 @@ export function createMockRepositories() {
       createWithLaps: vi.fn(),
       update: vi.fn(),
       replaceLapsForSession: vi.fn(),
+      delete: vi.fn(),
     },
     laps: {
       findById: vi.fn(),

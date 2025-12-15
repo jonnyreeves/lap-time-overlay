@@ -340,7 +340,11 @@ export default function ViewSessionRoute() {
           onRefresh={() => setRefreshKey((key) => key + 1)}
         />
 
-        <ConsistencyCard laps={lapsWithStart} consistency={sessionConsistency} />
+        <ConsistencyCard
+          laps={lapsWithStart}
+          consistency={sessionConsistency}
+          sessionFastestLap={session.fastestLap}
+        />
 
         <RecordingsCard
           sessionId={session.id}

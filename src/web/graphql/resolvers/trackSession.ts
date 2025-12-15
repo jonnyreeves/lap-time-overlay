@@ -720,4 +720,21 @@ export const trackSessionResolvers = {
 
     return { trackSession: toTrackSessionPayload(updatedSession, repositories) };
   },
+  deleteTrackSession: async (args: TrackSessionArgs, context: GraphQLContext) => {
+    const { repositories } = context;
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+    if (!args.id) {
+      throw new GraphQLError("id is required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const success = await repositories.trackSessions.delete(args.id, context.currentUser.id);
+
+    return { success };
+  },
 };

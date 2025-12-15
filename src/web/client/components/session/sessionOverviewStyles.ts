@@ -90,6 +90,25 @@ export const primaryButtonStyles = css`
   }
 `;
 
+export const dangerButtonStyles = css`
+  padding: 8px 14px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #c11212;
+  }
+
+  &:disabled {
+    background: #ef4444;
+    cursor: not-allowed;
+  }
+`;
 
 export const inlineHelpStyles = css`
   margin: 0;
