@@ -1,3 +1,4 @@
+import { getDatabasePath } from "../db/config.js";
 import http from "node:http";
 import { runMigrations } from "../db/migrations/runner.js";
 import { ensureWorkDirs } from "./config.js";
@@ -40,6 +41,7 @@ server.listen(process.env.PORT || 3000, () => {
   const address = server.address();
   if (address && typeof address === "object") {
     console.log(`Web UI running on http://localhost:${address.port}`);
+    console.log(`Database is persisted to: ${getDatabasePath()}`);
   } else {
     console.log("Web UI server started.");
   }
