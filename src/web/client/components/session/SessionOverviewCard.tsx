@@ -2,24 +2,14 @@ import { css } from "@emotion/react";
 import { useEffect, useState } from "react";
 import { graphql, useMutation } from "react-relay";
 import { Link, useNavigate } from "react-router-dom";
+import type { SessionOverviewCardDeleteTrackSessionMutation } from "../../__generated__/SessionOverviewCardDeleteTrackSessionMutation.graphql.js";
 import type { SessionOverviewCardUpdateTrackSessionMutation } from "../../__generated__/SessionOverviewCardUpdateTrackSessionMutation.graphql.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 import { Card } from "../Card.js";
 import { IconButton } from "../IconButton.js";
+import { dangerInlineActionButtonStyles, inlineActionButtonStyles } from "../inlineActionButtons.ts";
+import { Modal } from "../Modal.js";
 import type { LapWithEvents } from "./LapsCard.js";
-import {
-  actionsRowStyles,
-  infoTileStyles,
-  inlineHelpStyles,
-  inputStyles,
-  notesStyles,
-  primaryButtonStyles,
-  dangerButtonStyles,
-  sessionCardLayoutStyles,
-  sessionInfoGridStyles,
-  textareaStyles,
-} from "./sessionOverviewStyles.js";
-import { inlineActionButtonStyles, dangerInlineActionButtonStyles } from "../inlineActionButtons.ts";
 import {
   conditionsOptions,
   formatOptions,
@@ -27,8 +17,18 @@ import {
   splitDateTime,
   validateSessionOverviewForm,
 } from "./sessionOverviewForm.js";
-import { Modal } from "../Modal.js";
-import type { SessionOverviewCardDeleteTrackSessionMutation } from "../../__generated__/SessionOverviewCardDeleteTrackSessionMutation.graphql.js";
+import {
+  actionsRowStyles,
+  dangerButtonStyles,
+  infoTileStyles,
+  inlineHelpStyles,
+  inputStyles,
+  notesStyles,
+  primaryButtonStyles,
+  sessionCardLayoutStyles,
+  sessionInfoGridStyles,
+  textareaStyles,
+} from "./sessionOverviewStyles.js";
 
 type SessionDetails = {
   id: string;
@@ -191,13 +191,13 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
     tracks.length > 0
       ? [...tracks]
       : [
-          {
-            id: session.track.id,
-            name: session.track.name,
-            trackLayouts: session.trackLayout ? [session.trackLayout] : [],
-            karts: session.kart ? [session.kart] : [],
-          },
-        ];
+        {
+          id: session.track.id,
+          name: session.track.name,
+          trackLayouts: session.trackLayout ? [session.trackLayout] : [],
+          karts: session.kart ? [session.kart] : [],
+        },
+      ];
   const selectedTrack = trackOptions.find((option) => option.id === formValues.trackId);
   const selectedTrackLayouts =
     selectedTrack?.trackLayouts ??
@@ -243,7 +243,7 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
     commitDelete({
       variables: { id: session.id },
       onCompleted: () => {
-        navigate("/sessions");
+        navigate("/session");
       },
       updater: (store) => {
         store.delete(session.id);
