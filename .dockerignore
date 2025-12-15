@@ -6,5 +6,6 @@ dist
 *.log
 .env
 
-work/*
 database/*
+media/*
+temp/*
