@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { useParams } from "react-router-dom";
 import { type viewSessionQuery } from "../../__generated__/viewSessionQuery.graphql.js";
-import { LapsCard, type LapWithEvents } from "../../components/session/LapsCard.js";
 import { ConsistencyCard } from "../../components/session/ConsistencyCard.js";
+import { LapsCard, type LapWithEvents } from "../../components/session/LapsCard.js";
 import { PrimaryRecordingCard } from "../../components/session/PrimaryRecordingCard.js";
 import { RecordingsCard } from "../../components/session/RecordingsCard.js";
 import { SessionOverviewCard } from "../../components/session/SessionOverviewCard.js";
@@ -339,17 +339,15 @@ export default function ViewSessionRoute() {
           videoRefs={recordingVideoRefs}
           onRefresh={() => setRefreshKey((key) => key + 1)}
         />
-
-        <ConsistencyCard
-          laps={lapsWithStart}
-          consistency={sessionConsistency}
-          sessionFastestLap={session.fastestLap}
-        />
-
         <RecordingsCard
           sessionId={session.id}
           recordings={normalizedRecordings}
           onRefresh={() => setRefreshKey((key) => key + 1)}
+        />
+        <ConsistencyCard
+          laps={lapsWithStart}
+          consistency={sessionConsistency}
+          sessionFastestLap={session.fastestLap}
         />
       </div>
     </div>
