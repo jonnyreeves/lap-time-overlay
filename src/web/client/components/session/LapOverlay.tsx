@@ -1,7 +1,9 @@
 import { css } from "@emotion/react";
 import {
+  useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type CSSProperties,
   type MutableRefObject,
@@ -13,7 +15,14 @@ type LapOverlayProps = {
   enabled: boolean;
   getVideo: () => HTMLVideoElement | null;
   lapRanges: LapRange[];
-  lapLookup: Map<string, { lapNumber: number }>;
+  lapLookup: Map<
+    string,
+    {
+      lapNumber: number;
+      time?: number | null;
+      isFastest?: boolean | null;
+    }
+  >;
   lastJumpRef: MutableRefObject<{ id: string | null; at: number }>;
 };
 
@@ -21,6 +30,13 @@ type OverlayState = {
   lapId: string | null;
   lapElapsed: number;
   isPastEnd: boolean;
+};
+
+type PreviousLapState = {
+  lapNumber: number;
+  lapTime: number;
+  deltaToPrior: number | null;
+  tone: "fastest" | "faster" | "slower" | "neutral";
 };
 
 const overlayStyles = css`
@@ -50,6 +66,50 @@ const overlayStyles = css`
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.01em;
   }
+
+  .current-lap {
+    display: grid;
+    gap: calc(2px * var(--lap-overlay-scale, 1));
+    justify-items: end;
+  }
+
+  .previous-lap {
+    display: grid;
+    gap: calc(2px * var(--lap-overlay-scale, 1));
+    justify-items: end;
+    padding-top: calc(6px * var(--lap-overlay-scale, 1));
+    margin-top: calc(2px * var(--lap-overlay-scale, 1));
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    color: var(--previous-lap-color, #e2e8f0);
+  }
+
+  .previous-lap[data-tone="faster"] {
+    --previous-lap-color: #22c55e;
+  }
+
+  .previous-lap[data-tone="slower"] {
+    --previous-lap-color: #ef4444;
+  }
+
+  .previous-lap[data-tone="fastest"] {
+    --previous-lap-color: #a855f7;
+  }
+
+  .previous-label {
+    font-size: calc(12px * var(--lap-overlay-scale, 1));
+    letter-spacing: 0.01em;
+  }
+
+  .previous-time {
+    font-size: calc(16px * var(--lap-overlay-scale, 1));
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+  }
+
+  .previous-delta {
+    margin-left: calc(6px * var(--lap-overlay-scale, 1));
+    font-size: calc(14px * var(--lap-overlay-scale, 1));
+  }
 `;
 
 const initialState: OverlayState = {
@@ -57,6 +117,8 @@ const initialState: OverlayState = {
   lapElapsed: 0,
   isPastEnd: false,
 };
+
+const PREVIOUS_LAP_DISPLAY_MS = 10_000;
 
 function useLapOverlayState({
   enabled,
@@ -116,6 +178,18 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
+function formatDelta(delta: number | null): string {
+  if (delta == null || Number.isNaN(delta)) return "N/A";
+  const sign = delta < 0 ? "-" : "+";
+  return `${sign}${Math.abs(delta).toFixed(3)}`;
+}
+
+function resolveTone(delta: number | null, isFastest: boolean | null | undefined) {
+  if (isFastest) return "fastest";
+  if (delta == null || Math.abs(delta) < 0.0005) return "neutral";
+  return delta < 0 ? "faster" : "slower";
+}
+
 export function LapOverlay({
   enabled,
   getVideo,
@@ -130,6 +204,29 @@ export function LapOverlay({
     lastJumpRef,
   });
   const [scale, setScale] = useState(1);
+  const [previousLap, setPreviousLap] = useState<PreviousLapState | null>(null);
+  const lastLapIdRef = useRef<string | null>(null);
+  const hidePreviousTimerRef = useRef<number | null>(null);
+
+  const lapIndexById = useMemo(() => {
+    const byId = new Map<string, number>();
+    lapRanges.forEach((lap, index) => {
+      byId.set(lap.id, index);
+    });
+    return byId;
+  }, [lapRanges]);
+
+  const clearHideTimer = useCallback(() => {
+    if (hidePreviousTimerRef.current != null) {
+      window.clearTimeout(hidePreviousTimerRef.current);
+      hidePreviousTimerRef.current = null;
+    }
+  }, []);
+
+  const startHideTimer = useCallback(() => {
+    clearHideTimer();
+    hidePreviousTimerRef.current = window.setTimeout(() => setPreviousLap(null), PREVIOUS_LAP_DISPLAY_MS);
+  }, [clearHideTimer]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -173,6 +270,69 @@ export function LapOverlay({
     };
   }, [enabled, getVideo]);
 
+  useEffect(() => {
+    return () => clearHideTimer();
+  }, [clearHideTimer]);
+
+  useEffect(() => {
+    if (!enabled || isPastEnd) {
+      setPreviousLap(null);
+      clearHideTimer();
+      lastLapIdRef.current = lapId;
+      return;
+    }
+
+    const jumpIsRecent =
+      Boolean(lastJumpRef.current.id) &&
+      lapId === lastJumpRef.current.id &&
+      performance.now() - lastJumpRef.current.at < 800;
+
+    if (jumpIsRecent) {
+      setPreviousLap(null);
+      clearHideTimer();
+      lastLapIdRef.current = lapId;
+      return;
+    }
+
+    const lastLapId = lastLapIdRef.current;
+    if (lapId && lapId !== lastLapId && lastLapId) {
+      const previousLapMeta = lapLookup.get(lastLapId);
+      const lapTime =
+        previousLapMeta && typeof previousLapMeta.time === "number" && Number.isFinite(previousLapMeta.time)
+          ? previousLapMeta.time
+          : null;
+
+      if (previousLapMeta && lapTime != null && lapTime > 0) {
+        const previousIndex = lapIndexById.get(lastLapId) ?? -1;
+        const priorLapId = previousIndex > 0 ? lapRanges[previousIndex - 1]?.id ?? null : null;
+        const priorLapMeta = priorLapId ? lapLookup.get(priorLapId) : null;
+        const priorLapTime =
+          priorLapMeta && typeof priorLapMeta.time === "number" && Number.isFinite(priorLapMeta.time)
+            ? priorLapMeta.time
+            : null;
+        const deltaToPrior =
+          priorLapTime != null && priorLapTime > 0 ? lapTime - priorLapTime : null;
+        const tone = resolveTone(deltaToPrior, previousLapMeta.isFastest);
+
+        setPreviousLap({
+          lapNumber: previousLapMeta.lapNumber,
+          lapTime,
+          deltaToPrior,
+          tone,
+        });
+        startHideTimer();
+      } else {
+        setPreviousLap(null);
+        clearHideTimer();
+      }
+    } else if (!lapId) {
+      setPreviousLap(null);
+      clearHideTimer();
+    }
+
+    lastLapIdRef.current = lapId;
+  }, [clearHideTimer, enabled, isPastEnd, lapId, lapIndexById, lapLookup, lapRanges, lastJumpRef, startHideTimer]);
+
   const lapNumber = lapId ? lapLookup.get(lapId)?.lapNumber ?? null : null;
 
   if (!enabled || lapNumber == null || isPastEnd) {
@@ -185,8 +345,19 @@ export function LapOverlay({
       style={{ "--lap-overlay-scale": scale } as CSSProperties}
       aria-label="Current lap overlay"
     >
-      <span className="lap-label">Lap {lapNumber}</span>
-      <span className="lap-time">{formatStopwatchTime(lapElapsed)}</span>
+      <div className="current-lap">
+        <span className="lap-label">Lap {lapNumber}</span>
+        <span className="lap-time">{formatStopwatchTime(lapElapsed)}</span>
+      </div>
+      {previousLap ? (
+        <div className="previous-lap" data-tone={previousLap.tone}>
+          <span className="previous-label">Prev lap {previousLap.lapNumber}</span>
+          <span className="previous-time">
+            {formatStopwatchTime(previousLap.lapTime)}
+            <span className="previous-delta">[{formatDelta(previousLap.deltaToPrior)}]</span>
+          </span>
+        </div>
+      ) : null}
     </div>
   );
 }
