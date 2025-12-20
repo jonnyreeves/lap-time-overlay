@@ -9,4 +9,5 @@ export interface Migration {
 export const migrations: Migration[] = [
   (await import("./01_initial_schema.js")).migration,
   (await import("./02_add_fastest_lap_to_track_sessions.js")).migration,
+  (await import("./03_add_trim_offsets_to_recording_sources.js")).migration,
 ];

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<b9d188fd625121eecc337ad0c2b5427a>>
+ * @generated SignedSource<<6a621e9905be252a27788a337eb8f800>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -20,6 +20,8 @@ export type StartTrackRecordingUploadInput = {
 export type RecordingSourceInput = {
   fileName: string;
   sizeBytes?: number | null | undefined;
+  trimEndMs?: number | null | undefined;
+  trimStartMs?: number | null | undefined;
 };
 export type UploadRecordingModalStartUploadMutation$variables = {
   input: StartTrackRecordingUploadInput;

@@ -25,7 +25,9 @@ export const trackRecordingResolvers = {
         sessionId?: string;
         description?: string | null;
         lapOneOffset?: number | null;
-        sources?: { fileName?: string | null; sizeBytes?: number | null }[] | null;
+        sources?:
+          | { fileName?: string | null; sizeBytes?: number | null; trimStartMs?: number | null; trimEndMs?: number | null }[]
+          | null;
       };
     },
     context: GraphQLContext
@@ -42,6 +44,8 @@ export const trackRecordingResolvers = {
       });
     }
 
+    const totalSources = input.sources.length;
+
     const sources = input.sources.map((source, idx) => {
       const name = source?.fileName?.trim();
       if (!name) {
@@ -50,9 +54,46 @@ export const trackRecordingResolvers = {
         });
       }
       const size = source?.sizeBytes;
+      const rawTrimStart = source?.trimStartMs;
+      const rawTrimEnd = source?.trimEndMs;
+      const trimStartMs = rawTrimStart == null ? null : Number(rawTrimStart);
+      const trimEndMs = rawTrimEnd == null ? null : Number(rawTrimEnd);
+
+      if (trimStartMs != null && (!Number.isFinite(trimStartMs) || trimStartMs < 0)) {
+        throw new GraphQLError(`Source ${idx + 1} trimStartMs must be a non-negative number`, {
+          extensions: { code: "VALIDATION_FAILED" },
+        });
+      }
+      if (trimEndMs != null && (!Number.isFinite(trimEndMs) || trimEndMs < 0)) {
+        throw new GraphQLError(`Source ${idx + 1} trimEndMs must be a non-negative number`, {
+          extensions: { code: "VALIDATION_FAILED" },
+        });
+      }
+
+      const isFirst = idx === 0;
+      const isLast = idx === totalSources - 1;
+
+      if (trimStartMs != null && !isFirst) {
+        throw new GraphQLError("trimStartMs can only be set on the first file", {
+          extensions: { code: "VALIDATION_FAILED" },
+        });
+      }
+      if (trimEndMs != null && !isLast) {
+        throw new GraphQLError("trimEndMs can only be set on the last file", {
+          extensions: { code: "VALIDATION_FAILED" },
+        });
+      }
+      if (trimStartMs != null && trimEndMs != null && trimStartMs >= trimEndMs) {
+        throw new GraphQLError("trimStartMs must be less than trimEndMs", {
+          extensions: { code: "VALIDATION_FAILED" },
+        });
+      }
+
       return {
         fileName: name,
         sizeBytes: typeof size === "number" && size >= 0 ? size : null,
+        trimStartMs,
+        trimEndMs,
       };
     });
 

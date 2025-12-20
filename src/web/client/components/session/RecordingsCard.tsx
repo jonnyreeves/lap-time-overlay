@@ -5,6 +5,7 @@ import type { RecordingsCardDeleteRecordingMutation } from "../../__generated__/
 import type { RecordingsCardMarkPrimaryRecordingMutation } from "../../__generated__/RecordingsCardMarkPrimaryRecordingMutation.graphql.js";
 import { Card } from "../Card.js";
 import { IconButton } from "../IconButton.js";
+import { inlineActionButtonStyles } from "../inlineActionButtons.ts";
 import { UploadRecordingModal } from "./UploadRecordingModal.js";
 import {
   formatBytes,
@@ -13,7 +14,6 @@ import {
   type UploadTarget,
 } from "./recordingShared.js";
 import { actionsRowStyles } from "./sessionOverviewStyles";
-import { inlineActionButtonStyles } from "../inlineActionButtons.ts";
 
 type Recording = {
   id: string;
@@ -221,7 +221,7 @@ export function RecordingsCard({
 
   return (
     <Card
-      title="Recordings"
+      title="Video Attachments"
       rightHeaderContent={
         <div css={actionsRowStyles}>
           <IconButton

@@ -74,6 +74,8 @@ type UpdateTrackSessionLapsPayload {
 input RecordingSourceInput {
   fileName: String!
   sizeBytes: Float
+  trimStartMs: Float
+  trimEndMs: Float
 }
 
 input StartTrackRecordingUploadInput {

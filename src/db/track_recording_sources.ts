@@ -9,6 +9,8 @@ export interface TrackRecordingSourceRecord {
   fileName: string;
   ordinal: number;
   sizeBytes: number | null;
+  trimStartMs: number | null;
+  trimEndMs: number | null;
   uploadedBytes: number;
   storagePath: string;
   uploadToken: string;
@@ -23,6 +25,8 @@ interface TrackRecordingSourceRow {
   file_name: string;
   ordinal: number;
   size_bytes: number | null;
+  trim_start_ms: number | null;
+  trim_end_ms: number | null;
   uploaded_bytes: number;
   storage_path: string;
   upload_token: string;
@@ -38,6 +42,8 @@ function mapRow(row: TrackRecordingSourceRow): TrackRecordingSourceRecord {
     fileName: row.file_name,
     ordinal: row.ordinal,
     sizeBytes: row.size_bytes,
+    trimStartMs: row.trim_start_ms,
+    trimEndMs: row.trim_end_ms,
     uploadedBytes: row.uploaded_bytes,
     storagePath: row.storage_path,
     uploadToken: row.upload_token,
@@ -51,7 +57,7 @@ export function findTrackRecordingSourceById(id: string): TrackRecordingSourceRe
   const db = getDb();
   const row = db
     .prepare<unknown[], TrackRecordingSourceRow>(
-      `SELECT id, recording_id, file_name, ordinal, size_bytes, uploaded_bytes, storage_path, upload_token, status, created_at, updated_at
+      `SELECT id, recording_id, file_name, ordinal, size_bytes, trim_start_ms, trim_end_ms, uploaded_bytes, storage_path, upload_token, status, created_at, updated_at
        FROM track_recording_sources WHERE id = ? LIMIT 1`
     )
     .get(id);
@@ -64,7 +70,7 @@ export function findTrackRecordingSourcesByRecordingId(
   const db = getDb();
   const rows = db
     .prepare<unknown[], TrackRecordingSourceRow>(
-      `SELECT id, recording_id, file_name, ordinal, size_bytes, uploaded_bytes, storage_path, upload_token, status, created_at, updated_at
+      `SELECT id, recording_id, file_name, ordinal, size_bytes, trim_start_ms, trim_end_ms, uploaded_bytes, storage_path, upload_token, status, created_at, updated_at
        FROM track_recording_sources WHERE recording_id = ? ORDER BY ordinal ASC`
     )
     .all(recordingId);
@@ -76,6 +82,8 @@ export function createTrackRecordingSource({
   fileName,
   ordinal,
   sizeBytes = null,
+  trimStartMs = null,
+  trimEndMs = null,
   storagePath,
   uploadToken = randomUUID(),
   now = Date.now(),
@@ -84,6 +92,8 @@ export function createTrackRecordingSource({
   fileName: string;
   ordinal: number;
   sizeBytes?: number | null;
+  trimStartMs?: number | null;
+  trimEndMs?: number | null;
   storagePath: string;
   uploadToken?: string;
   now?: number;
@@ -92,15 +102,17 @@ export function createTrackRecordingSource({
   const id = randomUUID();
   db.prepare(
     `INSERT INTO track_recording_sources (
-      id, recording_id, file_name, ordinal, size_bytes, uploaded_bytes, storage_path, upload_token, status, created_at, updated_at
+      id, recording_id, file_name, ordinal, size_bytes, trim_start_ms, trim_end_ms, uploaded_bytes, storage_path, upload_token, status, created_at, updated_at
      )
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(
     id,
     recordingId,
     fileName,
     ordinal,
     sizeBytes,
+    trimStartMs,
+    trimEndMs,
     0,
     storagePath,
     uploadToken,
@@ -115,6 +127,8 @@ export function createTrackRecordingSource({
     fileName,
     ordinal,
     sizeBytes: sizeBytes ?? null,
+    trimStartMs: trimStartMs ?? null,
+    trimEndMs: trimEndMs ?? null,
     uploadedBytes: 0,
     storagePath,
     uploadToken,

@@ -71,6 +71,8 @@ describe("trackRecording resolvers", () => {
             fileName: "clip.mp4",
             ordinal: 1,
             sizeBytes: 10,
+            trimStartMs: null,
+            trimEndMs: null,
             uploadedBytes: 0,
             storagePath: "/tmp/clip",
             uploadToken: "t",
@@ -99,10 +101,41 @@ describe("trackRecording resolvers", () => {
       userId: "user-1",
       description: "desc",
       lapOneOffset: 0,
-      sources: [{ fileName: "clip.mp4", sizeBytes: 10 }],
+      sources: [{ fileName: "clip.mp4", sizeBytes: 10, trimStartMs: null, trimEndMs: null }],
     });
     expect(result.uploadTargets[0]?.uploadUrl).toBe("/upload");
     expect(result.recording.id).toBe("rec1");
+  });
+
+  it("validates trim offsets belong to first/last file", async () => {
+    await expect(
+      trackRecordingResolvers.startTrackRecordingUpload(
+        {
+          input: {
+            sessionId: "s1",
+            sources: [
+              { fileName: "first.mp4", sizeBytes: 10 },
+              { fileName: "second.mp4", sizeBytes: 20, trimStartMs: 500 },
+            ],
+          },
+        },
+        context
+      )
+    ).rejects.toThrowError("trimStartMs can only be set on the first file");
+
+    await expect(
+      trackRecordingResolvers.startTrackRecordingUpload(
+        {
+          input: {
+            sessionId: "s1",
+            sources: [
+              { fileName: "only.mp4", sizeBytes: 10, trimStartMs: 1000, trimEndMs: 500 },
+            ],
+          },
+        },
+        context
+      )
+    ).rejects.toThrowError("trimStartMs must be less than trimEndMs");
   });
 
   it("updates lap one offset on a ready recording", async () => {

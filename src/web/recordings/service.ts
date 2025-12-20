@@ -29,6 +29,8 @@ import {
 export interface RecordingSourcePlan {
   fileName: string;
   sizeBytes?: number | null;
+  trimStartMs?: number | null;
+  trimEndMs?: number | null;
 }
 
 export interface UploadTarget {
@@ -123,6 +125,77 @@ async function collectMetadata(outputPath: string): Promise<{
   };
 }
 
+async function prepareSourceForConcat(
+  source: TrackRecordingSourceRecord,
+  {
+    isFirst,
+    isLast,
+    stagingDir,
+  }: {
+    isFirst: boolean;
+    isLast: boolean;
+    stagingDir: string;
+  }
+): Promise<{ storagePath: string }> {
+  const shouldTrimStart = isFirst && source.trimStartMs != null && source.trimStartMs > 0;
+  const shouldTrimEnd = isLast && source.trimEndMs != null;
+
+  if (!shouldTrimStart && !shouldTrimEnd) {
+    return { storagePath: source.storagePath };
+  }
+
+  const metadata = await collectMetadata(source.storagePath);
+  const durationMs = metadata.durationMs;
+  const startMs = shouldTrimStart ? Math.max(0, Math.floor(source.trimStartMs ?? 0)) : 0;
+  const endMsRaw = shouldTrimEnd ? Math.max(0, Math.floor(source.trimEndMs ?? 0)) : null;
+  const endMs = endMsRaw == null ? null : endMsRaw;
+
+  if (endMs != null && endMs <= startMs) {
+    throw new RecordingUploadError(`End offset must be after start for ${source.fileName}`);
+  }
+  if (durationMs != null) {
+    if (startMs >= durationMs) {
+      throw new RecordingUploadError(`Start offset exceeds duration for ${source.fileName}`);
+    }
+    if (endMs != null && endMs > durationMs) {
+      throw new RecordingUploadError(`End offset exceeds duration for ${source.fileName}`);
+    }
+  }
+
+  const trimDurationSeconds = endMs != null ? (endMs - startMs) / 1000 : undefined;
+  const outputPath = path.join(
+    stagingDir,
+    `trimmed-${String(source.ordinal).padStart(2, "0")}-${source.fileName}`
+  );
+
+  await fsp.rm(outputPath, { force: true });
+
+  await new Promise<void>((resolve, reject) => {
+    const command = ffmpeg()
+      .input(source.storagePath)
+      .seekInput(startMs / 1000)
+      .outputOptions(["-c copy", "-avoid_negative_ts make_zero"])
+      .on("error", (err) => reject(err))
+      .on("end", () => resolve());
+
+    if (trimDurationSeconds != null) {
+      command.duration(trimDurationSeconds);
+    }
+
+    command.save(outputPath);
+  });
+
+  const trimmedMetadata = await collectMetadata(outputPath);
+  updateTrackRecordingSource(source.id, {
+    storagePath: outputPath,
+    sizeBytes: trimmedMetadata.sizeBytes,
+  });
+
+  await fsp.rm(source.storagePath, { force: true });
+
+  return { storagePath: outputPath };
+}
+
 async function combineRecording(recordingId: string): Promise<void> {
   if (combiningRecordings.has(recordingId)) {
     return combiningRecordings.get(recordingId) ?? Promise.resolve();
@@ -139,17 +212,29 @@ async function combineRecording(recordingId: string): Promise<void> {
 
     updateTrackRecording(recordingId, { status: "combining", error: null, combineProgress: 0 });
 
-    const concatFile = path.join(stagingDirForRecording(recording.sessionId, recording.id), "concat.txt");
-    const concatContents = sources
-      .map((src) => `file '${src.storagePath.replace(/'/g, "'\\\\''")}'`)
-      .join("\n");
-    await fsp.writeFile(concatFile, concatContents, "utf8");
-
+    const stagingDir = stagingDirForRecording(recording.sessionId, recording.id);
     const outputPath = path.join(sessionRecordingsDir, recording.mediaId);
-    await fsp.mkdir(path.dirname(outputPath), { recursive: true });
-    await fsp.rm(outputPath, { force: true });
+    const concatFile = path.join(stagingDir, "concat.txt");
 
     try {
+      const processedSources = await Promise.all(
+        sources.map((src, idx) =>
+          prepareSourceForConcat(src, {
+            isFirst: idx === 0,
+            isLast: idx === sources.length - 1,
+            stagingDir,
+          })
+        )
+      );
+
+      const concatContents = processedSources
+        .map((src) => `file '${src.storagePath.replace(/'/g, "'\\\\''")}'`)
+        .join("\n");
+      await fsp.writeFile(concatFile, concatContents, "utf8");
+
+      await fsp.mkdir(path.dirname(outputPath), { recursive: true });
+      await fsp.rm(outputPath, { force: true });
+
       await new Promise<void>((resolve, reject) => {
         const command = ffmpeg()
           .input(concatFile)
@@ -183,7 +268,7 @@ async function combineRecording(recordingId: string): Promise<void> {
       });
       await fsp.rm(outputPath, { force: true });
     } finally {
-      await fsp.rm(stagingDirForRecording(recording.sessionId, recording.id), {
+      await fsp.rm(stagingDir, {
         recursive: true,
         force: true,
       });
@@ -250,6 +335,8 @@ export async function startRecordingUploadSession({
       fileName: safeName,
       ordinal: idx + 1,
       sizeBytes: source.sizeBytes ?? null,
+      trimStartMs: source.trimStartMs ?? null,
+      trimEndMs: source.trimEndMs ?? null,
       storagePath: stagingPath,
     });
     const uploadUrl = `/uploads/recordings/${record.id}?token=${encodeURIComponent(record.uploadToken)}`;

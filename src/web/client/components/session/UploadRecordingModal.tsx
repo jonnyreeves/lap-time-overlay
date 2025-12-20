@@ -12,6 +12,14 @@ import {
 } from "./recordingShared.js";
 
 type FileEntry = File;
+type VideoItem = {
+  id: string;
+  file: File;
+  objectUrl: string;
+  durationMs: number | null;
+  startOffsetMs: number | null;
+  endOffsetMs: number | null;
+};
 
 type Props = {
   sessionId: string;
@@ -109,6 +117,16 @@ const footerStyles = css`
   gap: 10px;
 `;
 
+const hiddenFileInputStyles = css`
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+`;
+
 const StartUploadMutation = graphql`
   mutation UploadRecordingModalStartUploadMutation($input: StartTrackRecordingUploadInput!) {
     startTrackRecordingUpload(input: $input) {
@@ -155,28 +173,88 @@ export function UploadRecordingModal({
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const allObjectUrls = useRef<string[]>([]);
   const [startUpload, isStartInFlight] =
     useMutation<UploadRecordingModalStartUploadMutation>(StartUploadMutation);
 
   // New state for video preview
-  const [videoFiles, setVideoFiles] = useState<File[]>([]);
+  const [videoItems, setVideoItems] = useState<VideoItem[]>([]);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [videoPlayerSrc, setVideoPlayerSrc] = useState<string | null>(null);
+  const [isPreviewMuted, setIsPreviewMuted] = useState(true);
 
-  // Combine fileEntries (non-video) and videoFiles for upload
-  const allFiles = useMemo(
-    () => [...fileEntries.map((entry) => entry), ...videoFiles],
-    [fileEntries, videoFiles]
+  const currentVideo = videoItems[currentVideoIndex] ?? null;
+  const videoPlayerSrc = currentVideo?.objectUrl ?? null;
+
+  useEffect(() => {
+    if (!videoRef.current) return;
+    videoRef.current.muted = true;
+    setIsPreviewMuted(true);
+  }, [videoPlayerSrc]);
+
+  const uploadSources = useMemo(
+    () => [
+      ...videoItems.map((item) => ({
+        file: item.file,
+        trimStartMs: item.startOffsetMs,
+        trimEndMs: item.endOffsetMs,
+      })),
+      ...fileEntries.map((file) => ({ file, trimStartMs: null, trimEndMs: null })),
+    ],
+    [fileEntries, videoItems]
   );
+
+  const allFiles = useMemo(() => uploadSources.map((source) => source.file), [uploadSources]);
 
   const shouldShowBusyState = useMemo(
     () => isStartInFlight || isUploading,
     [isStartInFlight, isUploading]
   );
 
+  const trimValidationError = useMemo(() => {
+    if (!videoItems.length) return null;
+    const first = videoItems[0];
+    const last = videoItems[videoItems.length - 1];
+    const startMs = first.startOffsetMs;
+    const endMs = last.endOffsetMs;
+    const startForComparison = startMs ?? 0;
+
+    if (startMs != null && startMs < 0) {
+      return "Start offset must be zero or greater.";
+    }
+    if (endMs != null && endMs < 0) {
+      return "End offset must be zero or greater.";
+    }
+    if (first.durationMs != null && startMs != null && startMs >= first.durationMs) {
+      return "Start offset must be before the end of the first clip.";
+    }
+    if (last.durationMs != null && endMs != null && endMs > last.durationMs) {
+      return "End offset must be within the last clip.";
+    }
+    if (videoItems.length === 1 && endMs != null && startForComparison >= endMs) {
+      return "Start offset must be before the end offset.";
+    }
+
+    return null;
+  }, [videoItems]);
+
+  const uploadWindow = useMemo(() => {
+    if (!videoItems.length) return null;
+    const startMs = videoItems[0]?.startOffsetMs ?? 0;
+    const endMs =
+      videoItems.length === 1
+        ? videoItems[0]?.endOffsetMs ?? null
+        : videoItems[videoItems.length - 1]?.endOffsetMs ?? null;
+    return { startMs, endMs };
+  }, [videoItems]);
+
+  const errorMessage = trimValidationError ?? uploadError;
+
+  const canMarkStart = videoItems.length > 0 && currentVideoIndex === 0;
+  const canMarkEnd = videoItems.length > 0 && currentVideoIndex === videoItems.length - 1;
+
   useEffect(() => {
-    const shouldWarn = isUploading || isStartInFlight || fileEntries.length > 0;
+    const shouldWarn = isUploading || isStartInFlight || fileEntries.length > 0 || videoItems.length > 0;
     if (!shouldWarn) return;
 
     const handler = (event: BeforeUnloadEvent) => {
@@ -185,7 +263,7 @@ export function UploadRecordingModal({
     };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
-  }, [fileEntries.length, isStartInFlight, isUploading]);
+  }, [fileEntries.length, isStartInFlight, isUploading, videoItems.length]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -195,40 +273,137 @@ export function UploadRecordingModal({
       setUploadError(null);
       setIsUploading(false);
       setIsDragging(false);
-      setVideoFiles([]);
+      setVideoItems([]);
       setCurrentVideoIndex(0);
-      if (videoPlayerSrc) {
-        URL.revokeObjectURL(videoPlayerSrc);
-        setVideoPlayerSrc(null);
-      }
+      allObjectUrls.current.forEach((url) => URL.revokeObjectURL(url));
+      allObjectUrls.current = [];
     }
-  }, [isOpen, videoPlayerSrc]);
+  }, [isOpen]);
 
-  useEffect(() => {
-    if (videoPlayerSrc) {
-      URL.revokeObjectURL(videoPlayerSrc);
-    }
+  function normalizeTrimOffsets(items: VideoItem[]): VideoItem[] {
+    return items.map((item, idx) => {
+      const isFirst = idx === 0;
+      const isLast = idx === items.length - 1;
+      return {
+        ...item,
+        startOffsetMs: isFirst ? item.startOffsetMs : null,
+        endOffsetMs: isLast ? item.endOffsetMs : null,
+      };
+    });
+  }
 
-    if (videoFiles.length > 0 && currentVideoIndex >= 0 && currentVideoIndex < videoFiles.length) {
-      const file = videoFiles[currentVideoIndex];
-      const url = URL.createObjectURL(file);
-      setVideoPlayerSrc(url);
-      allObjectUrls.current.push(url);
-    } else {
-      setVideoPlayerSrc(null);
-    }
-  }, [videoFiles, currentVideoIndex]);
+  function loadDurationMetadata(item: Pick<VideoItem, "id" | "objectUrl">) {
+    const videoEl = document.createElement("video");
+    videoEl.preload = "metadata";
 
-  // Effect for component unmount cleanup
-  useEffect(() => {
-    return () => {
-      allObjectUrls.current.forEach(URL.revokeObjectURL);
-      allObjectUrls.current = []; // Clear the ref
+    const cleanup = () => {
+      videoEl.onloadedmetadata = null;
+      videoEl.onerror = null;
+      videoEl.src = "";
     };
-  }, []);
+
+    videoEl.onloadedmetadata = () => {
+      const durationMs =
+        typeof videoEl.duration === "number" && Number.isFinite(videoEl.duration)
+          ? videoEl.duration * 1000
+          : null;
+      setVideoItems((current) =>
+        current.map((existing) =>
+          existing.id === item.id ? { ...existing, durationMs } : existing
+        )
+      );
+      cleanup();
+    };
+
+    videoEl.onerror = () => {
+      cleanup();
+    };
+
+    videoEl.src = item.objectUrl;
+    videoEl.load();
+  }
+
+  function addVideoItems(files: File[]) {
+    if (!files.length) return;
+    const additions: VideoItem[] = files.map((file) => {
+      const objectUrl = URL.createObjectURL(file);
+      allObjectUrls.current.push(objectUrl);
+      const item: VideoItem = {
+        id: nextId(),
+        file,
+        objectUrl,
+        durationMs: null,
+        startOffsetMs: null,
+        endOffsetMs: null,
+      };
+      loadDurationMetadata(item);
+      return item;
+    });
+
+    setVideoItems((current) => normalizeTrimOffsets([...current, ...additions]));
+    setCurrentVideoIndex(0);
+  }
+
+  function updateVideoItem(itemId: string, updates: Partial<VideoItem>) {
+    setVideoItems((current) =>
+      normalizeTrimOffsets(
+        current.map((item) => (item.id === itemId ? { ...item, ...updates } : item))
+      )
+    );
+  }
+
+  function formatMs(ms: number | null | undefined): string {
+    if (ms == null) return "0:00.0";
+    const totalSeconds = ms / 1000;
+    const minutes = Math.floor(totalSeconds / 60);
+    const remainingSeconds = totalSeconds - minutes * 60;
+    const secondsStr = remainingSeconds < 10 ? `0${remainingSeconds.toFixed(1)}` : remainingSeconds.toFixed(1);
+    return `${minutes}:${secondsStr}`;
+  }
+
+  function setOffsetFromPlayer(kind: "start" | "end") {
+    if (!videoRef.current) return;
+    if (!videoItems.length) return;
+
+    const ms = Math.max(0, Math.round(videoRef.current.currentTime * 1000));
+    if (kind === "start") {
+      const target = videoItems[0];
+      if (!target) return;
+      if (videoItems.length > 1 && currentVideoIndex !== 0) {
+        setUploadError("Play the first clip to mark the start offset.");
+        return;
+      }
+      setUploadError(null);
+      updateVideoItem(target.id, { startOffsetMs: ms });
+    } else {
+      const target = videoItems[videoItems.length - 1];
+      if (!target) return;
+      if (videoItems.length > 1 && currentVideoIndex !== videoItems.length - 1) {
+        setUploadError("Play the last clip to mark the end offset.");
+        return;
+      }
+      setUploadError(null);
+      updateVideoItem(target.id, { endOffsetMs: ms });
+    }
+  }
+
+  function clearOffset(kind: "start" | "end") {
+    if (!videoItems.length) return;
+    if (kind === "start") {
+      const target = videoItems[0];
+      if (!target) return;
+      updateVideoItem(target.id, { startOffsetMs: null });
+    } else {
+      const target = videoItems[videoItems.length - 1];
+      if (!target) return;
+      updateVideoItem(target.id, { endOffsetMs: null });
+    }
+    setUploadError(null);
+  }
 
   function onFilesSelected(list: FileList | null) {
     if (!list || shouldShowBusyState) return;
+    setUploadError(null);
 
     const newVideoFiles: File[] = [];
     const newOtherFiles: File[] = [];
@@ -241,12 +416,12 @@ export function UploadRecordingModal({
       }
     }
 
-    if (newVideoFiles.length > 0) {
-      setVideoFiles((current) => [...current, ...newVideoFiles]);
-      setCurrentVideoIndex(0); // Reset to the first video when new ones are added
-    }
     if (newOtherFiles.length > 0) {
-      setFileEntries((current) => [...current, ...newOtherFiles]);
+      setUploadError("Only video files are supported for recording uploads.");
+    }
+
+    if (newVideoFiles.length > 0) {
+      addVideoItems(newVideoFiles);
     }
   }
 
@@ -269,7 +444,10 @@ export function UploadRecordingModal({
 
   function triggerFilePicker() {
     if (shouldShowBusyState) return;
-    fileInputRef.current?.click();
+    const input = fileInputRef.current;
+    if (!input) return;
+    input.value = "";
+    input.click();
   }
 
   function moveFileEntry(idx: number, direction: -1 | 1) {
@@ -282,58 +460,55 @@ export function UploadRecordingModal({
 
   function moveVideoFile(idx: number, direction: -1 | 1) {
     const target = idx + direction;
-    if (target < 0 || target >= videoFiles.length) return;
-    const next = [...videoFiles];
-    [next[idx], next[target]] = [next[target], next[idx]];
-    setVideoFiles(next);
+    setVideoItems((current) => {
+      if (target < 0 || target >= current.length) return current;
+      const next = [...current];
+      [next[idx], next[target]] = [next[target], next[idx]];
+      setCurrentVideoIndex((prev) => {
+        if (prev === idx) return target;
+        if (prev === target) return idx;
+        return prev;
+      });
+      return normalizeTrimOffsets(next);
+    });
   }
 
   function removeFileEntry(fileToRemove: File) {
     setFileEntries((current) => current.filter((file) => file !== fileToRemove));
   }
 
-  function removeVideoFile(fileToRemove: File) {
-    setVideoFiles((current) => current.filter((file) => file !== fileToRemove));
-    setCurrentVideoIndex(0); // Reset to the first video when a video is removed
+  function removeVideoFile(fileToRemove: VideoItem) {
+    setVideoItems((current) => {
+      const filtered = current.filter((file) => file.id !== fileToRemove.id);
+      const normalized = normalizeTrimOffsets(filtered);
+      setCurrentVideoIndex((prev) => Math.min(prev, Math.max(0, normalized.length - 1)));
+      return normalized;
+    });
+    URL.revokeObjectURL(fileToRemove.objectUrl);
+    allObjectUrls.current = allObjectUrls.current.filter((url) => url !== fileToRemove.objectUrl);
   }
 
   useEffect(() => {
-    if (videoFiles.length > 0 && currentVideoIndex >= 0 && currentVideoIndex < videoFiles.length) {
-      const file = videoFiles[currentVideoIndex];
-      const url = URL.createObjectURL(file);
-      allObjectUrls.current.push(url); // Store all created URLs for cleanup
-      setVideoPlayerSrc(url);
-    } else {
-      setVideoPlayerSrc(null);
-    }
-
-    // Cleanup function for this specific effect
-    return () => {
-      // If videoPlayerSrc is still pointing to a valid URL, revoke it.
-      // This handles cases where currentVideoIndex or videoFiles change.
-      if (videoPlayerSrc) {
-        URL.revokeObjectURL(videoPlayerSrc);
-      }
-    };
-  }, [videoFiles, currentVideoIndex]); // Depend on videoFiles and currentVideoIndex
-
-  // Effect for component unmount cleanup
-  useEffect(() => {
     return () => {
       allObjectUrls.current.forEach(URL.revokeObjectURL);
-      allObjectUrls.current = []; // Clear the ref
+      allObjectUrls.current = [];
     };
   }, []);
 
   function beginUpload() {
+    setUploadError(null);
     if (allFiles.length === 0) {
       setUploadError("Select at least one file to upload.");
       return;
     }
+    if (trimValidationError) {
+      return;
+    }
     if (shouldShowBusyState) return;
-    const selectedFiles = allFiles; // Use allFiles
+    const selectedSources = uploadSources;
     setFileEntries([]);
-    setVideoFiles([]); // Clear video files as well
+    setVideoItems([]); // Clear video files as well
+    setCurrentVideoIndex(0);
     setUploadError(null);
     setIsUploading(true);
     onClose();
@@ -343,9 +518,11 @@ export function UploadRecordingModal({
         input: {
           sessionId,
           description: description.trim() || null,
-          sources: selectedFiles.map((entry) => ({
-            fileName: entry.name,
-            sizeBytes: entry.size,
+          sources: selectedSources.map((entry) => ({
+            fileName: entry.file.name,
+            sizeBytes: entry.file.size,
+            trimStartMs: entry.trimStartMs ?? null,
+            trimEndMs: entry.trimEndMs ?? null,
           })),
         },
       },
@@ -358,7 +535,10 @@ export function UploadRecordingModal({
             }
             onRefresh();
             const targets = (session.uploadTargets ?? []).map((target: UploadTarget) => ({ ...target }));
-            await uploadToTargets(targets as UploadTarget[], selectedFiles);
+            await uploadToTargets(
+              targets as UploadTarget[],
+              selectedSources.map((source) => source.file)
+            );
             setDescription("");
             onRefresh();
             onClose(); // Close modal on successful upload
@@ -381,7 +561,7 @@ export function UploadRecordingModal({
       isOpen={isOpen}
       onClose={onClose}
       title="Upload Footage"
-      maxWidth={videoFiles.length > 0 ? "1200px" : undefined}
+      maxWidth={videoItems.length > 0 ? "1200px" : undefined}
     >
       <div>
         {isUploading || isStartInFlight ? (
@@ -404,92 +584,180 @@ export function UploadRecordingModal({
               ref={fileInputRef}
               type="file"
               multiple
-              accept="video/*,image/*,audio/*"
+              accept="video/*"
               onChange={(e) => onFilesSelected(e.target.files)}
               disabled={shouldShowBusyState}
-              css={css`
-                display: none;
-              `}
+              css={hiddenFileInputStyles}
             />
 
-            {videoFiles.length > 0 ? (
+            {videoItems.length > 0 ? (
               <div css={css`display: grid; grid-template-columns: 2fr 1fr; gap: 20px;`}>
-                <div css={css`position: relative; width: 100%; padding-bottom: 62.5%; background: black; border-radius: 8px; overflow: hidden;`}>
-                  {videoPlayerSrc && (
-                    <video
-                      key={videoPlayerSrc} // Key helps re-render video element when src changes
-                      src={videoPlayerSrc}
-                      controls
-                      autoPlay
-                      onEnded={() => {
-                        if (currentVideoIndex < videoFiles.length - 1) {
-                          setCurrentVideoIndex(currentVideoIndex + 1);
+                <div css={css`display: flex; flex-direction: column; gap: 12px;`}>
+                  <div css={css`position: relative; width: 100%; padding-bottom: 62.5%; background: black; border-radius: 8px; overflow: hidden;`}>
+                    {videoPlayerSrc && (
+                      <video
+                        key={videoPlayerSrc} // Key helps re-render video element when src changes
+                        src={videoPlayerSrc}
+                        controls
+                        autoPlay
+                        muted={isPreviewMuted}
+                        ref={videoRef}
+                        onVolumeChange={() =>
+                          setIsPreviewMuted(Boolean(videoRef.current?.muted))
                         }
-                      }}
-                      css={css`position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;`}
-                    />
-                  )}
-                  {!videoPlayerSrc && (
-                    <div css={css`position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; color: white; font-size: 1.2rem;`}>
-                      No video selected or available.
+                        onEnded={() => {
+                          setCurrentVideoIndex((idx) =>
+                            idx < videoItems.length - 1 ? idx + 1 : idx
+                          );
+                        }}
+                        css={css`position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;`}
+                      />
+                    )}
+                    {!videoPlayerSrc && (
+                      <div css={css`position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; color: white; font-size: 1.2rem;`}>
+                        No video selected or available.
+                      </div>
+                    )}
+                  </div>
+
+                  <div
+                    css={css`
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      padding: 10px 12px;
+                      border: 1px solid #e2e8f4;
+                      border-radius: 10px;
+                      background: #f8fafc;
+                    `}
+                  >
+                    <div>
+                      <strong>Upload window</strong>
+                      <div css={css`color: #475569;`}>
+                        {uploadWindow ? (
+                          <>
+                            Start: {formatMs(uploadWindow.startMs ?? 0)}
+                            {uploadWindow.endMs != null
+                              ? ` • End: ${formatMs(uploadWindow.endMs)}`
+                              : " • End: full last clip"}
+                          </>
+                        ) : (
+                          "No clips selected"
+                        )}
+                      </div>
                     </div>
-                  )}
+                    <div css={css`color: #475569;`}>Offsets trimmed after upload</div>
+                  </div>
+
+                  <div
+                    css={css`
+                      display: grid;
+                      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                      gap: 10px;
+                    `}
+                  >
+                    <button
+                      css={recordingButtonStyles}
+                      type="button"
+                      onClick={() => setOffsetFromPlayer("start")}
+                      disabled={!canMarkStart || shouldShowBusyState}
+                    >
+                      Mark start from playhead
+                    </button>
+                    <button
+                      css={recordingButtonStyles}
+                      type="button"
+                      onClick={() => setOffsetFromPlayer("end")}
+                      disabled={!canMarkEnd || shouldShowBusyState}
+                    >
+                      Mark end from playhead
+                    </button>
+                  </div>
                 </div>
 
                 <div css={rightColumnStyles}>
                   <div css={css`display: flex; flex-direction: column; gap: 10px;`}>
-                    <h4>Video Files ({videoFiles.length})</h4>
+                    <h4>Video Files ({videoItems.length})</h4>
+                    <p css={css`margin: 0; color: #475569; font-size: 0.9rem;`}>
+                      Set the start offset on the first clip and the end offset on the last clip. Single-clip uploads can set both.
+                    </p>
                     <div css={fileListStyles}>
-                      {videoFiles.map((file, idx) => (
-                        <div
-                          key={idx}
-                          css={[
-                            fileRowStyles,
-                            idx === currentVideoIndex && css`background: #eef2ff; border-color: #6366f1;`,
-                          ]}
-                        >
-                          <div className="meta">
-                            <strong>
-                              {idx + 1}. {file.name}
-                            </strong>
-                            <span>{formatBytes(file.size)}</span>
+                      {videoItems.map((video, idx) => {
+                        const isFirst = idx === 0;
+                        const isLast = idx === videoItems.length - 1;
+                        return (
+                          <div
+                            key={video.id}
+                            css={[
+                              fileRowStyles,
+                              idx === currentVideoIndex && css`background: #eef2ff; border-color: #6366f1;`,
+                            ]}
+                          >
+                            <div className="meta">
+                              <strong>
+                                {idx + 1}. {video.file.name}
+                              </strong>
+                              <span>
+                                {formatBytes(video.file.size)}
+                                {video.durationMs != null ? ` • ${formatMs(video.durationMs)}` : ""}
+                              </span>
+                              {(isFirst || isLast) && (
+                                <div css={css`display: grid; grid-template-columns: 1fr; gap: 4px; margin-top: 6px;`}>
+                                  {isFirst && (
+                                    <div css={css`color: #475569; font-size: 0.9rem;`}>
+                                      Start offset: <strong>{formatMs(video.startOffsetMs ?? 0)}</strong>
+                                    </div>
+                                  )}
+                                  {isLast && (
+                                    <div css={css`color: #475569; font-size: 0.9rem;`}>
+                                      End offset:{" "}
+                                      <strong>
+                                        {video.endOffsetMs != null
+                                          ? formatMs(video.endOffsetMs)
+                                          : "Full clip"}
+                                      </strong>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                            <div className="actions">
+                              <button
+                                css={recordingButtonStyles}
+                                onClick={() => moveVideoFile(idx, -1)}
+                                disabled={idx === 0 || shouldShowBusyState}
+                                type="button"
+                              >
+                                ↑
+                              </button>
+                              <button
+                                css={recordingButtonStyles}
+                                onClick={() => moveVideoFile(idx, 1)}
+                                disabled={idx === videoItems.length - 1 || shouldShowBusyState}
+                                type="button"
+                              >
+                                ↓
+                              </button>
+                              <button
+                                css={recordingButtonStyles}
+                                onClick={() => setCurrentVideoIndex(idx)}
+                                disabled={idx === currentVideoIndex || shouldShowBusyState}
+                                type="button"
+                              >
+                                Play
+                              </button>
+                              <button
+                                css={recordingButtonStyles}
+                                onClick={() => removeVideoFile(video)}
+                                disabled={shouldShowBusyState}
+                                type="button"
+                              >
+                                Remove
+                              </button>
+                            </div>
                           </div>
-                          <div className="actions">
-                            <button
-                              css={recordingButtonStyles}
-                              onClick={() => moveVideoFile(idx, -1)}
-                              disabled={idx === 0 || shouldShowBusyState}
-                              type="button"
-                            >
-                              ↑
-                            </button>
-                            <button
-                              css={recordingButtonStyles}
-                              onClick={() => moveVideoFile(idx, 1)}
-                              disabled={idx === videoFiles.length - 1 || shouldShowBusyState}
-                              type="button"
-                            >
-                              ↓
-                            </button>
-                            <button
-                              css={recordingButtonStyles}
-                              onClick={() => setCurrentVideoIndex(idx)}
-                              disabled={idx === currentVideoIndex || shouldShowBusyState}
-                              type="button"
-                            >
-                              Play
-                            </button>
-                            <button
-                              css={recordingButtonStyles}
-                              onClick={() => removeVideoFile(file)}
-                              disabled={shouldShowBusyState}
-                              type="button"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -550,23 +818,6 @@ export function UploadRecordingModal({
                       Add files
                     </button>
                   </div>
-                  <label>
-                    <span>Footage Description</span>
-                    <input
-                      type="text"
-                      placeholder="Optional description"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      disabled={shouldShowBusyState}
-                      css={css`
-                        width: 100%;
-                        padding: 10px 12px;
-                        border-radius: 8px;
-                        border: 1px solid #e2e8f4;
-                        margin-top: 6px;
-                      `}
-                    />
-                  </label>
                 </div>
               </div>
             ) : (
@@ -599,28 +850,11 @@ export function UploadRecordingModal({
                     Choose files
                   </button>
                 </div>
-                <label>
-                  <span>Footage Description</span>
-                  <input
-                    type="text"
-                    placeholder="Optional description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    disabled={shouldShowBusyState}
-                    css={css`
-                      width: 100%;
-                      padding: 10px 12px;
-                      border-radius: 8px;
-                      border: 1px solid #e2e8f4;
-                      margin-top: 6px;
-                    `}
-                  />
-                </label>
               </div>
             )}
           </>
         )}
-        {uploadError && <div css={css`color: #b91c1c;`}>{uploadError}</div>}
+        {errorMessage && <div css={css`color: #b91c1c;`}>{errorMessage}</div>}
       </div>
       <div css={footerStyles}>
         <button css={recordingButtonStyles} onClick={onClose} disabled={shouldShowBusyState}>
@@ -629,7 +863,7 @@ export function UploadRecordingModal({
         <button
           css={primaryButtonStyles}
           onClick={beginUpload}
-          disabled={shouldShowBusyState || allFiles.length === 0}
+          disabled={shouldShowBusyState || allFiles.length === 0 || Boolean(trimValidationError)}
           type="button"
         >
           {shouldShowBusyState ? "Uploading…" : "Upload footage"}
