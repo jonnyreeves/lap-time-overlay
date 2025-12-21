@@ -114,6 +114,7 @@ enum OverlayPosition {
 input OverlayStyleInput {
   textColor: OverlayTextColor
   textSize: Float
+  detailTextSize: Float
   overlayPosition: OverlayPosition
   boxOpacity: Float
   showLapDeltas: Boolean

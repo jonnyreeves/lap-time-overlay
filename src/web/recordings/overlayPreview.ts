@@ -71,6 +71,10 @@ function buildOverlayStyle(overrides?: Partial<OverlayStyle>): OverlayStyle {
     ? clamp(Math.round(overrides?.textSize as number), MIN_TEXT_SIZE, MAX_TEXT_SIZE)
     : base.textSize;
 
+  const detailTextSize = Number.isFinite(overrides?.detailTextSize)
+    ? clamp(Math.round(overrides?.detailTextSize as number), MIN_TEXT_SIZE, MAX_TEXT_SIZE)
+    : base.detailTextSize;
+
   const boxOpacity = Number.isFinite(overrides?.boxOpacity)
     ? clamp(overrides?.boxOpacity as number, 0, 1)
     : base.boxOpacity;
@@ -80,6 +84,7 @@ function buildOverlayStyle(overrides?: Partial<OverlayStyle>): OverlayStyle {
     ...overrides,
     overlayPosition,
     textSize,
+    detailTextSize,
     boxOpacity,
     textColor: overrides?.textColor ?? base.textColor,
     boxColor: overrides?.boxColor ?? base.boxColor,

@@ -4,6 +4,7 @@ import type { VideoInfo } from "./videoInfo.js";
 export interface OverlayStyle {
   textColor: string;
   textSize: number;
+  detailTextSize: number;
   boxColor: string;
   boxOpacity: number;
   showLapCounter: boolean;
@@ -29,6 +30,7 @@ export interface RenderContext {
 export const DEFAULT_OVERLAY_STYLE: OverlayStyle = {
   textColor: "#ffffff",
   textSize: 32,
+  detailTextSize: 32,
   boxColor: "#000000",
   boxOpacity: 0.6,
   showLapCounter: true,

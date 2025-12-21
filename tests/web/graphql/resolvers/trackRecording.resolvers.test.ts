@@ -303,14 +303,15 @@ describe("trackRecording resolvers", () => {
           lapId: "lap1",
           offsetSeconds: 2,
           style: {
-          textColor: "YELLOW",
-          textSize: 200,
-          overlayPosition: "TOP_RIGHT",
-          boxOpacity: 1.2,
-          showLapDeltas: false,
+            textColor: "YELLOW",
+            textSize: 200,
+            detailTextSize: 6,
+            overlayPosition: "TOP_RIGHT",
+            boxOpacity: 1.2,
+            showLapDeltas: false,
+          },
         },
       },
-    },
       context
     );
 
@@ -319,6 +320,7 @@ describe("trackRecording resolvers", () => {
         styleOverrides: {
           textColor: "#ffd500",
           textSize: 192,
+          detailTextSize: 12,
           overlayPosition: "top-right",
           boxOpacity: 1,
           showLapDeltas: false,

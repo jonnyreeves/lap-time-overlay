@@ -207,6 +207,7 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
   const [offsetSeconds, setOffsetSeconds] = useState(0);
   const [textColor, setTextColor] = useState<OverlayTextColorOption>("WHITE");
   const [textSize, setTextSize] = useState(32);
+  const [detailTextSize, setDetailTextSize] = useState(32);
   const [overlayPosition, setOverlayPosition] = useState<OverlayPositionOption>("BOTTOM_LEFT");
   const [backgroundOpacity, setBackgroundOpacity] = useState(60);
   const [showLapDeltas, setShowLapDeltas] = useState(true);
@@ -237,15 +238,28 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
     return `${preview.previewUrl}${suffix}`;
   }, [preview]);
 
+  const handleTextSizeChange = useCallback(
+    (nextSize: number) => {
+      setTextSize(nextSize);
+      setDetailTextSize((current) => (current === textSize ? nextSize : current));
+    },
+    [textSize]
+  );
+
+  const handleDetailTextSizeChange = useCallback((nextSize: number) => {
+    setDetailTextSize(nextSize);
+  }, []);
+
   const styleInput = useMemo(
     () => ({
       textColor,
       textSize,
+      detailTextSize,
       overlayPosition,
       boxOpacity: Math.max(0, Math.min(1, backgroundOpacity / 100)),
       showLapDeltas,
     }),
-    [backgroundOpacity, overlayPosition, showLapDeltas, textColor, textSize]
+    [backgroundOpacity, detailTextSize, overlayPosition, showLapDeltas, textColor, textSize]
   );
 
   const requestPreview = useCallback(() => {
@@ -350,11 +364,13 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
           <OverlayAppearanceControls
             textColor={textColor}
             textSize={textSize}
+            detailTextSize={detailTextSize}
             overlayPosition={overlayPosition}
             backgroundOpacity={backgroundOpacity}
             showLapDeltas={showLapDeltas}
             onTextColorChange={setTextColor}
-            onTextSizeChange={setTextSize}
+            onTextSizeChange={handleTextSizeChange}
+            onDetailTextSizeChange={handleDetailTextSizeChange}
             onOverlayPositionChange={setOverlayPosition}
             onBackgroundOpacityChange={setBackgroundOpacity}
             onShowLapDeltasChange={setShowLapDeltas}

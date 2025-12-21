@@ -240,9 +240,21 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
   const overlayPosition =
     style.overlayPosition ?? DEFAULT_OVERLAY_STYLE.overlayPosition;
 
+  const clampFontSize = (value: number, fallback: number) => {
+    if (!Number.isFinite(value)) return Math.max(12, Math.min(192, fallback));
+    return Math.max(12, Math.min(192, Math.round(value as number)));
+  };
+
   const lapCount = laps.length;
   const boxWidth = Math.round(width * boxWidthRatio);
-  const fontSize = Math.round(style.textSize || DEFAULT_OVERLAY_STYLE.textSize);
+  const lapFontSize = clampFontSize(
+    style.textSize,
+    DEFAULT_OVERLAY_STYLE.textSize
+  );
+  const detailFontSize = clampFontSize(
+    style.detailTextSize,
+    lapFontSize
+  );
 
   const fontColor = toFfmpegColor(textColor);
   const deltaColors = {
@@ -253,12 +265,12 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
   };
   const boxColorWithAlpha = toFfmpegColor(boxColor, boxOpacity);
 
+  const layoutFontSize = Math.max(lapFontSize, detailFontSize);
   const safeWidth = Math.max(200, Math.min(width, boxWidth));
-  const safeFontSize = Math.max(12, Math.min(192, fontSize));
-  const halfPad = Math.round(safeFontSize * 0.35);
+  const halfPad = Math.round(layoutFontSize * 0.35);
   const padding = { x: halfPad, y: halfPad };
-  const lineGapAfterFirst = Math.round(safeFontSize * 1.35);
-  const lineGap = Math.round(safeFontSize * 1.1);
+  const lineGapAfterFirst = Math.round(layoutFontSize * 1.35);
+  const lineGap = Math.round(layoutFontSize * 1.1);
   const lapDurations = laps
     .map((lap) => lap.durationS)
     .filter((value) => Number.isFinite(value) && value > 0);
@@ -364,6 +376,7 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
     labelPrefix: string;
     y: number;
     defaultColor: string;
+    fontSize: number;
   }[] = [];
   let overlayIndex = 0;
 
@@ -373,6 +386,7 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
       labelPrefix: "info",
       y: lineOffsets(overlayIndex++),
       defaultColor: fontColor,
+      fontSize: detailFontSize,
     });
   }
 
@@ -382,6 +396,7 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
       labelPrefix: "lap",
       y: lineOffsets(overlayIndex++),
       defaultColor: fontColor,
+      fontSize: lapFontSize,
     });
   }
 
@@ -393,6 +408,7 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
         labelPrefix: "deltaBestLabel",
         y,
         defaultColor: fontColor,
+        fontSize: detailFontSize,
       });
     }
     if (deltaBestValueTimeline.length) {
@@ -401,6 +417,7 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
         labelPrefix: "deltaBestValue",
         y,
         defaultColor: fontColor,
+        fontSize: detailFontSize,
       });
     }
   }
@@ -413,6 +430,7 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
         labelPrefix: "deltaAvgLabel",
         y,
         defaultColor: fontColor,
+        fontSize: detailFontSize,
       });
     }
     if (deltaAverageValueTimeline.length) {
@@ -421,6 +439,7 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
         labelPrefix: "deltaAvgValue",
         y,
         defaultColor: fontColor,
+        fontSize: detailFontSize,
       });
     }
   }
@@ -428,7 +447,7 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
   const lastLineOffset = overlays.length
     ? overlays[overlays.length - 1]!.y
     : padding.y;
-  const boxHeight = Math.round(lastLineOffset + safeFontSize + padding.y);
+  const boxHeight = Math.round(lastLineOffset + layoutFontSize + padding.y);
   const boxY = overlayPosition.startsWith("top") ? 32 : height - boxHeight - 32;
   const boxX = overlayPosition.endsWith("left") ? 32 : width - safeWidth - 32;
 
@@ -461,7 +480,7 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
     const overlay = buildDrawtextTimeline({
       inputs: line.timeline,
       defaultColor: line.defaultColor,
-      fontSize: safeFontSize,
+      fontSize: line.fontSize,
       x: xLeft,
       xRight,
       y: boxY + line.y,

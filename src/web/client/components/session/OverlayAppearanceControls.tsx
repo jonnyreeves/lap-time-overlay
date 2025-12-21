@@ -7,11 +7,13 @@ export type OverlayPositionOption = "TOP_LEFT" | "TOP_RIGHT" | "BOTTOM_LEFT" | "
 type Props = {
   textColor: OverlayTextColorOption;
   textSize: number;
+  detailTextSize: number;
   overlayPosition: OverlayPositionOption;
   backgroundOpacity: number;
   showLapDeltas: boolean;
   onTextColorChange: (value: OverlayTextColorOption) => void;
   onTextSizeChange: (value: number) => void;
+  onDetailTextSizeChange: (value: number) => void;
   onOverlayPositionChange: (value: OverlayPositionOption) => void;
   onBackgroundOpacityChange: (value: number) => void;
   onShowLapDeltasChange: (value: boolean) => void;
@@ -67,11 +69,13 @@ const overlayPositionOptions: { value: OverlayPositionOption; label: string }[] 
 export function OverlayAppearanceControls({
   textColor,
   textSize,
+  detailTextSize,
   overlayPosition,
   backgroundOpacity,
   showLapDeltas,
   onTextColorChange,
   onTextSizeChange,
+  onDetailTextSizeChange,
   onOverlayPositionChange,
   onBackgroundOpacityChange,
   onShowLapDeltasChange,
@@ -99,8 +103,22 @@ export function OverlayAppearanceControls({
         </label>
 
         <label>
-          Text size
+          Current lap time size
           <select value={textSize} onChange={(e) => onTextSizeChange(Number(e.target.value))}>
+            {textSizeOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}px
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Lap info & Δ size
+          <select
+            value={detailTextSize}
+            onChange={(e) => onDetailTextSizeChange(Number(e.target.value))}
+          >
             {textSizeOptions.map((option) => (
               <option key={option} value={option}>
                 {option}px

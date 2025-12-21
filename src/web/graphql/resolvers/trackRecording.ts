@@ -45,6 +45,7 @@ type OverlayStyleInput =
   | {
       textColor?: keyof typeof overlayTextColorMap | null;
       textSize?: number | null;
+      detailTextSize?: number | null;
       overlayPosition?: keyof typeof overlayPositionMap | null;
       boxOpacity?: number | null;
       showLapDeltas?: boolean | null;
@@ -65,6 +66,12 @@ function normalizeOverlayStyleInput(style: OverlayStyleInput): Partial<OverlaySt
   if (Number.isFinite(textSize)) {
     const rounded = Math.round(textSize as number);
     overrides.textSize = Math.min(192, Math.max(12, rounded));
+  }
+
+  const detailTextSize = style.detailTextSize;
+  if (Number.isFinite(detailTextSize)) {
+    const rounded = Math.round(detailTextSize as number);
+    overrides.detailTextSize = Math.min(192, Math.max(12, rounded));
   }
 
   const positionKey = style.overlayPosition;
