@@ -40,12 +40,38 @@ function buildLapTimeExpr(lapStartAbs: number): string {
 }
 
 type PositionSegment = { start: number; end: number; position: number };
-type TextSegment = { start: number; end: number; text: string };
+type TextSegment = {
+  start: number;
+  end: number;
+  text: string;
+  color?: string;
+  align?: "left" | "right";
+};
 
 function formatDelta(delta: number): string {
   if (!Number.isFinite(delta)) return "N/A";
   const sign = delta < 0 ? "-" : "+";
   return `${sign}${Math.abs(delta).toFixed(3)}`;
+}
+
+function deltaColor({
+  delta,
+  isFastest,
+  colors,
+}: {
+  delta: number;
+  isFastest: boolean;
+  colors: {
+    fastest: string;
+    faster: string;
+    slower: string;
+    neutral: string;
+  };
+}): string {
+  if (isFastest || Math.abs(delta) < 0.0005) return colors.fastest;
+  if (delta < 0) return colors.faster;
+  if (delta > 0) return colors.slower;
+  return colors.neutral;
 }
 
 function buildPositionTimeline(
@@ -219,6 +245,12 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
   const fontSize = Math.round(style.textSize || DEFAULT_OVERLAY_STYLE.textSize);
 
   const fontColor = toFfmpegColor(textColor);
+  const deltaColors = {
+    fastest: toFfmpegColor("#a855f7"),
+    faster: toFfmpegColor("#22c55e"),
+    slower: toFfmpegColor("#ef4444"),
+    neutral: fontColor,
+  };
   const boxColorWithAlpha = toFfmpegColor(boxColor, boxOpacity);
 
   const safeWidth = Math.max(200, Math.min(width, boxWidth));
@@ -244,8 +276,10 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
 
   const lapTimeline: TextSegment[] = [];
   const infoTimeline: TextSegment[] = [];
-  const deltaBestTimeline: TextSegment[] = [];
-  const deltaAverageTimeline: TextSegment[] = [];
+  const deltaBestLabelTimeline: TextSegment[] = [];
+  const deltaBestValueTimeline: TextSegment[] = [];
+  const deltaAverageLabelTimeline: TextSegment[] = [];
+  const deltaAverageValueTimeline: TextSegment[] = [];
   let lastPosition = 0;
   for (let idx = 0; idx < laps.length; idx++) {
     const lap = laps[idx];
@@ -274,19 +308,47 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
 
     if (showLapDeltas && fastestLapTime != null) {
       const deltaToBest = lap.durationS - fastestLapTime;
-      deltaBestTimeline.push({
+      const isFastestLap = Math.abs(deltaToBest) < 0.0005;
+      deltaBestLabelTimeline.push({
         start: lapStartAbs,
         end: lapStartAbs + lap.durationS,
-        text: `Δ vs Best ${formatDelta(deltaToBest)}`,
+        text: "Δ vs Best",
+      });
+      deltaBestValueTimeline.push({
+        start: lapStartAbs,
+        end: lapStartAbs + lap.durationS,
+        text: formatDelta(deltaToBest),
+        color: deltaColor({
+          delta: deltaToBest,
+          isFastest: isFastestLap,
+          colors: deltaColors,
+        }),
+        align: "right",
       });
     }
 
     if (showLapDeltas && averageLapTime != null) {
       const deltaToAverage = lap.durationS - averageLapTime;
-      deltaAverageTimeline.push({
+      const deltaToBest =
+        fastestLapTime != null
+          ? lap.durationS - fastestLapTime
+          : Number.POSITIVE_INFINITY;
+      const isFastestLap = Math.abs(deltaToBest) < 0.0005;
+      deltaAverageLabelTimeline.push({
         start: lapStartAbs,
         end: lapStartAbs + lap.durationS,
-        text: `Δ vs Avg ${formatDelta(deltaToAverage)}`,
+        text: "Δ vs Avg",
+      });
+      deltaAverageValueTimeline.push({
+        start: lapStartAbs,
+        end: lapStartAbs + lap.durationS,
+        text: formatDelta(deltaToAverage),
+        color: deltaColor({
+          delta: deltaToAverage,
+          isFastest: isFastestLap,
+          colors: deltaColors,
+        }),
+        align: "right",
       });
     }
   }
@@ -297,7 +359,12 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
     return padding.y + lineGapAfterFirst + lineGap * (index - 1);
   };
 
-  const overlays: { timeline: TextSegment[]; labelPrefix: string; y: number }[] = [];
+  const overlays: {
+    timeline: TextSegment[];
+    labelPrefix: string;
+    y: number;
+    defaultColor: string;
+  }[] = [];
   let overlayIndex = 0;
 
   if (infoTimeline.length) {
@@ -305,6 +372,7 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
       timeline: infoTimeline,
       labelPrefix: "info",
       y: lineOffsets(overlayIndex++),
+      defaultColor: fontColor,
     });
   }
 
@@ -313,23 +381,48 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
       timeline: lapTimeline,
       labelPrefix: "lap",
       y: lineOffsets(overlayIndex++),
+      defaultColor: fontColor,
     });
   }
 
-  if (deltaBestTimeline.length) {
-    overlays.push({
-      timeline: deltaBestTimeline,
-      labelPrefix: "deltaBest",
-      y: lineOffsets(overlayIndex++),
-    });
+  if (deltaBestLabelTimeline.length || deltaBestValueTimeline.length) {
+    const y = lineOffsets(overlayIndex++);
+    if (deltaBestLabelTimeline.length) {
+      overlays.push({
+        timeline: deltaBestLabelTimeline,
+        labelPrefix: "deltaBestLabel",
+        y,
+        defaultColor: fontColor,
+      });
+    }
+    if (deltaBestValueTimeline.length) {
+      overlays.push({
+        timeline: deltaBestValueTimeline,
+        labelPrefix: "deltaBestValue",
+        y,
+        defaultColor: fontColor,
+      });
+    }
   }
 
-  if (deltaAverageTimeline.length) {
-    overlays.push({
-      timeline: deltaAverageTimeline,
-      labelPrefix: "deltaAvg",
-      y: lineOffsets(overlayIndex++),
-    });
+  if (deltaAverageLabelTimeline.length || deltaAverageValueTimeline.length) {
+    const y = lineOffsets(overlayIndex++);
+    if (deltaAverageLabelTimeline.length) {
+      overlays.push({
+        timeline: deltaAverageLabelTimeline,
+        labelPrefix: "deltaAvgLabel",
+        y,
+        defaultColor: fontColor,
+      });
+    }
+    if (deltaAverageValueTimeline.length) {
+      overlays.push({
+        timeline: deltaAverageValueTimeline,
+        labelPrefix: "deltaAvgValue",
+        y,
+        defaultColor: fontColor,
+      });
+    }
   }
 
   const lastLineOffset = overlays.length
@@ -361,12 +454,16 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
     currentLabel = backgroundBox.label;
   }
 
+  const xLeft = boxX + padding.x;
+  const xRight = boxX + safeWidth - padding.x;
+
   overlays.forEach((line) => {
     const overlay = buildDrawtextTimeline({
       inputs: line.timeline,
-      color: fontColor,
+      defaultColor: line.defaultColor,
       fontSize: safeFontSize,
-      x: boxX + padding.x,
+      x: xLeft,
+      xRight,
       y: boxY + line.y,
       inputLabel: currentLabel,
       labelPrefix: line.labelPrefix,
@@ -403,20 +500,24 @@ function buildOverlayBox(options: {
 
 function buildDrawtextTimeline(options: {
   inputs: TextSegment[];
-  color: string;
+  defaultColor: string;
   fontSize: number;
   x: number;
+  xRight: number;
   y: number;
   inputLabel: string;
   labelPrefix: string;
 }): { filter: string; label: string } | null {
-  const { inputs, color, fontSize, x, y, inputLabel, labelPrefix } = options;
+  const { inputs, defaultColor, fontSize, x, xRight, y, inputLabel, labelPrefix } = options;
   if (!inputs.length) return null;
 
   const drawtextFilters = inputs.map((seg, idx) => {
     const enable = `between(t,${seg.start.toFixed(3)},${seg.end.toFixed(3)})`;
     const expr = escapeDrawtext(seg.text);
-    return `drawtext=text='${expr}':fontcolor=${color}:fontsize=${fontSize}:x=${x}:y=${y}:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=0:alpha=1:enable='${enable}'`;
+    const fontcolor = seg.color ?? defaultColor;
+    const xExpr = seg.align === "right" ? `${xRight.toFixed(3)}-text_w` : x.toFixed(3);
+    const yExpr = y.toFixed(3);
+    return `drawtext=text='${expr}':fontcolor=${fontcolor}:fontsize=${fontSize}:x=${xExpr}:y=${yExpr}:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:box=0:alpha=1:enable='${enable}'`;
   });
 
   const pipeline: string[] = [];

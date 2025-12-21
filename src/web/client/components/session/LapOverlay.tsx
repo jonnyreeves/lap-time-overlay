@@ -81,35 +81,38 @@ const overlayStyles = css`
     padding-top: calc(6px * var(--lap-overlay-scale, 1));
     margin-top: calc(2px * var(--lap-overlay-scale, 1));
     border-top: 1px solid rgba(255, 255, 255, 0.18);
-    color: var(--previous-lap-color, #e2e8f0);
-  }
-
-  .previous-lap[data-tone="faster"] {
-    --previous-lap-color: #22c55e;
-  }
-
-  .previous-lap[data-tone="slower"] {
-    --previous-lap-color: #ef4444;
-  }
-
-  .previous-lap[data-tone="fastest"] {
-    --previous-lap-color: #a855f7;
+    color: #e2e8f0;
   }
 
   .previous-label {
     font-size: calc(12px * var(--lap-overlay-scale, 1));
     letter-spacing: 0.01em;
+    color: #cbd5e1;
   }
 
   .previous-time {
     font-size: calc(16px * var(--lap-overlay-scale, 1));
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.01em;
+    color: #e2e8f0;
   }
 
   .previous-delta {
     margin-left: calc(6px * var(--lap-overlay-scale, 1));
     font-size: calc(14px * var(--lap-overlay-scale, 1));
+    color: #e2e8f0;
+  }
+
+  .previous-lap[data-tone="faster"] .previous-delta {
+    color: #22c55e;
+  }
+
+  .previous-lap[data-tone="slower"] .previous-delta {
+    color: #ef4444;
+  }
+
+  .previous-lap[data-tone="fastest"] .previous-delta {
+    color: #a855f7;
   }
 
   .delta-stack {
@@ -148,6 +151,10 @@ const overlayStyles = css`
 
   .delta-value[data-trend="even"] {
     color: #e2e8f0;
+  }
+
+  .delta-value[data-trend="fastest"] {
+    color: #a855f7;
   }
 `;
 
@@ -229,7 +236,11 @@ function resolveTone(delta: number | null, isFastest: boolean | null | undefined
   return delta < 0 ? "faster" : "slower";
 }
 
-function trendFromDelta(delta: number | null): "ahead" | "behind" | "even" | "none" {
+function trendFromDelta(
+  delta: number | null,
+  isFastest?: boolean | null
+): "ahead" | "behind" | "even" | "none" | "fastest" {
+  if (isFastest) return "fastest";
   if (delta == null || Number.isNaN(delta)) return "none";
   if (Math.abs(delta) < 0.0005) return "even";
   return delta < 0 ? "ahead" : "behind";
@@ -401,8 +412,10 @@ export function LapOverlay({
     lastLapIdRef.current = lapId;
   }, [clearHideTimer, enabled, isPastEnd, lapId, lapIndexById, lapLookup, lapRanges, lastJumpRef, startHideTimer]);
 
-  const lapNumber = lapId ? lapLookup.get(lapId)?.lapNumber ?? null : null;
-  const lapTime = lapId ? lapLookup.get(lapId)?.time ?? null : null;
+  const lapMeta = lapId ? lapLookup.get(lapId) ?? null : null;
+  const lapNumber = lapMeta?.lapNumber ?? null;
+  const lapTime = lapMeta?.time ?? null;
+  const lapIsFastest = Boolean(lapMeta?.isFastest);
 
   const deltaToBest = useMemo(() => {
     if (fastestLapTime == null || lapTime == null || !Number.isFinite(lapTime)) return null;
@@ -414,8 +427,8 @@ export function LapOverlay({
     return lapTime - averageLapTime;
   }, [averageLapTime, lapTime]);
 
-  const bestTrend = trendFromDelta(deltaToBest);
-  const averageTrend = trendFromDelta(deltaToAverage);
+  const bestTrend = trendFromDelta(deltaToBest, lapIsFastest);
+  const averageTrend = trendFromDelta(deltaToAverage, lapIsFastest);
 
   if (!enabled || lapNumber == null || isPastEnd) {
     return null;
