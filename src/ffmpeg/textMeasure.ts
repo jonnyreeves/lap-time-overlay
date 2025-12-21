@@ -1,4 +1,5 @@
-import fontkit, { type Font, type FontCollection } from "fontkit";
+import * as fontkit from "fontkit";
+import type { Font, FontCollection } from "fontkit";
 import fs from "node:fs";
 
 const FONT_CANDIDATES = [
