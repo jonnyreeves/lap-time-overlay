@@ -110,6 +110,44 @@ const overlayStyles = css`
     margin-left: calc(6px * var(--lap-overlay-scale, 1));
     font-size: calc(14px * var(--lap-overlay-scale, 1));
   }
+
+  .delta-stack {
+    display: grid;
+    gap: calc(4px * var(--lap-overlay-scale, 1));
+    justify-items: end;
+    margin-top: calc(4px * var(--lap-overlay-scale, 1));
+  }
+
+  .delta-row {
+    display: inline-flex;
+    align-items: baseline;
+    gap: calc(8px * var(--lap-overlay-scale, 1));
+  }
+
+  .delta-label {
+    font-size: calc(12px * var(--lap-overlay-scale, 1));
+    letter-spacing: 0.01em;
+    color: #cbd5e1;
+  }
+
+  .delta-value {
+    font-size: calc(16px * var(--lap-overlay-scale, 1));
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+    color: #e2e8f0;
+  }
+
+  .delta-value[data-trend="ahead"] {
+    color: #22c55e;
+  }
+
+  .delta-value[data-trend="behind"] {
+    color: #ef4444;
+  }
+
+  .delta-value[data-trend="even"] {
+    color: #e2e8f0;
+  }
 `;
 
 const initialState: OverlayState = {
@@ -190,6 +228,12 @@ function resolveTone(delta: number | null, isFastest: boolean | null | undefined
   return delta < 0 ? "faster" : "slower";
 }
 
+function trendFromDelta(delta: number | null): "ahead" | "behind" | "even" | "none" {
+  if (delta == null || Number.isNaN(delta)) return "none";
+  if (Math.abs(delta) < 0.0005) return "even";
+  return delta < 0 ? "ahead" : "behind";
+}
+
 export function LapOverlay({
   enabled,
   getVideo,
@@ -215,6 +259,28 @@ export function LapOverlay({
     });
     return byId;
   }, [lapRanges]);
+
+  const lapTimes = useMemo(() => {
+    const times: number[] = [];
+    lapLookup.forEach((lap) => {
+      const value = typeof lap.time === "number" ? lap.time : null;
+      if (value != null && Number.isFinite(value) && value > 0) {
+        times.push(value);
+      }
+    });
+    return times;
+  }, [lapLookup]);
+
+  const fastestLapTime = useMemo(() => {
+    if (lapTimes.length === 0) return null;
+    return lapTimes.reduce((best, value) => Math.min(best, value), Number.POSITIVE_INFINITY);
+  }, [lapTimes]);
+
+  const averageLapTime = useMemo(() => {
+    if (lapTimes.length === 0) return null;
+    const sum = lapTimes.reduce((acc, value) => acc + value, 0);
+    return sum / lapTimes.length;
+  }, [lapTimes]);
 
   const clearHideTimer = useCallback(() => {
     if (hidePreviousTimerRef.current != null) {
@@ -334,6 +400,20 @@ export function LapOverlay({
   }, [clearHideTimer, enabled, isPastEnd, lapId, lapIndexById, lapLookup, lapRanges, lastJumpRef, startHideTimer]);
 
   const lapNumber = lapId ? lapLookup.get(lapId)?.lapNumber ?? null : null;
+  const lapTime = lapId ? lapLookup.get(lapId)?.time ?? null : null;
+
+  const deltaToBest = useMemo(() => {
+    if (fastestLapTime == null || lapTime == null || !Number.isFinite(lapTime)) return null;
+    return lapTime - fastestLapTime;
+  }, [fastestLapTime, lapTime]);
+
+  const deltaToAverage = useMemo(() => {
+    if (averageLapTime == null || lapTime == null || !Number.isFinite(lapTime)) return null;
+    return lapTime - averageLapTime;
+  }, [averageLapTime, lapTime]);
+
+  const bestTrend = trendFromDelta(deltaToBest);
+  const averageTrend = trendFromDelta(deltaToAverage);
 
   if (!enabled || lapNumber == null || isPastEnd) {
     return null;
@@ -348,6 +428,24 @@ export function LapOverlay({
       <div className="current-lap">
         <span className="lap-label">Lap {lapNumber}</span>
         <span className="lap-time">{formatStopwatchTime(lapElapsed)}</span>
+        <div className="delta-stack" aria-label="Lap-relative deltas">
+          {deltaToBest != null ? (
+            <div className="delta-row">
+              <span className="delta-label">Δ vs Best Lap</span>
+              <span className="delta-value" data-trend={bestTrend}>
+                {formatDelta(deltaToBest)}
+              </span>
+            </div>
+          ) : null}
+          {deltaToAverage != null ? (
+            <div className="delta-row">
+              <span className="delta-label">Δ vs Session Avg</span>
+              <span className="delta-value" data-trend={averageTrend}>
+                {formatDelta(deltaToAverage)}
+              </span>
+            </div>
+          ) : null}
+        </div>
       </div>
       {previousLap ? (
         <div className="previous-lap" data-tone={previousLap.tone}>
