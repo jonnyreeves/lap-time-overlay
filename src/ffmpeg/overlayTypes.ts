@@ -9,6 +9,7 @@ export interface OverlayStyle {
   showLapCounter: boolean;
   showPosition: boolean;
   showCurrentLapTime: boolean;
+  showLapDeltas: boolean;
   overlayPosition: "bottom-left" | "top-left" | "top-right" | "bottom-right";
   boxWidthRatio: number;
 }
@@ -33,6 +34,7 @@ export const DEFAULT_OVERLAY_STYLE: OverlayStyle = {
   showLapCounter: true,
   showPosition: true,
   showCurrentLapTime: true,
+  showLapDeltas: true,
   overlayPosition: "bottom-left",
   boxWidthRatio: 0.45,
 };

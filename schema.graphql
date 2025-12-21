@@ -116,6 +116,7 @@ input OverlayStyleInput {
   textSize: Float
   overlayPosition: OverlayPosition
   boxOpacity: Float
+  showLapDeltas: Boolean
 }
 
 input RenderOverlayPreviewInput {

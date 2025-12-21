@@ -42,6 +42,12 @@ function buildLapTimeExpr(lapStartAbs: number): string {
 type PositionSegment = { start: number; end: number; position: number };
 type TextSegment = { start: number; end: number; text: string };
 
+function formatDelta(delta: number): string {
+  if (!Number.isFinite(delta)) return "N/A";
+  const sign = delta < 0 ? "-" : "+";
+  return `${sign}${Math.abs(delta).toFixed(3)}`;
+}
+
 function buildPositionTimeline(
   lap: Lap,
   lapStartAbs: number,
@@ -201,6 +207,8 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
     style.showPosition ?? DEFAULT_OVERLAY_STYLE.showPosition;
   const showCurrentLapTime =
     style.showCurrentLapTime ?? DEFAULT_OVERLAY_STYLE.showCurrentLapTime;
+  const showLapDeltas =
+    style.showLapDeltas ?? DEFAULT_OVERLAY_STYLE.showLapDeltas;
   const boxWidthRatio =
     style.boxWidthRatio ?? DEFAULT_OVERLAY_STYLE.boxWidthRatio;
   const overlayPosition =
@@ -217,12 +225,27 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
   const safeFontSize = Math.max(12, Math.min(192, fontSize));
   const halfPad = Math.round(safeFontSize * 0.35);
   const padding = { x: halfPad, y: halfPad };
-  const boxHeight = Math.round(safeFontSize * 2.9);
-  const boxY = overlayPosition.startsWith("top") ? 32 : height - boxHeight - 32;
-  const boxX = overlayPosition.endsWith("left") ? 32 : width - safeWidth - 32;
+  const lineGapAfterFirst = Math.round(safeFontSize * 1.35);
+  const lineGap = Math.round(safeFontSize * 1.1);
+  const lapDurations = laps
+    .map((lap) => lap.durationS)
+    .filter((value) => Number.isFinite(value) && value > 0);
+  const fastestLapTime =
+    lapDurations.length > 0
+      ? lapDurations.reduce(
+          (best, value) => Math.min(best, value),
+          Number.POSITIVE_INFINITY
+        )
+      : null;
+  const averageLapTime =
+    lapDurations.length > 0
+      ? lapDurations.reduce((sum, value) => sum + value, 0) / lapDurations.length
+      : null;
 
   const lapTimeline: TextSegment[] = [];
   const infoTimeline: TextSegment[] = [];
+  const deltaBestTimeline: TextSegment[] = [];
+  const deltaAverageTimeline: TextSegment[] = [];
   let lastPosition = 0;
   for (let idx = 0; idx < laps.length; idx++) {
     const lap = laps[idx];
@@ -248,7 +271,73 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
         positionSegments: positionTimeline.segments,
       })
     );
+
+    if (showLapDeltas && fastestLapTime != null) {
+      const deltaToBest = lap.durationS - fastestLapTime;
+      deltaBestTimeline.push({
+        start: lapStartAbs,
+        end: lapStartAbs + lap.durationS,
+        text: `Δ vs Best ${formatDelta(deltaToBest)}`,
+      });
+    }
+
+    if (showLapDeltas && averageLapTime != null) {
+      const deltaToAverage = lap.durationS - averageLapTime;
+      deltaAverageTimeline.push({
+        start: lapStartAbs,
+        end: lapStartAbs + lap.durationS,
+        text: `Δ vs Avg ${formatDelta(deltaToAverage)}`,
+      });
+    }
   }
+
+  const lineOffsets = (index: number) => {
+    if (index === 0) return padding.y;
+    if (index === 1) return padding.y + lineGapAfterFirst;
+    return padding.y + lineGapAfterFirst + lineGap * (index - 1);
+  };
+
+  const overlays: { timeline: TextSegment[]; labelPrefix: string; y: number }[] = [];
+  let overlayIndex = 0;
+
+  if (lapTimeline.length) {
+    overlays.push({
+      timeline: lapTimeline,
+      labelPrefix: "lap",
+      y: lineOffsets(overlayIndex++),
+    });
+  }
+
+  if (infoTimeline.length) {
+    overlays.push({
+      timeline: infoTimeline,
+      labelPrefix: "info",
+      y: lineOffsets(overlayIndex++),
+    });
+  }
+
+  if (deltaBestTimeline.length) {
+    overlays.push({
+      timeline: deltaBestTimeline,
+      labelPrefix: "deltaBest",
+      y: lineOffsets(overlayIndex++),
+    });
+  }
+
+  if (deltaAverageTimeline.length) {
+    overlays.push({
+      timeline: deltaAverageTimeline,
+      labelPrefix: "deltaAvg",
+      y: lineOffsets(overlayIndex++),
+    });
+  }
+
+  const lastLineOffset = overlays.length
+    ? overlays[overlays.length - 1]!.y
+    : padding.y;
+  const boxHeight = Math.round(lastLineOffset + safeFontSize + padding.y);
+  const boxY = overlayPosition.startsWith("top") ? 32 : height - boxHeight - 32;
+  const boxX = overlayPosition.endsWith("left") ? 32 : width - safeWidth - 32;
 
   let currentLabel = "0:v";
 
@@ -272,37 +361,21 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
     currentLabel = backgroundBox.label;
   }
 
-  if (lapTimeline.length) {
-    const lapOverlay = buildDrawtextTimeline({
-      inputs: lapTimeline,
+  overlays.forEach((line) => {
+    const overlay = buildDrawtextTimeline({
+      inputs: line.timeline,
       color: fontColor,
       fontSize: safeFontSize,
       x: boxX + padding.x,
-      y: boxY + padding.y,
+      y: boxY + line.y,
       inputLabel: currentLabel,
-      labelPrefix: "lap",
+      labelPrefix: line.labelPrefix,
     });
-    if (lapOverlay) {
-      filters.push(lapOverlay.filter);
-      currentLabel = lapOverlay.label;
+    if (overlay) {
+      filters.push(overlay.filter);
+      currentLabel = overlay.label;
     }
-  }
-
-  if (infoTimeline.length) {
-    const infoOverlay = buildDrawtextTimeline({
-      inputs: infoTimeline,
-      color: fontColor,
-      fontSize: safeFontSize,
-      x: boxX + padding.x,
-      y: boxY + padding.y + Math.round(safeFontSize * 1.4),
-      inputLabel: currentLabel,
-      labelPrefix: "info",
-    });
-    if (infoOverlay) {
-      filters.push(infoOverlay.filter);
-      currentLabel = infoOverlay.label;
-    }
-  }
+  });
 
   const filterGraph = filters;
   const outputLabel = currentLabel;

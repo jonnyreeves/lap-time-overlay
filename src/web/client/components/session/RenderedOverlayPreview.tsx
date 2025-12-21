@@ -63,6 +63,12 @@ const RenderOverlayPreviewMutation = graphql`
 const layoutStyles = css`
   display: grid;
   gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+
+  @media (min-width: 960px) {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  }
 `;
 
 const previewFrameStyles = css`
@@ -71,7 +77,8 @@ const previewFrameStyles = css`
   background: radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.25), transparent 45%),
     radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.2), transparent 35%),
     #0b1021;
-  min-height: 360px;
+  min-height: clamp(240px, 45vh, 460px);
+  max-height: 70vh;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -80,6 +87,7 @@ const previewFrameStyles = css`
 
   img {
     width: 100%;
+    max-height: 100%;
     display: block;
     object-fit: contain;
     background: #0b1021;
@@ -114,6 +122,7 @@ const controlsPanelStyles = css`
   padding: 14px 16px 16px;
   display: grid;
   gap: 10px;
+  align-self: stretch;
 
   h3 {
     margin: 0;
@@ -141,6 +150,16 @@ const controlsPanelStyles = css`
   .muted {
     color: #64748b;
     font-size: 0.95rem;
+  }
+`;
+
+const selectorRowStyles = css`
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
   }
 `;
 
@@ -190,6 +209,7 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
   const [textSize, setTextSize] = useState(32);
   const [overlayPosition, setOverlayPosition] = useState<OverlayPositionOption>("BOTTOM_LEFT");
   const [backgroundOpacity, setBackgroundOpacity] = useState(60);
+  const [showLapDeltas, setShowLapDeltas] = useState(true);
   const [preview, setPreview] = useState<PreviewState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [commitPreview, isPreviewInFlight] =
@@ -223,8 +243,9 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
       textSize,
       overlayPosition,
       boxOpacity: Math.max(0, Math.min(1, backgroundOpacity / 100)),
+      showLapDeltas,
     }),
-    [backgroundOpacity, overlayPosition, textColor, textSize]
+    [backgroundOpacity, overlayPosition, showLapDeltas, textColor, textSize]
   );
 
   const requestPreview = useCallback(() => {
@@ -266,7 +287,7 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
   const offsetChoices = useMemo(() => [0, 5], []);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Rendered Overlay Preview" maxWidth="960px">
+    <Modal isOpen={isOpen} onClose={onClose} title="Rendered Overlay Preview" maxWidth="1280px">
       <div css={layoutStyles}>
         <div css={previewFrameStyles}>
           {previewSrc ? (
@@ -294,45 +315,49 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
             </div>
           )}
 
-          <label>
-            Lap
-            <select
-              value={selectedLapId ?? ""}
-              onChange={(e) => setSelectedLapId(e.target.value || null)}
-              disabled={!lapOptions.length}
-            >
-              {lapOptions.map((lap) => (
-                <option key={lap.id} value={lap.id}>
-                  Lap {lap.lapNumber} — {formatLapTimeSeconds(lap.time)}s
-                </option>
-              ))}
-            </select>
-          </label>
+          <div css={selectorRowStyles}>
+            <label>
+              Lap
+              <select
+                value={selectedLapId ?? ""}
+                onChange={(e) => setSelectedLapId(e.target.value || null)}
+                disabled={!lapOptions.length}
+              >
+                {lapOptions.map((lap) => (
+                  <option key={lap.id} value={lap.id}>
+                    Lap {lap.lapNumber} — {formatLapTimeSeconds(lap.time)}s
+                  </option>
+                ))}
+              </select>
+            </label>
 
-          <label>
-            Offset into lap
-            <select
-              value={offsetSeconds}
-              onChange={(e) => setOffsetSeconds(Number(e.target.value))}
-              disabled={!selectedLap}
-            >
-              {offsetChoices.map((choice) => (
-                <option key={choice} value={choice}>
-                  {choice === 1 ? "1 second" : `${choice} seconds`}
-                </option>
-              ))}
-            </select>
-          </label>
+            <label>
+              Offset into lap
+              <select
+                value={offsetSeconds}
+                onChange={(e) => setOffsetSeconds(Number(e.target.value))}
+                disabled={!selectedLap}
+              >
+                {offsetChoices.map((choice) => (
+                  <option key={choice} value={choice}>
+                    {choice === 1 ? "1 second" : `${choice} seconds`}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
 
           <OverlayAppearanceControls
             textColor={textColor}
             textSize={textSize}
             overlayPosition={overlayPosition}
             backgroundOpacity={backgroundOpacity}
+            showLapDeltas={showLapDeltas}
             onTextColorChange={setTextColor}
             onTextSizeChange={setTextSize}
             onOverlayPositionChange={setOverlayPosition}
             onBackgroundOpacityChange={setBackgroundOpacity}
+            onShowLapDeltasChange={setShowLapDeltas}
           />
 
           {preview && (

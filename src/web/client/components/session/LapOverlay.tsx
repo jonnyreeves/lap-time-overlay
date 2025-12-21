@@ -24,6 +24,7 @@ type LapOverlayProps = {
     }
   >;
   lastJumpRef: MutableRefObject<{ id: string | null; at: number }>;
+  showLapDeltas?: boolean;
 };
 
 type OverlayState = {
@@ -240,6 +241,7 @@ export function LapOverlay({
   lapRanges,
   lapLookup,
   lastJumpRef,
+  showLapDeltas = true,
 }: LapOverlayProps) {
   const { lapId, lapElapsed, isPastEnd } = useLapOverlayState({
     enabled,
@@ -428,24 +430,26 @@ export function LapOverlay({
       <div className="current-lap">
         <span className="lap-label">Lap {lapNumber}</span>
         <span className="lap-time">{formatStopwatchTime(lapElapsed)}</span>
-        <div className="delta-stack" aria-label="Lap-relative deltas">
-          {deltaToBest != null ? (
-            <div className="delta-row">
-              <span className="delta-label">Δ vs Best Lap</span>
-              <span className="delta-value" data-trend={bestTrend}>
-                {formatDelta(deltaToBest)}
-              </span>
-            </div>
-          ) : null}
-          {deltaToAverage != null ? (
-            <div className="delta-row">
-              <span className="delta-label">Δ vs Session Avg</span>
-              <span className="delta-value" data-trend={averageTrend}>
-                {formatDelta(deltaToAverage)}
-              </span>
-            </div>
-          ) : null}
-        </div>
+        {showLapDeltas ? (
+          <div className="delta-stack" aria-label="Lap-relative deltas">
+            {deltaToBest != null ? (
+              <div className="delta-row">
+                <span className="delta-label">Δ vs Best Lap</span>
+                <span className="delta-value" data-trend={bestTrend}>
+                  {formatDelta(deltaToBest)}
+                </span>
+              </div>
+            ) : null}
+            {deltaToAverage != null ? (
+              <div className="delta-row">
+                <span className="delta-label">Δ vs Session Avg</span>
+                <span className="delta-value" data-trend={averageTrend}>
+                  {formatDelta(deltaToAverage)}
+                </span>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
       {previousLap ? (
         <div className="previous-lap" data-tone={previousLap.tone}>

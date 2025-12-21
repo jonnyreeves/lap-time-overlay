@@ -19,16 +19,20 @@ const modalOverlayStyles = css`
   background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   z-index: 1000;
+  overflow-y: auto;
+  padding: 20px 12px;
 `;
 
 const modalContentStyles = (maxWidth?: string) => css`
   background: white;
-  padding: 30px;
-  border-radius: 10px;
-  width: 90%;
-  max-width: ${maxWidth || '600px'};
+  padding: 24px;
+  border-radius: 14px;
+  width: min(96%, ${maxWidth || "600px"});
+  max-width: ${maxWidth || "600px"};
+  max-height: calc(100vh - 80px);
+  overflow: auto;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   position: relative;
   display: flex;

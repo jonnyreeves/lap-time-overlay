@@ -9,10 +9,12 @@ type Props = {
   textSize: number;
   overlayPosition: OverlayPositionOption;
   backgroundOpacity: number;
+  showLapDeltas: boolean;
   onTextColorChange: (value: OverlayTextColorOption) => void;
   onTextSizeChange: (value: number) => void;
   onOverlayPositionChange: (value: OverlayPositionOption) => void;
   onBackgroundOpacityChange: (value: number) => void;
+  onShowLapDeltasChange: (value: boolean) => void;
 };
 
 const sectionHeadingStyles = css`
@@ -67,10 +69,12 @@ export function OverlayAppearanceControls({
   textSize,
   overlayPosition,
   backgroundOpacity,
+  showLapDeltas,
   onTextColorChange,
   onTextSizeChange,
   onOverlayPositionChange,
   onBackgroundOpacityChange,
+  onShowLapDeltasChange,
 }: Props) {
   const handleOpacityChange = (event: ChangeEvent<HTMLInputElement>) => {
     onBackgroundOpacityChange(Number(event.target.value));
@@ -132,6 +136,18 @@ export function OverlayAppearanceControls({
             value={backgroundOpacity}
             onChange={handleOpacityChange}
           />
+        </label>
+
+        <label>
+          <span>Lap deltas</span>
+          <div>
+            <input
+              type="checkbox"
+              checked={showLapDeltas}
+              onChange={(e) => onShowLapDeltasChange(e.target.checked)}
+            />{" "}
+            Show Δ vs best and avg
+          </div>
         </label>
       </div>
     </div>

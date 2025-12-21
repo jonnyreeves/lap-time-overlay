@@ -43,6 +43,8 @@ describe("buildDrawtextFilterGraph", () => {
     expect(combined).toContain("drawtext");
     expect(combined).toContain("Lap 1/2");
     expect(combined).toContain("P2");
+    expect(combined).toContain("Δ vs Best");
+    expect(combined).toContain("Δ vs Avg");
     expect(combined).toContain("overlay=x=");
   });
 
@@ -59,5 +61,20 @@ describe("buildDrawtextFilterGraph", () => {
     const combined = filterGraph.join(";");
     expect(combined).not.toContain("%{eif:");
     expect(combined).toContain("Lap 1/2");
+  });
+
+  it("omits lap deltas when disabled", () => {
+    const { filterGraph } = buildDrawtextFilterGraph({
+      inputVideo: "input.mp4",
+      outputFile: "out.mp4",
+      video: { width: 1280, height: 720, fps: 24, duration: 120 },
+      laps: sampleLaps,
+      startOffsetS: 0,
+      style: { ...DEFAULT_OVERLAY_STYLE, showLapDeltas: false },
+    });
+
+    const combined = filterGraph.join(";");
+    expect(combined).not.toContain("Δ vs Best");
+    expect(combined).not.toContain("Δ vs Avg");
   });
 });

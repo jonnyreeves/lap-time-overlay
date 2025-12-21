@@ -83,6 +83,7 @@ function buildOverlayStyle(overrides?: Partial<OverlayStyle>): OverlayStyle {
     boxOpacity,
     textColor: overrides?.textColor ?? base.textColor,
     boxColor: overrides?.boxColor ?? base.boxColor,
+    showLapDeltas: overrides?.showLapDeltas ?? base.showLapDeltas,
   };
 }
 

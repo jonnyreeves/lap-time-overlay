@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<07ee9b528e86a31c5fb98e75a05d09b0>>
+ * @generated SignedSource<<7144a34713ce77b6dc2052858df67efb>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -20,6 +20,7 @@ export type RenderOverlayPreviewInput = {
 export type OverlayStyleInput = {
   boxOpacity?: number | null | undefined;
   overlayPosition?: OverlayPosition | null | undefined;
+  showLapDeltas?: boolean | null | undefined;
   textColor?: OverlayTextColor | null | undefined;
   textSize?: number | null | undefined;
 };

@@ -47,6 +47,7 @@ type OverlayStyleInput =
       textSize?: number | null;
       overlayPosition?: keyof typeof overlayPositionMap | null;
       boxOpacity?: number | null;
+      showLapDeltas?: boolean | null;
     }
   | null
   | undefined;
@@ -74,6 +75,10 @@ function normalizeOverlayStyleInput(style: OverlayStyleInput): Partial<OverlaySt
   const boxOpacity = style.boxOpacity;
   if (Number.isFinite(boxOpacity)) {
     overrides.boxOpacity = Math.min(1, Math.max(0, boxOpacity as number));
+  }
+
+  if (typeof style.showLapDeltas === "boolean") {
+    overrides.showLapDeltas = style.showLapDeltas;
   }
 
   return overrides;
