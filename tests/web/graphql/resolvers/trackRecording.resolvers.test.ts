@@ -271,13 +271,58 @@ describe("trackRecording resolvers", () => {
       context
     );
 
-    expect(generateOverlayPreview).toHaveBeenCalledWith({
-      recordingId: "rec1",
-      lapId: "lap1",
-      offsetSeconds: 5,
-      currentUserId: "user-1",
-    });
+    expect(generateOverlayPreview).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recordingId: "rec1",
+        lapId: "lap1",
+        offsetSeconds: 5,
+        currentUserId: "user-1",
+        styleOverrides: {},
+      })
+    );
     expect(result.preview.previewUrl).toContain("/previews/rec1/");
+  });
+
+  it("normalizes overlay style input", async () => {
+    vi.mocked(generateOverlayPreview).mockResolvedValue({
+      id: "prev1",
+      previewUrl: "/previews/rec1/file.png",
+      previewTimeSeconds: 8,
+      requestedOffsetSeconds: 2,
+      usedOffsetSeconds: 2,
+      lapId: "lap1",
+      lapNumber: 1,
+      recordingId: "rec1",
+      generatedAt: new Date(0).toISOString(),
+    });
+
+    await trackRecordingResolvers.renderOverlayPreview(
+      {
+        input: {
+          recordingId: "rec1",
+          lapId: "lap1",
+          offsetSeconds: 2,
+          style: {
+            textColor: "YELLOW",
+            textSize: 200,
+            overlayPosition: "TOP_RIGHT",
+            boxOpacity: 1.2,
+          },
+        },
+      },
+      context
+    );
+
+    expect(generateOverlayPreview).toHaveBeenCalledWith(
+      expect.objectContaining({
+        styleOverrides: {
+          textColor: "#ffd500",
+          textSize: 192,
+          overlayPosition: "top-right",
+          boxOpacity: 1,
+        },
+      })
+    );
   });
 
   it("maps overlay preview errors", async () => {

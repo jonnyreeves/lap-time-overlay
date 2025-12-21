@@ -214,7 +214,7 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
   const boxColorWithAlpha = toFfmpegColor(boxColor, boxOpacity);
 
   const safeWidth = Math.max(200, Math.min(width, boxWidth));
-  const safeFontSize = Math.max(12, Math.min(80, fontSize));
+  const safeFontSize = Math.max(12, Math.min(192, fontSize));
   const halfPad = Math.round(safeFontSize * 0.35);
   const padding = { x: halfPad, y: halfPad };
   const boxHeight = Math.round(safeFontSize * 2.9);

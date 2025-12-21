@@ -4,6 +4,11 @@ import { graphql, useMutation } from "react-relay";
 import type { RenderedOverlayPreviewGenerateMutation } from "../../__generated__/RenderedOverlayPreviewGenerateMutation.graphql.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 import { Modal } from "../Modal.js";
+import {
+  OverlayAppearanceControls,
+  type OverlayPositionOption,
+  type OverlayTextColorOption,
+} from "./OverlayAppearanceControls.js";
 import { recordingButtonStyles } from "./recordingShared.js";
 
 type LapOption = {
@@ -181,6 +186,10 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
     lapOptions[0]?.id ?? null
   );
   const [offsetSeconds, setOffsetSeconds] = useState(0);
+  const [textColor, setTextColor] = useState<OverlayTextColorOption>("WHITE");
+  const [textSize, setTextSize] = useState(32);
+  const [overlayPosition, setOverlayPosition] = useState<OverlayPositionOption>("BOTTOM_LEFT");
+  const [backgroundOpacity, setBackgroundOpacity] = useState(60);
   const [preview, setPreview] = useState<PreviewState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [commitPreview, isPreviewInFlight] =
@@ -208,6 +217,16 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
     return `${preview.previewUrl}${suffix}`;
   }, [preview]);
 
+  const styleInput = useMemo(
+    () => ({
+      textColor,
+      textSize,
+      overlayPosition,
+      boxOpacity: Math.max(0, Math.min(1, backgroundOpacity / 100)),
+    }),
+    [backgroundOpacity, overlayPosition, textColor, textSize]
+  );
+
   const requestPreview = useCallback(() => {
     if (!isOpen || !selectedLapId) return;
     setError(null);
@@ -217,6 +236,7 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
           recordingId: recording.id,
           lapId: selectedLapId,
           offsetSeconds,
+          style: styleInput,
         },
       },
       onCompleted: (data) => {
@@ -236,7 +256,7 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
       },
       onError: (err) => setError(err.message),
     });
-  }, [commitPreview, isOpen, offsetSeconds, recording.id, selectedLapId]);
+  }, [commitPreview, isOpen, offsetSeconds, recording.id, selectedLapId, styleInput]);
 
   useEffect(() => {
     if (!isOpen || !selectedLapId || !lapOptions.length) return;
@@ -263,8 +283,8 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
           <div>
             <h3>{recording.description || "Recording"}</h3>
             <div className="muted">
-              Lap 1 starts at {formatLapTimeSeconds(recording.lapOneOffset)}s in this video. Overlay
-              styling uses the current defaults; export is coming soon.
+              Lap 1 starts at {formatLapTimeSeconds(recording.lapOneOffset)}s in this video. Tweak
+              the overlay styling below to refresh the preview; export is coming soon.
             </div>
           </div>
 
@@ -303,6 +323,17 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
               ))}
             </select>
           </label>
+
+          <OverlayAppearanceControls
+            textColor={textColor}
+            textSize={textSize}
+            overlayPosition={overlayPosition}
+            backgroundOpacity={backgroundOpacity}
+            onTextColorChange={setTextColor}
+            onTextSizeChange={setTextSize}
+            onOverlayPositionChange={setOverlayPosition}
+            onBackgroundOpacityChange={setBackgroundOpacity}
+          />
 
           {preview && (
             <div css={badgeStyles}>

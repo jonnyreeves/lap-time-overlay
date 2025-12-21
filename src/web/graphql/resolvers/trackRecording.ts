@@ -4,6 +4,7 @@ import type { GraphQLContext } from "../context.js";
 import { RecordingUploadError, startRecordingUploadSession, deleteRecordingAndFiles } from "../../recordings/service.js";
 import { generateOverlayPreview, OverlayPreviewError } from "../../recordings/overlayPreview.js";
 import { toTrackRecordingPayload } from "./trackSession.js";
+import type { OverlayStyle } from "../../../ffmpeg/overlay.js";
 
 function toUploadError(err: unknown): GraphQLError {
   if (err instanceof RecordingUploadError) {
@@ -26,6 +27,56 @@ function toOverlayPreviewError(err: unknown): GraphQLError {
   }
   console.error("Unexpected overlay preview error", err);
   return new GraphQLError("Internal error", { extensions: { code: "INTERNAL_SERVER_ERROR" } });
+}
+
+const overlayTextColorMap = {
+  WHITE: "#ffffff",
+  YELLOW: "#ffd500",
+} as const;
+
+const overlayPositionMap = {
+  TOP_LEFT: "top-left",
+  TOP_RIGHT: "top-right",
+  BOTTOM_LEFT: "bottom-left",
+  BOTTOM_RIGHT: "bottom-right",
+} as const;
+
+type OverlayStyleInput =
+  | {
+      textColor?: keyof typeof overlayTextColorMap | null;
+      textSize?: number | null;
+      overlayPosition?: keyof typeof overlayPositionMap | null;
+      boxOpacity?: number | null;
+    }
+  | null
+  | undefined;
+
+function normalizeOverlayStyleInput(style: OverlayStyleInput): Partial<OverlayStyle> {
+  const overrides: Partial<OverlayStyle> = {};
+  if (!style) return overrides;
+
+  const colorKey = style.textColor;
+  if (colorKey && colorKey in overlayTextColorMap) {
+    overrides.textColor = overlayTextColorMap[colorKey];
+  }
+
+  const textSize = style.textSize;
+  if (Number.isFinite(textSize)) {
+    const rounded = Math.round(textSize as number);
+    overrides.textSize = Math.min(192, Math.max(12, rounded));
+  }
+
+  const positionKey = style.overlayPosition;
+  if (positionKey && positionKey in overlayPositionMap) {
+    overrides.overlayPosition = overlayPositionMap[positionKey];
+  }
+
+  const boxOpacity = style.boxOpacity;
+  if (Number.isFinite(boxOpacity)) {
+    overrides.boxOpacity = Math.min(1, Math.max(0, boxOpacity as number));
+  }
+
+  return overrides;
 }
 
 export const trackRecordingResolvers = {
@@ -208,7 +259,14 @@ export const trackRecordingResolvers = {
     return { recording: toTrackRecordingPayload(updated, context.repositories) };
   },
   renderOverlayPreview: async (
-    args: { input?: { recordingId?: string; lapId?: string; offsetSeconds?: number | null } },
+    args: {
+      input?: {
+        recordingId?: string;
+        lapId?: string;
+        offsetSeconds?: number | null;
+        style?: OverlayStyleInput;
+      };
+    },
     context: GraphQLContext
   ) => {
     if (!context.currentUser) {
@@ -230,12 +288,15 @@ export const trackRecordingResolvers = {
       });
     }
 
+    const styleOverrides = normalizeOverlayStyleInput(input.style);
+
     try {
       const preview = await generateOverlayPreview({
         recordingId: input.recordingId,
         lapId: input.lapId,
         offsetSeconds,
         currentUserId: context.currentUser.id,
+        styleOverrides,
       });
       return { preview };
     } catch (err) {

@@ -9,7 +9,11 @@ import {
   type TrackRecordingRecord,
 } from "../../db/track_recordings.js";
 import { findTrackSessionById } from "../../db/track_sessions.js";
-import { buildDrawtextFilterGraph, DEFAULT_OVERLAY_STYLE } from "../../ffmpeg/overlay.js";
+import {
+  buildDrawtextFilterGraph,
+  DEFAULT_OVERLAY_STYLE,
+  type OverlayStyle,
+} from "../../ffmpeg/overlay.js";
 import type { Lap } from "../../ffmpeg/lapTypes.js";
 import { probeVideoInfo, type VideoInfo } from "../../ffmpeg/videoInfo.js";
 import { sessionRecordingsDir, tmpPreviewsDir } from "../config.js";
@@ -41,6 +45,46 @@ export type OverlayPreviewResult = {
   recordingId: string;
   generatedAt: string;
 };
+
+const VALID_POSITIONS: OverlayStyle["overlayPosition"][] = [
+  "top-left",
+  "top-right",
+  "bottom-left",
+  "bottom-right",
+];
+
+const MIN_TEXT_SIZE = 12;
+const MAX_TEXT_SIZE = 192;
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function buildOverlayStyle(overrides?: Partial<OverlayStyle>): OverlayStyle {
+  const base = DEFAULT_OVERLAY_STYLE;
+  const nextPosition = overrides?.overlayPosition;
+  const overlayPosition = VALID_POSITIONS.includes(nextPosition as OverlayStyle["overlayPosition"])
+    ? (nextPosition as OverlayStyle["overlayPosition"])
+    : base.overlayPosition;
+
+  const textSize = Number.isFinite(overrides?.textSize)
+    ? clamp(Math.round(overrides?.textSize as number), MIN_TEXT_SIZE, MAX_TEXT_SIZE)
+    : base.textSize;
+
+  const boxOpacity = Number.isFinite(overrides?.boxOpacity)
+    ? clamp(overrides?.boxOpacity as number, 0, 1)
+    : base.boxOpacity;
+
+  return {
+    ...base,
+    ...overrides,
+    overlayPosition,
+    textSize,
+    boxOpacity,
+    textColor: overrides?.textColor ?? base.textColor,
+    boxColor: overrides?.boxColor ?? base.boxColor,
+  };
+}
 
 function assertRecordingOwnership(
   recordingId: string,
@@ -170,8 +214,9 @@ export async function generateOverlayPreview(options: {
   lapId: string;
   offsetSeconds: number;
   currentUserId: string;
+  styleOverrides?: Partial<OverlayStyle>;
 }): Promise<OverlayPreviewResult> {
-  const { recordingId, lapId, offsetSeconds, currentUserId } = options;
+  const { recordingId, lapId, offsetSeconds, currentUserId, styleOverrides } = options;
   const recording = assertRecordingOwnership(recordingId, currentUserId);
   const session = loadSession(recording);
 
@@ -203,13 +248,14 @@ export async function generateOverlayPreview(options: {
   const outputFile = path.join(previewDir, fileName);
 
   const startOffsetS = recording.lapOneOffset - previewTimeSeconds;
+  const style = buildOverlayStyle(styleOverrides);
   const { filterGraph, outputLabel } = buildDrawtextFilterGraph({
     inputVideo: videoPath,
     outputFile,
     video,
     laps: overlayLaps.map(({ lapId: _lapId, ...lap }) => lap),
     startOffsetS,
-    style: DEFAULT_OVERLAY_STYLE,
+    style,
   });
 
   try {

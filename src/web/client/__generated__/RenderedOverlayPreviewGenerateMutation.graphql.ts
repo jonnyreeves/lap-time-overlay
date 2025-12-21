@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<c604a4f212eaa572de75d7dc71ce05ea>>
+ * @generated SignedSource<<07ee9b528e86a31c5fb98e75a05d09b0>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,10 +9,19 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
+export type OverlayPosition = "BOTTOM_LEFT" | "BOTTOM_RIGHT" | "TOP_LEFT" | "TOP_RIGHT" | "%future added value";
+export type OverlayTextColor = "WHITE" | "YELLOW" | "%future added value";
 export type RenderOverlayPreviewInput = {
   lapId: string;
   offsetSeconds: number;
   recordingId: string;
+  style?: OverlayStyleInput | null | undefined;
+};
+export type OverlayStyleInput = {
+  boxOpacity?: number | null | undefined;
+  overlayPosition?: OverlayPosition | null | undefined;
+  textColor?: OverlayTextColor | null | undefined;
+  textSize?: number | null | undefined;
 };
 export type RenderedOverlayPreviewGenerateMutation$variables = {
   input: RenderOverlayPreviewInput;

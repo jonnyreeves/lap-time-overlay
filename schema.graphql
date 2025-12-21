@@ -99,10 +99,30 @@ input UpdateTrackRecordingInput {
   lapOneOffset: Float!
 }
 
+enum OverlayTextColor {
+  WHITE
+  YELLOW
+}
+
+enum OverlayPosition {
+  TOP_LEFT
+  TOP_RIGHT
+  BOTTOM_LEFT
+  BOTTOM_RIGHT
+}
+
+input OverlayStyleInput {
+  textColor: OverlayTextColor
+  textSize: Float
+  overlayPosition: OverlayPosition
+  boxOpacity: Float
+}
+
 input RenderOverlayPreviewInput {
   recordingId: ID!
   lapId: ID!
   offsetSeconds: Float!
+  style: OverlayStyleInput
 }
 
 type UpdateTrackRecordingPayload {

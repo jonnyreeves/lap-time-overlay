@@ -22,6 +22,7 @@ pnpm-debug.log*
 # Project artifacts
 work/
 media/
+temp/
 public/app.js
 public/app.js.map
 
