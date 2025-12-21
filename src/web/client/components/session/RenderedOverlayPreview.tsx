@@ -210,6 +210,7 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
   const [detailTextSize, setDetailTextSize] = useState(32);
   const [overlayPosition, setOverlayPosition] = useState<OverlayPositionOption>("BOTTOM_LEFT");
   const [backgroundOpacity, setBackgroundOpacity] = useState(60);
+  const [showLapInfo, setShowLapInfo] = useState(true);
   const [showLapDeltas, setShowLapDeltas] = useState(true);
   const [preview, setPreview] = useState<PreviewState | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -257,9 +258,19 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
       detailTextSize,
       overlayPosition,
       boxOpacity: Math.max(0, Math.min(1, backgroundOpacity / 100)),
+      showLapCounter: showLapInfo,
+      showPosition: showLapInfo,
       showLapDeltas,
     }),
-    [backgroundOpacity, detailTextSize, overlayPosition, showLapDeltas, textColor, textSize]
+    [
+      backgroundOpacity,
+      detailTextSize,
+      overlayPosition,
+      showLapDeltas,
+      showLapInfo,
+      textColor,
+      textSize,
+    ]
   );
 
   const requestPreview = useCallback(() => {
@@ -367,12 +378,14 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
             detailTextSize={detailTextSize}
             overlayPosition={overlayPosition}
             backgroundOpacity={backgroundOpacity}
+            showLapInfo={showLapInfo}
             showLapDeltas={showLapDeltas}
             onTextColorChange={setTextColor}
             onTextSizeChange={handleTextSizeChange}
             onDetailTextSizeChange={handleDetailTextSizeChange}
             onOverlayPositionChange={setOverlayPosition}
             onBackgroundOpacityChange={setBackgroundOpacity}
+            onShowLapInfoChange={setShowLapInfo}
             onShowLapDeltasChange={setShowLapDeltas}
           />
 

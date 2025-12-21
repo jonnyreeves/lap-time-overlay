@@ -1,6 +1,7 @@
 import ffmpeg from "fluent-ffmpeg";
 import { totalSessionDuration, type Lap } from "./laps.js";
 import { DEFAULT_OVERLAY_STYLE, type RenderContext } from "./overlayTypes.js";
+import { measureTextWidth } from "./textMeasure.js";
 
 function normalizeHexColor(input: string | undefined, fallback: string): string {
   const match = input?.match(/^#?[0-9a-fA-F]{6}$/);
@@ -37,6 +38,17 @@ function buildLapTimeExpr(lapStartAbs: number): string {
 
   // eif fmt is x/X/d/u; width is the optional 3rd argument (no %02d style)
   return `%{eif:${minExpr}:d:2}:%{eif:${secExpr}:d:2}:%{eif:${msExpr}:d:3}`;
+}
+
+function formatLapTimeForWidth(seconds: number): string {
+  const totalMs = Math.max(0, Math.round(seconds * 1000));
+  const ms = totalMs % 1000;
+  const totalSeconds = Math.floor(totalMs / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const secondsWithinMinute = totalSeconds % 60;
+  return `${minutes.toString().padStart(2, "0")}:${secondsWithinMinute
+    .toString()
+    .padStart(2, "0")}:${ms.toString().padStart(3, "0")}`;
 }
 
 type PositionSegment = { start: number; end: number; position: number };
@@ -235,8 +247,6 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
     style.showCurrentLapTime ?? DEFAULT_OVERLAY_STYLE.showCurrentLapTime;
   const showLapDeltas =
     style.showLapDeltas ?? DEFAULT_OVERLAY_STYLE.showLapDeltas;
-  const boxWidthRatio =
-    style.boxWidthRatio ?? DEFAULT_OVERLAY_STYLE.boxWidthRatio;
   const overlayPosition =
     style.overlayPosition ?? DEFAULT_OVERLAY_STYLE.overlayPosition;
 
@@ -246,7 +256,6 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
   };
 
   const lapCount = laps.length;
-  const boxWidth = Math.round(width * boxWidthRatio);
   const lapFontSize = clampFontSize(
     style.textSize,
     DEFAULT_OVERLAY_STYLE.textSize
@@ -265,7 +274,6 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
   };
   const boxColorWithAlpha = toFfmpegColor(boxColor, boxOpacity);
 
-  const safeWidth = Math.max(200, Math.min(width, boxWidth));
   const padding = (() => {
     const paddingBase = Math.max(detailFontSize, Math.min(lapFontSize, detailFontSize + 24));
     const halfPad = Math.round(Math.max(10, Math.min(26, paddingBase * 0.35)));
@@ -450,6 +458,73 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
       rows.push({ items, fontSize: detailFontSize });
     }
   }
+
+  const measureSegments = (segments: TextSegment[], fontSize: number) => {
+    const texts = Array.from(
+      new Set(
+        segments
+          .map((seg) => seg.text)
+          .filter((text): text is string => typeof text === "string" && text.length > 0)
+      )
+    );
+    if (!texts.length) return 0;
+    return texts.reduce(
+      (max, text) => Math.max(max, measureTextWidth(text, fontSize)),
+      0
+    );
+  };
+
+  const lapTimeWidth =
+    lapTimeline.length && lapDurations.length
+      ? measureTextWidth(
+          formatLapTimeForWidth(
+            lapDurations.reduce((max, value) => Math.max(max, value), 0)
+          ),
+          lapFontSize
+        )
+      : 0;
+
+  const infoWidth = measureSegments(infoTimeline, detailFontSize);
+  const deltaBestLabelWidth = measureSegments(deltaBestLabelTimeline, detailFontSize);
+  const deltaBestValueWidth = measureSegments(deltaBestValueTimeline, detailFontSize);
+  const deltaAvgLabelWidth = measureSegments(deltaAverageLabelTimeline, detailFontSize);
+  const deltaAvgValueWidth = measureSegments(deltaAverageValueTimeline, detailFontSize);
+  const horizontalGap = Math.max(12, Math.round(padding.x * 0.6));
+
+  const pairedWidth = (left: number, right: number) => {
+    if (left && right) return left + right + horizontalGap;
+    return Math.max(left, right);
+  };
+
+  const rowWidths: number[] = [];
+  if (infoWidth) rowWidths.push(infoWidth);
+  if (lapTimeWidth) rowWidths.push(lapTimeWidth);
+
+  const deltaBestWidth = pairedWidth(deltaBestLabelWidth, deltaBestValueWidth);
+  if (deltaBestWidth) rowWidths.push(deltaBestWidth);
+
+  const deltaAvgWidth = pairedWidth(deltaAvgLabelWidth, deltaAvgValueWidth);
+  if (deltaAvgWidth) rowWidths.push(deltaAvgWidth);
+
+  const widestRow = rowWidths.length ? Math.max(...rowWidths) : 0;
+  const paddingWidth = padding.x * 2;
+  const baseContentWidth =
+    widestRow || measureTextWidth("00:00:000", lapFontSize);
+  const safety = Math.round(Math.max(4, Math.min(24, lapFontSize * 0.1)));
+  const computedWidth = baseContentWidth + paddingWidth + safety;
+  const availableWidth = Math.max(80, width - 64);
+  const minWidth = Math.min(
+    availableWidth,
+    Math.max(
+      140,
+      paddingWidth +
+        measureTextWidth(
+          "00:00:000",
+          Math.max(lapFontSize, detailFontSize, 12)
+        )
+    )
+  );
+  const safeWidth = Math.min(availableWidth, Math.max(minWidth, computedWidth));
 
   let boxHeight = Math.round(padding.y * 2);
 

@@ -308,6 +308,8 @@ describe("trackRecording resolvers", () => {
             detailTextSize: 6,
             overlayPosition: "TOP_RIGHT",
             boxOpacity: 1.2,
+            showLapCounter: false,
+            showPosition: false,
             showLapDeltas: false,
           },
         },
@@ -323,6 +325,8 @@ describe("trackRecording resolvers", () => {
           detailTextSize: 12,
           overlayPosition: "top-right",
           boxOpacity: 1,
+          showLapCounter: false,
+          showPosition: false,
           showLapDeltas: false,
         },
       })

@@ -48,6 +48,8 @@ type OverlayStyleInput =
       detailTextSize?: number | null;
       overlayPosition?: keyof typeof overlayPositionMap | null;
       boxOpacity?: number | null;
+      showLapCounter?: boolean | null;
+      showPosition?: boolean | null;
       showLapDeltas?: boolean | null;
     }
   | null
@@ -82,6 +84,14 @@ function normalizeOverlayStyleInput(style: OverlayStyleInput): Partial<OverlaySt
   const boxOpacity = style.boxOpacity;
   if (Number.isFinite(boxOpacity)) {
     overrides.boxOpacity = Math.min(1, Math.max(0, boxOpacity as number));
+  }
+
+  if (typeof style.showLapCounter === "boolean") {
+    overrides.showLapCounter = style.showLapCounter;
+  }
+
+  if (typeof style.showPosition === "boolean") {
+    overrides.showPosition = style.showPosition;
   }
 
   if (typeof style.showLapDeltas === "boolean") {

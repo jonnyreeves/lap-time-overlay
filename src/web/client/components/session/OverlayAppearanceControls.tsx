@@ -11,11 +11,13 @@ type Props = {
   overlayPosition: OverlayPositionOption;
   backgroundOpacity: number;
   showLapDeltas: boolean;
+  showLapInfo: boolean;
   onTextColorChange: (value: OverlayTextColorOption) => void;
   onTextSizeChange: (value: number) => void;
   onDetailTextSizeChange: (value: number) => void;
   onOverlayPositionChange: (value: OverlayPositionOption) => void;
   onBackgroundOpacityChange: (value: number) => void;
+  onShowLapInfoChange: (value: boolean) => void;
   onShowLapDeltasChange: (value: boolean) => void;
 };
 
@@ -73,11 +75,13 @@ export function OverlayAppearanceControls({
   overlayPosition,
   backgroundOpacity,
   showLapDeltas,
+  showLapInfo,
   onTextColorChange,
   onTextSizeChange,
   onDetailTextSizeChange,
   onOverlayPositionChange,
   onBackgroundOpacityChange,
+  onShowLapInfoChange,
   onShowLapDeltasChange,
 }: Props) {
   const handleOpacityChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -154,6 +158,18 @@ export function OverlayAppearanceControls({
             value={backgroundOpacity}
             onChange={handleOpacityChange}
           />
+        </label>
+
+        <label>
+          <span>Lap number & position</span>
+          <div>
+            <input
+              type="checkbox"
+              checked={showLapInfo}
+              onChange={(e) => onShowLapInfoChange(e.target.checked)}
+            />{" "}
+            Show lap number and position
+          </div>
         </label>
 
         <label>

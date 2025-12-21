@@ -179,8 +179,8 @@ describe("overlay integration", () => {
     "renders overlay with narrow width",
     async () => {
       await assertOverlaySnapshot({
-        name: "overlay-narrow-width",
-        style: { boxWidthRatio: 0.2 },
+        name: "overlay-auto-width-small-text",
+        style: { textSize: 12, detailTextSize: 12, showLapDeltas: false },
       });
     },
     20000

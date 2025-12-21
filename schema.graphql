@@ -117,6 +117,8 @@ input OverlayStyleInput {
   detailTextSize: Float
   overlayPosition: OverlayPosition
   boxOpacity: Float
+  showLapCounter: Boolean
+  showPosition: Boolean
   showLapDeltas: Boolean
 }
 
