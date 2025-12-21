@@ -2,6 +2,7 @@ import { GraphQLError } from "graphql";
 import { findTrackRecordingById, markPrimaryRecording, updateTrackRecording } from "../../../db/track_recordings.js";
 import type { GraphQLContext } from "../context.js";
 import { RecordingUploadError, startRecordingUploadSession, deleteRecordingAndFiles } from "../../recordings/service.js";
+import { generateOverlayPreview, OverlayPreviewError } from "../../recordings/overlayPreview.js";
 import { toTrackRecordingPayload } from "./trackSession.js";
 
 function toUploadError(err: unknown): GraphQLError {
@@ -15,6 +16,15 @@ function toUploadError(err: unknown): GraphQLError {
     return new GraphQLError(err.message, { extensions: { code } });
   }
   console.error("Unexpected recording upload error", err);
+  return new GraphQLError("Internal error", { extensions: { code: "INTERNAL_SERVER_ERROR" } });
+}
+
+function toOverlayPreviewError(err: unknown): GraphQLError {
+  if (err instanceof OverlayPreviewError) {
+    const code = err.code ?? "VALIDATION_FAILED";
+    return new GraphQLError(err.message, { extensions: { code } });
+  }
+  console.error("Unexpected overlay preview error", err);
   return new GraphQLError("Internal error", { extensions: { code: "INTERNAL_SERVER_ERROR" } });
 }
 
@@ -196,6 +206,41 @@ export const trackRecordingResolvers = {
 
     const updated = updateTrackRecording(recording.id, { lapOneOffset }) ?? recording;
     return { recording: toTrackRecordingPayload(updated, context.repositories) };
+  },
+  renderOverlayPreview: async (
+    args: { input?: { recordingId?: string; lapId?: string; offsetSeconds?: number | null } },
+    context: GraphQLContext
+  ) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+
+    const input = args.input;
+    if (!input?.recordingId || !input?.lapId) {
+      throw new GraphQLError("recordingId and lapId are required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    const offsetSeconds = Number(input.offsetSeconds);
+    if (!Number.isFinite(offsetSeconds) || offsetSeconds < 0) {
+      throw new GraphQLError("offsetSeconds must be zero or greater", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    try {
+      const preview = await generateOverlayPreview({
+        recordingId: input.recordingId,
+        lapId: input.lapId,
+        offsetSeconds,
+        currentUserId: context.currentUser.id,
+      });
+      return { preview };
+    } catch (err) {
+      throw toOverlayPreviewError(err);
+    }
   },
   deleteTrackRecording: async (args: { id?: string }, context: GraphQLContext) => {
     if (!context.currentUser) {

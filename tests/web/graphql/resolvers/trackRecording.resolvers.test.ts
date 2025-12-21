@@ -7,6 +7,10 @@ import {
   RecordingUploadError,
   startRecordingUploadSession,
 } from "../../../../src/web/recordings/service.js";
+import {
+  generateOverlayPreview,
+  OverlayPreviewError,
+} from "../../../../src/web/recordings/overlayPreview.js";
 
 vi.mock("../../../../src/web/recordings/service.js", async () => {
   const actual = await vi.importActual<typeof import("../../../../src/web/recordings/service.js")>(
@@ -23,6 +27,15 @@ vi.mock("../../../../src/web/recordings/service.js", async () => {
     },
   };
 });
+
+vi.mock("../../../../src/web/recordings/overlayPreview.js", () => ({
+  generateOverlayPreview: vi.fn(),
+  OverlayPreviewError: class MockOverlayPreviewError extends Error {
+    constructor(message: string, public code: string = "VALIDATION_FAILED") {
+      super(message);
+    }
+  },
+}));
 
 describe("trackRecording resolvers", () => {
   const { context } = createMockGraphQLContext({
@@ -229,6 +242,55 @@ describe("trackRecording resolvers", () => {
 
     expect(recordingsDb.markPrimaryRecording).toHaveBeenCalledWith(recording.id);
     expect(result.recording.isPrimary).toBe(true);
+  });
+
+  it("rejects unauthenticated overlay preview requests", async () => {
+    await expect(
+      trackRecordingResolvers.renderOverlayPreview(
+        { input: { recordingId: "rec1", lapId: "lap1", offsetSeconds: 0 } },
+        { ...context, currentUser: null }
+      )
+    ).rejects.toThrowError("Authentication required");
+  });
+
+  it("delegates overlay preview generation", async () => {
+    vi.mocked(generateOverlayPreview).mockResolvedValue({
+      id: "prev1",
+      previewUrl: "/previews/rec1/file.png",
+      previewTimeSeconds: 12,
+      requestedOffsetSeconds: 5,
+      usedOffsetSeconds: 5,
+      lapId: "lap1",
+      lapNumber: 1,
+      recordingId: "rec1",
+      generatedAt: new Date(0).toISOString(),
+    });
+
+    const result = await trackRecordingResolvers.renderOverlayPreview(
+      { input: { recordingId: "rec1", lapId: "lap1", offsetSeconds: 5 } },
+      context
+    );
+
+    expect(generateOverlayPreview).toHaveBeenCalledWith({
+      recordingId: "rec1",
+      lapId: "lap1",
+      offsetSeconds: 5,
+      currentUserId: "user-1",
+    });
+    expect(result.preview.previewUrl).toContain("/previews/rec1/");
+  });
+
+  it("maps overlay preview errors", async () => {
+    vi.mocked(generateOverlayPreview).mockRejectedValue(
+      new OverlayPreviewError("no preview", "NOT_FOUND")
+    );
+
+    await expect(
+      trackRecordingResolvers.renderOverlayPreview(
+        { input: { recordingId: "rec1", lapId: "lap1", offsetSeconds: 0 } },
+        context
+      )
+    ).rejects.toThrowError("no preview");
   });
 
   it("maps service errors to GraphQL errors", async () => {

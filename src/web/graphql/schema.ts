@@ -30,6 +30,7 @@ export const rootValue = {
   startTrackRecordingUpload: trackRecordingResolvers.startTrackRecordingUpload,
   markPrimaryTrackRecording: trackRecordingResolvers.markPrimaryTrackRecording,
   updateTrackRecording: trackRecordingResolvers.updateTrackRecording,
+  renderOverlayPreview: trackRecordingResolvers.renderOverlayPreview,
   deleteTrackRecording: trackRecordingResolvers.deleteTrackRecording,
   createKart: trackResolvers.createKart,
   updateKart: trackResolvers.updateKart,

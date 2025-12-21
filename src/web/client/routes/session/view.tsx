@@ -341,6 +341,7 @@ export default function ViewSessionRoute() {
         />
         <RecordingsCard
           sessionId={session.id}
+          laps={lapsWithStart}
           recordings={normalizedRecordings}
           onRefresh={() => setRefreshKey((key) => key + 1)}
         />

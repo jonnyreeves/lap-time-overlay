@@ -6,6 +6,8 @@ import type { RecordingsCardMarkPrimaryRecordingMutation } from "../../__generat
 import { Card } from "../Card.js";
 import { IconButton } from "../IconButton.js";
 import { inlineActionButtonStyles } from "../inlineActionButtons.ts";
+import type { LapWithEvents } from "./LapsCard.js";
+import { RenderedOverlayPreview } from "./RenderedOverlayPreview.js";
 import { UploadRecordingModal } from "./UploadRecordingModal.js";
 import {
   formatBytes,
@@ -31,8 +33,11 @@ type Recording = {
   uploadTargets: UploadTarget[];
 };
 
+type LapForPreview = Pick<LapWithEvents, "id" | "lapNumber" | "time" | "start">;
+
 type Props = {
   sessionId: string; // Add sessionId prop
+  laps: LapForPreview[];
   recordings: readonly Recording[];
   onRefresh: () => void;
 };
@@ -128,6 +133,7 @@ function percent(value: number | null | undefined): number {
 
 export function RecordingsCard({
   sessionId, // Destructure sessionId
+  laps,
   recordings,
   onRefresh,
 }: Props) {
@@ -135,6 +141,8 @@ export function RecordingsCard({
   const [actionError, setActionError] = useState<string | null>(null);
   const [isResuming, setIsResuming] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false); // State for modal visibility
+  const [previewRecording, setPreviewRecording] = useState<Recording | null>(null);
+  const [isOverlayPreviewOpen, setIsOverlayPreviewOpen] = useState(false);
   const [deleteRecording, isDeleteInFlight] =
     useMutation<RecordingsCardDeleteRecordingMutation>(DeleteRecordingMutation);
   const [markPrimary, isMarkPrimaryInFlight] =
@@ -196,6 +204,16 @@ export function RecordingsCard({
     } finally {
       setIsResuming(false);
     }
+  }
+
+  function openOverlayPreview(recording: Recording) {
+    setPreviewRecording(recording);
+    setIsOverlayPreviewOpen(true);
+  }
+
+  function closeOverlayPreview() {
+    setIsOverlayPreviewOpen(false);
+    setPreviewRecording(null);
   }
 
   function setPrimaryRecording(recording: Recording) {
@@ -290,6 +308,21 @@ export function RecordingsCard({
                       Download / View
                     </a>
                   )}
+                  {isFinished && (
+                    <button
+                      css={recordingButtonStyles}
+                      type="button"
+                      onClick={() => openOverlayPreview(recording)}
+                      disabled={laps.length === 0}
+                      title={
+                        laps.length === 0
+                          ? "Add lap times to enable overlay previews"
+                          : undefined
+                      }
+                    >
+                      Render with Overlay
+                    </button>
+                  )}
                   {isFinished && !recording.isPrimary && (
                     <button
                       css={recordingButtonStyles}
@@ -347,6 +380,14 @@ export function RecordingsCard({
         onClose={() => setIsUploadModalOpen(false)}
         onRefresh={onRefresh}
       />
+      {previewRecording && (
+        <RenderedOverlayPreview
+          recording={previewRecording}
+          laps={laps}
+          isOpen={isOverlayPreviewOpen}
+          onClose={closeOverlayPreview}
+        />
+      )}
     </Card>
   );
 }

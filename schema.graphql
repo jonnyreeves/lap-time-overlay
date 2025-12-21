@@ -99,12 +99,34 @@ input UpdateTrackRecordingInput {
   lapOneOffset: Float!
 }
 
+input RenderOverlayPreviewInput {
+  recordingId: ID!
+  lapId: ID!
+  offsetSeconds: Float!
+}
+
 type UpdateTrackRecordingPayload {
   recording: TrackRecording!
 }
 
 type DeleteTrackRecordingPayload {
   success: Boolean!
+}
+
+type OverlayPreview {
+  id: ID!
+  recordingId: ID!
+  lapId: ID!
+  lapNumber: Int!
+  previewUrl: String!
+  requestedOffsetSeconds: Float!
+  usedOffsetSeconds: Float!
+  previewTimeSeconds: Float!
+  generatedAt: String!
+}
+
+type RenderOverlayPreviewPayload {
+  preview: OverlayPreview!
 }
 
 type DeleteTrackSessionPayload {
@@ -125,6 +147,7 @@ type Mutation {
   ): StartTrackRecordingUploadPayload!
   markPrimaryTrackRecording(id: ID!): MarkPrimaryTrackRecordingPayload!
   updateTrackRecording(input: UpdateTrackRecordingInput!): UpdateTrackRecordingPayload!
+  renderOverlayPreview(input: RenderOverlayPreviewInput!): RenderOverlayPreviewPayload!
   deleteTrackRecording(id: ID!): DeleteTrackRecordingPayload!
   createKart(input: CreateKartInput!): CreateKartPayload!
   updateKart(input: UpdateKartInput!): UpdateKartPayload!

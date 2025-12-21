@@ -3,6 +3,7 @@ import http from "node:http";
 import { runMigrations } from "../db/migrations/runner.js";
 import { ensureWorkDirs } from "./config.js";
 import { handleGraphQL } from "./graphql/handler.js";
+import { handleOverlayPreviewRequest } from "./http/overlayPreview.js";
 import { handleRecordingDownloadRequest, handleRecordingUploadRequest } from "./http/uploads.js";
 import { serveStatic } from "./http/static.js";
 
@@ -28,6 +29,13 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/graphql") {
     return void handleGraphQL(req, res);
+  }
+
+  if (req.method === "GET" && url.pathname.startsWith("/previews/")) {
+    const match = url.pathname.match(/^\/previews\/([^/]+)\/([^/]+)$/);
+    if (match) {
+      return void handleOverlayPreviewRequest(req, res, match[1], match[2]);
+    }
   }
 
   if (req.method === "GET") {
