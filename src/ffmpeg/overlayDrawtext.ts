@@ -300,18 +300,18 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
   const overlays: { timeline: TextSegment[]; labelPrefix: string; y: number }[] = [];
   let overlayIndex = 0;
 
-  if (lapTimeline.length) {
-    overlays.push({
-      timeline: lapTimeline,
-      labelPrefix: "lap",
-      y: lineOffsets(overlayIndex++),
-    });
-  }
-
   if (infoTimeline.length) {
     overlays.push({
       timeline: infoTimeline,
       labelPrefix: "info",
+      y: lineOffsets(overlayIndex++),
+    });
+  }
+
+  if (lapTimeline.length) {
+    overlays.push({
+      timeline: lapTimeline,
+      labelPrefix: "lap",
       y: lineOffsets(overlayIndex++),
     });
   }
