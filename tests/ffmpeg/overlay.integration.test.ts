@@ -196,4 +196,15 @@ describe("overlay integration", () => {
     },
     20000
   );
+
+  it(
+    "renders overlay with large lap time and small detail text",
+    async () => {
+      await assertOverlaySnapshot({
+        name: "overlay-large-lap-small-detail",
+        style: { textSize: 192, detailTextSize: 32 },
+      });
+    },
+    20000
+  );
 });

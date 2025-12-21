@@ -265,12 +265,12 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
   };
   const boxColorWithAlpha = toFfmpegColor(boxColor, boxOpacity);
 
-  const layoutFontSize = Math.max(lapFontSize, detailFontSize);
   const safeWidth = Math.max(200, Math.min(width, boxWidth));
-  const halfPad = Math.round(layoutFontSize * 0.35);
-  const padding = { x: halfPad, y: halfPad };
-  const lineGapAfterFirst = Math.round(layoutFontSize * 1.35);
-  const lineGap = Math.round(layoutFontSize * 1.1);
+  const padding = (() => {
+    const paddingBase = Math.max(detailFontSize, Math.min(lapFontSize, detailFontSize + 24));
+    const halfPad = Math.round(Math.max(10, Math.min(26, paddingBase * 0.35)));
+    return { x: halfPad, y: halfPad };
+  })();
   const lapDurations = laps
     .map((lap) => lap.durationS)
     .filter((value) => Number.isFinite(value) && value > 0);
@@ -365,89 +365,120 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
     }
   }
 
-  const lineOffsets = (index: number) => {
-    if (index === 0) return padding.y;
-    if (index === 1) return padding.y + lineGapAfterFirst;
-    return padding.y + lineGapAfterFirst + lineGap * (index - 1);
-  };
-
-  const overlays: {
+  type OverlayLine = {
     timeline: TextSegment[];
     labelPrefix: string;
-    y: number;
     defaultColor: string;
     fontSize: number;
-  }[] = [];
-  let overlayIndex = 0;
+    y?: number;
+  };
+
+  type OverlayRow = { items: OverlayLine[]; fontSize: number };
+
+  const rows: OverlayRow[] = [];
 
   if (infoTimeline.length) {
-    overlays.push({
-      timeline: infoTimeline,
-      labelPrefix: "info",
-      y: lineOffsets(overlayIndex++),
-      defaultColor: fontColor,
+    rows.push({
       fontSize: detailFontSize,
+      items: [
+        {
+          timeline: infoTimeline,
+          labelPrefix: "info",
+          defaultColor: fontColor,
+          fontSize: detailFontSize,
+        },
+      ],
     });
   }
 
   if (lapTimeline.length) {
-    overlays.push({
-      timeline: lapTimeline,
-      labelPrefix: "lap",
-      y: lineOffsets(overlayIndex++),
-      defaultColor: fontColor,
+    rows.push({
       fontSize: lapFontSize,
+      items: [
+        {
+          timeline: lapTimeline,
+          labelPrefix: "lap",
+          defaultColor: fontColor,
+          fontSize: lapFontSize,
+        },
+      ],
     });
   }
 
   if (deltaBestLabelTimeline.length || deltaBestValueTimeline.length) {
-    const y = lineOffsets(overlayIndex++);
+    const items: OverlayLine[] = [];
     if (deltaBestLabelTimeline.length) {
-      overlays.push({
+      items.push({
         timeline: deltaBestLabelTimeline,
         labelPrefix: "deltaBestLabel",
-        y,
         defaultColor: fontColor,
         fontSize: detailFontSize,
       });
     }
     if (deltaBestValueTimeline.length) {
-      overlays.push({
+      items.push({
         timeline: deltaBestValueTimeline,
         labelPrefix: "deltaBestValue",
-        y,
         defaultColor: fontColor,
         fontSize: detailFontSize,
       });
     }
+    if (items.length) {
+      rows.push({ items, fontSize: detailFontSize });
+    }
   }
 
   if (deltaAverageLabelTimeline.length || deltaAverageValueTimeline.length) {
-    const y = lineOffsets(overlayIndex++);
+    const items: OverlayLine[] = [];
     if (deltaAverageLabelTimeline.length) {
-      overlays.push({
+      items.push({
         timeline: deltaAverageLabelTimeline,
         labelPrefix: "deltaAvgLabel",
-        y,
         defaultColor: fontColor,
         fontSize: detailFontSize,
       });
     }
     if (deltaAverageValueTimeline.length) {
-      overlays.push({
+      items.push({
         timeline: deltaAverageValueTimeline,
         labelPrefix: "deltaAvgValue",
-        y,
         defaultColor: fontColor,
         fontSize: detailFontSize,
       });
     }
+    if (items.length) {
+      rows.push({ items, fontSize: detailFontSize });
+    }
   }
 
-  const lastLineOffset = overlays.length
-    ? overlays[overlays.length - 1]!.y
-    : padding.y;
-  const boxHeight = Math.round(lastLineOffset + layoutFontSize + padding.y);
+  let boxHeight = Math.round(padding.y * 2);
+
+  if (rows.length) {
+    const gapBase = (currentSize: number, nextSize: number) => {
+      const minSize = Math.min(currentSize, nextSize);
+      const maxSize = Math.max(currentSize, nextSize);
+      return Math.min(maxSize, Math.max(minSize * 1.25, minSize + 24));
+    };
+    const computeGap = (prevSize: number, nextSize: number, isFirstGap: boolean) => {
+      const base = gapBase(prevSize, nextSize);
+      const factor = isFirstGap ? 1.1 : 0.95;
+      return Math.round(base * factor * 0.5);
+    };
+
+    let cursorY = padding.y;
+    rows.forEach((row, idx) => {
+      if (idx > 0) {
+        const prev = rows[idx - 1]!;
+        cursorY += computeGap(prev.fontSize, row.fontSize, idx === 1);
+      }
+      row.items.forEach((item) => {
+        item.y = cursorY;
+      });
+      cursorY += row.fontSize;
+    });
+
+    boxHeight = Math.round(cursorY + padding.y);
+  }
   const boxY = overlayPosition.startsWith("top") ? 32 : height - boxHeight - 32;
   const boxX = overlayPosition.endsWith("left") ? 32 : width - safeWidth - 32;
 
@@ -476,14 +507,16 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
   const xLeft = boxX + padding.x;
   const xRight = boxX + safeWidth - padding.x;
 
-  overlays.forEach((line) => {
+  const overlayLines: OverlayLine[] = rows.flatMap((row) => row.items);
+
+  overlayLines.forEach((line) => {
     const overlay = buildDrawtextTimeline({
       inputs: line.timeline,
       defaultColor: line.defaultColor,
       fontSize: line.fontSize,
       x: xLeft,
       xRight,
-      y: boxY + line.y,
+      y: boxY + (line.y ?? padding.y),
       inputLabel: currentLabel,
       labelPrefix: line.labelPrefix,
     });
