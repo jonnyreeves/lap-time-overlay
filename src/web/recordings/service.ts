@@ -25,6 +25,10 @@ import {
   sessionRecordingsDir,
   tmpUploadsDir,
 } from "../config.js";
+import {
+  rebuildJellyfinSessionProjection,
+  removeJellyfinRecordingProjection,
+} from "./jellyfinProjection.js";
 
 export interface RecordingSourcePlan {
   fileName: string;
@@ -260,6 +264,9 @@ async function combineRecording(recordingId: string): Promise<void> {
         fps: metadata.fps,
         combineProgress: 1,
       });
+      await rebuildJellyfinSessionProjection(recording.sessionId).catch((err) => {
+        console.warn("Failed to rebuild Jellyfin projection after combine", err);
+      });
     } catch (err) {
       updateTrackRecording(recordingId, {
         status: "failed",
@@ -428,6 +435,9 @@ export async function deleteRecordingAndFiles(recordingId: string, userId: strin
   await fsp.rm(stagingDirForRecording(recording.sessionId, recording.id), {
     recursive: true,
     force: true,
+  });
+  await removeJellyfinRecordingProjection(recordingId).catch((err) => {
+    console.warn("Failed to remove Jellyfin projection for recording", err);
   });
   return deleteTrackRecording(recordingId);
 }

@@ -15,6 +15,10 @@ import {
   type ExcludedReason,
 } from "../../shared/consistency.js";
 import { toTrackPayload } from "./track.js";
+import {
+  rebuildJellyfinSessionProjection,
+  removeJellyfinProjectionsForRecordings,
+} from "../../recordings/jellyfinProjection.js";
 
 export type LapEventInputArg = { offset?: number; event?: string; value?: string };
 export type LapInputArg = { lapNumber?: number; time?: number; lapEvents?: LapEventInputArg[] | null };
@@ -504,7 +508,7 @@ export const trackSessionResolvers = {
     });
     return { trackSession: toTrackSessionPayload(trackSession, repositories) };
   },
-  updateTrackSession: (args: UpdateTrackSessionInputArgs, context: GraphQLContext) => {
+  updateTrackSession: async (args: UpdateTrackSessionInputArgs, context: GraphQLContext) => {
     const { repositories } = context;
     if (!context.currentUser) {
       throw new GraphQLError("Authentication required", {
@@ -683,6 +687,10 @@ export const trackSessionResolvers = {
       });
     }
 
+    await rebuildJellyfinSessionProjection(updated.id).catch((err) => {
+      console.warn("Failed to rebuild Jellyfin projection after session update", err);
+    });
+
     return { trackSession: toTrackSessionPayload(updated, repositories) };
   },
   updateTrackSessionLaps: (args: UpdateTrackSessionLapsInputArgs, context: GraphQLContext) => {
@@ -734,7 +742,15 @@ export const trackSessionResolvers = {
       });
     }
 
+    const recordingIds =
+      repositories.trackRecordings.findBySessionId?.(args.id)?.map((rec) => rec.id) ?? [];
     const success = await repositories.trackSessions.delete(args.id, context.currentUser.id);
+
+    if (success && recordingIds.length > 0) {
+      await removeJellyfinProjectionsForRecordings(recordingIds).catch((err) => {
+        console.warn("Failed to remove Jellyfin projections for deleted session", err);
+      });
+    }
 
     return { success };
   },

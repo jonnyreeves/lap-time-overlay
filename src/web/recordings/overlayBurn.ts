@@ -14,8 +14,9 @@ import type { OverlayStyle } from "../../ffmpeg/overlay.js";
 import { buildDrawtextFilterGraph } from "../../ffmpeg/overlay.js";
 import type { Lap } from "../../ffmpeg/lapTypes.js";
 import { probeVideoInfo } from "../../ffmpeg/videoInfo.js";
-import { sessionRecordingsDir } from "../config.js";
+import { sessionRecordingsDir, tmpRendersDir } from "../config.js";
 import { buildOverlayLaps, buildOverlayStyle } from "./overlayPreview.js";
+import { rebuildJellyfinSessionProjection } from "./jellyfinProjection.js";
 
 type BurnQuality = "best" | "good";
 
@@ -68,12 +69,11 @@ function loadSessionLaps(recording: TrackRecordingRecord): LapRecord[] {
   return laps;
 }
 
-function buildOutputPaths(recording: TrackRecordingRecord) {
+function buildOverlayFileInfo(recording: TrackRecordingRecord) {
   const parsed = path.parse(recording.mediaId);
   const overlayFileName = `${parsed.name}-overlay${parsed.ext || ".mp4"}`;
   const overlayMediaId = path.posix.join(parsed.dir, overlayFileName);
-  const outputFile = path.join(sessionRecordingsDir, overlayMediaId);
-  return { overlayMediaId, outputFile };
+  return { overlayFileName, overlayMediaId };
 }
 
 function qualityOptions(quality: BurnQuality): { preset: string; crf: number } {
@@ -148,6 +148,13 @@ async function runOverlayRender({
   });
 }
 
+async function moveRenderedOverlay(tempOutputFile: string, finalOutputFile: string): Promise<void> {
+  await fsp.mkdir(path.dirname(finalOutputFile), { recursive: true });
+  await fsp.rm(finalOutputFile, { force: true });
+  await fsp.rename(tempOutputFile, finalOutputFile);
+  await fsp.rm(path.dirname(tempOutputFile), { recursive: true, force: true }).catch(() => {});
+}
+
 export async function burnRecordingOverlay(options: {
   recordingId: string;
   currentUserId: string;
@@ -171,7 +178,7 @@ export async function burnRecordingOverlay(options: {
   }
   const startOffsetS = recording.lapOneOffset;
 
-  const { overlayMediaId, outputFile } = buildOutputPaths(recording);
+  const { overlayFileName, overlayMediaId } = buildOverlayFileInfo(recording);
   const overlayRecording = createTrackRecording({
     sessionId: recording.sessionId,
     userId: recording.userId,
@@ -184,11 +191,14 @@ export async function burnRecordingOverlay(options: {
   });
   updateTrackRecording(overlayRecording.id, { sizeBytes: recording.sizeBytes ?? 0 });
 
+  const tempOutputFile = path.join(tmpRendersDir, "overlay-burns", overlayRecording.id, overlayFileName);
+  const finalOutputFile = path.join(sessionRecordingsDir, overlayMediaId);
+
   try {
     updateTrackRecording(overlayRecording.id, { status: "combining", combineProgress: 0, error: null });
     await runOverlayRender({
       inputVideo,
-      outputFile,
+      outputFile: tempOutputFile,
       laps: overlayLaps,
       startOffsetS,
       style,
@@ -197,14 +207,16 @@ export async function burnRecordingOverlay(options: {
         updateTrackRecording(overlayRecording.id, { combineProgress: Math.max(0, Math.min(1, percent / 100)) });
       },
     });
+    await moveRenderedOverlay(tempOutputFile, finalOutputFile);
   } catch (err) {
+    await fsp.rm(tempOutputFile, { force: true }).catch(() => {});
     const message = err instanceof Error ? err.message : "Overlay burn failed";
     updateTrackRecording(overlayRecording.id, { status: "failed", combineProgress: 0, error: message });
     throw new OverlayBurnError(message, "INTERNAL_SERVER_ERROR");
   }
 
-  const videoMeta = await probeVideoInfo(outputFile).catch(() => null);
-  const sizeBytes = (await fsp.stat(outputFile).catch(() => null))?.size ?? null;
+  const videoMeta = await probeVideoInfo(finalOutputFile).catch(() => null);
+  const sizeBytes = (await fsp.stat(finalOutputFile).catch(() => null))?.size ?? null;
 
   const updated =
     updateTrackRecording(overlayRecording.id, {
@@ -217,6 +229,8 @@ export async function burnRecordingOverlay(options: {
       combineProgress: 1,
       error: null,
     }) ?? recording;
-
+  await rebuildJellyfinSessionProjection(recording.sessionId).catch((err) => {
+    console.warn("Failed to rebuild Jellyfin projection after overlay burn", err);
+  });
   return updated;
 }

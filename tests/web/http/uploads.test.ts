@@ -15,7 +15,9 @@ vi.mock("../../../src/web/config.js", () => {
   return {
     projectRoot: process.cwd(),
     publicDir: path.join(process.cwd(), "public"),
+    rawMediaDir: path.join(testRoot, "session_recordings"),
     sessionRecordingsDir: path.join(testRoot, "session_recordings"),
+    jellyfinProjectionDir: path.join(testRoot, "jellyfin"),
     tmpUploadsDir: path.join(testRoot, "uploads"),
     tmpRendersDir: path.join(testRoot, "renders"),
     tmpPreviewsDir: path.join(testRoot, "previews"),

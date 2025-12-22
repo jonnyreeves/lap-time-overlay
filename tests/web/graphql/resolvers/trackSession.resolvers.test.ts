@@ -1,4 +1,15 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+
+const { rebuildProjectionMock, removeProjectionMock } = vi.hoisted(() => ({
+  rebuildProjectionMock: vi.fn().mockResolvedValue({ folderName: "", recordings: [] }),
+  removeProjectionMock: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("../../../../src/web/recordings/jellyfinProjection.js", () => ({
+  rebuildJellyfinSessionProjection: rebuildProjectionMock,
+  removeJellyfinProjectionsForRecordings: removeProjectionMock,
+}));
+
 import { createMockGraphQLContext } from "../context.mock.js";
 import { computeConsistencyStats } from "../../../../src/web/shared/consistency.js";
 import { rootValue } from "../../../../src/web/graphql/schema.js";
@@ -49,7 +60,7 @@ const mockLayout = {
 
 describe("trackSession resolvers", () => {
   beforeEach(() => {
-    vi.resetAllMocks();
+    vi.clearAllMocks();
     repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
   });
 
@@ -262,10 +273,12 @@ describe("trackSession resolvers", () => {
   });
 
   it("updateTrackSession validates presence of id and auth", async () => {
-    expect(() => rootValue.updateTrackSession({ input: {} }, context)).toThrowError("id is required");
-    expect(() =>
+    await expect(rootValue.updateTrackSession({ input: {} }, context)).rejects.toThrowError(
+      "id is required"
+    );
+    await expect(
       rootValue.updateTrackSession({ input: { id: "s1" } }, { ...context, currentUser: null })
-    ).toThrowError("Authentication required");
+    ).rejects.toThrowError("Authentication required");
   });
 
   it("updateTrackSession forwards fields to DB and returns payload", async () => {
@@ -276,7 +289,7 @@ describe("trackSession resolvers", () => {
     repositories.trackLayouts.findById.mockReturnValue(mockLayout);
     repositories.tracks.findById.mockReturnValue(mockTrack);
 
-    const result = rootValue.updateTrackSession(
+    const result = await rootValue.updateTrackSession(
       { input: { id: "s1", format: "Practice" } },
       context
     );
@@ -298,31 +311,31 @@ describe("trackSession resolvers", () => {
     expect(result.trackSession.classification).toBe(1);
   });
 
-  it("updateTrackSession requires trackLayoutId when track changes", () => {
+  it("updateTrackSession requires trackLayoutId when track changes", async () => {
     repositories.trackSessions.findById.mockReturnValue(mockSession);
     repositories.tracks.findById.mockReturnValue({ ...mockTrack, id: "new-track" });
     repositories.trackLayouts.findById.mockReturnValue({ ...mockLayout, trackId: "c1" });
-    expect(() =>
+    await expect(
       rootValue.updateTrackSession(
         { input: { id: "s1", trackId: "new-track" } },
         context
       )
-    ).toThrowError("trackLayoutId is required when changing track");
+    ).rejects.toThrowError("trackLayoutId is required when changing track");
   });
 
-  it("updateTrackSession rejects when kart is not available for selected track", () => {
+  it("updateTrackSession rejects when kart is not available for selected track", async () => {
     repositories.trackSessions.findById.mockReturnValue(mockSession);
     repositories.tracks.findById.mockReturnValue(mockTrack);
     repositories.trackLayouts.findById.mockReturnValue(mockLayout);
     repositories.karts.findById.mockReturnValue(mockKart);
     repositories.trackKarts.findKartsForTrack.mockReturnValue([]);
 
-    expect(() =>
+    await expect(
       rootValue.updateTrackSession(
         { input: { id: "s1", kartId: "k1" } },
         context
       )
-    ).toThrowError("Kart is not available at the selected track");
+    ).rejects.toThrowError("Kart is not available at the selected track");
   });
 
   it("updateTrackSessionLaps validates auth and id", () => {

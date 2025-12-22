@@ -7,7 +7,7 @@ import { createTrackLayout } from "../../../src/db/track_layouts.js";
 import { createTrack } from "../../../src/db/tracks.js";
 import { createUser } from "../../../src/db/users.js";
 import { createTrackSessionWithLaps } from "../../../src/db/track_sessions.js";
-import { sessionRecordingsDir } from "../../../src/web/config.js";
+import { sessionRecordingsDir, tmpRendersDir } from "../../../src/web/config.js";
 import { burnRecordingOverlay } from "../../../src/web/recordings/overlayBurn.js";
 import { setupTestDb, teardownTestDb } from "../../db/test_setup.js";
 
@@ -16,7 +16,9 @@ vi.mock("../../../src/web/config.js", () => {
   return {
     projectRoot: process.cwd(),
     publicDir: path.join(process.cwd(), "public"),
+    rawMediaDir: path.join(testRoot, "session_recordings"),
     sessionRecordingsDir: path.join(testRoot, "session_recordings"),
+    jellyfinProjectionDir: path.join(testRoot, "jellyfin"),
     tmpUploadsDir: path.join(testRoot, "uploads"),
     tmpRendersDir: path.join(testRoot, "renders"),
     tmpPreviewsDir: path.join(testRoot, "previews"),
@@ -25,6 +27,8 @@ vi.mock("../../../src/web/config.js", () => {
 });
 
 const testRootDir = path.join(process.cwd(), "temp", "tests");
+
+let savedOutputs: string[] = [];
 
 vi.mock("fluent-ffmpeg", () => {
   return {
@@ -43,6 +47,7 @@ vi.mock("fluent-ffmpeg", () => {
           return api;
         },
         save: (output: string) => {
+          savedOutputs.push(output);
           fs.writeFileSync(output, "overlay-output");
           handlers.progress.forEach((cb) => cb({ percent: 50 }));
           handlers.progress.forEach((cb) => cb({ percent: 100 }));
@@ -63,6 +68,7 @@ describe("burnRecordingOverlay", () => {
   beforeEach(async () => {
     setupTestDb();
     await fsp.mkdir(sessionRecordingsDir, { recursive: true });
+    savedOutputs = [];
   });
 
   afterEach(async () => {
@@ -105,6 +111,10 @@ describe("burnRecordingOverlay", () => {
       quality: "good",
     });
 
+    expect(savedOutputs).toHaveLength(1);
+    const [tempOutput] = savedOutputs;
+    expect(tempOutput.startsWith(path.join(tmpRendersDir, "overlay-burns"))).toBe(true);
+
     const original = findTrackRecordingById(recording.id);
     expect(original?.overlayBurned).toBe(false);
     expect(original?.status).toBe("ready");
@@ -126,6 +136,7 @@ describe("burnRecordingOverlay", () => {
 
     const overlayPath = path.join(sessionRecordingsDir, overlayRecording!.mediaId);
     await expect(fsp.stat(overlayPath)).resolves.toBeTruthy();
+    await expect(fsp.stat(tempOutput)).rejects.toThrow();
     await expect(fsp.stat(inputPath)).resolves.toBeTruthy();
   });
 });

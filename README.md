@@ -31,6 +31,16 @@ Then open http://localhost:3000 and walk through the steps:
 
 The web UI always uses the ffmpeg renderer.
 
+## Jellyfin media projection
+
+RaceCraft keeps uploaded recordings in a stable raw store at `media/raw/{recordingId}.mp4`. A disposable Jellyfin view is derived under `media/jellyfin`:
+
+- Folder per session: `YYYY-MM-DD - Track Name/`
+- Each ready recording is hard-linked into that folder and paired with an NFO named `{recordingId}.nfo`.
+- Projections are rebuilt automatically when recordings finish combining, overlays are burned, or session metadata changes; deleting a recording or session removes the linked files only (raw media stays put).
+
+You can point a Jellyfin library at `media/jellyfin` (Home Videos). If the projection looks stale, clear the folder—RaceCraft will regenerate it on the next change.
+
 ## Work dir cleanup
 
 - Uploads and rendered/previews saved under `work/` are pruned automatically (renders/uploads after ~24h, previews after ~6h). Copy anything you want to keep somewhere else.
