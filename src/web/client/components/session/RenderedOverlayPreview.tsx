@@ -1,8 +1,8 @@
 import { css } from "@emotion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { graphql, useMutation } from "react-relay";
-import type { RenderedOverlayPreviewGenerateMutation } from "../../__generated__/RenderedOverlayPreviewGenerateMutation.graphql.js";
 import type { RenderedOverlayPreviewBurnOverlayMutation } from "../../__generated__/RenderedOverlayPreviewBurnOverlayMutation.graphql.js";
+import type { RenderedOverlayPreviewGenerateMutation } from "../../__generated__/RenderedOverlayPreviewGenerateMutation.graphql.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 import { Modal } from "../Modal.js";
 import {
@@ -95,6 +95,13 @@ const layoutStyles = css`
   }
 `;
 
+const previewColumnStyles = css`
+  display: grid;
+  gap: 12px;
+  grid-template-rows: auto 1fr;
+  align-self: stretch;
+`;
+
 const previewFrameStyles = css`
   border-radius: 14px;
   border: 1px solid #1f2937;
@@ -163,6 +170,44 @@ const controlsPanelStyles = css`
     font-size: 0.95rem;
   }
 
+  .inline-checkbox {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+
+  select {
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    font-size: 0.95rem;
+  }
+
+  .muted {
+    color: #64748b;
+    font-size: 0.95rem;
+  }
+`;
+
+const selectorPanelStyles = css`
+  border: 1px solid #e2e8f4;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 12px 14px;
+  display: grid;
+  gap: 10px;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 0.95rem;
+  }
+
   select {
     padding: 8px 10px;
     border-radius: 8px;
@@ -212,6 +257,12 @@ const primaryButtonStyles = css`
   border: 1px solid #6366f1;
   box-shadow: 0 12px 28px rgba(79, 70, 229, 0.25);
   font-weight: 700;
+
+  &:not(:disabled):hover {
+    background: linear-gradient(90deg, #4338ca, #4f46e5);
+    border-color: #4f46e5;
+    color: #fff;
+  }
 
   &:disabled {
     opacity: 0.7;
@@ -271,6 +322,7 @@ export function RenderedOverlayPreview({
   const [showLapInfo, setShowLapInfo] = useState(true);
   const [showLapDeltas, setShowLapDeltas] = useState(true);
   const [quality, setQuality] = useState<OverlayExportQualityOption>("BEST");
+  const [embedChapters, setEmbedChapters] = useState(true);
   const [preview, setPreview] = useState<PreviewState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [commitPreview, isPreviewInFlight] =
@@ -310,7 +362,6 @@ export function RenderedOverlayPreview({
   const handleTextSizeChange = useCallback(
     (nextSize: number) => {
       setTextSize(nextSize);
-      setDetailTextSize((current) => (current === textSize ? nextSize : current));
     },
     [textSize]
   );
@@ -381,6 +432,7 @@ export function RenderedOverlayPreview({
           recordingId: recording.id,
           quality,
           style: styleInput,
+          embedChapters,
         },
       },
       onCompleted: (data) => {
@@ -404,6 +456,7 @@ export function RenderedOverlayPreview({
     recording.id,
     recording.overlayBurned,
     styleInput,
+    embedChapters,
   ]);
 
   useEffect(() => {
@@ -411,68 +464,67 @@ export function RenderedOverlayPreview({
     requestPreview();
   }, [isOpen, selectedLapId, offsetSeconds, lapOptions.length, requestPreview]);
 
-  const offsetChoices = useMemo(() => [0, 5], []);
+  const offsetChoices = useMemo(() => [0, 5, 10, 15, 20], []);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Rendered Overlay Preview" maxWidth="1280px">
       <div css={layoutStyles}>
-        <div css={previewFrameStyles}>
-          {previewSrc ? (
-            <img src={previewSrc} alt="Overlay preview" />
-          ) : (
-            <div className="placeholder">
-              Choose a lap and offset to generate a still frame with the overlay baked in.
+        <div css={previewColumnStyles}>
+          <div css={selectorPanelStyles}>
+            {!lapOptions.length && (
+              <div className="muted">
+                Add lap times to this session to generate overlay previews.
+              </div>
+            )}
+
+            <div css={selectorRowStyles}>
+              <label>
+                Lap
+                <select
+                  value={selectedLapId ?? ""}
+                  onChange={(e) => setSelectedLapId(e.target.value || null)}
+                  disabled={!lapOptions.length}
+                >
+                  {lapOptions.map((lap) => (
+                    <option key={lap.id} value={lap.id}>
+                      Lap {lap.lapNumber} — {formatLapTimeSeconds(lap.time)}s
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                Offset into lap
+                <select
+                  value={offsetSeconds}
+                  onChange={(e) => setOffsetSeconds(Number(e.target.value))}
+                  disabled={!selectedLap}
+                >
+                  {offsetChoices.map((choice) => (
+                    <option key={choice} value={choice}>
+                      {choice === 1 ? "1 second" : `${choice} seconds`}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
-          )}
-          {isPreviewInFlight && <div className="loading">Rendering preview…</div>}
+          </div>
+
+          <div css={previewFrameStyles}>
+            {previewSrc ? (
+              <img src={previewSrc} alt="Overlay preview" />
+            ) : (
+              <div className="placeholder">
+                Choose a lap and offset to generate a still frame with the overlay baked in.
+              </div>
+            )}
+            {isPreviewInFlight && <div className="loading">Rendering preview…</div>}
+          </div>
         </div>
 
         <div css={controlsPanelStyles}>
           <div>
-            <h3>{recording.description || "Recording"}</h3>
-            <div className="muted">
-              {recording.overlayBurned
-                ? "Overlay is already burned into this recording. Download it from the recordings list."
-                : `Lap 1 starts at ${formatLapTimeSeconds(recording.lapOneOffset)}s in this video. Tweak the overlay styling below, choose a quality, and burn the overlay to export a new copy.`}
-            </div>
-          </div>
-
-          {!lapOptions.length && (
-            <div className="muted">
-              Add lap times to this session to generate overlay previews.
-            </div>
-          )}
-
-          <div css={selectorRowStyles}>
-            <label>
-              Lap
-              <select
-                value={selectedLapId ?? ""}
-                onChange={(e) => setSelectedLapId(e.target.value || null)}
-                disabled={!lapOptions.length}
-              >
-                {lapOptions.map((lap) => (
-                  <option key={lap.id} value={lap.id}>
-                    Lap {lap.lapNumber} — {formatLapTimeSeconds(lap.time)}s
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              Offset into lap
-              <select
-                value={offsetSeconds}
-                onChange={(e) => setOffsetSeconds(Number(e.target.value))}
-                disabled={!selectedLap}
-              >
-                {offsetChoices.map((choice) => (
-                  <option key={choice} value={choice}>
-                    {choice === 1 ? "1 second" : `${choice} seconds`}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <h3>{"Overlay Settings"}</h3>
           </div>
 
           <OverlayAppearanceControls
@@ -504,15 +556,15 @@ export function RenderedOverlayPreview({
             </select>
           </label>
 
-          {preview && (
-            <div css={badgeStyles}>
-              Previewed at {formatLapTimeSeconds(preview.previewTimeSeconds)}s • Offset{" "}
-              {formatLapTimeSeconds(preview.usedOffsetSeconds)}s
-              {Math.abs(preview.usedOffsetSeconds - preview.requestedOffsetSeconds) > 1e-3
-                ? " (clamped)"
-                : ""}
-            </div>
-          )}
+          <label className="inline-checkbox">
+            <input
+              type="checkbox"
+              checked={embedChapters}
+              onChange={(e) => setEmbedChapters(e.target.checked)}
+              disabled={recording.overlayBurned}
+            />
+            <span>Embed lap chapters in the MP4</span>
+          </label>
 
           {isEncoding && (
             <div css={progressSectionStyles}>

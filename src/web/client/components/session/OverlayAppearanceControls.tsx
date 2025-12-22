@@ -107,6 +107,20 @@ export function OverlayAppearanceControls({
         </label>
 
         <label>
+          Overlay position
+          <select
+            value={overlayPosition}
+            onChange={(e) => onOverlayPositionChange(e.target.value as OverlayPositionOption)}
+          >
+            {overlayPositionOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
           Current lap time size
           <select value={textSize} onChange={(e) => onTextSizeChange(Number(e.target.value))}>
             {textSizeOptions.map((option) => (
@@ -126,20 +140,6 @@ export function OverlayAppearanceControls({
             {textSizeOptions.map((option) => (
               <option key={option} value={option}>
                 {option}px
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label>
-          Overlay position
-          <select
-            value={overlayPosition}
-            onChange={(e) => onOverlayPositionChange(e.target.value as OverlayPositionOption)}
-          >
-            {overlayPositionOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
               </option>
             ))}
           </select>
@@ -173,7 +173,6 @@ export function OverlayAppearanceControls({
         </label>
 
         <label>
-          <span>Lap deltas</span>
           <div>
             <input
               type="checkbox"

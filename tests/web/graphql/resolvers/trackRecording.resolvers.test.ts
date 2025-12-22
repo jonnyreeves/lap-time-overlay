@@ -402,9 +402,50 @@ describe("trackRecording resolvers", () => {
         quality: "best",
         styleOverrides: { textColor: "#ffd500" },
         currentUserId: "user-1",
+        embedChapters: true,
       })
     );
     expect(result.recording.overlayBurned).toBe(true);
+  });
+
+  it("honors embedChapters flag when provided", async () => {
+    const burned: recordingsDb.TrackRecordingRecord = {
+      id: "rec2",
+      sessionId: "s1",
+      userId: "user-1",
+      mediaId: "media/rec2-overlay.mp4",
+      overlayBurned: true,
+      isPrimary: false,
+      lapOneOffset: 0,
+      description: null,
+      status: "ready",
+      error: null,
+      sizeBytes: 123,
+      durationMs: 5000,
+      fps: 30,
+      combineProgress: 1,
+      createdAt: 0,
+      updatedAt: 0,
+    };
+    vi.mocked(burnRecordingOverlay).mockResolvedValue(burned);
+
+    await trackRecordingResolvers.burnRecordingOverlay(
+      {
+        input: {
+          recordingId: "rec2",
+          quality: "GOOD",
+          embedChapters: false,
+        },
+      },
+      context
+    );
+
+    expect(burnRecordingOverlay).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recordingId: "rec2",
+        embedChapters: false,
+      })
+    );
   });
 
   it("adds burnRecordingOverlay to the GraphQL rootValue", () => {

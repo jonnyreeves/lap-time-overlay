@@ -346,6 +346,7 @@ export const trackRecordingResolvers = {
         recordingId?: string;
         quality?: keyof typeof overlayExportQualityMap | null;
         style?: OverlayStyleInput;
+        embedChapters?: boolean | null;
       };
     },
     context: GraphQLContext
@@ -372,6 +373,8 @@ export const trackRecordingResolvers = {
     }
 
     const styleOverrides = normalizeOverlayStyleInput(input.style);
+    const embedChapters =
+      typeof input.embedChapters === "boolean" ? input.embedChapters : true;
 
     try {
       const recording = await burnRecordingOverlay({
@@ -379,6 +382,7 @@ export const trackRecordingResolvers = {
         quality,
         styleOverrides,
         currentUserId: context.currentUser.id,
+        embedChapters,
       });
       return { recording: toTrackRecordingPayload(recording, context.repositories) };
     } catch (err) {

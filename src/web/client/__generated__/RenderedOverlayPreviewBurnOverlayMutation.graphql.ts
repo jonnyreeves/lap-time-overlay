@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<4fd3de7aeab937153e353bdc3b170f34>>
+ * @generated SignedSource<<c06e8350b969267155ea8d40ab0d852e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,6 +13,7 @@ export type OverlayExportQuality = "BEST" | "GOOD" | "%future added value";
 export type OverlayPosition = "BOTTOM_LEFT" | "BOTTOM_RIGHT" | "TOP_LEFT" | "TOP_RIGHT" | "%future added value";
 export type OverlayTextColor = "WHITE" | "YELLOW" | "%future added value";
 export type BurnRecordingOverlayInput = {
+  embedChapters?: boolean | null | undefined;
   quality: OverlayExportQuality;
   recordingId: string;
   style?: OverlayStyleInput | null | undefined;

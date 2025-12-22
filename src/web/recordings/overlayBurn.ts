@@ -13,12 +13,13 @@ import { findTrackSessionById } from "../../db/track_sessions.js";
 import type { OverlayStyle } from "../../ffmpeg/overlay.js";
 import { buildDrawtextFilterGraph } from "../../ffmpeg/overlay.js";
 import type { Lap } from "../../ffmpeg/lapTypes.js";
-import { probeVideoInfo } from "../../ffmpeg/videoInfo.js";
+import { probeVideoInfo, type VideoInfo } from "../../ffmpeg/videoInfo.js";
 import { sessionRecordingsDir, tmpRendersDir } from "../config.js";
 import { buildOverlayLaps, buildOverlayStyle } from "./overlayPreview.js";
 import { rebuildJellyfinSessionProjection } from "./jellyfinProjection.js";
 
 type BurnQuality = "best" | "good";
+const FINAL_CHAPTER_END_SENTINEL_MS = 9_999_999;
 
 export class OverlayBurnError extends Error {
   constructor(
@@ -84,6 +85,70 @@ function toLapPayload(laps: LapRecord[]): Lap[] {
   return buildOverlayLaps(laps).map(({ lapId: _lapId, ...lap }) => lap);
 }
 
+type ChapterMarker = { startMs: number; endMs: number; title: string };
+
+function buildChapterMarkers({
+  laps,
+  lapOneOffsetS,
+  videoDurationMs,
+}: {
+  laps: Lap[];
+  lapOneOffsetS: number;
+  videoDurationMs?: number;
+}): ChapterMarker[] {
+  const offsetMs = Math.max(0, Math.round(lapOneOffsetS * 1000));
+  const sorted = [...laps].sort((a, b) => {
+    if (a.startS === b.startS) return a.number - b.number;
+    return a.startS - b.startS;
+  });
+
+  return sorted.map((lap, idx) => {
+    const startMs = offsetMs + Math.max(0, Math.round(lap.startS * 1000));
+    const nextLap = sorted[idx + 1];
+    const nextStartMs = nextLap ? offsetMs + Math.max(0, Math.round(nextLap.startS * 1000)) : null;
+    const defaultEnd = Math.max(Math.round(videoDurationMs ?? FINAL_CHAPTER_END_SENTINEL_MS), FINAL_CHAPTER_END_SENTINEL_MS);
+    const endMs = Math.max(startMs + 1, nextStartMs ?? defaultEnd);
+
+    return { startMs, endMs, title: `Lap ${lap.number} Start` };
+  });
+}
+
+function buildChapterMetadataFile(chapters: ChapterMarker[]): string {
+  const header = ";FFMETADATA1";
+  const body = chapters
+    .map(
+      (chapter) =>
+        [
+          "[CHAPTER]",
+          "TIMEBASE=1/1000",
+          `START=${chapter.startMs}`,
+          `END=${chapter.endMs}`,
+          `title=${chapter.title}`,
+          "",
+        ].join("\n")
+    )
+    .join("\n");
+
+  return [header, body].join("\n");
+}
+
+async function writeChapterMetadataFile({
+  filePath,
+  laps,
+  lapOneOffsetS,
+  videoDurationMs,
+}: {
+  filePath: string;
+  laps: Lap[];
+  lapOneOffsetS: number;
+  videoDurationMs?: number;
+}): Promise<void> {
+  const chapters = buildChapterMarkers({ laps, lapOneOffsetS, videoDurationMs });
+  const metadata = buildChapterMetadataFile(chapters);
+  await fsp.mkdir(path.dirname(filePath), { recursive: true });
+  await fsp.writeFile(filePath, metadata, "utf8");
+}
+
 async function runOverlayRender({
   inputVideo,
   outputFile,
@@ -91,6 +156,8 @@ async function runOverlayRender({
   startOffsetS,
   style,
   quality,
+  video,
+  chapterMetadataFile,
   onProgress,
 }: {
   inputVideo: string;
@@ -99,9 +166,10 @@ async function runOverlayRender({
   startOffsetS: number;
   style: OverlayStyle;
   quality: BurnQuality;
+  video: VideoInfo;
+  chapterMetadataFile?: string | null;
   onProgress?: (percent: number) => void;
 }) {
-  const video = await probeVideoInfo(inputVideo);
   const { filterGraph, outputLabel } = buildDrawtextFilterGraph({
     inputVideo,
     outputFile,
@@ -117,25 +185,36 @@ async function runOverlayRender({
   const { preset, crf } = qualityOptions(quality);
 
   return new Promise<void>((resolve, reject) => {
-    const cmd = ffmpeg()
-      .input(inputVideo)
+    const cmd = ffmpeg().input(inputVideo);
+    const metadataInputIndex = chapterMetadataFile ? 1 : null;
+    if (chapterMetadataFile) {
+      cmd.input(chapterMetadataFile);
+    }
+
+    const outputOptions = [
+      "-map",
+      `[${outputLabel}]`,
+      "-map",
+      "0:a?",
+      "-c:v",
+      "libx265",
+      "-preset",
+      preset,
+      "-crf",
+      String(crf),
+      "-c:a",
+      "copy",
+      "-movflags",
+      "+faststart",
+    ];
+
+    if (metadataInputIndex != null) {
+      outputOptions.push("-map_metadata", String(metadataInputIndex), "-map_chapters", String(metadataInputIndex));
+    }
+
+    cmd
       .complexFilter(filterGraph)
-      .outputOptions([
-        "-map",
-        `[${outputLabel}]`,
-        "-map",
-        "0:a?",
-        "-c:v",
-        "libx265",
-        "-preset",
-        preset,
-        "-crf",
-        String(crf),
-        "-c:a",
-        "copy",
-        "-movflags",
-        "+faststart",
-      ])
+      .outputOptions(outputOptions)
       .on("progress", (progress) => {
         if (onProgress && typeof progress.percent === "number") {
           onProgress(progress.percent);
@@ -160,10 +239,12 @@ export async function burnRecordingOverlay(options: {
   currentUserId: string;
   quality: BurnQuality;
   styleOverrides?: Partial<OverlayStyle>;
+  embedChapters?: boolean | null;
 }): Promise<TrackRecordingRecord> {
   const { recordingId, currentUserId, quality, styleOverrides } = options;
   const recording = assertRecording(recordingId, currentUserId);
   const laps = loadSessionLaps(recording);
+  const embedChapters = options.embedChapters ?? true;
 
   const inputVideo = path.join(sessionRecordingsDir, recording.mediaId);
   const style = buildOverlayStyle(styleOverrides);
@@ -191,11 +272,24 @@ export async function burnRecordingOverlay(options: {
   });
   updateTrackRecording(overlayRecording.id, { sizeBytes: recording.sizeBytes ?? 0 });
 
-  const tempOutputFile = path.join(tmpRendersDir, "overlay-burns", overlayRecording.id, overlayFileName);
+  const renderDir = path.join(tmpRendersDir, "overlay-burns", overlayRecording.id);
+  const tempOutputFile = path.join(renderDir, overlayFileName);
   const finalOutputFile = path.join(sessionRecordingsDir, overlayMediaId);
+  const chapterMetadataFile = path.join(renderDir, "chapters.ffmetadata");
 
   try {
     updateTrackRecording(overlayRecording.id, { status: "combining", combineProgress: 0, error: null });
+    const video = await probeVideoInfo(inputVideo);
+
+    if (embedChapters) {
+      await writeChapterMetadataFile({
+        filePath: chapterMetadataFile,
+        laps: overlayLaps,
+        lapOneOffsetS: startOffsetS,
+        videoDurationMs: video.duration * 1000,
+      });
+    }
+
     await runOverlayRender({
       inputVideo,
       outputFile: tempOutputFile,
@@ -203,6 +297,8 @@ export async function burnRecordingOverlay(options: {
       startOffsetS,
       style,
       quality,
+      video,
+      chapterMetadataFile: embedChapters ? chapterMetadataFile : null,
       onProgress: (percent) => {
         updateTrackRecording(overlayRecording.id, { combineProgress: Math.max(0, Math.min(1, percent / 100)) });
       },
@@ -210,6 +306,7 @@ export async function burnRecordingOverlay(options: {
     await moveRenderedOverlay(tempOutputFile, finalOutputFile);
   } catch (err) {
     await fsp.rm(tempOutputFile, { force: true }).catch(() => {});
+    await fsp.rm(chapterMetadataFile, { force: true }).catch(() => {});
     const message = err instanceof Error ? err.message : "Overlay burn failed";
     updateTrackRecording(overlayRecording.id, { status: "failed", combineProgress: 0, error: message });
     throw new OverlayBurnError(message, "INTERNAL_SERVER_ERROR");

@@ -138,6 +138,7 @@ input BurnRecordingOverlayInput {
   recordingId: ID!
   quality: OverlayExportQuality!
   style: OverlayStyleInput
+  embedChapters: Boolean = true
 }
 
 type UpdateTrackRecordingPayload {
