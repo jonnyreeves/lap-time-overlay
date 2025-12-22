@@ -10,6 +10,21 @@ import { SESSION_COOKIE_NAME } from "../../../src/web/auth/cookies.js";
 import { loadUserFromSession, refreshSession } from "../../../src/web/auth/service.js";
 import { findTrackRecordingById } from "../../../src/db/track_recordings.js";
 
+vi.mock("../../../src/web/config.js", () => {
+  const testRoot = path.join(process.cwd(), "temp", "tests");
+  return {
+    projectRoot: process.cwd(),
+    publicDir: path.join(process.cwd(), "public"),
+    sessionRecordingsDir: path.join(testRoot, "session_recordings"),
+    tmpUploadsDir: path.join(testRoot, "uploads"),
+    tmpRendersDir: path.join(testRoot, "renders"),
+    tmpPreviewsDir: path.join(testRoot, "previews"),
+    ensureWorkDirs: async () => {},
+  };
+});
+
+const testRootDir = path.join(process.cwd(), "temp", "tests");
+
 vi.mock("../../../src/web/auth/service.js", () => ({
   loadUserFromSession: vi.fn(),
   refreshSession: vi.fn(),
@@ -139,6 +154,6 @@ describe("handleRecordingDownloadRequest", () => {
 
   afterEach(async () => {
     vi.resetAllMocks();
-    await fs.rm(path.join(sessionRecordingsDir, "test-downloads"), { recursive: true, force: true });
+    await fs.rm(testRootDir, { recursive: true, force: true });
   });
 });

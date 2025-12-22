@@ -557,6 +557,17 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
   const boxY = overlayPosition.startsWith("top") ? 32 : height - boxHeight - 32;
   const boxX = overlayPosition.endsWith("left") ? 32 : width - safeWidth - 32;
 
+  const lapStartAbsolute = laps.length ? startOffsetS + laps[0]!.startS : 0;
+  const lastLapEnd =
+    laps.length > 0
+      ? laps[laps.length - 1]!.startS + laps[laps.length - 1]!.durationS
+      : 0;
+  const overlayStart = Math.max(0, lapStartAbsolute);
+  const overlayEnd = laps.length
+    ? Math.max(overlayStart, startOffsetS + lastLapEnd)
+    : videoDuration;
+  const overlayDuration = Math.max(0, overlayEnd);
+
   let currentLabel = "0:v";
 
   const backgroundBox = buildOverlayBox({
@@ -565,10 +576,9 @@ export function buildDrawtextFilterGraph(ctx: RenderContext) {
     x: boxX,
     y: boxY,
     color: boxColorWithAlpha,
-    duration:
-      laps.length
-        ? laps[laps.length - 1].startS + laps[laps.length - 1].durationS + startOffsetS
-        : videoDuration,
+    startAt: overlayStart,
+    endAt: overlayEnd,
+    duration: overlayDuration,
     inputLabel: currentLabel,
   });
 
@@ -613,15 +623,24 @@ function buildOverlayBox(options: {
   x: number;
   y: number;
   color: string;
-  duration: number;
   inputLabel: string;
+  startAt: number;
+  endAt: number;
+  duration?: number;
 }): { filter: string; label: string } {
-  const { width, height, x, y, color, duration, inputLabel } = options;
+  const { width, height, x, y, color, startAt, endAt, duration, inputLabel } = options;
+  const start = Math.max(0, Number.isFinite(startAt) ? (startAt as number) : 0);
+  const end = Math.max(start, Number.isFinite(endAt) ? (endAt as number) : start);
+  const overlayDuration = Math.max(
+    end,
+    Number.isFinite(duration) ? (duration as number) : end
+  );
   const source = inputLabel.startsWith("[") ? inputLabel : `[${inputLabel}]`;
+  const enable = `between(t,${start.toFixed(3)},${end.toFixed(3)})`;
   const drawBox = `color=color=${color}:size=${width}x${height}:duration=${Math.max(
     0,
-    duration
-  ).toFixed(3)} [box]; ${source}[box] overlay=x=${x}:y=${y}:shortest=1 [v_box]`;
+    overlayDuration
+  ).toFixed(3)} [box]; ${source}[box] overlay=x=${x}:y=${y}:shortest=1:enable='${enable}' [v_box]`;
   return { filter: drawBox, label: "v_box" };
 }
 

@@ -77,4 +77,18 @@ describe("buildDrawtextFilterGraph", () => {
     expect(combined).not.toContain("Δ vs Best");
     expect(combined).not.toContain("Δ vs Avg");
   });
+
+  it("hides the background box before the first lap starts", () => {
+    const { filterGraph } = buildDrawtextFilterGraph({
+      inputVideo: "input.mp4",
+      outputFile: "out.mp4",
+      video: { width: 1920, height: 1080, fps: 30, duration: 200 },
+      laps: sampleLaps,
+      startOffsetS: 12,
+      style: DEFAULT_OVERLAY_STYLE,
+    });
+
+    const boxFilter = filterGraph.find((filter) => filter.includes("overlay=x=")) ?? "";
+    expect(boxFilter).toContain("enable='between(t,12.000,134.000)'");
+  });
 });

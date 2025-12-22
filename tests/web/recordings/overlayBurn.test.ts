@@ -11,6 +11,21 @@ import { sessionRecordingsDir } from "../../../src/web/config.js";
 import { burnRecordingOverlay } from "../../../src/web/recordings/overlayBurn.js";
 import { setupTestDb, teardownTestDb } from "../../db/test_setup.js";
 
+vi.mock("../../../src/web/config.js", () => {
+  const testRoot = path.join(process.cwd(), "temp", "tests");
+  return {
+    projectRoot: process.cwd(),
+    publicDir: path.join(process.cwd(), "public"),
+    sessionRecordingsDir: path.join(testRoot, "session_recordings"),
+    tmpUploadsDir: path.join(testRoot, "uploads"),
+    tmpRendersDir: path.join(testRoot, "renders"),
+    tmpPreviewsDir: path.join(testRoot, "previews"),
+    ensureWorkDirs: async () => {},
+  };
+});
+
+const testRootDir = path.join(process.cwd(), "temp", "tests");
+
 vi.mock("fluent-ffmpeg", () => {
   return {
     default: () => {
@@ -51,7 +66,7 @@ describe("burnRecordingOverlay", () => {
   });
 
   afterEach(async () => {
-    await fsp.rm(sessionRecordingsDir, { recursive: true, force: true });
+    await fsp.rm(testRootDir, { recursive: true, force: true });
     teardownTestDb();
   });
 
