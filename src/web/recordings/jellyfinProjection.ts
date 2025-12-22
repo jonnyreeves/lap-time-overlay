@@ -1,8 +1,15 @@
+import type { Stats } from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
-import { findTrackRecordingsBySessionId, type TrackRecordingRecord } from "../../db/track_recordings.js";
+import {
+  findTrackRecordingById,
+  findTrackRecordingsBySessionId,
+  type TrackRecordingRecord,
+} from "../../db/track_recordings.js";
 import { findTrackSessionById } from "../../db/track_sessions.js";
 import { findTrackById } from "../../db/tracks.js";
+import { findTrackLayoutById } from "../../db/track_layouts.js";
+import { findUserById } from "../../db/users.js";
 import { jellyfinProjectionDir, rawMediaDir, sessionRecordingsDir } from "../config.js";
 
 export interface JellyfinRecordingView {
@@ -27,14 +34,58 @@ export class JellyfinProjectionError extends Error {
 }
 
 const rawRoot = rawMediaDir || sessionRecordingsDir;
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"] as const;
+const projectionRoot = path.resolve(jellyfinProjectionDir);
 
-function sanitizeName(name: string): string {
-  const cleaned = name.replace(/[\\/]/g, "-").trim();
-  return cleaned || "Unknown Track";
+function sanitizeName(name: string, fallback = "Unknown"): string {
+  const cleaned = name.replace(/[\\/]/g, "-").replace(/^\.+/, "").replace(/\.+$/, "").trim();
+  if (!cleaned || cleaned === "." || cleaned === "..") {
+    return fallback;
+  }
+  return cleaned;
 }
 
-function sessionFolderName(date: string, trackName: string): string {
-  return `${date.trim()} - ${sanitizeName(trackName)}`;
+function sessionDateParts(dateStr: string): { isoDate: string; yearFolder: string; dayFolder: string } {
+  const parsed = new Date(`${dateStr}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) {
+    const fallback = sanitizeName(dateStr, "Unknown Date");
+    return { isoDate: sanitizeName(dateStr, "unknown-date"), yearFolder: "Unknown Year", dayFolder: fallback };
+  }
+
+  const isoDate = parsed.toISOString().slice(0, 10);
+  const monthLabel = MONTH_NAMES[parsed.getUTCMonth()] ?? "Unknown";
+
+  return {
+    isoDate,
+    yearFolder: `${parsed.getUTCFullYear()}`,
+    dayFolder: `${monthLabel} ${parsed.getUTCDate()}`,
+  };
+}
+
+function buildProjectionPaths({
+  username,
+  trackName,
+  trackLayoutName,
+  format,
+  sessionDate,
+}: {
+  username: string;
+  trackName: string;
+  trackLayoutName: string;
+  format: string;
+  sessionDate: string;
+}): { folderName: string; recordingBaseName: string; isoDate: string } {
+  const sanitizedUser = sanitizeName(username, "user");
+  const sanitizedTrack = sanitizeName(trackName, "Unknown Track");
+  const sanitizedLayout = sanitizeName(trackLayoutName, "Unknown Layout");
+  const sanitizedFormat = sanitizeName(format, "Unknown Format");
+  const { isoDate, yearFolder, dayFolder } = sessionDateParts(sessionDate);
+
+  return {
+    folderName: path.join(sanitizedUser, yearFolder, sanitizedTrack, dayFolder),
+    recordingBaseName: `${sanitizedTrack} - ${sanitizedLayout} - ${sanitizedFormat} - ${isoDate}`,
+    isoDate,
+  };
 }
 
 function escapeXml(value: string): string {
@@ -102,6 +153,7 @@ function buildNfo({
   sessionId,
   recordingId,
   format,
+  isoDate,
 }: {
   trackName: string;
   sessionDate: string;
@@ -109,8 +161,9 @@ function buildNfo({
   sessionId: string;
   recordingId: string;
   format?: string;
+  isoDate?: string;
 }): string {
-  const isoDate = formatIsoDate(sessionDate);
+  const safeIsoDate = isoDate || formatIsoDate(sessionDate);
   const title = buildTitle(trackName, sessionDate, classification);
   const plot = buildPlot({ trackName, classification, sessionId, recordingId, format });
 
@@ -120,17 +173,84 @@ function buildNfo({
   <plot>
     ${escapeXml(plot)}
   </plot>
-  <premiered>${escapeXml(isoDate)}</premiered>
-  <dateadded>${escapeXml(isoDate)}</dateadded>
+  <premiered>${escapeXml(safeIsoDate)}</premiered>
+  <dateadded>${escapeXml(safeIsoDate)}</dateadded>
   <tag>RaceCraft</tag>
   <tag>${escapeXml(trackName)}</tag>
 </movie>
 `;
 }
 
-function projectionFileName(recording: TrackRecordingRecord, rawPath: string): string {
+function projectionFileName({
+  recording,
+  rawPath,
+  baseName,
+  suffix,
+  existingNames,
+}: {
+  recording: TrackRecordingRecord;
+  rawPath: string;
+  baseName: string;
+  suffix?: string;
+  existingNames: Set<string>;
+}): string {
   const ext = path.extname(rawPath) || path.extname(recording.mediaId) || ".mp4";
-  return `${recording.id}${ext || ".mp4"}`;
+  const withSuffix = suffix ? `${baseName} - ${suffix}` : baseName;
+  let candidate = `${withSuffix}${ext || ".mp4"}`;
+  let counter = 2;
+
+  while (existingNames.has(candidate)) {
+    candidate = `${withSuffix} (${counter})${ext || ".mp4"}`;
+    counter += 1;
+  }
+
+  existingNames.add(candidate);
+  return candidate;
+}
+
+async function findRecordingProjectionFolders(recordingIds: Set<string>): Promise<Set<string>> {
+  const matches = new Set<string>();
+  if (!recordingIds.size) return matches;
+  const ids = Array.from(recordingIds);
+
+  async function walk(dir: string): Promise<void> {
+    const entries = await fsp.readdir(dir, { withFileTypes: true }).catch(() => []);
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        await walk(fullPath);
+        continue;
+      }
+
+      const baseName = path.parse(entry.name).name;
+      const ext = path.extname(entry.name).toLowerCase();
+      if (recordingIds.has(baseName) || ids.some((id) => baseName.endsWith(id))) {
+        matches.add(path.dirname(fullPath));
+        continue;
+      }
+
+      if (ext === ".nfo") {
+        const contents = await fsp.readFile(fullPath, "utf8").catch(() => null);
+        if (contents && ids.some((id) => contents.includes(`Recording ID: ${id}`))) {
+          matches.add(path.dirname(fullPath));
+        }
+      }
+    }
+  }
+
+  await walk(projectionRoot);
+  return matches;
+}
+
+async function pruneEmptyAncestors(start: string): Promise<void> {
+  let current = path.resolve(start);
+  while (current.startsWith(projectionRoot) && current !== projectionRoot) {
+    const entries = await fsp.readdir(current).catch(() => null);
+    if (!entries || entries.length > 0) break;
+
+    await fsp.rm(current, { recursive: true, force: true });
+    current = path.dirname(current);
+  }
 }
 
 function resolveRawPath(mediaId: string): string {
@@ -145,15 +265,11 @@ function resolveRawPath(mediaId: string): string {
 async function removeProjectionFolders(recordingIds: Set<string>): Promise<void> {
   if (!recordingIds.size) return;
 
-  const entries = await fsp.readdir(jellyfinProjectionDir, { withFileTypes: true }).catch(() => []);
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    const folderPath = path.join(jellyfinProjectionDir, entry.name);
-    const files = await fsp.readdir(folderPath).catch(() => []);
-    const hasRecording = files.some((file) => recordingIds.has(path.parse(file).name));
-    if (hasRecording) {
-      await fsp.rm(folderPath, { recursive: true, force: true });
-    }
+  const folders = await findRecordingProjectionFolders(recordingIds);
+  for (const folderPath of folders) {
+    if (path.resolve(folderPath) === projectionRoot) continue;
+    await fsp.rm(folderPath, { recursive: true, force: true });
+    await pruneEmptyAncestors(path.dirname(folderPath));
   }
 }
 
@@ -166,13 +282,27 @@ export async function rebuildJellyfinSessionProjection(sessionId: string): Promi
   if (!track) {
     throw new JellyfinProjectionError("Track not found for session", "NOT_FOUND");
   }
+  const trackLayout = findTrackLayoutById(session.trackLayoutId);
+  if (!trackLayout) {
+    throw new JellyfinProjectionError("Track layout not found for session", "NOT_FOUND");
+  }
+  const user = findUserById(session.userId);
+  if (!user) {
+    throw new JellyfinProjectionError("User not found for session", "NOT_FOUND");
+  }
 
-  const folderName = sessionFolderName(session.date, track.name);
-  const folderPath = path.join(jellyfinProjectionDir, folderName);
+  const { folderName, recordingBaseName, isoDate } = buildProjectionPaths({
+    username: user.username,
+    trackName: track.name,
+    trackLayoutName: trackLayout.name,
+    format: session.format,
+    sessionDate: session.date,
+  });
+  const folderPath = path.join(projectionRoot, folderName);
   const recordings = findTrackRecordingsBySessionId(sessionId);
   const recordingIds = new Set(recordings.map((rec) => rec.id));
 
-  await fsp.mkdir(jellyfinProjectionDir, { recursive: true });
+  await fsp.mkdir(projectionRoot, { recursive: true });
   await removeProjectionFolders(recordingIds);
   await fsp.rm(folderPath, { recursive: true, force: true });
 
@@ -183,6 +313,7 @@ export async function rebuildJellyfinSessionProjection(sessionId: string): Promi
 
   await fsp.mkdir(folderPath, { recursive: true });
   const views: JellyfinRecordingView[] = [];
+  const usedFileNames = new Set<string>();
 
   for (const recording of readyRecordings) {
     const rawPath = resolveRawPath(recording.mediaId);
@@ -191,8 +322,20 @@ export async function rebuildJellyfinSessionProjection(sessionId: string): Promi
       throw new JellyfinProjectionError(`Recording file missing for ${recording.id}`, "NOT_FOUND");
     }
 
-    const jellyfinPath = path.join(folderPath, projectionFileName(recording, rawPath));
-    const nfoPath = path.join(folderPath, `${recording.id}.nfo`);
+    const suffix =
+      readyRecordings.length > 1
+        ? sanitizeName(recording.description ?? recording.id, recording.id)
+        : undefined;
+    const videoFileName = projectionFileName({
+      recording,
+      rawPath,
+      baseName: recordingBaseName,
+      suffix,
+      existingNames: usedFileNames,
+    });
+    const jellyfinPath = path.join(folderPath, videoFileName);
+    const nfoBaseName = path.parse(videoFileName).name;
+    const nfoPath = path.join(folderPath, `${nfoBaseName}.nfo`);
 
     await fsp.link(rawPath, jellyfinPath);
     const nfoContents = buildNfo({
@@ -202,6 +345,7 @@ export async function rebuildJellyfinSessionProjection(sessionId: string): Promi
       sessionId: session.id,
       recordingId: recording.id,
       format: session.format,
+      isoDate,
     });
     await fsp.writeFile(nfoPath, nfoContents, "utf8");
 
@@ -212,21 +356,66 @@ export async function rebuildJellyfinSessionProjection(sessionId: string): Promi
 }
 
 export async function removeJellyfinRecordingProjection(recordingId: string): Promise<void> {
-  const entries = await fsp.readdir(jellyfinProjectionDir, { withFileTypes: true }).catch(() => []);
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    const folderPath = path.join(jellyfinProjectionDir, entry.name);
-    const files = await fsp.readdir(folderPath).catch(() => []);
-    const matches = files.filter((file) => path.parse(file).name === recordingId);
-    if (!matches.length) continue;
+  const recording = findTrackRecordingById(recordingId);
+  const suffixToken = recording
+    ? sanitizeName(recording.description ?? recording.id, recording.id)
+    : sanitizeName(recordingId, recordingId);
+  let rawStats: Stats | null = null;
+  if (recording) {
+    try {
+      const rawPath = resolveRawPath(recording.mediaId);
+      rawStats = await fsp.stat(rawPath).catch(() => null);
+    } catch {
+      rawStats = null;
+    }
+  }
 
-    for (const file of matches) {
-      await fsp.rm(path.join(folderPath, file), { force: true });
+  const folders = await findRecordingProjectionFolders(new Set([recordingId]));
+  for (const folderPath of folders) {
+    const files = await fsp.readdir(folderPath).catch(() => []);
+    if (!files.length) continue;
+
+    const targetBaseNames = new Set<string>();
+    for (const file of files) {
+      const filePath = path.join(folderPath, file);
+      const parsed = path.parse(file);
+      const baseName = parsed.name;
+      const ext = parsed.ext.toLowerCase();
+
+      if (baseName === recordingId || baseName.endsWith(suffixToken) || baseName.endsWith(recordingId)) {
+        targetBaseNames.add(baseName);
+        continue;
+      }
+
+      if (ext === ".nfo") {
+        const contents = await fsp.readFile(filePath, "utf8").catch(() => null);
+        if (contents?.includes(`Recording ID: ${recordingId}`)) {
+          targetBaseNames.add(baseName);
+          continue;
+        }
+      }
+
+      if (rawStats) {
+        const stats = await fsp.stat(filePath).catch(() => null);
+        if (stats && stats.isFile() && stats.dev === rawStats.dev && stats.ino === rawStats.ino) {
+          targetBaseNames.add(baseName);
+        }
+      }
+    }
+
+    for (const file of files) {
+      const filePath = path.join(folderPath, file);
+      const baseName = path.parse(file).name;
+      if (targetBaseNames.has(baseName)) {
+        await fsp.rm(filePath, { force: true });
+      }
     }
 
     const remaining = await fsp.readdir(folderPath).catch(() => []);
-    if (remaining.length === 0) {
+    const remainingNfos = remaining.filter((file) => path.extname(file).toLowerCase() === ".nfo");
+    if (remaining.length === 0 || remainingNfos.length === 0) {
       await fsp.rm(folderPath, { recursive: true, force: true });
+      await pruneEmptyAncestors(path.dirname(folderPath));
     }
   }
 }

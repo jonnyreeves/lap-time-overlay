@@ -70,13 +70,14 @@ describe("Jellyfin projection", () => {
     await fsp.mkdir(path.dirname(rawPath), { recursive: true });
     await fsp.writeFile(rawPath, "raw-file");
 
-    const staleFolder = path.join(projectionDir, "2025-12-03 - Old Track");
+    const staleFolder = path.join(projectionDir, "viewer", "2025", "Old Track", "Dec 3");
     await fsp.mkdir(staleFolder, { recursive: true });
     await fsp.writeFile(path.join(staleFolder, `${recording.id}.mp4`), "stale");
 
     const view = await rebuildJellyfinSessionProjection(trackSession.id);
 
-    expect(view.folderName).toBe(`${trackSession.date} - ${track.name}`);
+    const expectedFolderName = path.join("viewer", "2025", track.name, "Dec 3");
+    expect(view.folderName).toBe(expectedFolderName);
     expect(view.recordings).toHaveLength(1);
 
     const projection = view.recordings[0]!;
@@ -84,6 +85,7 @@ describe("Jellyfin projection", () => {
     const projectionStats = await fsp.stat(projection.jellyfinPath);
 
     expect(rawStats.ino).toBe(projectionStats.ino);
+    expect(path.parse(projection.jellyfinPath).name).toBe(path.parse(projection.nfoPath).name);
     await expect(fsp.stat(projection.nfoPath)).resolves.toBeTruthy();
     await expect(fsp.stat(staleFolder)).rejects.toBeTruthy();
 
@@ -92,6 +94,10 @@ describe("Jellyfin projection", () => {
     expect(nfo).toContain("P3");
     expect(nfo).toContain(`Recording ID: ${recording.id}`);
     expect(nfo).toContain(`Session ID: ${trackSession.id}`);
+    expect(path.basename(projection.jellyfinPath)).toBe(
+      "Daytona Sandown Park - Full - Race - 2025-12-03.mp4"
+    );
+    expect(projection.jellyfinPath).toContain(expectedFolderName);
   });
 
   it("removes a single recording projection without disturbing the session folder", async () => {
@@ -138,8 +144,17 @@ describe("Jellyfin projection", () => {
     const view = await rebuildJellyfinSessionProjection(trackSession.id);
     const rec1Projection = view.recordings.find((r) => r.recordingId === rec1.id);
     const rec2Projection = view.recordings.find((r) => r.recordingId === rec2.id);
+    const expectedFolderName = path.join("viewer", "2024", track.name, "Jun 10");
+
+    expect(view.folderName).toBe(expectedFolderName);
     expect(rec1Projection).toBeDefined();
     expect(rec2Projection).toBeDefined();
+    expect(path.basename(rec1Projection!.jellyfinPath)).toBe(
+      "Bayford Meadows - Short - Practice - 2024-06-10 - rec-one.mp4"
+    );
+    expect(path.basename(rec2Projection!.jellyfinPath)).toBe(
+      "Bayford Meadows - Short - Practice - 2024-06-10 - rec-two.mp4"
+    );
 
     await removeJellyfinRecordingProjection(rec1.id);
 
@@ -148,7 +163,7 @@ describe("Jellyfin projection", () => {
     await expect(fsp.stat(rec2Projection!.jellyfinPath)).resolves.toBeTruthy();
     await expect(fsp.stat(rec2Projection!.nfoPath)).resolves.toBeTruthy();
 
-    const sessionFolder = path.join(projectionDir, view.folderName);
+    const sessionFolder = path.join(projectionDir, expectedFolderName);
     await expect(fsp.stat(sessionFolder)).resolves.toBeTruthy();
   });
 });
