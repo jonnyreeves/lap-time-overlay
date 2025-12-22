@@ -13,6 +13,7 @@ export interface TrackRecordingRecord {
   sessionId: string;
   userId: string;
   mediaId: string;
+  overlayBurned: boolean;
   isPrimary: boolean;
   lapOneOffset: number;
   description: string | null;
@@ -31,6 +32,7 @@ interface TrackRecordingRow {
   session_id: string;
   user_id: string;
   media_id: string;
+  overlay_burned: number;
   is_primary: number;
   lap_one_offset: number;
   description: string | null;
@@ -50,6 +52,7 @@ function mapRow(row: TrackRecordingRow): TrackRecordingRecord {
     sessionId: row.session_id,
     userId: row.user_id,
     mediaId: row.media_id,
+    overlayBurned: Boolean(row.overlay_burned),
     isPrimary: Boolean(row.is_primary),
     lapOneOffset: row.lap_one_offset,
     description: row.description,
@@ -69,7 +72,7 @@ export function findTrackRecordingById(id: string): TrackRecordingRecord | null 
   const row = db
     .prepare<unknown[], TrackRecordingRow>(
       `SELECT id, session_id, user_id, media_id, lap_one_offset, description, status, error, size_bytes,
-              duration_ms, fps, combine_progress, is_primary, created_at, updated_at
+              duration_ms, fps, combine_progress, is_primary, overlay_burned, created_at, updated_at
        FROM track_recordings WHERE id = ? LIMIT 1`
     )
     .get(id);
@@ -81,7 +84,7 @@ export function findTrackRecordingsBySessionId(sessionId: string): TrackRecordin
   const rows = db
     .prepare<unknown[], TrackRecordingRow>(
       `SELECT id, session_id, user_id, media_id, lap_one_offset, description, status, error, size_bytes,
-              duration_ms, fps, combine_progress, is_primary, created_at, updated_at
+              duration_ms, fps, combine_progress, is_primary, overlay_burned, created_at, updated_at
        FROM track_recordings WHERE session_id = ? ORDER BY created_at DESC`
     )
     .all(sessionId);
@@ -93,6 +96,7 @@ export function createTrackRecording({
   sessionId,
   userId,
   mediaId,
+  overlayBurned = false,
   isPrimary = false,
   lapOneOffset,
   description = null,
@@ -102,6 +106,7 @@ export function createTrackRecording({
   sessionId: string;
   userId: string;
   mediaId: string;
+  overlayBurned?: boolean;
   isPrimary?: boolean;
   lapOneOffset: number;
   description?: string | null;
@@ -113,9 +118,9 @@ export function createTrackRecording({
   db.prepare(
     `INSERT INTO track_recordings (
       id, session_id, user_id, media_id, status, error, lap_one_offset, description, size_bytes, duration_ms, fps,
-      combine_progress, is_primary, created_at, updated_at
+      combine_progress, is_primary, overlay_burned, created_at, updated_at
      )
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(
     id,
     sessionId,
@@ -130,6 +135,7 @@ export function createTrackRecording({
     null,
     0,
     isPrimary ? 1 : 0,
+    overlayBurned ? 1 : 0,
     now,
     now
   );
@@ -139,6 +145,7 @@ export function createTrackRecording({
     sessionId,
     userId,
     mediaId,
+    overlayBurned,
     isPrimary,
     lapOneOffset,
     description: description ?? null,
@@ -158,7 +165,7 @@ export function updateTrackRecording(
   fields: Partial<
     Pick<
       TrackRecordingRecord,
-      "mediaId" | "lapOneOffset" | "description" | "status" | "error" | "sizeBytes" | "durationMs" | "fps" | "combineProgress" | "isPrimary"
+      "mediaId" | "lapOneOffset" | "description" | "status" | "error" | "sizeBytes" | "durationMs" | "fps" | "combineProgress" | "isPrimary" | "overlayBurned"
     >
   >,
   now = Date.now()
@@ -172,27 +179,36 @@ export function updateTrackRecording(
     updatedAt: now,
   };
 
+  const safeCombineProgress = Number.isFinite(next.combineProgress)
+    ? Math.max(0, Math.min(1, next.combineProgress))
+    : current.combineProgress;
+  const nextWithSafeProgress: TrackRecordingRecord = {
+    ...next,
+    combineProgress: safeCombineProgress,
+  };
+
   const db = getDb();
   db.prepare(
     `UPDATE track_recordings
-     SET media_id = ?, lap_one_offset = ?, description = ?, status = ?, error = ?, size_bytes = ?, duration_ms = ?, fps = ?, combine_progress = ?, is_primary = ?, updated_at = ?
+     SET media_id = ?, lap_one_offset = ?, description = ?, status = ?, error = ?, size_bytes = ?, duration_ms = ?, fps = ?, combine_progress = ?, is_primary = ?, overlay_burned = ?, updated_at = ?
      WHERE id = ?`
   ).run(
-    next.mediaId,
-    next.lapOneOffset,
-    next.description,
-    next.status,
-    next.error,
-    next.sizeBytes,
-    next.durationMs,
-    next.fps,
-    next.combineProgress,
-    next.isPrimary ? 1 : 0,
-    next.updatedAt,
+    nextWithSafeProgress.mediaId,
+    nextWithSafeProgress.lapOneOffset,
+    nextWithSafeProgress.description,
+    nextWithSafeProgress.status,
+    nextWithSafeProgress.error,
+    nextWithSafeProgress.sizeBytes,
+    nextWithSafeProgress.durationMs,
+    nextWithSafeProgress.fps,
+    nextWithSafeProgress.combineProgress,
+    nextWithSafeProgress.isPrimary ? 1 : 0,
+    nextWithSafeProgress.overlayBurned ? 1 : 0,
+    nextWithSafeProgress.updatedAt,
     id
   );
 
-  return next;
+  return nextWithSafeProgress;
 }
 
 export function deleteTrackRecording(id: string): boolean {

@@ -111,6 +111,11 @@ enum OverlayPosition {
   BOTTOM_RIGHT
 }
 
+enum OverlayExportQuality {
+  BEST
+  GOOD
+}
+
 input OverlayStyleInput {
   textColor: OverlayTextColor
   textSize: Float
@@ -126,6 +131,12 @@ input RenderOverlayPreviewInput {
   recordingId: ID!
   lapId: ID!
   offsetSeconds: Float!
+  style: OverlayStyleInput
+}
+
+input BurnRecordingOverlayInput {
+  recordingId: ID!
+  quality: OverlayExportQuality!
   style: OverlayStyleInput
 }
 
@@ -157,6 +168,10 @@ type DeleteTrackSessionPayload {
   success: Boolean!
 }
 
+type BurnRecordingOverlayPayload {
+  recording: TrackRecording!
+}
+
 type Mutation {
   register(input: AuthInput!): AuthPayload!
   login(input: AuthInput!): AuthPayload!
@@ -172,6 +187,7 @@ type Mutation {
   markPrimaryTrackRecording(id: ID!): MarkPrimaryTrackRecordingPayload!
   updateTrackRecording(input: UpdateTrackRecordingInput!): UpdateTrackRecordingPayload!
   renderOverlayPreview(input: RenderOverlayPreviewInput!): RenderOverlayPreviewPayload!
+  burnRecordingOverlay(input: BurnRecordingOverlayInput!): BurnRecordingOverlayPayload!
   deleteTrackRecording(id: ID!): DeleteTrackRecordingPayload!
   createKart(input: CreateKartInput!): CreateKartPayload!
   updateKart(input: UpdateKartInput!): UpdateKartPayload!
@@ -402,6 +418,7 @@ type TrackRecording {
   id: ID!
   session: TrackSession!
   mediaId: String!
+  overlayBurned: Boolean!
   isPrimary: Boolean!
   lapOneOffset: Float!
   description: String

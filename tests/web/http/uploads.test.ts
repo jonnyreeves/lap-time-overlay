@@ -74,6 +74,7 @@ describe("handleRecordingDownloadRequest", () => {
       sessionId,
       userId,
       mediaId,
+      overlayBurned: false,
       isPrimary: true,
       lapOneOffset: 0,
       description: null,

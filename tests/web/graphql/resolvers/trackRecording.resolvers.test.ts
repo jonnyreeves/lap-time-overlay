@@ -11,6 +11,11 @@ import {
   generateOverlayPreview,
   OverlayPreviewError,
 } from "../../../../src/web/recordings/overlayPreview.js";
+import {
+  burnRecordingOverlay,
+  OverlayBurnError,
+} from "../../../../src/web/recordings/overlayBurn.js";
+import { rootValue } from "../../../../src/web/graphql/schema.js";
 
 vi.mock("../../../../src/web/recordings/service.js", async () => {
   const actual = await vi.importActual<typeof import("../../../../src/web/recordings/service.js")>(
@@ -31,6 +36,15 @@ vi.mock("../../../../src/web/recordings/service.js", async () => {
 vi.mock("../../../../src/web/recordings/overlayPreview.js", () => ({
   generateOverlayPreview: vi.fn(),
   OverlayPreviewError: class MockOverlayPreviewError extends Error {
+    constructor(message: string, public code: string = "VALIDATION_FAILED") {
+      super(message);
+    }
+  },
+}));
+
+vi.mock("../../../../src/web/recordings/overlayBurn.js", () => ({
+  burnRecordingOverlay: vi.fn(),
+  OverlayBurnError: class MockOverlayBurnError extends Error {
     constructor(message: string, public code: string = "VALIDATION_FAILED") {
       super(message);
     }
@@ -62,6 +76,7 @@ describe("trackRecording resolvers", () => {
       sessionId: "s1",
       userId: "user-1",
       mediaId: "media/path",
+      overlayBurned: false,
       isPrimary: true,
       lapOneOffset: 0,
       description: "desc",
@@ -157,6 +172,7 @@ describe("trackRecording resolvers", () => {
       sessionId: "s1",
       userId: "user-1",
       mediaId: "media/path",
+      overlayBurned: false,
       isPrimary: true,
       lapOneOffset: 0,
       description: null,
@@ -192,6 +208,7 @@ describe("trackRecording resolvers", () => {
       sessionId: "s1",
       userId: "user-1",
       mediaId: "media/path",
+      overlayBurned: false,
       isPrimary: true,
       lapOneOffset: 0,
       description: null,
@@ -220,6 +237,7 @@ describe("trackRecording resolvers", () => {
       sessionId: "s1",
       userId: "user-1",
       mediaId: "media/path",
+      overlayBurned: false,
       isPrimary: false,
       lapOneOffset: 1,
       description: null,
@@ -346,6 +364,66 @@ describe("trackRecording resolvers", () => {
     ).rejects.toThrowError("no preview");
   });
 
+  it("delegates overlay burn", async () => {
+    const burned: recordingsDb.TrackRecordingRecord = {
+      id: "rec1",
+      sessionId: "s1",
+      userId: "user-1",
+      mediaId: "media/rec1-overlay.mp4",
+      overlayBurned: true,
+      isPrimary: false,
+      lapOneOffset: 0,
+      description: null,
+      status: "ready",
+      error: null,
+      sizeBytes: 123,
+      durationMs: 5000,
+      fps: 30,
+      combineProgress: 1,
+      createdAt: 0,
+      updatedAt: 0,
+    };
+    vi.mocked(burnRecordingOverlay).mockResolvedValue(burned);
+
+    const result = await trackRecordingResolvers.burnRecordingOverlay(
+      {
+        input: {
+          recordingId: "rec1",
+          quality: "BEST",
+          style: { textColor: "YELLOW" },
+        },
+      },
+      context
+    );
+
+    expect(burnRecordingOverlay).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recordingId: "rec1",
+        quality: "best",
+        styleOverrides: { textColor: "#ffd500" },
+        currentUserId: "user-1",
+      })
+    );
+    expect(result.recording.overlayBurned).toBe(true);
+  });
+
+  it("adds burnRecordingOverlay to the GraphQL rootValue", () => {
+    expect(rootValue.burnRecordingOverlay).toBe(trackRecordingResolvers.burnRecordingOverlay);
+  });
+
+  it("maps overlay burn errors", async () => {
+    vi.mocked(burnRecordingOverlay).mockRejectedValue(
+      new OverlayBurnError("cannot burn", "VALIDATION_FAILED")
+    );
+
+    await expect(
+      trackRecordingResolvers.burnRecordingOverlay(
+        { input: { recordingId: "rec1", quality: "GOOD" } },
+        context
+      )
+    ).rejects.toThrowError("cannot burn");
+  });
+
   it("maps service errors to GraphQL errors", async () => {
     vi.mocked(startRecordingUploadSession).mockRejectedValue(
       new RecordingUploadError("boom", 404)
@@ -364,6 +442,7 @@ describe("trackRecording resolvers", () => {
       sessionId: "s1",
       userId: "user-1",
       mediaId: "media/path",
+      overlayBurned: false,
       isPrimary: true,
       lapOneOffset: 0,
       description: null,

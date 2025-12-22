@@ -22,6 +22,7 @@ type Recording = {
   description: string | null;
   sizeBytes: number | null;
   isPrimary: boolean;
+  overlayBurned: boolean;
   lapOneOffset: number;
   durationMs: number | null;
   fps: number | null;
@@ -84,6 +85,15 @@ const recordingRowStyles = css`
     color: #b91c1c;
     font-weight: 600;
   }
+
+  .burned {
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fcd34d;
+  }
 `;
 
 const progressBarStyles = css`
@@ -141,7 +151,11 @@ export function RecordingsCard({
   const [actionError, setActionError] = useState<string | null>(null);
   const [isResuming, setIsResuming] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false); // State for modal visibility
-  const [previewRecording, setPreviewRecording] = useState<Recording | null>(null);
+  const [previewRecordingId, setPreviewRecordingId] = useState<string | null>(null);
+  const previewRecording = useMemo(
+    () => recordings.find((rec) => rec.id === previewRecordingId) ?? null,
+    [previewRecordingId, recordings]
+  );
   const [isOverlayPreviewOpen, setIsOverlayPreviewOpen] = useState(false);
   const [deleteRecording, isDeleteInFlight] =
     useMutation<RecordingsCardDeleteRecordingMutation>(DeleteRecordingMutation);
@@ -173,6 +187,14 @@ export function RecordingsCard({
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
   }, [isResuming, resumeSelections]);
+
+  useEffect(() => {
+    if (!isOverlayPreviewOpen) return;
+    if (previewRecordingId && !previewRecording) {
+      setIsOverlayPreviewOpen(false);
+      setPreviewRecordingId(null);
+    }
+  }, [isOverlayPreviewOpen, previewRecording, previewRecordingId]);
 
   function onResumeFilesSelected(recordingId: string, list: FileList | null) {
     if (!list) return;
@@ -207,13 +229,13 @@ export function RecordingsCard({
   }
 
   function openOverlayPreview(recording: Recording) {
-    setPreviewRecording(recording);
+    setPreviewRecordingId(recording.id);
     setIsOverlayPreviewOpen(true);
   }
 
   function closeOverlayPreview() {
     setIsOverlayPreviewOpen(false);
-    setPreviewRecording(null);
+    setPreviewRecordingId(null);
   }
 
   function setPrimaryRecording(recording: Recording) {
@@ -265,6 +287,13 @@ export function RecordingsCard({
             const uploadPercent = total ? Math.min(100, Math.round((uploaded / total) * 100)) : 0;
             const combinePercent = percent(recording.combineProgress ?? 0);
             const isFinished = recording.status === "READY";
+            const isCombining = recording.status === "COMBINING";
+            const isOverlayEncoding = isCombining && !recording.overlayBurned && recording.sizeBytes != null;
+            const showUploadProgress = !isFinished && !isOverlayEncoding;
+            const showCombineProgress = !isFinished && isCombining && !isOverlayEncoding;
+            const showOverlayProgress = !isFinished && isOverlayEncoding;
+            const hasLapOneOffset = (recording.lapOneOffset ?? 0) > 0;
+            const canRenderOverlay = laps.length > 0 && hasLapOneOffset;
             return (
               <div key={recording.id} css={recordingRowStyles}>
                 <div className="header">
@@ -276,6 +305,7 @@ export function RecordingsCard({
                     )}
                   </div>
                   <div css={css`display: flex; gap: 8px; align-items: center;`}>
+                    {recording.overlayBurned && <span className="burned">Overlay burned</span>}
                     {recording.isPrimary && <span className="primary">Primary</span>}
                     <div className="status">{recording.status.toLowerCase()}</div>
                   </div>
@@ -283,18 +313,30 @@ export function RecordingsCard({
                 {recording.error && <div className="error">{recording.error}</div>}
                 {!isFinished && (
                   <>
-                    <div>
-                      <div>Upload progress: {formatBytes(uploaded)} / {formatBytes(total)}</div>
-                      <div css={progressBarStyles}>
-                        <div className="fill" style={{ width: `${uploadPercent}%` }} />
+                    {showUploadProgress && (
+                      <div>
+                        <div>Upload progress: {formatBytes(uploaded)} / {formatBytes(total)}</div>
+                        <div css={progressBarStyles}>
+                          <div className="fill" style={{ width: `${uploadPercent}%` }} />
+                        </div>
                       </div>
-                    </div>
-                    <div>
-                      <div>Combine progress: {combinePercent}%</div>
-                      <div css={progressBarStyles}>
-                        <div className="fill" style={{ width: `${combinePercent}%` }} />
+                    )}
+                    {showCombineProgress && (
+                      <div>
+                        <div>Combine progress: {combinePercent}%</div>
+                        <div css={progressBarStyles}>
+                          <div className="fill" style={{ width: `${combinePercent}%` }} />
+                        </div>
                       </div>
-                    </div>
+                    )}
+                    {showOverlayProgress && (
+                      <div>
+                        <div>Recording with overlay: {combinePercent}%</div>
+                        <div css={progressBarStyles}>
+                          <div className="fill" style={{ width: `${combinePercent}%` }} />
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
                 <div css={controlsRowStyles}>
@@ -308,14 +350,16 @@ export function RecordingsCard({
                       Download / View
                     </a>
                   )}
-                  {isFinished && (
+                  {isFinished && !recording.overlayBurned && (
                     <button
                       css={recordingButtonStyles}
                       type="button"
                       onClick={() => openOverlayPreview(recording)}
-                      disabled={laps.length === 0}
+                      disabled={!canRenderOverlay}
                       title={
-                        laps.length === 0
+                        recording.lapOneOffset <= 0
+                          ? "Set the Lap 1 start time on this recording to enable overlay previews"
+                          : laps.length === 0
                           ? "Add lap times to enable overlay previews"
                           : undefined
                       }
@@ -386,6 +430,8 @@ export function RecordingsCard({
           laps={laps}
           isOpen={isOverlayPreviewOpen}
           onClose={closeOverlayPreview}
+          onRefresh={onRefresh}
+          onBurned={onRefresh}
         />
       )}
     </Card>

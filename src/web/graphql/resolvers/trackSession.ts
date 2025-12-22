@@ -362,6 +362,7 @@ export function toTrackRecordingPayload(recording: TrackRecordingRecord, reposit
       return toTrackSessionPayload(session, repositories);
     },
     mediaId: recording.mediaId,
+    overlayBurned: recording.overlayBurned,
     isPrimary: recording.isPrimary,
     lapOneOffset: recording.lapOneOffset,
     description: recording.description,

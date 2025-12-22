@@ -3,6 +3,7 @@ import { findTrackRecordingById, markPrimaryRecording, updateTrackRecording } fr
 import type { GraphQLContext } from "../context.js";
 import { RecordingUploadError, startRecordingUploadSession, deleteRecordingAndFiles } from "../../recordings/service.js";
 import { generateOverlayPreview, OverlayPreviewError } from "../../recordings/overlayPreview.js";
+import { burnRecordingOverlay, OverlayBurnError } from "../../recordings/overlayBurn.js";
 import { toTrackRecordingPayload } from "./trackSession.js";
 import type { OverlayStyle } from "../../../ffmpeg/overlay.js";
 
@@ -29,6 +30,15 @@ function toOverlayPreviewError(err: unknown): GraphQLError {
   return new GraphQLError("Internal error", { extensions: { code: "INTERNAL_SERVER_ERROR" } });
 }
 
+function toOverlayBurnError(err: unknown): GraphQLError {
+  if (err instanceof OverlayBurnError) {
+    const code = err.code ?? "VALIDATION_FAILED";
+    return new GraphQLError(err.message, { extensions: { code } });
+  }
+  console.error("Unexpected overlay burn error", err);
+  return new GraphQLError("Internal error", { extensions: { code: "INTERNAL_SERVER_ERROR" } });
+}
+
 const overlayTextColorMap = {
   WHITE: "#ffffff",
   YELLOW: "#ffd500",
@@ -39,6 +49,11 @@ const overlayPositionMap = {
   TOP_RIGHT: "top-right",
   BOTTOM_LEFT: "bottom-left",
   BOTTOM_RIGHT: "bottom-right",
+} as const;
+
+const overlayExportQualityMap = {
+  BEST: "best",
+  GOOD: "good",
 } as const;
 
 type OverlayStyleInput =
@@ -323,6 +338,51 @@ export const trackRecordingResolvers = {
       return { preview };
     } catch (err) {
       throw toOverlayPreviewError(err);
+    }
+  },
+  burnRecordingOverlay: async (
+    args: {
+      input?: {
+        recordingId?: string;
+        quality?: keyof typeof overlayExportQualityMap | null;
+        style?: OverlayStyleInput;
+      };
+    },
+    context: GraphQLContext
+  ) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+
+    const input = args.input;
+    if (!input?.recordingId || !input.quality) {
+      throw new GraphQLError("recordingId and quality are required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const qualityKey = input.quality;
+    const quality = qualityKey in overlayExportQualityMap ? overlayExportQualityMap[qualityKey] : null;
+    if (!quality) {
+      throw new GraphQLError("quality must be BEST or GOOD", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const styleOverrides = normalizeOverlayStyleInput(input.style);
+
+    try {
+      const recording = await burnRecordingOverlay({
+        recordingId: input.recordingId,
+        quality,
+        styleOverrides,
+        currentUserId: context.currentUser.id,
+      });
+      return { recording: toTrackRecordingPayload(recording, context.repositories) };
+    } catch (err) {
+      throw toOverlayBurnError(err);
     }
   },
   deleteTrackRecording: async (args: { id?: string }, context: GraphQLContext) => {

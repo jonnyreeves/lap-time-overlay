@@ -1,0 +1,222 @@
+import ffmpeg from "fluent-ffmpeg";
+import fsp from "node:fs/promises";
+import path from "node:path";
+import type { LapRecord } from "../../db/laps.js";
+import { findLapsBySessionId } from "../../db/laps.js";
+import {
+  findTrackRecordingById,
+  updateTrackRecording,
+  createTrackRecording,
+  type TrackRecordingRecord,
+} from "../../db/track_recordings.js";
+import { findTrackSessionById } from "../../db/track_sessions.js";
+import type { OverlayStyle } from "../../ffmpeg/overlay.js";
+import { buildDrawtextFilterGraph } from "../../ffmpeg/overlay.js";
+import type { Lap } from "../../ffmpeg/lapTypes.js";
+import { probeVideoInfo } from "../../ffmpeg/videoInfo.js";
+import { sessionRecordingsDir } from "../config.js";
+import { buildOverlayLaps, buildOverlayStyle } from "./overlayPreview.js";
+
+type BurnQuality = "best" | "good";
+
+export class OverlayBurnError extends Error {
+  constructor(
+    message: string,
+    public code:
+      | "NOT_FOUND"
+      | "UNAUTHENTICATED"
+      | "VALIDATION_FAILED"
+      | "INTERNAL_SERVER_ERROR" = "VALIDATION_FAILED"
+  ) {
+    super(message);
+    this.name = "OverlayBurnError";
+  }
+}
+
+function assertRecording(recordingId: string, currentUserId: string): TrackRecordingRecord {
+  const recording = findTrackRecordingById(recordingId);
+  if (!recording) {
+    throw new OverlayBurnError("Recording not found", "NOT_FOUND");
+  }
+  if (recording.userId !== currentUserId) {
+    throw new OverlayBurnError("You do not have access to this recording", "UNAUTHENTICATED");
+  }
+  if (recording.status !== "ready") {
+    throw new OverlayBurnError("Recording must be ready before burning the overlay", "VALIDATION_FAILED");
+  }
+  if (recording.overlayBurned) {
+    throw new OverlayBurnError("Overlay has already been burned into this recording", "VALIDATION_FAILED");
+  }
+  if (!Number.isFinite(recording.lapOneOffset) || recording.lapOneOffset < 0) {
+    throw new OverlayBurnError("Lap 1 offset must be set to zero or greater", "VALIDATION_FAILED");
+  }
+  return recording;
+}
+
+function loadSessionLaps(recording: TrackRecordingRecord): LapRecord[] {
+  const session = findTrackSessionById(recording.sessionId);
+  if (!session) {
+    throw new OverlayBurnError("Session not found for recording", "NOT_FOUND");
+  }
+  if (session.userId !== recording.userId) {
+    throw new OverlayBurnError("Session does not belong to the recording owner", "UNAUTHENTICATED");
+  }
+  const laps = findLapsBySessionId(session.id);
+  if (!laps.length) {
+    throw new OverlayBurnError("Add lap times before rendering overlays", "VALIDATION_FAILED");
+  }
+  return laps;
+}
+
+function buildOutputPaths(recording: TrackRecordingRecord) {
+  const parsed = path.parse(recording.mediaId);
+  const overlayFileName = `${parsed.name}-overlay${parsed.ext || ".mp4"}`;
+  const overlayMediaId = path.posix.join(parsed.dir, overlayFileName);
+  const outputFile = path.join(sessionRecordingsDir, overlayMediaId);
+  return { overlayMediaId, outputFile };
+}
+
+function qualityOptions(quality: BurnQuality): { preset: string; crf: number } {
+  return quality === "best" ? { preset: "slow", crf: 18 } : { preset: "medium", crf: 23 };
+}
+
+function toLapPayload(laps: LapRecord[]): Lap[] {
+  return buildOverlayLaps(laps).map(({ lapId: _lapId, ...lap }) => lap);
+}
+
+async function runOverlayRender({
+  inputVideo,
+  outputFile,
+  laps,
+  startOffsetS,
+  style,
+  quality,
+  onProgress,
+}: {
+  inputVideo: string;
+  outputFile: string;
+  laps: Lap[];
+  startOffsetS: number;
+  style: OverlayStyle;
+  quality: BurnQuality;
+  onProgress?: (percent: number) => void;
+}) {
+  const video = await probeVideoInfo(inputVideo);
+  const { filterGraph, outputLabel } = buildDrawtextFilterGraph({
+    inputVideo,
+    outputFile,
+    video,
+    laps,
+    startOffsetS,
+    style,
+  });
+
+  await fsp.mkdir(path.dirname(outputFile), { recursive: true });
+  await fsp.rm(outputFile, { force: true });
+
+  const { preset, crf } = qualityOptions(quality);
+
+  return new Promise<void>((resolve, reject) => {
+    const cmd = ffmpeg()
+      .input(inputVideo)
+      .complexFilter(filterGraph)
+      .outputOptions([
+        "-map",
+        `[${outputLabel}]`,
+        "-map",
+        "0:a?",
+        "-c:v",
+        "libx265",
+        "-preset",
+        preset,
+        "-crf",
+        String(crf),
+        "-c:a",
+        "copy",
+        "-movflags",
+        "+faststart",
+      ])
+      .on("progress", (progress) => {
+        if (onProgress && typeof progress.percent === "number") {
+          onProgress(progress.percent);
+        }
+      })
+      .on("error", (err) => reject(err))
+      .on("end", () => resolve());
+
+    cmd.save(outputFile);
+  });
+}
+
+export async function burnRecordingOverlay(options: {
+  recordingId: string;
+  currentUserId: string;
+  quality: BurnQuality;
+  styleOverrides?: Partial<OverlayStyle>;
+}): Promise<TrackRecordingRecord> {
+  const { recordingId, currentUserId, quality, styleOverrides } = options;
+  const recording = assertRecording(recordingId, currentUserId);
+  const laps = loadSessionLaps(recording);
+
+  const inputVideo = path.join(sessionRecordingsDir, recording.mediaId);
+  const style = buildOverlayStyle(styleOverrides);
+  let overlayLaps: Lap[];
+  try {
+    overlayLaps = toLapPayload(laps);
+  } catch (err) {
+    throw new OverlayBurnError(
+      err instanceof Error ? err.message : "Invalid lap data for overlay",
+      "VALIDATION_FAILED"
+    );
+  }
+  const startOffsetS = recording.lapOneOffset;
+
+  const { overlayMediaId, outputFile } = buildOutputPaths(recording);
+  const overlayRecording = createTrackRecording({
+    sessionId: recording.sessionId,
+    userId: recording.userId,
+    mediaId: overlayMediaId,
+    overlayBurned: false,
+    isPrimary: false,
+    lapOneOffset: recording.lapOneOffset,
+    description: recording.description ? `${recording.description} (Overlay)` : "Recording with overlay",
+    status: "combining",
+  });
+  updateTrackRecording(overlayRecording.id, { sizeBytes: recording.sizeBytes ?? 0 });
+
+  try {
+    updateTrackRecording(overlayRecording.id, { status: "combining", combineProgress: 0, error: null });
+    await runOverlayRender({
+      inputVideo,
+      outputFile,
+      laps: overlayLaps,
+      startOffsetS,
+      style,
+      quality,
+      onProgress: (percent) => {
+        updateTrackRecording(overlayRecording.id, { combineProgress: Math.max(0, Math.min(1, percent / 100)) });
+      },
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Overlay burn failed";
+    updateTrackRecording(overlayRecording.id, { status: "failed", combineProgress: 0, error: message });
+    throw new OverlayBurnError(message, "INTERNAL_SERVER_ERROR");
+  }
+
+  const videoMeta = await probeVideoInfo(outputFile).catch(() => null);
+  const sizeBytes = (await fsp.stat(outputFile).catch(() => null))?.size ?? null;
+
+  const updated =
+    updateTrackRecording(overlayRecording.id, {
+      mediaId: overlayMediaId,
+      overlayBurned: true,
+      sizeBytes,
+      durationMs: videoMeta ? videoMeta.duration * 1000 : recording.durationMs,
+      fps: videoMeta?.fps ?? recording.fps,
+      status: "ready",
+      combineProgress: 1,
+      error: null,
+    }) ?? recording;
+
+  return updated;
+}

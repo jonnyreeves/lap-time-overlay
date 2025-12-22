@@ -60,7 +60,7 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
-function buildOverlayStyle(overrides?: Partial<OverlayStyle>): OverlayStyle {
+export function buildOverlayStyle(overrides?: Partial<OverlayStyle>): OverlayStyle {
   const base = DEFAULT_OVERLAY_STYLE;
   const nextPosition = overrides?.overlayPosition;
   const overlayPosition = VALID_POSITIONS.includes(nextPosition as OverlayStyle["overlayPosition"])
@@ -122,7 +122,7 @@ function loadSession(recording: TrackRecordingRecord) {
   return session;
 }
 
-function buildOverlayLaps(laps: LapRecord[]): OverlayLap[] {
+export function buildOverlayLaps(laps: LapRecord[]): OverlayLap[] {
   const sorted = [...laps].sort((a, b) => a.lapNumber - b.lapNumber);
   let elapsed = 0;
   return sorted.map((lap) => {

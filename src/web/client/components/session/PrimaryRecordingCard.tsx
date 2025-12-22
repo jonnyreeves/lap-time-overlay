@@ -16,6 +16,7 @@ type Recording = {
   lapOneOffset: number;
   fps: number | null;
   createdAt: string;
+  overlayBurned: boolean;
 };
 
 type LapWithStart = {
@@ -740,6 +741,7 @@ function jumpToLapStart(lapStart: number, lapId?: string) {
       (recording?.lapOneOffset ?? 0) > 0 &&
       orderedLapRanges.length > 0
   );
+  const lapOverlayVisible = lapOverlayEnabled && !recording?.overlayBurned;
   const getPreviewVideo = useCallback(
     () => (recording ? videoRefs.current[recording.id] ?? null : null),
     [recording, videoRefs]
@@ -989,7 +991,7 @@ function jumpToLapStart(lapStart: number, lapId?: string) {
                 {overlayFullscreenLabel(isPreviewFullscreen)}
               </button>
               <LapOverlay
-                enabled={lapOverlayEnabled}
+                enabled={lapOverlayVisible}
                 getVideo={getPreviewVideo}
                 lapRanges={orderedLapRanges}
                 lapLookup={lapLookup}
@@ -1148,7 +1150,7 @@ function jumpToLapStart(lapStart: number, lapId?: string) {
                   {overlayFullscreenLabel(isExpandedFullscreen)}
                 </button>
                 <LapOverlay
-                  enabled={lapOverlayEnabled && isExpanded}
+                  enabled={lapOverlayVisible && isExpanded}
                   getVideo={getExpandedVideo}
                   lapRanges={orderedLapRanges}
                   lapLookup={lapLookup}

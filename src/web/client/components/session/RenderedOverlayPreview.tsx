@@ -2,6 +2,7 @@ import { css } from "@emotion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { graphql, useMutation } from "react-relay";
 import type { RenderedOverlayPreviewGenerateMutation } from "../../__generated__/RenderedOverlayPreviewGenerateMutation.graphql.js";
+import type { RenderedOverlayPreviewBurnOverlayMutation } from "../../__generated__/RenderedOverlayPreviewBurnOverlayMutation.graphql.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 import { Modal } from "../Modal.js";
 import {
@@ -18,12 +19,16 @@ type LapOption = {
   start: number;
 };
 
+type OverlayExportQualityOption = "BEST" | "GOOD";
+
 type RecordingSummary = {
   id: string;
   description: string | null;
   lapOneOffset: number;
   status: string;
+  combineProgress: number | null;
   createdAt: string;
+  overlayBurned: boolean;
 };
 
 type PreviewState = {
@@ -40,7 +45,14 @@ type Props = {
   laps: LapOption[];
   isOpen: boolean;
   onClose: () => void;
+  onRefresh?: () => void;
+  onBurned?: () => void;
 };
+
+function progressPercent(value: number | null | undefined): number {
+  if (value == null || Number.isNaN(value)) return 0;
+  return Math.max(0, Math.min(100, Math.round(value * 100)));
+}
 
 const RenderOverlayPreviewMutation = graphql`
   mutation RenderedOverlayPreviewGenerateMutation($input: RenderOverlayPreviewInput!) {
@@ -55,6 +67,18 @@ const RenderOverlayPreviewMutation = graphql`
         lapNumber
         recordingId
         generatedAt
+      }
+    }
+  }
+`;
+
+const BurnOverlayMutation = graphql`
+  mutation RenderedOverlayPreviewBurnOverlayMutation($input: BurnRecordingOverlayInput!) {
+    burnRecordingOverlay(input: $input) {
+      recording {
+        id
+        overlayBurned
+        updatedAt
       }
     }
   }
@@ -195,7 +219,41 @@ const primaryButtonStyles = css`
   }
 `;
 
-export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Props) {
+const progressSectionStyles = css`
+  display: grid;
+  gap: 6px;
+`;
+
+const progressHeaderStyles = css`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  color: #0f172a;
+`;
+
+const progressBarStyles = css`
+  height: 10px;
+  border-radius: 6px;
+  background: #e2e8f4;
+  overflow: hidden;
+  position: relative;
+
+  .fill {
+    background: linear-gradient(90deg, #4f46e5, #0ea5e9);
+    height: 100%;
+    transition: width 0.25s ease;
+  }
+`;
+
+export function RenderedOverlayPreview({
+  recording,
+  laps,
+  isOpen,
+  onClose,
+  onRefresh,
+  onBurned,
+}: Props) {
   const lapOptions = useMemo(
     () => [...laps].sort((a, b) => a.lapNumber - b.lapNumber),
     [laps]
@@ -212,10 +270,13 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
   const [backgroundOpacity, setBackgroundOpacity] = useState(60);
   const [showLapInfo, setShowLapInfo] = useState(true);
   const [showLapDeltas, setShowLapDeltas] = useState(true);
+  const [quality, setQuality] = useState<OverlayExportQualityOption>("BEST");
   const [preview, setPreview] = useState<PreviewState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [commitPreview, isPreviewInFlight] =
     useMutation<RenderedOverlayPreviewGenerateMutation>(RenderOverlayPreviewMutation);
+  const [commitBurn, isBurnInFlight] =
+    useMutation<RenderedOverlayPreviewBurnOverlayMutation>(BurnOverlayMutation);
 
   useEffect(() => {
     if (!lapOptions.length) {
@@ -238,6 +299,13 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
     const suffix = preview.generatedAt ? `?t=${encodeURIComponent(preview.generatedAt)}` : "";
     return `${preview.previewUrl}${suffix}`;
   }, [preview]);
+
+  const encodingPercent = useMemo(
+    () => progressPercent(recording.combineProgress ?? 0),
+    [recording.combineProgress]
+  );
+
+  const isEncoding = isBurnInFlight || recording.status === "COMBINING";
 
   const handleTextSizeChange = useCallback(
     (nextSize: number) => {
@@ -304,6 +372,40 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
     });
   }, [commitPreview, isOpen, offsetSeconds, recording.id, selectedLapId, styleInput]);
 
+  const handleBurnOverlay = useCallback(() => {
+    if (!isOpen || recording.overlayBurned || isBurnInFlight) return;
+    setError(null);
+    commitBurn({
+      variables: {
+        input: {
+          recordingId: recording.id,
+          quality,
+          style: styleInput,
+        },
+      },
+      onCompleted: (data) => {
+        const updated = data.burnRecordingOverlay?.recording;
+        if (updated?.overlayBurned) {
+          onBurned?.();
+          onClose();
+        }
+      },
+      onError: (err) => setError(err.message),
+    });
+    onRefresh?.();
+  }, [
+    commitBurn,
+    isBurnInFlight,
+    isOpen,
+    onBurned,
+    onClose,
+    onRefresh,
+    quality,
+    recording.id,
+    recording.overlayBurned,
+    styleInput,
+  ]);
+
   useEffect(() => {
     if (!isOpen || !selectedLapId || !lapOptions.length) return;
     requestPreview();
@@ -329,8 +431,9 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
           <div>
             <h3>{recording.description || "Recording"}</h3>
             <div className="muted">
-              Lap 1 starts at {formatLapTimeSeconds(recording.lapOneOffset)}s in this video. Tweak
-              the overlay styling below to refresh the preview; export is coming soon.
+              {recording.overlayBurned
+                ? "Overlay is already burned into this recording. Download it from the recordings list."
+                : `Lap 1 starts at ${formatLapTimeSeconds(recording.lapOneOffset)}s in this video. Tweak the overlay styling below, choose a quality, and burn the overlay to export a new copy.`}
             </div>
           </div>
 
@@ -389,6 +492,18 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
             onShowLapDeltasChange={setShowLapDeltas}
           />
 
+          <label>
+            Export quality
+            <select
+              value={quality}
+              onChange={(e) => setQuality(e.target.value as OverlayExportQualityOption)}
+              disabled={recording.overlayBurned}
+            >
+              <option value="BEST">Best (larger file)</option>
+              <option value="GOOD">Good (smaller file)</option>
+            </select>
+          </label>
+
           {preview && (
             <div css={badgeStyles}>
               Previewed at {formatLapTimeSeconds(preview.previewTimeSeconds)}s • Offset{" "}
@@ -396,6 +511,18 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
               {Math.abs(preview.usedOffsetSeconds - preview.requestedOffsetSeconds) > 1e-3
                 ? " (clamped)"
                 : ""}
+            </div>
+          )}
+
+          {isEncoding && (
+            <div css={progressSectionStyles}>
+              <div css={progressHeaderStyles}>
+                <span>Recording with overlay</span>
+                <span>{encodingPercent}%</span>
+              </div>
+              <div css={progressBarStyles}>
+                <div className="fill" style={{ width: `${encodingPercent}%` }} />
+              </div>
             </div>
           )}
 
@@ -413,10 +540,19 @@ export function RenderedOverlayPreview({ recording, laps, isOpen, onClose }: Pro
             <button
               css={[recordingButtonStyles, primaryButtonStyles]}
               type="button"
-              disabled
-              title="Coming soon"
+              onClick={handleBurnOverlay}
+              disabled={
+                recording.overlayBurned ||
+                !lapOptions.length ||
+                isEncoding
+              }
+              title={
+                recording.overlayBurned
+                  ? "Overlay already burned into this recording"
+                  : undefined
+              }
             >
-              Burn overlay and export (coming soon)
+              {recording.overlayBurned ? "Overlay burned" : isEncoding ? "Burning…" : "Burn overlay and export"}
             </button>
           </div>
         </div>

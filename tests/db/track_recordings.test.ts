@@ -9,6 +9,7 @@ import {
   createTrackRecording,
   findTrackRecordingById,
   findTrackRecordingsBySessionId,
+  updateTrackRecording,
   type TrackRecordingRecord,
 } from "../../src/db/track_recordings.js";
 
@@ -130,5 +131,29 @@ describe("track_recordings", () => {
     assert.deepStrictEqual(recordings[0], recording2); // Ordered by created_at DESC
     assert.deepStrictEqual(recordings[1], recording1);
     assert.strictEqual(recordings[1]?.isPrimary, true);
+  });
+
+  it("clamps combine progress updates and ignores invalid values", () => {
+    const recording = createTrackRecording({
+      sessionId: trackSession.id,
+      userId: trackSession.userId,
+      mediaId: "media-uuid-d",
+      lapOneOffset: 0,
+      description: "Clamp test",
+    });
+
+    const overshoot = updateTrackRecording(recording.id, { combineProgress: 2 });
+    assert.ok(overshoot);
+    assert.strictEqual(overshoot.combineProgress, 1);
+
+    const stillClamped = findTrackRecordingById(recording.id);
+    assert.strictEqual(stillClamped?.combineProgress, 1);
+
+    const invalid = updateTrackRecording(recording.id, { combineProgress: Number.NaN });
+    assert.ok(invalid);
+    assert.strictEqual(invalid.combineProgress, 1);
+
+    const unchanged = findTrackRecordingById(recording.id);
+    assert.strictEqual(unchanged?.combineProgress, 1);
   });
 });

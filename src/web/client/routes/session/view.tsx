@@ -76,6 +76,7 @@ const SessionQuery = graphql`
         status
         error
         sizeBytes
+        overlayBurned
         isPrimary
         lapOneOffset
         durationMs
@@ -175,6 +176,7 @@ export default function ViewSessionRoute() {
         description: recording.description ?? null,
         sizeBytes: recording.sizeBytes ?? null,
         isPrimary: recording.isPrimary ?? false,
+        overlayBurned: recording.overlayBurned ?? false,
         lapOneOffset: recording.lapOneOffset ?? 0,
         durationMs: recording.durationMs ?? null,
         fps: recording.fps ?? null,
