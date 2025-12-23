@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<c06e8350b969267155ea8d40ab0d852e>>
+ * @generated SignedSource<<17217f1d4b1ffdda7c74dc3ecb6f02d0>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,10 +9,12 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type OverlayExportQuality = "BEST" | "GOOD" | "%future added value";
+export type OverlayExportCodec = "H264" | "H265" | "%future added value";
+export type OverlayExportQuality = "BEST" | "GOOD" | "ULTRAFAST" | "%future added value";
 export type OverlayPosition = "BOTTOM_LEFT" | "BOTTOM_RIGHT" | "TOP_LEFT" | "TOP_RIGHT" | "%future added value";
 export type OverlayTextColor = "WHITE" | "YELLOW" | "%future added value";
 export type BurnRecordingOverlayInput = {
+  codec?: OverlayExportCodec | null | undefined;
   embedChapters?: boolean | null | undefined;
   quality: OverlayExportQuality;
   recordingId: string;

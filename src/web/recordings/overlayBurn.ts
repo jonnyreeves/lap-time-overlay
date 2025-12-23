@@ -19,7 +19,8 @@ import { buildOverlayLaps, buildOverlayStyle } from "./overlayPreview.js";
 import { buildChapterMarkers, buildChapterMetadataFile } from "./chapterMetadata.js";
 import { rebuildJellyfinSessionProjection } from "./jellyfinProjection.js";
 
-type BurnQuality = "best" | "good";
+type BurnQuality = "best" | "good" | "ultrafast";
+type BurnCodec = "h264" | "h265";
 
 export class OverlayBurnError extends Error {
   constructor(
@@ -78,7 +79,13 @@ function buildOverlayFileInfo(recording: TrackRecordingRecord) {
 }
 
 function qualityOptions(quality: BurnQuality): { preset: string; crf: number } {
-  return quality === "best" ? { preset: "slow", crf: 18 } : { preset: "medium", crf: 23 };
+  if (quality === "best") {
+    return { preset: "slow", crf: 18 };
+  }
+  if (quality === "ultrafast") {
+    return { preset: "ultrafast", crf: 28 };
+  }
+  return { preset: "medium", crf: 23 };
 }
 
 function toLapPayload(laps: LapRecord[]): Lap[] {
@@ -109,6 +116,7 @@ async function runOverlayRender({
   startOffsetS,
   style,
   quality,
+  codec,
   video,
   chapterMetadataFile,
   onProgress,
@@ -119,6 +127,7 @@ async function runOverlayRender({
   startOffsetS: number;
   style: OverlayStyle;
   quality: BurnQuality;
+  codec: BurnCodec;
   video: VideoInfo;
   chapterMetadataFile?: string | null;
   onProgress?: (percent: number) => void;
@@ -136,6 +145,7 @@ async function runOverlayRender({
   await fsp.rm(outputFile, { force: true });
 
   const { preset, crf } = qualityOptions(quality);
+  const videoCodec = codec === "h264" ? "libx264" : "libx265";
 
   return new Promise<void>((resolve, reject) => {
     const cmd = ffmpeg().input(inputVideo);
@@ -150,7 +160,7 @@ async function runOverlayRender({
       "-map",
       "0:a?",
       "-c:v",
-      "libx265",
+      videoCodec,
       "-preset",
       preset,
       "-crf",
@@ -191,10 +201,11 @@ export async function burnRecordingOverlay(options: {
   recordingId: string;
   currentUserId: string;
   quality: BurnQuality;
+  codec?: BurnCodec;
   styleOverrides?: Partial<OverlayStyle>;
   embedChapters?: boolean | null;
 }): Promise<TrackRecordingRecord> {
-  const { recordingId, currentUserId, quality, styleOverrides } = options;
+  const { recordingId, currentUserId, quality, styleOverrides, codec } = options;
   const recording = assertRecording(recordingId, currentUserId);
   const laps = loadSessionLaps(recording);
   const embedChapters = options.embedChapters ?? true;
@@ -250,6 +261,7 @@ export async function burnRecordingOverlay(options: {
       startOffsetS,
       style,
       quality,
+      codec: codec ?? "h265",
       video,
       chapterMetadataFile: embedChapters ? chapterMetadataFile : null,
       onProgress: (percent) => {

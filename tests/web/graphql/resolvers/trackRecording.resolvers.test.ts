@@ -400,12 +400,53 @@ describe("trackRecording resolvers", () => {
       expect.objectContaining({
         recordingId: "rec1",
         quality: "best",
+        codec: "h265",
         styleOverrides: { textColor: "#ffd500" },
         currentUserId: "user-1",
         embedChapters: true,
       })
     );
     expect(result.recording.overlayBurned).toBe(true);
+  });
+
+  it("accepts the ultrafast quality flag", async () => {
+    const burned: recordingsDb.TrackRecordingRecord = {
+      id: "rec4",
+      sessionId: "s1",
+      userId: "user-1",
+      mediaId: "media/rec4-overlay.mp4",
+      overlayBurned: true,
+      isPrimary: false,
+      lapOneOffset: 0,
+      description: null,
+      status: "ready",
+      error: null,
+      sizeBytes: 123,
+      durationMs: 5000,
+      fps: 30,
+      combineProgress: 1,
+      createdAt: 0,
+      updatedAt: 0,
+    };
+
+    vi.mocked(burnRecordingOverlay).mockResolvedValue(burned);
+
+    await trackRecordingResolvers.burnRecordingOverlay(
+      {
+        input: {
+          recordingId: "rec4",
+          quality: "ULTRAFAST",
+        },
+      },
+      context
+    );
+
+    expect(burnRecordingOverlay).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recordingId: "rec4",
+        quality: "ultrafast",
+      })
+    );
   });
 
   it("honors embedChapters flag when provided", async () => {
@@ -444,6 +485,46 @@ describe("trackRecording resolvers", () => {
       expect.objectContaining({
         recordingId: "rec2",
         embedChapters: false,
+      })
+    );
+  });
+
+  it("maps codec selection before burning", async () => {
+    const burned: recordingsDb.TrackRecordingRecord = {
+      id: "rec3",
+      sessionId: "s1",
+      userId: "user-1",
+      mediaId: "media/rec3-overlay.mp4",
+      overlayBurned: true,
+      isPrimary: false,
+      lapOneOffset: 0,
+      description: null,
+      status: "ready",
+      error: null,
+      sizeBytes: 123,
+      durationMs: 5000,
+      fps: 30,
+      combineProgress: 1,
+      createdAt: 0,
+      updatedAt: 0,
+    };
+    vi.mocked(burnRecordingOverlay).mockResolvedValue(burned);
+
+    await trackRecordingResolvers.burnRecordingOverlay(
+      {
+        input: {
+          recordingId: "rec3",
+          quality: "GOOD",
+          codec: "H264",
+        },
+      },
+      context
+    );
+
+    expect(burnRecordingOverlay).toHaveBeenCalledWith(
+      expect.objectContaining({
+        recordingId: "rec3",
+        codec: "h264",
       })
     );
   });

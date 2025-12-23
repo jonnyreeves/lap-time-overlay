@@ -19,7 +19,8 @@ type LapOption = {
   start: number;
 };
 
-type OverlayExportQualityOption = "BEST" | "GOOD";
+type OverlayExportQualityOption = "BEST" | "GOOD" | "ULTRAFAST";
+type OverlayExportCodecOption = "H265" | "H264";
 
 type RecordingSummary = {
   id: string;
@@ -322,6 +323,7 @@ export function RenderedOverlayPreview({
   const [showLapInfo, setShowLapInfo] = useState(true);
   const [showLapDeltas, setShowLapDeltas] = useState(true);
   const [quality, setQuality] = useState<OverlayExportQualityOption>("BEST");
+  const [codec, setCodec] = useState<OverlayExportCodecOption>("H265");
   const [embedChapters, setEmbedChapters] = useState(true);
   const [preview, setPreview] = useState<PreviewState | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -431,6 +433,7 @@ export function RenderedOverlayPreview({
         input: {
           recordingId: recording.id,
           quality,
+          codec,
           style: styleInput,
           embedChapters,
         },
@@ -453,6 +456,7 @@ export function RenderedOverlayPreview({
     onClose,
     onRefresh,
     quality,
+    codec,
     recording.id,
     recording.overlayBurned,
     styleInput,
@@ -544,17 +548,32 @@ export function RenderedOverlayPreview({
             onShowLapDeltasChange={setShowLapDeltas}
           />
 
-          <label>
-            Export quality
-            <select
-              value={quality}
-              onChange={(e) => setQuality(e.target.value as OverlayExportQualityOption)}
-              disabled={recording.overlayBurned}
-            >
-              <option value="BEST">Best (larger file)</option>
-              <option value="GOOD">Good (smaller file)</option>
-            </select>
-          </label>
+          <div css={selectorRowStyles}>
+            <label>
+              Export quality
+              <select
+                value={quality}
+                onChange={(e) => setQuality(e.target.value as OverlayExportQualityOption)}
+                disabled={recording.overlayBurned}
+              >
+                <option value="BEST">Best (larger file)</option>
+                <option value="GOOD">Good (smaller file)</option>
+                <option value="ULTRAFAST">Ultra-fast (fastest preset)</option>
+              </select>
+            </label>
+
+            <label>
+              Codec
+              <select
+                value={codec}
+                onChange={(e) => setCodec(e.target.value as OverlayExportCodecOption)}
+                disabled={recording.overlayBurned}
+              >
+                <option value="H265">H.265 (default)</option>
+                <option value="H264">H.264</option>
+              </select>
+            </label>
+          </div>
 
           <label className="inline-checkbox">
             <input

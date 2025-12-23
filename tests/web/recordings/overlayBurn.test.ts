@@ -222,4 +222,92 @@ describe("burnRecordingOverlay", () => {
     expect(savedMetadataInputs).toHaveLength(0);
     expect(savedOutputOptions.some((opts) => opts.includes("-map_chapters"))).toBe(false);
   });
+
+  it("uses the ultrafast preset when requested", async () => {
+    const user = createUser("ultrafast", "hashed");
+    const track = createTrack("Overlay Track Ultra");
+    const layout = createTrackLayout(track.id, "Full");
+    const userId = user.id;
+    const { trackSession } = createTrackSessionWithLaps({
+      date: "2024-01-01",
+      format: "Race",
+      classification: 1,
+      trackId: track.id,
+      userId,
+      trackLayoutId: layout.id,
+      laps: [
+        { lapNumber: 1, time: 60 },
+        { lapNumber: 2, time: 62 },
+      ],
+    });
+
+    const recording = createTrackRecording({
+      sessionId: trackSession.id,
+      userId,
+      mediaId: `${trackSession.id}/ultrafast.mp4`,
+      lapOneOffset: 0,
+      description: "Ultrafast recording",
+      status: "ready",
+      isPrimary: true,
+    });
+
+    const inputPath = path.join(sessionRecordingsDir, recording.mediaId);
+    await fsp.mkdir(path.dirname(inputPath), { recursive: true });
+    await fsp.writeFile(inputPath, "source");
+
+    await burnRecordingOverlay({
+      recordingId: recording.id,
+      currentUserId: userId,
+      quality: "ultrafast",
+    });
+
+    const flattened = savedOutputOptions.flat();
+    expect(flattened).toContain("-preset");
+    expect(flattened).toContain("ultrafast");
+    expect(flattened).toContain("-crf");
+    expect(flattened).toContain("28");
+  });
+
+  it("allows selecting the H.264 codec", async () => {
+    const user = createUser("codec", "hashed");
+    const track = createTrack("Overlay Track Codec");
+    const layout = createTrackLayout(track.id, "Full");
+    const userId = user.id;
+    const { trackSession } = createTrackSessionWithLaps({
+      date: "2024-01-01",
+      format: "Race",
+      classification: 1,
+      trackId: track.id,
+      userId,
+      trackLayoutId: layout.id,
+      laps: [
+        { lapNumber: 1, time: 60 },
+        { lapNumber: 2, time: 62 },
+      ],
+    });
+
+    const recording = createTrackRecording({
+      sessionId: trackSession.id,
+      userId,
+      mediaId: `${trackSession.id}/codec.mp4`,
+      lapOneOffset: 0,
+      description: "Codec recording",
+      status: "ready",
+      isPrimary: true,
+    });
+
+    const inputPath = path.join(sessionRecordingsDir, recording.mediaId);
+    await fsp.mkdir(path.dirname(inputPath), { recursive: true });
+    await fsp.writeFile(inputPath, "source");
+
+    await burnRecordingOverlay({
+      recordingId: recording.id,
+      currentUserId: userId,
+      quality: "good",
+      codec: "h264",
+    });
+
+    const flattened = savedOutputOptions.flat();
+    expect(flattened).toContain("libx264");
+  });
 });

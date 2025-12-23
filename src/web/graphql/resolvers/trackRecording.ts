@@ -54,6 +54,12 @@ const overlayPositionMap = {
 const overlayExportQualityMap = {
   BEST: "best",
   GOOD: "good",
+  ULTRAFAST: "ultrafast",
+} as const;
+
+const overlayExportCodecMap = {
+  H265: "h265",
+  H264: "h264",
 } as const;
 
 type OverlayStyleInput =
@@ -345,6 +351,7 @@ export const trackRecordingResolvers = {
       input?: {
         recordingId?: string;
         quality?: keyof typeof overlayExportQualityMap | null;
+        codec?: keyof typeof overlayExportCodecMap | null;
         style?: OverlayStyleInput;
         embedChapters?: boolean | null;
       };
@@ -367,7 +374,14 @@ export const trackRecordingResolvers = {
     const qualityKey = input.quality;
     const quality = qualityKey in overlayExportQualityMap ? overlayExportQualityMap[qualityKey] : null;
     if (!quality) {
-      throw new GraphQLError("quality must be BEST or GOOD", {
+      throw new GraphQLError("quality must be BEST, GOOD, or ULTRAFAST", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    const codecKey = input.codec ?? "H265";
+    const codec = codecKey in overlayExportCodecMap ? overlayExportCodecMap[codecKey] : null;
+    if (!codec) {
+      throw new GraphQLError("codec must be H265 or H264", {
         extensions: { code: "VALIDATION_FAILED" },
       });
     }
@@ -380,6 +394,7 @@ export const trackRecordingResolvers = {
       const recording = await burnRecordingOverlay({
         recordingId: input.recordingId,
         quality,
+        codec,
         styleOverrides,
         currentUserId: context.currentUser.id,
         embedChapters,

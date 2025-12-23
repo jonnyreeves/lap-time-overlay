@@ -114,6 +114,12 @@ enum OverlayPosition {
 enum OverlayExportQuality {
   BEST
   GOOD
+  ULTRAFAST
+}
+
+enum OverlayExportCodec {
+  H265
+  H264
 }
 
 input OverlayStyleInput {
@@ -137,6 +143,7 @@ input RenderOverlayPreviewInput {
 input BurnRecordingOverlayInput {
   recordingId: ID!
   quality: OverlayExportQuality!
+  codec: OverlayExportCodec = H265
   style: OverlayStyleInput
   embedChapters: Boolean = true
 }
