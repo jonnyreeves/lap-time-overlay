@@ -3,11 +3,13 @@ import { useEffect, useMemo, useState } from "react";
 import { graphql, useMutation } from "react-relay";
 import type { RecordingsCardDeleteRecordingMutation } from "../../__generated__/RecordingsCardDeleteRecordingMutation.graphql.js";
 import type { RecordingsCardMarkPrimaryRecordingMutation } from "../../__generated__/RecordingsCardMarkPrimaryRecordingMutation.graphql.js";
+import { getOverlayMediaId } from "../../utils/overlayMedia.js";
 import { Card } from "../Card.js";
 import { IconButton } from "../IconButton.js";
 import { inlineActionButtonStyles } from "../inlineActionButtons.ts";
+import type { RecordingSummary } from "../renderedOverlay/RenderedOverlayPreview";
+import { RenderedOverlayPreview } from "../renderedOverlay/RenderedOverlayPreview.js";
 import type { LapWithEvents } from "./LapsCard.js";
-import { RenderedOverlayPreview } from "./RenderedOverlayPreview.js";
 import { UploadRecordingModal } from "./UploadRecordingModal.js";
 import {
   formatBytes,
@@ -20,6 +22,7 @@ import { actionsRowStyles } from "./sessionOverviewStyles";
 type Recording = {
   id: string;
   description: string | null;
+  mediaId: string;
   sizeBytes: number | null;
   isPrimary: boolean;
   overlayBurned: boolean;
@@ -156,6 +159,33 @@ export function RecordingsCard({
     () => recordings.find((rec) => rec.id === previewRecordingId) ?? null,
     [previewRecordingId, recordings]
   );
+  const previewRecordingSummary = useMemo<RecordingSummary | null>(() => {
+    if (!previewRecording) return null;
+    return {
+      id: previewRecording.id,
+      description: previewRecording.description,
+      lapOneOffset: previewRecording.lapOneOffset,
+      status: previewRecording.status,
+      combineProgress: previewRecording.combineProgress,
+      createdAt: previewRecording.createdAt,
+      overlayBurned: previewRecording.overlayBurned,
+    };
+  }, [previewRecording]);
+  const overlayRecordingSummary = useMemo<RecordingSummary | null>(() => {
+    if (!previewRecording?.mediaId) return null;
+    const overlayMediaId = getOverlayMediaId(previewRecording.mediaId);
+    const overlayRecording = recordings.find((rec) => rec.mediaId === overlayMediaId);
+    if (!overlayRecording) return null;
+    return {
+      id: overlayRecording.id,
+      description: overlayRecording.description,
+      lapOneOffset: overlayRecording.lapOneOffset,
+      status: overlayRecording.status,
+      combineProgress: overlayRecording.combineProgress,
+      createdAt: overlayRecording.createdAt,
+      overlayBurned: overlayRecording.overlayBurned,
+    };
+  }, [previewRecording, recordings]);
   const [isOverlayPreviewOpen, setIsOverlayPreviewOpen] = useState(false);
   const [deleteRecording, isDeleteInFlight] =
     useMutation<RecordingsCardDeleteRecordingMutation>(DeleteRecordingMutation);
@@ -347,7 +377,7 @@ export function RecordingsCard({
                       target="_blank"
                       rel="noreferrer"
                     >
-                      Download / View
+                      Download
                     </a>
                   )}
                   {isFinished && !recording.overlayBurned && (
@@ -360,8 +390,8 @@ export function RecordingsCard({
                         recording.lapOneOffset <= 0
                           ? "Set the Lap 1 start time on this recording to enable overlay previews"
                           : laps.length === 0
-                          ? "Add lap times to enable overlay previews"
-                          : undefined
+                            ? "Add lap times to enable overlay previews"
+                            : undefined
                       }
                     >
                       Render with Overlay
@@ -424,9 +454,10 @@ export function RecordingsCard({
         onClose={() => setIsUploadModalOpen(false)}
         onRefresh={onRefresh}
       />
-      {previewRecording && (
+      {previewRecordingSummary && (
         <RenderedOverlayPreview
-          recording={previewRecording}
+          recording={previewRecordingSummary}
+          overlayRecording={overlayRecordingSummary}
           laps={laps}
           isOpen={isOverlayPreviewOpen}
           onClose={closeOverlayPreview}

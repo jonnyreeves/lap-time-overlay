@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d22afd20b5b8d4f436631339247500ec>>
+ * @generated SignedSource<<14a1788750a172c349cd45160eb3e0e1>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -27,10 +27,10 @@ export type OverlayStyleInput = {
   textColor?: OverlayTextColor | null | undefined;
   textSize?: number | null | undefined;
 };
-export type RenderedOverlayPreviewGenerateMutation$variables = {
+export type RenderPreviewControlsGenerateMutation$variables = {
   input: RenderOverlayPreviewInput;
 };
-export type RenderedOverlayPreviewGenerateMutation$data = {
+export type RenderPreviewControlsGenerateMutation$data = {
   readonly renderOverlayPreview: {
     readonly preview: {
       readonly generatedAt: string;
@@ -45,9 +45,9 @@ export type RenderedOverlayPreviewGenerateMutation$data = {
     };
   };
 };
-export type RenderedOverlayPreviewGenerateMutation = {
-  response: RenderedOverlayPreviewGenerateMutation$data;
-  variables: RenderedOverlayPreviewGenerateMutation$variables;
+export type RenderPreviewControlsGenerateMutation = {
+  response: RenderPreviewControlsGenerateMutation$data;
+  variables: RenderPreviewControlsGenerateMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -156,7 +156,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "RenderedOverlayPreviewGenerateMutation",
+    "name": "RenderPreviewControlsGenerateMutation",
     "selections": (v1/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -165,20 +165,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "RenderedOverlayPreviewGenerateMutation",
+    "name": "RenderPreviewControlsGenerateMutation",
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "35dbb7f1fed06e6e6037a5955ba1c28f",
+    "cacheID": "e4708b6888d794d2b131e3c4ea6d443b",
     "id": null,
     "metadata": {},
-    "name": "RenderedOverlayPreviewGenerateMutation",
+    "name": "RenderPreviewControlsGenerateMutation",
     "operationKind": "mutation",
-    "text": "mutation RenderedOverlayPreviewGenerateMutation(\n  $input: RenderOverlayPreviewInput!\n) {\n  renderOverlayPreview(input: $input) {\n    preview {\n      id\n      previewUrl\n      requestedOffsetSeconds\n      usedOffsetSeconds\n      previewTimeSeconds\n      lapId\n      lapNumber\n      recordingId\n      generatedAt\n    }\n  }\n}\n"
+    "text": "mutation RenderPreviewControlsGenerateMutation(\n  $input: RenderOverlayPreviewInput!\n) {\n  renderOverlayPreview(input: $input) {\n    preview {\n      id\n      previewUrl\n      requestedOffsetSeconds\n      usedOffsetSeconds\n      previewTimeSeconds\n      lapId\n      lapNumber\n      recordingId\n      generatedAt\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "161e608cf40d135bbaf859b40cf86e21";
+(node as any).hash = "bae2085acc09506191afd6ac20ba80ac";
 
 export default node;

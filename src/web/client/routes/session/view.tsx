@@ -73,6 +73,7 @@ const SessionQuery = graphql`
       trackRecordings(first: 20) {
         id
         description
+        mediaId
         status
         error
         sizeBytes
@@ -183,6 +184,7 @@ export default function ViewSessionRoute() {
         createdAt: recording.createdAt,
         status: recording.status,
         error: recording.error ?? null,
+        mediaId: recording.mediaId,
         combineProgress: recording.combineProgress ?? 0,
         uploadProgress: {
           uploadedBytes: recording.uploadProgress.uploadedBytes ?? 0,
