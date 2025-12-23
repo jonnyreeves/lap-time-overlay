@@ -7,6 +7,13 @@ export type TrackRecordingStatus =
   | "combining"
   | "ready"
   | "failed";
+const TRACK_RECORDING_STATUS_VALUES: TrackRecordingStatus[] = [
+  "pending_upload",
+  "uploading",
+  "combining",
+  "ready",
+  "failed",
+];
 
 export interface TrackRecordingRecord {
   id: string;
@@ -215,6 +222,63 @@ export function deleteTrackRecording(id: string): boolean {
   const db = getDb();
   const result = db.prepare(`DELETE FROM track_recordings WHERE id = ?`).run(id);
   return result.changes > 0;
+}
+
+type MediaIdRow = {
+  media_id: string | null;
+};
+
+export function findAllTrackRecordingMediaIds(): string[] {
+  const db = getDb();
+  const rows = db.prepare<unknown[], MediaIdRow>(`SELECT media_id FROM track_recordings`).all();
+  return rows
+    .map((row) => row.media_id)
+    .filter((mediaId): mediaId is string => typeof mediaId === "string");
+}
+
+type RecordingStatusCountRow = {
+  status: string | null;
+  count: number | null;
+};
+
+export function getTrackRecordingStatusCounts(): { status: TrackRecordingStatus; count: number }[] {
+  const db = getDb();
+  const rows = db
+    .prepare<unknown[], RecordingStatusCountRow>(
+      `SELECT status, COUNT(*) AS count FROM track_recordings GROUP BY status`
+    )
+    .all();
+
+  const counts = new Map<TrackRecordingStatus, number>();
+  for (const status of TRACK_RECORDING_STATUS_VALUES) {
+    counts.set(status, 0);
+  }
+
+  for (const row of rows) {
+    const status = row.status;
+    if (!status) continue;
+    if (!TRACK_RECORDING_STATUS_VALUES.includes(status as TrackRecordingStatus)) {
+      continue;
+    }
+    counts.set(status as TrackRecordingStatus, Number(row.count ?? 0));
+  }
+
+  return TRACK_RECORDING_STATUS_VALUES.map((status) => ({
+    status,
+    count: counts.get(status) ?? 0,
+  }));
+}
+
+type ReadySessionRow = {
+  session_id: string;
+};
+
+export function findSessionIdsWithReadyRecordings(): string[] {
+  const db = getDb();
+  const rows = db.prepare<unknown[], ReadySessionRow>(
+    `SELECT DISTINCT session_id FROM track_recordings WHERE status = 'ready'`
+  ).all();
+  return rows.map((row) => row.session_id);
 }
 
 export interface TrackRecordingRepository {

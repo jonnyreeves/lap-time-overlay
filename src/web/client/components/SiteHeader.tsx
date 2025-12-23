@@ -1,5 +1,5 @@
 import { graphql, useFragment } from "react-relay";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { SiteHeader_viewer$key } from "../__generated__/SiteHeader_viewer.graphql.js";
 import { useLogout } from "../hooks/useLogout.js";
 import { heroStyles } from "../styles/layout.js";
@@ -33,9 +33,10 @@ export function SiteHeader({ viewer }: Props) {
                     RaceCraft 🏁
                 </h1>
                 {isLoggedIn ? (
-                    <p className="lede" css={ledeStyles}>
-                        Signed in as {data.username} | <a href="#" onClick={handleLogout}>Sign out</a>
-                    </p>
+                <p className="lede" css={ledeStyles}>
+                    Signed in as {data.username} | <Link to="/admin">Admin</Link> |{" "}
+                    <a href="#" onClick={handleLogout}>Sign out</a>
+                </p>
                 ) : null}
 
             </div>

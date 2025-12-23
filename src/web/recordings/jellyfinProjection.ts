@@ -5,6 +5,7 @@ import { findTrackLayoutById } from "../../db/track_layouts.js";
 import {
   findTrackRecordingById,
   findTrackRecordingsBySessionId,
+  findSessionIdsWithReadyRecordings,
   type TrackRecordingRecord,
 } from "../../db/track_recordings.js";
 import { findTrackSessionById } from "../../db/track_sessions.js";
@@ -353,6 +354,25 @@ export async function rebuildJellyfinSessionProjection(sessionId: string): Promi
   }
 
   return { folderName, recordings: views };
+}
+
+export async function rebuildJellyfinProjectionAll(): Promise<{ rebuiltSessions: number }> {
+  await fsp.rm(projectionRoot, { recursive: true, force: true });
+  await fsp.mkdir(projectionRoot, { recursive: true });
+
+  const sessionIds = findSessionIdsWithReadyRecordings();
+  let rebuilt = 0;
+
+  for (const sessionId of sessionIds) {
+    try {
+      await rebuildJellyfinSessionProjection(sessionId);
+      rebuilt++;
+    } catch (err) {
+      console.warn("Failed to rebuild Jellyfin projection for session", sessionId, err);
+    }
+  }
+
+  return { rebuiltSessions: rebuilt };
 }
 
 export async function removeJellyfinRecordingProjection(recordingId: string): Promise<void> {

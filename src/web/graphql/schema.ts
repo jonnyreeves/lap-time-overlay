@@ -6,6 +6,7 @@ import { trackResolvers } from "./resolvers/track.js";
 import { trackSessionResolvers } from "./resolvers/trackSession.js";
 import { trackRecordingResolvers } from "./resolvers/trackRecording.js";
 import { viewerResolvers } from "./resolvers/viewer.js";
+import { adminResolvers } from "./resolvers/admin.js";
 
 const schemaFileContents = readFileSync(
   pathResolve(process.cwd(), "schema.graphql"),
@@ -41,4 +42,11 @@ export const rootValue = {
   addTrackLayoutToTrack: trackResolvers.addTrackLayoutToTrack,
   updateTrackLayout: trackResolvers.updateTrackLayout,
   removeTrackLayoutFromTrack: trackResolvers.removeTrackLayoutFromTrack,
+  adminOrphanedMedia: adminResolvers.adminOrphanedMedia,
+  adminTempDirs: adminResolvers.adminTempDirs,
+  adminRecordingHealth: adminResolvers.adminRecordingHealth,
+  rebuildJellyfinProjection: adminResolvers.rebuildJellyfinProjection,
+  deleteOrphanedMedia: adminResolvers.deleteOrphanedMedia,
+  emptyTempDir: adminResolvers.emptyTempDir,
+  rebuildJellyfinProjectionAll: adminResolvers.rebuildJellyfinProjectionAll,
 };

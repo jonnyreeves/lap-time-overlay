@@ -3,6 +3,45 @@ type Query {
   tracks: [Track!]!
   trackSession(id: ID!): TrackSession!
   track(id: ID!): Track
+  adminOrphanedMedia: [AdminOrphanedMedia!]!
+  adminTempDirs: [AdminTempDir!]!
+  adminRecordingHealth: [AdminRecordingHealth!]!
+}
+
+type AdminOrphanedMedia {
+  mediaId: String!
+  sizeBytes: Float!
+  modifiedAt: String!
+}
+
+enum AdminTempDirName {
+  UPLOADS
+  RENDERS
+  PREVIEWS
+}
+
+type AdminTempDir {
+  name: AdminTempDirName!
+  path: String!
+  sizeBytes: Float!
+  fileCount: Int!
+}
+
+type AdminRecordingHealth {
+  status: TrackRecordingStatus!
+  count: Int!
+}
+
+type JellyfinRecordingView {
+  recordingId: ID!
+  rawPath: String!
+  jellyfinPath: String!
+  nfoPath: String!
+}
+
+type JellyfinSessionView {
+  folderName: String!
+  recordings: [JellyfinRecordingView!]!
 }
 
 input CreateTrackInput {
@@ -205,6 +244,38 @@ type Mutation {
   addTrackLayoutToTrack(trackId: ID!, input: CreateTrackLayoutInput!): AddTrackLayoutToTrackPayload!
   updateTrackLayout(input: UpdateTrackLayoutInput!): UpdateTrackLayoutPayload!
   removeTrackLayoutFromTrack(trackId: ID!, trackLayoutId: ID!): RemoveTrackLayoutFromTrackPayload!
+  rebuildJellyfinProjection(input: RebuildJellyfinProjectionInput!): RebuildJellyfinProjectionPayload!
+  deleteOrphanedMedia(input: DeleteOrphanedMediaInput!): DeleteOrphanedMediaPayload!
+  emptyTempDir(input: EmptyTempDirInput!): EmptyTempDirPayload!
+  rebuildJellyfinProjectionAll: RebuildJellyfinProjectionAllPayload!
+}
+
+input RebuildJellyfinProjectionInput {
+  sessionId: ID!
+}
+
+type RebuildJellyfinProjectionPayload {
+  view: JellyfinSessionView!
+}
+
+input DeleteOrphanedMediaInput {
+  mediaIds: [String!]!
+}
+
+type DeleteOrphanedMediaPayload {
+  deleted: [String!]!
+}
+
+input EmptyTempDirInput {
+  name: AdminTempDirName!
+}
+
+type EmptyTempDirPayload {
+  name: AdminTempDirName!
+}
+
+type RebuildJellyfinProjectionAllPayload {
+  rebuiltSessions: Int!
 }
 
 input AuthInput {
