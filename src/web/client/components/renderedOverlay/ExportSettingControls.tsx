@@ -108,9 +108,10 @@ export function ExportSettingControls({
   canRenderOverlay,
   onBurn,
 }: Props) {
+  const optionDisabled = overlayBurned || isEncoding;
   const buttonDisabled = overlayBurned || !canRenderOverlay || isEncoding;
   const buttonTitle = overlayBurned ? "Overlay already burned into this recording" : undefined;
-  const buttonLabel = overlayBurned ? "Overlay burned" : isEncoding ? "Burning…" : "Burn overlay and export";
+  const buttonLabel = isEncoding ? "Rendering…" : "Export";
 
   return (
     <div css={exportSettingsStyles}>
@@ -124,7 +125,7 @@ export function ExportSettingControls({
           <select
             value={quality}
             onChange={(event) => onQualityChange(event.target.value as OverlayExportQualityOption)}
-            disabled={overlayBurned}
+            disabled={optionDisabled}
           >
             <option value="BEST">Best (larger file)</option>
             <option value="GOOD">Good (smaller file)</option>
@@ -137,7 +138,7 @@ export function ExportSettingControls({
           <select
             value={codec}
             onChange={(event) => onCodecChange(event.target.value as OverlayExportCodecOption)}
-            disabled={overlayBurned}
+            disabled={optionDisabled}
           >
             <option value="H265">H.265 (default)</option>
             <option value="H264">H.264</option>
@@ -150,7 +151,7 @@ export function ExportSettingControls({
           type="checkbox"
           checked={embedChapters}
           onChange={(event) => onEmbedChaptersChange(event.target.checked)}
-          disabled={overlayBurned}
+          disabled={optionDisabled}
         />
         <span>Embed lap chapters in the MP4</span>
       </label>

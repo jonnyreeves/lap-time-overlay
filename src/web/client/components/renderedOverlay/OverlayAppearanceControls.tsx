@@ -19,6 +19,7 @@ type Props = {
   onBackgroundOpacityChange: (value: number) => void;
   onShowLapInfoChange: (value: boolean) => void;
   onShowLapDeltasChange: (value: boolean) => void;
+  disabled?: boolean;
 };
 
 const sectionHeadingStyles = css`
@@ -83,6 +84,7 @@ export function OverlayAppearanceControls({
   onBackgroundOpacityChange,
   onShowLapInfoChange,
   onShowLapDeltasChange,
+  disabled,
 }: Props) {
   const handleOpacityChange = (event: ChangeEvent<HTMLInputElement>) => {
     onBackgroundOpacityChange(Number(event.target.value));
@@ -96,6 +98,7 @@ export function OverlayAppearanceControls({
           <select
             value={textColor}
             onChange={(e) => onTextColorChange(e.target.value as OverlayTextColorOption)}
+            disabled={disabled}
           >
             {textColorOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -110,6 +113,7 @@ export function OverlayAppearanceControls({
           <select
             value={overlayPosition}
             onChange={(e) => onOverlayPositionChange(e.target.value as OverlayPositionOption)}
+            disabled={disabled}
           >
             {overlayPositionOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -121,7 +125,11 @@ export function OverlayAppearanceControls({
 
         <label>
           Current lap time size
-          <select value={textSize} onChange={(e) => onTextSizeChange(Number(e.target.value))}>
+          <select
+            value={textSize}
+            onChange={(e) => onTextSizeChange(Number(e.target.value))}
+            disabled={disabled}
+          >
             {textSizeOptions.map((option) => (
               <option key={option} value={option}>
                 {option}px
@@ -135,6 +143,7 @@ export function OverlayAppearanceControls({
           <select
             value={detailTextSize}
             onChange={(e) => onDetailTextSizeChange(Number(e.target.value))}
+            disabled={disabled}
           >
             {textSizeOptions.map((option) => (
               <option key={option} value={option}>
@@ -156,6 +165,7 @@ export function OverlayAppearanceControls({
             step={1}
             value={backgroundOpacity}
             onChange={handleOpacityChange}
+            disabled={disabled}
           />
         </label>
 
@@ -166,6 +176,7 @@ export function OverlayAppearanceControls({
               type="checkbox"
               checked={showLapInfo}
               onChange={(e) => onShowLapInfoChange(e.target.checked)}
+              disabled={disabled}
             />{" "}
             Show lap number and position
           </div>
@@ -177,6 +188,7 @@ export function OverlayAppearanceControls({
               type="checkbox"
               checked={showLapDeltas}
               onChange={(e) => onShowLapDeltasChange(e.target.checked)}
+              disabled={disabled}
             />{" "}
             Show Δ vs best and avg
           </div>

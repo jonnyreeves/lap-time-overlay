@@ -8,7 +8,7 @@ import {
   type OverlayPositionOption,
   type OverlayTextColorOption,
 } from "../renderedOverlay/OverlayAppearanceControls.js";
-import { recordingButtonStyles } from "./recordingShared.js";
+import { recordingButtonStyles } from "../session/recordingShared.js";
 import {
   RenderPreviewControls,
   type LapOption,
@@ -235,6 +235,7 @@ export function RenderedOverlayPreview({
           style={styleInput}
           isOpen={isOpen}
           onError={setError}
+          disabled={isEncoding}
         />
 
         <div css={controlsColumnStyles}>
@@ -257,6 +258,7 @@ export function RenderedOverlayPreview({
               onBackgroundOpacityChange={setBackgroundOpacity}
               onShowLapInfoChange={setShowLapInfo}
               onShowLapDeltasChange={setShowLapDeltas}
+              disabled={isEncoding}
             />
           </div>
 

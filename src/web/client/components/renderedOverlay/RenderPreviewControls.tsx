@@ -42,6 +42,7 @@ type Props = {
   style: OverlayPreviewStyleInput;
   isOpen: boolean;
   onError: (message: string | null) => void;
+  disabled?: boolean;
 };
 
 const RenderPreviewControlsMutation = graphql`
@@ -172,6 +173,7 @@ export function RenderPreviewControls({
   style,
   isOpen,
   onError,
+  disabled,
 }: Props) {
   const lapOptions = useMemo(
     () => [...laps].sort((a, b) => a.lapNumber - b.lapNumber),
@@ -208,7 +210,7 @@ const [commitPreview, isPreviewInFlight] =
   }, [preview]);
 
   const requestPreview = useCallback(() => {
-    if (!isOpen || !selectedLapId) return;
+    if (!isOpen || !selectedLapId || disabled) return;
     onError(null);
     commitPreview({
       variables: {
@@ -236,10 +238,10 @@ const [commitPreview, isPreviewInFlight] =
       },
       onError: (err) => onError(err.message),
     });
-  }, [commitPreview, isOpen, offsetSeconds, recordingId, selectedLapId, style, onError]);
+  }, [commitPreview, isOpen, offsetSeconds, recordingId, selectedLapId, style, onError, disabled]);
 
   useEffect(() => {
-    if (!isOpen || !selectedLapId || !lapOptions.length) return;
+    if (!isOpen || !selectedLapId || !lapOptions.length || disabled) return;
     requestPreview();
   }, [isOpen, selectedLapId, offsetSeconds, lapOptions.length, requestPreview]);
 
@@ -258,7 +260,7 @@ const [commitPreview, isPreviewInFlight] =
             <select
               value={selectedLapId ?? ""}
               onChange={(e) => setSelectedLapId(e.target.value || null)}
-              disabled={!lapOptions.length}
+              disabled={disabled || !lapOptions.length}
             >
               {lapOptions.map((lap) => (
                 <option key={lap.id} value={lap.id}>
@@ -273,7 +275,7 @@ const [commitPreview, isPreviewInFlight] =
             <select
               value={offsetSeconds}
               onChange={(e) => setOffsetSeconds(Number(e.target.value))}
-              disabled={!selectedLap}
+              disabled={disabled || !selectedLap}
             >
               {offsetChoices.map((choice) => (
                 <option key={choice} value={choice}>
@@ -288,7 +290,7 @@ const [commitPreview, isPreviewInFlight] =
               css={[recordingButtonStyles, css`font-weight: 700;`]}
               onClick={requestPreview}
               type="button"
-              disabled={!selectedLap || isPreviewInFlight}
+              disabled={disabled || !selectedLap || isPreviewInFlight}
             >
               Refresh preview
             </button>
