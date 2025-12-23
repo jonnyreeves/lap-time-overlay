@@ -1,31 +1,30 @@
+import { once } from "node:events";
 import fs from "node:fs/promises";
+import type http from "node:http";
 import path from "node:path";
 import { Writable } from "node:stream";
-import { once } from "node:events";
-import type http from "node:http";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { sessionRecordingsDir } from "../../../src/web/config.js";
-import { handleRecordingDownloadRequest } from "../../../src/web/http/uploads.js";
+import { findTrackRecordingById } from "../../../src/db/track_recordings.js";
 import { SESSION_COOKIE_NAME } from "../../../src/web/auth/cookies.js";
 import { loadUserFromSession, refreshSession } from "../../../src/web/auth/service.js";
-import { findTrackRecordingById } from "../../../src/db/track_recordings.js";
+import { sessionRecordingsDir } from "../../../src/web/config.js";
+import { handleRecordingDownloadRequest } from "../../../src/web/http/uploads.js";
 
 vi.mock("../../../src/web/config.js", () => {
-  const testRoot = path.join(process.cwd(), "temp", "tests");
+  const testRoot = path.join(process.cwd(), "temp", "uploads-tests");
   return {
     projectRoot: process.cwd(),
     publicDir: path.join(process.cwd(), "public"),
-    rawMediaDir: path.join(testRoot, "session_recordings"),
     sessionRecordingsDir: path.join(testRoot, "session_recordings"),
     jellyfinProjectionDir: path.join(testRoot, "jellyfin"),
     tmpUploadsDir: path.join(testRoot, "uploads"),
     tmpRendersDir: path.join(testRoot, "renders"),
     tmpPreviewsDir: path.join(testRoot, "previews"),
-    ensureWorkDirs: async () => {},
+    ensureWorkDirs: async () => { },
   };
 });
 
-const testRootDir = path.join(process.cwd(), "temp", "tests");
+const testRootDir = path.join(process.cwd(), "temp", "uploads-tests");
 
 vi.mock("../../../src/web/auth/service.js", () => ({
   loadUserFromSession: vi.fn(),

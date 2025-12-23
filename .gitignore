@@ -20,8 +20,8 @@ pnpm-debug.log*
 .vscode/
 
 # Project artifacts
-work/
-media/
+media_library/
+session_recordings/
 temp/
 public/app.js
 public/app.js.map

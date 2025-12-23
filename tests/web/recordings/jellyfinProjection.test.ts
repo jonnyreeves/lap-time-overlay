@@ -17,8 +17,7 @@ vi.mock("../../../src/web/config.js", () => {
   return {
     projectRoot: process.cwd(),
     publicDir: path.join(process.cwd(), "public"),
-    rawMediaDir: path.join(root, "raw"),
-    sessionRecordingsDir: path.join(root, "raw"),
+    sessionRecordingsDir: path.join(root, "session_recordings"),
     jellyfinProjectionDir: path.join(root, "jellyfin"),
     tmpUploadsDir: path.join(root, "uploads"),
     tmpRendersDir: path.join(root, "renders"),
@@ -28,7 +27,7 @@ vi.mock("../../../src/web/config.js", () => {
 });
 
 const testRoot = path.join(process.cwd(), "temp", "jellyfin-projection");
-const rawDir = path.join(testRoot, "raw");
+const rawDir = path.join(testRoot, "session_recordings");
 const projectionDir = path.join(testRoot, "jellyfin");
 
 describe("Jellyfin projection", () => {

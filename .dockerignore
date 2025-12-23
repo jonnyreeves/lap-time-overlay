@@ -7,5 +7,6 @@ dist
 .env
 
 database/*
-media/*
+session_recordings/*
+media_library/*
 temp/*

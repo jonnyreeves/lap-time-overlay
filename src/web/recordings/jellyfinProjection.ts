@@ -3,15 +3,15 @@ import fsp from "node:fs/promises";
 import path from "node:path";
 import { findTrackLayoutById } from "../../db/track_layouts.js";
 import {
+  findSessionIdsWithReadyRecordings,
   findTrackRecordingById,
   findTrackRecordingsBySessionId,
-  findSessionIdsWithReadyRecordings,
   type TrackRecordingRecord,
 } from "../../db/track_recordings.js";
 import { findTrackSessionById } from "../../db/track_sessions.js";
 import { findTrackById } from "../../db/tracks.js";
 import { findUserById } from "../../db/users.js";
-import { jellyfinProjectionDir, rawMediaDir, sessionRecordingsDir } from "../config.js";
+import { jellyfinProjectionDir, sessionRecordingsDir } from "../config.js";
 
 export interface JellyfinRecordingView {
   recordingId: string;
@@ -34,7 +34,7 @@ export class JellyfinProjectionError extends Error {
   }
 }
 
-const rawRoot = rawMediaDir || sessionRecordingsDir;
+const rawRoot = sessionRecordingsDir;
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"] as const;
 const projectionRoot = path.resolve(jellyfinProjectionDir);
 

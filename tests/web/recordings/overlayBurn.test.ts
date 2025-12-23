@@ -2,31 +2,30 @@ import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createTrackRecording, findTrackRecordingById, findTrackRecordingsBySessionId } from "../../../src/db/track_recordings.js";
 import { createTrackLayout } from "../../../src/db/track_layouts.js";
+import { createTrackRecording, findTrackRecordingById, findTrackRecordingsBySessionId } from "../../../src/db/track_recordings.js";
+import { createTrackSessionWithLaps } from "../../../src/db/track_sessions.js";
 import { createTrack } from "../../../src/db/tracks.js";
 import { createUser } from "../../../src/db/users.js";
-import { createTrackSessionWithLaps } from "../../../src/db/track_sessions.js";
 import { sessionRecordingsDir, tmpRendersDir } from "../../../src/web/config.js";
 import { burnRecordingOverlay } from "../../../src/web/recordings/overlayBurn.js";
 import { setupTestDb, teardownTestDb } from "../../db/test_setup.js";
 
 vi.mock("../../../src/web/config.js", () => {
-  const testRoot = path.join(process.cwd(), "temp", "tests");
+  const testRoot = path.join(process.cwd(), "temp", "overlay-burn-tests");
   return {
     projectRoot: process.cwd(),
     publicDir: path.join(process.cwd(), "public"),
-    rawMediaDir: path.join(testRoot, "session_recordings"),
     sessionRecordingsDir: path.join(testRoot, "session_recordings"),
     jellyfinProjectionDir: path.join(testRoot, "jellyfin"),
     tmpUploadsDir: path.join(testRoot, "uploads"),
     tmpRendersDir: path.join(testRoot, "renders"),
     tmpPreviewsDir: path.join(testRoot, "previews"),
-    ensureWorkDirs: async () => {},
+    ensureWorkDirs: async () => { },
   };
 });
 
-const testRootDir = path.join(process.cwd(), "temp", "tests");
+const testRootDir = path.join(process.cwd(), "temp", "overlay-burn-tests");
 
 let savedOutputs: string[] = [];
 let savedMetadataInputs: string[] = [];

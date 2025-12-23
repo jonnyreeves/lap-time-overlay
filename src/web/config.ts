@@ -7,9 +7,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const projectRoot = path.resolve(__dirname, "../..");
 export const publicDir = path.join(projectRoot, "public");
 
-export const rawMediaDir = path.join(projectRoot, "media/raw");
-export const sessionRecordingsDir = rawMediaDir;
-export const jellyfinProjectionDir = path.join(projectRoot, "media/jellyfin");
+export const sessionRecordingsDir = path.join(projectRoot, "session_recordings");
+export const jellyfinProjectionDir = path.join(projectRoot, "media_library");
 
 export const tmpUploadsDir = path.join(projectRoot, "temp/uploads");
 export const tmpRendersDir = path.join(projectRoot, "temp/renders");
@@ -17,7 +16,7 @@ export const tmpPreviewsDir = path.join(projectRoot, "temp/previews");
 
 
 export async function ensureWorkDirs(): Promise<void> {
-  await fs.mkdir(rawMediaDir, { recursive: true });
+  await fs.mkdir(sessionRecordingsDir, { recursive: true });
   await fs.mkdir(jellyfinProjectionDir, { recursive: true });
 
   await fs.mkdir(tmpPreviewsDir, { recursive: true });
