@@ -159,7 +159,7 @@ export function ExportSettingControls({
       {isEncoding && (
         <div css={progressSectionStyles}>
           <div css={progressHeaderStyles}>
-            <span>Recording with overlay</span>
+            <span>Rendering</span>
             <span>{encodingPercent}%</span>
           </div>
           <div css={progressBarStyles}>
