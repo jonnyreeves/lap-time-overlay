@@ -2,14 +2,14 @@ import { css } from "@emotion/react";
 import { useEffect, useMemo, useState } from "react";
 import { graphql, useFragment, useLazyLoadQuery, useMutation } from "react-relay";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import type { adminToolsQuery } from "../../__generated__/adminToolsQuery.graphql.js";
+import type { adminAdminToolsRoute_viewer$key } from "../../__generated__/adminAdminToolsRoute_viewer.graphql.js";
 import type { adminDeleteOrphanedMediaMutation } from "../../__generated__/adminDeleteOrphanedMediaMutation.graphql.js";
 import type { adminEmptyTempDirMutation } from "../../__generated__/adminEmptyTempDirMutation.graphql.js";
 import type { adminRebuildJellyfinProjectionAllMutation } from "../../__generated__/adminRebuildJellyfinProjectionAllMutation.graphql.js";
-import type { adminUpdateTempCleanupScheduleMutation } from "../../__generated__/adminUpdateTempCleanupScheduleMutation.graphql.js";
 import type { adminRunTempCleanupMutation } from "../../__generated__/adminRunTempCleanupMutation.graphql.js";
+import type { adminToolsQuery } from "../../__generated__/adminToolsQuery.graphql.js";
+import type { adminUpdateTempCleanupScheduleMutation } from "../../__generated__/adminUpdateTempCleanupScheduleMutation.graphql.js";
 import type { adminUpdateUserAdminStatusMutation } from "../../__generated__/adminUpdateUserAdminStatusMutation.graphql.js";
-import type { adminAdminToolsRoute_viewer$key } from "../../__generated__/adminAdminToolsRoute_viewer.graphql.js";
 import type { RequireAuthViewerQuery } from "../../__generated__/RequireAuthViewerQuery.graphql.js";
 import { Card } from "../../components/Card.js";
 import { useBreadcrumbs } from "../../hooks/useBreadcrumbs.js";
@@ -453,16 +453,6 @@ export default function AdminToolsRoute() {
   return (
     <div css={pageGridStyles}>
       <div css={columnStyles}>
-        <Card title="Jellyfin projection">
-          <div css={buttonRowStyles}>
-            <button type="button" disabled={isFullRebuildRunning} onClick={handleRebuildAll}>
-              {isFullRebuildRunning ? "Rebuilding all…" : "Rebuild all sessions"}
-            </button>
-          </div>
-          {fullRebuildMessage ? <p>{fullRebuildMessage}</p> : null}
-          {fullRebuildError ? <p className="lede">{fullRebuildError}</p> : null}
-        </Card>
-
         <Card title="Users">
           {adminUsers.length === 0 ? (
             <p>No users found.</p>
@@ -544,7 +534,16 @@ export default function AdminToolsRoute() {
           )}
         </Card>
 
-        <Card title="User media libraries">
+        <Card
+          title="User media libraries"
+          rightHeaderContent={
+            <button type="button" disabled={isFullRebuildRunning} onClick={handleRebuildAll}>
+              {isFullRebuildRunning ? "Rebuilding Jellyfin index…" : "Rebuild Jellyfin index"}
+            </button>
+          }
+        >
+          {fullRebuildMessage ? <p>{fullRebuildMessage}</p> : null}
+          {fullRebuildError ? <p className="lede">{fullRebuildError}</p> : null}
           {mediaLibrariesSorted.length === 0 ? (
             <p>No users found.</p>
           ) : (
