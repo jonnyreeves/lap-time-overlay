@@ -1,11 +1,11 @@
 import fsp from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createTrackRecording } from "../../../src/db/track_recordings.js";
 import { createTrackLayout } from "../../../src/db/track_layouts.js";
+import { createTrackRecording } from "../../../src/db/track_recordings.js";
+import { createTrackSessionWithLaps } from "../../../src/db/track_sessions.js";
 import { createTrack } from "../../../src/db/tracks.js";
 import { createUser } from "../../../src/db/users.js";
-import { createTrackSessionWithLaps } from "../../../src/db/track_sessions.js";
 import {
   rebuildJellyfinSessionProjection,
   removeJellyfinRecordingProjection,
@@ -23,7 +23,7 @@ vi.mock("../../../src/web/config.js", () => {
     tmpUploadsDir: path.join(root, "uploads"),
     tmpRendersDir: path.join(root, "renders"),
     tmpPreviewsDir: path.join(root, "previews"),
-    ensureWorkDirs: async () => {},
+    ensureWorkDirs: async () => { },
   };
 });
 
@@ -95,7 +95,7 @@ describe("Jellyfin projection", () => {
     expect(nfo).toContain(`Recording ID: ${recording.id}`);
     expect(nfo).toContain(`Session ID: ${trackSession.id}`);
     expect(path.basename(projection.jellyfinPath)).toBe(
-      "Daytona Sandown Park - Full - Race - 2025-12-03.mp4"
+      "Race - Daytona Sandown Park - Full - 2025-12-03.mp4"
     );
     expect(projection.jellyfinPath).toContain(expectedFolderName);
   });
@@ -150,10 +150,10 @@ describe("Jellyfin projection", () => {
     expect(rec1Projection).toBeDefined();
     expect(rec2Projection).toBeDefined();
     expect(path.basename(rec1Projection!.jellyfinPath)).toBe(
-      "Bayford Meadows - Short - Practice - 2024-06-10 - rec-one.mp4"
+      "Practice - Bayford Meadows - Short - 2024-06-10 - rec-one.mp4"
     );
     expect(path.basename(rec2Projection!.jellyfinPath)).toBe(
-      "Bayford Meadows - Short - Practice - 2024-06-10 - rec-two.mp4"
+      "Practice - Bayford Meadows - Short - 2024-06-10 - rec-two.mp4"
     );
 
     await removeJellyfinRecordingProjection(rec1.id);

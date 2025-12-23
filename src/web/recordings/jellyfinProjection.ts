@@ -1,6 +1,7 @@
 import type { Stats } from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
+import { findTrackLayoutById } from "../../db/track_layouts.js";
 import {
   findTrackRecordingById,
   findTrackRecordingsBySessionId,
@@ -8,7 +9,6 @@ import {
 } from "../../db/track_recordings.js";
 import { findTrackSessionById } from "../../db/track_sessions.js";
 import { findTrackById } from "../../db/tracks.js";
-import { findTrackLayoutById } from "../../db/track_layouts.js";
 import { findUserById } from "../../db/users.js";
 import { jellyfinProjectionDir, rawMediaDir, sessionRecordingsDir } from "../config.js";
 
@@ -46,7 +46,7 @@ function sanitizeName(name: string, fallback = "Unknown"): string {
 }
 
 function sessionDateParts(dateStr: string): { isoDate: string; yearFolder: string; dayFolder: string } {
-  const parsed = new Date(`${dateStr}T00:00:00Z`);
+  const parsed = new Date(`${dateStr}`);
   if (Number.isNaN(parsed.getTime())) {
     const fallback = sanitizeName(dateStr, "Unknown Date");
     return { isoDate: sanitizeName(dateStr, "unknown-date"), yearFolder: "Unknown Year", dayFolder: fallback };
@@ -83,7 +83,7 @@ function buildProjectionPaths({
 
   return {
     folderName: path.join(sanitizedUser, yearFolder, sanitizedTrack, dayFolder),
-    recordingBaseName: `${sanitizedTrack} - ${sanitizedLayout} - ${sanitizedFormat} - ${isoDate}`,
+    recordingBaseName: `${sanitizedFormat} - ${sanitizedTrack} - ${sanitizedLayout} - ${isoDate}`,
     isoDate,
   };
 }
