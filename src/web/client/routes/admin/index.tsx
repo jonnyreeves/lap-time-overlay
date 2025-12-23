@@ -4,7 +4,6 @@ import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 import type { adminToolsQuery } from "../../__generated__/adminToolsQuery.graphql.js";
 import type { adminDeleteOrphanedMediaMutation } from "../../__generated__/adminDeleteOrphanedMediaMutation.graphql.js";
 import type { adminEmptyTempDirMutation } from "../../__generated__/adminEmptyTempDirMutation.graphql.js";
-import type { adminRebuildJellyfinProjectionMutation } from "../../__generated__/adminRebuildJellyfinProjectionMutation.graphql.js";
 import type { adminRebuildJellyfinProjectionAllMutation } from "../../__generated__/adminRebuildJellyfinProjectionAllMutation.graphql.js";
 import { Card } from "../../components/Card.js";
 import { useBreadcrumbs } from "../../hooks/useBreadcrumbs.js";
@@ -41,22 +40,6 @@ const AdminEmptyTempDirMutation = graphql`
   mutation adminEmptyTempDirMutation($input: EmptyTempDirInput!) {
     emptyTempDir(input: $input) {
       name
-    }
-  }
-`;
-
-const AdminRebuildJellyfinProjectionMutation = graphql`
-  mutation adminRebuildJellyfinProjectionMutation($input: RebuildJellyfinProjectionInput!) {
-    rebuildJellyfinProjection(input: $input) {
-      view {
-        folderName
-        recordings {
-          recordingId
-          rawPath
-          jellyfinPath
-          nfoPath
-        }
-      }
     }
   }
 `;
@@ -110,19 +93,6 @@ const tableStyles = css`
   }
 `;
 
-const formRowStyles = css`
-  display: grid;
-  gap: 8px;
-  margin-bottom: 12px;
-`;
-
-const inputStyles = css`
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #d2dae7;
-  font-size: 1rem;
-`;
-
 const buttonRowStyles = css`
   display: flex;
   gap: 10px;
@@ -152,14 +122,7 @@ export default function AdminToolsRoute() {
   const { setBreadcrumbs } = useBreadcrumbs();
   const [deletingIds, setDeletingIds] = useState<string[]>([]);
   const [clearingDirs, setClearingDirs] = useState<AdminTempDirName[]>([]);
-  const [sessionId, setSessionId] = useState("");
-  const [projectionMessage, setProjectionMessage] = useState<string | null>(null);
-  const [lastProjection, setLastProjection] = useState<
-    adminRebuildJellyfinProjectionMutation["response"]["rebuildJellyfinProjection"]["view"] | null
-  >(null);
-  const [isRebuilding, setIsRebuilding] = useState(false);
   const [isFullRebuildRunning, setIsFullRebuildRunning] = useState(false);
-  const [projectionError, setProjectionError] = useState<string | null>(null);
   const [fullRebuildMessage, setFullRebuildMessage] = useState<string | null>(null);
   const [fullRebuildError, setFullRebuildError] = useState<string | null>(null);
 
@@ -170,9 +133,6 @@ export default function AdminToolsRoute() {
 
   const [commitDelete] = useMutation<adminDeleteOrphanedMediaMutation>(AdminDeleteOrphanedMediaMutation);
   const [commitEmpty] = useMutation<adminEmptyTempDirMutation>(AdminEmptyTempDirMutation);
-  const [commitRebuild] = useMutation<adminRebuildJellyfinProjectionMutation>(
-    AdminRebuildJellyfinProjectionMutation
-  );
   const [commitRebuildAll] = useMutation<adminRebuildJellyfinProjectionAllMutation>(
     AdminRebuildJellyfinProjectionAllMutation
   );
@@ -228,30 +188,6 @@ export default function AdminToolsRoute() {
     });
   };
 
-  const handleRebuild = () => {
-    const trimmed = sessionId.trim();
-    if (!trimmed) return;
-    setIsRebuilding(true);
-    setProjectionError(null);
-    setProjectionMessage(null);
-    commitRebuild({
-      variables: { input: { sessionId: trimmed } },
-      onCompleted: (response) => {
-        setIsRebuilding(false);
-        const payload = response.rebuildJellyfinProjection;
-        if (payload?.view) {
-          setLastProjection(payload.view);
-          setProjectionMessage(`Projection rebuilt into ${payload.view.folderName}`);
-          setRefreshKey((key) => key + 1);
-        }
-      },
-      onError: (error) => {
-        setIsRebuilding(false);
-        setProjectionError(error.message);
-      },
-    });
-  };
-
   const tempDirs = data.adminTempDirs ?? [];
   const recordingHealth = data.adminRecordingHealth ?? [];
 
@@ -264,32 +200,13 @@ export default function AdminToolsRoute() {
     <div css={pageGridStyles}>
       <div css={columnStyles}>
         <Card title="Jellyfin projection">
-          <div css={formRowStyles}>
-            <label htmlFor="session-id-input">Session ID</label>
-            <input
-              id="session-id-input"
-              css={inputStyles}
-              value={sessionId}
-              onChange={(event) => setSessionId(event.target.value)}
-            />
-            <div css={buttonRowStyles}>
-              <button type="button" disabled={!sessionId.trim() || isRebuilding} onClick={handleRebuild}>
-                {isRebuilding ? "Rebuilding…" : "Rebuild"}
-              </button>
-              <button type="button" disabled={isFullRebuildRunning} onClick={handleRebuildAll}>
-                {isFullRebuildRunning ? "Rebuilding all…" : "Rebuild all sessions"}
-              </button>
-            </div>
+          <div css={buttonRowStyles}>
+            <button type="button" disabled={isFullRebuildRunning} onClick={handleRebuildAll}>
+              {isFullRebuildRunning ? "Rebuilding all…" : "Rebuild all sessions"}
+            </button>
           </div>
-          {projectionMessage ? <p>{projectionMessage}</p> : null}
-          {projectionError ? <p className="lede">{projectionError}</p> : null}
           {fullRebuildMessage ? <p>{fullRebuildMessage}</p> : null}
           {fullRebuildError ? <p className="lede">{fullRebuildError}</p> : null}
-          {lastProjection ? (
-            <p>
-              {lastProjection.recordings.length} recording{lastProjection.recordings.length === 1 ? "" : "s"} projected.
-            </p>
-          ) : null}
         </Card>
 
         <Card title="Orphaned media">

@@ -8,11 +8,7 @@ import {
   getRecordingHealthOverview,
   type AdminTempDirName,
 } from "../../recordings/admin.js";
-import {
-  rebuildJellyfinSessionProjection,
-  rebuildJellyfinProjectionAll,
-  JellyfinProjectionError,
-} from "../../recordings/jellyfinProjection.js";
+import { rebuildJellyfinProjectionAll } from "../../recordings/jellyfinProjection.js";
 
 function requireAuthentication(context: GraphQLContext): void {
   if (!context.currentUser) {
@@ -36,33 +32,6 @@ export const adminResolvers = {
   adminRecordingHealth: async (_args: unknown, context: GraphQLContext) => {
     requireAuthentication(context);
     return getRecordingHealthOverview();
-  },
-  rebuildJellyfinProjection: async (
-    args: { input?: { sessionId?: string | null } },
-    context: GraphQLContext
-  ) => {
-    requireAuthentication(context);
-    const sessionId = args.input?.sessionId?.trim();
-    if (!sessionId) {
-      throw new GraphQLError("sessionId is required", {
-        extensions: { code: "VALIDATION_FAILED" },
-      });
-    }
-
-    try {
-      const view = await rebuildJellyfinSessionProjection(sessionId);
-      return { view };
-    } catch (err) {
-      if (err instanceof JellyfinProjectionError) {
-        throw new GraphQLError(err.message, {
-          extensions: { code: err.code },
-        });
-      }
-      console.error("Failed to rebuild Jellyfin projection", err);
-      throw new GraphQLError("Failed to rebuild Jellyfin projection", {
-        extensions: { code: "INTERNAL_SERVER_ERROR" },
-      });
-    }
   },
   rebuildJellyfinProjectionAll: async (_args: unknown, context: GraphQLContext) => {
     requireAuthentication(context);

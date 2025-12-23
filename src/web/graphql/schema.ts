@@ -45,7 +45,6 @@ export const rootValue = {
   adminOrphanedMedia: adminResolvers.adminOrphanedMedia,
   adminTempDirs: adminResolvers.adminTempDirs,
   adminRecordingHealth: adminResolvers.adminRecordingHealth,
-  rebuildJellyfinProjection: adminResolvers.rebuildJellyfinProjection,
   deleteOrphanedMedia: adminResolvers.deleteOrphanedMedia,
   emptyTempDir: adminResolvers.emptyTempDir,
   rebuildJellyfinProjectionAll: adminResolvers.rebuildJellyfinProjectionAll,

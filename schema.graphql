@@ -32,18 +32,6 @@ type AdminRecordingHealth {
   count: Int!
 }
 
-type JellyfinRecordingView {
-  recordingId: ID!
-  rawPath: String!
-  jellyfinPath: String!
-  nfoPath: String!
-}
-
-type JellyfinSessionView {
-  folderName: String!
-  recordings: [JellyfinRecordingView!]!
-}
-
 input CreateTrackInput {
   name: String!
   heroImage: String
@@ -244,19 +232,11 @@ type Mutation {
   addTrackLayoutToTrack(trackId: ID!, input: CreateTrackLayoutInput!): AddTrackLayoutToTrackPayload!
   updateTrackLayout(input: UpdateTrackLayoutInput!): UpdateTrackLayoutPayload!
   removeTrackLayoutFromTrack(trackId: ID!, trackLayoutId: ID!): RemoveTrackLayoutFromTrackPayload!
-  rebuildJellyfinProjection(input: RebuildJellyfinProjectionInput!): RebuildJellyfinProjectionPayload!
   deleteOrphanedMedia(input: DeleteOrphanedMediaInput!): DeleteOrphanedMediaPayload!
   emptyTempDir(input: EmptyTempDirInput!): EmptyTempDirPayload!
   rebuildJellyfinProjectionAll: RebuildJellyfinProjectionAllPayload!
 }
 
-input RebuildJellyfinProjectionInput {
-  sessionId: ID!
-}
-
-type RebuildJellyfinProjectionPayload {
-  view: JellyfinSessionView!
-}
 
 input DeleteOrphanedMediaInput {
   mediaIds: [String!]!

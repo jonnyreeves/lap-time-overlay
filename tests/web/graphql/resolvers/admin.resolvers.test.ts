@@ -24,21 +24,19 @@ vi.mock("../../../../src/web/recordings/admin.js", () => ({
   getRecordingHealthOverview: getRecordingHealthOverviewMock,
 }));
 
-const { rebuildProjectionMock, rebuildProjectionAllMock } = vi.hoisted(() => ({
-  rebuildProjectionMock: vi.fn(),
+const { rebuildProjectionAllMock } = vi.hoisted(() => ({
   rebuildProjectionAllMock: vi.fn(),
 }));
 
 vi.mock("../../../../src/web/recordings/jellyfinProjection.js", async () => {
-    const actual = await vi.importActual<
-      typeof import("../../../../src/web/recordings/jellyfinProjection.js")
-    >("../../../../src/web/recordings/jellyfinProjection.js");
-    return {
-      ...actual,
-      rebuildJellyfinSessionProjection: rebuildProjectionMock,
-      rebuildJellyfinProjectionAll: rebuildProjectionAllMock,
-    };
-  });
+  const actual = await vi.importActual<
+    typeof import("../../../../src/web/recordings/jellyfinProjection.js")
+  >("../../../../src/web/recordings/jellyfinProjection.js");
+  return {
+    ...actual,
+    rebuildJellyfinProjectionAll: rebuildProjectionAllMock,
+  };
+});
 
 describe("admin resolvers", () => {
   const { context } = createMockGraphQLContext({
@@ -98,25 +96,6 @@ describe("admin resolvers", () => {
     await expect(rootValue.emptyTempDir({ input: { name: "INVALID" } }, context)).rejects.toThrow(
       "Invalid temp directory"
     );
-  });
-
-  it("rebuilds the jellyfin projection", async () => {
-    const view = { folderName: "folder", recordings: [] };
-    rebuildProjectionMock.mockResolvedValue(view);
-    expect(
-      await rootValue.rebuildJellyfinProjection({ input: { sessionId: "s1" } }, context)
-    ).toEqual({ view });
-    expect(rebuildProjectionMock).toHaveBeenCalledWith("s1");
-  });
-
-  it("propagates jellyfin projection errors", async () => {
-    const actual = await vi.importActual<typeof import("../../../../src/web/recordings/jellyfinProjection.js")>(
-      "../../../../src/web/recordings/jellyfinProjection.js"
-    );
-    rebuildProjectionMock.mockRejectedValue(new actual.JellyfinProjectionError("oops", "NOT_FOUND"));
-    await expect(
-      rootValue.rebuildJellyfinProjection({ input: { sessionId: "s1" } }, context)
-    ).rejects.toThrow("oops");
   });
 
   it("rebuilds all projections", async () => {
