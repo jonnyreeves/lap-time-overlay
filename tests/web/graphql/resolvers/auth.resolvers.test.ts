@@ -5,11 +5,13 @@ import { rootValue } from "../../../../src/web/graphql/schema.js";
 const registerUser = vi.hoisted(() => vi.fn());
 const loginUser = vi.hoisted(() => vi.fn());
 const endSession = vi.hoisted(() => vi.fn());
+const listPublicUsers = vi.hoisted(() => vi.fn());
 
 vi.mock("../../../../src/web/auth/service.js", () => ({
   registerUser,
   loginUser,
   endSession,
+  listPublicUsers,
 }));
 
 describe("auth resolvers", () => {
@@ -84,5 +86,20 @@ describe("auth resolvers", () => {
     expect(endSession).not.toHaveBeenCalled();
     expect(ctx.clearSessionCookie).toHaveBeenCalled();
     expect(result).toEqual({ success: true });
+  });
+
+  it("lists users from auth service", () => {
+    listPublicUsers.mockReturnValue([
+      { id: "u1", username: "sam", createdAt: 1000 },
+      { id: "u2", username: "alex", createdAt: 2000 },
+    ]);
+
+    const result = rootValue.users({}, baseContext as never);
+
+    expect(listPublicUsers).toHaveBeenCalled();
+    expect(result).toEqual([
+      { id: "u1", username: "sam", createdAt: new Date(1000).toISOString() },
+      { id: "u2", username: "alex", createdAt: new Date(2000).toISOString() },
+    ]);
   });
 });

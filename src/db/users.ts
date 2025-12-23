@@ -73,3 +73,16 @@ export function createUser(
     updatedAt: now,
   };
 }
+
+export function listUsers(): UserRecord[] {
+  const db = getDb();
+  const rows = db
+    .prepare<unknown[], UserRow>(
+      `SELECT id, username, password_hash, created_at, updated_at
+       FROM users
+       ORDER BY LOWER(username) ASC`
+    )
+    .all();
+
+  return rows.map(mapRow);
+}

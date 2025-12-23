@@ -1,5 +1,11 @@
 import { GraphQLError } from "graphql";
-import { endSession, loginUser, registerUser, type PublicUser } from "../../auth/service.js";
+import {
+  endSession,
+  listPublicUsers,
+  loginUser,
+  registerUser,
+  type PublicUser,
+} from "../../auth/service.js";
 import type { GraphQLContext } from "../context.js";
 import { toGraphQLError } from "./utils.js";
 
@@ -64,6 +70,9 @@ export const authResolvers = {
     }
     context.clearSessionCookie();
     return { success: true };
+  },
+  users: (_args: unknown, _context: GraphQLContext) => {
+    return listPublicUsers().map((user) => toUserPayload(user));
   },
 };
 

@@ -1,5 +1,6 @@
 type Query {
   viewer: User
+  users: [User!]!
   tracks: [Track!]!
   trackSession(id: ID!): TrackSession!
   track(id: ID!): Track

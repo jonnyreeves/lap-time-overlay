@@ -1,7 +1,7 @@
 import assert from "assert";
 import { describe, it, beforeEach, afterEach } from "vitest";
 import { setupTestDb, teardownTestDb } from "../db/test_setup.js";
-import { createUser, findUserById, findUserByUsername, normalizeUsername, type UserRecord } from "../../src/db/users.js";
+import { createUser, findUserById, findUserByUsername, listUsers, normalizeUsername, type UserRecord } from "../../src/db/users.js";
 
 describe("users", () => {
   beforeEach(() => {
@@ -47,5 +47,16 @@ describe("users", () => {
   it("returns null if user by id is not found", () => {
     const foundUser = findUserById("non-existent-id");
     assert.strictEqual(foundUser, null);
+  });
+
+  it("lists users sorted by username", () => {
+    const first = createUser("zeta", "hash1");
+    const second = createUser("alpha", "hash2");
+
+    const users = listUsers();
+    assert.deepStrictEqual(
+      users.map((u) => u.id),
+      [second.id, first.id]
+    );
   });
 });

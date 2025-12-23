@@ -17,6 +17,7 @@ export const schema: GraphQLSchema = buildSchema(schemaFileContents);
 
 export const rootValue = {
   viewer: viewerResolvers.viewer,
+  users: authResolvers.users,
   tracks: trackResolvers.tracks,
   trackSession: trackSessionResolvers.trackSession,
   track: trackResolvers.track,

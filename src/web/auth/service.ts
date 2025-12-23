@@ -10,6 +10,7 @@ import {
   findUserById,
   findUserByUsername,
   normalizeUsername,
+  listUsers,
   type UserRecord,
 } from "../../db/users.js";
 
@@ -113,4 +114,8 @@ export function refreshSession(token: string, now = Date.now()): number | null {
 
 export function endSession(token: string): void {
   deleteSession(token);
+}
+
+export function listPublicUsers(): PublicUser[] {
+  return listUsers().map(toPublicUser);
 }
