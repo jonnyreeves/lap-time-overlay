@@ -190,10 +190,31 @@ async function runOverlayRender({
   });
 }
 
+async function safeMove(src: string, dest: string): Promise<void> {
+  await fsp.mkdir(path.dirname(dest), { recursive: true });
+  await fsp.rm(dest, { force: true });
+
+  try {
+    await fsp.rename(src, dest);
+    return;
+  } catch (err: any) {
+    if (err?.code !== "EXDEV") {
+      throw err;
+    }
+  }
+
+  await fsp.copyFile(src, dest);
+  const destHandle = await fsp.open(dest, "r");
+  try {
+    await destHandle.sync();
+  } finally {
+    await destHandle.close();
+  }
+  await fsp.unlink(src);
+}
+
 async function moveRenderedOverlay(tempOutputFile: string, finalOutputFile: string): Promise<void> {
-  await fsp.mkdir(path.dirname(finalOutputFile), { recursive: true });
-  await fsp.rm(finalOutputFile, { force: true });
-  await fsp.rename(tempOutputFile, finalOutputFile);
+  await safeMove(tempOutputFile, finalOutputFile);
   await fsp.rm(path.dirname(tempOutputFile), { recursive: true, force: true }).catch(() => {});
 }
 
