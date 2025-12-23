@@ -6,6 +6,8 @@ type Query {
   adminOrphanedMedia: [AdminOrphanedMedia!]!
   adminTempDirs: [AdminTempDir!]!
   adminRecordingHealth: [AdminRecordingHealth!]!
+  adminUserMediaLibraries: [AdminUserMediaLibrary!]!
+  adminTempCleanupSchedule: TempCleanupSchedule!
 }
 
 type AdminOrphanedMedia {
@@ -30,6 +32,35 @@ type AdminTempDir {
 type AdminRecordingHealth {
   status: TrackRecordingStatus!
   count: Int!
+}
+
+type AdminUserMediaLibrary {
+  userId: ID!
+  username: String!
+  sizeBytes: Float!
+  recordingCount: Int!
+}
+
+type TempCleanupSchedule {
+  hour: Int!
+  days: [Int!]!
+  enabled: Boolean!
+  lastRunAt: String
+  nextRunAt: String
+}
+
+input UpdateTempCleanupScheduleInput {
+  hour: Int!
+  days: [Int!]!
+}
+
+type UpdateTempCleanupSchedulePayload {
+  schedule: TempCleanupSchedule!
+}
+
+type RunTempCleanupPayload {
+  started: Boolean!
+  schedule: TempCleanupSchedule!
 }
 
 input CreateTrackInput {
@@ -232,6 +263,8 @@ type Mutation {
   addTrackLayoutToTrack(trackId: ID!, input: CreateTrackLayoutInput!): AddTrackLayoutToTrackPayload!
   updateTrackLayout(input: UpdateTrackLayoutInput!): UpdateTrackLayoutPayload!
   removeTrackLayoutFromTrack(trackId: ID!, trackLayoutId: ID!): RemoveTrackLayoutFromTrackPayload!
+  updateTempCleanupSchedule(input: UpdateTempCleanupScheduleInput!): UpdateTempCleanupSchedulePayload!
+  runTempCleanup: RunTempCleanupPayload!
   deleteOrphanedMedia(input: DeleteOrphanedMediaInput!): DeleteOrphanedMediaPayload!
   emptyTempDir(input: EmptyTempDirInput!): EmptyTempDirPayload!
   rebuildJellyfinProjectionAll: RebuildJellyfinProjectionAllPayload!

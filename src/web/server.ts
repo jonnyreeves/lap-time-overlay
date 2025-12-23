@@ -6,9 +6,11 @@ import { handleGraphQL } from "./graphql/handler.js";
 import { handleOverlayPreviewRequest } from "./http/overlayPreview.js";
 import { handleRecordingDownloadRequest, handleRecordingUploadRequest } from "./http/uploads.js";
 import { serveStatic } from "./http/static.js";
+import { tempCleanupScheduler } from "./recordings/tempCleanupScheduler.js";
 
 await runMigrations();
 await ensureWorkDirs();
+await tempCleanupScheduler.start();
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", "http://localhost");

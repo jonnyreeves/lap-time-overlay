@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<532a1c139105b0434cdd6ab05089de5f>>
+ * @generated SignedSource<<3ce937234a97ba9b89074d77308e8efc>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -22,11 +22,24 @@ export type adminToolsQuery$data = {
     readonly count: number;
     readonly status: TrackRecordingStatus;
   }>;
+  readonly adminTempCleanupSchedule: {
+    readonly days: ReadonlyArray<number>;
+    readonly enabled: boolean;
+    readonly hour: number;
+    readonly lastRunAt: string | null | undefined;
+    readonly nextRunAt: string | null | undefined;
+  };
   readonly adminTempDirs: ReadonlyArray<{
     readonly fileCount: number;
     readonly name: AdminTempDirName;
     readonly path: string;
     readonly sizeBytes: number;
+  }>;
+  readonly adminUserMediaLibraries: ReadonlyArray<{
+    readonly recordingCount: number;
+    readonly sizeBytes: number;
+    readonly userId: string;
+    readonly username: string;
   }>;
 };
 export type adminToolsQuery = {
@@ -126,6 +139,85 @@ v1 = [
       }
     ],
     "storageKey": null
+  },
+  {
+    "alias": null,
+    "args": null,
+    "concreteType": "AdminUserMediaLibrary",
+    "kind": "LinkedField",
+    "name": "adminUserMediaLibraries",
+    "plural": true,
+    "selections": [
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "userId",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "username",
+        "storageKey": null
+      },
+      (v0/*: any*/),
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "recordingCount",
+        "storageKey": null
+      }
+    ],
+    "storageKey": null
+  },
+  {
+    "alias": null,
+    "args": null,
+    "concreteType": "TempCleanupSchedule",
+    "kind": "LinkedField",
+    "name": "adminTempCleanupSchedule",
+    "plural": false,
+    "selections": [
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "hour",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "days",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "enabled",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "lastRunAt",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "nextRunAt",
+        "storageKey": null
+      }
+    ],
+    "storageKey": null
   }
 ];
 return {
@@ -146,16 +238,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "1ccdd842b7ea532738c15f771c92d48d",
+    "cacheID": "5e2064884def03409fa2476da3582dda",
     "id": null,
     "metadata": {},
     "name": "adminToolsQuery",
     "operationKind": "query",
-    "text": "query adminToolsQuery {\n  adminOrphanedMedia {\n    mediaId\n    sizeBytes\n    modifiedAt\n  }\n  adminTempDirs {\n    name\n    path\n    sizeBytes\n    fileCount\n  }\n  adminRecordingHealth {\n    status\n    count\n  }\n}\n"
+    "text": "query adminToolsQuery {\n  adminOrphanedMedia {\n    mediaId\n    sizeBytes\n    modifiedAt\n  }\n  adminTempDirs {\n    name\n    path\n    sizeBytes\n    fileCount\n  }\n  adminRecordingHealth {\n    status\n    count\n  }\n  adminUserMediaLibraries {\n    userId\n    username\n    sizeBytes\n    recordingCount\n  }\n  adminTempCleanupSchedule {\n    hour\n    days\n    enabled\n    lastRunAt\n    nextRunAt\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "992d7dcd62acd15408c6da97f660f299";
+(node as any).hash = "aef0a9a3aa8ca5fe03091af5d7f58cd8";
 
 export default node;

@@ -5,6 +5,8 @@ import type { adminToolsQuery } from "../../__generated__/adminToolsQuery.graphq
 import type { adminDeleteOrphanedMediaMutation } from "../../__generated__/adminDeleteOrphanedMediaMutation.graphql.js";
 import type { adminEmptyTempDirMutation } from "../../__generated__/adminEmptyTempDirMutation.graphql.js";
 import type { adminRebuildJellyfinProjectionAllMutation } from "../../__generated__/adminRebuildJellyfinProjectionAllMutation.graphql.js";
+import type { adminUpdateTempCleanupScheduleMutation } from "../../__generated__/adminUpdateTempCleanupScheduleMutation.graphql.js";
+import type { adminRunTempCleanupMutation } from "../../__generated__/adminRunTempCleanupMutation.graphql.js";
 import { Card } from "../../components/Card.js";
 import { useBreadcrumbs } from "../../hooks/useBreadcrumbs.js";
 
@@ -24,6 +26,19 @@ const AdminToolsPageQuery = graphql`
     adminRecordingHealth {
       status
       count
+    }
+    adminUserMediaLibraries {
+      userId
+      username
+      sizeBytes
+      recordingCount
+    }
+    adminTempCleanupSchedule {
+      hour
+      days
+      enabled
+      lastRunAt
+      nextRunAt
     }
   }
 `;
@@ -48,6 +63,35 @@ const AdminRebuildJellyfinProjectionAllMutation = graphql`
   mutation adminRebuildJellyfinProjectionAllMutation {
     rebuildJellyfinProjectionAll {
       rebuiltSessions
+    }
+  }
+`;
+
+const AdminUpdateTempCleanupScheduleMutation = graphql`
+  mutation adminUpdateTempCleanupScheduleMutation($input: UpdateTempCleanupScheduleInput!) {
+    updateTempCleanupSchedule(input: $input) {
+      schedule {
+        hour
+        days
+        enabled
+        lastRunAt
+        nextRunAt
+      }
+    }
+  }
+`;
+
+const AdminRunTempCleanupMutation = graphql`
+  mutation adminRunTempCleanupMutation {
+    runTempCleanup {
+      started
+      schedule {
+        hour
+        days
+        enabled
+        lastRunAt
+        nextRunAt
+      }
     }
   }
 `;
@@ -99,10 +143,32 @@ const buttonRowStyles = css`
   margin-top: 8px;
 `;
 
+const scheduleGridStyles = css`
+  display: grid;
+  gap: 12px;
+`;
+
+const dayGridStyles = css`
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+`;
+
+const KB = 1024;
+const MB = KB * 1024;
+const GB = MB * 1024;
+const TB = GB * 1024;
+
 function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes < KB) return `${bytes} B`;
+  if (bytes < MB) return `${(bytes / KB).toFixed(1)} KB`;
+  if (bytes < GB) return `${(bytes / MB).toFixed(1)} MB`;
+  if (bytes < TB) return `${(bytes / GB).toFixed(2)} GB`;
+  return `${(bytes / TB).toFixed(2)} TB`;
 }
 
 function friendlyStatus(status: string): string {
@@ -111,6 +177,16 @@ function friendlyStatus(status: string): string {
     .map((part) => part.charAt(0) + part.slice(1).toLowerCase())
     .join(" ");
 }
+
+const dayOptions = [
+  { value: 0, label: "Sun" },
+  { value: 1, label: "Mon" },
+  { value: 2, label: "Tue" },
+  { value: 3, label: "Wed" },
+  { value: 4, label: "Thu" },
+  { value: 5, label: "Fri" },
+  { value: 6, label: "Sat" },
+];
 
 export default function AdminToolsRoute() {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -125,17 +201,34 @@ export default function AdminToolsRoute() {
   const [isFullRebuildRunning, setIsFullRebuildRunning] = useState(false);
   const [fullRebuildMessage, setFullRebuildMessage] = useState<string | null>(null);
   const [fullRebuildError, setFullRebuildError] = useState<string | null>(null);
+  const [scheduleHour, setScheduleHour] = useState<string>(() => String(data.adminTempCleanupSchedule.hour));
+  const [scheduleDays, setScheduleDays] = useState<Set<number>>(
+    () => new Set(data.adminTempCleanupSchedule.days ?? [])
+  );
+  const [isSavingSchedule, setIsSavingSchedule] = useState(false);
+  const [isRunningCleanup, setIsRunningCleanup] = useState(false);
+  const [scheduleMessage, setScheduleMessage] = useState<string | null>(null);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
 
   useEffect(() => {
     setBreadcrumbs([{ label: "Admin" }]);
     return () => setBreadcrumbs([]);
   }, [setBreadcrumbs]);
 
+  useEffect(() => {
+    setScheduleHour(String(data.adminTempCleanupSchedule.hour));
+    setScheduleDays(new Set(data.adminTempCleanupSchedule.days ?? []));
+  }, [data.adminTempCleanupSchedule.days, data.adminTempCleanupSchedule.hour]);
+
   const [commitDelete] = useMutation<adminDeleteOrphanedMediaMutation>(AdminDeleteOrphanedMediaMutation);
   const [commitEmpty] = useMutation<adminEmptyTempDirMutation>(AdminEmptyTempDirMutation);
   const [commitRebuildAll] = useMutation<adminRebuildJellyfinProjectionAllMutation>(
     AdminRebuildJellyfinProjectionAllMutation
   );
+  const [commitUpdateCleanup] = useMutation<adminUpdateTempCleanupScheduleMutation>(
+    AdminUpdateTempCleanupScheduleMutation
+  );
+  const [commitRunCleanup] = useMutation<adminRunTempCleanupMutation>(AdminRunTempCleanupMutation);
 
   const orphanedMedia = data.adminOrphanedMedia ?? [];
 
@@ -188,12 +281,97 @@ export default function AdminToolsRoute() {
     });
   };
 
+  const cleanupSchedule = data.adminTempCleanupSchedule;
+  const scheduleEnabled = scheduleDays.size > 0;
+
+  const toggleDay = (value: number) => {
+    setScheduleDays((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) {
+        next.delete(value);
+      } else {
+        next.add(value);
+      }
+      return next;
+    });
+  };
+
+  const formatRunTime = (value?: string | null) => {
+    if (!value) return "Never";
+    return new Date(value).toLocaleString();
+  };
+
+  const handleSaveSchedule = () => {
+    setScheduleError(null);
+    setScheduleMessage(null);
+    const parsedHour = Number(scheduleHour);
+    if (!Number.isInteger(parsedHour) || parsedHour < 0 || parsedHour > 23) {
+      setScheduleError("Hour must be between 0 and 23.");
+      return;
+    }
+    const days = Array.from(scheduleDays).sort((a, b) => a - b);
+    setIsSavingSchedule(true);
+    commitUpdateCleanup({
+      variables: { input: { hour: parsedHour, days } },
+      onCompleted: (response) => {
+        setIsSavingSchedule(false);
+        const nextSchedule = response.updateTempCleanupSchedule?.schedule;
+        if (nextSchedule) {
+          setScheduleHour(String(nextSchedule.hour));
+          setScheduleDays(new Set(nextSchedule.days ?? []));
+        }
+        setScheduleMessage(days.length ? "Schedule saved." : "Schedule disabled (no days selected).");
+        setRefreshKey((key) => key + 1);
+      },
+      onError: (error) => {
+        setIsSavingSchedule(false);
+        setScheduleError(error.message);
+      },
+    });
+  };
+
+  const handleRunCleanup = () => {
+    setScheduleError(null);
+    setScheduleMessage(null);
+    setIsRunningCleanup(true);
+    commitRunCleanup({
+      variables: {},
+      onCompleted: (response) => {
+        setIsRunningCleanup(false);
+        const payload = response.runTempCleanup;
+        if (payload?.schedule) {
+          setScheduleHour(String(payload.schedule.hour));
+          setScheduleDays(new Set(payload.schedule.days ?? []));
+        }
+        if (payload?.started) {
+          setScheduleMessage("Cleanup started.");
+        } else {
+          setScheduleMessage("Cleanup is already running.");
+        }
+        setRefreshKey((key) => key + 1);
+      },
+      onError: (error) => {
+        setIsRunningCleanup(false);
+        setScheduleError(error.message);
+      },
+    });
+  };
+
   const tempDirs = data.adminTempDirs ?? [];
   const recordingHealth = data.adminRecordingHealth ?? [];
+  const mediaLibraries = data.adminUserMediaLibraries ?? [];
 
   const recordingsByStatus = useMemo(
     () => recordingHealth.slice().sort((a, b) => b.count - a.count),
     [recordingHealth]
+  );
+
+  const mediaLibrariesSorted = useMemo(
+    () =>
+      mediaLibraries
+        .slice()
+        .sort((a, b) => (b.sizeBytes !== a.sizeBytes ? b.sizeBytes - a.sizeBytes : a.username.localeCompare(b.username))),
+    [mediaLibraries]
   );
 
   return (
@@ -243,9 +421,88 @@ export default function AdminToolsRoute() {
             </table>
           )}
         </Card>
+
+        <Card title="User media libraries">
+          {mediaLibrariesSorted.length === 0 ? (
+            <p>No users found.</p>
+          ) : (
+            <table css={tableStyles}>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Recordings</th>
+                  <th>Size</th>
+                </tr>
+              </thead>
+              <tbody>
+                {mediaLibrariesSorted.map((entry) => (
+                  <tr key={entry.userId}>
+                    <td>{entry.username}</td>
+                    <td>{entry.recordingCount}</td>
+                    <td>{formatBytes(entry.sizeBytes)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Card>
       </div>
 
       <div css={columnStyles}>
+        <Card title="Temp cleanup schedule">
+          <div css={scheduleGridStyles}>
+            <p css={css`color: #3e4b6d; margin: 0;`}>
+              Automatically deletes temp uploads/renders/previews older than 1 day.
+            </p>
+            <div css={css`display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.95rem;`}>
+              <span>
+                <strong>Last run:</strong> {formatRunTime(cleanupSchedule.lastRunAt)}
+              </span>
+              <span>
+                <strong>Next run:</strong> {cleanupSchedule.nextRunAt ? formatRunTime(cleanupSchedule.nextRunAt) : "Not scheduled"}
+              </span>
+            </div>
+            <label css={css`display: grid; gap: 4px; max-width: 200px;`}>
+              <span>Hour (server local)</span>
+              <input
+                type="number"
+                min={0}
+                max={23}
+                value={scheduleHour}
+                onChange={(event) => setScheduleHour(event.target.value)}
+              />
+            </label>
+            <div>
+              <span>Days of week</span>
+              <div css={dayGridStyles}>
+                {dayOptions.map((day) => (
+                  <label key={day.value} css={css`display: flex; align-items: center; gap: 6px;`}>
+                    <input
+                      type="checkbox"
+                      checked={scheduleDays.has(day.value)}
+                      onChange={() => toggleDay(day.value)}
+                    />
+                    {day.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div css={css`font-size: 0.9rem; color: #667084;`}>
+              {scheduleEnabled ? "Enabled" : "Disabled (select days to enable)."}
+            </div>
+            {scheduleError ? <p className="lede">{scheduleError}</p> : null}
+            {scheduleMessage ? <p>{scheduleMessage}</p> : null}
+            <div css={buttonRowStyles}>
+              <button type="button" disabled={isSavingSchedule} onClick={handleSaveSchedule}>
+                {isSavingSchedule ? "Saving…" : scheduleEnabled ? "Save schedule" : "Disable schedule"}
+              </button>
+              <button type="button" disabled={isRunningCleanup} onClick={handleRunCleanup}>
+                {isRunningCleanup ? "Running…" : "Run now"}
+              </button>
+            </div>
+          </div>
+        </Card>
+
         <Card title="Temp directories">
           <div css={css`display: grid; gap: 12px;`}>
             {tempDirs.map((dir) => (

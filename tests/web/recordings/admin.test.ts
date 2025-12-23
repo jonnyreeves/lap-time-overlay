@@ -63,6 +63,11 @@ async function createSessionFile(relative: string, contents: string) {
   await fsp.writeFile(target, contents);
 }
 
+async function createSessionDirectory(relative: string) {
+  const target = path.join(sessionRecordingsDir(), relative);
+  await fsp.mkdir(target, { recursive: true });
+}
+
 async function createTempFile(name: AdminTempDirName, fileName: string, contents: string) {
   const dirFunction =
     name === "UPLOADS"
@@ -98,6 +103,20 @@ describe("admin recordings utilities", () => {
     expect(new Date(items[0].modifiedAt).getTime()).toBeGreaterThan(0);
   });
 
+  it("ignores .DS_Store files when listing orphans", async () => {
+    await createSessionFile("sessionA/.DS_Store", "meta");
+    await createSessionFile("sessionA/orphan.mp4", "data");
+    const items = await listOrphanedMedia();
+    expect(items).toHaveLength(1);
+    expect(items[0].mediaId).toBe("sessionA/orphan.mp4");
+  });
+
+  it("reports empty directories as orphaned media", async () => {
+    await createSessionDirectory("sessionD/empty");
+    const items = await listOrphanedMedia();
+    expect(items.some((entry) => entry.mediaId === "sessionD/empty")).toBe(true);
+  });
+
   it("ignores media linked to recordings", async () => {
     await createSessionFile("sessionB/recording.mp4", "bits");
     findAllMediaIdsMock.mockReturnValue(["sessionB/recording.mp4"]);
@@ -118,6 +137,13 @@ describe("admin recordings utilities", () => {
     expect(deleted).toEqual(["sessionC/orphan.mp4"]);
     await expect(fsp.stat(path.join(sessionRecordingsDir(), "sessionC/orphan.mp4"))).rejects.toThrow();
     await expect(fsp.stat(path.join(sessionRecordingsDir(), "sessionC/keep.mp4"))).resolves.toBeTruthy();
+  });
+
+  it("deletes empty directories only when they are orphaned", async () => {
+    await createSessionDirectory("sessionE/empty");
+    const deleted = await deleteOrphanedMedia(["sessionE/empty"]);
+    expect(deleted).toEqual(["sessionE/empty"]);
+    await expect(fsp.stat(path.join(sessionRecordingsDir(), "sessionE/empty"))).rejects.toThrow();
   });
 
   it("calculates temp dir statistics", async () => {
