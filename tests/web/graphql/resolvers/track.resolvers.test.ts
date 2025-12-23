@@ -3,7 +3,10 @@ import { rootValue } from "../../../../src/web/graphql/schema.js";
 import { createMockGraphQLContext } from "../context.mock.js";
 
 const { context: baseContext, repositories } = createMockGraphQLContext();
-const authenticatedContext = { ...baseContext, currentUser: { id: "user-1", username: "test", createdAt: 0 } };
+const authenticatedContext = {
+  ...baseContext,
+  currentUser: { id: "user-1", username: "test", createdAt: 0, isAdmin: true },
+};
 
 describe("track resolver", () => {
   beforeEach(() => {

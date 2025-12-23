@@ -31,7 +31,7 @@ describe("auth resolvers", () => {
 
   it("register sets cookie and returns payload", () => {
     registerUser.mockReturnValue({
-      user: { id: "u1", username: "sam", createdAt: Date.now() },
+      user: { id: "u1", username: "sam", createdAt: Date.now(), isAdmin: true },
       token: "t1",
       expiresAt: 1700000000000,
     });
@@ -55,7 +55,7 @@ describe("auth resolvers", () => {
 
   it("login sets cookie and returns payload", () => {
     loginUser.mockReturnValue({
-      user: { id: "u2", username: "alex", createdAt: Date.now() },
+      user: { id: "u2", username: "alex", createdAt: Date.now(), isAdmin: false },
       token: "t2",
       expiresAt: 1800000000000,
     });
@@ -90,16 +90,16 @@ describe("auth resolvers", () => {
 
   it("lists users from auth service", () => {
     listPublicUsers.mockReturnValue([
-      { id: "u1", username: "sam", createdAt: 1000 },
-      { id: "u2", username: "alex", createdAt: 2000 },
+      { id: "u1", username: "sam", createdAt: 1000, isAdmin: true },
+      { id: "u2", username: "alex", createdAt: 2000, isAdmin: false },
     ]);
 
     const result = rootValue.users({}, baseContext as never);
 
     expect(listPublicUsers).toHaveBeenCalled();
     expect(result).toEqual([
-      { id: "u1", username: "sam", createdAt: new Date(1000).toISOString() },
-      { id: "u2", username: "alex", createdAt: new Date(2000).toISOString() },
+      { id: "u1", username: "sam", createdAt: new Date(1000).toISOString(), isAdmin: true },
+      { id: "u2", username: "alex", createdAt: new Date(2000).toISOString(), isAdmin: false },
     ]);
   });
 });

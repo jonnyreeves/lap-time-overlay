@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<bf1333fd3d1ccb3e42d069828f9a7ffe>>
+ * @generated SignedSource<<c3dbae8340e2012a9801d7c124a7f1a6>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,35 +10,27 @@
 
 import { ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
-export type SiteHeader_viewer$data = {
+export type adminAdminToolsRoute_viewer$data = {
   readonly id: string;
   readonly isAdmin: boolean;
-  readonly username: string;
-  readonly " $fragmentType": "SiteHeader_viewer";
+  readonly " $fragmentType": "adminAdminToolsRoute_viewer";
 };
-export type SiteHeader_viewer$key = {
-  readonly " $data"?: SiteHeader_viewer$data;
-  readonly " $fragmentSpreads": FragmentRefs<"SiteHeader_viewer">;
+export type adminAdminToolsRoute_viewer$key = {
+  readonly " $data"?: adminAdminToolsRoute_viewer$data;
+  readonly " $fragmentSpreads": FragmentRefs<"adminAdminToolsRoute_viewer">;
 };
 
 const node: ReaderFragment = {
   "argumentDefinitions": [],
   "kind": "Fragment",
   "metadata": null,
-  "name": "SiteHeader_viewer",
+  "name": "adminAdminToolsRoute_viewer",
   "selections": [
     {
       "alias": null,
       "args": null,
       "kind": "ScalarField",
       "name": "id",
-      "storageKey": null
-    },
-    {
-      "alias": null,
-      "args": null,
-      "kind": "ScalarField",
-      "name": "username",
       "storageKey": null
     },
     {
@@ -53,6 +45,6 @@ const node: ReaderFragment = {
   "abstractKey": null
 };
 
-(node as any).hash = "1f3a545861d26400d1898e7e60ebea8c";
+(node as any).hash = "7589bb5b5fd1a3f2b2b430c5efd2c234";
 
 export default node;

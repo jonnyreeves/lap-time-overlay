@@ -12,13 +12,16 @@ import { toGraphQLError } from "./utils.js";
 export function toUserPayload<T extends Record<string, unknown> | undefined = undefined>(
   user: PublicUser,
   extras?: T
-): { id: string; username: string; createdAt: string } & (T extends Record<string, unknown> ? T : {}) {
+): { id: string; username: string; createdAt: string; isAdmin: boolean } &
+  (T extends Record<string, unknown> ? T : {}) {
   return {
     id: user.id,
     username: user.username,
     createdAt: new Date(user.createdAt).toISOString(),
+    isAdmin: user.isAdmin,
     ...(extras ?? {}),
-  } as { id: string; username: string; createdAt: string } & (T extends Record<string, unknown> ? T : {});
+  } as { id: string; username: string; createdAt: string; isAdmin: boolean } &
+    (T extends Record<string, unknown> ? T : {});
 }
 
 export const authResolvers = {

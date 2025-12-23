@@ -15,7 +15,7 @@ import { computeConsistencyStats } from "../../../../src/web/shared/consistency.
 import { rootValue } from "../../../../src/web/graphql/schema.js";
 
 const { context, repositories } = createMockGraphQLContext({
-  currentUser: { id: "user-1", username: "sam", createdAt: Date.now() },
+  currentUser: { id: "user-1", username: "sam", createdAt: Date.now(), isAdmin: true },
   sessionToken: "token",
 });
 

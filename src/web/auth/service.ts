@@ -9,8 +9,10 @@ import {
   createUser,
   findUserById,
   findUserByUsername,
-  normalizeUsername,
   listUsers,
+  normalizeUsername,
+  countAdminUsers,
+  updateUserAdminStatus,
   type UserRecord,
 } from "../../db/users.js";
 
@@ -18,6 +20,7 @@ export interface PublicUser {
   id: string;
   username: string;
   createdAt: number;
+  isAdmin: boolean;
 }
 
 export interface AuthResult {
@@ -37,7 +40,12 @@ export class AuthError extends Error {
 }
 
 export function toPublicUser(user: UserRecord): PublicUser {
-  return { id: user.id, username: user.username, createdAt: user.createdAt };
+  return {
+    id: user.id,
+    username: user.username,
+    createdAt: user.createdAt,
+    isAdmin: user.isAdmin,
+  };
 }
 
 export function validateCredentials(
@@ -118,4 +126,20 @@ export function endSession(token: string): void {
 
 export function listPublicUsers(): PublicUser[] {
   return listUsers().map(toPublicUser);
+}
+
+export function listLocalUsers(): UserRecord[] {
+  return listUsers();
+}
+
+export function getAdminUserCount(): number {
+  return countAdminUsers();
+}
+
+export function setUserAdminFlag(userId: string, isAdmin: boolean): UserRecord | null {
+  return updateUserAdminStatus(userId, isAdmin);
+}
+
+export function getUserById(userId: string): UserRecord | null {
+  return findUserById(userId);
 }

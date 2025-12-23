@@ -1,12 +1,16 @@
 import { css } from "@emotion/react";
 import { useEffect, useMemo, useState } from "react";
-import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
+import { graphql, useFragment, useLazyLoadQuery, useMutation } from "react-relay";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import type { adminToolsQuery } from "../../__generated__/adminToolsQuery.graphql.js";
 import type { adminDeleteOrphanedMediaMutation } from "../../__generated__/adminDeleteOrphanedMediaMutation.graphql.js";
 import type { adminEmptyTempDirMutation } from "../../__generated__/adminEmptyTempDirMutation.graphql.js";
 import type { adminRebuildJellyfinProjectionAllMutation } from "../../__generated__/adminRebuildJellyfinProjectionAllMutation.graphql.js";
 import type { adminUpdateTempCleanupScheduleMutation } from "../../__generated__/adminUpdateTempCleanupScheduleMutation.graphql.js";
 import type { adminRunTempCleanupMutation } from "../../__generated__/adminRunTempCleanupMutation.graphql.js";
+import type { adminUpdateUserAdminStatusMutation } from "../../__generated__/adminUpdateUserAdminStatusMutation.graphql.js";
+import type { adminAdminToolsRoute_viewer$key } from "../../__generated__/adminAdminToolsRoute_viewer.graphql.js";
+import type { RequireAuthViewerQuery } from "../../__generated__/RequireAuthViewerQuery.graphql.js";
 import { Card } from "../../components/Card.js";
 import { useBreadcrumbs } from "../../hooks/useBreadcrumbs.js";
 
@@ -33,6 +37,12 @@ const AdminToolsPageQuery = graphql`
       sizeBytes
       recordingCount
     }
+    adminUsers {
+      id
+      username
+      createdAt
+      isAdmin
+    }
     adminTempCleanupSchedule {
       hour
       days
@@ -40,6 +50,13 @@ const AdminToolsPageQuery = graphql`
       lastRunAt
       nextRunAt
     }
+  }
+`;
+
+const AdminViewerFragment = graphql`
+  fragment adminAdminToolsRoute_viewer on User {
+    id
+    isAdmin
   }
 `;
 
@@ -96,7 +113,24 @@ const AdminRunTempCleanupMutation = graphql`
   }
 `;
 
+const AdminUpdateUserAdminStatusMutation = graphql`
+  mutation adminUpdateUserAdminStatusMutation($input: UpdateUserAdminStatusInput!) {
+    updateUserAdminStatus(input: $input) {
+      user {
+        id
+        username
+        createdAt
+        isAdmin
+      }
+    }
+  }
+`;
+
 type AdminTempDirName = adminToolsQuery["response"]["adminTempDirs"][number]["name"];
+
+type AdminViewerContext = {
+  viewer: NonNullable<RequireAuthViewerQuery["response"]["viewer"]>;
+};
 
 const pageGridStyles = css`
   display: grid;
@@ -195,6 +229,23 @@ export default function AdminToolsRoute() {
     {},
     { fetchPolicy: "store-and-network", fetchKey: refreshKey }
   );
+  const { viewer } = useOutletContext<AdminViewerContext>();
+  const adminViewer = useFragment(AdminViewerFragment, viewer as adminAdminToolsRoute_viewer$key);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!adminViewer?.isAdmin) {
+      navigate("/", { replace: true });
+    }
+  }, [navigate, adminViewer?.isAdmin]);
+  if (!adminViewer?.isAdmin) {
+    return (
+      <Card title="Admin access">
+        <p css={css`margin: 0; color: #1f2a44;`}>
+          You must be an administrator to view this page.
+        </p>
+      </Card>
+    );
+  }
   const { setBreadcrumbs } = useBreadcrumbs();
   const [deletingIds, setDeletingIds] = useState<string[]>([]);
   const [clearingDirs, setClearingDirs] = useState<AdminTempDirName[]>([]);
@@ -209,6 +260,9 @@ export default function AdminToolsRoute() {
   const [isRunningCleanup, setIsRunningCleanup] = useState(false);
   const [scheduleMessage, setScheduleMessage] = useState<string | null>(null);
   const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const [updatingUserIds, setUpdatingUserIds] = useState<string[]>([]);
+  const [userMessage, setUserMessage] = useState<string | null>(null);
+  const [userError, setUserError] = useState<string | null>(null);
 
   useEffect(() => {
     setBreadcrumbs([{ label: "Admin" }]);
@@ -229,8 +283,12 @@ export default function AdminToolsRoute() {
     AdminUpdateTempCleanupScheduleMutation
   );
   const [commitRunCleanup] = useMutation<adminRunTempCleanupMutation>(AdminRunTempCleanupMutation);
+  const [commitUpdateUserAdminStatus] = useMutation<adminUpdateUserAdminStatusMutation>(
+    AdminUpdateUserAdminStatusMutation
+  );
 
   const orphanedMedia = data.adminOrphanedMedia ?? [];
+  const adminUsers = data.adminUsers ?? [];
 
   const handleDelete = (mediaId: string) => {
     if (!window.confirm(`Delete orphaned media ${mediaId}?`)) return;
@@ -277,6 +335,24 @@ export default function AdminToolsRoute() {
       },
       onError: () => {
         setClearingDirs((prev) => prev.filter((value) => value !== name));
+      },
+    });
+  };
+
+  const handleToggleUserAdmin = (userId: string, currentValue: boolean) => {
+    setUserError(null);
+    setUserMessage(null);
+    setUpdatingUserIds((prev) => [...prev, userId]);
+    commitUpdateUserAdminStatus({
+      variables: { input: { userId, isAdmin: !currentValue } },
+      onCompleted: () => {
+        setUpdatingUserIds((prev) => prev.filter((value) => value !== userId));
+        setUserMessage("Admin status updated.");
+        setRefreshKey((key) => key + 1);
+      },
+      onError: (error) => {
+        setUpdatingUserIds((prev) => prev.filter((value) => value !== userId));
+        setUserError(error.message);
       },
     });
   };
@@ -385,6 +461,52 @@ export default function AdminToolsRoute() {
           </div>
           {fullRebuildMessage ? <p>{fullRebuildMessage}</p> : null}
           {fullRebuildError ? <p className="lede">{fullRebuildError}</p> : null}
+        </Card>
+
+        <Card title="Users">
+          {adminUsers.length === 0 ? (
+            <p>No users found.</p>
+          ) : (
+            <table css={tableStyles}>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Created</th>
+                  <th>Admin</th>
+                </tr>
+              </thead>
+              <tbody>
+                {adminUsers.map((user) => {
+                  const isCurrentUser = adminViewer?.id === user.id;
+                  const isUpdating = updatingUserIds.includes(user.id);
+                  return (
+                    <tr key={user.id}>
+                      <td>{user.username}</td>
+                      <td>{new Date(user.createdAt).toLocaleString()}</td>
+                      <td>
+                        <label css={css`display: flex; align-items: center; gap: 6px;`}>
+                          <input
+                            type="checkbox"
+                            checked={user.isAdmin}
+                            disabled={isUpdating || isCurrentUser}
+                            onChange={() => handleToggleUserAdmin(user.id, user.isAdmin)}
+                          />
+                          <span>{isCurrentUser ? "Admin (you)" : "Admin"}</span>
+                          {isUpdating ? (
+                            <span css={css`font-size: 0.78rem; color: #667084;`}>
+                              Saving…
+                            </span>
+                          ) : null}
+                        </label>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+          {userError ? <p className="lede">{userError}</p> : null}
+          {userMessage ? <p>{userMessage}</p> : null}
         </Card>
 
         <Card title="Orphaned media">

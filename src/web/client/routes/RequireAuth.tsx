@@ -10,6 +10,7 @@ const RequireAuthViewerQuery = graphql`
     viewer {
       ...HomePage_viewer
       ...SiteHeader_viewer
+      ...adminAdminToolsRoute_viewer
     }
   }
 `;

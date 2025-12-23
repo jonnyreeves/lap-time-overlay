@@ -53,7 +53,7 @@ vi.mock("../../../../src/web/recordings/overlayBurn.js", () => ({
 
 describe("trackRecording resolvers", () => {
   const { context } = createMockGraphQLContext({
-    currentUser: { id: "user-1", username: "sam", createdAt: Date.now() },
+    currentUser: { id: "user-1", username: "sam", createdAt: Date.now(), isAdmin: true },
     sessionToken: "token",
   });
 

@@ -8,6 +8,7 @@ type Query {
   adminTempDirs: [AdminTempDir!]!
   adminRecordingHealth: [AdminRecordingHealth!]!
   adminUserMediaLibraries: [AdminUserMediaLibrary!]!
+  adminUsers: [AdminUser!]!
   adminTempCleanupSchedule: TempCleanupSchedule!
 }
 
@@ -40,6 +41,13 @@ type AdminUserMediaLibrary {
   username: String!
   sizeBytes: Float!
   recordingCount: Int!
+}
+
+type AdminUser {
+  id: ID!
+  username: String!
+  createdAt: String!
+  isAdmin: Boolean!
 }
 
 type TempCleanupSchedule {
@@ -269,6 +277,7 @@ type Mutation {
   deleteOrphanedMedia(input: DeleteOrphanedMediaInput!): DeleteOrphanedMediaPayload!
   emptyTempDir(input: EmptyTempDirInput!): EmptyTempDirPayload!
   rebuildJellyfinProjectionAll: RebuildJellyfinProjectionAllPayload!
+  updateUserAdminStatus(input: UpdateUserAdminStatusInput!): UpdateUserAdminStatusPayload!
 }
 
 
@@ -292,6 +301,15 @@ type RebuildJellyfinProjectionAllPayload {
   rebuiltSessions: Int!
 }
 
+input UpdateUserAdminStatusInput {
+  userId: ID!
+  isAdmin: Boolean!
+}
+
+type UpdateUserAdminStatusPayload {
+  user: AdminUser!
+}
+
 input AuthInput {
   username: String!
   password: String!
@@ -300,6 +318,7 @@ input AuthInput {
 type User {
   id: ID!
   username: String!
+  isAdmin: Boolean!
   createdAt: String!
   recentTracks(first: Int = 10, after: String): TrackConnection!
   recentTrackSessions(

@@ -32,6 +32,25 @@ vi.mock("../../../../src/web/recordings/tempCleanup.js", () => ({
   getTempCleanupSchedule: getTempCleanupScheduleMock,
 }));
 
+const {
+  listLocalUsers: listLocalUsersMock,
+  getAdminUserCount: getAdminUserCountMock,
+  getUserById: getUserByIdMock,
+  setUserAdminFlag: setUserAdminFlagMock,
+} = vi.hoisted(() => ({
+  listLocalUsers: vi.fn(),
+  getAdminUserCount: vi.fn(),
+  getUserById: vi.fn(),
+  setUserAdminFlag: vi.fn(),
+}));
+
+vi.mock("../../../../src/web/auth/service.js", () => ({
+  listLocalUsers: listLocalUsersMock,
+  getAdminUserCount: getAdminUserCountMock,
+  getUserById: getUserByIdMock,
+  setUserAdminFlag: setUserAdminFlagMock,
+}));
+
 const { updateCleanupScheduleMock, runCleanupNowMock } = vi.hoisted(() => ({
   updateCleanupScheduleMock: vi.fn(),
   runCleanupNowMock: vi.fn(),
@@ -61,7 +80,7 @@ vi.mock("../../../../src/web/recordings/jellyfinProjection.js", async () => {
 
 describe("admin resolvers", () => {
   const { context } = createMockGraphQLContext({
-    currentUser: { id: "user-1", username: "sam", createdAt: 0 },
+    currentUser: { id: "user-1", username: "sam", createdAt: 0, isAdmin: true },
     sessionToken: "token",
   });
 
@@ -73,6 +92,16 @@ describe("admin resolvers", () => {
     await expect(
       rootValue.adminOrphanedMedia({}, { ...context, currentUser: null })
     ).rejects.toThrow("Authentication required");
+  });
+
+  it("requires admin privileges for admin queries", async () => {
+    const nonAdminContext = {
+      ...context,
+      currentUser: { id: "user-1", username: "sam", createdAt: 0, isAdmin: false },
+    };
+    await expect(rootValue.adminOrphanedMedia({}, nonAdminContext)).rejects.toThrow(
+      "Admin privileges required"
+    );
   });
 
   it("returns orphaned media from the service", async () => {
@@ -101,6 +130,31 @@ describe("admin resolvers", () => {
     expect(await rootValue.adminUserMediaLibraries({}, context)).toEqual([
       { userId: "u1", username: "sam", sizeBytes: 1234, recordingCount: 3 },
       { userId: "u2", username: "jane", sizeBytes: 0, recordingCount: 0 },
+    ]);
+  });
+
+  it("returns admin users sorted by username", async () => {
+    listLocalUsersMock.mockReturnValue([
+      {
+        id: "u2",
+        username: "beta",
+        passwordHash: "hash",
+        createdAt: 2000,
+        updatedAt: 2000,
+        isAdmin: false,
+      },
+      {
+        id: "u1",
+        username: "alpha",
+        passwordHash: "hash",
+        createdAt: 1000,
+        updatedAt: 1000,
+        isAdmin: true,
+      },
+    ]);
+    expect(await rootValue.adminUsers({}, context)).toEqual([
+      { id: "u1", username: "alpha", createdAt: new Date(1000).toISOString(), isAdmin: true },
+      { id: "u2", username: "beta", createdAt: new Date(2000).toISOString(), isAdmin: false },
     ]);
   });
 
@@ -202,6 +256,76 @@ describe("admin resolvers", () => {
       enabled: false,
       lastRunAt: new Date(456).toISOString(),
       nextRunAt: null,
+    });
+  });
+
+  it("validates updateUserAdminStatus input", async () => {
+    await expect(rootValue.updateUserAdminStatus({ input: {} }, context)).rejects.toThrow(
+      "userId is required"
+    );
+    await expect(
+      rootValue.updateUserAdminStatus({ input: { userId: "u1" } }, context)
+    ).rejects.toThrow("isAdmin must be true or false");
+  });
+
+  it("prevents removing your own admin flag", async () => {
+    getUserByIdMock.mockReturnValue({
+      id: "user-1",
+      username: "sam",
+      passwordHash: "hash",
+      createdAt: 0,
+      updatedAt: 0,
+      isAdmin: true,
+    });
+    await expect(
+      rootValue.updateUserAdminStatus({ input: { userId: "user-1", isAdmin: false } }, context)
+    ).rejects.toThrow("Cannot remove your own admin privileges");
+  });
+
+  it("prevents demoting the last admin", async () => {
+    getUserByIdMock.mockReturnValue({
+      id: "u2",
+      username: "jane",
+      passwordHash: "hash",
+      createdAt: 0,
+      updatedAt: 0,
+      isAdmin: true,
+    });
+    getAdminUserCountMock.mockReturnValue(1);
+    await expect(
+      rootValue.updateUserAdminStatus({ input: { userId: "u2", isAdmin: false } }, context)
+    ).rejects.toThrow("At least one admin account is required");
+  });
+
+  it("updates the admin flag successfully", async () => {
+    getUserByIdMock.mockReturnValue({
+      id: "u3",
+      username: "jane",
+      passwordHash: "hash",
+      createdAt: 0,
+      updatedAt: 0,
+      isAdmin: true,
+    });
+    getAdminUserCountMock.mockReturnValue(2);
+    setUserAdminFlagMock.mockReturnValue({
+      id: "u3",
+      username: "jane",
+      passwordHash: "hash",
+      createdAt: 0,
+      updatedAt: 0,
+      isAdmin: false,
+    });
+
+    const response = await rootValue.updateUserAdminStatus(
+      { input: { userId: "u3", isAdmin: false } },
+      context
+    );
+    expect(setUserAdminFlagMock).toHaveBeenCalledWith("u3", false);
+    expect(response.user).toEqual({
+      id: "u3",
+      username: "jane",
+      createdAt: new Date(0).toISOString(),
+      isAdmin: false,
     });
   });
 });

@@ -1,7 +1,16 @@
 import assert from "assert";
 import { describe, it, beforeEach, afterEach } from "vitest";
 import { setupTestDb, teardownTestDb } from "../db/test_setup.js";
-import { createUser, findUserById, findUserByUsername, listUsers, normalizeUsername, type UserRecord } from "../../src/db/users.js";
+import {
+  createUser,
+  findUserById,
+  findUserByUsername,
+  listUsers,
+  normalizeUsername,
+  countAdminUsers,
+  updateUserAdminStatus,
+  type UserRecord,
+} from "../../src/db/users.js";
 
 describe("users", () => {
   beforeEach(() => {
@@ -19,6 +28,7 @@ describe("users", () => {
     assert.ok(user.id);
     assert.ok(user.createdAt);
     assert.ok(user.updatedAt);
+    assert.strictEqual(user.isAdmin, true);
   });
 
   it("normalizes username correctly", () => {
@@ -58,5 +68,19 @@ describe("users", () => {
       users.map((u) => u.id),
       [second.id, first.id]
     );
+  });
+
+  it("counts admins separately from regular users", () => {
+    createUser("admin", "hash");
+    createUser("nonadmin", "hash", undefined, false);
+    assert.strictEqual(countAdminUsers(), 1);
+  });
+
+  it("updates the admin flag for a user", () => {
+    const user = createUser("toggle", "hash");
+    assert.strictEqual(user.isAdmin, true);
+    const updated = updateUserAdminStatus(user.id, false);
+    assert.strictEqual(updated?.isAdmin, false);
+    assert.strictEqual(countAdminUsers(), 0);
   });
 });

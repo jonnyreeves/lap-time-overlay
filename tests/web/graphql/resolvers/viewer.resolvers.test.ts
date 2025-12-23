@@ -3,7 +3,7 @@ import { createMockGraphQLContext } from "../context.mock.js";
 import { rootValue } from "../../../../src/web/graphql/schema.js";
 import { computeConsistencyStats } from "../../../../src/web/shared/consistency.js";
 
-const user = { id: "user-1", username: "sam", createdAt: 1700000000000 };
+const user = { id: "user-1", username: "sam", createdAt: 1700000000000, isAdmin: true };
 
 const mockSessions = [
   {

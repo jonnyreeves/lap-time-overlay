@@ -82,7 +82,7 @@ describe("handleRecordingDownloadRequest", () => {
 
   beforeEach(async () => {
     vi.mocked(loadUserFromSession).mockReturnValue({
-      user: { id: userId, username: "sam", createdAt: Date.now() },
+      user: { id: userId, username: "sam", createdAt: Date.now(), isAdmin: true },
       expiresAt: Date.now() + 1000,
     });
     vi.mocked(refreshSession).mockReturnValue(null);

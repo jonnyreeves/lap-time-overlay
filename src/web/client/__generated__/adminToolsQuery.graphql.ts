@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<3ce937234a97ba9b89074d77308e8efc>>
+ * @generated SignedSource<<edba325b9bb64885ca6526162fa591a6>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -41,6 +41,12 @@ export type adminToolsQuery$data = {
     readonly userId: string;
     readonly username: string;
   }>;
+  readonly adminUsers: ReadonlyArray<{
+    readonly createdAt: string;
+    readonly id: string;
+    readonly isAdmin: boolean;
+    readonly username: string;
+  }>;
 };
 export type adminToolsQuery = {
   response: adminToolsQuery$data;
@@ -55,7 +61,14 @@ var v0 = {
   "name": "sizeBytes",
   "storageKey": null
 },
-v1 = [
+v1 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "username",
+  "storageKey": null
+},
+v2 = [
   {
     "alias": null,
     "args": null,
@@ -155,19 +168,46 @@ v1 = [
         "name": "userId",
         "storageKey": null
       },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "username",
-        "storageKey": null
-      },
+      (v1/*: any*/),
       (v0/*: any*/),
       {
         "alias": null,
         "args": null,
         "kind": "ScalarField",
         "name": "recordingCount",
+        "storageKey": null
+      }
+    ],
+    "storageKey": null
+  },
+  {
+    "alias": null,
+    "args": null,
+    "concreteType": "AdminUser",
+    "kind": "LinkedField",
+    "name": "adminUsers",
+    "plural": true,
+    "selections": [
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "id",
+        "storageKey": null
+      },
+      (v1/*: any*/),
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "createdAt",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "isAdmin",
         "storageKey": null
       }
     ],
@@ -226,7 +266,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "adminToolsQuery",
-    "selections": (v1/*: any*/),
+    "selections": (v2/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -235,19 +275,19 @@ return {
     "argumentDefinitions": [],
     "kind": "Operation",
     "name": "adminToolsQuery",
-    "selections": (v1/*: any*/)
+    "selections": (v2/*: any*/)
   },
   "params": {
-    "cacheID": "5e2064884def03409fa2476da3582dda",
+    "cacheID": "708d79508b31973564f02af23cd8ef9f",
     "id": null,
     "metadata": {},
     "name": "adminToolsQuery",
     "operationKind": "query",
-    "text": "query adminToolsQuery {\n  adminOrphanedMedia {\n    mediaId\n    sizeBytes\n    modifiedAt\n  }\n  adminTempDirs {\n    name\n    path\n    sizeBytes\n    fileCount\n  }\n  adminRecordingHealth {\n    status\n    count\n  }\n  adminUserMediaLibraries {\n    userId\n    username\n    sizeBytes\n    recordingCount\n  }\n  adminTempCleanupSchedule {\n    hour\n    days\n    enabled\n    lastRunAt\n    nextRunAt\n  }\n}\n"
+    "text": "query adminToolsQuery {\n  adminOrphanedMedia {\n    mediaId\n    sizeBytes\n    modifiedAt\n  }\n  adminTempDirs {\n    name\n    path\n    sizeBytes\n    fileCount\n  }\n  adminRecordingHealth {\n    status\n    count\n  }\n  adminUserMediaLibraries {\n    userId\n    username\n    sizeBytes\n    recordingCount\n  }\n  adminUsers {\n    id\n    username\n    createdAt\n    isAdmin\n  }\n  adminTempCleanupSchedule {\n    hour\n    days\n    enabled\n    lastRunAt\n    nextRunAt\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "aef0a9a3aa8ca5fe03091af5d7f58cd8";
+(node as any).hash = "8d20298a9f2ba41b97f56ad1014791de";
 
 export default node;
