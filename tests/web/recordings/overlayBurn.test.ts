@@ -171,10 +171,10 @@ describe("burnRecordingOverlay", () => {
     await expect(fsp.stat(inputPath)).resolves.toBeTruthy();
 
     expect(savedMetadataInputs).toHaveLength(1);
-    expect(savedMetadataContents[0]).toContain("START=1000");
-    expect(savedMetadataContents[0]).toContain("END=61000");
-    expect(savedMetadataContents[0]).toContain("START=61000");
-    expect(savedMetadataContents[0]).toContain("END=9999999");
+    expect(savedMetadataContents[0]).toContain("START=0");
+    expect(savedMetadataContents[0]).toContain("END=60000");
+    expect(savedMetadataContents[0]).toContain("START=60000");
+    expect(savedMetadataContents[0]).toContain("END=9998999");
     expect(savedOutputOptions.some((opts) => opts.includes("-map_chapters"))).toBe(true);
     const chapterMetadataPath = path.join(tmpRendersDir, "overlay-burns", overlayRecording!.id, "chapters.ffmetadata");
     await expect(fsp.stat(chapterMetadataPath)).rejects.toThrow();

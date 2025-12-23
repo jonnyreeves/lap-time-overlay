@@ -16,10 +16,10 @@ import type { Lap } from "../../ffmpeg/lapTypes.js";
 import { probeVideoInfo, type VideoInfo } from "../../ffmpeg/videoInfo.js";
 import { sessionRecordingsDir, tmpRendersDir } from "../config.js";
 import { buildOverlayLaps, buildOverlayStyle } from "./overlayPreview.js";
+import { buildChapterMarkers, buildChapterMetadataFile } from "./chapterMetadata.js";
 import { rebuildJellyfinSessionProjection } from "./jellyfinProjection.js";
 
 type BurnQuality = "best" | "good";
-const FINAL_CHAPTER_END_SENTINEL_MS = 9_999_999;
 
 export class OverlayBurnError extends Error {
   constructor(
@@ -83,53 +83,6 @@ function qualityOptions(quality: BurnQuality): { preset: string; crf: number } {
 
 function toLapPayload(laps: LapRecord[]): Lap[] {
   return buildOverlayLaps(laps).map(({ lapId: _lapId, ...lap }) => lap);
-}
-
-type ChapterMarker = { startMs: number; endMs: number; title: string };
-
-function buildChapterMarkers({
-  laps,
-  lapOneOffsetS,
-  videoDurationMs,
-}: {
-  laps: Lap[];
-  lapOneOffsetS: number;
-  videoDurationMs?: number;
-}): ChapterMarker[] {
-  const offsetMs = Math.max(0, Math.round(lapOneOffsetS * 1000));
-  const sorted = [...laps].sort((a, b) => {
-    if (a.startS === b.startS) return a.number - b.number;
-    return a.startS - b.startS;
-  });
-
-  return sorted.map((lap, idx) => {
-    const startMs = offsetMs + Math.max(0, Math.round(lap.startS * 1000));
-    const nextLap = sorted[idx + 1];
-    const nextStartMs = nextLap ? offsetMs + Math.max(0, Math.round(nextLap.startS * 1000)) : null;
-    const defaultEnd = Math.max(Math.round(videoDurationMs ?? FINAL_CHAPTER_END_SENTINEL_MS), FINAL_CHAPTER_END_SENTINEL_MS);
-    const endMs = Math.max(startMs + 1, nextStartMs ?? defaultEnd);
-
-    return { startMs, endMs, title: `Lap ${lap.number} Start` };
-  });
-}
-
-function buildChapterMetadataFile(chapters: ChapterMarker[]): string {
-  const header = ";FFMETADATA1";
-  const body = chapters
-    .map(
-      (chapter) =>
-        [
-          "[CHAPTER]",
-          "TIMEBASE=1/1000",
-          `START=${chapter.startMs}`,
-          `END=${chapter.endMs}`,
-          `title=${chapter.title}`,
-          "",
-        ].join("\n")
-    )
-    .join("\n");
-
-  return [header, body].join("\n");
 }
 
 async function writeChapterMetadataFile({
