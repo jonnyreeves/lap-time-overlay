@@ -640,7 +640,7 @@ function buildOverlayBox(options: {
   const drawBox = `color=color=${color}:size=${width}x${height}:duration=${Math.max(
     0,
     overlayDuration
-  ).toFixed(3)} [box]; ${source}[box] overlay=x=${x}:y=${y}:shortest=1:enable='${enable}' [v_box]`;
+  ).toFixed(3)} [box]; ${source}[box] overlay=x=${x}:y=${y}:enable='${enable}' [v_box]`;
   return { filter: drawBox, label: "v_box" };
 }
 

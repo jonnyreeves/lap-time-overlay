@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildChapterMetadataFile, type ChapterMarker } from "../../../src/web/recordings/chapterMetadata.js";
+import { buildChapterMetadataFile, buildChapterMarkers, type ChapterMarker } from "../../../src/web/recordings/chapterMetadata.js";
+import type { Lap } from "../../../src/ffmpeg/lapTypes.js";
 
 describe("buildChapterMetadataFile", () => {
   it("emits only the FFMetadata header when no chapters are provided", () => {
@@ -28,5 +29,23 @@ describe("buildChapterMetadataFile", () => {
     expect(metadata).toContain("[CHAPTER]\nTIMEBASE=1/1000\nSTART=6000\nEND=8000\ntitle=Lap 2 Start");
     const sections = metadata.split("\n\n").filter(Boolean);
     expect(sections).toHaveLength(2);
+  });
+});
+
+describe("buildChapterMarkers", () => {
+  it("caps the final chapter end at the known video duration", () => {
+    const laps: Lap[] = [
+      { number: 1, durationS: 60, position: 0, positionChanges: [], startS: 0 },
+      { number: 2, durationS: 60, position: 0, positionChanges: [], startS: 60 },
+    ];
+
+    const markers = buildChapterMarkers({
+      laps,
+      lapOneOffsetS: 0,
+      videoDurationMs: 120_000,
+    });
+
+    expect(markers).toHaveLength(2);
+    expect(markers[1]?.endMs).toBe(120_000);
   });
 });

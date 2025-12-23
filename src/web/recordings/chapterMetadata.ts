@@ -21,15 +21,17 @@ export function buildChapterMarkers({
     return a.startS - b.startS;
   });
 
+  const safeVideoDurationMs =
+    typeof videoDurationMs === "number" && Number.isFinite(videoDurationMs) && videoDurationMs >= 0
+      ? Math.round(videoDurationMs)
+      : null;
+  const fallbackVideoDurationMs = safeVideoDurationMs ?? FINAL_CHAPTER_END_SENTINEL_MS;
+
   return sorted.map((lap, idx) => {
     const startMs = offsetMs + Math.max(0, Math.round(lap.startS * 1000));
     const nextLap = sorted[idx + 1];
     const nextStartMs = nextLap ? offsetMs + Math.max(0, Math.round(nextLap.startS * 1000)) : null;
-    const defaultEnd = Math.max(
-      Math.round(videoDurationMs ?? FINAL_CHAPTER_END_SENTINEL_MS),
-      FINAL_CHAPTER_END_SENTINEL_MS
-    );
-    const endMs = Math.max(startMs + 1, nextStartMs ?? defaultEnd);
+    const endMs = Math.max(startMs + 1, nextStartMs ?? fallbackVideoDurationMs);
 
     return { startMs, endMs, title: `Lap ${lap.number} Start` };
   });
