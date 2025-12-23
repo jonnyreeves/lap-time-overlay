@@ -103,6 +103,11 @@ const previewColumnStyles = css`
   align-self: stretch;
 `;
 
+const controlsColumnStyles = css`
+  display: grid;
+  gap: 12px;
+`;
+
 const previewFrameStyles = css`
   border-radius: 14px;
   border: 1px solid #1f2937;
@@ -226,18 +231,52 @@ const selectorPanelStyles = css`
 const selectorRowStyles = css`
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  align-items: end;
 
   @media (max-width: 560px) {
     grid-template-columns: 1fr;
   }
 `;
 
-const footerStyles = css`
+const refreshButtonContainerStyles = css`
   display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+
+  button {
+    width: 100%;
+  }
+`;
+
+const exportSettingsStyles = css`
+  border-top: 1px solid #e2e8f4;
+  padding-top: 14px;
+  display: grid;
   gap: 10px;
-  flex-wrap: wrap;
-  align-items: center;
+`;
+
+const exportSectionHeaderStyles = css`
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+`;
+
+const exportOptionsRowStyles = css`
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: end;
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const exportButtonRowStyles = css`
+  display: flex;
+  justify-content: flex-end;
 `;
 
 const badgeStyles = css`
@@ -511,6 +550,17 @@ export function RenderedOverlayPreview({
                   ))}
                 </select>
               </label>
+
+              <div css={refreshButtonContainerStyles}>
+                <button
+                  css={[recordingButtonStyles, css`font-weight: 700;`]}
+                  onClick={requestPreview}
+                  type="button"
+                  disabled={!selectedLap || isPreviewInFlight}
+                >
+                  Refresh preview
+                </button>
+              </div>
             </div>
           </div>
 
@@ -526,105 +576,104 @@ export function RenderedOverlayPreview({
           </div>
         </div>
 
-        <div css={controlsPanelStyles}>
-          <div>
-            <h3>{"Overlay Settings"}</h3>
-          </div>
-
-          <OverlayAppearanceControls
-            textColor={textColor}
-            textSize={textSize}
-            detailTextSize={detailTextSize}
-            overlayPosition={overlayPosition}
-            backgroundOpacity={backgroundOpacity}
-            showLapInfo={showLapInfo}
-            showLapDeltas={showLapDeltas}
-            onTextColorChange={setTextColor}
-            onTextSizeChange={handleTextSizeChange}
-            onDetailTextSizeChange={handleDetailTextSizeChange}
-            onOverlayPositionChange={setOverlayPosition}
-            onBackgroundOpacityChange={setBackgroundOpacity}
-            onShowLapInfoChange={setShowLapInfo}
-            onShowLapDeltasChange={setShowLapDeltas}
-          />
-
-          <div css={selectorRowStyles}>
-            <label>
-              Export quality
-              <select
-                value={quality}
-                onChange={(e) => setQuality(e.target.value as OverlayExportQualityOption)}
-                disabled={recording.overlayBurned}
-              >
-                <option value="BEST">Best (larger file)</option>
-                <option value="GOOD">Good (smaller file)</option>
-                <option value="ULTRAFAST">Ultra-fast (fastest preset)</option>
-              </select>
-            </label>
-
-            <label>
-              Codec
-              <select
-                value={codec}
-                onChange={(e) => setCodec(e.target.value as OverlayExportCodecOption)}
-                disabled={recording.overlayBurned}
-              >
-                <option value="H265">H.265 (default)</option>
-                <option value="H264">H.264</option>
-              </select>
-            </label>
-          </div>
-
-          <label className="inline-checkbox">
-            <input
-              type="checkbox"
-              checked={embedChapters}
-              onChange={(e) => setEmbedChapters(e.target.checked)}
-              disabled={recording.overlayBurned}
-            />
-            <span>Embed lap chapters in the MP4</span>
-          </label>
-
-          {isEncoding && (
-            <div css={progressSectionStyles}>
-              <div css={progressHeaderStyles}>
-                <span>Recording with overlay</span>
-                <span>{encodingPercent}%</span>
-              </div>
-              <div css={progressBarStyles}>
-                <div className="fill" style={{ width: `${encodingPercent}%` }} />
-              </div>
+        <div css={controlsColumnStyles}>
+          <div css={controlsPanelStyles}>
+            <div>
+              <h3>{"Overlay Settings"}</h3>
             </div>
-          )}
+            <OverlayAppearanceControls
+              textColor={textColor}
+              textSize={textSize}
+              detailTextSize={detailTextSize}
+              overlayPosition={overlayPosition}
+              backgroundOpacity={backgroundOpacity}
+              showLapInfo={showLapInfo}
+              showLapDeltas={showLapDeltas}
+              onTextColorChange={setTextColor}
+              onTextSizeChange={handleTextSizeChange}
+              onDetailTextSizeChange={handleDetailTextSizeChange}
+              onOverlayPositionChange={setOverlayPosition}
+              onBackgroundOpacityChange={setBackgroundOpacity}
+              onShowLapInfoChange={setShowLapInfo}
+              onShowLapDeltasChange={setShowLapDeltas}
+            />
+          </div>
 
-          {error && <div css={css`color: #b91c1c; font-weight: 600;`}>{error}</div>}
+          <div css={controlsPanelStyles}>
+            <div>
+              <h3 css={exportSectionHeaderStyles}>Export Settings</h3>
+            </div>
 
-          <div css={footerStyles}>
-            <button
-              css={[recordingButtonStyles, css`font-weight: 700;`]}
-              onClick={requestPreview}
-              type="button"
-              disabled={!selectedLap || isPreviewInFlight}
-            >
-              Refresh preview
-            </button>
-            <button
-              css={[recordingButtonStyles, primaryButtonStyles]}
-              type="button"
-              onClick={handleBurnOverlay}
-              disabled={
-                recording.overlayBurned ||
-                !lapOptions.length ||
-                isEncoding
-              }
-              title={
-                recording.overlayBurned
-                  ? "Overlay already burned into this recording"
-                  : undefined
-              }
-            >
-              {recording.overlayBurned ? "Overlay burned" : isEncoding ? "Burning…" : "Burn overlay and export"}
-            </button>
+            <div css={exportOptionsRowStyles}>
+              <label>
+                Export quality
+                <select
+                  value={quality}
+                  onChange={(e) => setQuality(e.target.value as OverlayExportQualityOption)}
+                  disabled={recording.overlayBurned}
+                >
+                  <option value="BEST">Best (larger file)</option>
+                  <option value="GOOD">Good (smaller file)</option>
+                  <option value="ULTRAFAST">Ultra-fast (fastest preset)</option>
+                </select>
+              </label>
+
+              <label>
+                Codec
+                <select
+                  value={codec}
+                  onChange={(e) => setCodec(e.target.value as OverlayExportCodecOption)}
+                  disabled={recording.overlayBurned}
+                >
+                  <option value="H265">H.265 (default)</option>
+                  <option value="H264">H.264</option>
+                </select>
+              </label>
+            </div>
+
+            <label className="inline-checkbox">
+              <input
+                type="checkbox"
+                checked={embedChapters}
+                onChange={(e) => setEmbedChapters(e.target.checked)}
+                disabled={recording.overlayBurned}
+              />
+              <span>Embed lap chapters in the MP4</span>
+            </label>
+
+            {isEncoding && (
+              <div css={progressSectionStyles}>
+                <div css={progressHeaderStyles}>
+                  <span>Recording with overlay</span>
+                  <span>{encodingPercent}%</span>
+                </div>
+                <div css={progressBarStyles}>
+                  <div className="fill" style={{ width: `${encodingPercent}%` }} />
+                </div>
+              </div>
+            )}
+
+            {error && <div css={css`color: #b91c1c; font-weight: 600;`}>{error}</div>}
+
+            <div css={exportButtonRowStyles}>
+              <button
+                css={[recordingButtonStyles, primaryButtonStyles]}
+                type="button"
+                onClick={handleBurnOverlay}
+                disabled={
+                  recording.overlayBurned ||
+                  !lapOptions.length ||
+                  isEncoding
+                }
+                title={
+                  recording.overlayBurned
+                    ? "Overlay already burned into this recording"
+                    : undefined
+                }
+              >
+                {recording.overlayBurned ? "Overlay burned" : isEncoding ? "Burning…" : "Burn overlay and export"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

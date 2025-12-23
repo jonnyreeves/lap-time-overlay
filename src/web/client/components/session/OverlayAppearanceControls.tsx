@@ -90,7 +90,6 @@ export function OverlayAppearanceControls({
 
   return (
     <div>
-      <div css={sectionHeadingStyles}>Overlay appearance</div>
       <div css={appearanceGridStyles}>
         <label>
           Text color
