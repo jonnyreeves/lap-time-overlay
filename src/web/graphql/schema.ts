@@ -51,7 +51,7 @@ export const rootValue = {
   adminTempCleanupSchedule: adminResolvers.adminTempCleanupSchedule,
   deleteOrphanedMedia: adminResolvers.deleteOrphanedMedia,
   emptyTempDir: adminResolvers.emptyTempDir,
-  rebuildJellyfinProjectionAll: adminResolvers.rebuildJellyfinProjectionAll,
+  rebuildMediaLibraryProjectionAll: adminResolvers.rebuildMediaLibraryProjectionAll,
   updateTempCleanupSchedule: adminResolvers.updateTempCleanupSchedule,
   runTempCleanup: adminResolvers.runTempCleanup,
   updateUserAdminStatus: adminResolvers.updateUserAdminStatus,

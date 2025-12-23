@@ -15,7 +15,7 @@ import {
   getUserById,
   setUserAdminFlag,
 } from "../../auth/service.js";
-import { rebuildJellyfinProjectionAll } from "../../recordings/jellyfinProjection.js";
+import { rebuildMediaLibraryProjectionAll } from "../../recordings/mediaLibraryProjection.js";
 import { getTempCleanupSchedule } from "../../recordings/tempCleanup.js";
 import { tempCleanupScheduler } from "../../recordings/tempCleanupScheduler.js";
 import type { TempCleanupSchedule } from "../../recordings/tempCleanup.js";
@@ -87,9 +87,9 @@ export const adminResolvers = {
     const schedule = await getTempCleanupSchedule();
     return toGraphQLSchedule(schedule);
   },
-  rebuildJellyfinProjectionAll: async (_args: unknown, context: GraphQLContext) => {
+  rebuildMediaLibraryProjectionAll: async (_args: unknown, context: GraphQLContext) => {
     requireAdmin(context);
-    const result = await rebuildJellyfinProjectionAll();
+    const result = await rebuildMediaLibraryProjectionAll();
     return { rebuiltSessions: result.rebuiltSessions };
   },
   deleteOrphanedMedia: async (

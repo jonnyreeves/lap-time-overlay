@@ -16,9 +16,9 @@ import {
 } from "../../shared/consistency.js";
 import { toTrackPayload } from "./track.js";
 import {
-  rebuildJellyfinSessionProjection,
-  removeJellyfinProjectionsForRecordings,
-} from "../../recordings/jellyfinProjection.js";
+  rebuildMediaLibrarySessionProjection,
+  removeMediaLibraryProjectionsForRecordings,
+} from "../../recordings/mediaLibraryProjection.js";
 
 export type LapEventInputArg = { offset?: number; event?: string; value?: string };
 export type LapInputArg = { lapNumber?: number; time?: number; lapEvents?: LapEventInputArg[] | null };
@@ -687,8 +687,8 @@ export const trackSessionResolvers = {
       });
     }
 
-    await rebuildJellyfinSessionProjection(updated.id).catch((err) => {
-      console.warn("Failed to rebuild Jellyfin projection after session update", err);
+    await rebuildMediaLibrarySessionProjection(updated.id).catch((err) => {
+      console.warn("Failed to rebuild Media Library projection after session update", err);
     });
 
     return { trackSession: toTrackSessionPayload(updated, repositories) };
@@ -747,8 +747,8 @@ export const trackSessionResolvers = {
     const success = await repositories.trackSessions.delete(args.id, context.currentUser.id);
 
     if (success && recordingIds.length > 0) {
-      await removeJellyfinProjectionsForRecordings(recordingIds).catch((err) => {
-        console.warn("Failed to remove Jellyfin projections for deleted session", err);
+      await removeMediaLibraryProjectionsForRecordings(recordingIds).catch((err) => {
+        console.warn("Failed to remove Media Library projections for deleted session", err);
       });
     }
 

@@ -68,13 +68,13 @@ const { rebuildProjectionAllMock } = vi.hoisted(() => ({
   rebuildProjectionAllMock: vi.fn(),
 }));
 
-vi.mock("../../../../src/web/recordings/jellyfinProjection.js", async () => {
+vi.mock("../../../../src/web/recordings/mediaLibraryProjection.js", async () => {
   const actual = await vi.importActual<
-    typeof import("../../../../src/web/recordings/jellyfinProjection.js")
-  >("../../../../src/web/recordings/jellyfinProjection.js");
+    typeof import("../../../../src/web/recordings/mediaLibraryProjection.js")
+  >("../../../../src/web/recordings/mediaLibraryProjection.js");
   return {
     ...actual,
-    rebuildJellyfinProjectionAll: rebuildProjectionAllMock,
+    rebuildMediaLibraryProjectionAll: rebuildProjectionAllMock,
   };
 });
 
@@ -205,7 +205,7 @@ describe("admin resolvers", () => {
 
   it("rebuilds all projections", async () => {
     rebuildProjectionAllMock.mockResolvedValue({ rebuiltSessions: 3 });
-    expect(await rootValue.rebuildJellyfinProjectionAll({}, context)).toEqual({
+    expect(await rootValue.rebuildMediaLibraryProjectionAll({}, context)).toEqual({
       rebuiltSessions: 3,
     });
     expect(rebuildProjectionAllMock).toHaveBeenCalled();

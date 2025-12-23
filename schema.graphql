@@ -276,7 +276,7 @@ type Mutation {
   runTempCleanup: RunTempCleanupPayload!
   deleteOrphanedMedia(input: DeleteOrphanedMediaInput!): DeleteOrphanedMediaPayload!
   emptyTempDir(input: EmptyTempDirInput!): EmptyTempDirPayload!
-  rebuildJellyfinProjectionAll: RebuildJellyfinProjectionAllPayload!
+  rebuildMediaLibraryProjectionAll: RebuildMediaLibraryProjectionAllPayload!
   updateUserAdminStatus(input: UpdateUserAdminStatusInput!): UpdateUserAdminStatusPayload!
 }
 
@@ -297,7 +297,7 @@ type EmptyTempDirPayload {
   name: AdminTempDirName!
 }
 
-type RebuildJellyfinProjectionAllPayload {
+type RebuildMediaLibraryProjectionAllPayload {
   rebuiltSessions: Int!
 }
 

@@ -26,9 +26,9 @@ import {
   tmpUploadsDir,
 } from "../config.js";
 import {
-  rebuildJellyfinSessionProjection,
-  removeJellyfinRecordingProjection,
-} from "./jellyfinProjection.js";
+  rebuildMediaLibrarySessionProjection,
+  removeMediaLibraryRecordingProjection,
+} from "./mediaLibraryProjection.js";
 
 export interface RecordingSourcePlan {
   fileName: string;
@@ -264,8 +264,8 @@ async function combineRecording(recordingId: string): Promise<void> {
         fps: metadata.fps,
         combineProgress: 1,
       });
-      await rebuildJellyfinSessionProjection(recording.sessionId).catch((err) => {
-        console.warn("Failed to rebuild Jellyfin projection after combine", err);
+      await rebuildMediaLibrarySessionProjection(recording.sessionId).catch((err) => {
+        console.warn("Failed to rebuild Media Library projection after combine", err);
       });
     } catch (err) {
       updateTrackRecording(recordingId, {
@@ -436,8 +436,8 @@ export async function deleteRecordingAndFiles(recordingId: string, userId: strin
     recursive: true,
     force: true,
   });
-  await removeJellyfinRecordingProjection(recordingId).catch((err) => {
-    console.warn("Failed to remove Jellyfin projection for recording", err);
+  await removeMediaLibraryRecordingProjection(recordingId).catch((err) => {
+    console.warn("Failed to remove Media Library projection for recording", err);
   });
   return deleteTrackRecording(recordingId);
 }

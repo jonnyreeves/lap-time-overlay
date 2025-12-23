@@ -5,9 +5,9 @@ const { rebuildProjectionMock, removeProjectionMock } = vi.hoisted(() => ({
   removeProjectionMock: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("../../../../src/web/recordings/jellyfinProjection.js", () => ({
-  rebuildJellyfinSessionProjection: rebuildProjectionMock,
-  removeJellyfinProjectionsForRecordings: removeProjectionMock,
+vi.mock("../../../../src/web/recordings/mediaLibraryProjection.js", () => ({
+  rebuildMediaLibrarySessionProjection: rebuildProjectionMock,
+  removeMediaLibraryProjectionsForRecordings: removeProjectionMock,
 }));
 
 import { createMockGraphQLContext } from "../context.mock.js";

@@ -11,32 +11,32 @@ import {
 import { findTrackSessionById } from "../../db/track_sessions.js";
 import { findTrackById } from "../../db/tracks.js";
 import { findUserById } from "../../db/users.js";
-import { jellyfinProjectionDir, sessionRecordingsDir } from "../config.js";
+import { mediaLibraryProjectionDir, sessionRecordingsDir } from "../config.js";
 
-export interface JellyfinRecordingView {
+export interface MediaLibraryRecordingView {
   recordingId: string;
   rawPath: string;
-  jellyfinPath: string;
+  mediaLibraryPath: string;
   nfoPath: string;
 }
 
-export interface JellyfinSessionView {
+export interface MediaLibrarySessionView {
   folderName: string;
-  recordings: JellyfinRecordingView[];
+  recordings: MediaLibraryRecordingView[];
 }
 
 type ProjectionErrorCode = "NOT_FOUND" | "VALIDATION_FAILED";
 
-export class JellyfinProjectionError extends Error {
+export class MediaLibraryProjectionError extends Error {
   constructor(message: string, public code: ProjectionErrorCode = "VALIDATION_FAILED") {
     super(message);
-    this.name = "JellyfinProjectionError";
+    this.name = "MediaLibraryProjectionError";
   }
 }
 
 const rawRoot = sessionRecordingsDir;
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"] as const;
-const projectionRoot = path.resolve(jellyfinProjectionDir);
+const projectionRoot = path.resolve(mediaLibraryProjectionDir);
 
 function sanitizeName(name: string, fallback = "Unknown"): string {
   const cleaned = name.replace(/[\\/]/g, "-").replace(/^\.+/, "").replace(/\.+$/, "").trim();
@@ -258,7 +258,7 @@ function resolveRawPath(mediaId: string): string {
   const base = path.resolve(rawRoot);
   const target = path.resolve(path.join(base, mediaId));
   if (!target.startsWith(base)) {
-    throw new JellyfinProjectionError("Recording media path is invalid");
+    throw new MediaLibraryProjectionError("Recording media path is invalid");
   }
   return target;
 }
@@ -274,22 +274,22 @@ async function removeProjectionFolders(recordingIds: Set<string>): Promise<void>
   }
 }
 
-export async function rebuildJellyfinSessionProjection(sessionId: string): Promise<JellyfinSessionView> {
+export async function rebuildMediaLibrarySessionProjection(sessionId: string): Promise<MediaLibrarySessionView> {
   const session = findTrackSessionById(sessionId);
   if (!session) {
-    throw new JellyfinProjectionError("Session not found", "NOT_FOUND");
+    throw new MediaLibraryProjectionError("Session not found", "NOT_FOUND");
   }
   const track = findTrackById(session.trackId);
   if (!track) {
-    throw new JellyfinProjectionError("Track not found for session", "NOT_FOUND");
+    throw new MediaLibraryProjectionError("Track not found for session", "NOT_FOUND");
   }
   const trackLayout = findTrackLayoutById(session.trackLayoutId);
   if (!trackLayout) {
-    throw new JellyfinProjectionError("Track layout not found for session", "NOT_FOUND");
+    throw new MediaLibraryProjectionError("Track layout not found for session", "NOT_FOUND");
   }
   const user = findUserById(session.userId);
   if (!user) {
-    throw new JellyfinProjectionError("User not found for session", "NOT_FOUND");
+    throw new MediaLibraryProjectionError("User not found for session", "NOT_FOUND");
   }
 
   const { folderName, recordingBaseName, isoDate } = buildProjectionPaths({
@@ -313,14 +313,14 @@ export async function rebuildJellyfinSessionProjection(sessionId: string): Promi
   }
 
   await fsp.mkdir(folderPath, { recursive: true });
-  const views: JellyfinRecordingView[] = [];
+  const views: MediaLibraryRecordingView[] = [];
   const usedFileNames = new Set<string>();
 
   for (const recording of readyRecordings) {
     const rawPath = resolveRawPath(recording.mediaId);
     const rawStats = await fsp.stat(rawPath).catch(() => null);
     if (!rawStats || !rawStats.isFile()) {
-      throw new JellyfinProjectionError(`Recording file missing for ${recording.id}`, "NOT_FOUND");
+      throw new MediaLibraryProjectionError(`Recording file missing for ${recording.id}`, "NOT_FOUND");
     }
 
     const suffix =
@@ -334,11 +334,11 @@ export async function rebuildJellyfinSessionProjection(sessionId: string): Promi
       suffix,
       existingNames: usedFileNames,
     });
-    const jellyfinPath = path.join(folderPath, videoFileName);
+    const mediaLibraryPath = path.join(folderPath, videoFileName);
     const nfoBaseName = path.parse(videoFileName).name;
     const nfoPath = path.join(folderPath, `${nfoBaseName}.nfo`);
 
-    await fsp.link(rawPath, jellyfinPath);
+    await fsp.link(rawPath, mediaLibraryPath);
     const nfoContents = buildNfo({
       trackName: track.name,
       sessionDate: session.date,
@@ -350,32 +350,35 @@ export async function rebuildJellyfinSessionProjection(sessionId: string): Promi
     });
     await fsp.writeFile(nfoPath, nfoContents, "utf8");
 
-    views.push({ recordingId: recording.id, rawPath, jellyfinPath, nfoPath });
+    views.push({ recordingId: recording.id, rawPath, mediaLibraryPath, nfoPath });
   }
 
   return { folderName, recordings: views };
 }
 
-export async function rebuildJellyfinProjectionAll(): Promise<{ rebuiltSessions: number }> {
-  await fsp.rm(projectionRoot, { recursive: true, force: true });
+export async function rebuildMediaLibraryProjectionAll(): Promise<{ rebuiltSessions: number }> {
   await fsp.mkdir(projectionRoot, { recursive: true });
+  const entries = await fsp.readdir(projectionRoot, { withFileTypes: true }).catch(() => []);
+  for (const entry of entries) {
+    await fsp.rm(path.join(projectionRoot, entry.name), { recursive: true, force: true });
+  }
 
   const sessionIds = findSessionIdsWithReadyRecordings();
   let rebuilt = 0;
 
   for (const sessionId of sessionIds) {
     try {
-      await rebuildJellyfinSessionProjection(sessionId);
+      await rebuildMediaLibrarySessionProjection(sessionId);
       rebuilt++;
     } catch (err) {
-      console.warn("Failed to rebuild Jellyfin projection for session", sessionId, err);
+      console.warn("Failed to rebuild Media Library projection for session", sessionId, err);
     }
   }
 
   return { rebuiltSessions: rebuilt };
 }
 
-export async function removeJellyfinRecordingProjection(recordingId: string): Promise<void> {
+export async function removeMediaLibraryRecordingProjection(recordingId: string): Promise<void> {
   const recording = findTrackRecordingById(recordingId);
   const suffixToken = recording
     ? sanitizeName(recording.description ?? recording.id, recording.id)
@@ -440,7 +443,7 @@ export async function removeJellyfinRecordingProjection(recordingId: string): Pr
   }
 }
 
-export async function removeJellyfinProjectionsForRecordings(
+export async function removeMediaLibraryProjectionsForRecordings(
   recordingIds: Iterable<string>
 ): Promise<void> {
   const ids = new Set(recordingIds);

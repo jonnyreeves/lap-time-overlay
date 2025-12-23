@@ -5,7 +5,7 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import type { adminAdminToolsRoute_viewer$key } from "../../__generated__/adminAdminToolsRoute_viewer.graphql.js";
 import type { adminDeleteOrphanedMediaMutation } from "../../__generated__/adminDeleteOrphanedMediaMutation.graphql.js";
 import type { adminEmptyTempDirMutation } from "../../__generated__/adminEmptyTempDirMutation.graphql.js";
-import type { adminRebuildJellyfinProjectionAllMutation } from "../../__generated__/adminRebuildJellyfinProjectionAllMutation.graphql.js";
+import type { adminRebuildMediaLibraryProjectionAllMutation } from "../../__generated__/adminRebuildMediaLibraryProjectionAllMutation.graphql.js";
 import type { adminRunTempCleanupMutation } from "../../__generated__/adminRunTempCleanupMutation.graphql.js";
 import type { adminToolsQuery } from "../../__generated__/adminToolsQuery.graphql.js";
 import type { adminUpdateTempCleanupScheduleMutation } from "../../__generated__/adminUpdateTempCleanupScheduleMutation.graphql.js";
@@ -76,9 +76,9 @@ const AdminEmptyTempDirMutation = graphql`
   }
 `;
 
-const AdminRebuildJellyfinProjectionAllMutation = graphql`
-  mutation adminRebuildJellyfinProjectionAllMutation {
-    rebuildJellyfinProjectionAll {
+const AdminRebuildMediaLibraryProjectionAllMutation = graphql`
+  mutation adminRebuildMediaLibraryProjectionAllMutation {
+    rebuildMediaLibraryProjectionAll {
       rebuiltSessions
     }
   }
@@ -276,8 +276,8 @@ export default function AdminToolsRoute() {
 
   const [commitDelete] = useMutation<adminDeleteOrphanedMediaMutation>(AdminDeleteOrphanedMediaMutation);
   const [commitEmpty] = useMutation<adminEmptyTempDirMutation>(AdminEmptyTempDirMutation);
-  const [commitRebuildAll] = useMutation<adminRebuildJellyfinProjectionAllMutation>(
-    AdminRebuildJellyfinProjectionAllMutation
+  const [commitRebuildAll] = useMutation<adminRebuildMediaLibraryProjectionAllMutation>(
+    AdminRebuildMediaLibraryProjectionAllMutation
   );
   const [commitUpdateCleanup] = useMutation<adminUpdateTempCleanupScheduleMutation>(
     AdminUpdateTempCleanupScheduleMutation
@@ -313,7 +313,7 @@ export default function AdminToolsRoute() {
       variables: {},
       onCompleted: (response) => {
         setIsFullRebuildRunning(false);
-        const sessions = response.rebuildJellyfinProjectionAll?.rebuiltSessions ?? 0;
+        const sessions = response.rebuildMediaLibraryProjectionAll?.rebuiltSessions ?? 0;
         const label = sessions === 1 ? "session" : "sessions";
         setFullRebuildMessage(`Rebuilt ${sessions} ${label}.`);
         setRefreshKey((key) => key + 1);
@@ -538,7 +538,7 @@ export default function AdminToolsRoute() {
           title="User media libraries"
           rightHeaderContent={
             <button type="button" disabled={isFullRebuildRunning} onClick={handleRebuildAll}>
-              {isFullRebuildRunning ? "Rebuilding Jellyfin index…" : "Rebuild Jellyfin index"}
+              {isFullRebuildRunning ? "Rebuilding Media Library index…" : "Rebuild Media Library index"}
             </button>
           }
         >

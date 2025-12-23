@@ -7,18 +7,18 @@ import { createTrackSessionWithLaps } from "../../../src/db/track_sessions.js";
 import { createTrack } from "../../../src/db/tracks.js";
 import { createUser } from "../../../src/db/users.js";
 import {
-  rebuildJellyfinSessionProjection,
-  removeJellyfinRecordingProjection,
-} from "../../../src/web/recordings/jellyfinProjection.js";
+  rebuildMediaLibrarySessionProjection,
+  removeMediaLibraryRecordingProjection,
+} from "../../../src/web/recordings/mediaLibraryProjection.js";
 import { setupTestDb, teardownTestDb } from "../../db/test_setup.js";
 
 vi.mock("../../../src/web/config.js", () => {
-  const root = path.join(process.cwd(), "temp", "jellyfin-projection");
+  const root = path.join(process.cwd(), "temp", "media-library-projection");
   return {
     projectRoot: process.cwd(),
     publicDir: path.join(process.cwd(), "public"),
     sessionRecordingsDir: path.join(root, "session_recordings"),
-    jellyfinProjectionDir: path.join(root, "jellyfin"),
+    mediaLibraryProjectionDir: path.join(root, "media_library"),
     tmpUploadsDir: path.join(root, "uploads"),
     tmpRendersDir: path.join(root, "renders"),
     tmpPreviewsDir: path.join(root, "previews"),
@@ -26,11 +26,11 @@ vi.mock("../../../src/web/config.js", () => {
   };
 });
 
-const testRoot = path.join(process.cwd(), "temp", "jellyfin-projection");
+const testRoot = path.join(process.cwd(), "temp", "media-library-projection");
 const rawDir = path.join(testRoot, "session_recordings");
-const projectionDir = path.join(testRoot, "jellyfin");
+const projectionDir = path.join(testRoot, "media_library");
 
-describe("Jellyfin projection", () => {
+describe("Media Library projection", () => {
   beforeEach(async () => {
     setupTestDb();
     await fsp.rm(testRoot, { recursive: true, force: true });
@@ -73,7 +73,7 @@ describe("Jellyfin projection", () => {
     await fsp.mkdir(staleFolder, { recursive: true });
     await fsp.writeFile(path.join(staleFolder, `${recording.id}.mp4`), "stale");
 
-    const view = await rebuildJellyfinSessionProjection(trackSession.id);
+    const view = await rebuildMediaLibrarySessionProjection(trackSession.id);
 
     const expectedFolderName = path.join("viewer", "2025", track.name, "Dec 3");
     expect(view.folderName).toBe(expectedFolderName);
@@ -81,10 +81,10 @@ describe("Jellyfin projection", () => {
 
     const projection = view.recordings[0]!;
     const rawStats = await fsp.stat(rawPath);
-    const projectionStats = await fsp.stat(projection.jellyfinPath);
+    const projectionStats = await fsp.stat(projection.mediaLibraryPath);
 
     expect(rawStats.ino).toBe(projectionStats.ino);
-    expect(path.parse(projection.jellyfinPath).name).toBe(path.parse(projection.nfoPath).name);
+    expect(path.parse(projection.mediaLibraryPath).name).toBe(path.parse(projection.nfoPath).name);
     await expect(fsp.stat(projection.nfoPath)).resolves.toBeTruthy();
     await expect(fsp.stat(staleFolder)).rejects.toBeTruthy();
 
@@ -93,10 +93,10 @@ describe("Jellyfin projection", () => {
     expect(nfo).toContain("P3");
     expect(nfo).toContain(`Recording ID: ${recording.id}`);
     expect(nfo).toContain(`Session ID: ${trackSession.id}`);
-    expect(path.basename(projection.jellyfinPath)).toBe(
+    expect(path.basename(projection.mediaLibraryPath)).toBe(
       "Race - Daytona Sandown Park - Full - 2025-12-03.mp4"
     );
-    expect(projection.jellyfinPath).toContain(expectedFolderName);
+    expect(projection.mediaLibraryPath).toContain(expectedFolderName);
   });
 
   it("removes a single recording projection without disturbing the session folder", async () => {
@@ -140,7 +140,7 @@ describe("Jellyfin projection", () => {
       await fsp.writeFile(p, rec.id);
     }
 
-    const view = await rebuildJellyfinSessionProjection(trackSession.id);
+    const view = await rebuildMediaLibrarySessionProjection(trackSession.id);
     const rec1Projection = view.recordings.find((r) => r.recordingId === rec1.id);
     const rec2Projection = view.recordings.find((r) => r.recordingId === rec2.id);
     const expectedFolderName = path.join("viewer", "2024", track.name, "Jun 10");
@@ -148,18 +148,18 @@ describe("Jellyfin projection", () => {
     expect(view.folderName).toBe(expectedFolderName);
     expect(rec1Projection).toBeDefined();
     expect(rec2Projection).toBeDefined();
-    expect(path.basename(rec1Projection!.jellyfinPath)).toBe(
+    expect(path.basename(rec1Projection!.mediaLibraryPath)).toBe(
       "Practice - Bayford Meadows - Short - 2024-06-10 - rec-one.mp4"
     );
-    expect(path.basename(rec2Projection!.jellyfinPath)).toBe(
+    expect(path.basename(rec2Projection!.mediaLibraryPath)).toBe(
       "Practice - Bayford Meadows - Short - 2024-06-10 - rec-two.mp4"
     );
 
-    await removeJellyfinRecordingProjection(rec1.id);
+    await removeMediaLibraryRecordingProjection(rec1.id);
 
-    await expect(fsp.stat(rec1Projection!.jellyfinPath)).rejects.toBeTruthy();
+    await expect(fsp.stat(rec1Projection!.mediaLibraryPath)).rejects.toBeTruthy();
     await expect(fsp.stat(rec1Projection!.nfoPath)).rejects.toBeTruthy();
-    await expect(fsp.stat(rec2Projection!.jellyfinPath)).resolves.toBeTruthy();
+    await expect(fsp.stat(rec2Projection!.mediaLibraryPath)).resolves.toBeTruthy();
     await expect(fsp.stat(rec2Projection!.nfoPath)).resolves.toBeTruthy();
 
     const sessionFolder = path.join(projectionDir, expectedFolderName);

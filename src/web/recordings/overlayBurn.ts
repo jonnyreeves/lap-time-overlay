@@ -17,7 +17,7 @@ import { probeVideoInfo, type VideoInfo } from "../../ffmpeg/videoInfo.js";
 import { sessionRecordingsDir, tmpRendersDir } from "../config.js";
 import { buildOverlayLaps, buildOverlayStyle } from "./overlayPreview.js";
 import { buildChapterMarkers, buildChapterMetadataFile } from "./chapterMetadata.js";
-import { rebuildJellyfinSessionProjection } from "./jellyfinProjection.js";
+import { rebuildMediaLibrarySessionProjection } from "./mediaLibraryProjection.js";
 
 type BurnQuality = "best" | "good" | "ultrafast";
 type BurnCodec = "h264" | "h265";
@@ -312,8 +312,8 @@ export async function burnRecordingOverlay(options: {
       combineProgress: 1,
       error: null,
     }) ?? recording;
-  await rebuildJellyfinSessionProjection(recording.sessionId).catch((err) => {
-    console.warn("Failed to rebuild Jellyfin projection after overlay burn", err);
+  await rebuildMediaLibrarySessionProjection(recording.sessionId).catch((err) => {
+    console.warn("Failed to rebuild Media Library projection after overlay burn", err);
   });
   return updated;
 }
