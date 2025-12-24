@@ -24,6 +24,7 @@ export type OverlayPreviewStyleInput = {
   boxOpacity: number;
   showLapCounter: boolean;
   showPosition: boolean;
+  showPreviousLapTime: boolean;
   showLapDeltas: boolean;
 };
 

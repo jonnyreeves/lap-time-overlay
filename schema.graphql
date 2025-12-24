@@ -220,6 +220,7 @@ input OverlayStyleInput {
   showLapCounter: Boolean
   showPosition: Boolean
   showLapDeltas: Boolean
+  showPreviousLapTime: Boolean
 }
 
 input RenderOverlayPreviewInput {

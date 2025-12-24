@@ -466,7 +466,7 @@ export function LapOverlay({
       </div>
       {previousLap ? (
         <div className="previous-lap" data-tone={previousLap.tone}>
-          <span className="previous-label">Prev lap {previousLap.lapNumber}</span>
+        <span className="previous-label">Prev</span>
           <span className="previous-time">
             {formatStopwatchTime(previousLap.lapTime)}
             <span className="previous-delta">[{formatDelta(previousLap.deltaToPrior)}]</span>

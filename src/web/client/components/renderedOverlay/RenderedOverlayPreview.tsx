@@ -134,6 +134,7 @@ export function RenderedOverlayPreview({
   const [backgroundOpacity, setBackgroundOpacity] = useState(60);
   const [showLapCounter, setShowLapCounter] = useState(true);
   const [showPosition, setShowPosition] = useState(true);
+  const [showPreviousLapTime, setShowPreviousLapTime] = useState(true);
   const [showLapDeltas, setShowLapDeltas] = useState(true);
   const [quality, setQuality] = useState<OverlayExportQualityOption>("BEST");
   const [codec, setCodec] = useState<OverlayExportCodecOption>("H265");
@@ -163,6 +164,7 @@ export function RenderedOverlayPreview({
       boxOpacity: Math.max(0, Math.min(1, backgroundOpacity / 100)),
       showLapCounter,
       showPosition,
+      showPreviousLapTime,
       showLapDeltas,
     }),
     [
@@ -170,6 +172,7 @@ export function RenderedOverlayPreview({
       detailTextSize,
       overlayPosition,
       showLapCounter,
+      showPreviousLapTime,
       showLapDeltas,
       showPosition,
       textColor,
@@ -253,6 +256,7 @@ export function RenderedOverlayPreview({
               backgroundOpacity={backgroundOpacity}
               showLapCounter={showLapCounter}
               showPosition={showPosition}
+              showPreviousLapTime={showPreviousLapTime}
               showLapDeltas={showLapDeltas}
               onTextColorChange={setTextColor}
               onTextSizeChange={handleTextSizeChange}
@@ -261,6 +265,7 @@ export function RenderedOverlayPreview({
               onBackgroundOpacityChange={setBackgroundOpacity}
               onShowLapCounterChange={setShowLapCounter}
               onShowPositionChange={setShowPosition}
+              onShowPreviousLapTimeChange={setShowPreviousLapTime}
               onShowLapDeltasChange={setShowLapDeltas}
               disabled={isEncoding}
             />

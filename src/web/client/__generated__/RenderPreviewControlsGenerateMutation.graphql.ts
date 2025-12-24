@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<14a1788750a172c349cd45160eb3e0e1>>
+ * @generated SignedSource<<4b7428d6775691ec4b5da5e06e036037>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -24,6 +24,7 @@ export type OverlayStyleInput = {
   showLapCounter?: boolean | null | undefined;
   showLapDeltas?: boolean | null | undefined;
   showPosition?: boolean | null | undefined;
+  showPreviousLapTime?: boolean | null | undefined;
   textColor?: OverlayTextColor | null | undefined;
   textSize?: number | null | undefined;
 };

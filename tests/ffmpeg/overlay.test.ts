@@ -43,9 +43,25 @@ describe("buildDrawtextFilterGraph", () => {
     expect(combined).toContain("drawtext");
     expect(combined).toContain("Lap 1/2");
     expect(combined).toContain("P2");
+    expect(combined).toContain("drawtext=text='Prev'");
+    expect(combined).toContain("01\\:00\\:000");
     expect(combined).toContain("Δ vs Best");
     expect(combined).toContain("Δ vs Avg");
     expect(combined).toContain("overlay=x=");
+  });
+
+  it("hides previous lap text when disabled", () => {
+    const { filterGraph } = buildDrawtextFilterGraph({
+      inputVideo: "input.mp4",
+      outputFile: "out.mp4",
+      video: { width: 1280, height: 720, fps: 24, duration: 120 },
+      laps: sampleLaps,
+      startOffsetS: 0,
+      style: { ...DEFAULT_OVERLAY_STYLE, showPreviousLapTime: false },
+    });
+
+    const combined = filterGraph.join(";");
+    expect(combined).not.toContain("drawtext=text='Prev'");
   });
 
   it("omits lap time overlay when disabled", () => {

@@ -73,6 +73,7 @@ type OverlayStyleInput =
       boxOpacity?: number | null;
       showLapCounter?: boolean | null;
       showPosition?: boolean | null;
+      showPreviousLapTime?: boolean | null;
       showLapDeltas?: boolean | null;
     }
   | null
@@ -119,6 +120,10 @@ function normalizeOverlayStyleInput(style: OverlayStyleInput): Partial<OverlaySt
 
   if (typeof style.showLapDeltas === "boolean") {
     overrides.showLapDeltas = style.showLapDeltas;
+  }
+
+  if (typeof style.showPreviousLapTime === "boolean") {
+    overrides.showPreviousLapTime = style.showPreviousLapTime;
   }
 
   return overrides;

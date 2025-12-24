@@ -11,6 +11,7 @@ export interface OverlayStyle {
   showPosition: boolean;
   showCurrentLapTime: boolean;
   showLapDeltas: boolean;
+  showPreviousLapTime: boolean;
   overlayPosition: "bottom-left" | "top-left" | "top-right" | "bottom-right";
 }
 
@@ -36,5 +37,6 @@ export const DEFAULT_OVERLAY_STYLE: OverlayStyle = {
   showPosition: true,
   showCurrentLapTime: true,
   showLapDeltas: true,
+  showPreviousLapTime: true,
   overlayPosition: "bottom-left",
 };

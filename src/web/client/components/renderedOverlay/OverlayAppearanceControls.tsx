@@ -13,6 +13,7 @@ type Props = {
   showLapDeltas: boolean;
   showLapCounter: boolean;
   showPosition: boolean;
+  showPreviousLapTime: boolean;
   onTextColorChange: (value: OverlayTextColorOption) => void;
   onTextSizeChange: (value: number) => void;
   onDetailTextSizeChange: (value: number) => void;
@@ -20,6 +21,7 @@ type Props = {
   onBackgroundOpacityChange: (value: number) => void;
   onShowLapCounterChange: (value: boolean) => void;
   onShowPositionChange: (value: boolean) => void;
+  onShowPreviousLapTimeChange: (value: boolean) => void;
   onShowLapDeltasChange: (value: boolean) => void;
   disabled?: boolean;
 };
@@ -80,6 +82,7 @@ export function OverlayAppearanceControls({
   showLapDeltas,
   showLapCounter,
   showPosition,
+  showPreviousLapTime,
   onTextColorChange,
   onTextSizeChange,
   onDetailTextSizeChange,
@@ -87,6 +90,7 @@ export function OverlayAppearanceControls({
   onBackgroundOpacityChange,
   onShowLapCounterChange,
   onShowPositionChange,
+  onShowPreviousLapTimeChange,
   onShowLapDeltasChange,
   disabled,
 }: Props) {
@@ -193,6 +197,17 @@ export function OverlayAppearanceControls({
               disabled={disabled}
             />{" "}
             Show position
+          </div>
+        </label>
+        <label>
+          <div>
+            <input
+              type="checkbox"
+              checked={showPreviousLapTime}
+              onChange={(e) => onShowPreviousLapTimeChange(e.target.checked)}
+              disabled={disabled}
+            />{" "}
+            Show previous lap time
           </div>
         </label>
 
