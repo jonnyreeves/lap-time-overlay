@@ -20,11 +20,12 @@ pnpm-debug.log*
 .vscode/
 
 # Project artifacts
-media_library/
-session_recordings/
-temp/
 public/app.js
 public/app.js.map
 
 # Database files
 database/*.sqlite*
+
+# Media files
+media/
+temp/

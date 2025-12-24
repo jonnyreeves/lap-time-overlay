@@ -7,8 +7,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const projectRoot = path.resolve(__dirname, "../..");
 export const publicDir = path.join(projectRoot, "public");
 
-export const sessionRecordingsDir = path.join(projectRoot, "session_recordings");
-export const mediaLibraryProjectionDir = path.join(projectRoot, "media_library");
+export const sessionRecordingsDir = path.join(projectRoot, "media/session_recordings");
+export const mediaLibraryProjectionDir = path.join(projectRoot, "media/library");
 
 export const tmpUploadsDir = path.join(projectRoot, "temp/uploads");
 export const tmpRendersDir = path.join(projectRoot, "temp/renders");
