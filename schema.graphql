@@ -7,6 +7,7 @@ type Query {
   adminOrphanedMedia: [AdminOrphanedMedia!]!
   adminTempDirs: [AdminTempDir!]!
   adminRecordingHealth: [AdminRecordingHealth!]!
+  adminRenderJobs: [AdminRenderJob!]!
   adminUserMediaLibraries: [AdminUserMediaLibrary!]!
   adminUsers: [AdminUser!]!
   adminTempCleanupSchedule: TempCleanupSchedule!
@@ -36,6 +37,22 @@ type AdminRecordingHealth {
   count: Int!
 }
 
+enum RenderJobType {
+  COMBINE
+  OVERLAY
+}
+
+type AdminRenderJob {
+  recordingId: ID!
+  sessionId: ID
+  description: String
+  userId: ID!
+  username: String
+  type: RenderJobType!
+  progress: Float!
+  startedAt: String!
+}
+
 type AdminUserMediaLibrary {
   userId: ID!
   username: String!
@@ -48,6 +65,10 @@ type AdminUser {
   username: String!
   createdAt: String!
   isAdmin: Boolean!
+}
+
+type CancelRenderJobPayload {
+  success: Boolean!
 }
 
 type TempCleanupSchedule {
@@ -279,6 +300,7 @@ type Mutation {
   emptyTempDir(input: EmptyTempDirInput!): EmptyTempDirPayload!
   rebuildMediaLibraryProjectionAll: RebuildMediaLibraryProjectionAllPayload!
   updateUserAdminStatus(input: UpdateUserAdminStatusInput!): UpdateUserAdminStatusPayload!
+  cancelRenderJob(recordingId: ID!): CancelRenderJobPayload!
 }
 
 

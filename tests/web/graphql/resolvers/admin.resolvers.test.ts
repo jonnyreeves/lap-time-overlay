@@ -78,6 +78,27 @@ vi.mock("../../../../src/web/recordings/mediaLibraryProjection.js", async () => 
   };
 });
 
+const {
+  getActiveRenderJobs: getActiveRenderJobsMock,
+  cancelRenderJob: cancelRenderJobMock,
+} = vi.hoisted(() => ({
+  getActiveRenderJobs: vi.fn(),
+  cancelRenderJob: vi.fn(),
+}));
+
+vi.mock("../../../../src/web/recordings/renderJobs.js", () => ({
+  getActiveRenderJobs: getActiveRenderJobsMock,
+  cancelRenderJob: cancelRenderJobMock,
+}));
+
+const { findTrackRecordingById: findTrackRecordingByIdMock } = vi.hoisted(() => ({
+  findTrackRecordingById: vi.fn(),
+}));
+
+vi.mock("../../../../src/db/track_recordings.js", () => ({
+  findTrackRecordingById: findTrackRecordingByIdMock,
+}));
+
 describe("admin resolvers", () => {
   const { context } = createMockGraphQLContext({
     currentUser: { id: "user-1", username: "sam", createdAt: 0, isAdmin: true },
@@ -131,6 +152,65 @@ describe("admin resolvers", () => {
       { userId: "u1", username: "sam", sizeBytes: 1234, recordingCount: 3 },
       { userId: "u2", username: "jane", sizeBytes: 0, recordingCount: 0 },
     ]);
+  });
+
+  it("lists active render jobs", async () => {
+    getActiveRenderJobsMock.mockReturnValue([
+      {
+        recordingId: "rec-1",
+        userId: "user-1",
+        type: "combine",
+        startedAt: 1000,
+        canceled: false,
+      },
+    ]);
+    findTrackRecordingByIdMock.mockReturnValue({
+      id: "rec-1",
+      sessionId: "session-1",
+      userId: "user-1",
+      mediaId: "foo",
+      overlayBurned: false,
+      isPrimary: false,
+      lapOneOffset: 0,
+      description: "desc",
+      status: "combining",
+      error: null,
+      sizeBytes: 0,
+      durationMs: null,
+      fps: null,
+      combineProgress: 0.35,
+      createdAt: 0,
+      updatedAt: 0,
+      showInMediaLibrary: true,
+    });
+    getUserByIdMock.mockReturnValue({
+      id: "user-1",
+      username: "sam",
+      passwordHash: "hash",
+      createdAt: 0,
+      updatedAt: 0,
+      isAdmin: true,
+    });
+
+    expect(await rootValue.adminRenderJobs({}, context)).toEqual([
+      {
+        recordingId: "rec-1",
+        sessionId: "session-1",
+        description: "desc",
+        userId: "user-1",
+        username: "sam",
+        type: "COMBINE",
+        progress: 0.35,
+        startedAt: new Date(1000).toISOString(),
+      },
+    ]);
+  });
+
+  it("cancels a render job", async () => {
+    cancelRenderJobMock.mockReturnValue(true);
+    const response = await rootValue.cancelRenderJob({ recordingId: "rec-2" }, context);
+    expect(cancelRenderJobMock).toHaveBeenCalledWith("rec-2");
+    expect(response).toEqual({ success: true });
   });
 
   it("returns admin users sorted by username", async () => {

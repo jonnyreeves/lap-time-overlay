@@ -29,6 +29,7 @@ import {
   rebuildMediaLibrarySessionProjection,
   removeMediaLibraryRecordingProjection,
 } from "./mediaLibraryProjection.js";
+import { getRenderJob, startRenderJob } from "./renderJobs.js";
 
 export interface RecordingSourcePlan {
   fileName: string;
@@ -50,7 +51,6 @@ export class RecordingUploadError extends Error {
 }
 
 const UPLOAD_FLUSH_BYTES = 512 * 1024;
-const combiningRecordings = new Map<string, Promise<void>>();
 
 function toPlannedMediaId(recordingId: string, sessionId: string, firstFileName: string): string {
   const ext = path.extname(firstFileName || "") || ".mp4";
@@ -201,25 +201,27 @@ async function prepareSourceForConcat(
 }
 
 async function combineRecording(recordingId: string): Promise<void> {
-  if (combiningRecordings.has(recordingId)) {
-    return combiningRecordings.get(recordingId) ?? Promise.resolve();
+  const existingJob = getRenderJob(recordingId);
+  if (existingJob) {
+    return existingJob.promise;
   }
 
+  const recording = findTrackRecordingById(recordingId);
+  if (!recording) return;
+
+  const sources = findTrackRecordingSourcesByRecordingId(recordingId);
+  if (!sources.length || sources.some((src) => src.status !== "uploaded")) {
+    return;
+  }
+
+  updateTrackRecording(recordingId, { status: "combining", error: null, combineProgress: 0 });
+
+  const stagingDir = stagingDirForRecording(recording.sessionId, recording.id);
+  const outputPath = path.join(sessionRecordingsDir, recording.mediaId);
+  const concatFile = path.join(stagingDir, "concat.txt");
+
+  let ffmpegCommand: ReturnType<typeof ffmpeg> | null = null;
   const promise = (async () => {
-    const recording = findTrackRecordingById(recordingId);
-    if (!recording) return;
-
-    const sources = findTrackRecordingSourcesByRecordingId(recordingId);
-    if (!sources.length || sources.some((src) => src.status !== "uploaded")) {
-      return;
-    }
-
-    updateTrackRecording(recordingId, { status: "combining", error: null, combineProgress: 0 });
-
-    const stagingDir = stagingDirForRecording(recording.sessionId, recording.id);
-    const outputPath = path.join(sessionRecordingsDir, recording.mediaId);
-    const concatFile = path.join(stagingDir, "concat.txt");
-
     try {
       const processedSources = await Promise.all(
         sources.map((src, idx) =>
@@ -252,6 +254,7 @@ async function combineRecording(recordingId: string): Promise<void> {
           .on("error", (err) => reject(err))
           .on("end", () => resolve());
 
+        ffmpegCommand = command;
         command.save(outputPath);
       });
 
@@ -268,11 +271,14 @@ async function combineRecording(recordingId: string): Promise<void> {
         console.warn("Failed to rebuild Media Library projection after combine", err);
       });
     } catch (err) {
-      updateTrackRecording(recordingId, {
-        status: "failed",
-        error: err instanceof Error ? err.message : "Combine failed",
-        combineProgress: 0,
-      });
+      const recordingAfterCancel = findTrackRecordingById(recordingId);
+      if (recordingAfterCancel?.error !== "Canceled by admin") {
+        updateTrackRecording(recordingId, {
+          status: "failed",
+          error: err instanceof Error ? err.message : "Combine failed",
+          combineProgress: 0,
+        });
+      }
       await fsp.rm(outputPath, { force: true });
     } finally {
       await fsp.rm(stagingDir, {
@@ -283,9 +289,15 @@ async function combineRecording(recordingId: string): Promise<void> {
     }
   })();
 
-  combiningRecordings.set(recordingId, promise);
-  await promise;
-  combiningRecordings.delete(recordingId);
+  return startRenderJob({
+    recordingId,
+    userId: recording.userId,
+    type: "combine",
+    promise,
+    cancel: () => {
+      ffmpegCommand?.kill("SIGKILL");
+    },
+  });
 }
 
 export async function startRecordingUploadSession({

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<edba325b9bb64885ca6526162fa591a6>>
+ * @generated SignedSource<<162c97c6cff2b710a485fdea1fa32ecc>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -10,6 +10,7 @@
 
 import { ConcreteRequest } from 'relay-runtime';
 export type AdminTempDirName = "PREVIEWS" | "RENDERS" | "UPLOADS" | "%future added value";
+export type RenderJobType = "COMBINE" | "OVERLAY" | "%future added value";
 export type TrackRecordingStatus = "COMBINING" | "FAILED" | "PENDING_UPLOAD" | "READY" | "UPLOADING" | "%future added value";
 export type adminToolsQuery$variables = Record<PropertyKey, never>;
 export type adminToolsQuery$data = {
@@ -21,6 +22,16 @@ export type adminToolsQuery$data = {
   readonly adminRecordingHealth: ReadonlyArray<{
     readonly count: number;
     readonly status: TrackRecordingStatus;
+  }>;
+  readonly adminRenderJobs: ReadonlyArray<{
+    readonly description: string | null | undefined;
+    readonly progress: number;
+    readonly recordingId: string;
+    readonly sessionId: string | null | undefined;
+    readonly startedAt: string;
+    readonly type: RenderJobType;
+    readonly userId: string;
+    readonly username: string | null | undefined;
   }>;
   readonly adminTempCleanupSchedule: {
     readonly days: ReadonlyArray<number>;
@@ -65,10 +76,17 @@ v1 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
+  "name": "userId",
+  "storageKey": null
+},
+v2 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
   "name": "username",
   "storageKey": null
 },
-v2 = [
+v3 = [
   {
     "alias": null,
     "args": null,
@@ -156,19 +174,68 @@ v2 = [
   {
     "alias": null,
     "args": null,
-    "concreteType": "AdminUserMediaLibrary",
+    "concreteType": "AdminRenderJob",
     "kind": "LinkedField",
-    "name": "adminUserMediaLibraries",
+    "name": "adminRenderJobs",
     "plural": true,
     "selections": [
       {
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "userId",
+        "name": "recordingId",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "sessionId",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "description",
         "storageKey": null
       },
       (v1/*: any*/),
+      (v2/*: any*/),
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "type",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "progress",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "startedAt",
+        "storageKey": null
+      }
+    ],
+    "storageKey": null
+  },
+  {
+    "alias": null,
+    "args": null,
+    "concreteType": "AdminUserMediaLibrary",
+    "kind": "LinkedField",
+    "name": "adminUserMediaLibraries",
+    "plural": true,
+    "selections": [
+      (v1/*: any*/),
+      (v2/*: any*/),
       (v0/*: any*/),
       {
         "alias": null,
@@ -195,7 +262,7 @@ v2 = [
         "name": "id",
         "storageKey": null
       },
-      (v1/*: any*/),
+      (v2/*: any*/),
       {
         "alias": null,
         "args": null,
@@ -266,7 +333,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "adminToolsQuery",
-    "selections": (v2/*: any*/),
+    "selections": (v3/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -275,19 +342,19 @@ return {
     "argumentDefinitions": [],
     "kind": "Operation",
     "name": "adminToolsQuery",
-    "selections": (v2/*: any*/)
+    "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "708d79508b31973564f02af23cd8ef9f",
+    "cacheID": "f451626fad6515279b9a99cdeef28d15",
     "id": null,
     "metadata": {},
     "name": "adminToolsQuery",
     "operationKind": "query",
-    "text": "query adminToolsQuery {\n  adminOrphanedMedia {\n    mediaId\n    sizeBytes\n    modifiedAt\n  }\n  adminTempDirs {\n    name\n    path\n    sizeBytes\n    fileCount\n  }\n  adminRecordingHealth {\n    status\n    count\n  }\n  adminUserMediaLibraries {\n    userId\n    username\n    sizeBytes\n    recordingCount\n  }\n  adminUsers {\n    id\n    username\n    createdAt\n    isAdmin\n  }\n  adminTempCleanupSchedule {\n    hour\n    days\n    enabled\n    lastRunAt\n    nextRunAt\n  }\n}\n"
+    "text": "query adminToolsQuery {\n  adminOrphanedMedia {\n    mediaId\n    sizeBytes\n    modifiedAt\n  }\n  adminTempDirs {\n    name\n    path\n    sizeBytes\n    fileCount\n  }\n  adminRecordingHealth {\n    status\n    count\n  }\n  adminRenderJobs {\n    recordingId\n    sessionId\n    description\n    userId\n    username\n    type\n    progress\n    startedAt\n  }\n  adminUserMediaLibraries {\n    userId\n    username\n    sizeBytes\n    recordingCount\n  }\n  adminUsers {\n    id\n    username\n    createdAt\n    isAdmin\n  }\n  adminTempCleanupSchedule {\n    hour\n    days\n    enabled\n    lastRunAt\n    nextRunAt\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "8d20298a9f2ba41b97f56ad1014791de";
+(node as any).hash = "602a73027fe17367803e6e674b182eda";
 
 export default node;

@@ -18,6 +18,7 @@ import { sessionRecordingsDir, tmpRendersDir } from "../config.js";
 import { buildOverlayLaps, buildOverlayStyle } from "./overlayPreview.js";
 import { buildChapterMarkers, buildChapterMetadataFile } from "./chapterMetadata.js";
 import { rebuildMediaLibrarySessionProjection } from "./mediaLibraryProjection.js";
+import { startRenderJob } from "./renderJobs.js";
 
 type BurnQuality = "best" | "good" | "ultrafast";
 type BurnCodec = "h264" | "h265";
@@ -120,6 +121,7 @@ async function runOverlayRender({
   video,
   chapterMetadataFile,
   onProgress,
+  onCommand,
 }: {
   inputVideo: string;
   outputFile: string;
@@ -131,6 +133,7 @@ async function runOverlayRender({
   video: VideoInfo;
   chapterMetadataFile?: string | null;
   onProgress?: (percent: number) => void;
+  onCommand?: (command: ReturnType<typeof ffmpeg>) => void;
 }) {
   const { filterGraph, outputLabel } = buildDrawtextFilterGraph({
     inputVideo,
@@ -175,6 +178,7 @@ async function runOverlayRender({
       outputOptions.push("-map_metadata", String(metadataInputIndex), "-map_chapters", String(metadataInputIndex));
     }
 
+    onCommand?.(cmd);
     cmd
       .complexFilter(filterGraph)
       .outputOptions(outputOptions)
@@ -262,7 +266,8 @@ export async function burnRecordingOverlay(options: {
   const finalOutputFile = path.join(sessionRecordingsDir, overlayMediaId);
   const chapterMetadataFile = path.join(renderDir, "chapters.ffmetadata");
 
-  try {
+  let overlayCommand: ReturnType<typeof ffmpeg> | null = null;
+  const renderPromise = (async () => {
     updateTrackRecording(overlayRecording.id, { status: "combining", combineProgress: 0, error: null });
     const video = await probeVideoInfo(inputVideo);
 
@@ -288,13 +293,31 @@ export async function burnRecordingOverlay(options: {
       onProgress: (percent) => {
         updateTrackRecording(overlayRecording.id, { combineProgress: Math.max(0, Math.min(1, percent / 100)) });
       },
+      onCommand: (command) => {
+        overlayCommand = command;
+      },
     });
     await moveRenderedOverlay(tempOutputFile, finalOutputFile);
+  })();
+
+  try {
+    await startRenderJob({
+      recordingId: overlayRecording.id,
+      userId: overlayRecording.userId,
+      type: "overlay",
+      promise: renderPromise,
+      cancel: () => {
+        overlayCommand?.kill("SIGKILL");
+      },
+    });
   } catch (err) {
     await fsp.rm(tempOutputFile, { force: true }).catch(() => {});
     await fsp.rm(chapterMetadataFile, { force: true }).catch(() => {});
     const message = err instanceof Error ? err.message : "Overlay burn failed";
-    updateTrackRecording(overlayRecording.id, { status: "failed", combineProgress: 0, error: message });
+    const recordingAfterCancel = findTrackRecordingById(overlayRecording.id);
+    if (recordingAfterCancel?.error !== "Canceled by admin") {
+      updateTrackRecording(overlayRecording.id, { status: "failed", combineProgress: 0, error: message });
+    }
     throw new OverlayBurnError(message, "INTERNAL_SERVER_ERROR");
   }
 

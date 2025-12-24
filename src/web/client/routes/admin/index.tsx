@@ -10,6 +10,7 @@ import type { adminRunTempCleanupMutation } from "../../__generated__/adminRunTe
 import type { adminToolsQuery } from "../../__generated__/adminToolsQuery.graphql.js";
 import type { adminUpdateTempCleanupScheduleMutation } from "../../__generated__/adminUpdateTempCleanupScheduleMutation.graphql.js";
 import type { adminUpdateUserAdminStatusMutation } from "../../__generated__/adminUpdateUserAdminStatusMutation.graphql.js";
+import type { adminCancelRenderJobMutation } from "../../__generated__/adminCancelRenderJobMutation.graphql.js";
 import type { RequireAuthViewerQuery } from "../../__generated__/RequireAuthViewerQuery.graphql.js";
 import { Card } from "../../components/Card.js";
 import { useBreadcrumbs } from "../../hooks/useBreadcrumbs.js";
@@ -30,6 +31,16 @@ const AdminToolsPageQuery = graphql`
     adminRecordingHealth {
       status
       count
+    }
+    adminRenderJobs {
+      recordingId
+      sessionId
+      description
+      userId
+      username
+      type
+      progress
+      startedAt
     }
     adminUserMediaLibraries {
       userId
@@ -126,6 +137,14 @@ const AdminUpdateUserAdminStatusMutation = graphql`
   }
 `;
 
+const AdminCancelRenderJobMutation = graphql`
+  mutation adminCancelRenderJobMutation($recordingId: ID!) {
+    cancelRenderJob(recordingId: $recordingId) {
+      success
+    }
+  }
+`;
+
 type AdminTempDirName = adminToolsQuery["response"]["adminTempDirs"][number]["name"];
 
 type AdminViewerContext = {
@@ -212,6 +231,58 @@ function friendlyStatus(status: string): string {
     .join(" ");
 }
 
+function friendlyRenderJobType(type: string): string {
+  if (type === "COMBINE") return "Combine";
+  if (type === "OVERLAY") return "Overlay";
+  return type
+    .split("_")
+    .map((part) => part.charAt(0) + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
+const renderJobListStyles = css`
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+`;
+
+const renderJobStyles = css`
+  border: 1px solid #e2e8f4;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+`;
+
+const renderJobHeaderStyles = css`
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+`;
+
+const renderJobProgressBarStyles = css`
+  background: #e2e8f4;
+  border-radius: 999px;
+  height: 6px;
+  overflow: hidden;
+  margin-top: 6px;
+`;
+
+const renderJobMetaStyles = css`
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #475569;
+  margin-top: 6px;
+`;
+
+const renderJobProgressFill = (percent: number) => css`
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
+  width: ${percent}%;
+  height: 100%;
+  transition: width 0.2s ease;
+`;
+
 const dayOptions = [
   { value: 0, label: "Sun" },
   { value: 1, label: "Mon" },
@@ -249,6 +320,7 @@ export default function AdminToolsRoute() {
   const { setBreadcrumbs } = useBreadcrumbs();
   const [deletingIds, setDeletingIds] = useState<string[]>([]);
   const [clearingDirs, setClearingDirs] = useState<AdminTempDirName[]>([]);
+  const [cancellingRenderIds, setCancellingRenderIds] = useState<string[]>([]);
   const [isFullRebuildRunning, setIsFullRebuildRunning] = useState(false);
   const [fullRebuildMessage, setFullRebuildMessage] = useState<string | null>(null);
   const [fullRebuildError, setFullRebuildError] = useState<string | null>(null);
@@ -286,6 +358,7 @@ export default function AdminToolsRoute() {
   const [commitUpdateUserAdminStatus] = useMutation<adminUpdateUserAdminStatusMutation>(
     AdminUpdateUserAdminStatusMutation
   );
+  const [commitCancelRenderJob] = useMutation<adminCancelRenderJobMutation>(AdminCancelRenderJobMutation);
 
   const orphanedMedia = data.adminOrphanedMedia ?? [];
   const adminUsers = data.adminUsers ?? [];
@@ -433,8 +506,24 @@ export default function AdminToolsRoute() {
     });
   };
 
+  const handleCancelRenderJob = (recordingId: string) => {
+    if (cancellingRenderIds.includes(recordingId)) return;
+    setCancellingRenderIds((prev) => [...prev, recordingId]);
+    commitCancelRenderJob({
+      variables: { recordingId },
+      onCompleted: () => {
+        setCancellingRenderIds((prev) => prev.filter((id) => id !== recordingId));
+        setRefreshKey((key) => key + 1);
+      },
+      onError: () => {
+        setCancellingRenderIds((prev) => prev.filter((id) => id !== recordingId));
+      },
+    });
+  };
+
   const tempDirs = data.adminTempDirs ?? [];
   const recordingHealth = data.adminRecordingHealth ?? [];
+  const renderJobs = data.adminRenderJobs ?? [];
   const mediaLibraries = data.adminUserMediaLibraries ?? [];
 
   const recordingsByStatus = useMemo(
@@ -657,6 +746,46 @@ export default function AdminToolsRoute() {
               ))}
             </ul>
           )}
+          <div css={css`margin-top: 18px;`}>
+            <strong>Active renders</strong>
+            {renderJobs.length === 0 ? (
+              <p css={css`margin: 6px 0 0; color: #475569;`}>No render jobs in flight.</p>
+            ) : (
+              <div css={renderJobListStyles}>
+                {renderJobs.map((job) => {
+                  const progressPercent = Math.min(100, Math.max(0, Math.round((job.progress ?? 0) * 100)));
+                  const jobDescription = job.description ?? `Recording ${job.recordingId}`;
+                  const recordingIdLabel = job.sessionId ?? job.recordingId;
+                  const isCancelling = cancellingRenderIds.includes(job.recordingId);
+                  return (
+                    <div key={job.recordingId} css={renderJobStyles}>
+                      <div css={renderJobHeaderStyles}>
+                        <div>
+                          <strong>{friendlyRenderJobType(job.type)} render</strong>
+                          <div css={css`font-size: 0.85rem; color: #475569; margin-top: 4px;`}>
+                            {jobDescription}
+                          </div>
+                          <div css={css`font-size: 0.78rem; color: #667084; margin-top: 4px;`}>
+                            Started by {job.username ?? job.userId} · {recordingIdLabel}
+                          </div>
+                        </div>
+                        <button type="button" disabled={isCancelling} onClick={() => handleCancelRenderJob(job.recordingId)}>
+                          {isCancelling ? "Cancelling…" : "Cancel render"}
+                        </button>
+                      </div>
+                      <div css={renderJobProgressBarStyles}>
+                        <div css={renderJobProgressFill(progressPercent)} />
+                      </div>
+                      <div css={renderJobMetaStyles}>
+                        <span>{progressPercent}% complete</span>
+                        <span>{new Date(job.startedAt).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </Card>
       </div>
     </div>

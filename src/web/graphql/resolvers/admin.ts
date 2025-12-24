@@ -15,10 +15,12 @@ import {
   getUserById,
   setUserAdminFlag,
 } from "../../auth/service.js";
+import { findTrackRecordingById } from "../../../db/track_recordings.js";
 import { rebuildMediaLibraryProjectionAll } from "../../recordings/mediaLibraryProjection.js";
 import { getTempCleanupSchedule } from "../../recordings/tempCleanup.js";
 import { tempCleanupScheduler } from "../../recordings/tempCleanupScheduler.js";
 import type { TempCleanupSchedule } from "../../recordings/tempCleanup.js";
+import { cancelRenderJob, getActiveRenderJobs } from "../../recordings/renderJobs.js";
 
 function requireAuthentication(context: GraphQLContext): void {
   if (!context.currentUser) {
@@ -56,10 +58,39 @@ function toAdminUserPayload(user: { id: string; username: string; createdAt: num
   };
 }
 
+function toGraphQLRenderJobType(type: "combine" | "overlay") {
+  return type === "combine" ? "COMBINE" : "OVERLAY";
+}
+
+function toAdminRenderJobPayload(job: {
+  recordingId: string;
+  userId: string;
+  type: "combine" | "overlay";
+  startedAt: number;
+}) {
+  const recording = findTrackRecordingById(job.recordingId);
+  const username = getUserById(job.userId)?.username ?? null;
+  const progress = recording?.combineProgress ?? 0;
+  return {
+    recordingId: job.recordingId,
+    sessionId: recording?.sessionId ?? null,
+    description: recording?.description ?? null,
+    userId: job.userId,
+    username,
+    type: toGraphQLRenderJobType(job.type),
+    progress: Math.max(0, Math.min(1, progress)),
+    startedAt: new Date(job.startedAt).toISOString(),
+  };
+}
+
 export const adminResolvers = {
   adminOrphanedMedia: async (_args: unknown, context: GraphQLContext) => {
     requireAdmin(context);
     return listOrphanedMedia();
+  },
+  adminRenderJobs: async (_args: unknown, context: GraphQLContext) => {
+    requireAdmin(context);
+    return getActiveRenderJobs().map((job) => toAdminRenderJobPayload(job));
   },
   adminTempDirs: async (_args: unknown, context: GraphQLContext) => {
     requireAdmin(context);
@@ -162,6 +193,22 @@ export const adminResolvers = {
         extensions: { code: "INTERNAL_SERVER_ERROR" },
       });
     }
+  },
+  cancelRenderJob: async (args: { recordingId?: string | null }, context: GraphQLContext) => {
+    requireAdmin(context);
+    const recordingId = args.recordingId?.trim();
+    if (!recordingId) {
+      throw new GraphQLError("recordingId is required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    const canceled = cancelRenderJob(recordingId);
+    if (!canceled) {
+      throw new GraphQLError("Render job not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+    return { success: true };
   },
   updateUserAdminStatus: async (
     args: { input?: { userId?: string | null; isAdmin?: boolean | null } },
