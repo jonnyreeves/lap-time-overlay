@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { graphql, useMutation } from "react-relay";
 import type { RecordingsCardDeleteRecordingMutation } from "../../__generated__/RecordingsCardDeleteRecordingMutation.graphql.js";
 import type { RecordingsCardMarkPrimaryRecordingMutation } from "../../__generated__/RecordingsCardMarkPrimaryRecordingMutation.graphql.js";
+import type { RecordingsCardUpdateRecordingVisibilityMutation } from "../../__generated__/RecordingsCardUpdateRecordingVisibilityMutation.graphql.js";
 import { getOverlayMediaId } from "../../utils/overlayMedia.js";
 import { Card } from "../Card.js";
 import { IconButton } from "../IconButton.js";
@@ -25,6 +26,7 @@ type Recording = {
   mediaId: string;
   sizeBytes: number | null;
   isPrimary: boolean;
+  showInMediaLibrary: boolean;
   overlayBurned: boolean;
   lapOneOffset: number;
   durationMs: number | null;
@@ -119,6 +121,21 @@ const controlsRowStyles = css`
   flex-wrap: wrap;
 `;
 
+const visibilityRowStyles = css`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: #475569;
+`;
+
+const visibilityLabelStyles = css`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+`;
+
 const DeleteRecordingMutation = graphql`
   mutation RecordingsCardDeleteRecordingMutation($id: ID!) {
     deleteTrackRecording(id: $id) {
@@ -133,6 +150,18 @@ const MarkPrimaryRecordingMutation = graphql`
       recording {
         id
         isPrimary
+        updatedAt
+      }
+    }
+  }
+`;
+
+const UpdateRecordingVisibilityMutation = graphql`
+  mutation RecordingsCardUpdateRecordingVisibilityMutation($input: UpdateTrackRecordingInput!) {
+    updateTrackRecording(input: $input) {
+      recording {
+        id
+        showInMediaLibrary
         updatedAt
       }
     }
@@ -191,6 +220,9 @@ export function RecordingsCard({
     useMutation<RecordingsCardDeleteRecordingMutation>(DeleteRecordingMutation);
   const [markPrimary, isMarkPrimaryInFlight] =
     useMutation<RecordingsCardMarkPrimaryRecordingMutation>(MarkPrimaryRecordingMutation);
+  const [updateVisibility, isUpdateVisibilityInFlight] =
+    useMutation<RecordingsCardUpdateRecordingVisibilityMutation>(UpdateRecordingVisibilityMutation);
+  const [visibilityUpdateId, setVisibilityUpdateId] = useState<string | null>(null);
 
   const hasPendingRecording = useMemo(
     () => recordings.some((recording) => recording.status !== "READY"),
@@ -278,6 +310,23 @@ export function RecordingsCard({
     });
   }
 
+  function toggleMediaLibraryVisibility(recording: Recording, visible: boolean) {
+    if (isUpdateVisibilityInFlight || recording.showInMediaLibrary === visible) return;
+    setActionError(null);
+    setVisibilityUpdateId(recording.id);
+    updateVisibility({
+      variables: { input: { id: recording.id, showInMediaLibrary: visible } },
+      onCompleted: () => {
+        setVisibilityUpdateId(null);
+        onRefresh();
+      },
+      onError: (err) => {
+        setVisibilityUpdateId(null);
+        setActionError(err.message);
+      },
+    });
+  }
+
   function handleDelete(id: string) {
     if (isDeleteInFlight) return;
     const confirmed = window.confirm("Delete this recording and its file?");
@@ -339,6 +388,23 @@ export function RecordingsCard({
                     {recording.isPrimary && <span className="primary">Primary</span>}
                     <div className="status">{recording.status.toLowerCase()}</div>
                   </div>
+                </div>
+                <div css={visibilityRowStyles}>
+                  <label css={visibilityLabelStyles}>
+                    <input
+                      type="checkbox"
+                      checked={recording.showInMediaLibrary}
+                      onChange={(event) =>
+                        toggleMediaLibraryVisibility(recording, event.target.checked)
+                      }
+                      disabled={isUpdateVisibilityInFlight}
+                      aria-label="Show recording in media library"
+                    />
+                    Show in media library
+                  </label>
+                  {visibilityUpdateId === recording.id && (
+                    <span css={css`font-size: 0.75rem; color: #475569;`}>Updating…</span>
+                  )}
                 </div>
                 {recording.error && <div className="error">{recording.error}</div>}
                 {!isFinished && (

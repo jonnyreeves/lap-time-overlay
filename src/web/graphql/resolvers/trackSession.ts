@@ -368,6 +368,7 @@ export function toTrackRecordingPayload(recording: TrackRecordingRecord, reposit
     mediaId: recording.mediaId,
     overlayBurned: recording.overlayBurned,
     isPrimary: recording.isPrimary,
+    showInMediaLibrary: recording.showInMediaLibrary,
     lapOneOffset: recording.lapOneOffset,
     description: recording.description,
     status: recording.status.toUpperCase(),

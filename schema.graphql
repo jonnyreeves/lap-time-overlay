@@ -163,7 +163,8 @@ type MarkPrimaryTrackRecordingPayload {
 
 input UpdateTrackRecordingInput {
   id: ID!
-  lapOneOffset: Float!
+  lapOneOffset: Float
+  showInMediaLibrary: Boolean
 }
 
 enum OverlayTextColor {
@@ -532,6 +533,7 @@ type TrackRecording {
   mediaId: String!
   overlayBurned: Boolean!
   isPrimary: Boolean!
+  showInMediaLibrary: Boolean!
   lapOneOffset: Float!
   description: String
   status: TrackRecordingStatus!

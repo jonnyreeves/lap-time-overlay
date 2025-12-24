@@ -99,6 +99,53 @@ describe("Media Library projection", () => {
     expect(projection.mediaLibraryPath).toContain(expectedFolderName);
   });
 
+  it("skips recordings marked as hidden from the media library", async () => {
+    const user = createUser("viewer", "hash");
+    const track = createTrack("Silverston Park");
+    const layout = createTrackLayout(track.id, "Classic");
+    const { trackSession } = createTrackSessionWithLaps({
+      date: "2025-08-15",
+      format: "Sprint",
+      classification: 2,
+      trackId: track.id,
+      userId: user.id,
+      trackLayoutId: layout.id,
+      laps: [{ lapNumber: 1, time: 40 }],
+    });
+    const visible = createTrackRecording({
+      id: "rec-visible",
+      sessionId: trackSession.id,
+      userId: user.id,
+      mediaId: `${trackSession.id}/visible.mp4`,
+      status: "ready",
+      lapOneOffset: 0,
+      description: "Visible cam",
+      isPrimary: true,
+    });
+    const hidden = createTrackRecording({
+      id: "rec-hidden",
+      sessionId: trackSession.id,
+      userId: user.id,
+      mediaId: `${trackSession.id}/hidden.mp4`,
+      status: "ready",
+      lapOneOffset: 0,
+      description: "Hidden cam",
+      isPrimary: false,
+      showInMediaLibrary: false,
+    });
+
+    for (const recording of [visible, hidden]) {
+      const rawPath = path.join(rawDir, recording.mediaId);
+      await fsp.mkdir(path.dirname(rawPath), { recursive: true });
+      await fsp.writeFile(rawPath, recording.id);
+    }
+
+    const view = await rebuildMediaLibrarySessionProjection(trackSession.id);
+    expect(view.recordings).toHaveLength(1);
+    expect(view.recordings[0]!.recordingId).toBe(visible.id);
+    expect(view.recordings.find((r) => r.recordingId === hidden.id)).toBeUndefined();
+  });
+
   it("removes a single recording projection without disturbing the session folder", async () => {
     const user = createUser("viewer", "hash");
     const track = createTrack("Bayford Meadows");

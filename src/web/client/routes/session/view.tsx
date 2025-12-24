@@ -79,6 +79,7 @@ const SessionQuery = graphql`
         sizeBytes
         overlayBurned
         isPrimary
+        showInMediaLibrary
         lapOneOffset
         durationMs
         fps
@@ -177,6 +178,7 @@ export default function ViewSessionRoute() {
         description: recording.description ?? null,
         sizeBytes: recording.sizeBytes ?? null,
         isPrimary: recording.isPrimary ?? false,
+        showInMediaLibrary: recording.showInMediaLibrary,
         overlayBurned: recording.overlayBurned ?? false,
         lapOneOffset: recording.lapOneOffset ?? 0,
         durationMs: recording.durationMs ?? null,

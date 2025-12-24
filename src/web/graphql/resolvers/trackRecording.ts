@@ -1,7 +1,9 @@
 import { GraphQLError } from "graphql";
 import { findTrackRecordingById, markPrimaryRecording, updateTrackRecording } from "../../../db/track_recordings.js";
+import type { TrackRecordingRecord } from "../../../db/track_recordings.js";
 import type { GraphQLContext } from "../context.js";
 import { RecordingUploadError, startRecordingUploadSession, deleteRecordingAndFiles } from "../../recordings/service.js";
+import { rebuildMediaLibrarySessionProjection } from "../../recordings/mediaLibraryProjection.js";
 import { generateOverlayPreview, OverlayPreviewError } from "../../recordings/overlayPreview.js";
 import { burnRecordingOverlay, OverlayBurnError } from "../../recordings/overlayBurn.js";
 import { toTrackRecordingPayload } from "./trackSession.js";
@@ -260,7 +262,13 @@ export const trackRecordingResolvers = {
     return { recording: toTrackRecordingPayload(updated, context.repositories) };
   },
   updateTrackRecording: async (
-    args: { input?: { id?: string; lapOneOffset?: number | null } },
+    args: {
+      input?: {
+        id?: string;
+        lapOneOffset?: number | null;
+        showInMediaLibrary?: boolean | null;
+      };
+    },
     context: GraphQLContext
   ) => {
     if (!context.currentUser) {
@@ -268,15 +276,10 @@ export const trackRecordingResolvers = {
         extensions: { code: "UNAUTHENTICATED" },
       });
     }
+
     const input = args.input;
     if (!input?.id) {
       throw new GraphQLError("id is required", {
-        extensions: { code: "VALIDATION_FAILED" },
-      });
-    }
-    const lapOneOffset = Number(input.lapOneOffset);
-    if (!Number.isFinite(lapOneOffset) || lapOneOffset < 0) {
-      throw new GraphQLError("lapOneOffset must be a non-negative number", {
         extensions: { code: "VALIDATION_FAILED" },
       });
     }
@@ -292,13 +295,40 @@ export const trackRecordingResolvers = {
         extensions: { code: "UNAUTHENTICATED" },
       });
     }
-    if (recording.status !== "ready") {
-      throw new GraphQLError("Recording is not ready for lap offset updates", {
-        extensions: { code: "VALIDATION_FAILED" },
+
+    const updates: Partial<Pick<TrackRecordingRecord, "lapOneOffset" | "showInMediaLibrary">> = {};
+
+    if (input.lapOneOffset != null) {
+      const lapOneOffset = Number(input.lapOneOffset);
+      if (!Number.isFinite(lapOneOffset) || lapOneOffset < 0) {
+        throw new GraphQLError("lapOneOffset must be a non-negative number", {
+          extensions: { code: "VALIDATION_FAILED" },
+        });
+      }
+      if (recording.status !== "ready") {
+        throw new GraphQLError("Recording is not ready for lap offset updates", {
+          extensions: { code: "VALIDATION_FAILED" },
+        });
+      }
+      updates.lapOneOffset = lapOneOffset;
+    }
+
+    if (typeof input.showInMediaLibrary === "boolean" && input.showInMediaLibrary !== recording.showInMediaLibrary) {
+      updates.showInMediaLibrary = input.showInMediaLibrary;
+    }
+
+    if (!Object.keys(updates).length) {
+      return { recording: toTrackRecordingPayload(recording, context.repositories) };
+    }
+
+    const updated = updateTrackRecording(recording.id, updates) ?? recording;
+
+    if (typeof updates.showInMediaLibrary === "boolean") {
+      await rebuildMediaLibrarySessionProjection(recording.sessionId).catch((err) => {
+        console.warn("Failed to rebuild Media Library projection after recording update", err);
       });
     }
 
-    const updated = updateTrackRecording(recording.id, { lapOneOffset }) ?? recording;
     return { recording: toTrackRecordingPayload(updated, context.repositories) };
   },
   renderOverlayPreview: async (

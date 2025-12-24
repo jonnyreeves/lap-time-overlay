@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<ef74c42f8f98f60f51807e9e18f28b24>>
+ * @generated SignedSource<<0c659e94d1493acd5be7aafc001473a4>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -14,22 +14,21 @@ export type UpdateTrackRecordingInput = {
   lapOneOffset?: number | null | undefined;
   showInMediaLibrary?: boolean | null | undefined;
 };
-export type PrimaryRecordingCardUpdateRecordingMutation$variables = {
+export type RecordingsCardUpdateRecordingVisibilityMutation$variables = {
   input: UpdateTrackRecordingInput;
 };
-export type PrimaryRecordingCardUpdateRecordingMutation$data = {
+export type RecordingsCardUpdateRecordingVisibilityMutation$data = {
   readonly updateTrackRecording: {
     readonly recording: {
-      readonly fps: number | null | undefined;
       readonly id: string;
-      readonly lapOneOffset: number;
+      readonly showInMediaLibrary: boolean;
       readonly updatedAt: string;
     };
   };
 };
-export type PrimaryRecordingCardUpdateRecordingMutation = {
-  response: PrimaryRecordingCardUpdateRecordingMutation$data;
-  variables: PrimaryRecordingCardUpdateRecordingMutation$variables;
+export type RecordingsCardUpdateRecordingVisibilityMutation = {
+  response: RecordingsCardUpdateRecordingVisibilityMutation$data;
+  variables: RecordingsCardUpdateRecordingVisibilityMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -74,14 +73,7 @@ v1 = [
             "alias": null,
             "args": null,
             "kind": "ScalarField",
-            "name": "lapOneOffset",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "fps",
+            "name": "showInMediaLibrary",
             "storageKey": null
           },
           {
@@ -103,7 +95,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "PrimaryRecordingCardUpdateRecordingMutation",
+    "name": "RecordingsCardUpdateRecordingVisibilityMutation",
     "selections": (v1/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -112,20 +104,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "PrimaryRecordingCardUpdateRecordingMutation",
+    "name": "RecordingsCardUpdateRecordingVisibilityMutation",
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "61848f39b796724aae7e35ea42ff1d96",
+    "cacheID": "310df84097057366a19932f9e65e816e",
     "id": null,
     "metadata": {},
-    "name": "PrimaryRecordingCardUpdateRecordingMutation",
+    "name": "RecordingsCardUpdateRecordingVisibilityMutation",
     "operationKind": "mutation",
-    "text": "mutation PrimaryRecordingCardUpdateRecordingMutation(\n  $input: UpdateTrackRecordingInput!\n) {\n  updateTrackRecording(input: $input) {\n    recording {\n      id\n      lapOneOffset\n      fps\n      updatedAt\n    }\n  }\n}\n"
+    "text": "mutation RecordingsCardUpdateRecordingVisibilityMutation(\n  $input: UpdateTrackRecordingInput!\n) {\n  updateTrackRecording(input: $input) {\n    recording {\n      id\n      showInMediaLibrary\n      updatedAt\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "46959a23a3f39a9119b609f85c05e959";
+(node as any).hash = "7890b047bd388779c22ec07fe62a0aff";
 
 export default node;

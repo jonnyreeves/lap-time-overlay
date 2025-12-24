@@ -15,6 +15,7 @@ import {
   burnRecordingOverlay,
   OverlayBurnError,
 } from "../../../../src/web/recordings/overlayBurn.js";
+import { rebuildMediaLibrarySessionProjection } from "../../../../src/web/recordings/mediaLibraryProjection.js";
 import { rootValue } from "../../../../src/web/graphql/schema.js";
 
 vi.mock("../../../../src/web/recordings/service.js", async () => {
@@ -32,6 +33,10 @@ vi.mock("../../../../src/web/recordings/service.js", async () => {
     },
   };
 });
+
+vi.mock("../../../../src/web/recordings/mediaLibraryProjection.js", () => ({
+  rebuildMediaLibrarySessionProjection: vi.fn(),
+}));
 
 vi.mock("../../../../src/web/recordings/overlayPreview.js", () => ({
   generateOverlayPreview: vi.fn(),
@@ -59,6 +64,10 @@ describe("trackRecording resolvers", () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
+    vi.mocked(rebuildMediaLibrarySessionProjection).mockResolvedValue({
+      folderName: "",
+      recordings: [],
+    });
   });
 
   it("rejects unauthenticated upload requests", async () => {
@@ -88,6 +97,7 @@ describe("trackRecording resolvers", () => {
       combineProgress: 0,
       createdAt: 0,
       updatedAt: 0,
+      showInMediaLibrary: true,
     };
     vi.mocked(startRecordingUploadSession).mockResolvedValue({
       recording,
@@ -184,6 +194,7 @@ describe("trackRecording resolvers", () => {
       combineProgress: 1,
       createdAt: 0,
       updatedAt: 0,
+      showInMediaLibrary: true,
     };
     vi.spyOn(recordingsDb, "findTrackRecordingById").mockReturnValue(recording);
     vi.spyOn(recordingsDb, "updateTrackRecording").mockReturnValue({
@@ -200,6 +211,44 @@ describe("trackRecording resolvers", () => {
       lapOneOffset: 1.25,
     });
     expect(result.recording.lapOneOffset).toBe(1.25);
+  });
+
+  it("updates media library visibility and rebuilds the projection", async () => {
+    const recording: recordingsDb.TrackRecordingRecord = {
+      id: "rec-visibility",
+      sessionId: "s1",
+      userId: "user-1",
+      mediaId: "media/path",
+      overlayBurned: false,
+      isPrimary: false,
+      lapOneOffset: 0,
+      description: "visibility test",
+      status: "ready",
+      error: null,
+      sizeBytes: null,
+      durationMs: null,
+      fps: null,
+      combineProgress: 1,
+      createdAt: 0,
+      updatedAt: 0,
+      showInMediaLibrary: true,
+    };
+    vi.spyOn(recordingsDb, "findTrackRecordingById").mockReturnValue(recording);
+    vi.spyOn(recordingsDb, "updateTrackRecording").mockReturnValue({
+      ...recording,
+      showInMediaLibrary: false,
+    });
+
+    const result = await trackRecordingResolvers.updateTrackRecording(
+      { input: { id: recording.id, showInMediaLibrary: false } },
+      context
+    );
+
+    expect(recordingsDb.updateTrackRecording).toHaveBeenCalledWith(recording.id, {
+      showInMediaLibrary: false,
+    });
+    expect(rebuildMediaLibrarySessionProjection).toHaveBeenCalledWith(recording.sessionId);
+    expect(result.recording.showInMediaLibrary).toBe(false);
   });
 
   it("rejects lap offset updates when recording is not ready", async () => {
@@ -220,6 +269,7 @@ describe("trackRecording resolvers", () => {
       combineProgress: 0.2,
       createdAt: 0,
       updatedAt: 0,
+      showInMediaLibrary: true,
     };
     vi.spyOn(recordingsDb, "findTrackRecordingById").mockReturnValue(recording);
 
@@ -249,6 +299,7 @@ describe("trackRecording resolvers", () => {
       combineProgress: 1,
       createdAt: 0,
       updatedAt: 0,
+      showInMediaLibrary: true,
     };
     vi.spyOn(recordingsDb, "findTrackRecordingById").mockReturnValue(recording);
     vi.spyOn(recordingsDb, "markPrimaryRecording").mockReturnValue({ ...recording, isPrimary: true });
@@ -382,6 +433,7 @@ describe("trackRecording resolvers", () => {
       combineProgress: 1,
       createdAt: 0,
       updatedAt: 0,
+      showInMediaLibrary: true,
     };
     vi.mocked(burnRecordingOverlay).mockResolvedValue(burned);
 
@@ -427,6 +479,7 @@ describe("trackRecording resolvers", () => {
       combineProgress: 1,
       createdAt: 0,
       updatedAt: 0,
+      showInMediaLibrary: true,
     };
 
     vi.mocked(burnRecordingOverlay).mockResolvedValue(burned);
@@ -467,6 +520,7 @@ describe("trackRecording resolvers", () => {
       combineProgress: 1,
       createdAt: 0,
       updatedAt: 0,
+      showInMediaLibrary: true,
     };
     vi.mocked(burnRecordingOverlay).mockResolvedValue(burned);
 
@@ -507,6 +561,7 @@ describe("trackRecording resolvers", () => {
       combineProgress: 1,
       createdAt: 0,
       updatedAt: 0,
+      showInMediaLibrary: true,
     };
     vi.mocked(burnRecordingOverlay).mockResolvedValue(burned);
 
@@ -576,6 +631,7 @@ describe("trackRecording resolvers", () => {
       combineProgress: 1,
       createdAt: 0,
       updatedAt: 0,
+      showInMediaLibrary: true,
     });
     vi.mocked(deleteRecordingAndFiles).mockResolvedValue(true);
 

@@ -100,6 +100,7 @@ describe("handleRecordingDownloadRequest", () => {
       durationMs: null,
       fps: null,
       combineProgress: 1,
+      showInMediaLibrary: true,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });

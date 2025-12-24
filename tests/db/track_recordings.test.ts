@@ -67,9 +67,11 @@ describe("track_recordings", () => {
     assert.strictEqual(trackRecording.combineProgress, 0);
     assert.strictEqual(trackRecording.createdAt, now);
     assert.strictEqual(trackRecording.updatedAt, now);
+    assert.strictEqual(trackRecording.showInMediaLibrary, true);
 
     const retrievedRecording = findTrackRecordingById(trackRecording.id);
     assert.deepStrictEqual(retrievedRecording, trackRecording);
+    assert.strictEqual(retrievedRecording?.showInMediaLibrary, true);
   });
 
   it("returns null for non-existent track recording", () => {

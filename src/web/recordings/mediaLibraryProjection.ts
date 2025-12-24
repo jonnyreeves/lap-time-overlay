@@ -118,28 +118,25 @@ function formatHumanDate(dateStr: string): string {
   });
 }
 
-function buildTitle(trackName: string, date: string, classification: number): string {
-  const position = Number.isFinite(classification) ? ` (P${classification})` : "";
-  return `${trackName} – ${formatHumanDate(date)}${position}`;
-}
-
 function buildPlot({
   trackName,
   classification,
   sessionId,
   recordingId,
   format,
+  conditions,
 }: {
   trackName: string;
   classification: number;
   sessionId: string;
   recordingId: string;
   format?: string;
+  conditions: string;
 }): string {
   const lines = [
-    `Go-kart session at ${trackName}.`,
-    format ? `Format: ${format}.` : null,
-    `Finished position: P${classification}.`,
+    `${format ? format : "Karting"} session at ${trackName}.`,
+    `Weather conditions: ${conditions}.`,
+    `Final classification: P${classification}.`,
     `Session ID: ${sessionId}`,
     `Recording ID: ${recordingId}`,
   ].filter(Boolean) as string[];
@@ -149,24 +146,29 @@ function buildPlot({
 
 function buildNfo({
   trackName,
+  trackLayout,
   sessionDate,
   classification,
   sessionId,
   recordingId,
   format,
   isoDate,
+  conditions,
 }: {
   trackName: string;
+  trackLayout: string;
   sessionDate: string;
   classification: number;
   sessionId: string;
   recordingId: string;
   format?: string;
   isoDate?: string;
+  conditions: string;
 }): string {
   const safeIsoDate = isoDate || formatIsoDate(sessionDate);
-  const title = buildTitle(trackName, sessionDate, classification);
-  const plot = buildPlot({ trackName, classification, sessionId, recordingId, format });
+  // return `${trackLayout} – ${trackName} – ${formatHumanDate(date)}${position}`;
+  const title = `${format} - ${trackLayout} - ${trackName} - ${formatHumanDate(sessionDate)}`;
+  const plot = buildPlot({ trackName, classification, sessionId, recordingId, format, conditions });
 
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <movie>
@@ -339,7 +341,8 @@ export async function rebuildMediaLibrarySessionProjection(sessionId: string): P
   await removeProjectionFolders(recordingIds);
 
   const readyRecordings = recordings.filter((rec) => rec.status === "ready");
-  if (!readyRecordings.length) {
+  const visibleRecordings = readyRecordings.filter((rec) => rec.showInMediaLibrary);
+  if (!visibleRecordings.length) {
     return { folderName, recordings: [] };
   }
 
@@ -347,7 +350,7 @@ export async function rebuildMediaLibrarySessionProjection(sessionId: string): P
   const views: MediaLibraryRecordingView[] = [];
   const usedFileNames = new Set<string>();
 
-  for (const recording of readyRecordings) {
+  for (const recording of visibleRecordings) {
     const rawPath = resolveRawPath(recording.mediaId);
     const rawStats = await fsp.stat(rawPath).catch(() => null);
     if (!rawStats || !rawStats.isFile()) {
@@ -355,7 +358,7 @@ export async function rebuildMediaLibrarySessionProjection(sessionId: string): P
     }
 
     const suffix =
-      readyRecordings.length > 1
+      visibleRecordings.length > 1
         ? sanitizeName(recording.description ?? recording.id, recording.id)
         : undefined;
     const videoFileName = projectionFileName({
@@ -372,12 +375,14 @@ export async function rebuildMediaLibrarySessionProjection(sessionId: string): P
     await fsp.link(rawPath, mediaLibraryPath);
     const nfoContents = buildNfo({
       trackName: track.name,
+      trackLayout: trackLayout.name,
       sessionDate: session.date,
       classification: session.classification,
       sessionId: session.id,
       recordingId: recording.id,
       format: session.format,
       isoDate,
+      conditions: session.conditions,
     });
     await fsp.writeFile(nfoPath, nfoContents, "utf8");
 
