@@ -267,10 +267,42 @@ async function removeProjectionFolders(recordingIds: Set<string>): Promise<void>
   if (!recordingIds.size) return;
 
   const folders = await findRecordingProjectionFolders(recordingIds);
+  const ids = Array.from(recordingIds);
   for (const folderPath of folders) {
     if (path.resolve(folderPath) === projectionRoot) continue;
-    await fsp.rm(folderPath, { recursive: true, force: true });
-    await pruneEmptyAncestors(path.dirname(folderPath));
+    const files = await fsp.readdir(folderPath).catch(() => []);
+    if (!files.length) continue;
+
+    const targetBaseNames = new Set<string>();
+    for (const file of files) {
+      const filePath = path.join(folderPath, file);
+      const parsed = path.parse(file);
+      const baseName = parsed.name;
+      const ext = parsed.ext.toLowerCase();
+
+      if (recordingIds.has(baseName) || ids.some((id) => baseName.endsWith(id))) {
+        targetBaseNames.add(baseName);
+        continue;
+      }
+
+      if (ext === ".nfo") {
+        const contents = await fsp.readFile(filePath, "utf8").catch(() => null);
+        if (contents && ids.some((id) => contents.includes(`Recording ID: ${id}`))) {
+          targetBaseNames.add(baseName);
+          continue;
+        }
+      }
+    }
+
+    for (const file of files) {
+      const filePath = path.join(folderPath, file);
+      const baseName = path.parse(file).name;
+      if (targetBaseNames.has(baseName)) {
+        await fsp.rm(filePath, { force: true });
+      }
+    }
+
+    await pruneEmptyAncestors(folderPath);
   }
 }
 
@@ -305,7 +337,6 @@ export async function rebuildMediaLibrarySessionProjection(sessionId: string): P
 
   await fsp.mkdir(projectionRoot, { recursive: true });
   await removeProjectionFolders(recordingIds);
-  await fsp.rm(folderPath, { recursive: true, force: true });
 
   const readyRecordings = recordings.filter((rec) => rec.status === "ready");
   if (!readyRecordings.length) {

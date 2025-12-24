@@ -165,4 +165,80 @@ describe("Media Library projection", () => {
     const sessionFolder = path.join(projectionDir, expectedFolderName);
     await expect(fsp.stat(sessionFolder)).resolves.toBeTruthy();
   });
+
+  it("keeps projections from other sessions when a same-day rebuild runs", async () => {
+    const user = createUser("viewer", "hash");
+    const track = createTrack("Bayford Meadows");
+    const layout = createTrackLayout(track.id, "Full");
+
+    const { trackSession: firstSession } = createTrackSessionWithLaps({
+      date: "2024-06-10",
+      format: "Race",
+      classification: 1,
+      trackId: track.id,
+      userId: user.id,
+      trackLayoutId: layout.id,
+      laps: [{ lapNumber: 1, time: 65 }],
+    });
+    const firstRecording = createTrackRecording({
+      id: "first-session",
+      sessionId: firstSession.id,
+      userId: user.id,
+      mediaId: `${firstSession.id}/first-session.mp4`,
+      status: "ready",
+      lapOneOffset: 0,
+      description: "First session cam",
+      isPrimary: true,
+    });
+
+    const { trackSession: secondSession } = createTrackSessionWithLaps({
+      date: "2024-06-10",
+      format: "Practice",
+      classification: 2,
+      trackId: track.id,
+      userId: user.id,
+      trackLayoutId: layout.id,
+      laps: [{ lapNumber: 1, time: 68 }],
+    });
+    const secondRecording = createTrackRecording({
+      id: "second-session",
+      sessionId: secondSession.id,
+      userId: user.id,
+      mediaId: `${secondSession.id}/second-session.mp4`,
+      status: "ready",
+      lapOneOffset: 0,
+      description: "Second session cam",
+      isPrimary: true,
+    });
+
+    for (const recording of [firstRecording, secondRecording]) {
+      const rawPath = path.join(rawDir, recording.mediaId);
+      await fsp.mkdir(path.dirname(rawPath), { recursive: true });
+      await fsp.writeFile(rawPath, recording.id);
+    }
+
+    await rebuildMediaLibrarySessionProjection(firstSession.id);
+    await rebuildMediaLibrarySessionProjection(secondSession.id);
+
+    const expectedFolderName = path.join("viewer", "2024", track.name, "Jun 10");
+    const folderPath = path.join(projectionDir, expectedFolderName);
+    const firstMedia = path.join(
+      folderPath,
+      "Race - Bayford Meadows - Full - 2024-06-10.mp4"
+    );
+    const secondMedia = path.join(
+      folderPath,
+      "Practice - Bayford Meadows - Full - 2024-06-10.mp4"
+    );
+    const firstNfo = path.join(folderPath, "Race - Bayford Meadows - Full - 2024-06-10.nfo");
+    const secondNfo = path.join(
+      folderPath,
+      "Practice - Bayford Meadows - Full - 2024-06-10.nfo"
+    );
+
+    await expect(fsp.stat(firstMedia)).resolves.toBeTruthy();
+    await expect(fsp.stat(firstNfo)).resolves.toBeTruthy();
+    await expect(fsp.stat(secondMedia)).resolves.toBeTruthy();
+    await expect(fsp.stat(secondNfo)).resolves.toBeTruthy();
+  });
 });
