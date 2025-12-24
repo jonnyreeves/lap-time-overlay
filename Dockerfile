@@ -14,7 +14,7 @@ COPY . .
 # Ensure runtime work directories exist for uploads/renders/previews
 RUN mkdir -p database media  temp
 
-VOLUME ["/app/database", "/app/media", "/app/media", "/app/temp"]
+VOLUME ["/app/database", "/app/media", "/app/temp"]
 
 EXPOSE 3000
 

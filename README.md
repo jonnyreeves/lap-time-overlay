@@ -21,35 +21,27 @@ npm install
 npm run web
 ```
 
-Then open http://localhost:3000 and walk through the steps:
-
-1. **Upload video** – select one or more MP4s in order (streamed to disk, 4GB+ ok).
-2. **Set offsets** – scrub the preview and mark the start frame.
-3. **Lap data** – paste laps, pick format/driver (TeamSport), save.
-4. **Preview** – auto-generates a single-frame overlay just after your start; tweak text/box colors.
-5. **Transform & download** – queue the render, poll status, and download the overlaid MP4.
-
-The web UI always uses the ffmpeg renderer.
+Then open http://localhost:3000.
 
 ## Media Library projection
 
-RaceCraft keeps uploaded recordings in a stable raw store at `media/raw/{recordingId}.mp4`. A disposable Media Library projection is derived under `media_library`:
+RaceCraft keeps uploaded recordings in a stable raw store at `/app/media/session_recordings/${sessionId}/{recordingId}.mp4`. A user friendly Media Library projection is created under `media/library`:
 
 - Folder per session is nested: `{username}/{YYYY}/{Track Name}/{Mon D}/` (e.g. `jonny/2025/Daytona Sandown Park/Sept 25/`).
 - Each ready recording is hard-linked into that folder as `{Track} - {Layout} - {Format} - YYYY-MM-DD[ - {camera}].mp4` with an NFO sharing the same base name.
 - Projections are rebuilt automatically when recordings finish combining, overlays are burned, or session metadata changes; deleting a recording or session removes the linked files only (raw media stays put).
 
-You can point a media server (e.g., Jellyfin) at `media_library` (Home Videos). If the projection looks stale, clear the folder—RaceCraft will regenerate it on the next change.
+You can point a media server (e.g., Jellyfin) at `/app/media/library` (Home Videos). If the projection looks stale, clear the folder—RaceCraft will regenerate it on the next change.
 
 ## Work dir cleanup
 
-- Uploads and rendered/previews saved under `work/` are pruned automatically (renders/uploads after ~24h, previews after ~6h). Copy anything you want to keep somewhere else.
+- Uploads and rendered/previews saved under `/app/temp/` are pruned automatically (renders/uploads after ~24h, previews after ~6h). Copy anything you want to keep somewhere else.
 
 ## Database
 
 - SQLite database lives at `/app/database/app.sqlite` by default (set `DB_PATH` to override). The folder is exposed as a Docker volume.
 - Default PRAGMAs: `journal_mode=WAL`, `synchronous=NORMAL`, `foreign_keys=ON`. Override with `DB_PRAGMAS="journal_mode=WAL,synchronous=FULL"` if needed.
-- Migrations run automatically on server start (`npm run db:migrate` to run manually). No schema is defined yet.
+- Migrations run automatically on server start (`npm run db:migrate` to run manually). 
 
 ## Development
 
@@ -64,6 +56,12 @@ colima start --arch x86_64
 ## build
 docker build --platform=linux/amd64 -t racecraft .
 
+## tag
+docker tag racecraft jonnyreeves83/racecraft:latest
+
+## publish
+docker push jonnyreeves83/racecraft:latest
+
 ## debug
 docker run -it --rm racecraft sh
 
@@ -73,11 +71,4 @@ docker run -it --rm \
   -v $(pwd)/work:/app/work \
   --name racecraft \
   jonnyreeves83/racecraft:latest
-
-## tag
-docker tag racecraft jonnyreeves83/racecraft:latest
-
-## publish
-docker push jonnyreeves83/racecraft:latest
-
 ```
