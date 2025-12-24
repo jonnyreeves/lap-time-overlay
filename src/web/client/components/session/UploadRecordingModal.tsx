@@ -127,6 +127,19 @@ const hiddenFileInputStyles = css`
   pointer-events: none;
 `;
 
+const fixedWidthButtonStyles = css`
+  ${recordingButtonStyles};
+  min-width: 130px;
+  text-align: center;
+`;
+
+const frameButtonStyles = css`
+  ${recordingButtonStyles};
+  width: 80px;
+  min-width: 60px;
+  text-align: center;
+`;
+
 const StartUploadMutation = graphql`
   mutation UploadRecordingModalStartUploadMutation($input: StartTrackRecordingUploadInput!) {
     startTrackRecordingUpload(input: $input) {
@@ -160,6 +173,8 @@ function nextId(): string {
   return Math.random().toString(36).slice(2);
 }
 
+const FRAME_STEP_MS = Math.round(1000 / 30);
+
 export function UploadRecordingModal({
   sessionId,
   onRefresh,
@@ -172,6 +187,8 @@ export function UploadRecordingModal({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [lapOneOffsetMs, setLapOneOffsetMs] = useState<number | null>(null);
+  const [lapOneReferenceId, setLapOneReferenceId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const allObjectUrls = useRef<string[]>([]);
@@ -182,6 +199,7 @@ export function UploadRecordingModal({
   const [videoItems, setVideoItems] = useState<VideoItem[]>([]);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const [isPreviewMuted, setIsPreviewMuted] = useState(true);
+  const [playheadMs, setPlayheadMs] = useState(0);
 
   const currentVideo = videoItems[currentVideoIndex] ?? null;
   const videoPlayerSrc = currentVideo?.objectUrl ?? null;
@@ -190,6 +208,7 @@ export function UploadRecordingModal({
     if (!videoRef.current) return;
     videoRef.current.muted = true;
     setIsPreviewMuted(true);
+    setPlayheadMs(0);
   }, [videoPlayerSrc]);
 
   const uploadSources = useMemo(
@@ -252,6 +271,24 @@ export function UploadRecordingModal({
 
   const canMarkStart = videoItems.length > 0 && currentVideoIndex === 0;
   const canMarkEnd = videoItems.length > 0 && currentVideoIndex === videoItems.length - 1;
+  const startOffsetForLapOne = Math.max(0, videoItems[0]?.startOffsetMs ?? 0);
+  const lapOneOffsetLabel =
+    lapOneOffsetMs != null ? formatMs(lapOneOffsetMs) : "Not set";
+  const endOffsetForLapOne = videoItems[videoItems.length - 1]?.endOffsetMs ?? null;
+  const lapOneCannotExceedEnd = endOffsetForLapOne != null && playheadMs > endOffsetForLapOne;
+  const isLapOneButtonDisabled =
+    shouldShowBusyState ||
+    (lapOneOffsetMs == null &&
+      (!canMarkStart || playheadMs < startOffsetForLapOne || lapOneCannotExceedEnd));
+  const hasStartOffset = videoItems[0]?.startOffsetMs != null;
+  const hasEndOffset = videoItems[videoItems.length - 1]?.endOffsetMs != null;
+  const startButtonLabel = hasStartOffset ? "Clear start offset" : "Mark start from playhead";
+  const endButtonLabel = hasEndOffset ? "Clear end offset" : "Mark end from playhead";
+  const startButtonDisabled = shouldShowBusyState || (!hasStartOffset && !canMarkStart);
+  const requiredEndPlayheadMs = Math.max(startOffsetForLapOne, lapOneOffsetMs ?? startOffsetForLapOne);
+  const endButtonDisabled =
+    shouldShowBusyState ||
+    (!hasEndOffset && (!canMarkEnd || playheadMs <= requiredEndPlayheadMs));
 
   useEffect(() => {
     const shouldWarn = isUploading || isStartInFlight || fileEntries.length > 0 || videoItems.length > 0;
@@ -277,8 +314,20 @@ export function UploadRecordingModal({
       setCurrentVideoIndex(0);
       allObjectUrls.current.forEach((url) => URL.revokeObjectURL(url));
       allObjectUrls.current = [];
+      setLapOneOffsetMs(null);
+      setLapOneReferenceId(null);
+      setPlayheadMs(0);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!lapOneReferenceId) return;
+    const firstId = videoItems[0]?.id ?? null;
+    if (!firstId || firstId !== lapOneReferenceId) {
+      setLapOneOffsetMs(null);
+      setLapOneReferenceId(null);
+    }
+  }, [videoItems, lapOneReferenceId]);
 
   function normalizeTrimOffsets(items: VideoItem[]): VideoItem[] {
     return items.map((item, idx) => {
@@ -361,6 +410,19 @@ export function UploadRecordingModal({
     return `${minutes}:${secondsStr}`;
   }
 
+  function stepPlayhead(direction: -1 | 1) {
+    if (!videoRef.current) return;
+    const videoEl = videoRef.current;
+    const duration = Number.isFinite(videoEl.duration) ? videoEl.duration : null;
+    const deltaSeconds = FRAME_STEP_MS / 1000;
+    let nextTime = videoEl.currentTime + direction * deltaSeconds;
+    nextTime = Math.max(0, nextTime);
+    if (duration != null) {
+      nextTime = Math.min(nextTime, duration);
+    }
+    videoEl.currentTime = nextTime;
+  }
+
   function setOffsetFromPlayer(kind: "start" | "end") {
     if (!videoRef.current) return;
     if (!videoItems.length) return;
@@ -385,6 +447,25 @@ export function UploadRecordingModal({
       setUploadError(null);
       updateVideoItem(target.id, { endOffsetMs: ms });
     }
+  }
+
+  function markLapOneOffsetFromPlayhead() {
+    if (!videoRef.current) return;
+    if (!videoItems.length) return;
+    const target = videoItems[0];
+    if (!target) return;
+    if (videoItems.length > 1 && currentVideoIndex !== 0) {
+      setUploadError("Play the first clip to mark the Lap 1 offset.");
+      return;
+    }
+    const ms = Math.max(0, Math.round(videoRef.current.currentTime * 1000));
+    if (endOffsetForLapOne != null && ms > endOffsetForLapOne) {
+      setUploadError("Lap 1 offset cannot be after the end offset.");
+      return;
+    }
+    setLapOneReferenceId(target.id);
+    setLapOneOffsetMs(ms);
+    setUploadError(null);
   }
 
   function clearOffset(kind: "start" | "end") {
@@ -513,6 +594,7 @@ export function UploadRecordingModal({
     setIsUploading(true);
     onClose();
 
+    const lapOneOffsetSeconds = lapOneOffsetMs != null ? lapOneOffsetMs / 1000 : null;
     startUpload({
       variables: {
         input: {
@@ -524,6 +606,7 @@ export function UploadRecordingModal({
             trimStartMs: entry.trimStartMs ?? null,
             trimEndMs: entry.trimEndMs ?? null,
           })),
+          ...(lapOneOffsetSeconds != null ? { lapOneOffset: lapOneOffsetSeconds } : {}),
         },
       },
       onCompleted: (payload) => {
@@ -599,9 +682,11 @@ export function UploadRecordingModal({
                         key={videoPlayerSrc} // Key helps re-render video element when src changes
                         src={videoPlayerSrc}
                         controls
-                        autoPlay
                         muted={isPreviewMuted}
                         ref={videoRef}
+                        onTimeUpdate={(event) =>
+                          setPlayheadMs(Math.max(0, Math.round(event.currentTarget.currentTime * 1000)))
+                        }
                         onVolumeChange={() =>
                           setIsPreviewMuted(Boolean(videoRef.current?.muted))
                         }
@@ -622,14 +707,14 @@ export function UploadRecordingModal({
 
                   <div
                     css={css`
-                      display: flex;
-                      align-items: center;
-                      justify-content: space-between;
-                      padding: 10px 12px;
-                      border: 1px solid #e2e8f4;
-                      border-radius: 10px;
-                      background: #f8fafc;
-                    `}
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 10px 12px;
+                        border: 1px solid #e2e8f4;
+                        border-radius: 10px;
+                        background: #f8fafc;
+                      `}
                   >
                     <div>
                       <strong>Upload window</strong>
@@ -647,30 +732,89 @@ export function UploadRecordingModal({
                       </div>
                     </div>
                     <div css={css`color: #475569;`}>Offsets trimmed after upload</div>
+                    <div
+                      css={css`
+                          color: #475569;
+                          display: flex;
+                          align-items: center;
+                          gap: 4px;
+                          font-size: 0.9rem;
+                        `}
+                    >
+                      Lap 1 offset:
+                      <strong>{lapOneOffsetLabel}</strong>
+                    </div>
                   </div>
 
                   <div
                     css={css`
-                      display: grid;
-                      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                      gap: 10px;
+                      display: flex;
+                      gap: 8px;
+                      flex-wrap: wrap;
+                      justify-content: center;
+                      align-items: center;
                     `}
                   >
                     <button
-                      css={recordingButtonStyles}
+                      css={frameButtonStyles}
                       type="button"
-                      onClick={() => setOffsetFromPlayer("start")}
-                      disabled={!canMarkStart || shouldShowBusyState}
+                      onClick={() => stepPlayhead(-1)}
+                      disabled={!videoPlayerSrc || shouldShowBusyState}
+                      aria-label="Step playhead back by one frame"
                     >
-                      Mark start from playhead
+                      -1 frame
                     </button>
                     <button
-                      css={recordingButtonStyles}
+                      css={fixedWidthButtonStyles}
                       type="button"
-                      onClick={() => setOffsetFromPlayer("end")}
-                      disabled={!canMarkEnd || shouldShowBusyState}
+                      onClick={() => {
+                        if (hasStartOffset) {
+                          clearOffset("start");
+                        } else {
+                          setOffsetFromPlayer("start");
+                        }
+                      }}
+                      disabled={startButtonDisabled}
                     >
-                      Mark end from playhead
+                      {startButtonLabel}
+                    </button>
+                    <button
+                      css={fixedWidthButtonStyles}
+                      type="button"
+                      onClick={() => {
+                        if (lapOneOffsetMs != null) {
+                          setLapOneOffsetMs(null);
+                          setLapOneReferenceId(null);
+                        } else {
+                          markLapOneOffsetFromPlayhead();
+                        }
+                      }}
+                      disabled={isLapOneButtonDisabled}
+                    >
+                      {lapOneOffsetMs != null ? "Clear lap 1 offset" : "Mark lap 1 from playhead"}
+                    </button>
+                    <button
+                      css={fixedWidthButtonStyles}
+                      type="button"
+                      onClick={() => {
+                        if (hasEndOffset) {
+                          clearOffset("end");
+                        } else {
+                          setOffsetFromPlayer("end");
+                        }
+                      }}
+                      disabled={endButtonDisabled}
+                    >
+                      {endButtonLabel}
+                    </button>
+                    <button
+                      css={frameButtonStyles}
+                      type="button"
+                      onClick={() => stepPlayhead(1)}
+                      disabled={!videoPlayerSrc || shouldShowBusyState}
+                      aria-label="Step playhead forward by one frame"
+                    >
+                      +1 frame
                     </button>
                   </div>
                 </div>
@@ -688,8 +832,20 @@ export function UploadRecordingModal({
                         return (
                           <div
                             key={video.id}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => setCurrentVideoIndex(idx)}
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                setCurrentVideoIndex(idx);
+                              }
+                            }}
                             css={[
                               fileRowStyles,
+                              css`
+                                cursor: pointer;
+                              `,
                               idx === currentVideoIndex && css`background: #eef2ff; border-color: #6366f1;`,
                             ]}
                           >
@@ -708,6 +864,11 @@ export function UploadRecordingModal({
                                       Start offset: <strong>{formatMs(video.startOffsetMs ?? 0)}</strong>
                                     </div>
                                   )}
+                                  {isFirst && (
+                                    <div css={css`color: #475569; font-size: 0.9rem;`}>
+                                      Lap 1 offset: <strong>{lapOneOffsetLabel}</strong>
+                                    </div>
+                                  )}
                                   {isLast && (
                                     <div css={css`color: #475569; font-size: 0.9rem;`}>
                                       End offset:{" "}
@@ -724,7 +885,10 @@ export function UploadRecordingModal({
                             <div className="actions">
                               <button
                                 css={recordingButtonStyles}
-                                onClick={() => moveVideoFile(idx, -1)}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  moveVideoFile(idx, -1);
+                                }}
                                 disabled={idx === 0 || shouldShowBusyState}
                                 type="button"
                               >
@@ -732,7 +896,10 @@ export function UploadRecordingModal({
                               </button>
                               <button
                                 css={recordingButtonStyles}
-                                onClick={() => moveVideoFile(idx, 1)}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  moveVideoFile(idx, 1);
+                                }}
                                 disabled={idx === videoItems.length - 1 || shouldShowBusyState}
                                 type="button"
                               >
@@ -740,15 +907,10 @@ export function UploadRecordingModal({
                               </button>
                               <button
                                 css={recordingButtonStyles}
-                                onClick={() => setCurrentVideoIndex(idx)}
-                                disabled={idx === currentVideoIndex || shouldShowBusyState}
-                                type="button"
-                              >
-                                Play
-                              </button>
-                              <button
-                                css={recordingButtonStyles}
-                                onClick={() => removeVideoFile(video)}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  removeVideoFile(video);
+                                }}
                                 disabled={shouldShowBusyState}
                                 type="button"
                               >
