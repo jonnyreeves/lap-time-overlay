@@ -2,6 +2,7 @@ import ffmpeg from "fluent-ffmpeg";
 import { randomUUID } from "node:crypto";
 import fsp from "node:fs/promises";
 import path from "node:path";
+import { findLapEventsByLapId, type LapEventRecord } from "../../db/lap_events.js";
 import type { LapRecord } from "../../db/laps.js";
 import { findLapsBySessionId } from "../../db/laps.js";
 import {
@@ -14,7 +15,7 @@ import {
   DEFAULT_OVERLAY_STYLE,
   type OverlayStyle,
 } from "../../ffmpeg/overlay.js";
-import type { Lap } from "../../ffmpeg/lapTypes.js";
+import type { Lap, PositionChange } from "../../ffmpeg/lapTypes.js";
 import { probeVideoInfo, type VideoInfo } from "../../ffmpeg/videoInfo.js";
 import { sessionRecordingsDir, tmpPreviewsDir } from "../config.js";
 
@@ -58,6 +59,57 @@ const MAX_TEXT_SIZE = 192;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
+}
+
+const POSITION_EVENT_TYPE = "position";
+
+function parseLapEventPositionValue(value: string): number | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  const match = trimmed.match(/\d+/);
+  if (!match) return null;
+  const parsed = Number.parseInt(match[0], 10);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function deriveLapPositionChanges(
+  lapEvents: LapEventRecord[],
+  lapDurationS: number
+): { positionChanges: PositionChange[]; initialPosition: number } {
+  const parsed = lapEvents
+    .filter((event) => event.event === POSITION_EVENT_TYPE)
+    .map((event) => {
+      const offset = Number(event.offset);
+      const position = parseLapEventPositionValue(event.value);
+      return { offset, position };
+    })
+    .filter(
+      ({ offset, position }) =>
+        Number.isFinite(offset) &&
+        offset >= 0 &&
+        Number.isFinite(position) &&
+        (position as number) > 0
+    )
+    .map(({ offset, position }) => ({
+      atS: Math.min(lapDurationS, Math.max(0, offset)),
+      position: Math.max(0, Math.round(position as number)),
+    }))
+    .sort((a, b) => a.atS - b.atS);
+
+  const positionChanges: PositionChange[] = [];
+  for (const change of parsed) {
+    const prev = positionChanges[positionChanges.length - 1];
+    if (
+      !prev ||
+      Math.abs(prev.atS - change.atS) > 1e-9 ||
+      prev.position !== change.position
+    ) {
+      positionChanges.push(change);
+    }
+  }
+
+  const initialPosition = positionChanges[0]?.position ?? 0;
+  return { positionChanges, initialPosition };
 }
 
 export function buildOverlayStyle(overrides?: Partial<OverlayStyle>): OverlayStyle {
@@ -135,12 +187,14 @@ export function buildOverlayLaps(laps: LapRecord[]): OverlayLap[] {
     }
     const startS = elapsed;
     elapsed += durationS;
+    const lapEvents = findLapEventsByLapId(lap.id);
+    const { positionChanges, initialPosition } = deriveLapPositionChanges(lapEvents, durationS);
     return {
       lapId: lap.id,
       number: lap.lapNumber,
       durationS,
-      position: 0,
-      positionChanges: [],
+      position: initialPosition,
+      positionChanges,
       startS,
     };
   });

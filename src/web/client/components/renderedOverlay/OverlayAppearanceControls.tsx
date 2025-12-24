@@ -11,13 +11,15 @@ type Props = {
   overlayPosition: OverlayPositionOption;
   backgroundOpacity: number;
   showLapDeltas: boolean;
-  showLapInfo: boolean;
+  showLapCounter: boolean;
+  showPosition: boolean;
   onTextColorChange: (value: OverlayTextColorOption) => void;
   onTextSizeChange: (value: number) => void;
   onDetailTextSizeChange: (value: number) => void;
   onOverlayPositionChange: (value: OverlayPositionOption) => void;
   onBackgroundOpacityChange: (value: number) => void;
-  onShowLapInfoChange: (value: boolean) => void;
+  onShowLapCounterChange: (value: boolean) => void;
+  onShowPositionChange: (value: boolean) => void;
   onShowLapDeltasChange: (value: boolean) => void;
   disabled?: boolean;
 };
@@ -76,13 +78,15 @@ export function OverlayAppearanceControls({
   overlayPosition,
   backgroundOpacity,
   showLapDeltas,
-  showLapInfo,
+  showLapCounter,
+  showPosition,
   onTextColorChange,
   onTextSizeChange,
   onDetailTextSizeChange,
   onOverlayPositionChange,
   onBackgroundOpacityChange,
-  onShowLapInfoChange,
+  onShowLapCounterChange,
+  onShowPositionChange,
   onShowLapDeltasChange,
   disabled,
 }: Props) {
@@ -170,15 +174,25 @@ export function OverlayAppearanceControls({
         </label>
 
         <label>
-          <span>Lap number & position</span>
           <div>
             <input
               type="checkbox"
-              checked={showLapInfo}
-              onChange={(e) => onShowLapInfoChange(e.target.checked)}
+              checked={showLapCounter}
+              onChange={(e) => onShowLapCounterChange(e.target.checked)}
               disabled={disabled}
             />{" "}
-            Show lap number and position
+            Show lap number
+          </div>
+        </label>
+        <label>
+          <div>
+            <input
+              type="checkbox"
+              checked={showPosition}
+              onChange={(e) => onShowPositionChange(e.target.checked)}
+              disabled={disabled}
+            />{" "}
+            Show position
           </div>
         </label>
 

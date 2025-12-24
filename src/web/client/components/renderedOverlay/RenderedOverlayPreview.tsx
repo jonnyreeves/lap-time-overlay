@@ -132,7 +132,8 @@ export function RenderedOverlayPreview({
   const [detailTextSize, setDetailTextSize] = useState(32);
   const [overlayPosition, setOverlayPosition] = useState<OverlayPositionOption>("BOTTOM_LEFT");
   const [backgroundOpacity, setBackgroundOpacity] = useState(60);
-  const [showLapInfo, setShowLapInfo] = useState(true);
+  const [showLapCounter, setShowLapCounter] = useState(true);
+  const [showPosition, setShowPosition] = useState(true);
   const [showLapDeltas, setShowLapDeltas] = useState(true);
   const [quality, setQuality] = useState<OverlayExportQualityOption>("BEST");
   const [codec, setCodec] = useState<OverlayExportCodecOption>("H265");
@@ -160,16 +161,17 @@ export function RenderedOverlayPreview({
       detailTextSize,
       overlayPosition,
       boxOpacity: Math.max(0, Math.min(1, backgroundOpacity / 100)),
-      showLapCounter: showLapInfo,
-      showPosition: showLapInfo,
+      showLapCounter,
+      showPosition,
       showLapDeltas,
     }),
     [
       backgroundOpacity,
       detailTextSize,
       overlayPosition,
+      showLapCounter,
       showLapDeltas,
-      showLapInfo,
+      showPosition,
       textColor,
       textSize,
     ]
@@ -249,14 +251,16 @@ export function RenderedOverlayPreview({
               detailTextSize={detailTextSize}
               overlayPosition={overlayPosition}
               backgroundOpacity={backgroundOpacity}
-              showLapInfo={showLapInfo}
+              showLapCounter={showLapCounter}
+              showPosition={showPosition}
               showLapDeltas={showLapDeltas}
               onTextColorChange={setTextColor}
               onTextSizeChange={handleTextSizeChange}
               onDetailTextSizeChange={handleDetailTextSizeChange}
               onOverlayPositionChange={setOverlayPosition}
               onBackgroundOpacityChange={setBackgroundOpacity}
-              onShowLapInfoChange={setShowLapInfo}
+              onShowLapCounterChange={setShowLapCounter}
+              onShowPositionChange={setShowPosition}
               onShowLapDeltasChange={setShowLapDeltas}
               disabled={isEncoding}
             />
