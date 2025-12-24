@@ -19,6 +19,7 @@ import {
   type UploadTarget,
 } from "./recordingShared.js";
 import { actionsRowStyles } from "./sessionOverviewStyles";
+import { UPLOAD_RECORDING_MODAL_EVENT } from "./uploadRecordingEvent.ts";
 
 type Recording = {
   id: string;
@@ -200,6 +201,16 @@ export function RecordingsCard({
       overlayBurned: previewRecording.overlayBurned,
     };
   }, [previewRecording]);
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+    const handler = () => {
+      setIsUploadModalOpen(true);
+    };
+    document.addEventListener(UPLOAD_RECORDING_MODAL_EVENT, handler);
+    return () => document.removeEventListener(UPLOAD_RECORDING_MODAL_EVENT, handler);
+  }, [setIsUploadModalOpen]);
   const overlayRecordingSummary = useMemo<RecordingSummary | null>(() => {
     if (!previewRecording?.mediaId) return null;
     const overlayMediaId = getOverlayMediaId(previewRecording.mediaId);
@@ -340,6 +351,7 @@ export function RecordingsCard({
 
   return (
     <Card
+      className="recordings-card"
       title="Video Attachments"
       rightHeaderContent={
         <div css={actionsRowStyles}>

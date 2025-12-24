@@ -4,10 +4,12 @@ import { graphql, useMutation } from "react-relay";
 import type { PrimaryRecordingCardUpdateRecordingMutation } from "../../__generated__/PrimaryRecordingCardUpdateRecordingMutation.graphql.js";
 import { Card } from "../Card.js";
 import { IconButton } from "../IconButton.js";
+import { primaryButtonStyles } from "./sessionOverviewStyles.ts";
 import { inlineActionButtonStyles } from "../inlineActionButtons.ts";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 import { buildLapRanges, resolveLapAtTime } from "../../hooks/useLapPositionSync.js";
 import { LapOverlay } from "./LapOverlay.js";
+import { UPLOAD_RECORDING_MODAL_EVENT } from "./uploadRecordingEvent.ts";
 
 type Recording = {
   id: string;
@@ -88,6 +90,30 @@ function useAutohideControls(delayMs = 2500) {
 const cardBodyStyles = css`
   display: grid;
   gap: 12px;
+`;
+
+const emptyStateStyles = css`
+  display: flex;
+  justify-content: center;
+  padding: 36px 0;
+`;
+
+const emptyStateButtonStyles = css`
+  padding: 12px 32px;
+  border-radius: 12px;
+  box-shadow: 0 15px 25px rgba(15, 23, 42, 0.25);
+  font-size: 1rem;
+  font-weight: 600;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
 `;
 
 const previewStyles = css`
@@ -915,10 +941,31 @@ function jumpToLapStart(lapStart: number, lapId?: string) {
     };
   }, [orderedLapRanges, recording, videoRefs, lapLookup]);
 
-  const statusContent = (() => {
-    if (!recording) {
-      return <p>No primary recording yet. Upload a video and mark it as primary.</p>;
+  const handleUploadCallToAction = useCallback(() => {
+    if (typeof document === "undefined") {
+      return;
     }
+    const card = document.querySelector(".recordings-card");
+    if (card) {
+      card.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    document.dispatchEvent(new CustomEvent(UPLOAD_RECORDING_MODAL_EVENT));
+  }, []);
+
+  const statusContent = (() => {
+        if (!recording) {
+          return (
+            <div css={emptyStateStyles}>
+              <button
+                css={[primaryButtonStyles, emptyStateButtonStyles]}
+                type="button"
+                onClick={handleUploadCallToAction}
+              >
+                Upload a recording
+              </button>
+            </div>
+          );
+        }
     if (recording.status !== "READY") {
       return <p>Primary recording is {recording.status.toLowerCase()}… Player will appear once ready.</p>;
     }
