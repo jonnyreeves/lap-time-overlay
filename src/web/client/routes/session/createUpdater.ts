@@ -1,5 +1,6 @@
 import {
   ConnectionHandler,
+  type RecordProxy,
   type RecordSourceProxy,
   type RecordSourceSelectorProxy,
 } from "relay-runtime";
@@ -29,18 +30,23 @@ export function prependCreatedSessionToRecentSessions(
   const edge = ConnectionHandler.createEdge(store, connection, payload, "TrackSessionEdge");
   const existingEdges = connection.getLinkedRecords("edges") ?? [];
   const newId = payload.getValue("id");
-  const filteredEdges = existingEdges.filter((existingEdge) => {
-    const node = existingEdge?.getLinkedRecord("node");
-    return node?.getValue("id") !== newId;
+  const filteredEdges: RecordProxy[] = [];
+  existingEdges.forEach((existingEdge) => {
+    if (!existingEdge) return;
+    const node = existingEdge.getLinkedRecord("node");
+    const nodeId = node?.getValue("id");
+    if (
+      typeof newId === "string" &&
+      typeof nodeId === "string" &&
+      nodeId === newId
+    ) {
+      return;
+    }
+    filteredEdges.push(existingEdge);
   });
 
-  ConnectionHandler.insertEdgeBefore(connection, edge);
-
-  const nextEdges = connection.getLinkedRecords("edges");
-  if (nextEdges) {
-    const deduped = [nextEdges[0], ...filteredEdges].slice(0, maxItems);
-    connection.setLinkedRecords(deduped, "edges");
-  }
+  const sortedEdges = sortTrackSessionEdgesByDate([edge, ...filteredEdges]);
+  connection.setLinkedRecords(sortedEdges.slice(0, maxItems), "edges");
 }
 
 export function prependTrackForCreatedSession(
@@ -75,4 +81,20 @@ export function prependTrackForCreatedSession(
   const edge = ConnectionHandler.createEdge(store, connection, track, "TrackEdge");
   const nextEdges = [edge, ...filteredEdges].slice(0, maxItems);
   connection.setLinkedRecords(nextEdges, "edges");
+}
+
+function sortTrackSessionEdgesByDate(edges: RecordProxy[]) {
+  return [...edges].sort((a, b) => getTrackSessionEdgeTimestamp(b) - getTrackSessionEdgeTimestamp(a));
+}
+
+function getTrackSessionEdgeTimestamp(edge: RecordProxy) {
+  const node = edge.getLinkedRecord("node");
+  const rawValue = node?.getValue("date");
+  if (typeof rawValue === "string") {
+    const timestamp = Date.parse(rawValue);
+    if (!Number.isNaN(timestamp)) {
+      return timestamp;
+    }
+  }
+  return Number.NEGATIVE_INFINITY;
 }
