@@ -35,6 +35,8 @@ export type ParsedTeamsportEmail = {
 export type ParsedSessionEmail = ParsedDaytonaEmail | ParsedTeamsportEmail;
 
 export type SessionImportSelection = {
+  provider: ParsedSessionEmail["provider"];
+  sourceText: string;
   sessionFormat: SessionFormat | null;
   sessionDate: string | null;
   sessionTime: string | null;

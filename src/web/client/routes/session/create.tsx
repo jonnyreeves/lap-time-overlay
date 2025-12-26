@@ -12,6 +12,7 @@ import { LapInputsCard } from "../../components/session/LapInputsCard.js";
 import { CreateTrackModal } from "../../components/tracks/CreateTrackModal.js";
 import { useLapRows, type LapInputPayload } from "../../hooks/useLapRows.js";
 import { formatLapTimeSeconds, parseLapTimeString } from "../../utils/lapTime.js";
+import { guessTrackIdFromImport } from "../../utils/guessTrackFromImport.js";
 import { type SessionImportSelection } from "../../utils/sessionImportTypes.js";
 import { prependCreatedSessionToRecentSessions, prependTrackForCreatedSession } from "./createUpdater.js";
 import { useBreadcrumbs } from "../../hooks/useBreadcrumbs.js";
@@ -471,6 +472,14 @@ export default function CreateSessionRoute() {
           lapEvents: lap.lapEvents,
         }))
       );
+    }
+
+    const guessedTrackId = guessTrackIdFromImport(data.tracks, {
+      provider: importResult.provider,
+      sourceText: importResult.sourceText,
+    });
+    if (guessedTrackId && guessedTrackId !== trackId) {
+      handleTrackChange(guessedTrackId);
     }
   };
 

@@ -195,6 +195,8 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
     if (!laps.length) return;
 
     onImport({
+      provider: parsed.provider,
+      sourceText: emailContent.trim(),
       sessionFormat: parsed.sessionFormat,
       sessionDate: parsed.sessionDate,
       sessionTime: parsed.sessionTime,
