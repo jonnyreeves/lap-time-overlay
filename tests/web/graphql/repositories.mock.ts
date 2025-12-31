@@ -8,6 +8,7 @@ export function createMockRepositories() {
       findById: vi.fn(),
       findAll: vi.fn(),
       create: vi.fn(),
+      update: vi.fn(),
     },
     trackSessions: {
       findById: vi.fn(),

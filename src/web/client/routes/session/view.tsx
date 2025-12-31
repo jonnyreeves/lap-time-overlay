@@ -37,11 +37,13 @@ const SessionQuery = graphql`
       classification
       fastestLap
       conditions
+      temperature
       notes
       kartNumber
       track {
         id
         name
+        postcode
       }
       trackLayout {
         id
@@ -115,6 +117,7 @@ const SessionQuery = graphql`
     tracks {
       id
       name
+      postcode
       karts {
         id
         name

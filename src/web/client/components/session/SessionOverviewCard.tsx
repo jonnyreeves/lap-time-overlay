@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { graphql, useMutation } from "react-relay";
 import { Link, useNavigate } from "react-router-dom";
 import type { SessionOverviewCardDeleteTrackSessionMutation } from "../../__generated__/SessionOverviewCardDeleteTrackSessionMutation.graphql.js";
+import type { SessionOverviewCardFetchTrackSessionTemperatureMutation } from "../../__generated__/SessionOverviewCardFetchTrackSessionTemperatureMutation.graphql.js";
 import type { SessionOverviewCardUpdateTrackSessionMutation } from "../../__generated__/SessionOverviewCardUpdateTrackSessionMutation.graphql.js";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 import { Card } from "../Card.js";
@@ -14,6 +15,7 @@ import {
   conditionsOptions,
   formatOptions,
   SessionOverviewFormState,
+  combineDateTime,
   splitDateTime,
   validateSessionOverviewForm,
 } from "./sessionOverviewForm.js";
@@ -22,6 +24,7 @@ import {
   dangerButtonStyles,
   infoTileStyles,
   inlineHelpStyles,
+  inputRowStyles,
   inputStyles,
   notesStyles,
   primaryButtonStyles,
@@ -37,8 +40,9 @@ type SessionDetails = {
   classification?: number | string | null;
   fastestLap?: number | null;
   conditions?: string | null;
+  temperature?: string | null;
   notes?: string | null;
-  track: { id: string; name: string };
+  track: { id: string; name: string; postcode?: string | null };
   kart?: { id: string; name: string } | null;
   kartNumber?: string | null;
   trackLayout: { id: string; name: string } | null;
@@ -52,6 +56,7 @@ type Props = {
   tracks: readonly {
     id: string;
     name: string;
+    postcode?: string | null;
     karts: readonly { id: string; name: string }[];
     trackLayouts: readonly { id: string; name: string }[];
   }[];
@@ -86,11 +91,13 @@ const UpdateTrackSessionMutation = graphql`
         classification
         fastestLap
         conditions
+        temperature
         notes
         kartNumber
         track {
           id
           name
+          postcode
         }
         kart {
           id
@@ -114,6 +121,16 @@ const DeleteTrackSessionMutation = graphql`
   }
 `;
 
+const FetchTrackSessionTemperatureMutation = graphql`
+  mutation SessionOverviewCardFetchTrackSessionTemperatureMutation(
+    $input: FetchTrackSessionTemperatureInput!
+  ) {
+    fetchTrackSessionTemperature(input: $input) {
+      temperature
+    }
+  }
+`;
+
 type FormState = SessionOverviewFormState;
 
 function toFormState(session: SessionDetails): FormState {
@@ -127,6 +144,7 @@ function toFormState(session: SessionDetails): FormState {
     date,
     time,
     conditions: session.conditions ?? "Dry",
+    temperature: session.temperature ?? "",
     classification:
       session.classification != null && session.classification !== ""
         ? String(session.classification)
@@ -147,6 +165,10 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
   const [actionError, setActionError] = useState<string | null>(null);
   const [commitUpdate, isSaving] =
     useMutation<SessionOverviewCardUpdateTrackSessionMutation>(UpdateTrackSessionMutation);
+  const [commitFetchTemperature, isFetchingTemperature] =
+    useMutation<SessionOverviewCardFetchTrackSessionTemperatureMutation>(
+      FetchTrackSessionTemperatureMutation
+    );
   const [commitDelete, isDeleting] =
     useMutation<SessionOverviewCardDeleteTrackSessionMutation>(DeleteTrackSessionMutation);
   const navigate = useNavigate();
@@ -165,12 +187,15 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
     session.id,
     session.notes,
     session.kartNumber,
+    session.temperature,
     session.trackLayout?.id,
     session.kart?.id,
   ]);
 
   const { date: sessionDate, time: sessionTime } = splitDateTime(session.date);
   const conditionsLabel = (isEditing ? formValues.conditions : session.conditions) ?? "Not set";
+  const temperatureValue = (isEditing ? formValues.temperature : session.temperature) ?? "";
+  const temperatureLabel = temperatureValue.trim() ? temperatureValue.trim() : "Not set";
   const classificationValue = session.classification;
   const classificationLabel =
     classificationValue != null && classificationValue !== ""
@@ -199,15 +224,19 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
         {
           id: session.track.id,
           name: session.track.name,
+          postcode: session.track.postcode ?? null,
           trackLayouts: session.trackLayout ? [session.trackLayout] : [],
           karts: session.kart ? [session.kart] : [],
         },
       ];
   const selectedTrack = trackOptions.find((option) => option.id === formValues.trackId);
+  const selectedTrackPostcode = selectedTrack?.postcode ?? session.track.postcode ?? null;
   const selectedTrackLayouts =
     selectedTrack?.trackLayouts ??
     (session.trackLayout ? [session.trackLayout] : []);
   const selectedTrackKarts = selectedTrack?.karts ?? (session.kart ? [session.kart] : []);
+  const canFetchTemperature =
+    Boolean(formValues.date.trim()) && Boolean(selectedTrackPostcode?.trim());
 
   function handleEdit() {
     setActionError(null);
@@ -270,6 +299,7 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
     const payload = validation.payload;
     if (!payload) return;
     const nextTrackName = selectedTrack?.name ?? session.track.name;
+    const nextTrackPostcode = selectedTrack?.postcode ?? session.track.postcode ?? null;
     const nextLayout =
       selectedTrackLayouts.find((layout) => layout.id === payload.trackLayoutId) ??
       (session.trackLayout ? { id: session.trackLayout.id, name: session.trackLayout.name } : null);
@@ -289,6 +319,7 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
           classification: payload.classification,
           fastestLap: payload.fastestLap,
           conditions: payload.conditions,
+          temperature: payload.temperature,
           notes: payload.notes,
           kartNumber: payload.kartNumber,
         },
@@ -301,11 +332,13 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
             format: payload.format,
             classification: payload.classification,
             conditions: payload.conditions,
+            temperature: payload.temperature,
             notes: payload.notes,
             kartNumber: payload.kartNumber,
             track: {
               id: payload.trackId,
               name: nextTrackName,
+              postcode: nextTrackPostcode,
               __typename: "Track",
             },
             kart: nextKart
@@ -323,6 +356,33 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
       onCompleted: () => {
         setIsEditing(false);
         setActionError(null);
+      },
+      onError: (error) => {
+        setActionError(error.message);
+      },
+    });
+  }
+
+  function handleFetchTemperature() {
+    if (!canFetchTemperature || isFetchingTemperature) return;
+    const sessionDateTime = formValues.time
+      ? combineDateTime(formValues.date, formValues.time)
+      : formValues.date;
+
+    commitFetchTemperature({
+      variables: {
+        input: {
+          trackId: formValues.trackId,
+          date: sessionDateTime,
+        },
+      },
+      onCompleted: (response) => {
+        const fetched = response.fetchTrackSessionTemperature?.temperature;
+        if (fetched) {
+          setFormValues((current) => ({ ...current, temperature: fetched }));
+        } else {
+          setActionError("No temperature available for that session date.");
+        }
       },
       onError: (error) => {
         setActionError(error.message);
@@ -556,6 +616,33 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
               <p className="value">
                 {conditionsIcon} {conditionsLabel}
               </p>
+            )}
+          </div>
+          <div css={infoTileStyles}>
+            <p className="label">Temperature (C)</p>
+            {isEditing ? (
+              <div css={inputRowStyles}>
+                <input
+                  type="text"
+                  css={inputStyles}
+                  value={formValues.temperature}
+                  onChange={(e) =>
+                    setFormValues((current) => ({ ...current, temperature: e.target.value }))
+                  }
+                  placeholder="e.g. 21"
+                  disabled={isSaving}
+                />
+                <button
+                  type="button"
+                  css={inlineActionButtonStyles}
+                  onClick={handleFetchTemperature}
+                  disabled={!canFetchTemperature || isSaving || isFetchingTemperature}
+                >
+                  {isFetchingTemperature ? "Fetching..." : "Fetch"}
+                </button>
+              </div>
+            ) : (
+              <p className="value">{temperatureLabel}</p>
             )}
           </div>
           <div css={infoTileStyles}>

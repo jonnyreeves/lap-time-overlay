@@ -15,4 +15,6 @@ export const migrations: Migration[] = [
   (await import("./06_add_is_admin_to_users.js")).migration,
   (await import("./07_add_show_in_media_library_to_track_recordings.js")).migration,
   (await import("./08_add_kart_number_to_track_sessions.js")).migration,
+  (await import("./09_add_temperature_to_track_sessions.js")).migration,
+  (await import("./10_add_postcode_to_tracks.js")).migration,
 ];

@@ -14,6 +14,7 @@ import {
   type ConsistencyStats,
   type ExcludedReason,
 } from "../../shared/consistency.js";
+import { fetchTemperatureForPostcode } from "../../shared/weather.js";
 import { toTrackPayload } from "./track.js";
 import {
   rebuildMediaLibrarySessionProjection,
@@ -29,6 +30,7 @@ export type CreateTrackSessionInputArgs = {
     format?: string;
     classification?: number | null;
     conditions?: string;
+    temperature?: string;
     trackId?: string;
     kartId?: string;
     kartNumber?: string;
@@ -46,6 +48,7 @@ export type UpdateTrackSessionInputArgs = {
     format?: string | null;
     classification?: number | null;
     conditions?: string | null;
+    temperature?: string | null;
     trackId?: string | null;
     kartId?: string | null;
     kartNumber?: string | null;
@@ -64,6 +67,13 @@ export type UpdateTrackSessionLapsInputArgs = {
 
 export type TrackSessionArgs = {
   id?: string;
+};
+
+export type FetchTrackSessionTemperatureArgs = {
+  input?: {
+    trackId?: string;
+    date?: string;
+  };
 };
 
 export function parseConditions(conditions: string | undefined): TrackSessionConditions {
@@ -241,6 +251,7 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
     classification: session.classification,
     fastestLap: session.fastestLap,
     conditions: session.conditions,
+    temperature: session.temperature,
     kartNumber: session.kartNumber,
     track: () => {
       const track = repositories.tracks.findById(session.trackId);
@@ -443,7 +454,7 @@ export const trackSessionResolvers = {
 
     return toTrackSessionPayload(session, repositories);
   },
-  createTrackSession: (args: CreateTrackSessionInputArgs, context: GraphQLContext) => {
+  createTrackSession: async (args: CreateTrackSessionInputArgs, context: GraphQLContext) => {
     const { repositories } = context;
     if (!context.currentUser) {
       throw new GraphQLError("Authentication required", {
@@ -498,6 +509,7 @@ export const trackSessionResolvers = {
     const conditions = parseConditions(input.conditions);
     const fastestLap = parseFastestLap(input.fastestLap);
     const kartNumber = input.kartNumber?.trim() ?? "";
+    const temperature = input.temperature?.trim() ?? "";
     const { trackSession } = repositories.trackSessions.createWithLaps({
       date: input.date,
       format: input.format,
@@ -511,6 +523,7 @@ export const trackSessionResolvers = {
       kartNumber,
       trackLayoutId: input.trackLayoutId,
       fastestLap,
+      temperature,
     });
     return { trackSession: toTrackSessionPayload(trackSession, repositories) };
   },
@@ -653,6 +666,10 @@ export const trackSessionResolvers = {
     const targetKartNumber = kartNumberProvided
       ? (input.kartNumber ?? "").trim()
       : existingSession.kartNumber;
+    const temperatureProvided = Object.prototype.hasOwnProperty.call(input, "temperature");
+    let targetTemperature = temperatureProvided
+      ? (input.temperature ?? "").trim()
+      : existingSession.temperature;
 
     const notesProvided = Object.prototype.hasOwnProperty.call(input, "notes");
     const classificationProvided = Object.prototype.hasOwnProperty.call(input, "classification");
@@ -689,6 +706,7 @@ export const trackSessionResolvers = {
       notes,
       kartId: targetKartId,
       kartNumber: targetKartNumber,
+      temperature: targetTemperature,
       trackLayoutId: targetTrackLayoutId,
       fastestLap,
     });
@@ -704,6 +722,40 @@ export const trackSessionResolvers = {
     });
 
     return { trackSession: toTrackSessionPayload(updated, repositories) };
+  },
+  fetchTrackSessionTemperature: async (
+    args: FetchTrackSessionTemperatureArgs,
+    context: GraphQLContext
+  ) => {
+    const { repositories } = context;
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+
+    const input = args.input;
+    const trackId = input?.trackId?.trim();
+    const date = input?.date?.trim();
+    if (!trackId || !date) {
+      throw new GraphQLError("trackId and date are required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const track = repositories.tracks.findById(trackId);
+    if (!track) {
+      throw new GraphQLError("Track not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    if (!track.postcode?.trim()) {
+      return { temperature: null };
+    }
+
+    const temperature = await fetchTemperatureForPostcode(track.postcode, date);
+    return { temperature };
   },
   updateTrackSessionLaps: (args: UpdateTrackSessionLapsInputArgs, context: GraphQLContext) => {
     const { repositories } = context;

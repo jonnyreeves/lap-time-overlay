@@ -19,6 +19,7 @@ describe("track resolver", () => {
         id: "c1",
         name: "Spa",
         heroImage: null,
+        postcode: null,
         createdAt: 0,
         updatedAt: 0,
       },
@@ -26,6 +27,7 @@ describe("track resolver", () => {
         id: "c2",
         name: "Monza",
         heroImage: null,
+        postcode: null,
         createdAt: 0,
         updatedAt: 0,
       },
@@ -39,6 +41,7 @@ describe("track resolver", () => {
         classification: 2,
         fastestLap: null,
         conditions: "Dry",
+        temperature: "",
         trackId: "c1",
         userId: "user-1",
         notes: null,
@@ -55,6 +58,7 @@ describe("track resolver", () => {
         classification: 5,
         fastestLap: null,
         conditions: "Wet",
+        temperature: "19",
         trackId: "c1",
         userId: "user-1",
         notes: null,
@@ -71,6 +75,7 @@ describe("track resolver", () => {
         classification: 3,
         fastestLap: null,
         conditions: "Dry",
+        temperature: "",
         trackId: "c1",
         userId: "user-1",
         notes: null,
@@ -87,6 +92,7 @@ describe("track resolver", () => {
         classification: 4,
         fastestLap: null,
         conditions: "Dry",
+        temperature: "",
         trackId: "c1",
         userId: "user-1",
         notes: null,
@@ -103,6 +109,7 @@ describe("track resolver", () => {
         classification: 3,
         fastestLap: null,
         conditions: "Dry",
+        temperature: "",
         trackId: "c1",
         userId: "user-1",
         notes: null,
@@ -119,6 +126,7 @@ describe("track resolver", () => {
         classification: 3,
         fastestLap: null,
         conditions: "Dry",
+        temperature: "",
         trackId: "c1",
         userId: "user-1",
         notes: null,
@@ -135,6 +143,7 @@ describe("track resolver", () => {
         classification: 2,
         fastestLap: null,
         conditions: "Dry",
+        temperature: "",
         trackId: "c2",
         userId: "user-1",
         notes: null,
@@ -295,7 +304,7 @@ describe("track resolver", () => {
 
   it("returns an empty list when no lap data exists", async () => {
     repositories.tracks.findAll.mockReturnValue([
-      { id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 },
+      { id: "c1", name: "Spa", heroImage: null, postcode: null, createdAt: 0, updatedAt: 0 },
     ]);
 
     repositories.trackSessions.findByTrackId.mockReturnValue([]);
@@ -319,6 +328,7 @@ describe("track resolver", () => {
       id: "c1",
       name: "Spa",
       heroImage: "img",
+      postcode: "SW1A 1AA",
       createdAt: 0,
       updatedAt: 0,
     });
@@ -344,6 +354,7 @@ describe("track resolver", () => {
         input: {
           name: "Spa",
           heroImage: "img",
+          postcode: "SW1A 1AA",
           karts: [{ name: "Rotax" }, { name: "Sodi" }],
           trackLayouts: [{ name: "GP" }, { name: "Indy" }],
         },
@@ -351,13 +362,13 @@ describe("track resolver", () => {
       authenticatedContext as never
     );
 
-    expect(repositories.tracks.create).toHaveBeenCalledWith("Spa", "img");
+    expect(repositories.tracks.create).toHaveBeenCalledWith("Spa", "img", undefined, "SW1A 1AA");
     expect(repositories.karts.create).toHaveBeenCalledTimes(2);
     expect(repositories.trackKarts.addKartToTrack).toHaveBeenCalledWith("c1", "k1");
     expect(repositories.trackKarts.addKartToTrack).toHaveBeenCalledWith("c1", "k2");
     expect(repositories.trackLayouts.create).toHaveBeenCalledTimes(2);
 
-    expect(result.track).toMatchObject({ id: "c1", name: "Spa", heroImage: "img" });
+    expect(result.track).toMatchObject({ id: "c1", name: "Spa", heroImage: "img", postcode: "SW1A 1AA" });
     expect(result.track.karts).toBeTypeOf("function");
     expect(await result.track.karts()).toHaveLength(2);
     expect(await result.track.trackLayouts()).toHaveLength(2);
@@ -399,6 +410,60 @@ describe("track resolver", () => {
       )
     ).toThrowError("At least one track layout name is required");
   });
+
+  it("updateTrack rejects unauthenticated requests", () => {
+    expect(() =>
+      rootValue.updateTrack({ input: { id: "c1", postcode: "KT14 6GB" } }, baseContext as never)
+    ).toThrowError("Authentication required");
+  });
+
+  it("updateTrack validates required id and fields", () => {
+    expect(() =>
+      rootValue.updateTrack({ input: {} }, authenticatedContext as never)
+    ).toThrowError("Track ID is required");
+    repositories.tracks.findById.mockReturnValue({
+      id: "c1",
+      name: "Spa",
+      heroImage: null,
+      postcode: null,
+      createdAt: 0,
+      updatedAt: 0,
+    });
+    expect(() =>
+      rootValue.updateTrack({ input: { id: "c1" } }, authenticatedContext as never)
+    ).toThrowError("At least one track field is required");
+  });
+
+  it("updateTrack updates the postcode", () => {
+    repositories.tracks.findById.mockReturnValue({
+      id: "c1",
+      name: "Spa",
+      heroImage: null,
+      postcode: "KT14 6GB",
+      createdAt: 0,
+      updatedAt: 0,
+    });
+    repositories.tracks.update.mockReturnValue({
+      id: "c1",
+      name: "Spa",
+      heroImage: null,
+      postcode: "SW1A 1AA",
+      createdAt: 0,
+      updatedAt: 1,
+    });
+
+    const result = rootValue.updateTrack(
+      { input: { id: "c1", postcode: "SW1A 1AA" } },
+      authenticatedContext as never
+    );
+
+    expect(repositories.tracks.update).toHaveBeenCalledWith("c1", {
+      name: undefined,
+      heroImage: undefined,
+      postcode: "SW1A 1AA",
+    });
+    expect(result.track).toMatchObject({ id: "c1", postcode: "SW1A 1AA" });
+  });
 });
 
 describe("track resolver by id", () => {
@@ -411,6 +476,7 @@ describe("track resolver by id", () => {
       id: "c1",
       name: "Spa",
       heroImage: "spa.jpg",
+      postcode: "SW1A 1AA",
       createdAt: 0,
       updatedAt: 0,
     });
@@ -421,6 +487,7 @@ describe("track resolver by id", () => {
       id: "c1",
       name: "Spa",
       heroImage: "spa.jpg",
+      postcode: "SW1A 1AA",
     });
   });
 
@@ -450,6 +517,7 @@ describe("kart resolvers", () => {
       id: "c1",
       name: "Spa",
       heroImage: null,
+      postcode: null,
       createdAt: 0,
       updatedAt: 0,
     };
@@ -581,7 +649,14 @@ describe("kart resolvers", () => {
   });
 
   it("addKartToTrack returns GraphQLError if kart not found", () => {
-    repositories.tracks.findById.mockReturnValue({ id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 });
+    repositories.tracks.findById.mockReturnValue({
+      id: "c1",
+      name: "Spa",
+      heroImage: null,
+      postcode: null,
+      createdAt: 0,
+      updatedAt: 0,
+    });
     repositories.karts.findById.mockReturnValue(null);
 
     expect(() =>
@@ -590,7 +665,14 @@ describe("kart resolvers", () => {
   });
 
   it("addKartToTrack adds kart to track and returns payload", async () => {
-    const mockTrack = { id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 };
+    const mockTrack = {
+      id: "c1",
+      name: "Spa",
+      heroImage: null,
+      postcode: null,
+      createdAt: 0,
+      updatedAt: 0,
+    };
     const mockKart = { id: "k1", name: "Kart 1", createdAt: 0, updatedAt: 0 };
     repositories.tracks.findById.mockReturnValue(mockTrack);
     repositories.karts.findById.mockReturnValue(mockKart);
@@ -632,7 +714,14 @@ describe("kart resolvers", () => {
   });
 
   it("removeKartFromTrack returns GraphQLError if kart not found", () => {
-    repositories.tracks.findById.mockReturnValue({ id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 });
+    repositories.tracks.findById.mockReturnValue({
+      id: "c1",
+      name: "Spa",
+      heroImage: null,
+      postcode: null,
+      createdAt: 0,
+      updatedAt: 0,
+    });
     repositories.karts.findById.mockReturnValue(null);
 
     expect(() =>
@@ -641,7 +730,14 @@ describe("kart resolvers", () => {
   });
 
   it("removeKartFromTrack removes kart from track and returns payload", async () => {
-    const mockTrack = { id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 };
+    const mockTrack = {
+      id: "c1",
+      name: "Spa",
+      heroImage: null,
+      postcode: null,
+      createdAt: 0,
+      updatedAt: 0,
+    };
     const mockKart = { id: "k1", name: "Kart 1", createdAt: 0, updatedAt: 0 };
     repositories.tracks.findById.mockReturnValue(mockTrack);
     repositories.karts.findById.mockReturnValue(mockKart);
@@ -688,7 +784,14 @@ describe("track layout resolvers", () => {
   });
 
   it("addTrackLayoutToTrack creates layout and returns payload", () => {
-    const track = { id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 };
+    const track = {
+      id: "c1",
+      name: "Spa",
+      heroImage: null,
+      postcode: null,
+      createdAt: 0,
+      updatedAt: 0,
+    };
     const layout = { id: "l1", trackId: "c1", name: "Outer", createdAt: 0, updatedAt: 0 };
     repositories.tracks.findById.mockReturnValue(track);
     repositories.trackLayouts.create.mockReturnValue(layout);
@@ -737,6 +840,7 @@ describe("track layout resolvers", () => {
       id: "c1",
       name: "Spa",
       heroImage: null,
+      postcode: null,
       createdAt: 0,
       updatedAt: 0,
     });
@@ -777,7 +881,14 @@ describe("track layout resolvers", () => {
   });
 
   it("removeTrackLayoutFromTrack returns GraphQLError if layout not found", () => {
-    repositories.tracks.findById.mockReturnValue({ id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 });
+    repositories.tracks.findById.mockReturnValue({
+      id: "c1",
+      name: "Spa",
+      heroImage: null,
+      postcode: null,
+      createdAt: 0,
+      updatedAt: 0,
+    });
     repositories.trackLayouts.findById.mockReturnValue(null);
 
     expect(() =>
@@ -786,7 +897,14 @@ describe("track layout resolvers", () => {
   });
 
   it("removeTrackLayoutFromTrack returns GraphQLError if layout belongs to another track", () => {
-    repositories.tracks.findById.mockReturnValue({ id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 });
+    repositories.tracks.findById.mockReturnValue({
+      id: "c1",
+      name: "Spa",
+      heroImage: null,
+      postcode: null,
+      createdAt: 0,
+      updatedAt: 0,
+    });
     repositories.trackLayouts.findById.mockReturnValue({ id: "l1", trackId: "other", name: "Outer", createdAt: 0, updatedAt: 0 });
 
     expect(() =>
@@ -795,7 +913,14 @@ describe("track layout resolvers", () => {
   });
 
   it("removeTrackLayoutFromTrack deletes layout and returns payload", () => {
-    const track = { id: "c1", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 };
+    const track = {
+      id: "c1",
+      name: "Spa",
+      heroImage: null,
+      postcode: null,
+      createdAt: 0,
+      updatedAt: 0,
+    };
     const layout = { id: "l1", trackId: "c1", name: "Outer", createdAt: 0, updatedAt: 0 };
     repositories.tracks.findById.mockReturnValue(track);
     repositories.trackLayouts.findById.mockReturnValue(layout);

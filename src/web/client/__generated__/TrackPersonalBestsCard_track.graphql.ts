@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<31e741114a2f471a295e3524d4e2583b>>
+ * @generated SignedSource<<89a425e77ec5d08405ccae7bbb3a5ace>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -27,6 +27,7 @@ export type TrackPersonalBestsCard_track$data = {
     };
     readonly trackSessionId: string;
   }>;
+  readonly postcode: string | null | undefined;
   readonly " $fragmentType": "TrackPersonalBestsCard_track";
 };
 export type TrackPersonalBestsCard_track$key = {
@@ -66,6 +67,13 @@ return {
       "args": null,
       "kind": "ScalarField",
       "name": "heroImage",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "postcode",
       "storageKey": null
     },
     {
@@ -126,6 +134,6 @@ return {
 };
 })();
 
-(node as any).hash = "fba8f61e059dbc983336f7108eebe10d";
+(node as any).hash = "35fe59a008c5feadb2f68c0f3fb4299f";
 
 export default node;

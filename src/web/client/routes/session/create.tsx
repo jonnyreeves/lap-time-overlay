@@ -4,9 +4,11 @@ import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { ConnectionHandler } from "relay-runtime";
 import { type create_tsxTracksQuery } from "../../__generated__/create_tsxTracksQuery.graphql.js";
+import { createSessionFetchTrackSessionTemperatureMutation } from "../../__generated__/createSessionFetchTrackSessionTemperatureMutation.graphql.js";
 import { createTrackSessionMutation } from "../../__generated__/createTrackSessionMutation.graphql.js";
 import { Card } from "../../components/Card.js";
 import { IconButton } from "../../components/IconButton.js";
+import { inlineActionButtonStyles } from "../../components/inlineActionButtons.ts";
 import { ImportSessionModal } from "../../components/session/ImportSessionModal.js";
 import { LapInputsCard } from "../../components/session/LapInputsCard.js";
 import { CreateTrackModal } from "../../components/tracks/CreateTrackModal.js";
@@ -74,6 +76,13 @@ const twoColumnRowStyles = css`
   @media (max-width: 640px) {
     grid-template-columns: 1fr;
   }
+`;
+
+const temperatureRowStyles = css`
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
 `;
 
 const AddTrackButtonStyles = css`
@@ -162,6 +171,7 @@ const CreateSessionRouteTracksQuery = graphql`
     tracks {
       id
       name
+      postcode
       karts {
         id
         name
@@ -170,6 +180,16 @@ const CreateSessionRouteTracksQuery = graphql`
         id
         name
       }
+    }
+  }
+`;
+
+const FetchTrackSessionTemperatureMutation = graphql`
+  mutation createSessionFetchTrackSessionTemperatureMutation(
+    $input: FetchTrackSessionTemperatureInput!
+  ) {
+    fetchTrackSessionTemperature(input: $input) {
+      temperature
     }
   }
 `;
@@ -192,6 +212,7 @@ const CreateTrackSessionMutation = graphql`
         classification
         fastestLap
         conditions
+        temperature
         trackLayout {
           id
           name
@@ -252,6 +273,7 @@ export default function CreateSessionRoute() {
   const [trackLayoutId, setTrackLayoutId] = useState("");
   const [classification, setClassification] = useState("");
   const [fastestLap, setFastestLap] = useState("");
+  const [temperature, setTemperature] = useState("");
   const [notes, setNotes] = useState("");
 
   const navigate = useNavigate();
@@ -270,6 +292,10 @@ export default function CreateSessionRoute() {
   const [commitMutation, isInFlight] = useMutation<createTrackSessionMutation>(
     CreateTrackSessionMutation,
   );
+  const [commitFetchTemperature, isFetchingTemperature] =
+    useMutation<createSessionFetchTrackSessionTemperatureMutation>(
+      FetchTrackSessionTemperatureMutation
+    );
   const isCreateDisabled =
     isInFlight ||
     !date ||
@@ -301,6 +327,7 @@ export default function CreateSessionRoute() {
   const selectedTrack = data.tracks.find((track) => track.id === trackId);
   const selectedTrackKarts = selectedTrack?.karts ?? [];
   const selectedTrackLayouts = selectedTrack?.trackLayouts ?? [];
+  const canFetchTemperature = Boolean(date) && Boolean(selectedTrack?.postcode?.trim());
   const { setBreadcrumbs } = useBreadcrumbs();
 
   useEffect(() => {
@@ -396,6 +423,7 @@ export default function CreateSessionRoute() {
       return;
     }
     const trimmedKartNumber = kartNumber.trim();
+    const trimmedTemperature = temperature.trim();
 
     commitMutation({
       variables: {
@@ -407,6 +435,7 @@ export default function CreateSessionRoute() {
           trackLayoutId,
           kartId,
           conditions,
+          temperature: trimmedTemperature,
           notes: notes.trim() ? notes.trim() : null,
           ...(trimmedKartNumber ? { kartNumber: trimmedKartNumber } : {}),
           ...(parsedFastestLap != null ? { fastestLap: parsedFastestLap } : {}),
@@ -447,6 +476,33 @@ export default function CreateSessionRoute() {
     } else {
       setTrackLayoutId("");
     }
+  };
+
+  const handleFetchTemperature = () => {
+    if (!trackId || !date || !selectedTrack?.postcode?.trim() || isFetchingTemperature) {
+      return;
+    }
+
+    const sessionDateTime = time ? `${date}T${time}` : date;
+    commitFetchTemperature({
+      variables: {
+        input: {
+          trackId,
+          date: sessionDateTime,
+        },
+      },
+      onCompleted: (response) => {
+        const fetched = response.fetchTrackSessionTemperature?.temperature;
+        if (fetched) {
+          setTemperature(fetched);
+        } else {
+          alert("No temperature available for that session date.");
+        }
+      },
+      onError: (error) => {
+        alert(`Unable to fetch temperature: ${error.message}`);
+      },
+    });
   };
 
   const handleImportEmail = (importResult: SessionImportSelection) => {
@@ -630,6 +686,27 @@ export default function CreateSessionRoute() {
                 <option value="Dry">Dry</option>
                 <option value="Wet">Wet</option>
               </select>
+            </div>
+          </div>
+          <div css={inputFieldStyles}>
+            <label htmlFor="session-temperature">Temperature (C)</label>
+            <div css={temperatureRowStyles}>
+              <input
+                type="text"
+                id="session-temperature"
+                value={temperature}
+                onChange={(e) => setTemperature(e.target.value)}
+                placeholder="e.g. 21"
+                disabled={isInFlight}
+              />
+              <button
+                type="button"
+                css={inlineActionButtonStyles}
+                onClick={handleFetchTemperature}
+                disabled={!canFetchTemperature || isInFlight || isFetchingTemperature}
+              >
+                {isFetchingTemperature ? "Fetching..." : "Fetch"}
+              </button>
             </div>
           </div>
           <div css={inputFieldStyles}>

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<12e9775601ecf98ea123198b8a2fcf33>>
+ * @generated SignedSource<<4064e171564db9fc22614dec74332acc>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,6 +13,7 @@ export type CreateTrackInput = {
   heroImage?: string | null | undefined;
   karts: ReadonlyArray<CreateKartInput>;
   name: string;
+  postcode?: string | null | undefined;
   trackLayouts: ReadonlyArray<CreateTrackLayoutInput>;
 };
 export type CreateKartInput = {
@@ -33,6 +34,7 @@ export type CreateTrackModalCreateTrackMutation$data = {
         readonly name: string;
       }>;
       readonly name: string;
+      readonly postcode: string | null | undefined;
       readonly trackLayouts: ReadonlyArray<{
         readonly id: string;
         readonly name: string;
@@ -99,6 +101,13 @@ v4 = [
           {
             "alias": null,
             "args": null,
+            "kind": "ScalarField",
+            "name": "postcode",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
             "concreteType": "Kart",
             "kind": "LinkedField",
             "name": "karts",
@@ -141,16 +150,16 @@ return {
     "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "66c440629a67fae95246b7dac86c8538",
+    "cacheID": "578045ceaecd95a7c3763cd3ba0459c8",
     "id": null,
     "metadata": {},
     "name": "CreateTrackModalCreateTrackMutation",
     "operationKind": "mutation",
-    "text": "mutation CreateTrackModalCreateTrackMutation(\n  $input: CreateTrackInput!\n) {\n  createTrack(input: $input) {\n    track {\n      id\n      name\n      karts {\n        id\n        name\n      }\n      trackLayouts {\n        id\n        name\n      }\n    }\n  }\n}\n"
+    "text": "mutation CreateTrackModalCreateTrackMutation(\n  $input: CreateTrackInput!\n) {\n  createTrack(input: $input) {\n    track {\n      id\n      name\n      postcode\n      karts {\n        id\n        name\n      }\n      trackLayouts {\n        id\n        name\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "a6eb0e489b252e6daf6091fd7cdd4d5a";
+(node as any).hash = "8e57a98f144a73588ce3a33db1681e41";
 
 export default node;

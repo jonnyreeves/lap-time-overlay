@@ -58,6 +58,16 @@ export const inputStyles = css`
   }
 `;
 
+export const inputRowStyles = css`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  input {
+    flex: 1;
+  }
+`;
+
 export const textareaStyles = css`
   ${inputStyles};
   min-height: 96px;

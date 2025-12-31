@@ -96,11 +96,23 @@ type RunTempCleanupPayload {
 input CreateTrackInput {
   name: String!
   heroImage: String
+  postcode: String
   karts: [CreateKartInput!]!
   trackLayouts: [CreateTrackLayoutInput!]!
 }
 
 type CreateTrackPayload {
+  track: Track!
+}
+
+input UpdateTrackInput {
+  id: ID!
+  name: String
+  heroImage: String
+  postcode: String
+}
+
+type UpdateTrackPayload {
   track: Track!
 }
 
@@ -121,6 +133,7 @@ input CreateTrackSessionInput {
   format: String!
   classification: Int!
   conditions: String
+  temperature: String
   trackId: ID
   kartId: ID!
   kartNumber: String
@@ -140,6 +153,7 @@ input UpdateTrackSessionInput {
   format: String
   classification: Int
   conditions: String
+  temperature: String
   trackId: ID
   kartId: ID
   kartNumber: String
@@ -159,6 +173,15 @@ input UpdateTrackSessionLapsInput {
 
 type UpdateTrackSessionLapsPayload {
   trackSession: TrackSession!
+}
+
+input FetchTrackSessionTemperatureInput {
+  trackId: ID!
+  date: String!
+}
+
+type FetchTrackSessionTemperaturePayload {
+  temperature: String
 }
 
 input RecordingSourceInput {
@@ -277,9 +300,13 @@ type Mutation {
   login(input: AuthInput!): AuthPayload!
   logout: LogoutResult!
   createTrack(input: CreateTrackInput!): CreateTrackPayload!
+  updateTrack(input: UpdateTrackInput!): UpdateTrackPayload!
   createTrackSession(input: CreateTrackSessionInput!): CreateTrackSessionPayload!
   updateTrackSession(input: UpdateTrackSessionInput!): UpdateTrackSessionPayload!
   updateTrackSessionLaps(input: UpdateTrackSessionLapsInput!): UpdateTrackSessionLapsPayload!
+  fetchTrackSessionTemperature(
+    input: FetchTrackSessionTemperatureInput!
+  ): FetchTrackSessionTemperaturePayload!
   deleteTrackSession(id: ID!): DeleteTrackSessionPayload!
   startTrackRecordingUpload(
     input: StartTrackRecordingUploadInput!
@@ -359,6 +386,7 @@ type Track {
   id: ID!
   name: String!
   heroImage: String
+  postcode: String
   timesRaced: Int!
   lastVisit: String
   sessionStats: TrackSessionStats!
@@ -429,6 +457,7 @@ type TrackSession {
   classification: Int!
   fastestLap: Float
   conditions: String!
+  temperature: String
   track: Track!
   trackLayout: TrackLayout!
   kart: Kart

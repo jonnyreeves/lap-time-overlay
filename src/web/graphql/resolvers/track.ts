@@ -225,6 +225,7 @@ export function toTrackPayload(
     id: track.id,
     name: track.name,
     heroImage: track.heroImage,
+    postcode: track.postcode,
     timesRaced,
     lastVisit,
     sessionStats: () => getTrackSessionStats(track, repositories, userId, sessions),
@@ -288,7 +289,7 @@ export const trackResolvers = {
       .map((track) => toTrackPayload(track, repositories, userId));
   },
   createTrack: (
-    args: { input?: { name?: string; heroImage?: string | null; karts?: { name?: string }[]; trackLayouts?: { name?: string }[] } },
+    args: { input?: { name?: string; heroImage?: string | null; postcode?: string | null; karts?: { name?: string }[]; trackLayouts?: { name?: string }[] } },
     context: GraphQLContext
   ) => {
     if (!context.currentUser) {
@@ -325,14 +326,86 @@ export const trackResolvers = {
 
     const uniqueKartNames = Array.from(new Set(kartNames));
     const uniqueLayoutNames = Array.from(new Set(layoutNames));
+    const postcode = input.postcode?.trim() ?? "";
+    const normalizedPostcode = postcode ? postcode : null;
 
-    const newTrack = context.repositories.tracks.create(input.name, input.heroImage ?? null);
+    const newTrack = context.repositories.tracks.create(
+      input.name,
+      input.heroImage ?? null,
+      undefined,
+      normalizedPostcode
+    );
     const createdKarts = uniqueKartNames.map((name) => context.repositories.karts.create(name));
     createdKarts.forEach((kart) => context.repositories.trackKarts.addKartToTrack(newTrack.id, kart.id));
 
     uniqueLayoutNames.forEach((name) => context.repositories.trackLayouts.create(newTrack.id, name));
 
     return { track: toTrackPayload(newTrack, context.repositories, context.currentUser.id) };
+  },
+
+  updateTrack: (
+    args: { input?: { id?: string; name?: string | null; heroImage?: string | null; postcode?: string | null } },
+    context: GraphQLContext
+  ) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+
+    const input = args.input;
+    const trackId = input?.id;
+    if (!trackId) {
+      throw new GraphQLError("Track ID is required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const track = context.repositories.tracks.findById(trackId);
+    if (!track) {
+      throw new GraphQLError("Track not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    const nameProvided = Object.prototype.hasOwnProperty.call(input, "name");
+    const heroImageProvided = Object.prototype.hasOwnProperty.call(input, "heroImage");
+    const postcodeProvided = Object.prototype.hasOwnProperty.call(input, "postcode");
+
+    if (!nameProvided && !heroImageProvided && !postcodeProvided) {
+      throw new GraphQLError("At least one track field is required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const name = nameProvided ? input?.name?.trim() ?? "" : undefined;
+    if (nameProvided && !name) {
+      throw new GraphQLError("Track name cannot be empty", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    const heroImage = heroImageProvided ? input?.heroImage ?? null : undefined;
+    const trimmedPostcode = postcodeProvided ? (input?.postcode ?? "").trim() : undefined;
+    const normalizedPostcode = postcodeProvided
+      ? trimmedPostcode
+        ? trimmedPostcode
+        : null
+      : undefined;
+
+    const updated = context.repositories.tracks.update(trackId, {
+      name: nameProvided ? name : undefined,
+      heroImage,
+      postcode: normalizedPostcode,
+    });
+
+    if (!updated) {
+      throw new GraphQLError("Track not found", {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    return { track: toTrackPayload(updated, context.repositories, context.currentUser.id) };
   },
 
   createKart: (args: { input?: { name?: string } }, context: GraphQLContext) => {

@@ -13,6 +13,7 @@ const TrackPersonalBestsFragment = graphql`
     id
     name
     heroImage
+    postcode
     personalBestEntries {
       trackSessionId
       conditions
@@ -60,6 +61,12 @@ const trackTitleStyles = css`
   cursor: default;
 `;
 
+const trackMetaStyles = css`
+  margin: 4px 0 0;
+  color: #64748b;
+  font-weight: 600;
+`;
+
 type Props = {
   track: TrackPersonalBestsCard_track$key;
   showTrackHeader?: boolean;
@@ -70,6 +77,7 @@ export function TrackPersonalBestsCard({ track, showTrackHeader = false }: Props
   const navigate = useNavigate();
   const personalBestEntries = data.personalBestEntries ?? [];
   const groupedEntries = groupPersonalBestEntries(personalBestEntries, 3);
+  const postcodeLabel = data.postcode?.trim() ?? "";
 
   function handleNavigate(entry: TrackPersonalBestEntry) {
     navigate(`/session/${entry.trackSessionId}`);
@@ -80,7 +88,10 @@ export function TrackPersonalBestsCard({ track, showTrackHeader = false }: Props
       {showTrackHeader ? (
         <div css={trackHeaderStyles}>
           <TrackAvatar name={data.name ?? ""} heroImage={data.heroImage} size={84} />
-          <p css={trackTitleStyles}>{data.name}</p>
+          <div>
+            <p css={trackTitleStyles}>{data.name}</p>
+            {postcodeLabel ? <p css={trackMetaStyles}>Postcode: {postcodeLabel}</p> : null}
+          </div>
         </div>
       ) : null}
       {groupedEntries.length ? (

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<16ca61ecbbebc649b8a689f71138652a>>
+ * @generated SignedSource<<72ec559e0946bf9aa30fdc1753261969>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -18,7 +18,7 @@ export type TrackViewPageQuery$data = {
     readonly heroImage: string | null | undefined;
     readonly id: string;
     readonly name: string;
-    readonly " $fragmentSpreads": FragmentRefs<"TrackKartsCard_track" | "TrackLayoutCard_track" | "TrackPersonalBestsCard_track" | "TrackVisitStatsCard_track">;
+    readonly " $fragmentSpreads": FragmentRefs<"TrackDetailsCard_track" | "TrackKartsCard_track" | "TrackLayoutCard_track" | "TrackPersonalBestsCard_track" | "TrackVisitStatsCard_track">;
   } | null | undefined;
 };
 export type TrackViewPageQuery = {
@@ -121,6 +121,11 @@ return {
           {
             "args": null,
             "kind": "FragmentSpread",
+            "name": "TrackDetailsCard_track"
+          },
+          {
+            "args": null,
+            "kind": "FragmentSpread",
             "name": "TrackKartsCard_track"
           },
           {
@@ -162,6 +167,13 @@ return {
           (v2/*: any*/),
           (v3/*: any*/),
           (v4/*: any*/),
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "postcode",
+            "storageKey": null
+          },
           {
             "alias": null,
             "args": null,
@@ -273,16 +285,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "cd2342362ac804cc6be520e1214d5aa1",
+    "cacheID": "6fa1ff1f7a443416e6b988f03c8cde8b",
     "id": null,
     "metadata": {},
     "name": "TrackViewPageQuery",
     "operationKind": "query",
-    "text": "query TrackViewPageQuery(\n  $trackId: ID!\n) {\n  track(id: $trackId) {\n    id\n    name\n    heroImage\n    ...TrackKartsCard_track\n    ...TrackLayoutCard_track\n    ...TrackPersonalBestsCard_track\n    ...TrackVisitStatsCard_track\n  }\n}\n\nfragment TrackKartsCard_track on Track {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n\nfragment TrackLayoutCard_track on Track {\n  id\n  name\n  trackLayouts {\n    id\n    name\n  }\n}\n\nfragment TrackPersonalBestsCard_track on Track {\n  id\n  name\n  heroImage\n  personalBestEntries {\n    trackSessionId\n    conditions\n    lapTime\n    kart {\n      id\n      name\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n\nfragment TrackVisitStatsCard_track on Track {\n  id\n  name\n  sessionStats {\n    totalSessions\n    byKart {\n      count\n      kart {\n        id\n        name\n      }\n    }\n    byTrackLayout {\n      count\n      trackLayout {\n        id\n        name\n      }\n    }\n    byCondition {\n      conditions\n      count\n    }\n  }\n}\n"
+    "text": "query TrackViewPageQuery(\n  $trackId: ID!\n) {\n  track(id: $trackId) {\n    id\n    name\n    heroImage\n    ...TrackDetailsCard_track\n    ...TrackKartsCard_track\n    ...TrackLayoutCard_track\n    ...TrackPersonalBestsCard_track\n    ...TrackVisitStatsCard_track\n  }\n}\n\nfragment TrackDetailsCard_track on Track {\n  id\n  name\n  postcode\n}\n\nfragment TrackKartsCard_track on Track {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n\nfragment TrackLayoutCard_track on Track {\n  id\n  name\n  trackLayouts {\n    id\n    name\n  }\n}\n\nfragment TrackPersonalBestsCard_track on Track {\n  id\n  name\n  heroImage\n  postcode\n  personalBestEntries {\n    trackSessionId\n    conditions\n    lapTime\n    kart {\n      id\n      name\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n\nfragment TrackVisitStatsCard_track on Track {\n  id\n  name\n  sessionStats {\n    totalSessions\n    byKart {\n      count\n      kart {\n        id\n        name\n      }\n    }\n    byTrackLayout {\n      count\n      trackLayout {\n        id\n        name\n      }\n    }\n    byCondition {\n      conditions\n      count\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "9a2d9f3c2e62c7002cf0695983ae6f0c";
+(node as any).hash = "ad11ee369ce75762a61e5bba94de8580";
 
 export default node;

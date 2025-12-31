@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<509fbd25ad37ad1ae1183bb33a26a8c1>>
+ * @generated SignedSource<<4b620973ff3baa9a2c5d89844a7cd4cd>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -19,6 +19,7 @@ export type CreateTrackSessionInput = {
   kartNumber?: string | null | undefined;
   laps?: ReadonlyArray<LapInput> | null | undefined;
   notes?: string | null | undefined;
+  temperature?: string | null | undefined;
   trackId?: string | null | undefined;
   trackLayoutId: string;
 };
@@ -55,6 +56,7 @@ export type createTrackSessionMutation$data = {
         readonly personalBest: number | null | undefined;
       }>;
       readonly notes: string | null | undefined;
+      readonly temperature: string | null | undefined;
       readonly track: {
         readonly heroImage: string | null | undefined;
         readonly id: string;
@@ -154,34 +156,41 @@ v10 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
+  "name": "temperature",
+  "storageKey": null
+},
+v11 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
   "name": "name",
   "storageKey": null
 },
-v11 = [
+v12 = [
   (v4/*: any*/),
-  (v10/*: any*/)
+  (v11/*: any*/)
 ],
-v12 = {
+v13 = {
   "alias": null,
   "args": null,
   "concreteType": "TrackLayout",
   "kind": "LinkedField",
   "name": "trackLayout",
   "plural": false,
-  "selections": (v11/*: any*/),
+  "selections": (v12/*: any*/),
   "storageKey": null
 },
-v13 = {
+v14 = {
   "alias": null,
   "args": null,
   "concreteType": "Kart",
   "kind": "LinkedField",
   "name": "kart",
   "plural": false,
-  "selections": (v11/*: any*/),
+  "selections": (v12/*: any*/),
   "storageKey": null
 },
-v14 = {
+v15 = {
   "alias": null,
   "args": null,
   "concreteType": "Track",
@@ -190,7 +199,7 @@ v14 = {
   "plural": false,
   "selections": [
     (v4/*: any*/),
-    (v10/*: any*/),
+    (v11/*: any*/),
     {
       "alias": null,
       "args": null,
@@ -221,22 +230,22 @@ v14 = {
           "name": "lapTime",
           "storageKey": null
         },
-        (v13/*: any*/),
-        (v12/*: any*/)
+        (v14/*: any*/),
+        (v13/*: any*/)
       ],
       "storageKey": null
     }
   ],
   "storageKey": null
 },
-v15 = {
+v16 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "notes",
   "storageKey": null
 },
-v16 = {
+v17 = {
   "alias": null,
   "args": [
     {
@@ -294,11 +303,12 @@ return {
               (v7/*: any*/),
               (v8/*: any*/),
               (v9/*: any*/),
-              (v12/*: any*/),
+              (v10/*: any*/),
               (v13/*: any*/),
               (v14/*: any*/),
               (v15/*: any*/),
-              (v16/*: any*/)
+              (v16/*: any*/),
+              (v17/*: any*/)
             ],
             "storageKey": null
           }
@@ -341,9 +351,10 @@ return {
               (v7/*: any*/),
               (v8/*: any*/),
               (v9/*: any*/),
-              (v12/*: any*/),
+              (v10/*: any*/),
               (v13/*: any*/),
               (v14/*: any*/),
+              (v15/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -365,8 +376,8 @@ return {
                   }
                 ]
               },
-              (v15/*: any*/),
-              (v16/*: any*/)
+              (v16/*: any*/),
+              (v17/*: any*/)
             ],
             "storageKey": null
           },
@@ -397,16 +408,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "737de4c8030c9d9715f53fd336701308",
+    "cacheID": "8e130ff05ec3068291c14d7fae8ac925",
     "id": null,
     "metadata": {},
     "name": "createTrackSessionMutation",
     "operationKind": "mutation",
-    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      fastestLap\n      conditions\n      trackLayout {\n        id\n        name\n      }\n      kart {\n        id\n        name\n      }\n      track {\n        id\n        name\n        heroImage\n        personalBestEntries {\n          trackSessionId\n          conditions\n          lapTime\n          kart {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n        }\n      }\n      notes\n      laps(first: 1) {\n        personalBest\n        id\n      }\n    }\n  }\n}\n"
+    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      fastestLap\n      conditions\n      temperature\n      trackLayout {\n        id\n        name\n      }\n      kart {\n        id\n        name\n      }\n      track {\n        id\n        name\n        heroImage\n        personalBestEntries {\n          trackSessionId\n          conditions\n          lapTime\n          kart {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n        }\n      }\n      notes\n      laps(first: 1) {\n        personalBest\n        id\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "8483dd372f9228b2d4ef9447fe2d7db1";
+(node as any).hash = "733e6f2e24d256d665f69d012e43612b";
 
 export default node;

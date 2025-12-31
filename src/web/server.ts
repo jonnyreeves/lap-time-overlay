@@ -2,12 +2,14 @@ import { getDatabasePath } from "../db/config.js";
 import http from "node:http";
 import { runMigrations } from "../db/migrations/runner.js";
 import { ensureWorkDirs } from "./config.js";
+import { loadEnvFiles } from "./shared/env.js";
 import { handleGraphQL } from "./graphql/handler.js";
 import { handleOverlayPreviewRequest } from "./http/overlayPreview.js";
 import { handleRecordingDownloadRequest, handleRecordingUploadRequest } from "./http/uploads.js";
 import { serveStatic } from "./http/static.js";
 import { tempCleanupScheduler } from "./recordings/tempCleanupScheduler.js";
 
+await loadEnvFiles();
 await runMigrations();
 await ensureWorkDirs();
 await tempCleanupScheduler.start();

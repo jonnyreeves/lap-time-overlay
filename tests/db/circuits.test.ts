@@ -13,9 +13,10 @@ describe("tracks", () => {
   });
 
   it("can create a track", () => {
-    const track = createTrack("Test Circuit", "http://example.com/hero.jpg");
+    const track = createTrack("Test Circuit", "http://example.com/hero.jpg", undefined, "SW1A 1AA");
     assert.strictEqual(track.name, "Test Circuit");
     assert.strictEqual(track.heroImage, "http://example.com/hero.jpg");
+    assert.strictEqual(track.postcode, "SW1A 1AA");
     assert.ok(track.id);
     assert.ok(track.createdAt);
     assert.ok(track.updatedAt);
@@ -24,6 +25,7 @@ describe("tracks", () => {
   it("can create a track with null heroImage", () => {
     const track = createTrack("Circuit without Hero");
     assert.strictEqual(track.heroImage, null);
+    assert.strictEqual(track.postcode, null);
   });
 
   it("can find a track by id", () => {

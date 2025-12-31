@@ -4,6 +4,7 @@ import { graphql, useLazyLoadQuery } from "react-relay";
 import { useParams } from "react-router-dom";
 import { TrackViewPageQuery as TrackViewPageQueryType } from "../../__generated__/TrackViewPageQuery.graphql";
 import { Card } from "../../components/Card.js";
+import { TrackDetailsCard } from "../../components/tracks/TrackDetailsCard.js";
 import { TrackKartsCard } from "../../components/tracks/TrackKartsCard.js";
 import { TrackLayoutCard } from "../../components/tracks/TrackLayoutCard.js";
 import { TrackPersonalBestsCard } from "../../components/tracks/TrackPersonalBestsCard.js";
@@ -29,6 +30,7 @@ export const TRACK_VIEW_QUERY = graphql`
       id
       name
       heroImage
+      ...TrackDetailsCard_track
       ...TrackKartsCard_track
       ...TrackLayoutCard_track
       ...TrackPersonalBestsCard_track
@@ -73,6 +75,7 @@ export default function TrackViewPage(): React.ReactNode {
       <div css={sideBySideStyles}>
         <TrackKartsCard track={data.track} />
         <TrackLayoutCard track={data.track} />
+        <TrackDetailsCard track={data.track} />
       </div>
     </>
   );

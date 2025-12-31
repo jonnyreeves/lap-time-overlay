@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<ff7529437614d149f22688e8b5b22bf3>>
+ * @generated SignedSource<<ea2163911d777e7e4978de0b3717c62c>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -18,6 +18,7 @@ export type create_tsxTracksQuery$data = {
       readonly name: string;
     }>;
     readonly name: string;
+    readonly postcode: string | null | undefined;
     readonly trackLayouts: ReadonlyArray<{
       readonly id: string;
       readonly name: string;
@@ -62,6 +63,13 @@ v3 = [
       {
         "alias": null,
         "args": null,
+        "kind": "ScalarField",
+        "name": "postcode",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
         "concreteType": "Kart",
         "kind": "LinkedField",
         "name": "karts",
@@ -101,16 +109,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "d9a13e80b3e60ef1a06d01f1b8b30df2",
+    "cacheID": "8eba02d8800f34205afd1a17d5fccbf2",
     "id": null,
     "metadata": {},
     "name": "create_tsxTracksQuery",
     "operationKind": "query",
-    "text": "query create_tsxTracksQuery {\n  tracks {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n}\n"
+    "text": "query create_tsxTracksQuery {\n  tracks {\n    id\n    name\n    postcode\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "5182e98dc041c538a451f6d972971df7";
+(node as any).hash = "ac9d7978a43c6087296b549a3048dbb3";
 
 export default node;

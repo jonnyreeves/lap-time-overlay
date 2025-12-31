@@ -13,6 +13,7 @@ const mockSessions = [
     classification: 1,
     fastestLap: null,
     conditions: "Dry" as const,
+    temperature: "",
     trackId: "c1",
     userId: user.id,
     notes: null,
@@ -29,6 +30,7 @@ const mockSessions = [
     classification: 2,
     fastestLap: null,
     conditions: "Wet" as const,
+    temperature: "18",
     trackId: "c2",
     userId: user.id,
     notes: "fun",
@@ -45,6 +47,7 @@ const mockSessions = [
     classification: 3,
     fastestLap: null,
     conditions: "Dry" as const,
+    temperature: "",
     trackId: "c1",
     userId: user.id,
     notes: null,
@@ -57,8 +60,8 @@ const mockSessions = [
 ];
 
 const tracks = {
-  c1: { id: "c1", name: "Monza", heroImage: null, createdAt: 0, updatedAt: 0 },
-  c2: { id: "c2", name: "Spa", heroImage: null, createdAt: 0, updatedAt: 0 },
+  c1: { id: "c1", name: "Monza", heroImage: null, postcode: null, createdAt: 0, updatedAt: 0 },
+  c2: { id: "c2", name: "Spa", heroImage: null, postcode: null, createdAt: 0, updatedAt: 0 },
 };
 
 const lapsBySession: Record<string, Array<{ id: string; time: number }>> = {

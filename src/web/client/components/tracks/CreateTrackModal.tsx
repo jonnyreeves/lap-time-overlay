@@ -157,6 +157,7 @@ const CreateTrackMutation = graphql`
       track {
         id
         name
+        postcode
         karts {
           id
           name
@@ -172,6 +173,7 @@ const CreateTrackMutation = graphql`
 
 export function CreateTrackModal({ isOpen, onClose, onTrackCreated }: CreateTrackModalProps) {
   const [trackName, setTrackName] = useState("");
+  const [postcode, setPostcode] = useState("");
   const [kartNames, setKartNames] = useState<string[]>([""]);
   const [trackLayoutNames, setTrackLayoutNames] = useState<string[]>([""]);
   const [formError, setFormError] = useState<string | null>(null);
@@ -249,17 +251,20 @@ export function CreateTrackModal({ isOpen, onClose, onTrackCreated }: CreateTrac
       return;
     }
 
+    const trimmedPostcode = postcode.trim();
 
     commit({
       variables: {
         input: {
           name: trackName.trim(),
+          ...(trimmedPostcode ? { postcode: trimmedPostcode } : {}),
           karts: trimmedKartNames.map((name) => ({ name })),
           trackLayouts: trimmedTrackLayoutNames.map((name) => ({ name })),
         },
       },
       onCompleted: () => {
         setTrackName("");
+        setPostcode("");
         setKartNames([""]);
         setTrackLayoutNames([""]);
         setFormError(null);
@@ -287,6 +292,17 @@ export function CreateTrackModal({ isOpen, onClose, onTrackCreated }: CreateTrac
             value={trackName}
             onChange={(e) => setTrackName(e.target.value)}
             required
+            disabled={isInFlight}
+          />
+        </div>
+        <div css={inputFieldStyles}>
+          <label htmlFor="track-postcode">Postcode (optional)</label>
+          <input
+            id="track-postcode"
+            type="text"
+            value={postcode}
+            onChange={(e) => setPostcode(e.target.value)}
+            placeholder="e.g. SW1A 1AA"
             disabled={isInFlight}
           />
         </div>

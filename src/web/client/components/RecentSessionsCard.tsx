@@ -20,6 +20,7 @@ const RecentSessionsCardFragment = graphql`
           format
           classification
           conditions
+          temperature
           notes
           track {
             name
@@ -86,7 +87,7 @@ const sessionRowStyles = css`
 
 const sessionGridStyles = css`
   display: grid;
-  grid-template-columns: 1.6fr 1.1fr 0.95fr 0.9fr 0.55fr 0.8fr 1.05fr;
+  grid-template-columns: 1.6fr 1.1fr 1.15fr 0.85fr 0.8fr 1.05fr;
   align-items: center;
   gap: 10px 14px;
 
@@ -129,19 +130,6 @@ const trackLinkStyles = css`
   }
 `;
 
-const sessionTypeStyles = css`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 12px;
-  border-radius: 10px;
-  background: #e0e7ff;
-  border: 1px solid #c7d2fe;
-  color: #3730a3;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-`;
-
 const kartPillStyles = css`
   display: inline-flex;
   align-items: center;
@@ -163,15 +151,20 @@ const kartPillMutedStyles = css`
 `;
 
 const conditionsEmojiStyles = css`
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   background: #f1f5fb;
   border: 1px solid #d7e3f4;
-  width: 44px;
-  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
 `;
 
@@ -342,11 +335,21 @@ export function RecentSessionsCard({ viewer }: Props) {
             const formattedDate = format(new Date(session.date), "do MMM yyyy");
             const formattedTime = format(new Date(session.date), "p");
             const trackName = session.track?.name ?? "Unknown track";
-            const sessionType = session.format ?? "—";
-            const kartName = session.kart?.name ?? "Not set";
-            const hasKartName = Boolean(session.kart?.name);
+            const sessionType = session.format?.trim() ?? "";
+            const kartName = session.kart?.name?.trim() ?? "";
+            const combinedKartSession = [kartName, sessionType].filter(Boolean).join(" ");
+            const combinedKartSessionLabel = combinedKartSession || "—";
+            const hasCombinedKartSession = Boolean(combinedKartSession);
             const trackLayoutName = session.trackLayout?.name;
             const trackLabel = trackLayoutName ? `${trackName} • ${trackLayoutName}` : trackName;
+            const temperatureLabel = session.temperature?.trim();
+            const conditionsEmoji = getConditionsEmoji(session.conditions);
+            const conditionsDisplay = temperatureLabel
+              ? `${conditionsEmoji} ${temperatureLabel}°C`
+              : conditionsEmoji;
+            const conditionsAriaLabel = temperatureLabel
+              ? `${session.conditions ?? "Unknown conditions"} ${temperatureLabel} C`
+              : session.conditions ?? "Unknown conditions";
             const sessionPath = `/session/${session.id}`;
 
             return (
@@ -378,23 +381,19 @@ export function RecentSessionsCard({ viewer }: Props) {
                     </Link>
                   </div>
                   <div css={fieldStackStyles}>
-                    <span css={fieldLabelStyles}>Kart Type</span>
-                    <span css={[kartPillStyles, !hasKartName && kartPillMutedStyles]}>
-                      {kartName}
+                    <span css={fieldLabelStyles}>Kart / Session</span>
+                    <span css={[kartPillStyles, !hasCombinedKartSession && kartPillMutedStyles]}>
+                      {combinedKartSessionLabel}
                     </span>
-                  </div>
-                  <div css={fieldStackStyles}>
-                    <span css={fieldLabelStyles}>Session Type</span>
-                    <span css={sessionTypeStyles}>{sessionType}</span>
                   </div>
                   <div css={fieldStackStyles}>
                     <span css={fieldLabelStyles}>Conditions</span>
                     <span
                       css={conditionsEmojiStyles}
-                      aria-label={session.conditions ?? "Unknown conditions"}
-                      title={session.conditions ?? "Unknown conditions"}
+                      aria-label={conditionsAriaLabel}
+                      title={conditionsAriaLabel}
                     >
-                      <span aria-hidden>{getConditionsEmoji(session.conditions)}</span>
+                      <span aria-hidden>{conditionsDisplay}</span>
                     </span>
                   </div>
                   <div css={fieldStackStyles}>

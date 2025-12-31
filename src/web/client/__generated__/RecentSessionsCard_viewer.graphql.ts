@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d2553a0e697e8bc11c5f41d10105f277>>
+ * @generated SignedSource<<f71702f686d95526684b2b617315bb72>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -29,6 +29,7 @@ export type RecentSessionsCard_viewer$data = {
           readonly personalBest: number | null | undefined;
         }>;
         readonly notes: string | null | undefined;
+        readonly temperature: string | null | undefined;
         readonly track: {
           readonly id: string;
           readonly name: string;
@@ -135,6 +136,13 @@ return {
                   "args": null,
                   "kind": "ScalarField",
                   "name": "conditions",
+                  "storageKey": null
+                },
+                {
+                  "alias": null,
+                  "args": null,
+                  "kind": "ScalarField",
+                  "name": "temperature",
                   "storageKey": null
                 },
                 {
@@ -256,6 +264,6 @@ return {
 };
 })();
 
-(node as any).hash = "9c2f5e3f16540b018f10adffd81da6d4";
+(node as any).hash = "606bad8b867a6aa023e34f3eac5d7c9d";
 
 export default node;

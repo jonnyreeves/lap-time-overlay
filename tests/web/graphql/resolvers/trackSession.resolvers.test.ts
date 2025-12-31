@@ -5,9 +5,17 @@ const { rebuildProjectionMock, removeProjectionMock } = vi.hoisted(() => ({
   removeProjectionMock: vi.fn().mockResolvedValue(undefined),
 }));
 
+const { fetchTemperatureMock } = vi.hoisted(() => ({
+  fetchTemperatureMock: vi.fn(),
+}));
+
 vi.mock("../../../../src/web/recordings/mediaLibraryProjection.js", () => ({
   rebuildMediaLibrarySessionProjection: rebuildProjectionMock,
   removeMediaLibraryProjectionsForRecordings: removeProjectionMock,
+}));
+
+vi.mock("../../../../src/web/shared/weather.js", () => ({
+  fetchTemperatureForPostcode: fetchTemperatureMock,
 }));
 
 import { createMockGraphQLContext } from "../context.mock.js";
@@ -26,6 +34,7 @@ const mockSession = {
   classification: 1,
   fastestLap: null,
   conditions: "Dry" as const,
+  temperature: "",
   trackId: "c1",
   userId: "user-1",
   notes: null,
@@ -40,6 +49,7 @@ const mockTrack = {
   id: "c1",
   name: "Spa",
   heroImage: null,
+  postcode: null,
   createdAt: 0,
   updatedAt: 0,
 };
@@ -62,6 +72,7 @@ const mockLayout = {
 describe("trackSession resolvers", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    fetchTemperatureMock.mockResolvedValue(null);
     repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
   });
 
@@ -118,14 +129,14 @@ describe("trackSession resolvers", () => {
   });
 
   it("createTrackSession validates required fields", async () => {
-    expect(() => rootValue.createTrackSession({ input: {} }, context)).toThrowError(
+    await expect(rootValue.createTrackSession({ input: {} }, context)).rejects.toThrowError(
       "Date, format, trackId, trackLayoutId, kartId, and classification are required"
     );
   });
 
   it("createTrackSession rejects when track is missing", async () => {
     repositories.tracks.findById.mockReturnValueOnce(null);
-    expect(() =>
+    await expect(
       rootValue.createTrackSession(
         {
           input: {
@@ -139,7 +150,7 @@ describe("trackSession resolvers", () => {
         },
         context
       )
-    ).toThrowError("Track with ID missing not found");
+    ).rejects.toThrowError("Track with ID missing not found");
   });
 
   it("createTrackSession forwards parsed input", async () => {
@@ -149,7 +160,7 @@ describe("trackSession resolvers", () => {
     repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
     repositories.trackLayouts.findById.mockReturnValue(mockLayout);
 
-    const result = rootValue.createTrackSession(
+    const result = await rootValue.createTrackSession(
       {
         input: {
           date: "2024-02-01",
@@ -157,6 +168,7 @@ describe("trackSession resolvers", () => {
           classification: 2,
           trackId: "c1",
           conditions: "Wet",
+          temperature: "21",
           notes: "fun",
           trackLayoutId: "l1",
           kartId: "k1",
@@ -167,6 +179,7 @@ describe("trackSession resolvers", () => {
       context
     );
 
+    expect(fetchTemperatureMock).not.toHaveBeenCalled();
     expect(repositories.trackSessions.createWithLaps).toHaveBeenCalledWith({
       date: "2024-02-01",
       format: "Race",
@@ -179,17 +192,81 @@ describe("trackSession resolvers", () => {
       trackLayoutId: "l1",
       kartId: "k1",
       kartNumber: "42",
+      temperature: "21",
       fastestLap: null,
     });
     expect(result.trackSession.id).toBe("s1");
     expect(result.trackSession.classification).toBe(1);
   });
 
+  it("createTrackSession does not auto-fetch temperature", async () => {
+    repositories.trackSessions.createWithLaps.mockReturnValue({ trackSession: mockSession, laps: [] });
+    repositories.tracks.findById.mockReturnValue(mockTrack);
+    repositories.karts.findById.mockReturnValue(mockKart);
+    repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
+    repositories.trackLayouts.findById.mockReturnValue(mockLayout);
+
+    await rootValue.createTrackSession(
+      {
+        input: {
+          date: "2024-02-01",
+          format: "Race",
+          classification: 2,
+          trackId: "c1",
+          trackLayoutId: "l1",
+          kartId: "k1",
+        },
+      },
+      context
+    );
+
+    expect(fetchTemperatureMock).not.toHaveBeenCalled();
+    expect(repositories.trackSessions.createWithLaps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        temperature: "",
+      })
+    );
+  });
+
+  it("fetchTrackSessionTemperature requires authentication", async () => {
+    await expect(
+      rootValue.fetchTrackSessionTemperature(
+        { input: { trackId: "c1", date: "2024-02-01T12:00" } },
+        { ...context, currentUser: null }
+      )
+    ).rejects.toThrowError("Authentication required");
+  });
+
+  it("fetchTrackSessionTemperature returns temperature for track/date", async () => {
+    repositories.tracks.findById.mockReturnValue({ ...mockTrack, postcode: "KT14 6GB" });
+    fetchTemperatureMock.mockResolvedValue("18");
+
+    const result = await rootValue.fetchTrackSessionTemperature(
+      { input: { trackId: "c1", date: "2024-02-01T12:30" } },
+      context
+    );
+
+    expect(fetchTemperatureMock).toHaveBeenCalledWith("KT14 6GB", "2024-02-01T12:30");
+    expect(result).toEqual({ temperature: "18" });
+  });
+
+  it("fetchTrackSessionTemperature returns null when track has no postcode", async () => {
+    repositories.tracks.findById.mockReturnValue({ ...mockTrack, postcode: null });
+
+    const result = await rootValue.fetchTrackSessionTemperature(
+      { input: { trackId: "c1", date: "2024-02-01T12:30" } },
+      context
+    );
+
+    expect(fetchTemperatureMock).not.toHaveBeenCalled();
+    expect(result).toEqual({ temperature: null });
+  });
+
   it("createTrackSession rejects when kart does not exist", async () => {
     repositories.tracks.findById.mockReturnValue(mockTrack);
     repositories.karts.findById.mockReturnValue(null);
 
-    expect(() =>
+    await expect(
       rootValue.createTrackSession(
         {
           input: {
@@ -203,7 +280,7 @@ describe("trackSession resolvers", () => {
         },
         context
       )
-    ).toThrowError("Kart with ID missing not found");
+    ).rejects.toThrowError("Kart with ID missing not found");
   });
 
   it("createTrackSession rejects when kart not on track", async () => {
@@ -212,7 +289,7 @@ describe("trackSession resolvers", () => {
     repositories.trackKarts.findKartsForTrack.mockReturnValue([]);
     repositories.trackLayouts.findById.mockReturnValue(mockLayout);
 
-    expect(() =>
+    await expect(
       rootValue.createTrackSession(
         {
           input: {
@@ -226,7 +303,7 @@ describe("trackSession resolvers", () => {
         },
         context
       )
-    ).toThrowError("Kart is not available at the selected track");
+    ).rejects.toThrowError("Kart is not available at the selected track");
   });
 
   it("createTrackSession rejects when track layout does not exist", async () => {
@@ -235,7 +312,7 @@ describe("trackSession resolvers", () => {
     repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
     repositories.trackLayouts.findById.mockReturnValue(null);
 
-    expect(() =>
+    await expect(
       rootValue.createTrackSession(
         {
           input: {
@@ -249,7 +326,7 @@ describe("trackSession resolvers", () => {
         },
         context
       )
-    ).toThrowError("Track layout with ID missing not found");
+    ).rejects.toThrowError("Track layout with ID missing not found");
   });
 
   it("createTrackSession rejects when track layout not on track", async () => {
@@ -258,7 +335,7 @@ describe("trackSession resolvers", () => {
     repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
     repositories.trackLayouts.findById.mockReturnValue({ ...mockLayout, trackId: "other" });
 
-    expect(() =>
+    await expect(
       rootValue.createTrackSession(
         {
           input: {
@@ -272,7 +349,7 @@ describe("trackSession resolvers", () => {
         },
         context
       )
-    ).toThrowError("Track layout is not available at the selected track");
+    ).rejects.toThrowError("Track layout is not available at the selected track");
   });
 
   it("updateTrackSession validates presence of id and auth", async () => {
@@ -306,6 +383,7 @@ describe("trackSession resolvers", () => {
         trackId: "c1",
         kartId: "k1",
         kartNumber: "",
+        temperature: "",
         conditions: undefined,
         trackLayoutId: "l1",
         notes: undefined,
@@ -314,6 +392,7 @@ describe("trackSession resolvers", () => {
     expect(result.trackSession.format).toBe("Practice");
     expect(result.trackSession.classification).toBe(1);
   });
+
 
   it("updateTrackSession requires trackLayoutId when track changes", async () => {
     repositories.trackSessions.findById.mockReturnValue(mockSession);

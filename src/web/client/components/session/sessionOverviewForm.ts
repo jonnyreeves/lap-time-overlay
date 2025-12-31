@@ -12,6 +12,7 @@ export type SessionOverviewFormState = {
   date: string;
   time: string;
   conditions: string;
+  temperature: string;
   classification: string;
   fastestLap: string;
   notes: string;
@@ -40,6 +41,7 @@ export function validateSessionOverviewForm(formValues: SessionOverviewFormState
   const trimmedNotes = formValues.notes.trim();
   const trimmedFastestLap = formValues.fastestLap.trim();
   const trimmedKartNumber = formValues.kartNumber.trim();
+  const trimmedTemperature = formValues.temperature.trim();
 
   if (!formValues.trackId) {
     return { error: "Please select a track." } as const;
@@ -79,6 +81,7 @@ export function validateSessionOverviewForm(formValues: SessionOverviewFormState
       date: combineDateTime(trimmedDate, trimmedTime),
       classification,
       conditions: formValues.conditions,
+      temperature: trimmedTemperature,
       trackLayoutId: formValues.trackLayoutId,
       kartId: formValues.kartId,
       kartNumber: trimmedKartNumber,

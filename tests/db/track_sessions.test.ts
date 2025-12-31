@@ -56,6 +56,7 @@ describe("track_sessions", () => {
     assert.strictEqual(trackSession.format, "Practice");
     assert.strictEqual(trackSession.classification, 5);
     assert.strictEqual(trackSession.conditions, "Dry");
+    assert.strictEqual(trackSession.temperature, "");
     assert.strictEqual(trackSession.trackId, track.id);
     assert.strictEqual(trackSession.userId, user.id);
     assert.strictEqual(trackSession.notes, "Some notes");
@@ -97,6 +98,7 @@ describe("track_sessions", () => {
     assert.strictEqual(trackSession.notes, "with laps");
     assert.strictEqual(trackSession.userId, user.id);
     assert.strictEqual(trackSession.kartNumber, "");
+    assert.strictEqual(trackSession.temperature, "");
     assert.strictEqual(laps.length, 2);
     assert.strictEqual(laps[0].sessionId, trackSession.id);
     assert.deepStrictEqual(findLapsBySessionId(trackSession.id), laps);
@@ -257,6 +259,7 @@ describe("track_sessions", () => {
       conditions: "Wet",
       notes: "Updated",
       kartNumber: "77",
+      temperature: "23",
       now: now + 1000,
       trackLayoutId: otherLayout.id,
     });
@@ -268,6 +271,7 @@ describe("track_sessions", () => {
     assert.strictEqual(updated?.trackId, otherTrack.id);
     assert.strictEqual(updated?.userId, user.id);
     assert.strictEqual(updated?.conditions, "Wet");
+    assert.strictEqual(updated?.temperature, "23");
     assert.strictEqual(updated?.notes, "Updated");
     assert.strictEqual(updated?.kartNumber, "77");
     assert.strictEqual(updated?.trackLayoutId, otherLayout.id);
