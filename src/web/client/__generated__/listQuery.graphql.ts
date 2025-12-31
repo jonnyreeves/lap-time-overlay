@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<bfe897b784753998d5ca611da29d3c32>>
+ * @generated SignedSource<<e6260e36ed736a74ba18daadaf51d81c>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -78,11 +78,18 @@ v5 = {
   "name": "name",
   "storageKey": null
 },
-v6 = [
+v6 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "isIndoors",
+  "storageKey": null
+},
+v7 = [
   (v4/*: any*/),
   (v5/*: any*/)
 ],
-v7 = [
+v8 = [
   {
     "kind": "Literal",
     "name": "first",
@@ -129,6 +136,7 @@ return {
         "selections": [
           (v4/*: any*/),
           (v5/*: any*/),
+          (v6/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -136,7 +144,7 @@ return {
             "kind": "LinkedField",
             "name": "karts",
             "plural": true,
-            "selections": (v6/*: any*/),
+            "selections": (v7/*: any*/),
             "storageKey": null
           },
           {
@@ -146,7 +154,7 @@ return {
             "kind": "LinkedField",
             "name": "trackLayouts",
             "plural": true,
-            "selections": (v6/*: any*/),
+            "selections": (v7/*: any*/),
             "storageKey": null
           }
         ],
@@ -231,13 +239,7 @@ return {
                         "selections": [
                           (v4/*: any*/),
                           (v5/*: any*/),
-                          {
-                            "alias": null,
-                            "args": null,
-                            "kind": "ScalarField",
-                            "name": "isIndoors",
-                            "storageKey": null
-                          }
+                          (v6/*: any*/)
                         ],
                         "storageKey": null
                       },
@@ -248,7 +250,7 @@ return {
                         "kind": "LinkedField",
                         "name": "trackLayout",
                         "plural": false,
-                        "selections": (v6/*: any*/),
+                        "selections": (v7/*: any*/),
                         "storageKey": null
                       },
                       {
@@ -258,7 +260,7 @@ return {
                         "kind": "LinkedField",
                         "name": "kart",
                         "plural": false,
-                        "selections": (v6/*: any*/),
+                        "selections": (v7/*: any*/),
                         "storageKey": null
                       },
                       {
@@ -270,7 +272,7 @@ return {
                       },
                       {
                         "alias": null,
-                        "args": (v7/*: any*/),
+                        "args": (v8/*: any*/),
                         "concreteType": "Lap",
                         "kind": "LinkedField",
                         "name": "laps",
@@ -289,7 +291,7 @@ return {
                       },
                       {
                         "alias": null,
-                        "args": (v7/*: any*/),
+                        "args": (v8/*: any*/),
                         "concreteType": "TrackRecording",
                         "kind": "LinkedField",
                         "name": "trackRecordings",
@@ -358,12 +360,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "47169d78cf2fe25db86c480ed34f0291",
+    "cacheID": "fb419f720f8308a58045c21bafd49f26",
     "id": null,
     "metadata": {},
     "name": "listQuery",
     "operationKind": "query",
-    "text": "query listQuery(\n  $first: Int = 20\n  $filter: TrackSessionFilterInput\n  $sort: TrackSessionSort = DATE_DESC\n) {\n  ...TrackSessionsTable_query_1bvy9D\n}\n\nfragment TrackSessionsTable_query_1bvy9D on Query {\n  tracks {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n  viewer {\n    id\n    recentTrackSessions(first: $first, filter: $filter, sort: $sort) {\n      edges {\n        cursor\n        node {\n          id\n          date\n          format\n          classification\n          conditions\n          track {\n            id\n            name\n            isIndoors\n          }\n          trackLayout {\n            id\n            name\n          }\n          kart {\n            id\n            name\n          }\n          consistencyScore\n          laps(first: 1) {\n            id\n            personalBest\n          }\n          trackRecordings(first: 1) {\n            id\n          }\n          __typename\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}\n"
+    "text": "query listQuery(\n  $first: Int = 20\n  $filter: TrackSessionFilterInput\n  $sort: TrackSessionSort = DATE_DESC\n) {\n  ...TrackSessionsTable_query_1bvy9D\n}\n\nfragment TrackSessionsTable_query_1bvy9D on Query {\n  tracks {\n    id\n    name\n    isIndoors\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n  viewer {\n    id\n    recentTrackSessions(first: $first, filter: $filter, sort: $sort) {\n      edges {\n        cursor\n        node {\n          id\n          date\n          format\n          classification\n          conditions\n          track {\n            id\n            name\n            isIndoors\n          }\n          trackLayout {\n            id\n            name\n          }\n          kart {\n            id\n            name\n          }\n          consistencyScore\n          laps(first: 1) {\n            id\n            personalBest\n          }\n          trackRecordings(first: 1) {\n            id\n          }\n          __typename\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}\n"
   }
 };
 })();

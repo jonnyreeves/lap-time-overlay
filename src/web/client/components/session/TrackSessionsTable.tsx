@@ -388,6 +388,7 @@ const TrackSessionsTableFragment = graphql`
     tracks {
       id
       name
+      isIndoors
       karts {
         id
         name
@@ -485,6 +486,8 @@ export function TrackSessionsTable({
         .sort((a, b) => a.name.localeCompare(b.name)),
     [tracks]
   );
+  const selectedTrackIsIndoors =
+    tracks.find((track) => track.id === filters.trackId)?.isIndoors ?? false;
 
   const trackLayoutOptions = useMemo(() => {
     if (!filters.trackId) return [];
@@ -696,6 +699,7 @@ export function TrackSessionsTable({
             css={filterSelectStyles}
             value={filters.conditions}
             onChange={(event) => applyFilter({ conditions: event.target.value })}
+            disabled={selectedTrackIsIndoors}
           >
             <option value="">All</option>
             <option value="Dry">Dry</option>

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<1f97bb0874bd0fde1237ee6bd56e001f>>
+ * @generated SignedSource<<37fbc2f098b37e7a183bfb1d4ae226cb>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,6 +13,7 @@ import { FragmentRefs } from "relay-runtime";
 export type TrackSessionsTable_query$data = {
   readonly tracks: ReadonlyArray<{
     readonly id: string;
+    readonly isIndoors: boolean;
     readonly karts: ReadonlyArray<{
       readonly id: string;
       readonly name: string;
@@ -91,11 +92,18 @@ v2 = {
   "name": "name",
   "storageKey": null
 },
-v3 = [
+v3 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "isIndoors",
+  "storageKey": null
+},
+v4 = [
   (v1/*: any*/),
   (v2/*: any*/)
 ],
-v4 = [
+v5 = [
   {
     "kind": "Literal",
     "name": "first",
@@ -160,6 +168,7 @@ return {
       "selections": [
         (v1/*: any*/),
         (v2/*: any*/),
+        (v3/*: any*/),
         {
           "alias": null,
           "args": null,
@@ -167,7 +176,7 @@ return {
           "kind": "LinkedField",
           "name": "karts",
           "plural": true,
-          "selections": (v3/*: any*/),
+          "selections": (v4/*: any*/),
           "storageKey": null
         },
         {
@@ -177,7 +186,7 @@ return {
           "kind": "LinkedField",
           "name": "trackLayouts",
           "plural": true,
-          "selections": (v3/*: any*/),
+          "selections": (v4/*: any*/),
           "storageKey": null
         }
       ],
@@ -273,13 +282,7 @@ return {
                       "selections": [
                         (v1/*: any*/),
                         (v2/*: any*/),
-                        {
-                          "alias": null,
-                          "args": null,
-                          "kind": "ScalarField",
-                          "name": "isIndoors",
-                          "storageKey": null
-                        }
+                        (v3/*: any*/)
                       ],
                       "storageKey": null
                     },
@@ -290,7 +293,7 @@ return {
                       "kind": "LinkedField",
                       "name": "trackLayout",
                       "plural": false,
-                      "selections": (v3/*: any*/),
+                      "selections": (v4/*: any*/),
                       "storageKey": null
                     },
                     {
@@ -300,7 +303,7 @@ return {
                       "kind": "LinkedField",
                       "name": "kart",
                       "plural": false,
-                      "selections": (v3/*: any*/),
+                      "selections": (v4/*: any*/),
                       "storageKey": null
                     },
                     {
@@ -312,7 +315,7 @@ return {
                     },
                     {
                       "alias": null,
-                      "args": (v4/*: any*/),
+                      "args": (v5/*: any*/),
                       "concreteType": "Lap",
                       "kind": "LinkedField",
                       "name": "laps",
@@ -331,7 +334,7 @@ return {
                     },
                     {
                       "alias": null,
-                      "args": (v4/*: any*/),
+                      "args": (v5/*: any*/),
                       "concreteType": "TrackRecording",
                       "kind": "LinkedField",
                       "name": "trackRecordings",
@@ -391,6 +394,6 @@ return {
 };
 })();
 
-(node as any).hash = "2f08b530365c67eb701a06694d927392";
+(node as any).hash = "3654f2729911bd43b45201bd46e01d6f";
 
 export default node;

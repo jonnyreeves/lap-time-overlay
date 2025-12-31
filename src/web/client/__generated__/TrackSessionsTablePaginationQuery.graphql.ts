@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<d6926dff5c8234f08a6e2c27137ec981>>
+ * @generated SignedSource<<89846167832af8d6836be47eaf1d7d6a>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -91,11 +91,18 @@ v3 = {
   "name": "name",
   "storageKey": null
 },
-v4 = [
+v4 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "isIndoors",
+  "storageKey": null
+},
+v5 = [
   (v2/*: any*/),
   (v3/*: any*/)
 ],
-v5 = [
+v6 = [
   {
     "kind": "Literal",
     "name": "first",
@@ -134,6 +141,7 @@ return {
         "selections": [
           (v2/*: any*/),
           (v3/*: any*/),
+          (v4/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -141,7 +149,7 @@ return {
             "kind": "LinkedField",
             "name": "karts",
             "plural": true,
-            "selections": (v4/*: any*/),
+            "selections": (v5/*: any*/),
             "storageKey": null
           },
           {
@@ -151,7 +159,7 @@ return {
             "kind": "LinkedField",
             "name": "trackLayouts",
             "plural": true,
-            "selections": (v4/*: any*/),
+            "selections": (v5/*: any*/),
             "storageKey": null
           }
         ],
@@ -236,13 +244,7 @@ return {
                         "selections": [
                           (v2/*: any*/),
                           (v3/*: any*/),
-                          {
-                            "alias": null,
-                            "args": null,
-                            "kind": "ScalarField",
-                            "name": "isIndoors",
-                            "storageKey": null
-                          }
+                          (v4/*: any*/)
                         ],
                         "storageKey": null
                       },
@@ -253,7 +255,7 @@ return {
                         "kind": "LinkedField",
                         "name": "trackLayout",
                         "plural": false,
-                        "selections": (v4/*: any*/),
+                        "selections": (v5/*: any*/),
                         "storageKey": null
                       },
                       {
@@ -263,7 +265,7 @@ return {
                         "kind": "LinkedField",
                         "name": "kart",
                         "plural": false,
-                        "selections": (v4/*: any*/),
+                        "selections": (v5/*: any*/),
                         "storageKey": null
                       },
                       {
@@ -275,7 +277,7 @@ return {
                       },
                       {
                         "alias": null,
-                        "args": (v5/*: any*/),
+                        "args": (v6/*: any*/),
                         "concreteType": "Lap",
                         "kind": "LinkedField",
                         "name": "laps",
@@ -294,7 +296,7 @@ return {
                       },
                       {
                         "alias": null,
-                        "args": (v5/*: any*/),
+                        "args": (v6/*: any*/),
                         "concreteType": "TrackRecording",
                         "kind": "LinkedField",
                         "name": "trackRecordings",
@@ -363,16 +365,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "41518e84a18f896bcdf9f5c7215d55d8",
+    "cacheID": "cb046c3a827109cd3c39e361ace2fa2c",
     "id": null,
     "metadata": {},
     "name": "TrackSessionsTablePaginationQuery",
     "operationKind": "query",
-    "text": "query TrackSessionsTablePaginationQuery(\n  $after: String\n  $filter: TrackSessionFilterInput = null\n  $first: Int = 20\n  $sort: TrackSessionSort = DATE_DESC\n) {\n  ...TrackSessionsTable_query_3JsJJ3\n}\n\nfragment TrackSessionsTable_query_3JsJJ3 on Query {\n  tracks {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n  viewer {\n    id\n    recentTrackSessions(first: $first, after: $after, filter: $filter, sort: $sort) {\n      edges {\n        cursor\n        node {\n          id\n          date\n          format\n          classification\n          conditions\n          track {\n            id\n            name\n            isIndoors\n          }\n          trackLayout {\n            id\n            name\n          }\n          kart {\n            id\n            name\n          }\n          consistencyScore\n          laps(first: 1) {\n            id\n            personalBest\n          }\n          trackRecordings(first: 1) {\n            id\n          }\n          __typename\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}\n"
+    "text": "query TrackSessionsTablePaginationQuery(\n  $after: String\n  $filter: TrackSessionFilterInput = null\n  $first: Int = 20\n  $sort: TrackSessionSort = DATE_DESC\n) {\n  ...TrackSessionsTable_query_3JsJJ3\n}\n\nfragment TrackSessionsTable_query_3JsJJ3 on Query {\n  tracks {\n    id\n    name\n    isIndoors\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n  viewer {\n    id\n    recentTrackSessions(first: $first, after: $after, filter: $filter, sort: $sort) {\n      edges {\n        cursor\n        node {\n          id\n          date\n          format\n          classification\n          conditions\n          track {\n            id\n            name\n            isIndoors\n          }\n          trackLayout {\n            id\n            name\n          }\n          kart {\n            id\n            name\n          }\n          consistencyScore\n          laps(first: 1) {\n            id\n            personalBest\n          }\n          trackRecordings(first: 1) {\n            id\n          }\n          __typename\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "2f08b530365c67eb701a06694d927392";
+(node as any).hash = "3654f2729911bd43b45201bd46e01d6f";
 
 export default node;
