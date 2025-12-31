@@ -6,11 +6,12 @@ import { type ParsedDaytonaEmail, type ParsedLap } from "./sessionImportTypes.js
 const LAP_ENTRY_RE = /(\d+)\s+(\d+):(\d+):(\d+)\s+\[(\d+)\]/g;
 const TIME_STARTED_RE = /time\s*started\s*(?::|\-)?\s*(.+)/i;
 const FASTEST_DRIVER_RE = /fastest\s+driver\s+(.+)/i;
+const RACE_POSITION_RE = /race\s+position\s*(?::|\-)?\s*(.*)/i;
 
 export function parseDaytonaEmail(text: string): ParsedDaytonaEmail {
   const lines = text.split(/\r?\n/);
   const { date: sessionDate, time: sessionTime } = parseTimeStarted(text);
-  let finalPosition: number | null = null;
+  const racePosition = parseRacePosition(text);
   let sessionFastestLapSeconds: number | null = null;
 
   const laps: ParsedLap[] = [];
@@ -42,7 +43,6 @@ export function parseDaytonaEmail(text: string): ParsedDaytonaEmail {
       const pos = parseInt(m[5], 10);
 
       if (![lapNum, mm, ss, ms, pos].every(Number.isFinite)) continue;
-      finalPosition = pos;
 
       const durationS = mm * 60 + ss + ms / 1000;
       laps.push({
@@ -56,14 +56,7 @@ export function parseDaytonaEmail(text: string): ParsedDaytonaEmail {
 
   laps.sort((a, b) => a.lapNumber - b.lapNumber);
 
-  const lastLap = laps[laps.length - 1];
-  const lastLapPosition = lastLap?.lapEvents?.find((event) => event.event === "position");
-  if (lastLapPosition) {
-    const parsed = Number.parseInt(lastLapPosition.value, 10);
-    if (Number.isFinite(parsed)) {
-      finalPosition = parsed;
-    }
-  }
+  const finalPosition = racePosition ?? parseLastLapPosition(laps);
 
   return {
     provider: "daytona",
@@ -74,6 +67,47 @@ export function parseDaytonaEmail(text: string): ParsedDaytonaEmail {
     sessionFastestLapSeconds,
     laps,
   };
+}
+
+function parseRacePosition(text: string): number | null {
+  const lines = text.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i]?.trim();
+    if (!line) continue;
+    const match = line.match(RACE_POSITION_RE);
+    if (!match) continue;
+
+    const inlineValue = match[1]?.trim();
+    const candidate = inlineValue || nextNonEmptyLine(lines, i + 1);
+    const parsed = parseOrdinal(candidate);
+    if (parsed != null) return parsed;
+  }
+
+  return null;
+}
+
+function nextNonEmptyLine(lines: string[], startIndex: number): string {
+  for (let i = startIndex; i < lines.length; i += 1) {
+    const line = lines[i]?.trim();
+    if (line) return line;
+  }
+  return "";
+}
+
+function parseOrdinal(raw: string): number | null {
+  if (!raw) return null;
+  const match = raw.match(/(\d+)(?:st|nd|rd|th)?/i);
+  if (!match) return null;
+  const parsed = Number.parseInt(match[1], 10);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseLastLapPosition(laps: ParsedLap[]): number | null {
+  const lastLap = laps[laps.length - 1];
+  const lastLapPosition = lastLap?.lapEvents?.find((event) => event.event === "position");
+  if (!lastLapPosition) return null;
+  const parsed = Number.parseInt(lastLapPosition.value, 10);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 function parseTimeStarted(text: string): { date: string | null; time: string | null } {

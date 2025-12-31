@@ -47,6 +47,75 @@ describe("parseDaytonaEmail", () => {
     expect(result.sessionTime).toBe("13:28");
   });
 
+  it("prefers the race position over the final lap position", () => {
+    const text = `
+    Club Speed Event
+
+    Driver
+    Jonny R(John Reeves)
+
+    Race Position
+    2nd Place
+
+    Kart No:
+    143
+
+    Heat Type (DMAX Sprint)
+    Time Printed 30/12/2025 18:53
+    Time Started 30/12/2025 18:40
+    Laps Completed 11
+    Best Laptime 00:47:528
+    Average Laptime 00:50:383
+    Top Average Speed 68.27 km/hr
+    Average Speed 64.31 km/hr
+    Fastest Driver 00:47:461 by JB
+    Track Layout
+    GP Circuit
+
+    Track Length 900 meter
+    Track Lap Record 00:44:861 by James Baldwin
+    Best Laptime Today Best Lap of the Day: 47.147 seconds by Thomas Mcmurray
+    Pos Kart Racer Best Lap #Lap Avg. Gap
+    1 55 JB 00:47:461 12 00:51:582 -
+    2 143 Jonny R 00:47:528 11 00:50:383 0.067
+    3 141 Alex Read 00:47:586 11 00:50:216 0.125
+    4 146 Stephanie Walt... 00:47:994 12 00:49:533 0.533
+    5 140 Jamie French 00:48:029 12 00:50:533 0.568
+    6 148 Spencer Roest 00:48:073 12 00:49:646 0.612
+    7 132 Robert Seaman 00:48:336 11 00:50:552 0.875
+    8 51 Michael Weekes 00:48:549 11 00:50:780 1.088
+    9 144 Berke Nart Aca... 00:48:594 12 00:52:081 1.133
+    10 131 Eric Walker 00:48:971 11 00:50:772 1.510
+    11 133 Ricky Bobby 00:49:243 11 00:54:419 1.782
+    12 54 Marc Jones 00:49:555 11 00:54:048 2.094
+    13 145 H -Dave Cowan 00:49:768 10 00:55:254 2.307
+    14 57 Steven Long 00:50:209 10 00:53:690 2.748
+    15 149 Jake Ford 00:50:332 11 00:54:230 2.871
+    16 59 Harvey Packman 00:50:932 9 01:05:376 3.471
+    17 150 Younes Lachaal 00:51:324 11 00:56:271 3.863
+    18 138 Harry Payne 00:53:609 11 00:58:109 6.148
+    19 130 Jacob M 00:54:591 10 01:02:635 7.130
+
+    (By Best Lap Time)
+    01 0:49:328 [2]
+    02 0:50:435 [2]
+    03 0:47:528 [1]
+    04 0:48:242 [1]
+    05 0:54:798 [1]
+    06 0:55:115 [1]
+    07 0:49:123 [1]
+    08 0:48:287 [1]
+    09 0:48:501 [1]
+    10 0:53:244 [1]
+    11 0:48:557 [1]
+    `;
+
+    const result = parseDaytonaEmail(text);
+
+    expect(result.laps).toHaveLength(11);
+    expect(result.classification).toBe(2);
+  });
+
   it("parses lap lines that wrap into multiple columns", () => {
     const text = `
     Club Speed Event
