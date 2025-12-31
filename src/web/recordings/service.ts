@@ -52,6 +52,19 @@ export class RecordingUploadError extends Error {
 
 const UPLOAD_FLUSH_BYTES = 512 * 1024;
 
+function headerValue(value: string | string[] | undefined): string | null {
+  if (!value) return null;
+  if (Array.isArray(value)) return value.join(", ");
+  return value;
+}
+
+function parseContentLength(value: string | string[] | undefined): number | null {
+  const normalized = headerValue(value);
+  if (!normalized) return null;
+  const parsed = Number.parseInt(normalized, 10);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function toPlannedMediaId(recordingId: string, sessionId: string, firstFileName: string): string {
   const ext = path.extname(firstFileName || "") || ".mp4";
   return path.posix.join(sessionId, `${recordingId}${ext}`);
@@ -376,26 +389,79 @@ export async function handleSourceUpload({
   currentUserId: string | null;
   req: http.IncomingMessage;
 }): Promise<{ recording: TrackRecordingRecord; source: TrackRecordingSourceRecord }> {
+  const contentLength = parseContentLength(req.headers["content-length"]);
+  const baseLog = {
+    sourceId,
+    userId: currentUserId,
+    contentLength,
+    contentType: headerValue(req.headers["content-type"]),
+    userAgent: headerValue(req.headers["user-agent"]),
+    hasToken: Boolean(token),
+  };
+
   if (!currentUserId) {
+    console.warn("Recording upload rejected: unauthenticated", baseLog);
     throw new RecordingUploadError("Authentication required", 401);
   }
   const source = findTrackRecordingSourceById(sourceId);
   if (!source) {
+    console.warn("Recording upload rejected: source not found", baseLog);
     throw new RecordingUploadError("Upload target not found", 404);
   }
   const recording = findTrackRecordingById(source.recordingId);
   if (!recording) {
+    console.warn("Recording upload rejected: recording not found", {
+      ...baseLog,
+      recordingId: source.recordingId,
+    });
     throw new RecordingUploadError("Recording not found", 404);
   }
   if (recording.userId !== currentUserId) {
+    console.warn("Recording upload rejected: access denied", {
+      ...baseLog,
+      recordingId: recording.id,
+    });
     throw new RecordingUploadError("You do not have access to this recording", 403);
   }
   if (!token || token !== source.uploadToken) {
+    console.warn("Recording upload rejected: token mismatch", {
+      ...baseLog,
+      recordingId: recording.id,
+    });
     throw new RecordingUploadError("Upload token is invalid", 401);
   }
   if (recording.status === "ready" || recording.status === "combining") {
+    console.warn("Recording upload rejected: recording not accepting uploads", {
+      ...baseLog,
+      recordingId: recording.id,
+      status: recording.status,
+    });
     throw new RecordingUploadError("Recording cannot accept uploads right now", 400);
   }
+
+  const uploadLog = {
+    ...baseLog,
+    recordingId: recording.id,
+    sessionId: recording.sessionId,
+    sourcePath: source.storagePath,
+  };
+
+  if (source.sizeBytes != null && contentLength != null && source.sizeBytes !== contentLength) {
+    console.warn("Recording upload size mismatch", {
+      ...uploadLog,
+      expectedBytes: source.sizeBytes,
+      contentLength,
+    });
+  }
+
+  req.once("aborted", () => {
+    console.warn("Recording upload aborted", uploadLog);
+  });
+  req.once("error", (err) => {
+    console.error("Recording upload request error", uploadLog, err);
+  });
+
+  console.info("Recording upload started", uploadLog);
 
   updateTrackRecording(recording.id, {
     status: "uploading",
@@ -415,6 +481,7 @@ export async function handleSourceUpload({
       }
     });
   } catch (err) {
+    console.error("Recording upload failed", { ...uploadLog, uploadedBytes }, err);
     updateTrackRecordingSource(source.id, { status: "failed", uploadedBytes });
     updateTrackRecording(recording.id, {
       status: "failed",
@@ -422,6 +489,8 @@ export async function handleSourceUpload({
     });
     throw err;
   }
+
+  console.info("Recording upload finished", { ...uploadLog, uploadedBytes });
 
   const updatedSource =
     updateTrackRecordingSource(source.id, { status: "uploaded", uploadedBytes }) ?? source;
