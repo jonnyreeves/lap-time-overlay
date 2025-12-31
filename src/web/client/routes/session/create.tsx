@@ -516,6 +516,12 @@ export default function CreateSessionRoute() {
       setTime(importResult.sessionTime);
     }
     setKartNumber(importResult.kartNumber?.trim() ?? "");
+    if (importResult.temperature) {
+      setTemperature(importResult.temperature);
+    }
+    if (importResult.conditions) {
+      setConditions(importResult.conditions);
+    }
     setClassification(
       importResult.classification != null ? String(importResult.classification) : ""
     );
@@ -534,12 +540,15 @@ export default function CreateSessionRoute() {
       );
     }
 
-    const guessedTrackId = guessTrackIdFromImport(data.tracks, {
-      provider: importResult.provider,
-      sourceText: importResult.sourceText,
-    });
-    if (guessedTrackId && guessedTrackId !== trackId) {
-      handleTrackChange(guessedTrackId);
+    const importedTrackId = importResult.trackId?.trim();
+    const nextTrackId =
+      importedTrackId ||
+      guessTrackIdFromImport(data.tracks, {
+        provider: importResult.provider,
+        sourceText: importResult.sourceText,
+      });
+    if (nextTrackId && nextTrackId !== trackId) {
+      handleTrackChange(nextTrackId);
     }
   };
 
@@ -781,6 +790,7 @@ export default function CreateSessionRoute() {
         isOpen={showImportSessionModal}
         onClose={() => setShowImportSessionModal(false)}
         onImport={handleImportEmail}
+        tracks={data.tracks}
       />
     </div>
   );

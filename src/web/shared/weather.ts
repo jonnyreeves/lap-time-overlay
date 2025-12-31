@@ -4,10 +4,18 @@ const WEATHER_API_ENDPOINT = "https://api.weatherapi.com/v1/history.json";
 type WeatherApiHour = {
   time?: string;
   temp_c?: number;
+  precip_mm?: number;
+  condition?: WeatherApiCondition;
 };
 
 type WeatherApiDay = {
   avgtemp_c?: number;
+  totalprecip_mm?: number;
+  condition?: WeatherApiCondition;
+};
+
+type WeatherApiCondition = {
+  text?: string;
 };
 
 type WeatherApiForecastDay = {
@@ -21,6 +29,21 @@ type WeatherApiHistoryResponse = {
     forecastday?: WeatherApiForecastDay[];
   };
 };
+
+type NormalizedWeatherCondition = "Dry" | "Wet";
+
+const PRECIP_DRY_THRESHOLD_MM = 0.1;
+const WET_CONDITION_KEYWORDS = [
+  "rain",
+  "drizzle",
+  "shower",
+  "sleet",
+  "snow",
+  "hail",
+  "thunder",
+  "storm",
+  "ice",
+] as const;
 
 function normalizePostcode(postcode: string | null | undefined): string | null {
   if (!postcode) return null;
@@ -77,10 +100,53 @@ function findHourlyTemperature(
   return temperature;
 }
 
-export async function fetchTemperatureForPostcode(
+function findHourlyPrecip(
+  hours: WeatherApiHour[] | undefined,
+  date: string,
+  hour: number | null
+): number | null {
+  if (!hours || hour == null) return null;
+  const targetPrefix = `${date} ${String(hour).padStart(2, "0")}:`;
+  const match = hours.find((entry) => entry.time?.startsWith(targetPrefix));
+  const precip = match?.precip_mm;
+  if (typeof precip !== "number" || !Number.isFinite(precip)) {
+    return null;
+  }
+  return precip;
+}
+
+function findHourlyCondition(
+  hours: WeatherApiHour[] | undefined,
+  date: string,
+  hour: number | null
+): string | null {
+  if (!hours || hour == null) return null;
+  const targetPrefix = `${date} ${String(hour).padStart(2, "0")}:`;
+  const match = hours.find((entry) => entry.time?.startsWith(targetPrefix));
+  const condition = match?.condition?.text?.trim();
+  return condition ? condition : null;
+}
+
+function normalizePrecipCondition(
+  precip: number | null | undefined
+): NormalizedWeatherCondition | null {
+  if (precip == null) return null;
+  if (!Number.isFinite(precip)) return null;
+  return precip > PRECIP_DRY_THRESHOLD_MM ? "Wet" : "Dry";
+}
+
+function normalizeCondition(raw: string | null | undefined): NormalizedWeatherCondition | null {
+  const trimmed = raw?.trim();
+  if (!trimmed) return null;
+  const normalized = trimmed.toLowerCase();
+  const isWet = WET_CONDITION_KEYWORDS.some((keyword) => normalized.includes(keyword));
+  return isWet ? "Wet" : "Dry";
+}
+
+export async function fetchWeatherForPostcode(
   postcode: string | null | undefined,
   sessionDate: string | null | undefined
-): Promise<string | null> {
+): Promise<{ temperature: string | null; conditions: NormalizedWeatherCondition | null } | null> {
   const apiKey = process.env[WEATHER_API_KEY_ENV];
   if (!apiKey) {
     console.warn(`Missing ${WEATHER_API_KEY_ENV} env var; skipping weather lookup.`);
@@ -136,7 +202,30 @@ export async function fetchTemperatureForPostcode(
     }
   }
 
-  if (temperature == null) return null;
+  const hourlyPrecip = findHourlyPrecip(
+    forecastDay.hour,
+    parsedDateTime.date,
+    parsedDateTime.hour
+  );
+  const dailyPrecip = forecastDay.day?.totalprecip_mm;
+  const conditions =
+    normalizePrecipCondition(hourlyPrecip) ??
+    normalizePrecipCondition(dailyPrecip) ??
+    normalizeCondition(
+      findHourlyCondition(forecastDay.hour, parsedDateTime.date, parsedDateTime.hour) ??
+        forecastDay.day?.condition?.text
+    );
 
-  return String(Math.round(temperature));
+  return {
+    temperature: temperature == null ? null : String(Math.round(temperature)),
+    conditions,
+  };
+}
+
+export async function fetchTemperatureForPostcode(
+  postcode: string | null | undefined,
+  sessionDate: string | null | undefined
+): Promise<string | null> {
+  const weather = await fetchWeatherForPostcode(postcode, sessionDate);
+  return weather?.temperature ?? null;
 }

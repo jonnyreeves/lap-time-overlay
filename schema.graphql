@@ -182,6 +182,7 @@ input FetchTrackSessionTemperatureInput {
 
 type FetchTrackSessionTemperaturePayload {
   temperature: String
+  conditions: String
 }
 
 input RecordingSourceInput {

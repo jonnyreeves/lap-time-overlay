@@ -14,7 +14,7 @@ import {
   type ConsistencyStats,
   type ExcludedReason,
 } from "../../shared/consistency.js";
-import { fetchTemperatureForPostcode } from "../../shared/weather.js";
+import { fetchWeatherForPostcode } from "../../shared/weather.js";
 import { toTrackPayload } from "./track.js";
 import {
   rebuildMediaLibrarySessionProjection,
@@ -751,11 +751,14 @@ export const trackSessionResolvers = {
     }
 
     if (!track.postcode?.trim()) {
-      return { temperature: null };
+      return { temperature: null, conditions: null };
     }
 
-    const temperature = await fetchTemperatureForPostcode(track.postcode, date);
-    return { temperature };
+    const weather = await fetchWeatherForPostcode(track.postcode, date);
+    return {
+      temperature: weather?.temperature ?? null,
+      conditions: weather?.conditions ?? null,
+    };
   },
   updateTrackSessionLaps: (args: UpdateTrackSessionLapsInputArgs, context: GraphQLContext) => {
     const { repositories } = context;

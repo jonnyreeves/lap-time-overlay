@@ -5,8 +5,8 @@ const { rebuildProjectionMock, removeProjectionMock } = vi.hoisted(() => ({
   removeProjectionMock: vi.fn().mockResolvedValue(undefined),
 }));
 
-const { fetchTemperatureMock } = vi.hoisted(() => ({
-  fetchTemperatureMock: vi.fn(),
+const { fetchWeatherMock } = vi.hoisted(() => ({
+  fetchWeatherMock: vi.fn(),
 }));
 
 vi.mock("../../../../src/web/recordings/mediaLibraryProjection.js", () => ({
@@ -15,7 +15,7 @@ vi.mock("../../../../src/web/recordings/mediaLibraryProjection.js", () => ({
 }));
 
 vi.mock("../../../../src/web/shared/weather.js", () => ({
-  fetchTemperatureForPostcode: fetchTemperatureMock,
+  fetchWeatherForPostcode: fetchWeatherMock,
 }));
 
 import { createMockGraphQLContext } from "../context.mock.js";
@@ -72,7 +72,7 @@ const mockLayout = {
 describe("trackSession resolvers", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    fetchTemperatureMock.mockResolvedValue(null);
+    fetchWeatherMock.mockResolvedValue({ temperature: null, conditions: null });
     repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
   });
 
@@ -179,7 +179,7 @@ describe("trackSession resolvers", () => {
       context
     );
 
-    expect(fetchTemperatureMock).not.toHaveBeenCalled();
+    expect(fetchWeatherMock).not.toHaveBeenCalled();
     expect(repositories.trackSessions.createWithLaps).toHaveBeenCalledWith({
       date: "2024-02-01",
       format: "Race",
@@ -220,7 +220,7 @@ describe("trackSession resolvers", () => {
       context
     );
 
-    expect(fetchTemperatureMock).not.toHaveBeenCalled();
+    expect(fetchWeatherMock).not.toHaveBeenCalled();
     expect(repositories.trackSessions.createWithLaps).toHaveBeenCalledWith(
       expect.objectContaining({
         temperature: "",
@@ -239,15 +239,15 @@ describe("trackSession resolvers", () => {
 
   it("fetchTrackSessionTemperature returns temperature for track/date", async () => {
     repositories.tracks.findById.mockReturnValue({ ...mockTrack, postcode: "KT14 6GB" });
-    fetchTemperatureMock.mockResolvedValue("18");
+    fetchWeatherMock.mockResolvedValue({ temperature: "18", conditions: "Sunny" });
 
     const result = await rootValue.fetchTrackSessionTemperature(
       { input: { trackId: "c1", date: "2024-02-01T12:30" } },
       context
     );
 
-    expect(fetchTemperatureMock).toHaveBeenCalledWith("KT14 6GB", "2024-02-01T12:30");
-    expect(result).toEqual({ temperature: "18" });
+    expect(fetchWeatherMock).toHaveBeenCalledWith("KT14 6GB", "2024-02-01T12:30");
+    expect(result).toEqual({ temperature: "18", conditions: "Sunny" });
   });
 
   it("fetchTrackSessionTemperature returns null when track has no postcode", async () => {
@@ -258,8 +258,8 @@ describe("trackSession resolvers", () => {
       context
     );
 
-    expect(fetchTemperatureMock).not.toHaveBeenCalled();
-    expect(result).toEqual({ temperature: null });
+    expect(fetchWeatherMock).not.toHaveBeenCalled();
+    expect(result).toEqual({ temperature: null, conditions: null });
   });
 
   it("createTrackSession rejects when kart does not exist", async () => {

@@ -43,6 +43,9 @@ export type SessionImportSelection = {
   sessionTime: string | null;
   classification: number | null;
   laps: ParsedLap[];
+  trackId?: string | null;
+  temperature?: string | null;
+  conditions?: "Dry" | "Wet" | null;
   driverName?: string;
   sessionFastestLapSeconds: number | null;
   kartNumber?: string | null;

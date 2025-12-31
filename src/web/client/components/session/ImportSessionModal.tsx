@@ -1,16 +1,20 @@
 import { css } from "@emotion/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { graphql, useMutation } from "react-relay";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
+import { guessTrackIdFromImport } from "../../utils/guessTrackFromImport.js";
 import { parseSessionEmail } from "../../utils/parseSessionEmail.js";
 import {
   type ParsedSessionEmail,
   type SessionImportSelection,
 } from "../../utils/sessionImportTypes.js";
+import type { ImportSessionModalFetchTrackSessionWeatherMutation } from "../../__generated__/ImportSessionModalFetchTrackSessionWeatherMutation.graphql.js";
 
 interface ImportSessionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onImport: (result: SessionImportSelection) => void;
+  tracks: ReadonlyArray<{ id: string; name: string }>;
 }
 
 const modalOverlayStyles = css`
@@ -147,16 +151,23 @@ const selectStyles = css`
   }
 `;
 
-const inputPreviewGridStyles = css`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-top: 16px;
+const stepIntroStyles = css`
+  margin-bottom: 16px;
+  color: #475569;
+`;
 
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+const FetchSessionWeatherMutation = graphql`
+  mutation ImportSessionModalFetchTrackSessionWeatherMutation(
+    $input: FetchTrackSessionTemperatureInput!
+  ) {
+    fetchTrackSessionTemperature(input: $input) {
+      temperature
+      conditions
+    }
   }
 `;
+
+type WeatherStatus = "idle" | "loading" | "loaded" | "error" | "unavailable";
 
 function getSelectedDriverLaps(parsed: ParsedSessionEmail, selectedDriver: string) {
   if (parsed.provider !== "teamsport") return parsed.laps;
@@ -172,18 +183,39 @@ function getSelectedClassification(parsed: ParsedSessionEmail, selectedDriver: s
   return driver?.classification ?? null;
 }
 
-export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionModalProps) {
+export function ImportSessionModal({
+  isOpen,
+  onClose,
+  onImport,
+  tracks,
+}: ImportSessionModalProps) {
   const [emailContent, setEmailContent] = useState("");
   const [selectedDriver, setSelectedDriver] = useState("");
+  const [step, setStep] = useState<"email" | "preview">("email");
+  const [selectedTrackId, setSelectedTrackId] = useState("");
+  const [weatherStatus, setWeatherStatus] = useState<WeatherStatus>("idle");
+  const [weatherData, setWeatherData] = useState<{
+    temperature: string | null;
+    conditions: "Dry" | "Wet" | null;
+  }>({ temperature: null, conditions: null });
+  const weatherRequestId = useRef(0);
+  const [commitFetchWeather, isFetchingWeather] =
+    useMutation<ImportSessionModalFetchTrackSessionWeatherMutation>(FetchSessionWeatherMutation);
 
   const handleClose = () => {
     setEmailContent("");
     setSelectedDriver("");
+    setStep("email");
+    setSelectedTrackId("");
+    setWeatherStatus("idle");
+    setWeatherData({ temperature: null, conditions: null });
+    weatherRequestId.current += 1;
     onClose();
   };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
+    if (step !== "preview") return;
     const parsed = parseSessionEmail(emailContent);
     if (!parsed) return;
 
@@ -203,6 +235,9 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
       classification: getSelectedClassification(parsed, selectedDriver),
       kartNumber: parsed.provider === "daytona" ? parsed.kartNumber : null,
       laps,
+      trackId: selectedTrackId.trim() ? selectedTrackId.trim() : null,
+      temperature: weatherData.temperature,
+      conditions: weatherData.conditions,
       driverName: parsed.provider === "teamsport" ? selectedDriver || parsed.drivers[0]?.name : undefined,
       sessionFastestLapSeconds: parsed.sessionFastestLapSeconds ?? null,
     });
@@ -213,6 +248,13 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
     () => parseSessionEmail(emailContent),
     [emailContent]
   );
+  const guessedTrackId = useMemo(() => {
+    if (!parsed) return null;
+    return guessTrackIdFromImport(tracks, {
+      provider: parsed.provider,
+      sourceText: emailContent,
+    });
+  }, [parsed, emailContent, tracks]);
 
   useEffect(() => {
     if (parsed?.provider === "teamsport") {
@@ -227,6 +269,16 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
     }
   }, [parsed]);
 
+  useEffect(() => {
+    if (step !== "email") return;
+    const fallbackTrackId =
+      guessedTrackId ?? (tracks.length === 1 ? tracks[0]?.id ?? "" : "");
+    setSelectedTrackId(fallbackTrackId);
+    setWeatherStatus("idle");
+    setWeatherData({ temperature: null, conditions: null });
+    weatherRequestId.current += 1;
+  }, [step, guessedTrackId, tracks]);
+
   const previewLaps =
     parsed?.provider === "teamsport"
       ? getSelectedDriverLaps(parsed, selectedDriver)
@@ -236,8 +288,88 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
     : null;
   const previewFastestLap = parsed?.sessionFastestLapSeconds ?? null;
   const previewKartNumber = parsed?.provider === "daytona" ? parsed.kartNumber : null;
+  const sessionDateTime = parsed?.sessionDate
+    ? parsed.sessionTime
+      ? `${parsed.sessionDate}T${parsed.sessionTime}`
+      : parsed.sessionDate
+    : null;
 
   const importDisabled = !emailContent.trim() || !(previewLaps?.length ?? 0);
+  const weatherLoading = weatherStatus === "loading" || isFetchingWeather;
+  const weatherUnavailableReason = !selectedTrackId.trim()
+    ? "Select a track"
+    : sessionDateTime
+      ? "Not available"
+      : "Missing session date";
+  const weatherConditionsLabel = weatherLoading
+    ? "Fetching..."
+    : weatherStatus === "error"
+      ? "Unable to fetch"
+      : weatherStatus === "unavailable" || weatherStatus === "idle"
+        ? weatherUnavailableReason
+        : weatherData.conditions ?? "Not found";
+  const weatherTemperatureLabel = weatherLoading
+    ? "Fetching..."
+    : weatherStatus === "error"
+      ? "Unable to fetch"
+      : weatherStatus === "unavailable" || weatherStatus === "idle"
+        ? weatherUnavailableReason
+        : weatherData.temperature
+          ? `${weatherData.temperature} C`
+          : "Not found";
+
+  const handleBack = () => {
+    setStep("email");
+    setWeatherStatus("idle");
+    setWeatherData({ temperature: null, conditions: null });
+    weatherRequestId.current += 1;
+  };
+
+  const handleNext = () => {
+    if (importDisabled) return;
+    setStep("preview");
+  };
+
+  useEffect(() => {
+    if (step !== "preview") return;
+    const trimmedTrackId = selectedTrackId.trim();
+    if (!trimmedTrackId || !sessionDateTime) {
+      setWeatherStatus("unavailable");
+      setWeatherData({ temperature: null, conditions: null });
+      weatherRequestId.current += 1;
+      return;
+    }
+
+    const requestId = weatherRequestId.current + 1;
+    weatherRequestId.current = requestId;
+    setWeatherStatus("loading");
+    setWeatherData({ temperature: null, conditions: null });
+    commitFetchWeather({
+      variables: {
+        input: {
+          trackId: trimmedTrackId,
+          date: sessionDateTime,
+        },
+      },
+      onCompleted: (response) => {
+        if (weatherRequestId.current !== requestId) return;
+        const payload = response.fetchTrackSessionTemperature;
+        setWeatherData({
+      temperature: payload?.temperature ?? null,
+      conditions:
+        payload?.conditions === "Dry" || payload?.conditions === "Wet"
+          ? payload.conditions
+          : null,
+        });
+        setWeatherStatus("loaded");
+      },
+      onError: () => {
+        if (weatherRequestId.current !== requestId) return;
+        setWeatherStatus("error");
+        setWeatherData({ temperature: null, conditions: null });
+      },
+    });
+  }, [step, selectedTrackId, sessionDateTime, commitFetchWeather]);
 
   if (!isOpen) return null;
 
@@ -245,9 +377,13 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
     <div css={modalOverlayStyles} onClick={handleClose}>
       <div css={modalContentStyles} onClick={(e) => e.stopPropagation()}>
         <h2>Import Session Email</h2>
-        <p>Paste the email that describes your session and we&apos;ll crunch it soon.</p>
+        <p css={stepIntroStyles}>
+          {step === "email"
+            ? "Paste the email that describes your session and we'll preview what we found."
+            : "Review the parsed session details before importing."}
+        </p>
         <form onSubmit={handleSubmit}>
-          <div css={inputPreviewGridStyles}>
+          {step === "email" ? (
             <div css={inputFieldStyles}>
               <label htmlFor="session-import-email">Email contents</label>
               <textarea
@@ -258,11 +394,27 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
                 required
               />
             </div>
+          ) : (
             <div css={previewStyles}>
               {parsed ? (
                 <>
                   <div>
                     <strong>Source:</strong> {parsed.provider}
+                  </div>
+                  <div css={selectStyles}>
+                    <label htmlFor="session-import-track">Track for weather</label>
+                    <select
+                      id="session-import-track"
+                      value={selectedTrackId}
+                      onChange={(e) => setSelectedTrackId(e.target.value)}
+                    >
+                      <option value="">Select a track</option>
+                      {tracks.map((track) => (
+                        <option key={track.id} value={track.id}>
+                          {track.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <strong>Session date:</strong>{" "}
@@ -275,6 +427,12 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
                   <div>
                     <strong>Session format:</strong>{" "}
                     {parsed.sessionFormat ?? "Not found"}
+                  </div>
+                  <div>
+                    <strong>Weather conditions:</strong> {weatherConditionsLabel}
+                  </div>
+                  <div>
+                    <strong>Temperature:</strong> {weatherTemperatureLabel}
                   </div>
                   <div>
                     <strong>Classification:</strong>{" "}
@@ -328,14 +486,34 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
                 <div>No importable data detected yet.</div>
               )}
             </div>
-          </div>
+          )}
           <div css={buttonGroupStyles}>
             <button type="button" css={secondaryButtonStyles} onClick={handleClose}>
               Cancel
             </button>
-            <button type="submit" css={primaryButtonStyles} disabled={importDisabled}>
-              Import
-            </button>
+            {step === "preview" ? (
+              <>
+                <button
+                  type="button"
+                  css={secondaryButtonStyles}
+                  onClick={handleBack}
+                >
+                  Back
+                </button>
+                <button type="submit" css={primaryButtonStyles} disabled={importDisabled}>
+                  Import
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                css={primaryButtonStyles}
+                disabled={importDisabled}
+                onClick={handleNext}
+              >
+                Next
+              </button>
+            )}
           </div>
         </form>
       </div>
