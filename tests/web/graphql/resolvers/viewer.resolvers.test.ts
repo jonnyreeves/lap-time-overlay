@@ -19,6 +19,7 @@ const mockSessions = [
     createdAt: 0,
     updatedAt: 0,
     kartId: "kart-a",
+    kartNumber: "",
     trackLayoutId: "l1",
   },
   {
@@ -34,6 +35,7 @@ const mockSessions = [
     createdAt: 0,
     updatedAt: 0,
     kartId: "kart-b",
+    kartNumber: "",
     trackLayoutId: "l2",
   },
   {
@@ -49,6 +51,7 @@ const mockSessions = [
     createdAt: 0,
     updatedAt: 0,
     kartId: "kart-a",
+    kartNumber: "",
     trackLayoutId: "l1",
   },
 ];

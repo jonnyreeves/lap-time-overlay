@@ -7,11 +7,13 @@ const LAP_ENTRY_RE = /(\d+)\s+(\d+):(\d+):(\d+)\s+\[(\d+)\]/g;
 const TIME_STARTED_RE = /time\s*started\s*(?::|\-)?\s*(.+)/i;
 const FASTEST_DRIVER_RE = /fastest\s+driver\s+(.+)/i;
 const RACE_POSITION_RE = /race\s+position\s*(?::|\-)?\s*(.*)/i;
+const KART_NUMBER_RE = /kart\s*no\.?\s*(?::|\-)?\s*(.*)/i;
 
 export function parseDaytonaEmail(text: string): ParsedDaytonaEmail {
   const lines = text.split(/\r?\n/);
   const { date: sessionDate, time: sessionTime } = parseTimeStarted(text);
   const racePosition = parseRacePosition(text);
+  const kartNumber = parseKartNumber(text);
   let sessionFastestLapSeconds: number | null = null;
 
   const laps: ParsedLap[] = [];
@@ -65,6 +67,7 @@ export function parseDaytonaEmail(text: string): ParsedDaytonaEmail {
     sessionTime,
     classification: finalPosition,
     sessionFastestLapSeconds,
+    kartNumber,
     laps,
   };
 }
@@ -81,6 +84,25 @@ function parseRacePosition(text: string): number | null {
     const candidate = inlineValue || nextNonEmptyLine(lines, i + 1);
     const parsed = parseOrdinal(candidate);
     if (parsed != null) return parsed;
+  }
+
+  return null;
+}
+
+function parseKartNumber(text: string): string | null {
+  const lines = text.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i]?.trim();
+    if (!line) continue;
+    const match = line.match(KART_NUMBER_RE);
+    if (!match) continue;
+
+    const inlineValue = match[1]?.trim();
+    const candidate = inlineValue || nextNonEmptyLine(lines, i + 1);
+    const normalized = candidate.trim();
+    if (normalized) {
+      return normalized;
+    }
   }
 
   return null;

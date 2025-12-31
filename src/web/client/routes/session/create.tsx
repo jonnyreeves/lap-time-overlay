@@ -248,6 +248,7 @@ export default function CreateSessionRoute() {
   const [time, setTime] = useState("");
   const [trackId, setTrackId] = useState("");
   const [kartId, setKartId] = useState("");
+  const [kartNumber, setKartNumber] = useState("");
   const [trackLayoutId, setTrackLayoutId] = useState("");
   const [classification, setClassification] = useState("");
   const [fastestLap, setFastestLap] = useState("");
@@ -394,6 +395,7 @@ export default function CreateSessionRoute() {
       alert("Please enter a valid fastest lap (e.g. 1:03.076).");
       return;
     }
+    const trimmedKartNumber = kartNumber.trim();
 
     commitMutation({
       variables: {
@@ -406,6 +408,7 @@ export default function CreateSessionRoute() {
           kartId,
           conditions,
           notes: notes.trim() ? notes.trim() : null,
+          ...(trimmedKartNumber ? { kartNumber: trimmedKartNumber } : {}),
           ...(parsedFastestLap != null ? { fastestLap: parsedFastestLap } : {}),
           ...(lapInput.length ? { laps: lapInput } : {}),
         },
@@ -456,6 +459,7 @@ export default function CreateSessionRoute() {
     if (importResult.sessionTime) {
       setTime(importResult.sessionTime);
     }
+    setKartNumber(importResult.kartNumber?.trim() ?? "");
     setClassification(
       importResult.classification != null ? String(importResult.classification) : ""
     );
@@ -589,6 +593,17 @@ export default function CreateSessionRoute() {
                 ))}
               </select>
             </div>
+          </div>
+          <div css={inputFieldStyles}>
+            <label htmlFor="session-kart-number">Kart number (optional)</label>
+            <input
+              type="text"
+              id="session-kart-number"
+              value={kartNumber}
+              onChange={(e) => setKartNumber(e.target.value)}
+              placeholder="e.g. 143"
+              disabled={isInFlight}
+            />
           </div>
           <div css={twoColumnRowStyles}>
             <div css={inputFieldStyles}>

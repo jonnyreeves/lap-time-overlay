@@ -29,6 +29,7 @@ describe("parseDaytonaEmail", () => {
     expect(result.laps[2]).toMatchObject({ lapNumber: 3, timeSeconds: 51.258 });
     expect(result.sessionFastestLapSeconds).toBeCloseTo(63.076, 3);
     expect(result.classification).toBe(11);
+    expect(result.kartNumber).toBeNull();
   });
 
   it("parses time started date when separated by tabs", () => {
@@ -114,6 +115,7 @@ describe("parseDaytonaEmail", () => {
 
     expect(result.laps).toHaveLength(11);
     expect(result.classification).toBe(2);
+    expect(result.kartNumber).toBe("143");
   });
 
   it("parses lap lines that wrap into multiple columns", () => {

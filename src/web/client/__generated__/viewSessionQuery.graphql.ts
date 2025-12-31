@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<c39b4fade23c4840693108a43a2b3135>>
+ * @generated SignedSource<<9d3f2bdd05ac48e03318747a7fe0f245>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -46,6 +46,7 @@ export type viewSessionQuery$data = {
       readonly id: string;
       readonly name: string;
     } | null | undefined;
+    readonly kartNumber: string | null | undefined;
     readonly laps: ReadonlyArray<{
       readonly id: string;
       readonly lapEvents: ReadonlyArray<{
@@ -239,6 +240,13 @@ v10 = [
         "args": null,
         "kind": "ScalarField",
         "name": "notes",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "kartNumber",
         "storageKey": null
       },
       {
@@ -647,16 +655,16 @@ return {
     "selections": (v10/*: any*/)
   },
   "params": {
-    "cacheID": "1f04608cfa3de8e1e3d99a29ac029642",
+    "cacheID": "6dc45a5a5f6b1d20fb5dfb8a1b713b9f",
     "id": null,
     "metadata": {},
     "name": "viewSessionQuery",
     "operationKind": "query",
-    "text": "query viewSessionQuery(\n  $id: ID!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    classification\n    fastestLap\n    conditions\n    notes\n    track {\n      id\n      name\n    }\n    trackLayout {\n      id\n      name\n    }\n    kart {\n      id\n      name\n    }\n    consistencyScore\n    consistency {\n      score\n      label\n      mean\n      stdDev\n      cvPct\n      median\n      windowPct\n      cleanLapCount\n      excludedLapCount\n      totalValidLapCount\n      usableLapNumbers\n      excludedLaps {\n        lapNumber\n        reason\n      }\n    }\n    createdAt\n    updatedAt\n    trackRecordings(first: 20) {\n      id\n      description\n      mediaId\n      status\n      error\n      sizeBytes\n      overlayBurned\n      isPrimary\n      showInMediaLibrary\n      lapOneOffset\n      durationMs\n      fps\n      createdAt\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n      uploadTargets(first: 50) {\n        id\n        fileName\n        sizeBytes\n        uploadedBytes\n        status\n        ordinal\n        uploadUrl\n      }\n    }\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents(first: 50) {\n        id\n        offset\n        event\n        value\n      }\n    }\n  }\n  tracks {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n}\n"
+    "text": "query viewSessionQuery(\n  $id: ID!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    classification\n    fastestLap\n    conditions\n    notes\n    kartNumber\n    track {\n      id\n      name\n    }\n    trackLayout {\n      id\n      name\n    }\n    kart {\n      id\n      name\n    }\n    consistencyScore\n    consistency {\n      score\n      label\n      mean\n      stdDev\n      cvPct\n      median\n      windowPct\n      cleanLapCount\n      excludedLapCount\n      totalValidLapCount\n      usableLapNumbers\n      excludedLaps {\n        lapNumber\n        reason\n      }\n    }\n    createdAt\n    updatedAt\n    trackRecordings(first: 20) {\n      id\n      description\n      mediaId\n      status\n      error\n      sizeBytes\n      overlayBurned\n      isPrimary\n      showInMediaLibrary\n      lapOneOffset\n      durationMs\n      fps\n      createdAt\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n      uploadTargets(first: 50) {\n        id\n        fileName\n        sizeBytes\n        uploadedBytes\n        status\n        ordinal\n        uploadUrl\n      }\n    }\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents(first: 50) {\n        id\n        offset\n        event\n        value\n      }\n    }\n  }\n  tracks {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "87b51e4d79b56f6716dd71a98363dfbe";
+(node as any).hash = "672307e79e195c5666ccb8d2fd12d3ab";
 
 export default node;

@@ -45,6 +45,7 @@ describe("track resolver", () => {
         createdAt: 0,
         updatedAt: 0,
         kartId: "k1",
+        kartNumber: "",
         trackLayoutId: "l1",
       },
       {
@@ -60,6 +61,7 @@ describe("track resolver", () => {
         createdAt: 0,
         updatedAt: 0,
         kartId: "k1",
+        kartNumber: "",
         trackLayoutId: "l1",
       },
       {
@@ -75,6 +77,7 @@ describe("track resolver", () => {
         createdAt: 0,
         updatedAt: 0,
         kartId: "k1",
+        kartNumber: "",
         trackLayoutId: "l1",
       },
       {
@@ -90,6 +93,7 @@ describe("track resolver", () => {
         createdAt: 0,
         updatedAt: 0,
         kartId: "k2",
+        kartNumber: "",
         trackLayoutId: "l2",
       },
       {
@@ -105,6 +109,7 @@ describe("track resolver", () => {
         createdAt: 0,
         updatedAt: 0,
         kartId: "k1",
+        kartNumber: "",
         trackLayoutId: "l1",
       },
       {
@@ -120,6 +125,7 @@ describe("track resolver", () => {
         createdAt: 0,
         updatedAt: 0,
         kartId: "k1",
+        kartNumber: "",
         trackLayoutId: "l1",
       },
       {
@@ -135,6 +141,7 @@ describe("track resolver", () => {
         createdAt: 0,
         updatedAt: 0,
         kartId: "k1",
+        kartNumber: "",
         trackLayoutId: "l3",
       },
     ]);

@@ -38,6 +38,7 @@ const SessionQuery = graphql`
       fastestLap
       conditions
       notes
+      kartNumber
       track {
         id
         name

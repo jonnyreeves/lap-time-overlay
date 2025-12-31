@@ -61,6 +61,7 @@ describe("track_sessions", () => {
     assert.strictEqual(trackSession.notes, "Some notes");
     assert.strictEqual(trackSession.createdAt, now);
     assert.strictEqual(trackSession.updatedAt, now);
+    assert.strictEqual(trackSession.kartNumber, "");
 
     const retrievedSession = findTrackSessionById(trackSession.id);
     assert.deepStrictEqual(retrievedSession, trackSession);
@@ -95,6 +96,7 @@ describe("track_sessions", () => {
     assert.strictEqual(trackSession.conditions, "Wet");
     assert.strictEqual(trackSession.notes, "with laps");
     assert.strictEqual(trackSession.userId, user.id);
+    assert.strictEqual(trackSession.kartNumber, "");
     assert.strictEqual(laps.length, 2);
     assert.strictEqual(laps[0].sessionId, trackSession.id);
     assert.deepStrictEqual(findLapsBySessionId(trackSession.id), laps);
@@ -254,6 +256,7 @@ describe("track_sessions", () => {
       trackId: otherTrack.id,
       conditions: "Wet",
       notes: "Updated",
+      kartNumber: "77",
       now: now + 1000,
       trackLayoutId: otherLayout.id,
     });
@@ -266,6 +269,7 @@ describe("track_sessions", () => {
     assert.strictEqual(updated?.userId, user.id);
     assert.strictEqual(updated?.conditions, "Wet");
     assert.strictEqual(updated?.notes, "Updated");
+    assert.strictEqual(updated?.kartNumber, "77");
     assert.strictEqual(updated?.trackLayoutId, otherLayout.id);
     assert.strictEqual(updated?.updatedAt, now + 1000);
 

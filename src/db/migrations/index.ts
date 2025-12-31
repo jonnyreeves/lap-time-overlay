@@ -14,4 +14,5 @@ export const migrations: Migration[] = [
   (await import("./05_add_temp_cleanup_schedule.js")).migration,
   (await import("./06_add_is_admin_to_users.js")).migration,
   (await import("./07_add_show_in_media_library_to_track_recordings.js")).migration,
+  (await import("./08_add_kart_number_to_track_sessions.js")).migration,
 ];

@@ -123,6 +123,7 @@ input CreateTrackSessionInput {
   conditions: String
   trackId: ID
   kartId: ID!
+  kartNumber: String
   trackLayoutId: ID!
   notes: String
   laps: [LapInput!]
@@ -141,6 +142,7 @@ input UpdateTrackSessionInput {
   conditions: String
   trackId: ID
   kartId: ID
+  kartNumber: String
   trackLayoutId: ID
   notes: String
   fastestLap: Float
@@ -430,6 +432,7 @@ type TrackSession {
   track: Track!
   trackLayout: TrackLayout!
   kart: Kart
+  kartNumber: String
   consistencyScore: Int
   consistency: TrackSessionConsistency!
   notes: String

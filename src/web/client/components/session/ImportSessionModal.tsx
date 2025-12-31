@@ -201,6 +201,7 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
       sessionDate: parsed.sessionDate,
       sessionTime: parsed.sessionTime,
       classification: getSelectedClassification(parsed, selectedDriver),
+      kartNumber: parsed.provider === "daytona" ? parsed.kartNumber : null,
       laps,
       driverName: parsed.provider === "teamsport" ? selectedDriver || parsed.drivers[0]?.name : undefined,
       sessionFastestLapSeconds: parsed.sessionFastestLapSeconds ?? null,
@@ -234,6 +235,7 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
     ? getSelectedClassification(parsed, selectedDriver)
     : null;
   const previewFastestLap = parsed?.sessionFastestLapSeconds ?? null;
+  const previewKartNumber = parsed?.provider === "daytona" ? parsed.kartNumber : null;
 
   const importDisabled = !emailContent.trim() || !(previewLaps?.length ?? 0);
 
@@ -277,6 +279,10 @@ export function ImportSessionModal({ isOpen, onClose, onImport }: ImportSessionM
                   <div>
                     <strong>Classification:</strong>{" "}
                     {previewClassification ?? "Not found"}
+                  </div>
+                  <div>
+                    <strong>Kart number:</strong>{" "}
+                    {previewKartNumber ? previewKartNumber : "Not found"}
                   </div>
                   <div>
                     <strong>Session fastest lap:</strong>{" "}

@@ -40,6 +40,7 @@ type SessionDetails = {
   notes?: string | null;
   track: { id: string; name: string };
   kart?: { id: string; name: string } | null;
+  kartNumber?: string | null;
   trackLayout: { id: string; name: string } | null;
   createdAt: string;
   updatedAt: string;
@@ -86,6 +87,7 @@ const UpdateTrackSessionMutation = graphql`
         fastestLap
         conditions
         notes
+        kartNumber
         track {
           id
           name
@@ -120,6 +122,7 @@ function toFormState(session: SessionDetails): FormState {
     trackId: session.track.id,
     trackLayoutId: session.trackLayout?.id ?? "",
     kartId: session.kart?.id ?? "",
+    kartNumber: session.kartNumber ?? "",
     format: session.format || "Practice",
     date,
     time,
@@ -161,6 +164,7 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
     session.format,
     session.id,
     session.notes,
+    session.kartNumber,
     session.trackLayout?.id,
     session.kart?.id,
   ]);
@@ -184,6 +188,7 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
       ? `${formatLapTimeSeconds(fastestLap.time)}s`
       : null;
   const kartName = session.kart?.name ?? "Not set";
+  const kartNumberLabel = session.kartNumber?.trim() ? session.kartNumber.trim() : "Not set";
   const trackLayoutName = session.trackLayout?.name ?? "Not set";
   const notesText = (isEditing ? formValues.notes : session.notes)?.trim() ?? "";
   const conditionsIcon = /wet/i.test(conditionsLabel) ? "🌧️" : "☀️";
@@ -285,6 +290,7 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
           fastestLap: payload.fastestLap,
           conditions: payload.conditions,
           notes: payload.notes,
+          kartNumber: payload.kartNumber,
         },
       },
       optimisticResponse: {
@@ -296,6 +302,7 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
             classification: payload.classification,
             conditions: payload.conditions,
             notes: payload.notes,
+            kartNumber: payload.kartNumber,
             track: {
               id: payload.trackId,
               name: nextTrackName,
@@ -476,6 +483,23 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
             )}
           </div>
           <div css={infoTileStyles}>
+            <p className="label">Kart number</p>
+            {isEditing ? (
+              <input
+                type="text"
+                css={inputStyles}
+                value={formValues.kartNumber}
+                onChange={(e) =>
+                  setFormValues((current) => ({ ...current, kartNumber: e.target.value }))
+                }
+                placeholder="e.g. 143"
+                disabled={isSaving}
+              />
+            ) : (
+              <p className="value">{kartNumberLabel}</p>
+            )}
+          </div>
+          <div css={infoTileStyles}>
             <p className="label">Session date</p>
             {isEditing ? (
               <input
@@ -510,7 +534,6 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
           <div css={infoTileStyles}>
             <p className="label">Laps completed</p>
             <p className="value">{lapsCount}</p>
-            {fastestLapTime ? <p className="note">Fastest recorded lap {fastestLapTime}</p> : null}
           </div>
           <div css={infoTileStyles}>
             <p className="label">Conditions</p>
@@ -551,6 +574,10 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
             ) : (
               <p className="value">{classificationLabel}</p>
             )}
+          </div>
+          <div css={infoTileStyles}>
+            <p className="label">Your fastest lap</p>
+            <p className="value">{fastestLapTime}</p>
           </div>
           <div css={infoTileStyles}>
             <p className="label">Session fastest lap</p>

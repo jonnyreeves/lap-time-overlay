@@ -24,6 +24,7 @@ export interface TrackSessionRecord {
   createdAt: number;
   updatedAt: number;
   kartId: string | null;
+  kartNumber: string;
   trackLayoutId: string;
 }
 
@@ -40,6 +41,7 @@ interface TrackSessionRow {
   created_at: number;
   updated_at: number;
   kart_id: string | null;
+  kart_number: string | null;
   track_layout_id: string;
 }
 
@@ -57,6 +59,7 @@ function mapRow(row: TrackSessionRow): TrackSessionRecord {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     kartId: row.kart_id,
+    kartNumber: row.kart_number ?? "",
     trackLayoutId: row.track_layout_id,
   };
 }
@@ -65,7 +68,7 @@ export function findTrackSessionById(id: string): TrackSessionRecord | null {
   const db = getDb();
   const row = db
     .prepare<unknown[], TrackSessionRow>(
-      `SELECT id, date, format, classification, fastest_lap, conditions, track_id, user_id, notes, created_at, updated_at, kart_id, track_layout_id
+      `SELECT id, date, format, classification, fastest_lap, conditions, track_id, user_id, notes, created_at, updated_at, kart_id, kart_number, track_layout_id
        FROM track_sessions WHERE id = ? LIMIT 1`
     )
     .get(id);
@@ -76,7 +79,7 @@ export function findTrackSessionsByTrackId(trackId: string): TrackSessionRecord[
   const db = getDb();
   const rows = db
     .prepare<unknown[], TrackSessionRow>(
-      `SELECT id, date, format, classification, fastest_lap, conditions, track_id, user_id, notes, created_at, updated_at, kart_id, track_layout_id
+      `SELECT id, date, format, classification, fastest_lap, conditions, track_id, user_id, notes, created_at, updated_at, kart_id, kart_number, track_layout_id
        FROM track_sessions WHERE track_id = ? ORDER BY date DESC`
     )
     .all(trackId);
@@ -87,7 +90,7 @@ export function findTrackSessionsByUserId(userId: string): TrackSessionRecord[] 
   const db = getDb();
   const rows = db
     .prepare<unknown[], TrackSessionRow>(
-            `SELECT id, date, format, classification, fastest_lap, conditions, track_id, user_id, notes, created_at, updated_at, kart_id, track_layout_id
+            `SELECT id, date, format, classification, fastest_lap, conditions, track_id, user_id, notes, created_at, updated_at, kart_id, kart_number, track_layout_id
                  FROM track_sessions WHERE user_id = ? ORDER BY date DESC`    )
     .all(userId);
   return rows.map(mapRow);
@@ -108,6 +111,7 @@ export function createTrackSessionWithLaps({
   laps = [],
   now = Date.now(),
   kartId = null,
+  kartNumber = "",
   trackLayoutId,
   fastestLap = null,
 }: {
@@ -121,14 +125,15 @@ export function createTrackSessionWithLaps({
   laps?: TrackSessionLapInput[];
   now?: number;
   kartId?: string | null;
+  kartNumber?: string;
   trackLayoutId: string;
   fastestLap?: number | null;
 }): { trackSession: TrackSessionRecord; laps: LapRecord[] } {
   const db = getDb();
   const sessionId = randomUUID();
   const insertSession = db.prepare(
-    `INSERT INTO track_sessions (id, date, format, classification, fastest_lap, conditions, track_id, user_id, notes, created_at, updated_at, kart_id, track_layout_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO track_sessions (id, date, format, classification, fastest_lap, conditions, track_id, user_id, notes, created_at, updated_at, kart_id, kart_number, track_layout_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const insertLap =
     laps.length > 0
@@ -160,6 +165,7 @@ export function createTrackSessionWithLaps({
       now,
       now,
       kartId,
+      kartNumber,
       trackLayoutId
     );
     if (insertLap) {
@@ -204,6 +210,7 @@ export function createTrackSessionWithLaps({
     createdAt: now,
     updatedAt: now,
     kartId: kartId ?? null,
+    kartNumber,
     trackLayoutId,
   };
 
@@ -221,7 +228,8 @@ export function createTrackSession(
   conditions: TrackSessionConditions = "Dry",
   kartId: string | null = null,
   trackLayoutId: string,
-  fastestLap: number | null = null
+  fastestLap: number | null = null,
+  kartNumber: string = ""
 ): TrackSessionRecord {
   return createTrackSessionWithLaps({
     date,
@@ -234,6 +242,7 @@ export function createTrackSession(
     now,
     laps: [],
     kartId,
+    kartNumber,
     trackLayoutId,
     fastestLap,
   }).trackSession;
@@ -249,6 +258,7 @@ export function updateTrackSession({
   notes,
   now = Date.now(),
   kartId,
+  kartNumber,
   trackLayoutId,
   fastestLap,
 }: {
@@ -261,6 +271,7 @@ export function updateTrackSession({
   notes?: string | null;
   now?: number;
   kartId?: string | null;
+  kartNumber?: string;
   trackLayoutId?: string;
   fastestLap?: number | null;
 }): TrackSessionRecord | null {
@@ -282,12 +293,13 @@ export function updateTrackSession({
     notes: notes === undefined ? current.notes : notes,
     updatedAt: now,
     kartId: kartId === undefined ? current.kartId : kartId,
+    kartNumber: kartNumber === undefined ? current.kartNumber : kartNumber,
     trackLayoutId: trackLayoutId ?? current.trackLayoutId,
   };
 
   db.prepare(
     `UPDATE track_sessions
-     SET date = ?, format = ?, classification = ?, fastest_lap = ?, conditions = ?, track_id = ?, notes = ?, updated_at = ?, kart_id = ?, track_layout_id = ?
+     SET date = ?, format = ?, classification = ?, fastest_lap = ?, conditions = ?, track_id = ?, notes = ?, updated_at = ?, kart_id = ?, kart_number = ?, track_layout_id = ?
      WHERE id = ?`
   ).run(
     next.date,
@@ -299,6 +311,7 @@ export function updateTrackSession({
     next.notes,
     next.updatedAt,
     next.kartId,
+    next.kartNumber,
     next.trackLayoutId,
     id
   );
@@ -426,6 +439,7 @@ export interface TrackSessionRepository {
     laps?: TrackSessionLapInput[];
     now?: number;
     kartId?: string | null;
+    kartNumber?: string;
     trackLayoutId: string;
     fastestLap?: number | null;
   }) => { trackSession: TrackSessionRecord; laps: LapRecord[] };
@@ -439,6 +453,7 @@ export interface TrackSessionRepository {
     notes?: string | null;
     now?: number;
     kartId?: string | null;
+    kartNumber?: string;
     trackLayoutId?: string;
     fastestLap?: number | null;
   }) => TrackSessionRecord | null;

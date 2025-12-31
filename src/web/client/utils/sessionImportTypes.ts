@@ -14,6 +14,7 @@ export type ParsedDaytonaEmail = {
   sessionTime: string | null;
   classification: number | null;
   sessionFastestLapSeconds: number | null;
+  kartNumber: string | null;
   laps: ParsedLap[];
 };
 
@@ -44,4 +45,5 @@ export type SessionImportSelection = {
   laps: ParsedLap[];
   driverName?: string;
   sessionFastestLapSeconds: number | null;
+  kartNumber?: string | null;
 };

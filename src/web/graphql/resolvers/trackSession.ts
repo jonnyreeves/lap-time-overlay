@@ -31,6 +31,7 @@ export type CreateTrackSessionInputArgs = {
     conditions?: string;
     trackId?: string;
     kartId?: string;
+    kartNumber?: string;
     trackLayoutId?: string;
     notes?: string;
     laps?: LapInputArg[] | null;
@@ -47,6 +48,7 @@ export type UpdateTrackSessionInputArgs = {
     conditions?: string | null;
     trackId?: string | null;
     kartId?: string | null;
+    kartNumber?: string | null;
     trackLayoutId?: string | null;
     notes?: string | null;
     fastestLap?: number | null;
@@ -239,6 +241,7 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
     classification: session.classification,
     fastestLap: session.fastestLap,
     conditions: session.conditions,
+    kartNumber: session.kartNumber,
     track: () => {
       const track = repositories.tracks.findById(session.trackId);
       if (!track) {
@@ -494,6 +497,7 @@ export const trackSessionResolvers = {
     const classification = parseClassification(input.classification);
     const conditions = parseConditions(input.conditions);
     const fastestLap = parseFastestLap(input.fastestLap);
+    const kartNumber = input.kartNumber?.trim() ?? "";
     const { trackSession } = repositories.trackSessions.createWithLaps({
       date: input.date,
       format: input.format,
@@ -504,6 +508,7 @@ export const trackSessionResolvers = {
       notes: input.notes,
       laps,
       kartId: input.kartId,
+      kartNumber,
       trackLayoutId: input.trackLayoutId,
       fastestLap,
     });
@@ -644,6 +649,11 @@ export const trackSessionResolvers = {
       }
     }
 
+    const kartNumberProvided = Object.prototype.hasOwnProperty.call(input, "kartNumber");
+    const targetKartNumber = kartNumberProvided
+      ? (input.kartNumber ?? "").trim()
+      : existingSession.kartNumber;
+
     const notesProvided = Object.prototype.hasOwnProperty.call(input, "notes");
     const classificationProvided = Object.prototype.hasOwnProperty.call(input, "classification");
     const conditionsProvided = Object.prototype.hasOwnProperty.call(input, "conditions");
@@ -678,6 +688,7 @@ export const trackSessionResolvers = {
       conditions,
       notes,
       kartId: targetKartId,
+      kartNumber: targetKartNumber,
       trackLayoutId: targetTrackLayoutId,
       fastestLap,
     });

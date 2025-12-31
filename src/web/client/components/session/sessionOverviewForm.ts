@@ -7,6 +7,7 @@ export type SessionOverviewFormState = {
   trackId: string;
   trackLayoutId: string;
   kartId: string;
+  kartNumber: string;
   format: string;
   date: string;
   time: string;
@@ -38,6 +39,7 @@ export function validateSessionOverviewForm(formValues: SessionOverviewFormState
   const trimmedTime = formValues.time.trim();
   const trimmedNotes = formValues.notes.trim();
   const trimmedFastestLap = formValues.fastestLap.trim();
+  const trimmedKartNumber = formValues.kartNumber.trim();
 
   if (!formValues.trackId) {
     return { error: "Please select a track." } as const;
@@ -79,6 +81,7 @@ export function validateSessionOverviewForm(formValues: SessionOverviewFormState
       conditions: formValues.conditions,
       trackLayoutId: formValues.trackLayoutId,
       kartId: formValues.kartId,
+      kartNumber: trimmedKartNumber,
       notes: trimmedNotes,
       fastestLap,
     },

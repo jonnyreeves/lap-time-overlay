@@ -32,6 +32,7 @@ const mockSession = {
   createdAt: 0,
   updatedAt: 0,
   kartId: "k1",
+  kartNumber: "",
   trackLayoutId: "l1",
 };
 
@@ -159,6 +160,7 @@ describe("trackSession resolvers", () => {
           notes: "fun",
           trackLayoutId: "l1",
           kartId: "k1",
+          kartNumber: "42",
           laps: [{ lapNumber: 1, time: 74.5 }],
         },
       },
@@ -176,6 +178,7 @@ describe("trackSession resolvers", () => {
       laps: [{ lapNumber: 1, time: 74.5 }],
       trackLayoutId: "l1",
       kartId: "k1",
+      kartNumber: "42",
       fastestLap: null,
     });
     expect(result.trackSession.id).toBe("s1");
@@ -302,6 +305,7 @@ describe("trackSession resolvers", () => {
         classification: undefined,
         trackId: "c1",
         kartId: "k1",
+        kartNumber: "",
         conditions: undefined,
         trackLayoutId: "l1",
         notes: undefined,

@@ -8,6 +8,7 @@ const baseForm: SessionOverviewFormState = {
   trackId: "c1",
   trackLayoutId: "l1",
   kartId: "k1",
+  kartNumber: "",
   format: "Practice",
   date: "2024-01-01",
   time: "10:00",
@@ -29,6 +30,7 @@ describe("validateSessionOverviewForm", () => {
       conditions: "Dry",
       trackLayoutId: "l1",
       kartId: "k1",
+      kartNumber: "",
       notes: "Notes",
       fastestLap: null,
     });
