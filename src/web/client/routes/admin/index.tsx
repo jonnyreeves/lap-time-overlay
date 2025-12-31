@@ -11,6 +11,7 @@ import type { adminToolsQuery } from "../../__generated__/adminToolsQuery.graphq
 import type { adminUpdateTempCleanupScheduleMutation } from "../../__generated__/adminUpdateTempCleanupScheduleMutation.graphql.js";
 import type { adminUpdateUserAdminStatusMutation } from "../../__generated__/adminUpdateUserAdminStatusMutation.graphql.js";
 import type { adminCancelRenderJobMutation } from "../../__generated__/adminCancelRenderJobMutation.graphql.js";
+import type { adminUpdateVideoAccelerationPreferenceMutation } from "../../__generated__/adminUpdateVideoAccelerationPreferenceMutation.graphql.js";
 import type { RequireAuthViewerQuery } from "../../__generated__/RequireAuthViewerQuery.graphql.js";
 import { Card } from "../../components/Card.js";
 import { useBreadcrumbs } from "../../hooks/useBreadcrumbs.js";
@@ -60,6 +61,31 @@ const AdminToolsPageQuery = graphql`
       enabled
       lastRunAt
       nextRunAt
+    }
+    adminVideoAcceleration {
+      available
+      backend
+      effectiveBackend
+      preferHardwareEncoding
+      probing
+      circuitBreakerActive
+      circuitResetAt
+      details {
+        hasDri
+        hasRenderD128
+        hasCard0
+        ffmpegHasHwaccel {
+          qsv
+          vaapi
+        }
+        ffmpegHasEncoder {
+          h264_qsv
+          h264_vaapi
+          hevc_qsv
+          hevc_vaapi
+        }
+        probeErrors
+      }
     }
   }
 `;
@@ -119,6 +145,40 @@ const AdminRunTempCleanupMutation = graphql`
         enabled
         lastRunAt
         nextRunAt
+      }
+    }
+  }
+`;
+
+const AdminUpdateVideoAccelerationPreferenceMutation = graphql`
+  mutation adminUpdateVideoAccelerationPreferenceMutation(
+    $input: UpdateVideoAccelerationPreferenceInput!
+  ) {
+    updateVideoAccelerationPreference(input: $input) {
+      status {
+        available
+        backend
+        effectiveBackend
+        preferHardwareEncoding
+        probing
+        circuitBreakerActive
+        circuitResetAt
+        details {
+          hasDri
+          hasRenderD128
+          hasCard0
+          ffmpegHasHwaccel {
+            qsv
+            vaapi
+          }
+          ffmpegHasEncoder {
+            h264_qsv
+            h264_vaapi
+            hevc_qsv
+            hevc_vaapi
+          }
+          probeErrors
+        }
       }
     }
   }
@@ -240,6 +300,16 @@ function friendlyRenderJobType(type: string): string {
     .join(" ");
 }
 
+function backendLabel(backend?: string | null): string {
+  if (backend === "QSV") return "QSV";
+  if (backend === "VAAPI") return "VA-API";
+  return "CPU";
+}
+
+function boolLabel(value?: boolean | null): string {
+  return value ? "Yes" : "No";
+}
+
 const renderJobListStyles = css`
   display: grid;
   gap: 10px;
@@ -281,6 +351,33 @@ const renderJobProgressFill = (percent: number) => css`
   width: ${percent}%;
   height: 100%;
   transition: width 0.2s ease;
+`;
+
+const statusBadge = (tone: "success" | "warning" | "muted") => css`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: ${tone === "success" ? "#e8f5e9" : tone === "warning" ? "#fff4e5" : "#f3f4f6"};
+  color: ${tone === "success" ? "#166534" : tone === "warning" ? "#92400e" : "#1f2937"};
+`;
+
+const detailListStyles = css`
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+`;
+
+const detailRowStyles = css`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #1f2937;
 `;
 
 const dayOptions = [
@@ -335,6 +432,10 @@ export default function AdminToolsRoute() {
   const [updatingUserIds, setUpdatingUserIds] = useState<string[]>([]);
   const [userMessage, setUserMessage] = useState<string | null>(null);
   const [userError, setUserError] = useState<string | null>(null);
+  const [videoAcceleration, setVideoAcceleration] = useState(data.adminVideoAcceleration);
+  const [videoAccelError, setVideoAccelError] = useState<string | null>(null);
+  const [videoAccelMessage, setVideoAccelMessage] = useState<string | null>(null);
+  const [showVideoDetails, setShowVideoDetails] = useState(false);
 
   useEffect(() => {
     setBreadcrumbs([{ label: "Admin" }]);
@@ -345,6 +446,10 @@ export default function AdminToolsRoute() {
     setScheduleHour(String(data.adminTempCleanupSchedule.hour));
     setScheduleDays(new Set(data.adminTempCleanupSchedule.days ?? []));
   }, [data.adminTempCleanupSchedule.days, data.adminTempCleanupSchedule.hour]);
+
+  useEffect(() => {
+    setVideoAcceleration(data.adminVideoAcceleration);
+  }, [data.adminVideoAcceleration]);
 
   const [commitDelete] = useMutation<adminDeleteOrphanedMediaMutation>(AdminDeleteOrphanedMediaMutation);
   const [commitEmpty] = useMutation<adminEmptyTempDirMutation>(AdminEmptyTempDirMutation);
@@ -359,6 +464,8 @@ export default function AdminToolsRoute() {
     AdminUpdateUserAdminStatusMutation
   );
   const [commitCancelRenderJob] = useMutation<adminCancelRenderJobMutation>(AdminCancelRenderJobMutation);
+  const [commitUpdateVideoAccelerationPreference, isUpdatingVideoPreference] =
+    useMutation<adminUpdateVideoAccelerationPreferenceMutation>(AdminUpdateVideoAccelerationPreferenceMutation);
 
   const orphanedMedia = data.adminOrphanedMedia ?? [];
   const adminUsers = data.adminUsers ?? [];
@@ -430,8 +537,34 @@ export default function AdminToolsRoute() {
     });
   };
 
+  const handleUpdateVideoPreference = (nextValue: boolean) => {
+    if (!videoAcceleration) return;
+    setVideoAccelError(null);
+    setVideoAccelMessage(null);
+    const previous = videoAcceleration;
+    setVideoAcceleration({ ...videoAcceleration, preferHardwareEncoding: nextValue });
+    commitUpdateVideoAccelerationPreference({
+      variables: { input: { preferHardwareEncoding: nextValue } },
+      onCompleted: (response) => {
+        const status = response.updateVideoAccelerationPreference?.status;
+        if (status) {
+          setVideoAcceleration(status);
+          setVideoAccelMessage("Preference updated.");
+        } else {
+          setVideoAcceleration(previous);
+        }
+      },
+      onError: (error) => {
+        setVideoAcceleration(previous);
+        setVideoAccelError(error.message);
+      },
+    });
+  };
+
   const cleanupSchedule = data.adminTempCleanupSchedule;
   const scheduleEnabled = scheduleDays.size > 0;
+  const videoStatus = videoAcceleration ?? data.adminVideoAcceleration;
+  const hardwareToggleDisabled = !videoStatus?.available || isUpdatingVideoPreference;
 
   const toggleDay = (value: number) => {
     setScheduleDays((prev) => {
@@ -659,6 +792,105 @@ export default function AdminToolsRoute() {
       </div>
 
       <div css={columnStyles}>
+        <Card title="Video acceleration">
+          {!videoStatus ? (
+            <p>Loading status…</p>
+          ) : (
+            <div css={css`display: grid; gap: 12px;`}>
+              <div css={css`display: grid; gap: 6px;`}>
+                <span
+                  css={statusBadge(
+                    videoStatus.available ? "success" : videoStatus.probing ? "muted" : "warning"
+                  )}
+                >
+                  {videoStatus.probing
+                    ? "Hardware encoding: Probing…"
+                    : videoStatus.available
+                      ? `Hardware encoding: Available (${backendLabel(videoStatus.backend)})`
+                      : "Hardware encoding: Unavailable"}
+                </span>
+                <div css={css`color: #475569; font-size: 0.95rem;`}>
+                  <div>
+                    Effective:{" "}
+                    {videoStatus.effectiveBackend === "NONE"
+                      ? "CPU (fallback)"
+                      : backendLabel(videoStatus.effectiveBackend)}
+                  </div>
+                  {videoStatus.circuitBreakerActive && videoStatus.circuitResetAt ? (
+                    <div>
+                      GPU temporarily disabled after failures until{" "}
+                      {new Date(videoStatus.circuitResetAt).toLocaleString()}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+
+              <label css={css`display: grid; gap: 6px;`}>
+                <span>Prefer hardware encoding (GPU) when available</span>
+                <div css={css`display: flex; gap: 10px; align-items: center;`}>
+                  <input
+                    type="checkbox"
+                    checked={videoStatus.preferHardwareEncoding}
+                    disabled={hardwareToggleDisabled}
+                    onChange={(event) => handleUpdateVideoPreference(event.target.checked)}
+                  />
+                  <span css={css`color: #4b5563; font-size: 0.95rem;`}>
+                    Uses Intel/AMD hardware encoders when detected; automatically falls back to CPU if unavailable or if encoding fails.
+                  </span>
+                </div>
+                {!videoStatus.available ? (
+                  <span css={css`color: #b45309; font-size: 0.9rem;`}>GPU not detected; encoding will use CPU.</span>
+                ) : null}
+                {videoAccelMessage ? <span css={css`color: #166534;`}>{videoAccelMessage}</span> : null}
+                {videoAccelError ? <span className="lede">{videoAccelError}</span> : null}
+              </label>
+
+              <button type="button" onClick={() => setShowVideoDetails((prev) => !prev)}>
+                {showVideoDetails ? "Hide probe details" : "Show probe details"}
+              </button>
+
+              {showVideoDetails ? (
+                <div css={detailListStyles}>
+                  <div css={detailRowStyles}>
+                    <span>/dev/dri present</span>
+                    <strong>{boolLabel(videoStatus.details.hasDri)}</strong>
+                  </div>
+                  <div css={detailRowStyles}>
+                    <span>renderD128 readable</span>
+                    <strong>{boolLabel(videoStatus.details.hasRenderD128)}</strong>
+                  </div>
+                  <div css={detailRowStyles}>
+                    <span>card0 readable</span>
+                    <strong>{boolLabel(videoStatus.details.hasCard0)}</strong>
+                  </div>
+                  <div css={detailRowStyles}>
+                    <span>ffmpeg hwaccels</span>
+                    <strong>{`qsv ${boolLabel(videoStatus.details.ffmpegHasHwaccel.qsv)} · vaapi ${boolLabel(videoStatus.details.ffmpegHasHwaccel.vaapi)}`}</strong>
+                  </div>
+                  <div css={detailRowStyles}>
+                    <span>Encoders</span>
+                    <strong>{`h264_qsv ${boolLabel(videoStatus.details.ffmpegHasEncoder.h264_qsv)} · h264_vaapi ${boolLabel(videoStatus.details.ffmpegHasEncoder.h264_vaapi)}`}</strong>
+                  </div>
+                  <div css={detailRowStyles}>
+                    <span>HEVC encoders</span>
+                    <strong>{`hevc_qsv ${boolLabel(videoStatus.details.ffmpegHasEncoder.hevc_qsv)} · hevc_vaapi ${boolLabel(videoStatus.details.ffmpegHasEncoder.hevc_vaapi)}`}</strong>
+                  </div>
+                  {videoStatus.details.probeErrors.length ? (
+                    <div css={css`font-size: 0.9rem; color: #b91c1c;`}>
+                      <strong>Probe errors</strong>
+                      <ul css={css`margin: 6px 0 0 14px; padding: 0;`}>
+                        {videoStatus.details.probeErrors.map((err, idx) => (
+                          <li key={`${err}-${idx}`}>{err}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          )}
+        </Card>
+
         <Card title="Temp cleanup schedule">
           <div css={scheduleGridStyles}>
             <p css={css`color: #3e4b6d; margin: 0;`}>

@@ -25,6 +25,34 @@ vi.mock("../../../src/web/config.js", () => {
   };
 });
 
+vi.mock("../../../src/web/video/hardwareEncoding.js", () => ({
+  prepareEncoderPlans: vi.fn(async ({ codec, preset, crf }) => {
+    const videoCodec = codec === "h265" ? "libx265" : "libx264";
+    const plan = {
+      label: "cpu",
+      backend: "none",
+      isHardware: false,
+      videoCodec,
+      videoQualityOptions: ["-preset", preset, "-crf", String(crf)],
+      extraOutputOptions: [],
+    };
+    return {
+      primary: plan,
+      fallback: plan,
+      attemptedHardware: false,
+      backend: "none",
+      circuitBreakerActive: false,
+      disabledUntil: null,
+      preferHardwareEncoding: false,
+    };
+  }),
+  runEncodingAttempts: vi.fn(async ({ attempts, execute }) => {
+    if (attempts.length) {
+      await execute(attempts[0]);
+    }
+  }),
+}));
+
 const testRootDir = path.join(process.cwd(), "temp", "overlay-burn-tests");
 
 let savedOutputs: string[] = [];
@@ -39,6 +67,7 @@ vi.mock("fluent-ffmpeg", () => {
         progress: [],
         error: [],
         end: [],
+        stderr: [],
       };
       const outputOptionsCalls: string[][] = [];
       const api = {

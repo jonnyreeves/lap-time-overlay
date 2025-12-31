@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<162c97c6cff2b710a485fdea1fa32ecc>>
+ * @generated SignedSource<<6bbe48274639f5a357f5df596bebfce2>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,6 +12,7 @@ import { ConcreteRequest } from 'relay-runtime';
 export type AdminTempDirName = "PREVIEWS" | "RENDERS" | "UPLOADS" | "%future added value";
 export type RenderJobType = "COMBINE" | "OVERLAY" | "%future added value";
 export type TrackRecordingStatus = "COMBINING" | "FAILED" | "PENDING_UPLOAD" | "READY" | "UPLOADING" | "%future added value";
+export type VideoAccelerationBackend = "NONE" | "QSV" | "VAAPI" | "%future added value";
 export type adminToolsQuery$variables = Record<PropertyKey, never>;
 export type adminToolsQuery$data = {
   readonly adminOrphanedMedia: ReadonlyArray<{
@@ -58,6 +59,31 @@ export type adminToolsQuery$data = {
     readonly isAdmin: boolean;
     readonly username: string;
   }>;
+  readonly adminVideoAcceleration: {
+    readonly available: boolean;
+    readonly backend: VideoAccelerationBackend;
+    readonly circuitBreakerActive: boolean;
+    readonly circuitResetAt: string | null | undefined;
+    readonly details: {
+      readonly ffmpegHasEncoder: {
+        readonly h264_qsv: boolean;
+        readonly h264_vaapi: boolean;
+        readonly hevc_qsv: boolean;
+        readonly hevc_vaapi: boolean;
+      };
+      readonly ffmpegHasHwaccel: {
+        readonly qsv: boolean;
+        readonly vaapi: boolean;
+      };
+      readonly hasCard0: boolean;
+      readonly hasDri: boolean;
+      readonly hasRenderD128: boolean;
+      readonly probeErrors: ReadonlyArray<string>;
+    };
+    readonly effectiveBackend: VideoAccelerationBackend;
+    readonly preferHardwareEncoding: boolean;
+    readonly probing: boolean;
+  };
 };
 export type adminToolsQuery = {
   response: adminToolsQuery$data;
@@ -325,6 +351,169 @@ v3 = [
       }
     ],
     "storageKey": null
+  },
+  {
+    "alias": null,
+    "args": null,
+    "concreteType": "VideoAccelerationStatus",
+    "kind": "LinkedField",
+    "name": "adminVideoAcceleration",
+    "plural": false,
+    "selections": [
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "available",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "backend",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "effectiveBackend",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "preferHardwareEncoding",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "probing",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "circuitBreakerActive",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "circuitResetAt",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "concreteType": "VideoAccelerationDetails",
+        "kind": "LinkedField",
+        "name": "details",
+        "plural": false,
+        "selections": [
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "hasDri",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "hasRenderD128",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "hasCard0",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "VideoAccelerationHwaccel",
+            "kind": "LinkedField",
+            "name": "ffmpegHasHwaccel",
+            "plural": false,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "qsv",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "vaapi",
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "VideoAccelerationEncoders",
+            "kind": "LinkedField",
+            "name": "ffmpegHasEncoder",
+            "plural": false,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "h264_qsv",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "h264_vaapi",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "hevc_qsv",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "hevc_vaapi",
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "probeErrors",
+            "storageKey": null
+          }
+        ],
+        "storageKey": null
+      }
+    ],
+    "storageKey": null
   }
 ];
 return {
@@ -345,16 +534,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "f451626fad6515279b9a99cdeef28d15",
+    "cacheID": "5b44e971002db876bd69522bdf1f6298",
     "id": null,
     "metadata": {},
     "name": "adminToolsQuery",
     "operationKind": "query",
-    "text": "query adminToolsQuery {\n  adminOrphanedMedia {\n    mediaId\n    sizeBytes\n    modifiedAt\n  }\n  adminTempDirs {\n    name\n    path\n    sizeBytes\n    fileCount\n  }\n  adminRecordingHealth {\n    status\n    count\n  }\n  adminRenderJobs {\n    recordingId\n    sessionId\n    description\n    userId\n    username\n    type\n    progress\n    startedAt\n  }\n  adminUserMediaLibraries {\n    userId\n    username\n    sizeBytes\n    recordingCount\n  }\n  adminUsers {\n    id\n    username\n    createdAt\n    isAdmin\n  }\n  adminTempCleanupSchedule {\n    hour\n    days\n    enabled\n    lastRunAt\n    nextRunAt\n  }\n}\n"
+    "text": "query adminToolsQuery {\n  adminOrphanedMedia {\n    mediaId\n    sizeBytes\n    modifiedAt\n  }\n  adminTempDirs {\n    name\n    path\n    sizeBytes\n    fileCount\n  }\n  adminRecordingHealth {\n    status\n    count\n  }\n  adminRenderJobs {\n    recordingId\n    sessionId\n    description\n    userId\n    username\n    type\n    progress\n    startedAt\n  }\n  adminUserMediaLibraries {\n    userId\n    username\n    sizeBytes\n    recordingCount\n  }\n  adminUsers {\n    id\n    username\n    createdAt\n    isAdmin\n  }\n  adminTempCleanupSchedule {\n    hour\n    days\n    enabled\n    lastRunAt\n    nextRunAt\n  }\n  adminVideoAcceleration {\n    available\n    backend\n    effectiveBackend\n    preferHardwareEncoding\n    probing\n    circuitBreakerActive\n    circuitResetAt\n    details {\n      hasDri\n      hasRenderD128\n      hasCard0\n      ffmpegHasHwaccel {\n        qsv\n        vaapi\n      }\n      ffmpegHasEncoder {\n        h264_qsv\n        h264_vaapi\n        hevc_qsv\n        hevc_vaapi\n      }\n      probeErrors\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "602a73027fe17367803e6e674b182eda";
+(node as any).hash = "4a89453239b61412924b23c9cd6c04b1";
 
 export default node;

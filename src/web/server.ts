@@ -8,10 +8,14 @@ import { handleOverlayPreviewRequest } from "./http/overlayPreview.js";
 import { handleRecordingDownloadRequest, handleRecordingUploadRequest } from "./http/uploads.js";
 import { serveStatic } from "./http/static.js";
 import { tempCleanupScheduler } from "./recordings/tempCleanupScheduler.js";
+import { startHardwareProbe } from "../video/hwProbe.js";
 
 await loadEnvFiles();
 await runMigrations();
 await ensureWorkDirs();
+void startHardwareProbe().catch((err) => {
+  console.warn("Hardware encoding probe failed to start", err);
+});
 await tempCleanupScheduler.start();
 
 const server = http.createServer(async (req, res) => {

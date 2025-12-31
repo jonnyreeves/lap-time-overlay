@@ -21,6 +21,10 @@ import { getTempCleanupSchedule } from "../../recordings/tempCleanup.js";
 import { tempCleanupScheduler } from "../../recordings/tempCleanupScheduler.js";
 import type { TempCleanupSchedule } from "../../recordings/tempCleanup.js";
 import { cancelRenderJob, getActiveRenderJobs } from "../../recordings/renderJobs.js";
+import {
+  getVideoAccelerationStatus,
+  updateVideoAccelerationPreference,
+} from "../../video/hardwareEncoding.js";
 
 function requireAuthentication(context: GraphQLContext): void {
   if (!context.currentUser) {
@@ -117,6 +121,10 @@ export const adminResolvers = {
     requireAdmin(context);
     const schedule = await getTempCleanupSchedule();
     return toGraphQLSchedule(schedule);
+  },
+  adminVideoAcceleration: async (_args: unknown, context: GraphQLContext) => {
+    requireAdmin(context);
+    return getVideoAccelerationStatus();
   },
   rebuildMediaLibraryProjectionAll: async (_args: unknown, context: GraphQLContext) => {
     requireAdmin(context);
@@ -258,5 +266,19 @@ export const adminResolvers = {
     }
 
     return { user: toAdminUserPayload(updated) };
+  },
+  updateVideoAccelerationPreference: async (
+    args: { input?: { preferHardwareEncoding?: boolean | null } },
+    context: GraphQLContext
+  ) => {
+    requireAdmin(context);
+    const prefer = args.input?.preferHardwareEncoding;
+    if (typeof prefer !== "boolean") {
+      throw new GraphQLError("preferHardwareEncoding must be true or false", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    const status = await updateVideoAccelerationPreference(prefer);
+    return { status };
   },
 };

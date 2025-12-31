@@ -99,6 +99,19 @@ vi.mock("../../../../src/db/track_recordings.js", () => ({
   findTrackRecordingById: findTrackRecordingByIdMock,
 }));
 
+const {
+  getVideoAccelerationStatusMock,
+  updateVideoAccelerationPreferenceMock,
+} = vi.hoisted(() => ({
+  getVideoAccelerationStatusMock: vi.fn(),
+  updateVideoAccelerationPreferenceMock: vi.fn(),
+}));
+
+vi.mock("../../../../src/web/video/hardwareEncoding.js", () => ({
+  getVideoAccelerationStatus: getVideoAccelerationStatusMock,
+  updateVideoAccelerationPreference: updateVideoAccelerationPreferenceMock,
+}));
+
 describe("admin resolvers", () => {
   const { context } = createMockGraphQLContext({
     currentUser: { id: "user-1", username: "sam", createdAt: 0, isAdmin: true },
@@ -140,6 +153,28 @@ describe("admin resolvers", () => {
     expect(await rootValue.adminRecordingHealth({}, context)).toEqual([
       { status: "READY", count: 1 },
     ]);
+  });
+
+  it("exposes video acceleration status", async () => {
+    const status = {
+      available: true,
+      backend: "QSV",
+      effectiveBackend: "QSV",
+      preferHardwareEncoding: true,
+      probing: false,
+      circuitBreakerActive: false,
+      circuitResetAt: null,
+      details: {
+        hasDri: true,
+        hasRenderD128: true,
+        hasCard0: false,
+        ffmpegHasHwaccel: { qsv: true, vaapi: false },
+        ffmpegHasEncoder: { h264_qsv: true, h264_vaapi: false, hevc_qsv: false, hevc_vaapi: false },
+        probeErrors: [],
+      },
+    };
+    getVideoAccelerationStatusMock.mockResolvedValue(status);
+    await expect(rootValue.adminVideoAcceleration({}, context)).resolves.toEqual(status);
   });
 
   it("exposes user media libraries", async () => {
@@ -337,6 +372,33 @@ describe("admin resolvers", () => {
       lastRunAt: new Date(456).toISOString(),
       nextRunAt: null,
     });
+  });
+
+  it("updates video acceleration preference", async () => {
+    const status = {
+      available: false,
+      backend: "NONE",
+      effectiveBackend: "NONE",
+      preferHardwareEncoding: false,
+      probing: false,
+      circuitBreakerActive: false,
+      circuitResetAt: null,
+      details: {
+        hasDri: false,
+        hasRenderD128: false,
+        hasCard0: false,
+        ffmpegHasHwaccel: { qsv: false, vaapi: false },
+        ffmpegHasEncoder: { h264_qsv: false, h264_vaapi: false, hevc_qsv: false, hevc_vaapi: false },
+        probeErrors: ["ffmpeg missing"],
+      },
+    };
+    updateVideoAccelerationPreferenceMock.mockResolvedValue(status);
+    const response = await rootValue.updateVideoAccelerationPreference(
+      { input: { preferHardwareEncoding: false } },
+      context
+    );
+    expect(updateVideoAccelerationPreferenceMock).toHaveBeenCalledWith(false);
+    expect(response).toEqual({ status });
   });
 
   it("validates updateUserAdminStatus input", async () => {

@@ -15,6 +15,11 @@ import { buildDrawtextFilterGraph } from "../../ffmpeg/overlay.js";
 import type { Lap } from "../../ffmpeg/lapTypes.js";
 import { probeVideoInfo, type VideoInfo } from "../../ffmpeg/videoInfo.js";
 import { sessionRecordingsDir, tmpRendersDir } from "../config.js";
+import {
+  prepareEncoderPlans,
+  runEncodingAttempts,
+  type VideoEncoderPlan,
+} from "../video/hardwareEncoding.js";
 import { buildOverlayLaps, buildOverlayStyle } from "./overlayPreview.js";
 import { buildChapterMarkers, buildChapterMetadataFile } from "./chapterMetadata.js";
 import { rebuildMediaLibrarySessionProjection } from "./mediaLibraryProjection.js";
@@ -116,26 +121,26 @@ async function runOverlayRender({
   laps,
   startOffsetS,
   style,
-  quality,
-  codec,
   video,
   chapterMetadataFile,
   onProgress,
   onCommand,
+  encoderPlan,
+  onStderr,
 }: {
   inputVideo: string;
   outputFile: string;
   laps: Lap[];
   startOffsetS: number;
   style: OverlayStyle;
-  quality: BurnQuality;
-  codec: BurnCodec;
   video: VideoInfo;
   chapterMetadataFile?: string | null;
   onProgress?: (percent: number) => void;
   onCommand?: (command: ReturnType<typeof ffmpeg>) => void;
+  encoderPlan: VideoEncoderPlan;
+  onStderr?: (line: string) => void;
 }) {
-  const { filterGraph, outputLabel } = buildDrawtextFilterGraph({
+  const baseGraph = buildDrawtextFilterGraph({
     inputVideo,
     outputFile,
     video,
@@ -143,18 +148,26 @@ async function runOverlayRender({
     startOffsetS,
     style,
   });
+  let filterGraph = [...baseGraph.filterGraph];
+  let outputLabel = baseGraph.outputLabel;
+
+  if (encoderPlan.transformFilterGraph) {
+    const transformed = encoderPlan.transformFilterGraph(filterGraph, outputLabel);
+    filterGraph = transformed.filterGraph;
+    outputLabel = transformed.outputLabel;
+  }
 
   await fsp.mkdir(path.dirname(outputFile), { recursive: true });
   await fsp.rm(outputFile, { force: true });
-
-  const { preset, crf } = qualityOptions(quality);
-  const videoCodec = codec === "h264" ? "libx264" : "libx265";
 
   return new Promise<void>((resolve, reject) => {
     const cmd = ffmpeg().input(inputVideo);
     const metadataInputIndex = chapterMetadataFile ? 1 : null;
     if (chapterMetadataFile) {
       cmd.input(chapterMetadataFile);
+    }
+    if (encoderPlan.inputOptions?.length) {
+      cmd.inputOptions(encoderPlan.inputOptions);
     }
 
     const outputOptions = [
@@ -163,15 +176,13 @@ async function runOverlayRender({
       "-map",
       "0:a?",
       "-c:v",
-      videoCodec,
-      "-preset",
-      preset,
-      "-crf",
-      String(crf),
+      encoderPlan.videoCodec,
+      ...encoderPlan.videoQualityOptions,
       "-c:a",
       "copy",
       "-movflags",
       "+faststart",
+      ...(encoderPlan.extraOutputOptions ?? []),
     ];
 
     if (metadataInputIndex != null) {
@@ -179,6 +190,9 @@ async function runOverlayRender({
     }
 
     onCommand?.(cmd);
+    if (onStderr) {
+      cmd.on("stderr", onStderr);
+    }
     cmd
       .complexFilter(filterGraph)
       .outputOptions(outputOptions)
@@ -280,21 +294,71 @@ export async function burnRecordingOverlay(options: {
       });
     }
 
-    await runOverlayRender({
-      inputVideo,
-      outputFile: tempOutputFile,
-      laps: overlayLaps,
-      startOffsetS,
-      style,
-      quality,
-      codec: codec ?? "h265",
-      video,
-      chapterMetadataFile: embedChapters ? chapterMetadataFile : null,
-      onProgress: (percent) => {
-        updateTrackRecording(overlayRecording.id, { combineProgress: Math.max(0, Math.min(1, percent / 100)) });
-      },
-      onCommand: (command) => {
-        overlayCommand = command;
+    const { preset, crf } = qualityOptions(quality);
+    const targetCodec: BurnCodec = codec ?? "h265";
+    const encoderPlans = await prepareEncoderPlans({
+      codec: targetCodec,
+      preset,
+      crf,
+    });
+
+    const attempts = encoderPlans.attemptedHardware
+      ? [
+          {
+            plan: encoderPlans.primary,
+            isHardware: encoderPlans.primary.isHardware,
+            backend: encoderPlans.backend,
+            stderr: [] as string[],
+          },
+          {
+            plan: encoderPlans.fallback,
+            isHardware: false,
+            backend: "none" as const,
+            stderr: [] as string[],
+          },
+        ]
+      : [
+          {
+            plan: encoderPlans.primary,
+            isHardware: false,
+            backend: "none" as const,
+            stderr: [] as string[],
+          },
+        ];
+
+    await runEncodingAttempts({
+      attempts: attempts.map((attempt) => ({
+        plan: attempt.plan,
+        isHardware: attempt.isHardware,
+        backend: attempt.backend,
+        collectStderr: () => attempt.stderr.join("\n"),
+      })),
+      execute: async (attempt) => {
+        const buffer = attempts.find((entry) => entry.plan === attempt.plan);
+        const stderr = buffer?.stderr ?? [];
+        await runOverlayRender({
+          inputVideo,
+          outputFile: tempOutputFile,
+          laps: overlayLaps,
+          startOffsetS,
+          style,
+          video,
+          chapterMetadataFile: embedChapters ? chapterMetadataFile : null,
+          encoderPlan: attempt.plan,
+          onProgress: (percent) => {
+            updateTrackRecording(overlayRecording.id, {
+              combineProgress: Math.max(0, Math.min(1, percent / 100)),
+            });
+          },
+          onCommand: (command) => {
+            overlayCommand = command;
+          },
+          onStderr: (line) => {
+            if (stderr.length < 200) {
+              stderr.push(line);
+            }
+          },
+        });
       },
     });
     await moveRenderedOverlay(tempOutputFile, finalOutputFile);

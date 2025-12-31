@@ -52,6 +52,7 @@ export const rootValue = {
   adminUserMediaLibraries: adminResolvers.adminUserMediaLibraries,
   adminUsers: adminResolvers.adminUsers,
   adminTempCleanupSchedule: adminResolvers.adminTempCleanupSchedule,
+  adminVideoAcceleration: adminResolvers.adminVideoAcceleration,
   deleteOrphanedMedia: adminResolvers.deleteOrphanedMedia,
   emptyTempDir: adminResolvers.emptyTempDir,
   rebuildMediaLibraryProjectionAll: adminResolvers.rebuildMediaLibraryProjectionAll,
@@ -59,4 +60,5 @@ export const rootValue = {
   updateTempCleanupSchedule: adminResolvers.updateTempCleanupSchedule,
   runTempCleanup: adminResolvers.runTempCleanup,
   updateUserAdminStatus: adminResolvers.updateUserAdminStatus,
+  updateVideoAccelerationPreference: adminResolvers.updateVideoAccelerationPreference,
 };

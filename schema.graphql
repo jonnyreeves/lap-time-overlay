@@ -11,6 +11,7 @@ type Query {
   adminUserMediaLibraries: [AdminUserMediaLibrary!]!
   adminUsers: [AdminUser!]!
   adminTempCleanupSchedule: TempCleanupSchedule!
+  adminVideoAcceleration: VideoAccelerationStatus!
 }
 
 type AdminOrphanedMedia {
@@ -69,6 +70,44 @@ type AdminUser {
 
 type CancelRenderJobPayload {
   success: Boolean!
+}
+
+enum VideoAccelerationBackend {
+  NONE
+  QSV
+  VAAPI
+}
+
+type VideoAccelerationHwaccel {
+  qsv: Boolean!
+  vaapi: Boolean!
+}
+
+type VideoAccelerationEncoders {
+  h264_qsv: Boolean!
+  h264_vaapi: Boolean!
+  hevc_qsv: Boolean!
+  hevc_vaapi: Boolean!
+}
+
+type VideoAccelerationDetails {
+  hasDri: Boolean!
+  hasRenderD128: Boolean!
+  hasCard0: Boolean!
+  ffmpegHasHwaccel: VideoAccelerationHwaccel!
+  ffmpegHasEncoder: VideoAccelerationEncoders!
+  probeErrors: [String!]!
+}
+
+type VideoAccelerationStatus {
+  available: Boolean!
+  backend: VideoAccelerationBackend!
+  effectiveBackend: VideoAccelerationBackend!
+  preferHardwareEncoding: Boolean!
+  probing: Boolean!
+  circuitBreakerActive: Boolean!
+  circuitResetAt: String
+  details: VideoAccelerationDetails!
 }
 
 type TempCleanupSchedule {
@@ -298,6 +337,14 @@ type BurnRecordingOverlayPayload {
   recording: TrackRecording!
 }
 
+input UpdateVideoAccelerationPreferenceInput {
+  preferHardwareEncoding: Boolean!
+}
+
+type UpdateVideoAccelerationPreferencePayload {
+  status: VideoAccelerationStatus!
+}
+
 type Mutation {
   register(input: AuthInput!): AuthPayload!
   login(input: AuthInput!): AuthPayload!
@@ -334,6 +381,9 @@ type Mutation {
   rebuildMediaLibraryProjectionAll: RebuildMediaLibraryProjectionAllPayload!
   updateUserAdminStatus(input: UpdateUserAdminStatusInput!): UpdateUserAdminStatusPayload!
   cancelRenderJob(recordingId: ID!): CancelRenderJobPayload!
+  updateVideoAccelerationPreference(
+    input: UpdateVideoAccelerationPreferenceInput!
+  ): UpdateVideoAccelerationPreferencePayload!
 }
 
 
