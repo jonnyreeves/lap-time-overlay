@@ -412,6 +412,7 @@ const TrackSessionsTableFragment = graphql`
             track {
               id
               name
+              isIndoors
             }
             trackLayout {
               id
@@ -821,8 +822,9 @@ export function TrackSessionsTable({
                   const consistencyScore = session.consistencyScore ?? null;
                   const formattedDate = format(new Date(session.date), "do MMM yyyy");
                   const formattedTime = format(new Date(session.date), "p");
-                  const conditionsLabel = session.conditions ?? "—";
-                  const conditionsEmoji = getConditionsEmoji(session.conditions);
+                  const isTrackIndoors = session.track?.isIndoors ?? false;
+                  const conditionsLabel = isTrackIndoors ? "Dry" : session.conditions ?? "—";
+                  const conditionsEmoji = getConditionsEmoji(conditionsLabel);
 
                   return (
                     <tr key={session.id} onClick={() => navigate(`/session/${session.id}`)}>
@@ -856,7 +858,7 @@ export function TrackSessionsTable({
                       <td>
                         <span
                           css={[pillStyles, conditionsPillStyles]}
-                          aria-label={session.conditions ?? "Conditions unknown"}
+                          aria-label={conditionsLabel ?? "Conditions unknown"}
                         >
                           <span aria-hidden>{conditionsEmoji}</span>
                           <span>{conditionsLabel}</span>

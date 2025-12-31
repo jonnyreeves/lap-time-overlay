@@ -217,7 +217,11 @@ export const viewerResolvers = {
           if (trackIdFilter && session.trackId !== trackIdFilter) return false;
           if (trackLayoutIdFilter && session.trackLayoutId !== trackLayoutIdFilter) return false;
           if (kartIdFilter && session.kartId !== kartIdFilter) return false;
-          if (normalizedConditions && session.conditions !== normalizedConditions) return false;
+          if (normalizedConditions) {
+            const track = repositories.tracks.findById(session.trackId);
+            const sessionConditions = track?.isIndoors ? "Dry" : session.conditions;
+            if (sessionConditions !== normalizedConditions) return false;
+          }
           if (normalizedFormat && session.format !== normalizedFormat) return false;
           return true;
         });

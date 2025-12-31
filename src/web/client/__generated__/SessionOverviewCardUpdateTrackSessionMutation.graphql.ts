@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<95e97225d58ef4f7d56c395fbcc2629d>>
+ * @generated SignedSource<<8d8437240c0d130936cf923cec711940>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -44,6 +44,7 @@ export type SessionOverviewCardUpdateTrackSessionMutation$data = {
       readonly temperature: string | null | undefined;
       readonly track: {
         readonly id: string;
+        readonly isIndoors: boolean;
         readonly name: string;
         readonly postcode: string | null | undefined;
       };
@@ -182,6 +183,13 @@ v4 = [
                 "kind": "ScalarField",
                 "name": "postcode",
                 "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "isIndoors",
+                "storageKey": null
               }
             ],
             "storageKey": null
@@ -238,16 +246,16 @@ return {
     "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "2849e2075651efaa5acc9374e5cd08a5",
+    "cacheID": "b42b053f6f09deeddb4299b317f670c5",
     "id": null,
     "metadata": {},
     "name": "SessionOverviewCardUpdateTrackSessionMutation",
     "operationKind": "mutation",
-    "text": "mutation SessionOverviewCardUpdateTrackSessionMutation(\n  $input: UpdateTrackSessionInput!\n) {\n  updateTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      fastestLap\n      conditions\n      temperature\n      notes\n      kartNumber\n      track {\n        id\n        name\n        postcode\n      }\n      kart {\n        id\n        name\n      }\n      trackLayout {\n        id\n        name\n      }\n      updatedAt\n    }\n  }\n}\n"
+    "text": "mutation SessionOverviewCardUpdateTrackSessionMutation(\n  $input: UpdateTrackSessionInput!\n) {\n  updateTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      fastestLap\n      conditions\n      temperature\n      notes\n      kartNumber\n      track {\n        id\n        name\n        postcode\n        isIndoors\n      }\n      kart {\n        id\n        name\n      }\n      trackLayout {\n        id\n        name\n      }\n      updatedAt\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "b0bb5fd26f233a8b9bb221d773904409";
+(node as any).hash = "c5df8df7abb31a2b52df244b7d30163f";
 
 export default node;

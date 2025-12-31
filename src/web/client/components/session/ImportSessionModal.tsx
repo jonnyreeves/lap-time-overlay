@@ -14,7 +14,7 @@ interface ImportSessionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onImport: (result: SessionImportSelection) => void;
-  tracks: ReadonlyArray<{ id: string; name: string }>;
+  tracks: ReadonlyArray<{ id: string; name: string; isIndoors: boolean }>;
 }
 
 const modalOverlayStyles = css`
@@ -237,7 +237,7 @@ export function ImportSessionModal({
       laps,
       trackId: selectedTrackId.trim() ? selectedTrackId.trim() : null,
       temperature: weatherData.temperature,
-      conditions: weatherData.conditions,
+      conditions: selectedTrackIsIndoors ? "Dry" : weatherData.conditions,
       driverName: parsed.provider === "teamsport" ? selectedDriver || parsed.drivers[0]?.name : undefined,
       sessionFastestLapSeconds: parsed.sessionFastestLapSeconds ?? null,
     });
@@ -293,6 +293,8 @@ export function ImportSessionModal({
       ? `${parsed.sessionDate}T${parsed.sessionTime}`
       : parsed.sessionDate
     : null;
+  const selectedTrack = tracks.find((track) => track.id === selectedTrackId);
+  const selectedTrackIsIndoors = selectedTrack?.isIndoors ?? false;
 
   const importDisabled = !emailContent.trim() || !(previewLaps?.length ?? 0);
   const weatherLoading = weatherStatus === "loading" || isFetchingWeather;
@@ -301,13 +303,15 @@ export function ImportSessionModal({
     : sessionDateTime
       ? "Not available"
       : "Missing session date";
-  const weatherConditionsLabel = weatherLoading
-    ? "Fetching..."
-    : weatherStatus === "error"
-      ? "Unable to fetch"
-      : weatherStatus === "unavailable" || weatherStatus === "idle"
-        ? weatherUnavailableReason
-        : weatherData.conditions ?? "Not found";
+  const weatherConditionsLabel = selectedTrackIsIndoors
+    ? "Dry"
+    : weatherLoading
+      ? "Fetching..."
+      : weatherStatus === "error"
+        ? "Unable to fetch"
+        : weatherStatus === "unavailable" || weatherStatus === "idle"
+          ? weatherUnavailableReason
+          : weatherData.conditions ?? "Not found";
   const weatherTemperatureLabel = weatherLoading
     ? "Fetching..."
     : weatherStatus === "error"
@@ -356,8 +360,9 @@ export function ImportSessionModal({
         const payload = response.fetchTrackSessionTemperature;
         setWeatherData({
       temperature: payload?.temperature ?? null,
-      conditions:
-        payload?.conditions === "Dry" || payload?.conditions === "Wet"
+      conditions: selectedTrackIsIndoors
+        ? "Dry"
+        : payload?.conditions === "Dry" || payload?.conditions === "Wet"
           ? payload.conditions
           : null,
         });
@@ -369,7 +374,7 @@ export function ImportSessionModal({
         setWeatherData({ temperature: null, conditions: null });
       },
     });
-  }, [step, selectedTrackId, sessionDateTime, commitFetchWeather]);
+  }, [step, selectedTrackId, sessionDateTime, commitFetchWeather, selectedTrackIsIndoors]);
 
   if (!isOpen) return null;
 

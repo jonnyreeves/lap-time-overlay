@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<f71702f686d95526684b2b617315bb72>>
+ * @generated SignedSource<<daaf6d72778f7307f32be114178f10f3>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -32,6 +32,7 @@ export type RecentSessionsCard_viewer$data = {
         readonly temperature: string | null | undefined;
         readonly track: {
           readonly id: string;
+          readonly isIndoors: boolean;
           readonly name: string;
         };
         readonly trackLayout: {
@@ -161,7 +162,14 @@ return {
                   "plural": false,
                   "selections": [
                     (v1/*: any*/),
-                    (v0/*: any*/)
+                    (v0/*: any*/),
+                    {
+                      "alias": null,
+                      "args": null,
+                      "kind": "ScalarField",
+                      "name": "isIndoors",
+                      "storageKey": null
+                    }
                   ],
                   "storageKey": null
                 },
@@ -264,6 +272,6 @@ return {
 };
 })();
 
-(node as any).hash = "606bad8b867a6aa023e34f3eac5d7c9d";
+(node as any).hash = "f738d8d8f16f906585030d2f1ca5e819";
 
 export default node;

@@ -172,6 +172,7 @@ const CreateSessionRouteTracksQuery = graphql`
       id
       name
       postcode
+      isIndoors
       karts {
         id
         name
@@ -229,6 +230,7 @@ const CreateTrackSessionMutation = graphql`
           id
           name
           heroImage
+          isIndoors
           personalBestEntries {
             trackSessionId
             conditions
@@ -327,6 +329,7 @@ export default function CreateSessionRoute() {
   const selectedTrack = data.tracks.find((track) => track.id === trackId);
   const selectedTrackKarts = selectedTrack?.karts ?? [];
   const selectedTrackLayouts = selectedTrack?.trackLayouts ?? [];
+  const selectedTrackIsIndoors = selectedTrack?.isIndoors ?? false;
   const canFetchTemperature = Boolean(date) && Boolean(selectedTrack?.postcode?.trim());
   const { setBreadcrumbs } = useBreadcrumbs();
 
@@ -371,6 +374,12 @@ export default function CreateSessionRoute() {
       setTrackLayoutId(availableLayoutIds[0]);
     }
   }, [trackId, kartId, trackLayoutId, data.tracks]);
+
+  useEffect(() => {
+    if (selectedTrackIsIndoors && conditions !== "Dry") {
+      setConditions("Dry");
+    }
+  }, [conditions, selectedTrackIsIndoors]);
 
   useEffect(() => {
     setBreadcrumbs([
@@ -434,7 +443,7 @@ export default function CreateSessionRoute() {
           trackId,
           trackLayoutId,
           kartId,
-          conditions,
+          conditions: selectedTrackIsIndoors ? "Dry" : conditions,
           temperature: trimmedTemperature,
           notes: notes.trim() ? notes.trim() : null,
           ...(trimmedKartNumber ? { kartNumber: trimmedKartNumber } : {}),
@@ -686,15 +695,24 @@ export default function CreateSessionRoute() {
             </div>
             <div css={inputFieldStyles}>
               <label htmlFor="session-conditions">Conditions</label>
-              <select
-                id="session-conditions"
-                value={conditions}
-                onChange={(e) => setConditions(e.target.value)}
-                disabled={isInFlight}
-              >
-                <option value="Dry">Dry</option>
-                <option value="Wet">Wet</option>
-              </select>
+              {selectedTrackIsIndoors ? (
+                <input
+                  id="session-conditions"
+                  type="text"
+                  value="Dry"
+                  disabled
+                />
+              ) : (
+                <select
+                  id="session-conditions"
+                  value={conditions}
+                  onChange={(e) => setConditions(e.target.value)}
+                  disabled={isInFlight}
+                >
+                  <option value="Dry">Dry</option>
+                  <option value="Wet">Wet</option>
+                </select>
+              )}
             </div>
           </div>
           <div css={inputFieldStyles}>

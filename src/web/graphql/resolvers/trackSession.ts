@@ -207,6 +207,7 @@ export function parseLapInputs(laps: LapInputArg[] | null | undefined): TrackSes
 
 export function toTrackSessionPayload(session: TrackSessionRecord, repositories: Repositories) {
   const loadLaps = () => repositories.laps.findBySessionId(session.id);
+  const cachedTrack = repositories.tracks.findById(session.trackId);
   let cachedConsistency: ConsistencyStats | null = null;
 
   const getConsistency = () => {
@@ -250,17 +251,16 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
     format: session.format,
     classification: session.classification,
     fastestLap: session.fastestLap,
-    conditions: session.conditions,
+    conditions: cachedTrack?.isIndoors ? "Dry" : session.conditions,
     temperature: session.temperature,
     kartNumber: session.kartNumber,
     track: () => {
-      const track = repositories.tracks.findById(session.trackId);
-      if (!track) {
+      if (!cachedTrack) {
         throw new GraphQLError(`Track with ID ${session.trackId} not found`, {
           extensions: { code: "NOT_FOUND" },
         });
       }
-      return toTrackPayload(track, repositories, session.userId);
+      return toTrackPayload(cachedTrack, repositories, session.userId);
     },
     trackLayout: () => {
       const layout = repositories.trackLayouts.findById(session.trackLayoutId);
@@ -269,7 +269,7 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
           extensions: { code: "NOT_FOUND" },
         });
       }
-      const track = repositories.tracks.findById(layout.trackId);
+      const track = cachedTrack ?? repositories.tracks.findById(layout.trackId);
       if (!track) {
         throw new GraphQLError(`Track with ID ${layout.trackId} not found`, {
           extensions: { code: "NOT_FOUND" },
@@ -506,7 +506,7 @@ export const trackSessionResolvers = {
 
     const laps = parseLapInputs(input.laps);
     const classification = parseClassification(input.classification);
-    const conditions = parseConditions(input.conditions);
+    const conditions = track.isIndoors ? "Dry" : parseConditions(input.conditions);
     const fastestLap = parseFastestLap(input.fastestLap);
     const kartNumber = input.kartNumber?.trim() ?? "";
     const temperature = input.temperature?.trim() ?? "";
@@ -575,6 +575,13 @@ export const trackSessionResolvers = {
           extensions: { code: "NOT_FOUND" },
         });
       }
+    }
+
+    const targetTrack = repositories.tracks.findById(targetTrackId);
+    if (!targetTrack) {
+      throw new GraphQLError(`Track with ID ${targetTrackId} not found`, {
+        extensions: { code: "NOT_FOUND" },
+      });
     }
 
     const dateProvided = Object.prototype.hasOwnProperty.call(input, "date");
@@ -687,8 +694,9 @@ export const trackSessionResolvers = {
       classificationProvided && input.classification !== null && input.classification !== undefined
         ? parseClassification(input.classification)
         : undefined;
-    const conditions =
-      conditionsProvided && input.conditions !== null && input.conditions !== undefined
+    const conditions = targetTrack.isIndoors
+      ? "Dry"
+      : conditionsProvided && input.conditions !== null && input.conditions !== undefined
         ? parseConditions(input.conditions)
         : undefined;
     const fastestLap =
@@ -751,13 +759,13 @@ export const trackSessionResolvers = {
     }
 
     if (!track.postcode?.trim()) {
-      return { temperature: null, conditions: null };
+      return { temperature: null, conditions: track.isIndoors ? "Dry" : null };
     }
 
     const weather = await fetchWeatherForPostcode(track.postcode, date);
     return {
       temperature: weather?.temperature ?? null,
-      conditions: weather?.conditions ?? null,
+      conditions: track.isIndoors ? "Dry" : weather?.conditions ?? null,
     };
   },
   updateTrackSessionLaps: (args: UpdateTrackSessionLapsInputArgs, context: GraphQLContext) => {

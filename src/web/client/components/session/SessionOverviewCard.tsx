@@ -42,7 +42,7 @@ type SessionDetails = {
   conditions?: string | null;
   temperature?: string | null;
   notes?: string | null;
-  track: { id: string; name: string; postcode?: string | null };
+  track: { id: string; name: string; postcode?: string | null; isIndoors: boolean };
   kart?: { id: string; name: string } | null;
   kartNumber?: string | null;
   trackLayout: { id: string; name: string } | null;
@@ -57,6 +57,7 @@ type Props = {
     id: string;
     name: string;
     postcode?: string | null;
+    isIndoors: boolean;
     karts: readonly { id: string; name: string }[];
     trackLayouts: readonly { id: string; name: string }[];
   }[];
@@ -98,6 +99,7 @@ const UpdateTrackSessionMutation = graphql`
           id
           name
           postcode
+          isIndoors
         }
         kart {
           id
@@ -193,7 +195,6 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
   ]);
 
   const { date: sessionDate, time: sessionTime } = splitDateTime(session.date);
-  const conditionsLabel = (isEditing ? formValues.conditions : session.conditions) ?? "Not set";
   const temperatureValue = (isEditing ? formValues.temperature : session.temperature) ?? "";
   const temperatureLabel = temperatureValue.trim() ? temperatureValue.trim() : "Not set";
   const classificationValue = session.classification;
@@ -216,7 +217,6 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
   const kartNumberLabel = session.kartNumber?.trim() ? session.kartNumber.trim() : "Not set";
   const trackLayoutName = session.trackLayout?.name ?? "Not set";
   const notesText = (isEditing ? formValues.notes : session.notes)?.trim() ?? "";
-  const conditionsIcon = /wet/i.test(conditionsLabel) ? "🌧️" : "☀️";
   const trackOptions =
     tracks.length > 0
       ? [...tracks]
@@ -225,11 +225,17 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
           id: session.track.id,
           name: session.track.name,
           postcode: session.track.postcode ?? null,
+          isIndoors: session.track.isIndoors,
           trackLayouts: session.trackLayout ? [session.trackLayout] : [],
           karts: session.kart ? [session.kart] : [],
         },
       ];
   const selectedTrack = trackOptions.find((option) => option.id === formValues.trackId);
+  const selectedTrackIsIndoors = selectedTrack?.isIndoors ?? session.track.isIndoors;
+  const conditionsLabel = selectedTrackIsIndoors
+    ? "Dry"
+    : (isEditing ? formValues.conditions : session.conditions) ?? "Not set";
+  const conditionsIcon = /wet/i.test(conditionsLabel) ? "🌧️" : "☀️";
   const selectedTrackPostcode = selectedTrack?.postcode ?? session.track.postcode ?? null;
   const selectedTrackLayouts =
     selectedTrack?.trackLayouts ??
@@ -252,6 +258,13 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
       setFormValues((current) => ({ ...current, trackLayoutId: availableLayouts[0].id }));
     }
   }, [isEditing, selectedTrackLayouts, formValues.trackLayoutId]);
+
+  useEffect(() => {
+    if (!isEditing) return;
+    if (selectedTrackIsIndoors && formValues.conditions !== "Dry") {
+      setFormValues((current) => ({ ...current, conditions: "Dry" }));
+    }
+  }, [formValues.conditions, isEditing, selectedTrackIsIndoors]);
 
   useEffect(() => {
     if (!isEditing) return;
@@ -300,6 +313,7 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
     if (!payload) return;
     const nextTrackName = selectedTrack?.name ?? session.track.name;
     const nextTrackPostcode = selectedTrack?.postcode ?? session.track.postcode ?? null;
+    const nextTrackIsIndoors = selectedTrack?.isIndoors ?? session.track.isIndoors;
     const nextLayout =
       selectedTrackLayouts.find((layout) => layout.id === payload.trackLayoutId) ??
       (session.trackLayout ? { id: session.trackLayout.id, name: session.trackLayout.name } : null);
@@ -318,7 +332,7 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
           date: payload.date,
           classification: payload.classification,
           fastestLap: payload.fastestLap,
-          conditions: payload.conditions,
+          conditions: nextTrackIsIndoors ? "Dry" : payload.conditions,
           temperature: payload.temperature,
           notes: payload.notes,
           kartNumber: payload.kartNumber,
@@ -331,7 +345,7 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
             date: payload.date,
             format: payload.format,
             classification: payload.classification,
-            conditions: payload.conditions,
+            conditions: nextTrackIsIndoors ? "Dry" : payload.conditions,
             temperature: payload.temperature,
             notes: payload.notes,
             kartNumber: payload.kartNumber,
@@ -339,6 +353,7 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
               id: payload.trackId,
               name: nextTrackName,
               postcode: nextTrackPostcode,
+              isIndoors: nextTrackIsIndoors,
               __typename: "Track",
             },
             kart: nextKart
@@ -597,7 +612,9 @@ export function SessionOverviewCard({ session, laps, tracks }: Props) {
           </div>
           <div css={infoTileStyles}>
             <p className="label">Conditions</p>
-            {isEditing ? (
+            {selectedTrackIsIndoors ? (
+              <p className="value">☀️ Dry</p>
+            ) : isEditing ? (
               <select
                 css={inputStyles}
                 value={formValues.conditions}

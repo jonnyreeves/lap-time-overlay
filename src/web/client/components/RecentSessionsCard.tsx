@@ -25,6 +25,7 @@ const RecentSessionsCardFragment = graphql`
           track {
             name
             id
+            isIndoors
           }
           trackLayout {
             id
@@ -343,13 +344,17 @@ export function RecentSessionsCard({ viewer }: Props) {
             const trackLayoutName = session.trackLayout?.name;
             const trackLabel = trackLayoutName ? `${trackName} • ${trackLayoutName}` : trackName;
             const temperatureLabel = session.temperature?.trim();
-            const conditionsEmoji = getConditionsEmoji(session.conditions);
+            const isTrackIndoors = session.track?.isIndoors ?? false;
+            const conditionsLabel = isTrackIndoors
+              ? "Dry"
+              : session.conditions ?? "Unknown conditions";
+            const conditionsEmoji = getConditionsEmoji(conditionsLabel);
             const conditionsDisplay = temperatureLabel
               ? `${conditionsEmoji} ${temperatureLabel}°C`
               : conditionsEmoji;
             const conditionsAriaLabel = temperatureLabel
-              ? `${session.conditions ?? "Unknown conditions"} ${temperatureLabel} C`
-              : session.conditions ?? "Unknown conditions";
+              ? `${conditionsLabel} ${temperatureLabel} C`
+              : conditionsLabel;
             const sessionPath = `/session/${session.id}`;
 
             return (

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<e9566d2f241c5804506dcc93accdf01a>>
+ * @generated SignedSource<<d6926dff5c8234f08a6e2c27137ec981>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -233,7 +233,17 @@ return {
                         "kind": "LinkedField",
                         "name": "track",
                         "plural": false,
-                        "selections": (v4/*: any*/),
+                        "selections": [
+                          (v2/*: any*/),
+                          (v3/*: any*/),
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "isIndoors",
+                            "storageKey": null
+                          }
+                        ],
                         "storageKey": null
                       },
                       {
@@ -353,16 +363,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "1f329f89024c870288392ad351559e8b",
+    "cacheID": "41518e84a18f896bcdf9f5c7215d55d8",
     "id": null,
     "metadata": {},
     "name": "TrackSessionsTablePaginationQuery",
     "operationKind": "query",
-    "text": "query TrackSessionsTablePaginationQuery(\n  $after: String\n  $filter: TrackSessionFilterInput = null\n  $first: Int = 20\n  $sort: TrackSessionSort = DATE_DESC\n) {\n  ...TrackSessionsTable_query_3JsJJ3\n}\n\nfragment TrackSessionsTable_query_3JsJJ3 on Query {\n  tracks {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n  viewer {\n    id\n    recentTrackSessions(first: $first, after: $after, filter: $filter, sort: $sort) {\n      edges {\n        cursor\n        node {\n          id\n          date\n          format\n          classification\n          conditions\n          track {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n          kart {\n            id\n            name\n          }\n          consistencyScore\n          laps(first: 1) {\n            id\n            personalBest\n          }\n          trackRecordings(first: 1) {\n            id\n          }\n          __typename\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}\n"
+    "text": "query TrackSessionsTablePaginationQuery(\n  $after: String\n  $filter: TrackSessionFilterInput = null\n  $first: Int = 20\n  $sort: TrackSessionSort = DATE_DESC\n) {\n  ...TrackSessionsTable_query_3JsJJ3\n}\n\nfragment TrackSessionsTable_query_3JsJJ3 on Query {\n  tracks {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n  viewer {\n    id\n    recentTrackSessions(first: $first, after: $after, filter: $filter, sort: $sort) {\n      edges {\n        cursor\n        node {\n          id\n          date\n          format\n          classification\n          conditions\n          track {\n            id\n            name\n            isIndoors\n          }\n          trackLayout {\n            id\n            name\n          }\n          kart {\n            id\n            name\n          }\n          consistencyScore\n          laps(first: 1) {\n            id\n            personalBest\n          }\n          trackRecordings(first: 1) {\n            id\n          }\n          __typename\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "10c57a1e80830a03d556ab6456481f3d";
+(node as any).hash = "2f08b530365c67eb701a06694d927392";
 
 export default node;

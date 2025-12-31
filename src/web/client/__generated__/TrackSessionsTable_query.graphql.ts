@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<0dabf851d9ffda533ea15a9985b71761>>
+ * @generated SignedSource<<1f97bb0874bd0fde1237ee6bd56e001f>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -45,6 +45,7 @@ export type TrackSessionsTable_query$data = {
           }>;
           readonly track: {
             readonly id: string;
+            readonly isIndoors: boolean;
             readonly name: string;
           };
           readonly trackLayout: {
@@ -269,7 +270,17 @@ return {
                       "kind": "LinkedField",
                       "name": "track",
                       "plural": false,
-                      "selections": (v3/*: any*/),
+                      "selections": [
+                        (v1/*: any*/),
+                        (v2/*: any*/),
+                        {
+                          "alias": null,
+                          "args": null,
+                          "kind": "ScalarField",
+                          "name": "isIndoors",
+                          "storageKey": null
+                        }
+                      ],
                       "storageKey": null
                     },
                     {
@@ -380,6 +391,6 @@ return {
 };
 })();
 
-(node as any).hash = "10c57a1e80830a03d556ab6456481f3d";
+(node as any).hash = "2f08b530365c67eb701a06694d927392";
 
 export default node;

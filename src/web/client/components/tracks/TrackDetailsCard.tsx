@@ -13,6 +13,7 @@ const TrackDetailsFragment = graphql`
     id
     name
     postcode
+    isIndoors
   }
 `;
 
@@ -23,6 +24,7 @@ const UpdateTrackMutation = graphql`
         id
         name
         postcode
+        isIndoors
       }
     }
   }
@@ -41,6 +43,7 @@ export function TrackDetailsCard({ track: trackKey }: Props) {
   const track = useFragment(TrackDetailsFragment, trackKey);
   const [isEditing, setIsEditing] = useState(false);
   const [postcode, setPostcode] = useState(track.postcode ?? "");
+  const [isIndoors, setIsIndoors] = useState(track.isIndoors);
   const [actionError, setActionError] = useState<string | null>(null);
   const [commitUpdate, isUpdating] =
     useMutation<TrackDetailsCardUpdateTrackMutation>(UpdateTrackMutation);
@@ -48,11 +51,13 @@ export function TrackDetailsCard({ track: trackKey }: Props) {
   useEffect(() => {
     if (!isEditing) {
       setPostcode(track.postcode ?? "");
+      setIsIndoors(track.isIndoors);
     }
-  }, [isEditing, track.postcode]);
+  }, [isEditing, track.postcode, track.isIndoors]);
 
   const isSaving = isUpdating;
   const postcodeLabel = track.postcode?.trim() ? track.postcode.trim() : "Not set";
+  const trackTypeLabel = track.isIndoors ? "Indoor" : "Outdoor";
 
   function handleEdit() {
     setActionError(null);
@@ -63,6 +68,7 @@ export function TrackDetailsCard({ track: trackKey }: Props) {
     setActionError(null);
     setIsEditing(false);
     setPostcode(track.postcode ?? "");
+    setIsIndoors(track.isIndoors);
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -78,6 +84,7 @@ export function TrackDetailsCard({ track: trackKey }: Props) {
         input: {
           id: track.id,
           postcode: normalizedPostcode,
+          isIndoors,
         },
       },
       optimisticResponse: {
@@ -86,6 +93,7 @@ export function TrackDetailsCard({ track: trackKey }: Props) {
             id: track.id,
             name: track.name,
             postcode: normalizedPostcode,
+            isIndoors,
             __typename: "Track",
           },
           __typename: "UpdateTrackPayload",
@@ -142,6 +150,22 @@ export function TrackDetailsCard({ track: trackKey }: Props) {
             />
           ) : (
             <p className="value">{postcodeLabel}</p>
+          )}
+        </div>
+        <div css={infoTileStyles}>
+          <p className="label">Track type</p>
+          {isEditing ? (
+            <select
+              css={inputStyles}
+              value={isIndoors ? "indoor" : "outdoor"}
+              onChange={(event) => setIsIndoors(event.target.value === "indoor")}
+              disabled={isSaving}
+            >
+              <option value="outdoor">Outdoor</option>
+              <option value="indoor">Indoor</option>
+            </select>
+          ) : (
+            <p className="value">{trackTypeLabel}</p>
           )}
         </div>
       </form>

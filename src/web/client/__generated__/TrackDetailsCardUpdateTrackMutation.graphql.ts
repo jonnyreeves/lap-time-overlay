@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<29035238afa75f5b6d3536ca6aeeb366>>
+ * @generated SignedSource<<4406523b01386be71ba936c85355db0b>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,6 +12,7 @@ import { ConcreteRequest } from 'relay-runtime';
 export type UpdateTrackInput = {
   heroImage?: string | null | undefined;
   id: string;
+  isIndoors?: boolean | null | undefined;
   name?: string | null | undefined;
   postcode?: string | null | undefined;
 };
@@ -22,6 +23,7 @@ export type TrackDetailsCardUpdateTrackMutation$data = {
   readonly updateTrack: {
     readonly track: {
       readonly id: string;
+      readonly isIndoors: boolean;
       readonly name: string;
       readonly postcode: string | null | undefined;
     };
@@ -83,6 +85,13 @@ v1 = [
             "kind": "ScalarField",
             "name": "postcode",
             "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "isIndoors",
+            "storageKey": null
           }
         ],
         "storageKey": null
@@ -109,16 +118,16 @@ return {
     "selections": (v1/*: any*/)
   },
   "params": {
-    "cacheID": "205963d1a45b449bb8cfb4418b210d52",
+    "cacheID": "ca082b90de10347ae6a553a4dac4da99",
     "id": null,
     "metadata": {},
     "name": "TrackDetailsCardUpdateTrackMutation",
     "operationKind": "mutation",
-    "text": "mutation TrackDetailsCardUpdateTrackMutation(\n  $input: UpdateTrackInput!\n) {\n  updateTrack(input: $input) {\n    track {\n      id\n      name\n      postcode\n    }\n  }\n}\n"
+    "text": "mutation TrackDetailsCardUpdateTrackMutation(\n  $input: UpdateTrackInput!\n) {\n  updateTrack(input: $input) {\n    track {\n      id\n      name\n      postcode\n      isIndoors\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "b3203f764550e0c5363df90bdfc8a37f";
+(node as any).hash = "2a34982226534ac272eb9f2ef13a0d4a";
 
 export default node;

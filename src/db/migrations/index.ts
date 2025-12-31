@@ -17,4 +17,5 @@ export const migrations: Migration[] = [
   (await import("./08_add_kart_number_to_track_sessions.js")).migration,
   (await import("./09_add_temperature_to_track_sessions.js")).migration,
   (await import("./10_add_postcode_to_tracks.js")).migration,
+  (await import("./11_add_is_indoors_to_tracks.js")).migration,
 ];

@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<72ec559e0946bf9aa30fdc1753261969>>
+ * @generated SignedSource<<eca860c40d2994f5bf48c06cf810c4cd>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -177,6 +177,13 @@ return {
           {
             "alias": null,
             "args": null,
+            "kind": "ScalarField",
+            "name": "isIndoors",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
             "concreteType": "Kart",
             "kind": "LinkedField",
             "name": "karts",
@@ -285,12 +292,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "6fa1ff1f7a443416e6b988f03c8cde8b",
+    "cacheID": "2772559ae02573ab35dcade0048285f5",
     "id": null,
     "metadata": {},
     "name": "TrackViewPageQuery",
     "operationKind": "query",
-    "text": "query TrackViewPageQuery(\n  $trackId: ID!\n) {\n  track(id: $trackId) {\n    id\n    name\n    heroImage\n    ...TrackDetailsCard_track\n    ...TrackKartsCard_track\n    ...TrackLayoutCard_track\n    ...TrackPersonalBestsCard_track\n    ...TrackVisitStatsCard_track\n  }\n}\n\nfragment TrackDetailsCard_track on Track {\n  id\n  name\n  postcode\n}\n\nfragment TrackKartsCard_track on Track {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n\nfragment TrackLayoutCard_track on Track {\n  id\n  name\n  trackLayouts {\n    id\n    name\n  }\n}\n\nfragment TrackPersonalBestsCard_track on Track {\n  id\n  name\n  heroImage\n  postcode\n  personalBestEntries {\n    trackSessionId\n    conditions\n    lapTime\n    kart {\n      id\n      name\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n\nfragment TrackVisitStatsCard_track on Track {\n  id\n  name\n  sessionStats {\n    totalSessions\n    byKart {\n      count\n      kart {\n        id\n        name\n      }\n    }\n    byTrackLayout {\n      count\n      trackLayout {\n        id\n        name\n      }\n    }\n    byCondition {\n      conditions\n      count\n    }\n  }\n}\n"
+    "text": "query TrackViewPageQuery(\n  $trackId: ID!\n) {\n  track(id: $trackId) {\n    id\n    name\n    heroImage\n    ...TrackDetailsCard_track\n    ...TrackKartsCard_track\n    ...TrackLayoutCard_track\n    ...TrackPersonalBestsCard_track\n    ...TrackVisitStatsCard_track\n  }\n}\n\nfragment TrackDetailsCard_track on Track {\n  id\n  name\n  postcode\n  isIndoors\n}\n\nfragment TrackKartsCard_track on Track {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n\nfragment TrackLayoutCard_track on Track {\n  id\n  name\n  trackLayouts {\n    id\n    name\n  }\n}\n\nfragment TrackPersonalBestsCard_track on Track {\n  id\n  name\n  heroImage\n  postcode\n  personalBestEntries {\n    trackSessionId\n    conditions\n    lapTime\n    kart {\n      id\n      name\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n\nfragment TrackVisitStatsCard_track on Track {\n  id\n  name\n  sessionStats {\n    totalSessions\n    byKart {\n      count\n      kart {\n        id\n        name\n      }\n    }\n    byTrackLayout {\n      count\n      trackLayout {\n        id\n        name\n      }\n    }\n    byCondition {\n      conditions\n      count\n    }\n  }\n}\n"
   }
 };
 })();

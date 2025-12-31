@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<c3c7ee9ec01fa78cb46c18976e6a7979>>
+ * @generated SignedSource<<1df6f2a4457965b1ac1d69049d3fc9d0>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -62,6 +62,7 @@ export type viewSessionQuery$data = {
     readonly temperature: string | null | undefined;
     readonly track: {
       readonly id: string;
+      readonly isIndoors: boolean;
       readonly name: string;
       readonly postcode: string | null | undefined;
     };
@@ -102,6 +103,7 @@ export type viewSessionQuery$data = {
   };
   readonly tracks: ReadonlyArray<{
     readonly id: string;
+    readonly isIndoors: boolean;
     readonly karts: ReadonlyArray<{
       readonly id: string;
       readonly name: string;
@@ -148,53 +150,60 @@ v3 = {
   "name": "postcode",
   "storageKey": null
 },
-v4 = [
+v4 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "isIndoors",
+  "storageKey": null
+},
+v5 = [
   (v1/*: any*/),
   (v2/*: any*/)
 ],
-v5 = {
+v6 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "lapNumber",
   "storageKey": null
 },
-v6 = {
+v7 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "createdAt",
   "storageKey": null
 },
-v7 = {
+v8 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "status",
   "storageKey": null
 },
-v8 = {
+v9 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "sizeBytes",
   "storageKey": null
 },
-v9 = {
+v10 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "uploadedBytes",
   "storageKey": null
 },
-v10 = [
+v11 = [
   {
     "kind": "Literal",
     "name": "first",
     "value": 50
   }
 ],
-v11 = [
+v12 = [
   {
     "alias": null,
     "args": [
@@ -276,7 +285,8 @@ v11 = [
         "selections": [
           (v1/*: any*/),
           (v2/*: any*/),
-          (v3/*: any*/)
+          (v3/*: any*/),
+          (v4/*: any*/)
         ],
         "storageKey": null
       },
@@ -287,7 +297,7 @@ v11 = [
         "kind": "LinkedField",
         "name": "trackLayout",
         "plural": false,
-        "selections": (v4/*: any*/),
+        "selections": (v5/*: any*/),
         "storageKey": null
       },
       {
@@ -297,7 +307,7 @@ v11 = [
         "kind": "LinkedField",
         "name": "kart",
         "plural": false,
-        "selections": (v4/*: any*/),
+        "selections": (v5/*: any*/),
         "storageKey": null
       },
       {
@@ -400,7 +410,7 @@ v11 = [
             "name": "excludedLaps",
             "plural": true,
             "selections": [
-              (v5/*: any*/),
+              (v6/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -414,7 +424,7 @@ v11 = [
         ],
         "storageKey": null
       },
-      (v6/*: any*/),
+      (v7/*: any*/),
       {
         "alias": null,
         "args": null,
@@ -451,7 +461,7 @@ v11 = [
             "name": "mediaId",
             "storageKey": null
           },
-          (v7/*: any*/),
+          (v8/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -459,7 +469,7 @@ v11 = [
             "name": "error",
             "storageKey": null
           },
-          (v8/*: any*/),
+          (v9/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -502,7 +512,7 @@ v11 = [
             "name": "fps",
             "storageKey": null
           },
-          (v6/*: any*/),
+          (v7/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -518,7 +528,7 @@ v11 = [
             "name": "uploadProgress",
             "plural": false,
             "selections": [
-              (v9/*: any*/),
+              (v10/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -531,7 +541,7 @@ v11 = [
           },
           {
             "alias": null,
-            "args": (v10/*: any*/),
+            "args": (v11/*: any*/),
             "concreteType": "RecordingUploadTarget",
             "kind": "LinkedField",
             "name": "uploadTargets",
@@ -545,9 +555,9 @@ v11 = [
                 "name": "fileName",
                 "storageKey": null
               },
-              (v8/*: any*/),
               (v9/*: any*/),
-              (v7/*: any*/),
+              (v10/*: any*/),
+              (v8/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -570,14 +580,14 @@ v11 = [
       },
       {
         "alias": null,
-        "args": (v10/*: any*/),
+        "args": (v11/*: any*/),
         "concreteType": "Lap",
         "kind": "LinkedField",
         "name": "laps",
         "plural": true,
         "selections": [
           (v1/*: any*/),
-          (v5/*: any*/),
+          (v6/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -587,7 +597,7 @@ v11 = [
           },
           {
             "alias": null,
-            "args": (v10/*: any*/),
+            "args": (v11/*: any*/),
             "concreteType": "LapEvent",
             "kind": "LinkedField",
             "name": "lapEvents",
@@ -635,6 +645,7 @@ v11 = [
       (v1/*: any*/),
       (v2/*: any*/),
       (v3/*: any*/),
+      (v4/*: any*/),
       {
         "alias": null,
         "args": null,
@@ -642,7 +653,7 @@ v11 = [
         "kind": "LinkedField",
         "name": "karts",
         "plural": true,
-        "selections": (v4/*: any*/),
+        "selections": (v5/*: any*/),
         "storageKey": null
       },
       {
@@ -652,7 +663,7 @@ v11 = [
         "kind": "LinkedField",
         "name": "trackLayouts",
         "plural": true,
-        "selections": (v4/*: any*/),
+        "selections": (v5/*: any*/),
         "storageKey": null
       }
     ],
@@ -665,7 +676,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "viewSessionQuery",
-    "selections": (v11/*: any*/),
+    "selections": (v12/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -674,19 +685,19 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "viewSessionQuery",
-    "selections": (v11/*: any*/)
+    "selections": (v12/*: any*/)
   },
   "params": {
-    "cacheID": "06014219579a33e057d16080c9a06fac",
+    "cacheID": "08a75029a00894d20d3540b58f5f7eb3",
     "id": null,
     "metadata": {},
     "name": "viewSessionQuery",
     "operationKind": "query",
-    "text": "query viewSessionQuery(\n  $id: ID!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    classification\n    fastestLap\n    conditions\n    temperature\n    notes\n    kartNumber\n    track {\n      id\n      name\n      postcode\n    }\n    trackLayout {\n      id\n      name\n    }\n    kart {\n      id\n      name\n    }\n    consistencyScore\n    consistency {\n      score\n      label\n      mean\n      stdDev\n      cvPct\n      median\n      windowPct\n      cleanLapCount\n      excludedLapCount\n      totalValidLapCount\n      usableLapNumbers\n      excludedLaps {\n        lapNumber\n        reason\n      }\n    }\n    createdAt\n    updatedAt\n    trackRecordings(first: 20) {\n      id\n      description\n      mediaId\n      status\n      error\n      sizeBytes\n      overlayBurned\n      isPrimary\n      showInMediaLibrary\n      lapOneOffset\n      durationMs\n      fps\n      createdAt\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n      uploadTargets(first: 50) {\n        id\n        fileName\n        sizeBytes\n        uploadedBytes\n        status\n        ordinal\n        uploadUrl\n      }\n    }\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents(first: 50) {\n        id\n        offset\n        event\n        value\n      }\n    }\n  }\n  tracks {\n    id\n    name\n    postcode\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n}\n"
+    "text": "query viewSessionQuery(\n  $id: ID!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    classification\n    fastestLap\n    conditions\n    temperature\n    notes\n    kartNumber\n    track {\n      id\n      name\n      postcode\n      isIndoors\n    }\n    trackLayout {\n      id\n      name\n    }\n    kart {\n      id\n      name\n    }\n    consistencyScore\n    consistency {\n      score\n      label\n      mean\n      stdDev\n      cvPct\n      median\n      windowPct\n      cleanLapCount\n      excludedLapCount\n      totalValidLapCount\n      usableLapNumbers\n      excludedLaps {\n        lapNumber\n        reason\n      }\n    }\n    createdAt\n    updatedAt\n    trackRecordings(first: 20) {\n      id\n      description\n      mediaId\n      status\n      error\n      sizeBytes\n      overlayBurned\n      isPrimary\n      showInMediaLibrary\n      lapOneOffset\n      durationMs\n      fps\n      createdAt\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n      uploadTargets(first: 50) {\n        id\n        fileName\n        sizeBytes\n        uploadedBytes\n        status\n        ordinal\n        uploadUrl\n      }\n    }\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents(first: 50) {\n        id\n        offset\n        event\n        value\n      }\n    }\n  }\n  tracks {\n    id\n    name\n    postcode\n    isIndoors\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "eacefc1398e2d5310c849983537fe920";
+(node as any).hash = "eaed2bb9d2cfb75595a43257db9bc1e1";
 
 export default node;

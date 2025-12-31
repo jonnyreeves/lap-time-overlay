@@ -73,13 +73,14 @@ export function getTrackPersonalBestEntries(
     }
 
     const bestLapTime = Math.min(...laps.map((lap) => lap.time));
-    const key = `${trackLayout.id}:${kart.id}:${session.conditions}`;
+    const sessionConditions = track.isIndoors ? "Dry" : session.conditions;
+    const key = `${trackLayout.id}:${kart.id}:${sessionConditions}`;
     const entriesForSetup = bestBySetup.get(key) ?? [];
 
     entriesForSetup.push({
       kart,
       trackLayout,
-      conditions: session.conditions,
+      conditions: sessionConditions,
       lapTime: bestLapTime,
       trackSessionId: session.id,
     });
@@ -143,7 +144,8 @@ function getTrackSessionStats(
   const conditionCounts = new Map<TrackSessionConditions, number>();
 
   for (const session of sessions) {
-    conditionCounts.set(session.conditions, (conditionCounts.get(session.conditions) ?? 0) + 1);
+    const sessionConditions = track.isIndoors ? "Dry" : session.conditions;
+    conditionCounts.set(sessionConditions, (conditionCounts.get(sessionConditions) ?? 0) + 1);
 
     if (session.kartId) {
       const kart = repositories.karts.findById(session.kartId);
@@ -226,6 +228,7 @@ export function toTrackPayload(
     name: track.name,
     heroImage: track.heroImage,
     postcode: track.postcode,
+    isIndoors: track.isIndoors,
     timesRaced,
     lastVisit,
     sessionStats: () => getTrackSessionStats(track, repositories, userId, sessions),
@@ -289,7 +292,16 @@ export const trackResolvers = {
       .map((track) => toTrackPayload(track, repositories, userId));
   },
   createTrack: (
-    args: { input?: { name?: string; heroImage?: string | null; postcode?: string | null; karts?: { name?: string }[]; trackLayouts?: { name?: string }[] } },
+    args: {
+      input?: {
+        name?: string;
+        heroImage?: string | null;
+        postcode?: string | null;
+        isIndoors?: boolean | null;
+        karts?: { name?: string }[];
+        trackLayouts?: { name?: string }[];
+      };
+    },
     context: GraphQLContext
   ) => {
     if (!context.currentUser) {
@@ -328,12 +340,14 @@ export const trackResolvers = {
     const uniqueLayoutNames = Array.from(new Set(layoutNames));
     const postcode = input.postcode?.trim() ?? "";
     const normalizedPostcode = postcode ? postcode : null;
+    const isIndoors = input.isIndoors ?? false;
 
     const newTrack = context.repositories.tracks.create(
       input.name,
       input.heroImage ?? null,
       undefined,
-      normalizedPostcode
+      normalizedPostcode,
+      isIndoors
     );
     const createdKarts = uniqueKartNames.map((name) => context.repositories.karts.create(name));
     createdKarts.forEach((kart) => context.repositories.trackKarts.addKartToTrack(newTrack.id, kart.id));
@@ -344,7 +358,15 @@ export const trackResolvers = {
   },
 
   updateTrack: (
-    args: { input?: { id?: string; name?: string | null; heroImage?: string | null; postcode?: string | null } },
+    args: {
+      input?: {
+        id?: string;
+        name?: string | null;
+        heroImage?: string | null;
+        postcode?: string | null;
+        isIndoors?: boolean | null;
+      };
+    },
     context: GraphQLContext
   ) => {
     if (!context.currentUser) {
@@ -371,8 +393,9 @@ export const trackResolvers = {
     const nameProvided = Object.prototype.hasOwnProperty.call(input, "name");
     const heroImageProvided = Object.prototype.hasOwnProperty.call(input, "heroImage");
     const postcodeProvided = Object.prototype.hasOwnProperty.call(input, "postcode");
+    const isIndoorsProvided = Object.prototype.hasOwnProperty.call(input, "isIndoors");
 
-    if (!nameProvided && !heroImageProvided && !postcodeProvided) {
+    if (!nameProvided && !heroImageProvided && !postcodeProvided && !isIndoorsProvided) {
       throw new GraphQLError("At least one track field is required", {
         extensions: { code: "VALIDATION_FAILED" },
       });
@@ -392,11 +415,13 @@ export const trackResolvers = {
         ? trimmedPostcode
         : null
       : undefined;
+    const isIndoors = isIndoorsProvided ? input?.isIndoors ?? false : undefined;
 
     const updated = context.repositories.tracks.update(trackId, {
       name: nameProvided ? name : undefined,
       heroImage,
       postcode: normalizedPostcode,
+      isIndoors,
     });
 
     if (!updated) {

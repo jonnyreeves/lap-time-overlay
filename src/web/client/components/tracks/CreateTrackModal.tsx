@@ -19,7 +19,8 @@ const inputFieldStyles = css`
     color: #333;
   }
 
-  input[type="text"] {
+  input[type="text"],
+  select {
     width: 100%;
     padding: 10px;
     border: 1px solid #e2e8f4;
@@ -158,6 +159,7 @@ const CreateTrackMutation = graphql`
         id
         name
         postcode
+        isIndoors
         karts {
           id
           name
@@ -174,6 +176,7 @@ const CreateTrackMutation = graphql`
 export function CreateTrackModal({ isOpen, onClose, onTrackCreated }: CreateTrackModalProps) {
   const [trackName, setTrackName] = useState("");
   const [postcode, setPostcode] = useState("");
+  const [isIndoors, setIsIndoors] = useState(false);
   const [kartNames, setKartNames] = useState<string[]>([""]);
   const [trackLayoutNames, setTrackLayoutNames] = useState<string[]>([""]);
   const [formError, setFormError] = useState<string | null>(null);
@@ -258,6 +261,7 @@ export function CreateTrackModal({ isOpen, onClose, onTrackCreated }: CreateTrac
         input: {
           name: trackName.trim(),
           ...(trimmedPostcode ? { postcode: trimmedPostcode } : {}),
+          isIndoors,
           karts: trimmedKartNames.map((name) => ({ name })),
           trackLayouts: trimmedTrackLayoutNames.map((name) => ({ name })),
         },
@@ -265,6 +269,7 @@ export function CreateTrackModal({ isOpen, onClose, onTrackCreated }: CreateTrac
       onCompleted: () => {
         setTrackName("");
         setPostcode("");
+        setIsIndoors(false);
         setKartNames([""]);
         setTrackLayoutNames([""]);
         setFormError(null);
@@ -305,6 +310,18 @@ export function CreateTrackModal({ isOpen, onClose, onTrackCreated }: CreateTrac
             placeholder="e.g. SW1A 1AA"
             disabled={isInFlight}
           />
+        </div>
+        <div css={inputFieldStyles}>
+          <label htmlFor="track-type">Track type</label>
+          <select
+            id="track-type"
+            value={isIndoors ? "indoor" : "outdoor"}
+            onChange={(event) => setIsIndoors(event.target.value === "indoor")}
+            disabled={isInFlight}
+          >
+            <option value="outdoor">Outdoor</option>
+            <option value="indoor">Indoor</option>
+          </select>
         </div>
         <div css={inputFieldStyles}>
           <label htmlFor="kart-names">Kart Types</label>

@@ -60,8 +60,24 @@ const mockSessions = [
 ];
 
 const tracks = {
-  c1: { id: "c1", name: "Monza", heroImage: null, postcode: null, createdAt: 0, updatedAt: 0 },
-  c2: { id: "c2", name: "Spa", heroImage: null, postcode: null, createdAt: 0, updatedAt: 0 },
+  c1: {
+    id: "c1",
+    name: "Monza",
+    heroImage: null,
+    postcode: null,
+    isIndoors: false,
+    createdAt: 0,
+    updatedAt: 0,
+  },
+  c2: {
+    id: "c2",
+    name: "Spa",
+    heroImage: null,
+    postcode: null,
+    isIndoors: false,
+    createdAt: 0,
+    updatedAt: 0,
+  },
 };
 
 const lapsBySession: Record<string, Array<{ id: string; time: number }>> = {

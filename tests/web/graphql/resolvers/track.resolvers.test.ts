@@ -20,6 +20,7 @@ describe("track resolver", () => {
         name: "Spa",
         heroImage: null,
         postcode: null,
+        isIndoors: false,
         createdAt: 0,
         updatedAt: 0,
       },
@@ -28,6 +29,7 @@ describe("track resolver", () => {
         name: "Monza",
         heroImage: null,
         postcode: null,
+        isIndoors: false,
         createdAt: 0,
         updatedAt: 0,
       },
@@ -304,7 +306,7 @@ describe("track resolver", () => {
 
   it("returns an empty list when no lap data exists", async () => {
     repositories.tracks.findAll.mockReturnValue([
-      { id: "c1", name: "Spa", heroImage: null, postcode: null, createdAt: 0, updatedAt: 0 },
+      { id: "c1", name: "Spa", heroImage: null, postcode: null, isIndoors: false, createdAt: 0, updatedAt: 0 },
     ]);
 
     repositories.trackSessions.findByTrackId.mockReturnValue([]);
@@ -329,6 +331,7 @@ describe("track resolver", () => {
       name: "Spa",
       heroImage: "img",
       postcode: "SW1A 1AA",
+      isIndoors: false,
       createdAt: 0,
       updatedAt: 0,
     });
@@ -355,6 +358,7 @@ describe("track resolver", () => {
           name: "Spa",
           heroImage: "img",
           postcode: "SW1A 1AA",
+          isIndoors: false,
           karts: [{ name: "Rotax" }, { name: "Sodi" }],
           trackLayouts: [{ name: "GP" }, { name: "Indy" }],
         },
@@ -362,7 +366,7 @@ describe("track resolver", () => {
       authenticatedContext as never
     );
 
-    expect(repositories.tracks.create).toHaveBeenCalledWith("Spa", "img", undefined, "SW1A 1AA");
+    expect(repositories.tracks.create).toHaveBeenCalledWith("Spa", "img", undefined, "SW1A 1AA", false);
     expect(repositories.karts.create).toHaveBeenCalledTimes(2);
     expect(repositories.trackKarts.addKartToTrack).toHaveBeenCalledWith("c1", "k1");
     expect(repositories.trackKarts.addKartToTrack).toHaveBeenCalledWith("c1", "k2");
@@ -426,6 +430,7 @@ describe("track resolver", () => {
       name: "Spa",
       heroImage: null,
       postcode: null,
+      isIndoors: false,
       createdAt: 0,
       updatedAt: 0,
     });
@@ -440,6 +445,7 @@ describe("track resolver", () => {
       name: "Spa",
       heroImage: null,
       postcode: "KT14 6GB",
+      isIndoors: false,
       createdAt: 0,
       updatedAt: 0,
     });
@@ -448,6 +454,7 @@ describe("track resolver", () => {
       name: "Spa",
       heroImage: null,
       postcode: "SW1A 1AA",
+      isIndoors: false,
       createdAt: 0,
       updatedAt: 1,
     });
@@ -461,6 +468,7 @@ describe("track resolver", () => {
       name: undefined,
       heroImage: undefined,
       postcode: "SW1A 1AA",
+      isIndoors: undefined,
     });
     expect(result.track).toMatchObject({ id: "c1", postcode: "SW1A 1AA" });
   });
@@ -477,6 +485,7 @@ describe("track resolver by id", () => {
       name: "Spa",
       heroImage: "spa.jpg",
       postcode: "SW1A 1AA",
+      isIndoors: false,
       createdAt: 0,
       updatedAt: 0,
     });
@@ -518,6 +527,7 @@ describe("kart resolvers", () => {
       name: "Spa",
       heroImage: null,
       postcode: null,
+      isIndoors: false,
       createdAt: 0,
       updatedAt: 0,
     };
@@ -654,6 +664,7 @@ describe("kart resolvers", () => {
       name: "Spa",
       heroImage: null,
       postcode: null,
+      isIndoors: false,
       createdAt: 0,
       updatedAt: 0,
     });
@@ -670,6 +681,7 @@ describe("kart resolvers", () => {
       name: "Spa",
       heroImage: null,
       postcode: null,
+      isIndoors: false,
       createdAt: 0,
       updatedAt: 0,
     };
@@ -719,6 +731,7 @@ describe("kart resolvers", () => {
       name: "Spa",
       heroImage: null,
       postcode: null,
+      isIndoors: false,
       createdAt: 0,
       updatedAt: 0,
     });
@@ -735,6 +748,7 @@ describe("kart resolvers", () => {
       name: "Spa",
       heroImage: null,
       postcode: null,
+      isIndoors: false,
       createdAt: 0,
       updatedAt: 0,
     };
@@ -789,6 +803,7 @@ describe("track layout resolvers", () => {
       name: "Spa",
       heroImage: null,
       postcode: null,
+      isIndoors: false,
       createdAt: 0,
       updatedAt: 0,
     };
@@ -841,6 +856,7 @@ describe("track layout resolvers", () => {
       name: "Spa",
       heroImage: null,
       postcode: null,
+      isIndoors: false,
       createdAt: 0,
       updatedAt: 0,
     });
@@ -886,6 +902,7 @@ describe("track layout resolvers", () => {
       name: "Spa",
       heroImage: null,
       postcode: null,
+      isIndoors: false,
       createdAt: 0,
       updatedAt: 0,
     });
@@ -902,6 +919,7 @@ describe("track layout resolvers", () => {
       name: "Spa",
       heroImage: null,
       postcode: null,
+      isIndoors: false,
       createdAt: 0,
       updatedAt: 0,
     });
@@ -918,6 +936,7 @@ describe("track layout resolvers", () => {
       name: "Spa",
       heroImage: null,
       postcode: null,
+      isIndoors: false,
       createdAt: 0,
       updatedAt: 0,
     };

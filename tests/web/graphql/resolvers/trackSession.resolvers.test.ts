@@ -50,6 +50,7 @@ const mockTrack = {
   name: "Spa",
   heroImage: null,
   postcode: null,
+  isIndoors: false,
   createdAt: 0,
   updatedAt: 0,
 };
@@ -197,6 +198,35 @@ describe("trackSession resolvers", () => {
     });
     expect(result.trackSession.id).toBe("s1");
     expect(result.trackSession.classification).toBe(1);
+  });
+
+  it("createTrackSession forces Dry conditions for indoor tracks", async () => {
+    repositories.trackSessions.createWithLaps.mockReturnValue({ trackSession: mockSession, laps: [] });
+    repositories.tracks.findById.mockReturnValue({ ...mockTrack, isIndoors: true });
+    repositories.karts.findById.mockReturnValue(mockKart);
+    repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
+    repositories.trackLayouts.findById.mockReturnValue(mockLayout);
+
+    await rootValue.createTrackSession(
+      {
+        input: {
+          date: "2024-02-01",
+          format: "Race",
+          classification: 2,
+          trackId: "c1",
+          conditions: "Wet",
+          trackLayoutId: "l1",
+          kartId: "k1",
+        },
+      },
+      context
+    );
+
+    expect(repositories.trackSessions.createWithLaps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        conditions: "Dry",
+      })
+    );
   });
 
   it("createTrackSession does not auto-fetch temperature", async () => {
@@ -391,6 +421,26 @@ describe("trackSession resolvers", () => {
     );
     expect(result.trackSession.format).toBe("Practice");
     expect(result.trackSession.classification).toBe(1);
+  });
+
+  it("updateTrackSession forces Dry conditions for indoor tracks", async () => {
+    repositories.trackSessions.findById.mockReturnValue({ ...mockSession, conditions: "Wet" });
+    repositories.trackSessions.update.mockReturnValue({ ...mockSession, conditions: "Dry" });
+    repositories.lapEvents.findByLapId.mockReturnValue([]);
+    repositories.trackRecordings.findBySessionId.mockReturnValue([]);
+    repositories.trackLayouts.findById.mockReturnValue(mockLayout);
+    repositories.tracks.findById.mockReturnValue({ ...mockTrack, isIndoors: true });
+
+    await rootValue.updateTrackSession(
+      { input: { id: "s1", conditions: "Wet" } },
+      context
+    );
+
+    expect(repositories.trackSessions.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        conditions: "Dry",
+      })
+    );
   });
 
 

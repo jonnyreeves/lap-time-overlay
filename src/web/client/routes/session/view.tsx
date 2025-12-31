@@ -44,6 +44,7 @@ const SessionQuery = graphql`
         id
         name
         postcode
+        isIndoors
       }
       trackLayout {
         id
@@ -118,6 +119,7 @@ const SessionQuery = graphql`
       id
       name
       postcode
+      isIndoors
       karts {
         id
         name

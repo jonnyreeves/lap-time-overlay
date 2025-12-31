@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<abe1ef4f9caf8288f3fa8ebf14bd3ffb>>
+ * @generated SignedSource<<86074f96e9518855f1650b6b9a62ac7d>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -12,6 +12,7 @@ import { ReaderFragment } from 'relay-runtime';
 import { FragmentRefs } from "relay-runtime";
 export type TrackDetailsCard_track$data = {
   readonly id: string;
+  readonly isIndoors: boolean;
   readonly name: string;
   readonly postcode: string | null | undefined;
   readonly " $fragmentType": "TrackDetailsCard_track";
@@ -47,12 +48,19 @@ const node: ReaderFragment = {
       "kind": "ScalarField",
       "name": "postcode",
       "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "isIndoors",
+      "storageKey": null
     }
   ],
   "type": "Track",
   "abstractKey": null
 };
 
-(node as any).hash = "599b4df254b44678cc284d98973a01d0";
+(node as any).hash = "c77b88e5bace5af07f32c1ac57c0e815";
 
 export default node;

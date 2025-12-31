@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<4b620973ff3baa9a2c5d89844a7cd4cd>>
+ * @generated SignedSource<<8e83ec60ddb5289c5785d84e28b2ac55>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -60,6 +60,7 @@ export type createTrackSessionMutation$data = {
       readonly track: {
         readonly heroImage: string | null | undefined;
         readonly id: string;
+        readonly isIndoors: boolean;
         readonly name: string;
         readonly personalBestEntries: ReadonlyArray<{
           readonly conditions: string;
@@ -205,6 +206,13 @@ v15 = {
       "args": null,
       "kind": "ScalarField",
       "name": "heroImage",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "isIndoors",
       "storageKey": null
     },
     {
@@ -408,16 +416,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "8e130ff05ec3068291c14d7fae8ac925",
+    "cacheID": "ae9bc1c1bfce8ba6df8b5d5a80fab924",
     "id": null,
     "metadata": {},
     "name": "createTrackSessionMutation",
     "operationKind": "mutation",
-    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      fastestLap\n      conditions\n      temperature\n      trackLayout {\n        id\n        name\n      }\n      kart {\n        id\n        name\n      }\n      track {\n        id\n        name\n        heroImage\n        personalBestEntries {\n          trackSessionId\n          conditions\n          lapTime\n          kart {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n        }\n      }\n      notes\n      laps(first: 1) {\n        personalBest\n        id\n      }\n    }\n  }\n}\n"
+    "text": "mutation createTrackSessionMutation(\n  $input: CreateTrackSessionInput!\n) {\n  createTrackSession(input: $input) {\n    trackSession {\n      id\n      date\n      format\n      classification\n      fastestLap\n      conditions\n      temperature\n      trackLayout {\n        id\n        name\n      }\n      kart {\n        id\n        name\n      }\n      track {\n        id\n        name\n        heroImage\n        isIndoors\n        personalBestEntries {\n          trackSessionId\n          conditions\n          lapTime\n          kart {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n        }\n      }\n      notes\n      laps(first: 1) {\n        personalBest\n        id\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "733e6f2e24d256d665f69d012e43612b";
+(node as any).hash = "00071ea0701cfcf8d1edad17d2dd30bb";
 
 export default node;

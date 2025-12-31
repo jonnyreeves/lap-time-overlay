@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<1fe0c8fcfa0e4b998de9e5e5211d4011>>
+ * @generated SignedSource<<bfe897b784753998d5ca611da29d3c32>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -228,7 +228,17 @@ return {
                         "kind": "LinkedField",
                         "name": "track",
                         "plural": false,
-                        "selections": (v6/*: any*/),
+                        "selections": [
+                          (v4/*: any*/),
+                          (v5/*: any*/),
+                          {
+                            "alias": null,
+                            "args": null,
+                            "kind": "ScalarField",
+                            "name": "isIndoors",
+                            "storageKey": null
+                          }
+                        ],
                         "storageKey": null
                       },
                       {
@@ -348,12 +358,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "2ae3e20c2cb5a314645fb4536f0261c3",
+    "cacheID": "47169d78cf2fe25db86c480ed34f0291",
     "id": null,
     "metadata": {},
     "name": "listQuery",
     "operationKind": "query",
-    "text": "query listQuery(\n  $first: Int = 20\n  $filter: TrackSessionFilterInput\n  $sort: TrackSessionSort = DATE_DESC\n) {\n  ...TrackSessionsTable_query_1bvy9D\n}\n\nfragment TrackSessionsTable_query_1bvy9D on Query {\n  tracks {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n  viewer {\n    id\n    recentTrackSessions(first: $first, filter: $filter, sort: $sort) {\n      edges {\n        cursor\n        node {\n          id\n          date\n          format\n          classification\n          conditions\n          track {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n          kart {\n            id\n            name\n          }\n          consistencyScore\n          laps(first: 1) {\n            id\n            personalBest\n          }\n          trackRecordings(first: 1) {\n            id\n          }\n          __typename\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}\n"
+    "text": "query listQuery(\n  $first: Int = 20\n  $filter: TrackSessionFilterInput\n  $sort: TrackSessionSort = DATE_DESC\n) {\n  ...TrackSessionsTable_query_1bvy9D\n}\n\nfragment TrackSessionsTable_query_1bvy9D on Query {\n  tracks {\n    id\n    name\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n  viewer {\n    id\n    recentTrackSessions(first: $first, filter: $filter, sort: $sort) {\n      edges {\n        cursor\n        node {\n          id\n          date\n          format\n          classification\n          conditions\n          track {\n            id\n            name\n            isIndoors\n          }\n          trackLayout {\n            id\n            name\n          }\n          kart {\n            id\n            name\n          }\n          consistencyScore\n          laps(first: 1) {\n            id\n            personalBest\n          }\n          trackRecordings(first: 1) {\n            id\n          }\n          __typename\n        }\n      }\n      pageInfo {\n        hasNextPage\n        endCursor\n      }\n    }\n  }\n}\n"
   }
 };
 })();
