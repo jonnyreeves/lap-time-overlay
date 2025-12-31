@@ -21,6 +21,19 @@ export async function handleRecordingUploadRequest(
   sourceId: string,
   token: string | null
 ): Promise<boolean> {
+  const headerValue = (value: string | string[] | undefined): string | null => {
+    if (!value) return null;
+    return Array.isArray(value) ? value.join(", ") : value;
+  };
+  console.info("Recording upload request received", {
+    sourceId,
+    hasToken: Boolean(token),
+    contentLength: headerValue(req.headers["content-length"]),
+    contentType: headerValue(req.headers["content-type"]),
+    userAgent: headerValue(req.headers["user-agent"]),
+    remoteAddress: req.socket.remoteAddress ?? null,
+  });
+
   const cookies = parseCookies(req.headers.cookie);
   const sessionToken =
     typeof cookies[SESSION_COOKIE_NAME] === "string" ? cookies[SESSION_COOKIE_NAME] : null;

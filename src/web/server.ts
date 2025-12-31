@@ -52,6 +52,9 @@ server.listen(process.env.PORT || 3000, () => {
   if (address && typeof address === "object") {
     console.log(`Web UI running on http://localhost:${address.port}`);
     console.log(`Database is persisted to: ${getDatabasePath()}`);
+    if (process.env.BUILD_TIMESTAMP) {
+      console.log(`Build timestamp: ${process.env.BUILD_TIMESTAMP}`);
+    }
   } else {
     console.log("Web UI server started.");
   }
