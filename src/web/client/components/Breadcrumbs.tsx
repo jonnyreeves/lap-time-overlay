@@ -6,6 +6,8 @@ type Props = {
   items: BreadcrumbItem[];
 };
 
+const homeCrumb: BreadcrumbItem = { label: "Home", to: "/" };
+
 const breadcrumbBarStyles = css`
   display: flex;
   align-items: center;
@@ -41,12 +43,12 @@ const separatorStyles = css`
 `;
 
 export function Breadcrumbs({ items }: Props) {
-  if (!items.length) return null;
+  const crumbs = [homeCrumb, ...items.filter((item) => item.label !== "Home" || item.to !== "/")];
 
   return (
     <nav aria-label="Breadcrumb" css={breadcrumbBarStyles}>
-      {items.map((item, index) => {
-        const isLast = index === items.length - 1;
+      {crumbs.map((item, index) => {
+        const isLast = index === crumbs.length - 1;
 
         return (
           <span key={`${item.label}-${index}`} css={isLast ? crumbCurrentStyles : undefined}>
