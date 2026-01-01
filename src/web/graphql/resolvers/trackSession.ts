@@ -2,6 +2,7 @@ import { GraphQLError } from "graphql";
 import type { LapEventRecord } from "../../../db/lap_events.js";
 import type { LapRecord } from "../../../db/laps.js";
 import type { TrackRecordingRecord } from "../../../db/track_recordings.js";
+import type { TrackRecord } from "../../../db/tracks.js";
 import type {
   TrackSessionConditions,
   TrackSessionLapInput,
@@ -124,6 +125,93 @@ export function parseFastestLap(
   return parsed;
 }
 
+function getCachedTrack(
+  trackId: string,
+  repositories: Repositories,
+  trackCache: Map<string, TrackRecord | null>
+): TrackRecord | null {
+  if (trackCache.has(trackId)) {
+    return trackCache.get(trackId) ?? null;
+  }
+  const track = repositories.tracks.findById(trackId);
+  trackCache.set(trackId, track);
+  return track;
+}
+
+function resolveSessionConditions(
+  session: TrackSessionRecord,
+  repositories: Repositories,
+  trackCache: Map<string, TrackRecord | null>
+): TrackSessionConditions {
+  const track = getCachedTrack(session.trackId, repositories, trackCache);
+  return track?.isIndoors ? "Dry" : session.conditions;
+}
+
+function getSessionPersonalBestKey(
+  session: TrackSessionRecord,
+  conditions: TrackSessionConditions
+) {
+  const kartKey = session.kartId ?? "none";
+  return `${session.trackId}::${session.trackLayoutId}::${kartKey}::${conditions}`;
+}
+
+function getFastestLapForSession(
+  session: TrackSessionRecord,
+  repositories: Repositories,
+  fastestLapCache: Map<string, number | null>
+): number | null {
+  if (fastestLapCache.has(session.id)) {
+    return fastestLapCache.get(session.id) ?? null;
+  }
+
+  if (session.fastestLap != null) {
+    fastestLapCache.set(session.id, session.fastestLap);
+    return session.fastestLap;
+  }
+
+  const laps = repositories.laps.findBySessionId(session.id);
+  if (!laps.length) {
+    fastestLapCache.set(session.id, null);
+    return null;
+  }
+  const fastest = Math.min(...laps.map((lap) => lap.time));
+  fastestLapCache.set(session.id, fastest);
+  return fastest;
+}
+
+function buildPersonalBestIndexForUser(userId: string, repositories: Repositories) {
+  const trackCache = new Map<string, TrackRecord | null>();
+  const fastestLapCache = new Map<string, number | null>();
+  const bestByKey = new Map<
+    string,
+    {
+      bestLap: number;
+      timestamp: number;
+      sessionId: string;
+    }
+  >();
+
+  const sessions = repositories.trackSessions.findByUserId(userId);
+  sessions.forEach((session) => {
+    const fastestLap = getFastestLapForSession(session, repositories, fastestLapCache);
+    if (fastestLap == null) return;
+    const conditions = resolveSessionConditions(session, repositories, trackCache);
+    const key = getSessionPersonalBestKey(session, conditions);
+    const timestampValue = new Date(session.date).getTime();
+    const timestamp = Number.isNaN(timestampValue) ? 0 : timestampValue;
+    const current = bestByKey.get(key);
+    if (
+      current == null ||
+      fastestLap < current.bestLap ||
+      (fastestLap === current.bestLap && timestamp < current.timestamp)
+    ) {
+      bestByKey.set(key, { bestLap: fastestLap, timestamp, sessionId: session.id });
+    }
+  });
+
+  return bestByKey;
+}
+
 function parseLapEventInputs(
   lapEvents: LapEventInputArg[] | null | undefined,
   lapNumber: number,
@@ -209,6 +297,9 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
   const loadLaps = () => repositories.laps.findBySessionId(session.id);
   const cachedTrack = repositories.tracks.findById(session.trackId);
   let cachedConsistency: ConsistencyStats | null = null;
+  let personalBestIndex:
+    | ReturnType<typeof buildPersonalBestIndexForUser>
+    | null = null;
 
   const getConsistency = () => {
     if (cachedConsistency) return cachedConsistency;
@@ -217,6 +308,13 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
       laps.map((lap) => ({ id: lap.id, lapNumber: lap.lapNumber, time: lap.time }))
     );
     return cachedConsistency;
+  };
+
+  const getPersonalBestIndex = () => {
+    if (!personalBestIndex) {
+      personalBestIndex = buildPersonalBestIndexForUser(session.userId, repositories);
+    }
+    return personalBestIndex;
   };
 
   const toConsistencyPayload = () => {
@@ -244,6 +342,8 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
       })),
     };
   };
+  const normalizedConditions = cachedTrack?.isIndoors ? "Dry" : session.conditions;
+  const personalBestKey = getSessionPersonalBestKey(session, normalizedConditions);
 
   return {
     id: session.id,
@@ -251,7 +351,11 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
     format: session.format,
     classification: session.classification,
     fastestLap: session.fastestLap,
-    conditions: cachedTrack?.isIndoors ? "Dry" : session.conditions,
+    isPersonalBest: () => {
+      const bestEntry = getPersonalBestIndex().get(personalBestKey);
+      return bestEntry?.sessionId === session.id;
+    },
+    conditions: normalizedConditions,
     temperature: session.temperature,
     kartNumber: session.kartNumber,
     track: () => {

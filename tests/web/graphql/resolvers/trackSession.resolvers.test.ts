@@ -21,6 +21,7 @@ vi.mock("../../../../src/web/shared/weather.js", () => ({
 import { createMockGraphQLContext } from "../context.mock.js";
 import { computeConsistencyStats } from "../../../../src/web/shared/consistency.js";
 import { rootValue } from "../../../../src/web/graphql/schema.js";
+import type { TrackSessionRecord } from "../../../../src/db/track_sessions.js";
 
 const { context, repositories } = createMockGraphQLContext({
   currentUser: { id: "user-1", username: "sam", createdAt: Date.now(), isAdmin: true },
@@ -102,6 +103,57 @@ describe("trackSession resolvers", () => {
     expect(payload.id).toBe("s1");
     expect(await payload.track()).toMatchObject({ id: "c1", name: "Spa" });
     expect((await payload.laps({ first: 10 })).length).toBe(1);
+  });
+
+  it("flags all-time personal best per track, layout, kart, and conditions", async () => {
+    const baseSession: TrackSessionRecord = {
+      ...mockSession,
+      id: "s1",
+      fastestLap: 47.004,
+      date: "2024-01-10",
+    };
+    const slowerSession: TrackSessionRecord = {
+      ...mockSession,
+      id: "s2",
+      fastestLap: 48.5,
+      date: "2024-01-11",
+    };
+    const wetSession: TrackSessionRecord = {
+      ...mockSession,
+      id: "s3",
+      fastestLap: 46.5,
+      conditions: "Wet" as const,
+      date: "2024-01-12",
+    };
+    const otherKartSession: TrackSessionRecord = {
+      ...mockSession,
+      id: "s4",
+      fastestLap: 46.1,
+      kartId: "k2",
+      date: "2024-01-09",
+    };
+
+    const sessionsById = new Map([
+      ["s1", baseSession],
+      ["s2", slowerSession],
+      ["s3", wetSession],
+      ["s4", otherKartSession],
+    ]);
+
+    repositories.trackSessions.findById.mockImplementation((id: string) => sessionsById.get(id) ?? null);
+    repositories.trackSessions.findByUserId.mockReturnValue([
+      slowerSession,
+      baseSession,
+      wetSession,
+      otherKartSession,
+    ]);
+    repositories.tracks.findById.mockReturnValue(mockTrack);
+
+    const bestPayload = rootValue.trackSession({ id: "s1" }, context);
+    expect(await bestPayload.isPersonalBest()).toBe(true);
+
+    const slowerPayload = rootValue.trackSession({ id: "s2" }, context);
+    expect(await slowerPayload.isPersonalBest()).toBe(false);
   });
 
   it("exposes consistency score and breakdown derived from laps", async () => {

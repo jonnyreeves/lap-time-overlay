@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<738b3a4c333d3ca29093cea8286e5088>>
+ * @generated SignedSource<<07177b1b76441be21e55e2b2d1d8a56d>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -300,6 +300,13 @@ return {
                         "name": "classification",
                         "storageKey": null
                       },
+                      {
+                        "alias": null,
+                        "args": null,
+                        "kind": "ScalarField",
+                        "name": "isPersonalBest",
+                        "storageKey": null
+                      },
                       (v3/*: any*/),
                       {
                         "alias": null,
@@ -396,12 +403,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "e64a6cbe7a463d79be090fb7e0b41961",
+    "cacheID": "bf89c97bc21ce3cb9b5021292b4c5854",
     "id": null,
     "metadata": {},
     "name": "RequireAuthViewerQuery",
     "operationKind": "query",
-    "text": "query RequireAuthViewerQuery {\n  viewer {\n    ...HomePage_viewer\n    ...SiteHeader_viewer\n    ...adminAdminToolsRoute_viewer\n    id\n  }\n}\n\nfragment HomePage_viewer on User {\n  id\n  username\n  ...RecentTracksCard_viewer\n  ...RecentSessionsCard_viewer\n}\n\nfragment RecentSessionsCard_viewer on User {\n  id\n  recentTrackSessions(first: 5) {\n    edges {\n      node {\n        id\n        date\n        format\n        classification\n        conditions\n        temperature\n        notes\n        track {\n          name\n          id\n          isIndoors\n        }\n        trackLayout {\n          id\n          name\n        }\n        kart {\n          id\n          name\n        }\n        laps(first: 1) {\n          personalBest\n          id\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment RecentTracksCard_viewer on User {\n  id\n  recentTracks(first: 5) {\n    edges {\n      node {\n        id\n        name\n        heroImage\n        personalBestEntries {\n          trackSessionId\n          conditions\n          lapTime\n          kart {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment SiteHeader_viewer on User {\n  id\n  username\n  isAdmin\n}\n\nfragment adminAdminToolsRoute_viewer on User {\n  id\n  isAdmin\n}\n"
+    "text": "query RequireAuthViewerQuery {\n  viewer {\n    ...HomePage_viewer\n    ...SiteHeader_viewer\n    ...adminAdminToolsRoute_viewer\n    id\n  }\n}\n\nfragment HomePage_viewer on User {\n  id\n  username\n  ...RecentTracksCard_viewer\n  ...RecentSessionsCard_viewer\n}\n\nfragment RecentSessionsCard_viewer on User {\n  id\n  recentTrackSessions(first: 5) {\n    edges {\n      node {\n        id\n        date\n        format\n        classification\n        isPersonalBest\n        conditions\n        temperature\n        notes\n        track {\n          name\n          id\n          isIndoors\n        }\n        trackLayout {\n          id\n          name\n        }\n        kart {\n          id\n          name\n        }\n        laps(first: 1) {\n          personalBest\n          id\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment RecentTracksCard_viewer on User {\n  id\n  recentTracks(first: 5) {\n    edges {\n      node {\n        id\n        name\n        heroImage\n        personalBestEntries {\n          trackSessionId\n          conditions\n          lapTime\n          kart {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment SiteHeader_viewer on User {\n  id\n  username\n  isAdmin\n}\n\nfragment adminAdminToolsRoute_viewer on User {\n  id\n  isAdmin\n}\n"
   }
 };
 })();

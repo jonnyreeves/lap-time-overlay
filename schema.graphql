@@ -510,6 +510,7 @@ type TrackSession {
   format: String!
   classification: Int!
   fastestLap: Float
+  isPersonalBest: Boolean!
   conditions: String!
   temperature: String
   track: Track!
