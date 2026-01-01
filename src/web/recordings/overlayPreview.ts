@@ -75,7 +75,7 @@ function parseLapEventPositionValue(value: string): number | null {
 function deriveLapPositionChanges(
   lapEvents: LapEventRecord[],
   lapDurationS: number
-): { positionChanges: PositionChange[]; initialPosition: number } {
+): { positionChanges: PositionChange[]; firstPosition: number | null; lastPosition: number | null } {
   const parsed = lapEvents
     .filter((event) => event.event === POSITION_EVENT_TYPE)
     .map((event) => {
@@ -108,8 +108,9 @@ function deriveLapPositionChanges(
     }
   }
 
-  const initialPosition = positionChanges[0]?.position ?? 0;
-  return { positionChanges, initialPosition };
+  const firstPosition = positionChanges[0]?.position ?? null;
+  const lastPosition = positionChanges[positionChanges.length - 1]?.position ?? null;
+  return { positionChanges, firstPosition, lastPosition };
 }
 
 export function buildOverlayStyle(overrides?: Partial<OverlayStyle>): OverlayStyle {
@@ -177,6 +178,8 @@ function loadSession(recording: TrackRecordingRecord) {
 export function buildOverlayLaps(laps: LapRecord[]): OverlayLap[] {
   const sorted = [...laps].sort((a, b) => a.lapNumber - b.lapNumber);
   let elapsed = 0;
+  let carryPosition = 0;
+
   return sorted.map((lap) => {
     const durationS = Number(lap.time);
     if (!Number.isFinite(durationS) || durationS <= 0) {
@@ -188,15 +191,30 @@ export function buildOverlayLaps(laps: LapRecord[]): OverlayLap[] {
     const startS = elapsed;
     elapsed += durationS;
     const lapEvents = findLapEventsByLapId(lap.id);
-    const { positionChanges, initialPosition } = deriveLapPositionChanges(lapEvents, durationS);
-    return {
+    const { positionChanges, firstPosition, lastPosition } = deriveLapPositionChanges(
+      lapEvents,
+      durationS
+    );
+
+    const startPositionChange = positionChanges.find((change) => change.atS === 0);
+    const startPosition =
+      startPositionChange?.position ??
+      (carryPosition > 0 ? carryPosition : firstPosition ?? 0);
+    const overlayLap: OverlayLap = {
       lapId: lap.id,
       number: lap.lapNumber,
       durationS,
-      position: initialPosition,
+      position: startPosition,
       positionChanges,
       startS,
     };
+
+    const nextCarry = Number.isFinite(lastPosition) && (lastPosition as number) > 0
+      ? (lastPosition as number)
+      : startPosition;
+    carryPosition = Math.max(0, Math.round(nextCarry));
+
+    return overlayLap;
   });
 }
 

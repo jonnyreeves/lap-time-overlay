@@ -113,4 +113,63 @@ describe("buildOverlayLaps", () => {
       { atS: 62, position: 1 },
     ]);
   });
+
+  it("carries end-of-lap position into the next lap", () => {
+    lapEventsByLapId["lap-1"] = [
+      {
+        id: "event-1",
+        lapId: "lap-1",
+        offset: 50,
+        event: "position",
+        value: "4",
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    ];
+
+    lapEventsByLapId["lap-2"] = [
+      {
+        id: "event-2",
+        lapId: "lap-2",
+        offset: 55,
+        event: "position",
+        value: "2",
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    ];
+
+    const laps: LapRecord[] = [
+      {
+        id: "lap-1",
+        sessionId: "session",
+        lapNumber: 1,
+        time: 50,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+      {
+        id: "lap-2",
+        sessionId: "session",
+        lapNumber: 2,
+        time: 55,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    ];
+
+    const overlayLaps = buildOverlayLaps(laps);
+
+    expect(overlayLaps[0]).toMatchObject({
+      number: 1,
+      position: 4,
+      positionChanges: [{ atS: 50, position: 4 }],
+    });
+
+    expect(overlayLaps[1]).toMatchObject({
+      number: 2,
+      position: 4,
+      positionChanges: [{ atS: 55, position: 2 }],
+    });
+  });
 });

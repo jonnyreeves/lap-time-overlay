@@ -163,12 +163,14 @@ function buildPositionTimeline(
     }
   }
 
+  const lastKnownChange = withFallback[withFallback.length - 1];
   const lastPosition =
-    segments.length > 0
+    lastKnownChange?.position ??
+    (segments.length > 0
       ? segments[segments.length - 1].position
       : startPosition > 0
         ? startPosition
-        : carryPosition;
+        : carryPosition);
 
   return { segments, lastPosition };
 }

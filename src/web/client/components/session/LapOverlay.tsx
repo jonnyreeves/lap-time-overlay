@@ -1,4 +1,3 @@
-import { css } from "@emotion/react";
 import {
   useCallback,
   useEffect,
@@ -10,6 +9,16 @@ import {
 } from "react";
 import { computeLapPosition, type LapRange } from "../../hooks/useLapPositionSync.js";
 import { formatStopwatchTime } from "../../utils/lapTime.js";
+import { overlayStyles } from "./lapOverlayStyles.js";
+import {
+  buildLapPositionTimelines,
+  clamp,
+  formatDelta,
+  positionForLapElapsed,
+  resolveTone,
+  trendFromDelta,
+  type LapEvent,
+} from "./lapOverlayUtils.js";
 
 type LapOverlayProps = {
   enabled: boolean;
@@ -21,6 +30,7 @@ type LapOverlayProps = {
       lapNumber: number;
       time?: number | null;
       isFastest?: boolean | null;
+      lapEvents?: LapEvent[];
     }
   >;
   lastJumpRef: MutableRefObject<{ id: string | null; at: number }>;
@@ -39,124 +49,6 @@ type PreviousLapState = {
   deltaToPrior: number | null;
   tone: "fastest" | "faster" | "slower" | "neutral";
 };
-
-const overlayStyles = css`
-  position: absolute;
-  top: calc(10px * var(--lap-overlay-scale, 1));
-  right: calc(10px * var(--lap-overlay-scale, 1));
-  color: #ffd500;
-  pointer-events: none;
-  display: grid;
-  gap: calc(4px * var(--lap-overlay-scale, 1));
-  z-index: 2;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
-  justify-items: end;
-  background: rgba(0, 0, 0, 0.6);
-  padding: calc(8px * var(--lap-overlay-scale, 1)) calc(10px * var(--lap-overlay-scale, 1));
-  border-radius: calc(8px * var(--lap-overlay-scale, 1));
-  transform-origin: top right;
-
-  .lap-label {
-    font-size: calc(15px * var(--lap-overlay-scale, 1));
-    letter-spacing: 0.01em;
-    line-height: 1.2;
-  }
-
-  .lap-time {
-    font-size: calc(20px * var(--lap-overlay-scale, 1));
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.01em;
-  }
-
-  .current-lap {
-    display: grid;
-    gap: calc(2px * var(--lap-overlay-scale, 1));
-    justify-items: end;
-  }
-
-  .previous-lap {
-    display: grid;
-    gap: calc(2px * var(--lap-overlay-scale, 1));
-    justify-items: end;
-    padding-top: calc(6px * var(--lap-overlay-scale, 1));
-    margin-top: calc(2px * var(--lap-overlay-scale, 1));
-    border-top: 1px solid rgba(255, 255, 255, 0.18);
-    color: #e2e8f0;
-  }
-
-  .previous-label {
-    font-size: calc(12px * var(--lap-overlay-scale, 1));
-    letter-spacing: 0.01em;
-    color: #cbd5e1;
-  }
-
-  .previous-time {
-    font-size: calc(16px * var(--lap-overlay-scale, 1));
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.01em;
-    color: #e2e8f0;
-  }
-
-  .previous-delta {
-    margin-left: calc(6px * var(--lap-overlay-scale, 1));
-    font-size: calc(14px * var(--lap-overlay-scale, 1));
-    color: #e2e8f0;
-  }
-
-  .previous-lap[data-tone="faster"] .previous-delta {
-    color: #22c55e;
-  }
-
-  .previous-lap[data-tone="slower"] .previous-delta {
-    color: #ef4444;
-  }
-
-  .previous-lap[data-tone="fastest"] .previous-delta {
-    color: #a855f7;
-  }
-
-  .delta-stack {
-    display: grid;
-    gap: calc(4px * var(--lap-overlay-scale, 1));
-    justify-items: end;
-    margin-top: calc(4px * var(--lap-overlay-scale, 1));
-  }
-
-  .delta-row {
-    display: inline-flex;
-    align-items: baseline;
-    gap: calc(8px * var(--lap-overlay-scale, 1));
-  }
-
-  .delta-label {
-    font-size: calc(12px * var(--lap-overlay-scale, 1));
-    letter-spacing: 0.01em;
-    color: #cbd5e1;
-  }
-
-  .delta-value {
-    font-size: calc(16px * var(--lap-overlay-scale, 1));
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.01em;
-    color: #e2e8f0;
-  }
-
-  .delta-value[data-trend="ahead"] {
-    color: #22c55e;
-  }
-
-  .delta-value[data-trend="behind"] {
-    color: #ef4444;
-  }
-
-  .delta-value[data-trend="even"] {
-    color: #e2e8f0;
-  }
-
-  .delta-value[data-trend="fastest"] {
-    color: #a855f7;
-  }
-`;
 
 const initialState: OverlayState = {
   lapId: null,
@@ -218,32 +110,6 @@ function useLapOverlayState({
   }, [enabled, getVideo, lapRanges, lastJumpRef, rangeById]);
 
   return state;
-}
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value));
-}
-
-function formatDelta(delta: number | null): string {
-  if (delta == null || Number.isNaN(delta)) return "N/A";
-  const sign = delta < 0 ? "-" : "+";
-  return `${sign}${Math.abs(delta).toFixed(3)}`;
-}
-
-function resolveTone(delta: number | null, isFastest: boolean | null | undefined) {
-  if (isFastest) return "fastest";
-  if (delta == null || Math.abs(delta) < 0.0005) return "neutral";
-  return delta < 0 ? "faster" : "slower";
-}
-
-function trendFromDelta(
-  delta: number | null,
-  isFastest?: boolean | null
-): "ahead" | "behind" | "even" | "none" | "fastest" {
-  if (isFastest) return "fastest";
-  if (delta == null || Number.isNaN(delta)) return "none";
-  if (Math.abs(delta) < 0.0005) return "even";
-  return delta < 0 ? "ahead" : "behind";
 }
 
 export function LapOverlay({
@@ -416,6 +282,15 @@ export function LapOverlay({
   const lapNumber = lapMeta?.lapNumber ?? null;
   const lapTime = lapMeta?.time ?? null;
   const lapIsFastest = Boolean(lapMeta?.isFastest);
+  const positionTimelines = useMemo(
+    () => buildLapPositionTimelines(lapRanges, lapLookup),
+    [lapRanges, lapLookup]
+  );
+  const currentPosition = useMemo(() => {
+    if (!lapId) return null;
+    const timeline = positionTimelines.get(lapId) ?? null;
+    return positionForLapElapsed(timeline, lapElapsed);
+  }, [lapElapsed, lapId, positionTimelines]);
 
   const deltaToBest = useMemo(() => {
     if (fastestLapTime == null || lapTime == null || !Number.isFinite(lapTime)) return null;
@@ -441,7 +316,12 @@ export function LapOverlay({
       aria-label="Current lap overlay"
     >
       <div className="current-lap">
-        <span className="lap-label">Lap {lapNumber}</span>
+        <span className="lap-label">
+          Lap {lapNumber}
+          {currentPosition != null ? (
+            <span className="lap-position">P{currentPosition}</span>
+          ) : null}
+        </span>
         <span className="lap-time">{formatStopwatchTime(lapElapsed)}</span>
         {showLapDeltas ? (
           <div className="delta-stack" aria-label="Lap-relative deltas">
@@ -466,7 +346,7 @@ export function LapOverlay({
       </div>
       {previousLap ? (
         <div className="previous-lap" data-tone={previousLap.tone}>
-        <span className="previous-label">Prev</span>
+          <span className="previous-label">Prev</span>
           <span className="previous-time">
             {formatStopwatchTime(previousLap.lapTime)}
             <span className="previous-delta">[{formatDelta(previousLap.deltaToPrior)}]</span>

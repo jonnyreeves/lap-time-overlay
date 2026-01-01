@@ -9,6 +9,7 @@ import { inlineActionButtonStyles } from "../inlineActionButtons.ts";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
 import { buildLapRanges, resolveLapAtTime } from "../../hooks/useLapPositionSync.js";
 import { LapOverlay } from "./LapOverlay.js";
+import type { LapEvent } from "./lapOverlayUtils.js";
 import { UPLOAD_RECORDING_MODAL_EVENT } from "./uploadRecordingEvent.ts";
 
 type Recording = {
@@ -28,6 +29,7 @@ type LapWithStart = {
   start: number;
   isFastest: boolean;
   deltaToFastest: number | null;
+  lapEvents: LapEvent[];
 };
 
 type Props = {

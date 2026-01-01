@@ -51,7 +51,8 @@ export function parseDaytonaEmail(text: string): ParsedDaytonaEmail {
         lapNumber: lapNum,
         timeSeconds: durationS,
         displayTime: formatLapTimeSeconds(durationS),
-        lapEvents: [{ offset: 0, event: "position", value: String(pos) }],
+        // Daytona emails report the position at the end of the lap, so store it at the lap duration.
+        lapEvents: [{ offset: durationS, event: "position", value: String(pos) }],
       });
     }
   }

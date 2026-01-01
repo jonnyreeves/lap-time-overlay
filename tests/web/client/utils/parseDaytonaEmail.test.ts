@@ -24,7 +24,7 @@ describe("parseDaytonaEmail", () => {
     expect(result.laps[0]).toMatchObject({
       lapNumber: 1,
       timeSeconds: 57.755,
-      lapEvents: [{ offset: 0, event: "position", value: "11" }],
+      lapEvents: [{ offset: 57.755, event: "position", value: "11" }],
     });
     expect(result.laps[2]).toMatchObject({ lapNumber: 3, timeSeconds: 51.258 });
     expect(result.sessionFastestLapSeconds).toBeCloseTo(63.076, 3);
@@ -162,7 +162,7 @@ describe("parseDaytonaEmail", () => {
     const lap25 = result.laps.find((lap) => lap.lapNumber === 25);
     expect(lap25).toMatchObject({
       timeSeconds: 50.604,
-      lapEvents: [{ offset: 0, event: "position", value: "11" }],
+      lapEvents: [{ offset: 50.604, event: "position", value: "11" }],
     });
 
     const lap41 = result.laps.find((lap) => lap.lapNumber === 41);
