@@ -1,9 +1,10 @@
 import { css } from "@emotion/react";
 import { format } from "date-fns";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { listTracksQuery } from "../../__generated__/listTracksQuery.graphql.js";
 import { Card } from "../Card.js";
+import { primaryButtonStyles } from "../session/sessionOverviewStyles.ts";
 
 type TrackRow = NonNullable<listTracksQuery["response"]["tracks"][number]>;
 type SortField = "name" | "timesRaced" | "lastVisit";
@@ -95,6 +96,21 @@ const emptyStateStyles = css`
   color: #475569;
 `;
 
+const headerActionsStyles = css`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+`;
+
+const addTrackButtonStyles = css`
+  ${primaryButtonStyles};
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+`;
+
 type Props = {
   tracks: readonly TrackRow[];
 };
@@ -177,9 +193,18 @@ export function TracksTable({ tracks }: Props) {
   };
 
   return (
-    <Card title="Tracks">
+    <Card
+      title="Tracks"
+      rightHeaderContent={
+        <div css={headerActionsStyles}>
+          <Link to="/tracks/create" css={addTrackButtonStyles}>
+            Add Track
+          </Link>
+        </div>
+      }
+    >
       {tracks.length === 0 ? (
-        <p css={emptyStateStyles}>No tracks yet. Create a session to add your first track.</p>
+        <p css={emptyStateStyles}>No tracks yet. Add your first track to get started.</p>
       ) : (
         <div css={tableWrapperStyles}>
           <table css={tableStyles}>

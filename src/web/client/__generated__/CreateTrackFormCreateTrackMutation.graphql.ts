@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<552121841c1dc07dfc8e54b380cff631>>
+ * @generated SignedSource<<c5b4142dd382702d04e57a118fbc5853>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -23,10 +23,10 @@ export type CreateKartInput = {
 export type CreateTrackLayoutInput = {
   name: string;
 };
-export type CreateTrackModalCreateTrackMutation$variables = {
+export type CreateTrackFormCreateTrackMutation$variables = {
   input: CreateTrackInput;
 };
-export type CreateTrackModalCreateTrackMutation$data = {
+export type CreateTrackFormCreateTrackMutation$data = {
   readonly createTrack: {
     readonly track: {
       readonly id: string;
@@ -44,9 +44,9 @@ export type CreateTrackModalCreateTrackMutation$data = {
     };
   };
 };
-export type CreateTrackModalCreateTrackMutation = {
-  response: CreateTrackModalCreateTrackMutation$data;
-  variables: CreateTrackModalCreateTrackMutation$variables;
+export type CreateTrackFormCreateTrackMutation = {
+  response: CreateTrackFormCreateTrackMutation$data;
+  variables: CreateTrackFormCreateTrackMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -146,7 +146,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "CreateTrackModalCreateTrackMutation",
+    "name": "CreateTrackFormCreateTrackMutation",
     "selections": (v4/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -155,20 +155,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "CreateTrackModalCreateTrackMutation",
+    "name": "CreateTrackFormCreateTrackMutation",
     "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "3d8e2c756cd08089003184b6a7bb88dd",
+    "cacheID": "16eac51dacbf1e10bb07b0c8d27a31fa",
     "id": null,
     "metadata": {},
-    "name": "CreateTrackModalCreateTrackMutation",
+    "name": "CreateTrackFormCreateTrackMutation",
     "operationKind": "mutation",
-    "text": "mutation CreateTrackModalCreateTrackMutation(\n  $input: CreateTrackInput!\n) {\n  createTrack(input: $input) {\n    track {\n      id\n      name\n      postcode\n      isIndoors\n      karts {\n        id\n        name\n      }\n      trackLayouts {\n        id\n        name\n      }\n    }\n  }\n}\n"
+    "text": "mutation CreateTrackFormCreateTrackMutation(\n  $input: CreateTrackInput!\n) {\n  createTrack(input: $input) {\n    track {\n      id\n      name\n      postcode\n      isIndoors\n      karts {\n        id\n        name\n      }\n      trackLayouts {\n        id\n        name\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "36d9035e406266a309985d39653bd911";
+(node as any).hash = "7665ee198551ffc74b5d528c21a7f799";
 
 export default node;
