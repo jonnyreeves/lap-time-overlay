@@ -88,6 +88,7 @@ const viewAllButtonStyles = css`
   border: 1px solid #d7e3f4;
   background: #f8fafc;
   color: #536ad6;
+  font-size: 0.85rem;
   font-weight: 700;
   text-decoration: none;
   letter-spacing: -0.01em;
