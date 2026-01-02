@@ -64,6 +64,33 @@ const trackLinkButtonStyles = css`
   cursor: pointer;
 `;
 
+const headerActionsStyles = css`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+`;
+
+const viewAllButtonStyles = css`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #d7e3f4;
+  background: #f8fafc;
+  color: #536ad6;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+
+  &:hover {
+    color: #334ac0;
+    border-color: #c7d2fe;
+    background: #eef2ff;
+  }
+`;
+
 const avatarButtonStyles = css`
   display: flex;
   justify-content: center;
@@ -100,23 +127,6 @@ const emptyStateStyles = css`
   font-weight: 600;
 `;
 
-const footerLinkRowStyles = css`
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 4px;
-`;
-
-const footerLinkStyles = css`
-  font-weight: 700;
-  color: #4f46e5;
-  text-decoration: none;
-  letter-spacing: -0.01em;
-
-  &:hover {
-    color: #312e81;
-  }
-`;
-
 export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$key }) {
   const data = useFragment(RecentTracksCardFragment, viewer);
   const tracks = (data.recentTracks?.edges ?? [])
@@ -127,7 +137,16 @@ export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$k
   const handleSessionNavigate = (sessionId: string) => navigate(`/session/${sessionId}`);
 
   return (
-    <Card title="Recent Tracks">
+    <Card
+      title="Recent Tracks"
+      rightHeaderContent={
+        <div css={headerActionsStyles}>
+          <Link to="/tracks" css={viewAllButtonStyles}>
+            View all tracks →
+          </Link>
+        </div>
+      }
+    >
       <div css={tracksContainerStyles}>
         {tracks.map((track) => (
           <div
@@ -167,11 +186,6 @@ export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$k
             </div>
           </div>
         ))}
-      </div>
-      <div css={footerLinkRowStyles}>
-        <Link to="/tracks" css={footerLinkStyles}>
-          View all tracks →
-        </Link>
       </div>
     </Card>
   );
