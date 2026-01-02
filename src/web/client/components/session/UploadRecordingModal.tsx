@@ -587,6 +587,9 @@ export function UploadRecordingModal({
     }
     if (shouldShowBusyState) return;
     const selectedSources = uploadSources;
+    const startOffsetMs = videoItems[0]?.startOffsetMs ?? 0;
+    const lapOneOffsetSeconds =
+      lapOneOffsetMs != null ? Math.max(0, lapOneOffsetMs - startOffsetMs) / 1000 : null;
     setFileEntries([]);
     setVideoItems([]); // Clear video files as well
     setCurrentVideoIndex(0);
@@ -594,7 +597,6 @@ export function UploadRecordingModal({
     setIsUploading(true);
     onClose();
 
-    const lapOneOffsetSeconds = lapOneOffsetMs != null ? lapOneOffsetMs / 1000 : null;
     startUpload({
       variables: {
         input: {
