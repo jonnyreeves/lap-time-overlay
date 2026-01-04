@@ -5,6 +5,8 @@ import {
   type RecentTracksCard_viewer$key,
 } from "../../__generated__/RecentTracksCard_viewer.graphql.js";
 import { Card } from "../Card.js";
+import { inlineActionLinkStyles } from "../inlineActionButtons.ts";
+import { actionsRowStyles } from "../session/sessionOverviewStyles.ts";
 import { TrackAvatar } from "./TrackAvatar.js";
 import { TrackPersonalBestPill } from "./TrackPersonalBestPill.js";
 import { groupPersonalBestEntries } from "./personalBestGrouping.js";
@@ -64,34 +66,6 @@ const trackLinkButtonStyles = css`
   cursor: pointer;
 `;
 
-const headerActionsStyles = css`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-`;
-
-const viewAllButtonStyles = css`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid #d7e3f4;
-  background: #f8fafc;
-  color: #536ad6;
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-decoration: none;
-  letter-spacing: -0.01em;
-
-  &:hover {
-    color: #334ac0;
-    border-color: #c7d2fe;
-    background: #eef2ff;
-  }
-`;
-
 const avatarButtonStyles = css`
   display: flex;
   justify-content: center;
@@ -141,8 +115,8 @@ export function RecentTracksCard({ viewer }: { viewer: RecentTracksCard_viewer$k
     <Card
       title="Recent Tracks"
       rightHeaderContent={
-        <div css={headerActionsStyles}>
-          <Link to="/tracks" css={viewAllButtonStyles}>
+        <div css={actionsRowStyles}>
+          <Link to="/tracks" css={inlineActionLinkStyles}>
             View all tracks →
           </Link>
         </div>

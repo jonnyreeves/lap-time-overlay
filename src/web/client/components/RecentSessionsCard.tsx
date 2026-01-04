@@ -10,6 +10,8 @@ import { getConditionsEmoji } from "../utils/conditionsEmoji.js";
 import { formatStopwatchTime } from "../utils/lapTime.js";
 import { Card } from "./Card.js";
 import { IconButton } from "./IconButton.js";
+import { inlineActionLinkStyles } from "./inlineActionButtons.ts";
+import { actionsRowStyles, primaryButtonStyles } from "./session/sessionOverviewStyles.ts";
 
 const RecentSessionsCardFragment = graphql`
   fragment RecentSessionsCard_viewer on User {
@@ -52,53 +54,6 @@ const RecentSessionsCardFragment = graphql`
 type Props = {
   viewer: RecentSessionsCard_viewer$key;
 };
-
-const addSessionButtonStyles = css`
-  padding: 10px 16px;
-  border-radius: 10px;
-  border: 1px solid #5b6fe9;
-  background: linear-gradient(140deg, #5b6fe9, #7487ff);
-  color: #fff;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
-
-  &:hover {
-    transform: translateY(-1px);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-`;
-
-const headerActionsStyles = css`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-`;
-
-const viewAllButtonStyles = css`
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  border: 1px solid #d7e3f4;
-  background: #f8fafc;
-  color: #536ad6;
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-decoration: none;
-  letter-spacing: -0.01em;
-
-  &:hover {
-    color: #334ac0;
-    border-color: #c7d2fe;
-    background: #eef2ff;
-  }
-`;
 
 const sessionsListStyles = css`
   display: flex;
@@ -390,14 +345,14 @@ export function RecentSessionsCard({ viewer }: Props) {
     <Card
       title="Recent sessions"
       rightHeaderContent={
-        <div css={headerActionsStyles}>
-          <Link to="/session" css={viewAllButtonStyles}>
+        <div css={actionsRowStyles}>
+          <Link to="/session" css={inlineActionLinkStyles}>
             View all sessions →
           </Link>
           <IconButton
             type="button"
             icon="+"
-            css={addSessionButtonStyles}
+            css={primaryButtonStyles}
             onClick={() => navigate("/session/create")}
           >
             Add session

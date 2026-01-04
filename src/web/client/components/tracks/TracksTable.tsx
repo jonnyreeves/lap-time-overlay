@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { listTracksQuery } from "../../__generated__/listTracksQuery.graphql.js";
 import { Card } from "../Card.js";
-import { primaryButtonStyles } from "../session/sessionOverviewStyles.ts";
+import { inlineActionLinkStyles } from "../inlineActionButtons.ts";
+import { actionsRowStyles } from "../session/sessionOverviewStyles.ts";
 
 type TrackRow = NonNullable<listTracksQuery["response"]["tracks"][number]>;
 type SortField = "name" | "timesRaced" | "lastVisit";
@@ -96,21 +97,6 @@ const emptyStateStyles = css`
   color: #475569;
 `;
 
-const headerActionsStyles = css`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-`;
-
-const addTrackButtonStyles = css`
-  ${primaryButtonStyles};
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  text-decoration: none;
-`;
-
 type Props = {
   tracks: readonly TrackRow[];
 };
@@ -196,8 +182,8 @@ export function TracksTable({ tracks }: Props) {
     <Card
       title="Tracks"
       rightHeaderContent={
-        <div css={headerActionsStyles}>
-          <Link to="/tracks/create" css={addTrackButtonStyles}>
+        <div css={actionsRowStyles}>
+          <Link to="/tracks/create" css={inlineActionLinkStyles}>
             Add Track
           </Link>
         </div>

@@ -14,6 +14,7 @@ import type { adminCancelRenderJobMutation } from "../../__generated__/adminCanc
 import type { adminUpdateVideoAccelerationPreferenceMutation } from "../../__generated__/adminUpdateVideoAccelerationPreferenceMutation.graphql.js";
 import type { RequireAuthViewerQuery } from "../../__generated__/RequireAuthViewerQuery.graphql.js";
 import { Card } from "../../components/Card.js";
+import { inlineActionButtonStyles } from "../../components/inlineActionButtons.ts";
 import { useBreadcrumbs } from "../../hooks/useBreadcrumbs.js";
 
 const AdminToolsPageQuery = graphql`
@@ -759,7 +760,12 @@ export default function AdminToolsRoute() {
         <Card
           title="User media libraries"
           rightHeaderContent={
-            <button type="button" disabled={isFullRebuildRunning} onClick={handleRebuildAll}>
+            <button
+              type="button"
+              css={inlineActionButtonStyles}
+              disabled={isFullRebuildRunning}
+              onClick={handleRebuildAll}
+            >
               {isFullRebuildRunning ? "Rebuilding Media Library index…" : "Rebuild Media Library index"}
             </button>
           }

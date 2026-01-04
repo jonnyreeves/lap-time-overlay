@@ -9,6 +9,7 @@ import { createTrackSessionMutation } from "../../__generated__/createTrackSessi
 import { Card } from "../../components/Card.js";
 import { IconButton } from "../../components/IconButton.js";
 import { inlineActionButtonStyles } from "../../components/inlineActionButtons.ts";
+import { actionsRowStyles, primaryButtonStyles } from "../../components/session/sessionOverviewStyles.ts";
 import { ImportSessionModal } from "../../components/session/ImportSessionModal.js";
 import { LapInputsCard } from "../../components/session/LapInputsCard.js";
 import { CreateTrackModal } from "../../components/tracks/CreateTrackModal.js";
@@ -85,28 +86,8 @@ const temperatureRowStyles = css`
   align-items: center;
 `;
 
-const AddTrackButtonStyles = css`
+const addTrackButtonStyles = css`
   margin-left: 10px;
-  padding: 8px 12px;
-  background-color: #e2e8f4;
-  color: #0b1021;
-  border: 1px solid #d7deed;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.2s ease-in-out;
-
-  &:hover {
-    background-color: #cbd5e1;
-    border-color: #cbd5e1;
-  }
-
-  &:disabled {
-    background-color: #e2e8f4;
-    color: #94a3b8;
-    border-color: #d7deed;
-    cursor: not-allowed;
-  }
 `;
 
 const formActionsStyles = css`
@@ -114,50 +95,6 @@ const formActionsStyles = css`
   justify-content: flex-end;
   gap: 10px;
   margin-top: 20px;
-`;
-
-const primaryButtonStyles = css`
-  padding: 10px 18px;
-  background-color: #6366f1;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 600;
-  transition: background-color 0.2s ease-in-out;
-
-  &:hover {
-    background-color: #4f46e5;
-  }
-
-  &:disabled {
-    background-color: #a5b4fc;
-    cursor: not-allowed;
-  }
-`;
-
-const secondaryButtonStyles = css`
-  padding: 10px 18px;
-  background-color: #e2e8f4;
-  color: #0b1021;
-  border: 1px solid #d7deed;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 600;
-  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-
-  &:hover {
-    background-color: #cbd5e1;
-    border-color: #cbd5e1;
-  }
-
-  &:disabled {
-    background-color: #e2e8f4;
-    color: #94a3b8;
-    cursor: not-allowed;
-  }
 `;
 
 const rightColumnStyles = css`
@@ -566,10 +503,10 @@ export default function CreateSessionRoute() {
       <Card
         title="Session Details"
         rightHeaderContent={
-          <div css={css`display: flex; gap: 8px;`}>
+          <div css={actionsRowStyles}>
             <IconButton
               type="button"
-              css={secondaryButtonStyles}
+              css={inlineActionButtonStyles}
               onClick={() => setShowImportSessionModal(true)}
               disabled={isInFlight}
               icon="📥"
@@ -628,7 +565,7 @@ export default function CreateSessionRoute() {
               </select>
               <button
                 type="button"
-                css={AddTrackButtonStyles}
+                css={[inlineActionButtonStyles, addTrackButtonStyles]}
                 onClick={() => setShowCreateTrackModal(true)}
                 disabled={isInFlight}
               >

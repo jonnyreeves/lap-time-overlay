@@ -19,6 +19,14 @@ export const inlineActionButtonStyles = css`
   }
 `;
 
+export const inlineActionLinkStyles = css`
+  ${inlineActionButtonStyles};
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+`;
+
 export const dangerInlineActionButtonStyles = css`
   padding: 8px 12px;
   background: #dc2626;
@@ -101,5 +109,4 @@ export const largeInlineActionButtonStyles = css`
     box-shadow: none;
   }
 `;
-
 

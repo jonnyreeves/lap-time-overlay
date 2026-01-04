@@ -13,6 +13,7 @@ import { getConditionsEmoji } from "../../utils/conditionsEmoji.js";
 import { formatStopwatchTime } from "../../utils/lapTime.js";
 import { Card } from "../Card.js";
 import { IconButton } from "../IconButton.js";
+import { primaryButtonStyles } from "./sessionOverviewStyles.ts";
 
 export type TrackSessionFilters = {
   trackId: string;
@@ -212,31 +213,6 @@ const loadMoreButtonStyles = css`
   &:hover:enabled {
     transform: translateY(-1px);
     box-shadow: 0 10px 18px rgba(91, 111, 233, 0.25);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-`;
-
-const addSessionButtonStyles = css`
-  padding: 10px 16px;
-  border-radius: 10px;
-  border: 1px solid #5b6fe9;
-  background: linear-gradient(140deg, #5b6fe9, #7487ff);
-  color: #fff;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
-
-  &:hover:enabled {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 18px rgba(91, 111, 233, 0.25);
-  }
-
-  &:active:enabled {
-    transform: translateY(0);
   }
 
   &:disabled {
@@ -636,7 +612,7 @@ export function TrackSessionsTable({
         <IconButton
           type="button"
           icon="+"
-          css={addSessionButtonStyles}
+          css={primaryButtonStyles}
           onClick={() => navigate("/session/create")}
         >
           Add session
