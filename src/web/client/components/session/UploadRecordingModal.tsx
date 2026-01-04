@@ -10,6 +10,7 @@ import {
   uploadToTargets,
   type UploadTarget,
 } from "./recordingShared.js";
+import { useEndOffsetButtonDisabled } from "../../hooks/useUploadRecordingOffsets.js";
 
 type FileEntry = File;
 type VideoItem = {
@@ -270,7 +271,6 @@ export function UploadRecordingModal({
   const errorMessage = trimValidationError ?? uploadError;
 
   const canMarkStart = videoItems.length > 0 && currentVideoIndex === 0;
-  const canMarkEnd = videoItems.length > 0 && currentVideoIndex === videoItems.length - 1;
   const startOffsetForLapOne = Math.max(0, videoItems[0]?.startOffsetMs ?? 0);
   const lapOneOffsetLabel =
     lapOneOffsetMs != null ? formatMs(lapOneOffsetMs) : "Not set";
@@ -285,10 +285,15 @@ export function UploadRecordingModal({
   const startButtonLabel = hasStartOffset ? "Clear start offset" : "Mark start from playhead";
   const endButtonLabel = hasEndOffset ? "Clear end offset" : "Mark end from playhead";
   const startButtonDisabled = shouldShowBusyState || (!hasStartOffset && !canMarkStart);
-  const requiredEndPlayheadMs = Math.max(startOffsetForLapOne, lapOneOffsetMs ?? startOffsetForLapOne);
-  const endButtonDisabled =
-    shouldShowBusyState ||
-    (!hasEndOffset && (!canMarkEnd || playheadMs <= requiredEndPlayheadMs));
+  const endButtonDisabled = useEndOffsetButtonDisabled({
+    videoCount: videoItems.length,
+    currentVideoIndex,
+    playheadMs,
+    startOffsetMs: videoItems[0]?.startOffsetMs,
+    lapOneOffsetMs,
+    hasEndOffset,
+    isBusy: shouldShowBusyState,
+  });
 
   useEffect(() => {
     const shouldWarn = isUploading || isStartInFlight || fileEntries.length > 0 || videoItems.length > 0;
