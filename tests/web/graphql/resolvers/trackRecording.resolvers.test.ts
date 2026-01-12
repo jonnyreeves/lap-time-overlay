@@ -118,7 +118,6 @@ describe("trackRecording resolvers", () => {
             createdAt: 0,
             updatedAt: 0,
           },
-          uploadUrl: "/upload",
         },
       ],
     });
@@ -141,7 +140,6 @@ describe("trackRecording resolvers", () => {
       lapOneOffset: 0,
       sources: [{ fileName: "clip.mp4", sizeBytes: 10, trimStartMs: null, trimEndMs: null }],
     });
-    expect(result.uploadTargets[0]?.uploadUrl).toBe("/upload");
     expect(result.recording.id).toBe("rec1");
   });
 

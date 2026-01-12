@@ -22,6 +22,8 @@ import {
   removeMediaLibraryProjectionsForRecordings,
 } from "../../recordings/mediaLibraryProjection.js";
 
+const DEBUG_UPLOAD_PROGRESS = process.env.DEBUG_UPLOAD_PROGRESS === "1";
+
 export type LapEventInputArg = { offset?: number; event?: string; value?: string };
 export type LapInputArg = { lapNumber?: number; time?: number; lapEvents?: LapEventInputArg[] | null };
 
@@ -501,6 +503,19 @@ export function toTrackRecordingPayload(recording: TrackRecordingRecord, reposit
       const totalBytes = targets.some((target) => target.sizeBytes == null)
         ? null
         : targets.reduce((sum, target) => sum + (target.sizeBytes ?? 0), 0);
+      if (DEBUG_UPLOAD_PROGRESS) {
+        console.info("GraphQL upload progress", {
+          recordingId: recording.id,
+          uploadedBytes,
+          totalBytes,
+          targets: targets.map((target) => ({
+            id: target.id,
+            sizeBytes: target.sizeBytes ?? null,
+            uploadedBytes: target.uploadedBytes ?? 0,
+            status: target.status,
+          })),
+        });
+      }
       return { uploadedBytes, totalBytes };
     },
     uploadTargets: (args: { first?: number }) => {
@@ -513,10 +528,7 @@ export function toTrackRecordingPayload(recording: TrackRecordingRecord, reposit
         uploadedBytes: target.uploadedBytes,
         status: target.status.toUpperCase(),
         ordinal: target.ordinal,
-        uploadUrl:
-          target.status === "uploaded"
-            ? null
-            : `/uploads/recordings/${target.id}?token=${encodeURIComponent(target.uploadToken)}`,
+        uploadToken: target.uploadToken,
       }));
     },
     createdAt: new Date(recording.createdAt).toISOString(),

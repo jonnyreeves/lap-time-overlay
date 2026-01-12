@@ -226,7 +226,7 @@ export const trackRecordingResolvers = {
           uploadedBytes: target.source.uploadedBytes,
           status: target.source.status.toUpperCase(),
           ordinal: target.source.ordinal,
-          uploadUrl: target.uploadUrl,
+          uploadToken: target.source.uploadToken,
         })),
       };
     } catch (err) {

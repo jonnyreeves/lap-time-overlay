@@ -64,6 +64,19 @@ export function findTrackRecordingSourceById(id: string): TrackRecordingSourceRe
   return row ? mapRow(row) : null;
 }
 
+export function findTrackRecordingSourceByUploadToken(
+  uploadToken: string
+): TrackRecordingSourceRecord | null {
+  const db = getDb();
+  const row = db
+    .prepare<unknown[], TrackRecordingSourceRow>(
+      `SELECT id, recording_id, file_name, ordinal, size_bytes, trim_start_ms, trim_end_ms, uploaded_bytes, storage_path, upload_token, status, created_at, updated_at
+       FROM track_recording_sources WHERE upload_token = ? LIMIT 1`
+    )
+    .get(uploadToken);
+  return row ? mapRow(row) : null;
+}
+
 export function findTrackRecordingSourcesByRecordingId(
   recordingId: string
 ): TrackRecordingSourceRecord[] {
@@ -170,9 +183,11 @@ export function updateTrackRecordingSource(
 export interface TrackRecordingSourceRepository {
   findByRecordingId: (recordingId: string) => TrackRecordingSourceRecord[];
   findById?: (id: string) => TrackRecordingSourceRecord | null;
+  findByUploadToken?: (uploadToken: string) => TrackRecordingSourceRecord | null;
 }
 
 export const trackRecordingSourcesRepository: TrackRecordingSourceRepository = {
   findByRecordingId: findTrackRecordingSourcesByRecordingId,
   findById: findTrackRecordingSourceById,
+  findByUploadToken: findTrackRecordingSourceByUploadToken,
 };

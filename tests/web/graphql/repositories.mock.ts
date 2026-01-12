@@ -1,5 +1,7 @@
 import { vi } from "vitest";
 import type { Repositories } from "../../../src/web/graphql/repositories.js";
+import type { TrackRecordingRecord } from "../../../src/db/track_recordings.js";
+import type { TrackRecordingSourceRecord } from "../../../src/db/track_recording_sources.js";
 import type { TrackLayoutsRepository } from "../../../src/db/track_layouts.js";
 
 export function createMockRepositories() {
@@ -27,12 +29,13 @@ export function createMockRepositories() {
       findByLapId: vi.fn(),
     },
     trackRecordings: {
-      findBySessionId: vi.fn(() => []),
-      findById: vi.fn(),
+      findBySessionId: vi.fn<[string], TrackRecordingRecord[]>(() => []),
+      findById: vi.fn<[string], TrackRecordingRecord | null>(),
     },
     trackRecordingSources: {
-      findByRecordingId: vi.fn(() => []),
-      findById: vi.fn(),
+      findByRecordingId: vi.fn<[string], TrackRecordingSourceRecord[]>(() => []),
+      findById: vi.fn<[string], TrackRecordingSourceRecord | null>(),
+      findByUploadToken: vi.fn<[string], TrackRecordingSourceRecord | null>(),
     },
     karts: {
       findById: vi.fn(),

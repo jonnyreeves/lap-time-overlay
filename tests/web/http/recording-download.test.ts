@@ -8,7 +8,7 @@ import { findTrackRecordingById } from "../../../src/db/track_recordings.js";
 import { SESSION_COOKIE_NAME } from "../../../src/web/auth/cookies.js";
 import { loadUserFromSession, refreshSession } from "../../../src/web/auth/service.js";
 import { sessionRecordingsDir } from "../../../src/web/config.js";
-import { handleRecordingDownloadRequest } from "../../../src/web/http/uploads.js";
+import { handleRecordingDownloadRequest } from "../../../src/web/http/recordingDownload.js";
 
 vi.mock("../../../src/web/config.js", () => {
   const testRoot = path.join(process.cwd(), "temp", "uploads-tests");

@@ -1,9 +1,6 @@
 import ffmpeg from "fluent-ffmpeg";
 import { randomUUID } from "node:crypto";
-import { once } from "node:events";
-import fs from "node:fs";
 import fsp from "node:fs/promises";
-import type http from "node:http";
 import path from "node:path";
 import {
   createTrackRecordingSource,
@@ -40,7 +37,6 @@ export interface RecordingSourcePlan {
 
 export interface UploadTarget {
   source: TrackRecordingSourceRecord;
-  uploadUrl: string;
 }
 
 export class RecordingUploadError extends Error {
@@ -50,19 +46,67 @@ export class RecordingUploadError extends Error {
   }
 }
 
-const UPLOAD_FLUSH_BYTES = 512 * 1024;
+const DEBUG_UPLOAD_PROGRESS = process.env.DEBUG_UPLOAD_PROGRESS === "1";
 
-function headerValue(value: string | string[] | undefined): string | null {
-  if (!value) return null;
-  if (Array.isArray(value)) return value.join(", ");
-  return value;
+function tokenSuffix(token: string | null | undefined): string | null {
+  if (!token) return null;
+  return token.slice(-6);
 }
 
-function parseContentLength(value: string | string[] | undefined): number | null {
-  const normalized = headerValue(value);
-  if (!normalized) return null;
-  const parsed = Number.parseInt(normalized, 10);
-  return Number.isFinite(parsed) ? parsed : null;
+
+export function validateRecordingUpload({
+  sourceId,
+  token,
+  currentUserId,
+}: {
+  sourceId: string;
+  token: string | null;
+  currentUserId: string | null;
+}): { recording: TrackRecordingRecord; source: TrackRecordingSourceRecord } {
+  if (!currentUserId) {
+    throw new RecordingUploadError("Authentication required", 401);
+  }
+  const source = findTrackRecordingSourceById(sourceId);
+  if (!source) {
+    throw new RecordingUploadError("Upload target not found", 404);
+  }
+  const recording = findTrackRecordingById(source.recordingId);
+  if (!recording) {
+    throw new RecordingUploadError("Recording not found", 404);
+  }
+  if (recording.userId !== currentUserId) {
+    throw new RecordingUploadError("You do not have access to this recording", 403);
+  }
+  if (!token || token !== source.uploadToken) {
+    throw new RecordingUploadError("Upload token is invalid", 401);
+  }
+  if (recording.status === "ready" || recording.status === "combining") {
+    throw new RecordingUploadError("Recording cannot accept uploads right now", 400);
+  }
+  return { recording, source };
+}
+
+export function startSourceUpload({
+  recordingId,
+  sourceId,
+  sizeBytes,
+  uploadedBytes = 0,
+}: {
+  recordingId: string;
+  sourceId: string;
+  sizeBytes: number | null;
+  uploadedBytes?: number;
+}): void {
+  updateTrackRecording(recordingId, {
+    status: "uploading",
+    error: null,
+    combineProgress: 0,
+  });
+  updateTrackRecordingSource(sourceId, {
+    status: "uploading",
+    uploadedBytes,
+    sizeBytes,
+  });
 }
 
 function toPlannedMediaId(recordingId: string, sessionId: string, firstFileName: string): string {
@@ -74,34 +118,25 @@ function stagingDirForRecording(sessionId: string, recordingId: string): string 
   return path.join(tmpUploadsDir, sessionId, recordingId);
 }
 
-async function writeUploadToDisk(
-  req: http.IncomingMessage,
-  destination: string,
-  onChunk: (uploaded: number) => void
-): Promise<number> {
-  await fsp.mkdir(path.dirname(destination), { recursive: true });
-  await fsp.rm(destination, { force: true });
-
-  const stream = fs.createWriteStream(destination);
-  let uploaded = 0;
-
-  try {
-    for await (const chunk of req) {
-      const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-      uploaded += buf.length;
-      if (!stream.write(buf)) {
-        await once(stream, "drain");
-      }
-      onChunk(uploaded);
-    }
-    stream.end();
-    await once(stream, "close");
-    return uploaded;
-  } catch (err) {
-    stream.destroy();
-    await fsp.rm(destination, { force: true });
-    throw err;
+export async function finalizeSourceUpload({
+  recording,
+  source,
+  uploadedBytes,
+}: {
+  recording: TrackRecordingRecord;
+  source: TrackRecordingSourceRecord;
+  uploadedBytes: number;
+}): Promise<{ recording: TrackRecordingRecord; source: TrackRecordingSourceRecord }> {
+  const updatedSource =
+    updateTrackRecordingSource(source.id, { status: "uploaded", uploadedBytes }) ?? source;
+  const allSources = findTrackRecordingSourcesByRecordingId(recording.id);
+  const pending = allSources.some((src) => src.status !== "uploaded");
+  if (!pending) {
+    await combineRecording(recording.id);
   }
+
+  const updatedRecording = findTrackRecordingById(recording.id) ?? recording;
+  return { recording: updatedRecording, source: updatedSource };
 }
 
 async function collectMetadata(outputPath: string): Promise<{
@@ -353,6 +388,20 @@ export async function startRecordingUploadSession({
     now: Date.now(),
   });
 
+  if (DEBUG_UPLOAD_PROGRESS) {
+    console.info("Recording upload session initialized", {
+      recordingId,
+      sessionId,
+      userId,
+      sourceCount: sources.length,
+      sources: sources.map((source, idx) => ({
+        ordinal: idx + 1,
+        fileName: source.fileName,
+        sizeBytes: source.sizeBytes ?? null,
+      })),
+    });
+  }
+
   const stagingDir = stagingDirForRecording(sessionId, recording.id);
   await fsp.mkdir(stagingDir, { recursive: true });
 
@@ -371,137 +420,20 @@ export async function startRecordingUploadSession({
       trimEndMs: source.trimEndMs ?? null,
       storagePath: stagingPath,
     });
-    const uploadUrl = `/uploads/recordings/${record.id}?token=${encodeURIComponent(record.uploadToken)}`;
-    return { source: record, uploadUrl };
+    if (DEBUG_UPLOAD_PROGRESS) {
+      console.info("Recording upload source created", {
+        recordingId: recording.id,
+        sourceId: record.id,
+        ordinal: record.ordinal,
+        fileName: record.fileName,
+        sizeBytes: record.sizeBytes ?? null,
+        uploadTokenSuffix: tokenSuffix(record.uploadToken),
+      });
+    }
+    return { source: record };
   });
 
   return { recording, uploadTargets };
-}
-
-export async function handleSourceUpload({
-  sourceId,
-  token,
-  currentUserId,
-  req,
-}: {
-  sourceId: string;
-  token: string | null;
-  currentUserId: string | null;
-  req: http.IncomingMessage;
-}): Promise<{ recording: TrackRecordingRecord; source: TrackRecordingSourceRecord }> {
-  const contentLength = parseContentLength(req.headers["content-length"]);
-  const baseLog = {
-    sourceId,
-    userId: currentUserId,
-    contentLength,
-    contentType: headerValue(req.headers["content-type"]),
-    userAgent: headerValue(req.headers["user-agent"]),
-    hasToken: Boolean(token),
-  };
-
-  if (!currentUserId) {
-    console.warn("Recording upload rejected: unauthenticated", baseLog);
-    throw new RecordingUploadError("Authentication required", 401);
-  }
-  const source = findTrackRecordingSourceById(sourceId);
-  if (!source) {
-    console.warn("Recording upload rejected: source not found", baseLog);
-    throw new RecordingUploadError("Upload target not found", 404);
-  }
-  const recording = findTrackRecordingById(source.recordingId);
-  if (!recording) {
-    console.warn("Recording upload rejected: recording not found", {
-      ...baseLog,
-      recordingId: source.recordingId,
-    });
-    throw new RecordingUploadError("Recording not found", 404);
-  }
-  if (recording.userId !== currentUserId) {
-    console.warn("Recording upload rejected: access denied", {
-      ...baseLog,
-      recordingId: recording.id,
-    });
-    throw new RecordingUploadError("You do not have access to this recording", 403);
-  }
-  if (!token || token !== source.uploadToken) {
-    console.warn("Recording upload rejected: token mismatch", {
-      ...baseLog,
-      recordingId: recording.id,
-    });
-    throw new RecordingUploadError("Upload token is invalid", 401);
-  }
-  if (recording.status === "ready" || recording.status === "combining") {
-    console.warn("Recording upload rejected: recording not accepting uploads", {
-      ...baseLog,
-      recordingId: recording.id,
-      status: recording.status,
-    });
-    throw new RecordingUploadError("Recording cannot accept uploads right now", 400);
-  }
-
-  const uploadLog = {
-    ...baseLog,
-    recordingId: recording.id,
-    sessionId: recording.sessionId,
-    sourcePath: source.storagePath,
-  };
-
-  if (source.sizeBytes != null && contentLength != null && source.sizeBytes !== contentLength) {
-    console.warn("Recording upload size mismatch", {
-      ...uploadLog,
-      expectedBytes: source.sizeBytes,
-      contentLength,
-    });
-  }
-
-  req.once("aborted", () => {
-    console.warn("Recording upload aborted", uploadLog);
-  });
-  req.once("error", (err) => {
-    console.error("Recording upload request error", uploadLog, err);
-  });
-
-  console.info("Recording upload started", uploadLog);
-
-  updateTrackRecording(recording.id, {
-    status: "uploading",
-    error: null,
-    combineProgress: 0,
-  });
-  updateTrackRecordingSource(source.id, { status: "uploading", uploadedBytes: 0 });
-
-  let uploadedBytes = 0;
-  let lastPersist = 0;
-  try {
-    uploadedBytes = await writeUploadToDisk(req, source.storagePath, (total) => {
-      uploadedBytes = total;
-      if (uploadedBytes - lastPersist >= UPLOAD_FLUSH_BYTES) {
-        updateTrackRecordingSource(source.id, { uploadedBytes });
-        lastPersist = uploadedBytes;
-      }
-    });
-  } catch (err) {
-    console.error("Recording upload failed", { ...uploadLog, uploadedBytes }, err);
-    updateTrackRecordingSource(source.id, { status: "failed", uploadedBytes });
-    updateTrackRecording(recording.id, {
-      status: "failed",
-      error: "Upload failed",
-    });
-    throw err;
-  }
-
-  console.info("Recording upload finished", { ...uploadLog, uploadedBytes });
-
-  const updatedSource =
-    updateTrackRecordingSource(source.id, { status: "uploaded", uploadedBytes }) ?? source;
-  const allSources = findTrackRecordingSourcesByRecordingId(recording.id);
-  const pending = allSources.some((src) => src.status !== "uploaded");
-  if (!pending) {
-    await combineRecording(recording.id);
-  }
-
-  const updatedRecording = findTrackRecordingById(recording.id) ?? recording;
-  return { recording: updatedRecording, source: updatedSource };
 }
 
 export async function deleteRecordingAndFiles(recordingId: string, userId: string): Promise<boolean> {

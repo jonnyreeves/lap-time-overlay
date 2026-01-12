@@ -21,6 +21,8 @@ vi.mock("../../../../src/web/shared/weather.js", () => ({
 import { createMockGraphQLContext } from "../context.mock.js";
 import { computeConsistencyStats } from "../../../../src/web/shared/consistency.js";
 import { rootValue } from "../../../../src/web/graphql/schema.js";
+import type { TrackRecordingRecord } from "../../../../src/db/track_recordings.js";
+import type { TrackRecordingSourceRecord } from "../../../../src/db/track_recording_sources.js";
 import type { TrackSessionRecord } from "../../../../src/db/track_sessions.js";
 
 const { context, repositories } = createMockGraphQLContext({
@@ -103,6 +105,70 @@ describe("trackSession resolvers", () => {
     expect(payload.id).toBe("s1");
     expect(await payload.track()).toMatchObject({ id: "c1", name: "Spa" });
     expect((await payload.laps({ first: 10 })).length).toBe(1);
+  });
+
+  it("surfaces upload progress for track recordings", async () => {
+    repositories.trackSessions.findById.mockReturnValue(mockSession);
+    const recording: TrackRecordingRecord = {
+      id: "rec-1",
+      sessionId: mockSession.id,
+      userId: mockSession.userId,
+      mediaId: "s1/rec-1.mp4",
+      overlayBurned: false,
+      isPrimary: true,
+      lapOneOffset: 0,
+      description: null,
+      status: "uploading",
+      error: null,
+      sizeBytes: null,
+      durationMs: null,
+      fps: null,
+      combineProgress: 0,
+      showInMediaLibrary: true,
+      createdAt: 0,
+      updatedAt: 0,
+    };
+    const sources: TrackRecordingSourceRecord[] = [
+      {
+        id: "src-1",
+        recordingId: recording.id,
+        fileName: "source-1.mp4",
+        ordinal: 1,
+        sizeBytes: 10,
+        trimStartMs: null,
+        trimEndMs: null,
+        uploadedBytes: 4,
+        storagePath: "/tmp/source-1.mp4",
+        uploadToken: "token-1",
+        status: "uploading",
+        createdAt: 0,
+        updatedAt: 0,
+      },
+      {
+        id: "src-2",
+        recordingId: recording.id,
+        fileName: "source-2.mp4",
+        ordinal: 2,
+        sizeBytes: 12,
+        trimStartMs: null,
+        trimEndMs: null,
+        uploadedBytes: 6,
+        storagePath: "/tmp/source-2.mp4",
+        uploadToken: "token-2",
+        status: "uploading",
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    ];
+
+    repositories.trackRecordings.findBySessionId.mockReturnValue([recording]);
+    repositories.trackRecordingSources.findByRecordingId.mockReturnValue(sources);
+
+    const payload = rootValue.trackSession({ id: mockSession.id }, context);
+    const recordings = payload.trackRecordings({ first: 10 });
+    const progress = recordings[0]?.uploadProgress();
+
+    expect(progress).toEqual({ uploadedBytes: 10, totalBytes: 22 });
   });
 
   it("flags all-time personal best per track, layout, kart, and conditions", async () => {

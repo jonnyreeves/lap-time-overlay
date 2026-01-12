@@ -279,7 +279,7 @@ export function RecordingsCard({
 
   async function resumeRecordingUpload(recording: Recording) {
     const pendingTargets = recording.uploadTargets.filter(
-      (target) => target.uploadUrl && target.status !== "UPLOADED"
+      (target) => target.status !== "UPLOADED" && target.uploadToken
     );
     if (pendingTargets.length === 0 || isResuming) return;
     const selected = resumeSelections[recording.id] ?? [];
@@ -292,7 +292,7 @@ export function RecordingsCard({
     setActionError(null);
     setIsResuming(true);
     try {
-      await uploadToTargets(pendingTargets as UploadTarget[], selected);
+      await uploadToTargets(pendingTargets as UploadTarget[], selected, { onProgress: onRefresh });
       onRefresh();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Upload failed");
@@ -495,7 +495,9 @@ export function RecordingsCard({
                   </button>
                 </div>
                 {recording.status === "FAILED" &&
-                  recording.uploadTargets.some((target) => target.uploadUrl) && (
+                  recording.uploadTargets.some(
+                    (target) => target.status !== "UPLOADED" && target.uploadToken
+                  ) && (
                     <div>
                       <strong>Resume upload</strong>
                       <div css={controlsRowStyles}>

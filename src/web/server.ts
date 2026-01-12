@@ -5,7 +5,8 @@ import { ensureWorkDirs } from "./config.js";
 import { loadEnvFiles } from "./shared/env.js";
 import { handleGraphQL } from "./graphql/handler.js";
 import { handleOverlayPreviewRequest } from "./http/overlayPreview.js";
-import { handleRecordingDownloadRequest, handleRecordingUploadRequest } from "./http/uploads.js";
+import { handleTusUploadRequest } from "./http/tus.js";
+import { handleRecordingDownloadRequest } from "./http/recordingDownload.js";
 import { serveStatic } from "./http/static.js";
 import { tempCleanupScheduler } from "./recordings/tempCleanupScheduler.js";
 import { startHardwareProbe } from "../video/hwProbe.js";
@@ -21,11 +22,9 @@ await tempCleanupScheduler.start();
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", "http://localhost");
 
-  if (req.method === "PUT" && url.pathname.startsWith("/uploads/recordings/")) {
-    const match = url.pathname.match(/^\/uploads\/recordings\/([^/]+)$/);
-    if (match) {
-      return void handleRecordingUploadRequest(req, res, match[1], url.searchParams.get("token"));
-    }
+  const tusMatch = url.pathname.match(/^\/api\/uploads\/tus(?:\/([^/]+))?$/);
+  if (tusMatch) {
+    return void handleTusUploadRequest(req, res, tusMatch[1] ?? null);
   }
 
   if (req.method === "GET" && url.pathname.startsWith("/recordings/")) {

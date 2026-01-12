@@ -161,7 +161,7 @@ const StartUploadMutation = graphql`
         uploadedBytes
         status
         ordinal
-        uploadUrl
+        uploadToken
       }
     }
   }
@@ -627,7 +627,8 @@ export function UploadRecordingModal({
             const targets = (session.uploadTargets ?? []).map((target: UploadTarget) => ({ ...target }));
             await uploadToTargets(
               targets as UploadTarget[],
-              selectedSources.map((source) => source.file)
+              selectedSources.map((source) => source.file),
+              { onProgress: onRefresh }
             );
             setDescription("");
             onRefresh();

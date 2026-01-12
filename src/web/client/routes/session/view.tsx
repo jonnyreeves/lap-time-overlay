@@ -100,7 +100,7 @@ const SessionQuery = graphql`
           uploadedBytes
           status
           ordinal
-          uploadUrl
+          uploadToken
         }
       }
       laps(first: 50) {
@@ -205,7 +205,7 @@ export default function ViewSessionRoute() {
           uploadedBytes: target.uploadedBytes,
           status: target.status,
           ordinal: target.ordinal,
-          uploadUrl: target.uploadUrl ?? null,
+          uploadToken: target.uploadToken,
         })),
       })),
     [trackRecordings]

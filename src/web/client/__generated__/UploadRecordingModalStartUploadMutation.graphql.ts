@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<6a621e9905be252a27788a337eb8f800>>
+ * @generated SignedSource<<9f945c5b1c9428b319a57c1f49dfa924>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -44,7 +44,7 @@ export type UploadRecordingModalStartUploadMutation$data = {
       readonly ordinal: number;
       readonly sizeBytes: number | null | undefined;
       readonly status: RecordingUploadStatus;
-      readonly uploadUrl: string | null | undefined;
+      readonly uploadToken: string;
       readonly uploadedBytes: number;
     }>;
   };
@@ -180,7 +180,7 @@ v4 = [
             "alias": null,
             "args": null,
             "kind": "ScalarField",
-            "name": "uploadUrl",
+            "name": "uploadToken",
             "storageKey": null
           }
         ],
@@ -208,16 +208,16 @@ return {
     "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "bf59e21201e7e58d31a9ea7d84a54999",
+    "cacheID": "f0349d9e93b05ad1702126ad49875c7f",
     "id": null,
     "metadata": {},
     "name": "UploadRecordingModalStartUploadMutation",
     "operationKind": "mutation",
-    "text": "mutation UploadRecordingModalStartUploadMutation(\n  $input: StartTrackRecordingUploadInput!\n) {\n  startTrackRecordingUpload(input: $input) {\n    recording {\n      id\n      isPrimary\n      status\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n    }\n    uploadTargets {\n      id\n      fileName\n      sizeBytes\n      uploadedBytes\n      status\n      ordinal\n      uploadUrl\n    }\n  }\n}\n"
+    "text": "mutation UploadRecordingModalStartUploadMutation(\n  $input: StartTrackRecordingUploadInput!\n) {\n  startTrackRecordingUpload(input: $input) {\n    recording {\n      id\n      isPrimary\n      status\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n    }\n    uploadTargets {\n      id\n      fileName\n      sizeBytes\n      uploadedBytes\n      status\n      ordinal\n      uploadToken\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "8d7bdeef83671490d64d5acb67fccf97";
+(node as any).hash = "a1b745b538eecb479a92ed2ec97e3775";
 
 export default node;

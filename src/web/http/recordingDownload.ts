@@ -10,69 +10,9 @@ import {
   SESSION_COOKIE_NAME,
 } from "../auth/cookies.js";
 import { loadUserFromSession, refreshSession } from "../auth/service.js";
-import { handleSourceUpload, RecordingUploadError } from "../recordings/service.js";
 import { findTrackRecordingById } from "../../db/track_recordings.js";
 import { sessionRecordingsDir } from "../config.js";
 import { sendJson } from "./respond.js";
-
-export async function handleRecordingUploadRequest(
-  req: http.IncomingMessage,
-  res: http.ServerResponse,
-  sourceId: string,
-  token: string | null
-): Promise<boolean> {
-  const headerValue = (value: string | string[] | undefined): string | null => {
-    if (!value) return null;
-    return Array.isArray(value) ? value.join(", ") : value;
-  };
-  console.info("Recording upload request received", {
-    sourceId,
-    hasToken: Boolean(token),
-    contentLength: headerValue(req.headers["content-length"]),
-    contentType: headerValue(req.headers["content-type"]),
-    userAgent: headerValue(req.headers["user-agent"]),
-    remoteAddress: req.socket.remoteAddress ?? null,
-  });
-
-  const cookies = parseCookies(req.headers.cookie);
-  const sessionToken =
-    typeof cookies[SESSION_COOKIE_NAME] === "string" ? cookies[SESSION_COOKIE_NAME] : null;
-  const auth = sessionToken ? loadUserFromSession(sessionToken) : null;
-
-  if (!auth && sessionToken) {
-    appendSetCookie(res, clearSessionCookie());
-  }
-  if (auth && sessionToken) {
-    const newExpires = refreshSession(sessionToken);
-    if (newExpires) {
-      appendSetCookie(res, buildSessionCookie(sessionToken, newExpires));
-    }
-  }
-
-  try {
-    const result = await handleSourceUpload({
-      sourceId,
-      token,
-      currentUserId: auth?.user.id ?? null,
-      req,
-    });
-
-    sendJson(res, 200, {
-      recordingId: result.recording.id,
-      status: result.recording.status,
-      uploadedBytes: result.source.uploadedBytes,
-    });
-  } catch (err) {
-    if (err instanceof RecordingUploadError) {
-      sendJson(res, err.statusCode, { error: err.message });
-      return true;
-    }
-    console.error("Unexpected recording upload error", err);
-    sendJson(res, 500, { error: "Upload failed" });
-  }
-
-  return true;
-}
 
 function contentTypeFor(filePath: string): string {
   const ext = path.extname(filePath).toLowerCase();

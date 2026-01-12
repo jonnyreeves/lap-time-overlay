@@ -629,7 +629,7 @@ type RecordingUploadTarget {
   uploadedBytes: Float!
   status: RecordingUploadStatus!
   ordinal: Int!
-  uploadUrl: String
+  uploadToken: String!
 }
 
 type RecordingUploadProgress {
