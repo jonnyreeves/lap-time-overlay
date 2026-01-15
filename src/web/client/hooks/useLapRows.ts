@@ -27,6 +27,8 @@ export type LapInputPayload = {
   lapEvents?: LapEventInputPayload[];
 };
 
+const LAP_TIME_EPSILON_S = 1e-6;
+
 function parseLapTimeInput(time: string): number | null {
   const trimmed = time.trim();
   if (!trimmed) return null;
@@ -205,7 +207,7 @@ function parseLapEvents(
     if (!Number.isFinite(offset) || offset < 0) {
       throw new Error(`Lap ${lapNumber} event offset must be >= 0 (row ${idx + 1}).`);
     }
-    if (offset > lapTimeSeconds) {
+    if (offset - lapTimeSeconds > LAP_TIME_EPSILON_S) {
       throw new Error(
         `Lap ${lapNumber} event offset (${offset}s) cannot exceed lap time (${lapTimeSeconds}s).`
       );

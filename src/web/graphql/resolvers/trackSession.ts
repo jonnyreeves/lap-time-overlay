@@ -23,6 +23,7 @@ import {
 } from "../../recordings/mediaLibraryProjection.js";
 
 const DEBUG_UPLOAD_PROGRESS = process.env.DEBUG_UPLOAD_PROGRESS === "1";
+const LAP_TIME_EPSILON_S = 1e-6;
 
 export type LapEventInputArg = { offset?: number; event?: string; value?: string };
 export type LapInputArg = { lapNumber?: number; time?: number; lapEvents?: LapEventInputArg[] | null };
@@ -230,7 +231,7 @@ function parseLapEventInputs(
         extensions: { code: "VALIDATION_FAILED" },
       });
     }
-    if (offset > lapTime) {
+    if (offset - lapTime > LAP_TIME_EPSILON_S) {
       throw new GraphQLError(
         `Lap ${lapNumber} event offset cannot exceed lap time (${lapTime}s)`,
         { extensions: { code: "VALIDATION_FAILED" } },

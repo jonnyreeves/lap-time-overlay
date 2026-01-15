@@ -318,6 +318,47 @@ describe("trackSession resolvers", () => {
     expect(result.trackSession.classification).toBe(1);
   });
 
+  it("createTrackSession tolerates lap event offsets that match lap times within float jitter", async () => {
+    repositories.trackSessions.createWithLaps.mockReturnValue({ trackSession: mockSession, laps: [] });
+    repositories.tracks.findById.mockReturnValue(mockTrack);
+    repositories.karts.findById.mockReturnValue(mockKart);
+    repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
+    repositories.trackLayouts.findById.mockReturnValue(mockLayout);
+
+    await rootValue.createTrackSession(
+      {
+        input: {
+          date: "2024-02-01",
+          format: "Race",
+          classification: 2,
+          trackId: "c1",
+          trackLayoutId: "l1",
+          kartId: "k1",
+          laps: [
+            {
+              lapNumber: 14,
+              time: 61.153999999999996,
+              lapEvents: [{ offset: 61.154, event: "position", value: "2" }],
+            },
+          ],
+        },
+      },
+      context
+    );
+
+    expect(repositories.trackSessions.createWithLaps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        laps: [
+          {
+            lapNumber: 14,
+            time: 61.153999999999996,
+            lapEvents: [{ offset: 61.154, event: "position", value: "2" }],
+          },
+        ],
+      })
+    );
+  });
+
   it("createTrackSession forces Dry conditions for indoor tracks", async () => {
     repositories.trackSessions.createWithLaps.mockReturnValue({ trackSession: mockSession, laps: [] });
     repositories.tracks.findById.mockReturnValue({ ...mockTrack, isIndoors: true });
