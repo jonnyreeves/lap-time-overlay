@@ -2,7 +2,10 @@ import { css } from "@emotion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { graphql, useMutation } from "react-relay";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
-import { guessTrackIdFromImport } from "../../utils/guessTrackFromImport.js";
+import {
+  guessTrackIdFromImport,
+  guessTrackLayoutIdFromImport,
+} from "../../utils/guessTrackFromImport.js";
 import { parseSessionEmail } from "../../utils/parseSessionEmail.js";
 import {
   type ParsedSessionEmail,
@@ -14,7 +17,12 @@ interface ImportSessionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onImport: (result: SessionImportSelection) => void;
-  tracks: ReadonlyArray<{ id: string; name: string; isIndoors: boolean }>;
+  tracks: ReadonlyArray<{
+    id: string;
+    name: string;
+    isIndoors: boolean;
+    trackLayouts: ReadonlyArray<{ id: string; name: string }>;
+  }>;
 }
 
 const modalOverlayStyles = css`
@@ -234,6 +242,7 @@ export function ImportSessionModal({
       sessionTime: parsed.sessionTime,
       classification: getSelectedClassification(parsed, selectedDriver),
       kartNumber: parsed.provider === "daytona" ? parsed.kartNumber : null,
+      trackLayoutName: parsed.provider === "daytona" ? parsed.trackLayoutName : null,
       laps,
       trackId: selectedTrackId.trim() ? selectedTrackId.trim() : null,
       temperature: weatherData.temperature,
@@ -295,6 +304,16 @@ export function ImportSessionModal({
     : null;
   const selectedTrack = tracks.find((track) => track.id === selectedTrackId);
   const selectedTrackIsIndoors = selectedTrack?.isIndoors ?? false;
+  const layoutTrack =
+    selectedTrack ??
+    (guessedTrackId ? tracks.find((track) => track.id === guessedTrackId) : undefined);
+  const layoutOptions = layoutTrack?.trackLayouts ?? [];
+  const trackLayoutName = parsed?.provider === "daytona" ? parsed.trackLayoutName : null;
+  const guessedTrackLayoutId = guessTrackLayoutIdFromImport(layoutOptions, trackLayoutName);
+  const resolvedTrackLayout =
+    layoutOptions.find((layout) => layout.id === guessedTrackLayoutId) ??
+    layoutOptions[0] ??
+    null;
 
   const importDisabled = !emailContent.trim() || !(previewLaps?.length ?? 0);
   const weatherLoading = weatherStatus === "loading" || isFetchingWeather;
@@ -403,11 +422,8 @@ export function ImportSessionModal({
             <div css={previewStyles}>
               {parsed ? (
                 <>
-                  <div>
-                    <strong>Source:</strong> {parsed.provider}
-                  </div>
                   <div css={selectStyles}>
-                    <label htmlFor="session-import-track">Track for weather</label>
+                    <label htmlFor="session-import-track">Track</label>
                     <select
                       id="session-import-track"
                       value={selectedTrackId}
@@ -418,8 +434,12 @@ export function ImportSessionModal({
                         <option key={track.id} value={track.id}>
                           {track.name}
                         </option>
-                      ))}
-                    </select>
+                        ))}
+                      </select>
+                    </div>
+                  <div>
+                    <strong>Track layout:</strong>{" "}
+                    {resolvedTrackLayout ? resolvedTrackLayout.name : "Not found"}
                   </div>
                   <div>
                     <strong>Session date:</strong>{" "}

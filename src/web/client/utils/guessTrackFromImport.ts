@@ -10,6 +10,15 @@ type TrackMetadata = {
   readonly name: string;
 };
 
+type TrackLayoutMetadata = {
+  readonly id: string;
+  readonly name: string;
+};
+
+function normalizeMatchValue(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
 export function guessTrackIdFromImport(
   tracks: ReadonlyArray<TrackMetadata>,
   importSelection: Pick<SessionImportSelection, "provider" | "sourceText">
@@ -50,6 +59,70 @@ export function guessTrackIdFromImport(
     if (score > bestScore) {
       bestScore = score;
       bestMatchId = track.id;
+    }
+  }
+
+  return bestScore > 0 ? bestMatchId : null;
+}
+
+export function guessTrackLayoutIdFromImport(
+  layouts: ReadonlyArray<TrackLayoutMetadata>,
+  trackLayoutName: string | null | undefined
+): string | null {
+  if (!layouts.length || !trackLayoutName) {
+    return null;
+  }
+
+  const normalizedTarget = normalizeMatchValue(trackLayoutName);
+  if (!normalizedTarget) {
+    return null;
+  }
+
+  let bestMatchId: string | null = null;
+  let bestScore = 0;
+  const targetWords = normalizedTarget.split(" ").filter(Boolean);
+  const targetCompact = targetWords.join("");
+
+  for (const layout of layouts) {
+    const normalizedCandidate = normalizeMatchValue(layout.name);
+    if (!normalizedCandidate) continue;
+
+    let score = 0;
+    if (normalizedCandidate === normalizedTarget) {
+      score += 100;
+    }
+    if (normalizedCandidate.includes(normalizedTarget)) {
+      score += normalizedTarget.length + 20;
+    }
+    if (normalizedTarget.includes(normalizedCandidate)) {
+      score += normalizedCandidate.length + 10;
+    }
+
+    const candidateWords = normalizedCandidate.split(" ").filter(Boolean);
+    for (const word of targetWords) {
+      if (candidateWords.includes(word)) {
+        score += 4;
+      }
+    }
+
+    const candidateInitials = candidateWords.map((word) => word[0]).join("");
+    if (candidateInitials === targetCompact) {
+      score += 15;
+    } else if (
+      (candidateInitials && targetCompact.startsWith(candidateInitials)) ||
+      (targetCompact && candidateInitials.startsWith(targetCompact))
+    ) {
+      score += 8;
+    }
+    for (const word of targetWords) {
+      if (word.length <= 3 && candidateInitials.includes(word)) {
+        score += 4;
+      }
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestMatchId = layout.id;
     }
   }
 

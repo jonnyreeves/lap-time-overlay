@@ -116,6 +116,7 @@ describe("parseDaytonaEmail", () => {
     expect(result.laps).toHaveLength(11);
     expect(result.classification).toBe(2);
     expect(result.kartNumber).toBe("143");
+    expect(result.trackLayoutName).toBe("GP Circuit");
   });
 
   it("parses lap lines that wrap into multiple columns", () => {

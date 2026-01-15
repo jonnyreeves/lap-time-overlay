@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { guessTrackIdFromImport } from "../../../../src/web/client/utils/guessTrackFromImport.js";
+import {
+  guessTrackIdFromImport,
+  guessTrackLayoutIdFromImport,
+} from "../../../../src/web/client/utils/guessTrackFromImport.js";
 
 const tracks = [
   { id: "track:daytona", name: "Daytona Sandown Park" },
@@ -30,5 +33,21 @@ describe("guessTrackIdFromImport", () => {
     };
     const otherTracks = [{ id: "track:ocean", name: "Ocean Circuit" }];
     expect(guessTrackIdFromImport(otherTracks, selection)).toBeNull();
+  });
+});
+
+describe("guessTrackLayoutIdFromImport", () => {
+  it("matches a layout name fuzzily", () => {
+    const layouts = [
+      { id: "layout:gp", name: "Grand Prix Circuit" },
+      { id: "layout:indy", name: "Indy Circuit" },
+    ];
+
+    expect(guessTrackLayoutIdFromImport(layouts, "GP Circuit")).toBe("layout:gp");
+  });
+
+  it("returns null when the layout name is missing", () => {
+    const layouts = [{ id: "layout:gp", name: "GP Circuit" }];
+    expect(guessTrackLayoutIdFromImport(layouts, null)).toBeNull();
   });
 });
