@@ -8,6 +8,7 @@ import { ConsistencyCard } from "../../components/session/ConsistencyCard.js";
 import { LapsCard, type LapWithEvents } from "../../components/session/LapsCard.js";
 import { PrimaryRecordingCard } from "../../components/session/PrimaryRecordingCard.js";
 import { RecordingsCard } from "../../components/session/RecordingsCard.js";
+import { RivalComparisonCard } from "../../components/session/RivalComparisonCard.js";
 import { SessionOverviewCard } from "../../components/session/SessionOverviewCard.js";
 import { useBreadcrumbs, type BreadcrumbItem } from "../../hooks/useBreadcrumbs.js";
 
@@ -29,7 +30,7 @@ const columnStackStyles = css`
 
 
 const SessionQuery = graphql`
-  query viewSessionQuery($id: ID!) {
+  query viewSessionQuery($id: ID!, $rivalName: String!) {
     trackSession(id: $id) {
       id
       date
@@ -114,6 +115,50 @@ const SessionQuery = graphql`
           value
         }
       }
+      participants {
+        id
+        name
+        classification
+        kartNumber
+        isSelf
+        laps {
+          lapNumber
+          time
+        }
+      }
+      rivalAnalysis(rivalName: $rivalName) {
+        rivalName
+        lapComparisons {
+          lapNumber
+          selfLap
+          rivalLap
+          delta
+          cumulativeDelta
+          outcome
+        }
+        sessionInsights {
+          fasterLapCount
+          slowerLapCount
+          tieCount
+          longestGainStreak
+          longestLossStreak
+          medianDelta
+          consistencyGap
+          insightLabel
+        }
+        trend {
+          direction
+          sampleCount
+          slope
+          firstDelta
+          latestDelta
+          points {
+            sessionId
+            date
+            delta
+          }
+        }
+      }
     }
     tracks {
       id
@@ -135,13 +180,14 @@ const SessionQuery = graphql`
 export default function ViewSessionRoute() {
   const { sessionId } = useParams();
   const [refreshKey, setRefreshKey] = useState(0);
+  const [selectedRivalName, setSelectedRivalName] = useState("");
   const recordingVideoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
   const [jumpAnchorReady, setJumpAnchorReady] = useState(false);
   const { setBreadcrumbs } = useBreadcrumbs();
 
   const data = useLazyLoadQuery<viewSessionQuery>(
     SessionQuery,
-    { id: sessionId ?? "" },
+    { id: sessionId ?? "", rivalName: selectedRivalName },
     {
       fetchPolicy: "store-and-network",
       UNSTABLE_renderPolicy: "full",
@@ -153,7 +199,46 @@ export default function ViewSessionRoute() {
   const tracks = data.tracks ?? [];
   const trackRecordings = session?.trackRecordings ?? [];
   const laps = session?.laps ?? [];
+  const rivalParticipants =
+    session?.participants
+      ?.filter((participant) => !participant.isSelf)
+      .map((participant) => ({
+        name: participant.name,
+        classification: participant.classification,
+      }))
+      .sort((left, right) => {
+        const leftClassification = left.classification;
+        const rightClassification = right.classification;
+        if (leftClassification == null && rightClassification == null) {
+          return left.name.localeCompare(right.name);
+        }
+        if (leftClassification == null) {
+          return 1;
+        }
+        if (rightClassification == null) {
+          return -1;
+        }
+        if (leftClassification !== rightClassification) {
+          return leftClassification - rightClassification;
+        }
+        return left.name.localeCompare(right.name);
+      }) ?? [];
+  const rivalCandidates = rivalParticipants.map((participant) => participant.name);
+  const rivalAnalysis = session?.rivalAnalysis ?? null;
   const sessionConsistency = session?.consistency ?? null;
+
+  useEffect(() => {
+    if (!rivalCandidates.length) {
+      if (selectedRivalName !== "") {
+        setSelectedRivalName("");
+      }
+      return;
+    }
+    if (selectedRivalName && rivalCandidates.includes(selectedRivalName)) {
+      return;
+    }
+    setSelectedRivalName(rivalCandidates[0] ?? "");
+  }, [rivalCandidates, selectedRivalName]);
 
   useEffect(() => {
     const crumbs: BreadcrumbItem[] = [{ label: "Sessions", to: "/session" }];
@@ -362,6 +447,14 @@ export default function ViewSessionRoute() {
           consistency={sessionConsistency}
           sessionFastestLap={session.fastestLap}
         />
+        {rivalCandidates.length ? (
+          <RivalComparisonCard
+            rivalParticipants={rivalParticipants}
+            selectedRivalName={selectedRivalName}
+            analysis={rivalAnalysis}
+            onSelectRival={setSelectedRivalName}
+          />
+        ) : null}
       </div>
     </div>
   );

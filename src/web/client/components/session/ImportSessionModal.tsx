@@ -245,6 +245,11 @@ function getSelectedKartNumber(parsed: ParsedSessionEmail, selectedDriver: strin
   return driver?.kartNumber ?? null;
 }
 
+function getResolvedSelectedDriver(parsed: ParsedSessionEmail, selectedDriver: string) {
+  if (!hasDriverRows(parsed)) return null;
+  return parsed.drivers.find((d) => d.name === selectedDriver) ?? parsed.drivers[0] ?? null;
+}
+
 export function ImportSessionModal({
   isOpen,
   onClose,
@@ -293,6 +298,7 @@ export function ImportSessionModal({
       hasDriverRows(parsed)
         ? getSelectedDriverLaps(parsed, selectedDriver)
         : parsed.laps;
+    const resolvedDriver = getResolvedSelectedDriver(parsed, selectedDriver);
 
     if (!laps.length) return;
 
@@ -310,6 +316,18 @@ export function ImportSessionModal({
       temperature: weatherData.temperature,
       conditions: selectedTrackIsIndoors ? "Dry" : weatherData.conditions,
       driverName: hasDriverRows(parsed) ? selectedDriver || parsed.drivers[0]?.name : undefined,
+      participants: hasDriverRows(parsed)
+        ? parsed.drivers.map((driver) => ({
+            name: driver.name,
+            classification: driver.classification ?? null,
+            kartNumber:
+              parsed.provider === "alphatiming" && "kartNumber" in driver
+                ? driver.kartNumber ?? null
+                : null,
+            isSelf: resolvedDriver != null && driver.name === resolvedDriver.name,
+            laps: driver.laps,
+          }))
+        : undefined,
       sessionFastestLapSeconds: parsed.sessionFastestLapSeconds ?? null,
     });
     handleClose();

@@ -214,6 +214,9 @@ export default function CreateSessionRoute() {
   const [fastestLap, setFastestLap] = useState("");
   const [temperature, setTemperature] = useState("");
   const [notes, setNotes] = useState("");
+  const [importedParticipants, setImportedParticipants] = useState<
+    SessionImportSelection["participants"]
+  >([]);
 
   const navigate = useNavigate();
   const {
@@ -386,6 +389,20 @@ export default function CreateSessionRoute() {
           ...(trimmedKartNumber ? { kartNumber: trimmedKartNumber } : {}),
           ...(parsedFastestLap != null ? { fastestLap: parsedFastestLap } : {}),
           ...(lapInput.length ? { laps: lapInput } : {}),
+          ...(importedParticipants && importedParticipants.length > 0
+            ? {
+                participants: importedParticipants.map((participant) => ({
+                  name: participant.name,
+                  classification: participant.classification,
+                  kartNumber: participant.kartNumber,
+                  isSelf: participant.isSelf,
+                  laps: participant.laps.map((lap) => ({
+                    lapNumber: lap.lapNumber,
+                    time: lap.timeSeconds,
+                  })),
+                })),
+              }
+            : {}),
         },
         connections: [viewerConnectionId],
         trackConnections: [viewerTrackConnectionId],
@@ -485,6 +502,7 @@ export default function CreateSessionRoute() {
         }))
       );
     }
+    setImportedParticipants(importResult.participants ?? []);
 
     const importedTrackId = importResult.trackId?.trim();
     const nextTrackId =

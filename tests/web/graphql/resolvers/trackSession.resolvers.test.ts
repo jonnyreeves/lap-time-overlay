@@ -106,6 +106,9 @@ describe("trackSession resolvers", () => {
       ],
     });
     repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
+    repositories.trackSessionParticipants.findBySessionId.mockReturnValue([]);
+    repositories.trackSessionParticipants.findBySessionIds.mockReturnValue([]);
+    repositories.trackSessionParticipants.findLapsByParticipantIds.mockReturnValue([]);
   });
 
   it("rejects unauthenticated trackSession query", async () => {
@@ -133,6 +136,117 @@ describe("trackSession resolvers", () => {
     expect(payload.id).toBe("s1");
     expect(await payload.track()).toMatchObject({ id: "c1", name: "Spa" });
     expect((await payload.laps({ first: 10 })).length).toBe(1);
+  });
+
+  it("returns participants and rival analysis for a session", async () => {
+    repositories.trackSessions.findById.mockReturnValue(mockSession);
+    repositories.trackSessions.findByUserId.mockReturnValue([
+      mockSession,
+      { ...mockSession, id: "s2", date: "2024-02-08" },
+      { ...mockSession, id: "s3", date: "2024-02-15" },
+    ]);
+    repositories.tracks.findById.mockReturnValue(mockTrack);
+    repositories.trackLayouts.findById.mockReturnValue(mockLayout);
+    repositories.trackSessionParticipants.findBySessionId.mockReturnValue([
+      {
+        id: "p-self-s1",
+        sessionId: "s1",
+        name: "John Reeves",
+        classification: 2,
+        kartNumber: "16",
+        isSelf: true,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+      {
+        id: "p-rival-s1",
+        sessionId: "s1",
+        name: "Robert Seaman",
+        classification: 1,
+        kartNumber: "7",
+        isSelf: false,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    ]);
+    repositories.trackSessionParticipants.findBySessionIds.mockReturnValue([
+      {
+        id: "p-self-s1",
+        sessionId: "s1",
+        name: "John Reeves",
+        classification: 2,
+        kartNumber: "16",
+        isSelf: true,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+      {
+        id: "p-rival-s1",
+        sessionId: "s1",
+        name: "Robert Seaman",
+        classification: 1,
+        kartNumber: "7",
+        isSelf: false,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+      {
+        id: "p-self-s2",
+        sessionId: "s2",
+        name: "John Reeves",
+        classification: 2,
+        kartNumber: "16",
+        isSelf: true,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+      {
+        id: "p-rival-s2",
+        sessionId: "s2",
+        name: "Robert Seaman",
+        classification: 1,
+        kartNumber: "7",
+        isSelf: false,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+      {
+        id: "p-self-s3",
+        sessionId: "s3",
+        name: "John Reeves",
+        classification: 2,
+        kartNumber: "16",
+        isSelf: true,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+      {
+        id: "p-rival-s3",
+        sessionId: "s3",
+        name: "Robert Seaman",
+        classification: 1,
+        kartNumber: "7",
+        isSelf: false,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    ]);
+    repositories.trackSessionParticipants.findLapsByParticipantIds.mockReturnValue([
+      { id: "l1", participantId: "p-self-s1", lapNumber: 1, time: 52.1, createdAt: 0, updatedAt: 0 },
+      { id: "l2", participantId: "p-rival-s1", lapNumber: 1, time: 51.8, createdAt: 0, updatedAt: 0 },
+      { id: "l3", participantId: "p-self-s2", lapNumber: 1, time: 51.9, createdAt: 0, updatedAt: 0 },
+      { id: "l4", participantId: "p-rival-s2", lapNumber: 1, time: 51.7, createdAt: 0, updatedAt: 0 },
+      { id: "l5", participantId: "p-self-s3", lapNumber: 1, time: 51.7, createdAt: 0, updatedAt: 0 },
+      { id: "l6", participantId: "p-rival-s3", lapNumber: 1, time: 51.6, createdAt: 0, updatedAt: 0 },
+    ]);
+
+    const payload = rootValue.trackSession({ id: "s1" }, context);
+    expect(payload.participants()).toHaveLength(2);
+
+    const analysis = payload.rivalAnalysis({ rivalName: "Robert Seaman" });
+    expect(analysis?.lapComparisons).toHaveLength(1);
+    expect(analysis?.sessionInsights.slowerLapCount).toBe(1);
+    expect(analysis?.trend.sampleCount).toBe(3);
   });
 
   it("surfaces upload progress for track recordings", async () => {
@@ -321,6 +435,22 @@ describe("trackSession resolvers", () => {
           kartId: "k1",
           kartNumber: "42",
           laps: [{ lapNumber: 1, time: 74.5 }],
+          participants: [
+            {
+              name: "John Reeves",
+              classification: 2,
+              kartNumber: "16",
+              isSelf: true,
+              laps: [{ lapNumber: 1, time: 52.111 }],
+            },
+            {
+              name: "Robert Seaman",
+              classification: 1,
+              kartNumber: "7",
+              isSelf: false,
+              laps: [{ lapNumber: 1, time: 51.62 }],
+            },
+          ],
         },
       },
       context
@@ -341,6 +471,22 @@ describe("trackSession resolvers", () => {
       kartNumber: "42",
       temperature: "21",
       fastestLap: null,
+      participants: [
+        {
+          name: "John Reeves",
+          classification: 2,
+          kartNumber: "16",
+          isSelf: true,
+          laps: [{ lapNumber: 1, time: 52.111 }],
+        },
+        {
+          name: "Robert Seaman",
+          classification: 1,
+          kartNumber: "7",
+          isSelf: false,
+          laps: [{ lapNumber: 1, time: 51.62 }],
+        },
+      ],
     });
     expect(result.trackSession.id).toBe("s1");
     expect(result.trackSession.classification).toBe(1);

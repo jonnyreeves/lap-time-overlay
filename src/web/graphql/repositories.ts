@@ -19,6 +19,10 @@ import {
   trackLayoutsRepository,
   type TrackLayoutsRepository,
 } from "../../db/track_layouts.js";
+import {
+  trackSessionParticipantsRepository,
+  type TrackSessionParticipantsRepository,
+} from "../../db/track_session_participants.js";
 
 export interface Repositories {
   tracks: TrackRepository;
@@ -30,6 +34,7 @@ export interface Repositories {
   karts: KartsRepository;
   trackKarts: TrackKartsRepository;
   trackLayouts: TrackLayoutsRepository;
+  trackSessionParticipants: TrackSessionParticipantsRepository;
 }
 
 export function createRepositories(): Repositories {
@@ -43,5 +48,6 @@ export function createRepositories(): Repositories {
     karts: kartsRepository,
     trackKarts: trackKartsRepository,
     trackLayouts: trackLayoutsRepository,
+    trackSessionParticipants: trackSessionParticipantsRepository,
   };
 }

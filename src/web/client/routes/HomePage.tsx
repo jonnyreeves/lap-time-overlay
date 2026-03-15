@@ -4,12 +4,14 @@ import { graphql, useFragment } from "react-relay";
 import { useOutletContext } from "react-router-dom";
 import type { HomePage_viewer$key } from "../__generated__/HomePage_viewer.graphql.js";
 import { RecentSessionsCard } from "../components/RecentSessionsCard.js";
+import { RivalsTeaserCard } from "../components/RivalsTeaserCard.js";
 import { RecentTracksCard } from "../components/tracks/RecentTracksCard.js";
 
 const HomePageFragment = graphql`
   fragment HomePage_viewer on User {
     id
     username
+    ...RivalsTeaserCard_viewer
     ...RecentTracksCard_viewer
     ...RecentSessionsCard_viewer
   }
@@ -35,9 +37,14 @@ export function HomePage() {
 
   return (
     <div css={homePageLayoutStyles}>
-      <Suspense fallback={<p>Loading recent sessions...</p>}>
-        <RecentSessionsCard viewer={data} />
-      </Suspense>
+      <div css={css`display: grid; gap: 20px;`}>
+        <Suspense fallback={<p>Loading recent sessions...</p>}>
+          <RecentSessionsCard viewer={data} />
+        </Suspense>
+        <Suspense fallback={<p>Loading rivals...</p>}>
+          <RivalsTeaserCard viewer={data} />
+        </Suspense>
+      </div>
       <Suspense fallback={<p>Loading recent tracks...</p>}>
         <RecentTracksCard viewer={data} />
       </Suspense>

@@ -12,7 +12,13 @@ import { tempCleanupScheduler } from "./recordings/tempCleanupScheduler.js";
 import { startHardwareProbe } from "../video/hwProbe.js";
 
 await loadEnvFiles();
-await runMigrations();
+console.log("Running DB migrations...");
+try {
+  await runMigrations();
+} catch (err) {
+  console.error("Failed to run DB migrations. Server will not start.", err);
+  process.exit(1);
+}
 await ensureWorkDirs();
 void startHardwareProbe().catch((err) => {
   console.warn("Hardware encoding probe failed to start", err);

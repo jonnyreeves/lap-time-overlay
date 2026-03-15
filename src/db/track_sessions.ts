@@ -9,6 +9,19 @@ export interface TrackSessionLapEventInput {
   value: string;
 }
 
+export interface TrackSessionParticipantLapInput {
+  lapNumber: number;
+  time: number;
+}
+
+export interface TrackSessionParticipantInput {
+  name: string;
+  classification: number | null;
+  kartNumber?: string | null;
+  isSelf: boolean;
+  laps: TrackSessionParticipantLapInput[];
+}
+
 export type TrackSessionConditions = "Dry" | "Wet";
 
 export interface TrackSessionRecord {
@@ -118,6 +131,7 @@ export function createTrackSessionWithLaps({
   trackLayoutId,
   fastestLap = null,
   temperature = "",
+  participants = [],
 }: {
   date: string;
   format: string;
@@ -133,6 +147,7 @@ export function createTrackSessionWithLaps({
   trackLayoutId: string;
   fastestLap?: number | null;
   temperature?: string;
+  participants?: TrackSessionParticipantInput[];
 }): { trackSession: TrackSessionRecord; laps: LapRecord[] } {
   const db = getDb();
   const sessionId = randomUUID();
@@ -156,6 +171,22 @@ export function createTrackSessionWithLaps({
         )
       : null;
   const createdLaps: LapRecord[] = [];
+  const insertParticipant =
+    participants.length > 0
+      ? db.prepare(
+          `INSERT INTO track_session_participants (
+            id, session_id, name, classification, kart_number, is_self, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+        )
+      : null;
+  const insertParticipantLap =
+    participants.length > 0
+      ? db.prepare(
+          `INSERT INTO track_session_participant_laps (
+            id, participant_id, lap_number, time, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?)`
+        )
+      : null;
 
   db.transaction(() => {
     insertSession.run(
@@ -199,6 +230,31 @@ export function createTrackSessionWithLaps({
               now
             );
           }
+        }
+      }
+    }
+    if (insertParticipant && insertParticipantLap) {
+      for (const participant of participants) {
+        const participantId = randomUUID();
+        insertParticipant.run(
+          participantId,
+          sessionId,
+          participant.name,
+          participant.classification,
+          participant.kartNumber ?? "",
+          participant.isSelf ? 1 : 0,
+          now,
+          now
+        );
+        for (const lap of participant.laps) {
+          insertParticipantLap.run(
+            randomUUID(),
+            participantId,
+            lap.lapNumber,
+            lap.time,
+            now,
+            now
+          );
         }
       }
     }
@@ -457,6 +513,7 @@ export interface TrackSessionRepository {
     trackLayoutId: string;
     fastestLap?: number | null;
     temperature?: string;
+    participants?: TrackSessionParticipantInput[];
   }) => { trackSession: TrackSessionRecord; laps: LapRecord[] };
   update: (input: {
     id: string;

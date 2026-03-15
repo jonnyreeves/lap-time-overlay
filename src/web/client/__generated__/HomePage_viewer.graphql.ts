@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<5168d0132a44927a3283a479714c2451>>
+ * @generated SignedSource<<ff2c61b2973a52a549e5876193cce497>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,7 +13,7 @@ import { FragmentRefs } from "relay-runtime";
 export type HomePage_viewer$data = {
   readonly id: string;
   readonly username: string;
-  readonly " $fragmentSpreads": FragmentRefs<"RecentSessionsCard_viewer" | "RecentTracksCard_viewer">;
+  readonly " $fragmentSpreads": FragmentRefs<"RecentSessionsCard_viewer" | "RecentTracksCard_viewer" | "RivalsTeaserCard_viewer">;
   readonly " $fragmentType": "HomePage_viewer";
 };
 export type HomePage_viewer$key = {
@@ -44,6 +44,11 @@ const node: ReaderFragment = {
     {
       "args": null,
       "kind": "FragmentSpread",
+      "name": "RivalsTeaserCard_viewer"
+    },
+    {
+      "args": null,
+      "kind": "FragmentSpread",
       "name": "RecentTracksCard_viewer"
     },
     {
@@ -56,6 +61,6 @@ const node: ReaderFragment = {
   "abstractKey": null
 };
 
-(node as any).hash = "c71a9c68ac135b797cf4b7f63a7ef0f5";
+(node as any).hash = "f678a51b12225baa6643703b86575f1a";
 
 export default node;

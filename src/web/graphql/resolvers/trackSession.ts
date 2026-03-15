@@ -2,10 +2,15 @@ import { GraphQLError } from "graphql";
 import type { LapEventRecord } from "../../../db/lap_events.js";
 import type { LapRecord } from "../../../db/laps.js";
 import type { TrackRecordingRecord } from "../../../db/track_recordings.js";
+import type {
+  TrackSessionParticipantLapRecord,
+  TrackSessionParticipantRecord,
+} from "../../../db/track_session_participants.js";
 import type { TrackRecord } from "../../../db/tracks.js";
 import type {
   TrackSessionConditions,
   TrackSessionLapInput,
+  TrackSessionParticipantInput,
   TrackSessionRecord,
 } from "../../../db/track_sessions.js";
 import type { GraphQLContext } from "../context.js";
@@ -15,6 +20,12 @@ import {
   type ConsistencyStats,
   type ExcludedReason,
 } from "../../shared/consistency.js";
+import {
+  buildLapComparisons,
+  buildRivalTrend,
+  buildSessionInsights,
+  computeBestNAvg,
+} from "../../shared/rivalAnalysis.js";
 import { fetchWeatherForPostcode } from "../../shared/weather.js";
 import { toTrackPayload } from "./track.js";
 import {
@@ -29,6 +40,14 @@ const LAP_TIME_EPSILON_S = 1e-6;
 
 export type LapEventInputArg = { offset?: number; event?: string; value?: string };
 export type LapInputArg = { lapNumber?: number; time?: number; lapEvents?: LapEventInputArg[] | null };
+export type ParticipantLapInputArg = { lapNumber?: number; time?: number };
+export type ParticipantInputArg = {
+  name?: string;
+  classification?: number | null;
+  kartNumber?: string | null;
+  isSelf?: boolean;
+  laps?: ParticipantLapInputArg[] | null;
+};
 
 export type CreateTrackSessionInputArgs = {
   input?: {
@@ -44,6 +63,7 @@ export type CreateTrackSessionInputArgs = {
     notes?: string;
     laps?: LapInputArg[] | null;
     fastestLap?: number | null;
+    participants?: ParticipantInputArg[] | null;
   };
 };
 
@@ -304,10 +324,170 @@ export function parseLapInputs(laps: LapInputArg[] | null | undefined): TrackSes
   return parsed;
 }
 
+function parseParticipantLaps(
+  laps: ParticipantLapInputArg[] | null | undefined,
+  participantName: string
+) {
+  if (!laps || laps.length === 0) {
+    return [];
+  }
+  const seenLapNumbers = new Set<number>();
+  const parsed = laps.map((lap, index) => {
+    const lapNumber = Number(lap?.lapNumber);
+    const time = Number(lap?.time);
+    if (!Number.isInteger(lapNumber) || lapNumber < 1) {
+      throw new GraphQLError(
+        `Participant ${participantName} lap number must be >= 1 (row ${index + 1})`,
+        { extensions: { code: "VALIDATION_FAILED" } }
+      );
+    }
+    if (!Number.isFinite(time) || time <= 0) {
+      throw new GraphQLError(
+        `Participant ${participantName} lap time must be positive`,
+        { extensions: { code: "VALIDATION_FAILED" } }
+      );
+    }
+    if (seenLapNumbers.has(lapNumber)) {
+      throw new GraphQLError(
+        `Participant ${participantName} has duplicate lap ${lapNumber}`,
+        { extensions: { code: "VALIDATION_FAILED" } }
+      );
+    }
+    seenLapNumbers.add(lapNumber);
+    return { lapNumber, time };
+  });
+  parsed.sort((a, b) => a.lapNumber - b.lapNumber);
+  return parsed;
+}
+
+export function parseParticipantInputs(
+  participants: ParticipantInputArg[] | null | undefined
+): TrackSessionParticipantInput[] {
+  if (!participants || participants.length === 0) {
+    return [];
+  }
+
+  let selfCount = 0;
+  const parsed = participants.map((participant, index) => {
+    const name = participant?.name?.trim();
+    if (!name) {
+      throw new GraphQLError(`Participant name is required (row ${index + 1})`, {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    const classification =
+      participant?.classification == null
+        ? null
+        : parseClassification(participant.classification);
+    const kartNumber = participant?.kartNumber?.trim() ?? "";
+    const isSelf = participant?.isSelf === true;
+    if (isSelf) {
+      selfCount += 1;
+    }
+    return {
+      name,
+      classification,
+      kartNumber,
+      isSelf,
+      laps: parseParticipantLaps(participant?.laps, name),
+    };
+  });
+
+  if (selfCount > 1) {
+    throw new GraphQLError("Only one participant can be marked as self", {
+      extensions: { code: "VALIDATION_FAILED" },
+    });
+  }
+
+  return parsed;
+}
+
+function groupParticipantLapsById(
+  laps: TrackSessionParticipantLapRecord[]
+): Map<string, TrackSessionParticipantLapRecord[]> {
+  const byId = new Map<string, TrackSessionParticipantLapRecord[]>();
+  for (const lap of laps) {
+    const existing = byId.get(lap.participantId) ?? [];
+    existing.push(lap);
+    byId.set(lap.participantId, existing);
+  }
+  for (const [participantId, participantLaps] of byId.entries()) {
+    participantLaps.sort((a, b) => a.lapNumber - b.lapNumber);
+    byId.set(participantId, participantLaps);
+  }
+  return byId;
+}
+
+function buildComparableTrendPoints(
+  session: TrackSessionRecord,
+  rivalName: string,
+  repositories: Repositories
+) {
+  const comparableSessions = repositories.trackSessions
+    .findByUserId(session.userId)
+    .filter(
+      (candidate) =>
+        candidate.trackId === session.trackId && candidate.trackLayoutId === session.trackLayoutId
+    );
+  if (comparableSessions.length === 0) {
+    return [];
+  }
+
+  const comparableSessionIds = comparableSessions.map((candidate) => candidate.id);
+  const participants = repositories.trackSessionParticipants.findBySessionIds(comparableSessionIds);
+  const participantsBySessionId = new Map<string, TrackSessionParticipantRecord[]>();
+  for (const participant of participants) {
+    const existing = participantsBySessionId.get(participant.sessionId) ?? [];
+    existing.push(participant);
+    participantsBySessionId.set(participant.sessionId, existing);
+  }
+
+  const participantIds = participants.map((participant) => participant.id);
+  const participantLaps = repositories.trackSessionParticipants.findLapsByParticipantIds(participantIds);
+  const lapsByParticipantId = groupParticipantLapsById(participantLaps);
+
+  const points: Array<{ sessionId: string; date: string; delta: number }> = [];
+  for (const comparableSession of comparableSessions) {
+    const sessionParticipants = participantsBySessionId.get(comparableSession.id) ?? [];
+    const selfParticipant = sessionParticipants.find((participant) => participant.isSelf);
+    const rivalParticipant = sessionParticipants.find(
+      (participant) => !participant.isSelf && participant.name === rivalName
+    );
+    if (!selfParticipant || !rivalParticipant) {
+      continue;
+    }
+
+    const selfLaps =
+      lapsByParticipantId
+        .get(selfParticipant.id)
+        ?.map((lap) => ({ lapNumber: lap.lapNumber, time: lap.time })) ?? [];
+    const rivalLaps =
+      lapsByParticipantId
+        .get(rivalParticipant.id)
+        ?.map((lap) => ({ lapNumber: lap.lapNumber, time: lap.time })) ?? [];
+    const selfBest10 = computeBestNAvg(selfLaps, 10);
+    const rivalBest10 = computeBestNAvg(rivalLaps, 10);
+    if (selfBest10 == null || rivalBest10 == null) {
+      continue;
+    }
+
+    points.push({
+      sessionId: comparableSession.id,
+      date: comparableSession.date,
+      delta: selfBest10 - rivalBest10,
+    });
+  }
+
+  return points;
+}
+
 export function toTrackSessionPayload(session: TrackSessionRecord, repositories: Repositories) {
   const loadLaps = () => repositories.laps.findBySessionId(session.id);
+  const loadParticipants = () => repositories.trackSessionParticipants.findBySessionId(session.id);
   const cachedTrack = repositories.tracks.findById(session.trackId);
   let cachedConsistency: ConsistencyStats | null = null;
+  let cachedParticipants: TrackSessionParticipantRecord[] | null = null;
+  let cachedParticipantLapsById: Map<string, TrackSessionParticipantLapRecord[]> | null = null;
   let personalBestIndex:
     | ReturnType<typeof buildPersonalBestIndexForUser>
     | null = null;
@@ -326,6 +506,23 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
       personalBestIndex = buildPersonalBestIndexForUser(session.userId, repositories);
     }
     return personalBestIndex;
+  };
+
+  const getParticipants = () => {
+    if (!cachedParticipants) {
+      cachedParticipants = loadParticipants();
+    }
+    return cachedParticipants;
+  };
+
+  const getParticipantLapsById = () => {
+    if (!cachedParticipantLapsById) {
+      const participants = getParticipants();
+      const participantIds = participants.map((participant) => participant.id);
+      const laps = repositories.trackSessionParticipants.findLapsByParticipantIds(participantIds);
+      cachedParticipantLapsById = groupParticipantLapsById(laps);
+    }
+    return cachedParticipantLapsById;
   };
 
   const toConsistencyPayload = () => {
@@ -417,6 +614,55 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
     notes: session.notes,
     createdAt: new Date(session.createdAt).toISOString(),
     updatedAt: new Date(session.updatedAt).toISOString(),
+    participants: () => {
+      const lapsByParticipantId = getParticipantLapsById();
+      return getParticipants().map((participant) => ({
+        id: participant.id,
+        name: participant.name,
+        classification: participant.classification,
+        kartNumber: participant.kartNumber || null,
+        isSelf: participant.isSelf,
+        laps:
+          lapsByParticipantId.get(participant.id)?.map((lap) => ({
+            lapNumber: lap.lapNumber,
+            time: lap.time,
+          })) ?? [],
+      }));
+    },
+    rivalAnalysis: (args: { rivalName: string }) => {
+      const rivalName = args?.rivalName?.trim();
+      if (!rivalName) return null;
+
+      const sessionParticipants = getParticipants();
+      const selfParticipant = sessionParticipants.find((participant) => participant.isSelf);
+      const rivalParticipant = sessionParticipants.find(
+        (participant) => !participant.isSelf && participant.name === rivalName
+      );
+      if (!selfParticipant || !rivalParticipant) {
+        return null;
+      }
+
+      const lapsByParticipantId = getParticipantLapsById();
+      const selfLaps =
+        lapsByParticipantId
+          .get(selfParticipant.id)
+          ?.map((lap) => ({ lapNumber: lap.lapNumber, time: lap.time })) ?? [];
+      const rivalLaps =
+        lapsByParticipantId
+          .get(rivalParticipant.id)
+          ?.map((lap) => ({ lapNumber: lap.lapNumber, time: lap.time })) ?? [];
+      const lapComparisons = buildLapComparisons(selfLaps, rivalLaps);
+      const sessionInsights = buildSessionInsights(lapComparisons);
+      const trendPoints = buildComparableTrendPoints(session, rivalName, repositories);
+      const trend = buildRivalTrend(trendPoints);
+
+      return {
+        rivalName,
+        lapComparisons,
+        sessionInsights,
+        trend,
+      };
+    },
     laps: (args: { first: number }) => {
       const laps = loadLaps();
       return laps.slice(0, args.first).map((lap) => toLapPayload(lap, repositories));
@@ -635,6 +881,7 @@ export const trackSessionResolvers = {
     const fastestLap = parseFastestLap(input.fastestLap);
     const kartNumber = input.kartNumber?.trim() ?? "";
     const temperature = input.temperature?.trim() ?? "";
+    const participants = parseParticipantInputs(input.participants);
     const { trackSession } = repositories.trackSessions.createWithLaps({
       date: input.date,
       format: input.format,
@@ -649,6 +896,7 @@ export const trackSessionResolvers = {
       trackLayoutId: input.trackLayoutId,
       fastestLap,
       temperature,
+      ...(participants.length ? { participants } : {}),
     });
     return { trackSession: toTrackSessionPayload(trackSession, repositories) };
   },

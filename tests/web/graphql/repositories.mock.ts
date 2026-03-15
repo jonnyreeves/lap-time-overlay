@@ -3,6 +3,10 @@ import type { Repositories } from "../../../src/web/graphql/repositories.js";
 import type { TrackRecordingRecord } from "../../../src/db/track_recordings.js";
 import type { TrackRecordingSourceRecord } from "../../../src/db/track_recording_sources.js";
 import type { TrackLayoutsRepository } from "../../../src/db/track_layouts.js";
+import type {
+  TrackSessionParticipantLapRecord,
+  TrackSessionParticipantRecord,
+} from "../../../src/db/track_session_participants.js";
 
 export function createMockRepositories() {
   const repositories = {
@@ -55,6 +59,12 @@ export function createMockRepositories() {
       create: vi.fn<[string, string], ReturnType<TrackLayoutsRepository["create"]>>(),
       update: vi.fn<[string, string], ReturnType<TrackLayoutsRepository["update"]>>(),
       delete: vi.fn<[string], ReturnType<TrackLayoutsRepository["delete"]>>(),
+    },
+    trackSessionParticipants: {
+      findBySessionId: vi.fn<[string], TrackSessionParticipantRecord[]>(() => []),
+      findBySessionIds: vi.fn<[string[]], TrackSessionParticipantRecord[]>(() => []),
+      findLapsByParticipantId: vi.fn<[string], TrackSessionParticipantLapRecord[]>(() => []),
+      findLapsByParticipantIds: vi.fn<[string[]], TrackSessionParticipantLapRecord[]>(() => []),
     },
   } satisfies Repositories;
 

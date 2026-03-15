@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<07177b1b76441be21e55e2b2d1d8a56d>>
+ * @generated SignedSource<<1298ca5f5fcf03dfd025fff1b37c59f9>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -29,20 +29,20 @@ var v0 = {
   "name": "id",
   "storageKey": null
 },
-v1 = [
-  {
-    "kind": "Literal",
-    "name": "first",
-    "value": 5
-  }
-],
-v2 = {
+v1 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "name",
   "storageKey": null
 },
+v2 = [
+  {
+    "kind": "Literal",
+    "name": "first",
+    "value": 5
+  }
+],
 v3 = {
   "alias": null,
   "args": null,
@@ -52,7 +52,7 @@ v3 = {
 },
 v4 = [
   (v0/*: any*/),
-  (v2/*: any*/)
+  (v1/*: any*/)
 ],
 v5 = {
   "alias": null,
@@ -174,7 +174,60 @@ return {
           },
           {
             "alias": null,
-            "args": (v1/*: any*/),
+            "args": [
+              {
+                "kind": "Literal",
+                "name": "first",
+                "value": 3
+              }
+            ],
+            "concreteType": "RivalSummary",
+            "kind": "LinkedField",
+            "name": "rivals",
+            "plural": true,
+            "selections": [
+              (v1/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "sharedSessions",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "lastRacedAt",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "avgBest10Delta",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "trendDirection",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "sampleCount",
+                "storageKey": null
+              }
+            ],
+            "storageKey": "rivals(first:3)"
+          },
+          {
+            "alias": null,
+            "args": (v2/*: any*/),
             "concreteType": "TrackConnection",
             "kind": "LinkedField",
             "name": "recentTracks",
@@ -197,7 +250,7 @@ return {
                     "plural": false,
                     "selections": [
                       (v0/*: any*/),
-                      (v2/*: any*/),
+                      (v1/*: any*/),
                       {
                         "alias": null,
                         "args": null,
@@ -247,7 +300,7 @@ return {
           },
           {
             "alias": null,
-            "args": (v1/*: any*/),
+            "args": (v2/*: any*/),
             "filters": null,
             "handle": "connection",
             "key": "RecentTracksCard_recentTracks",
@@ -256,7 +309,7 @@ return {
           },
           {
             "alias": null,
-            "args": (v1/*: any*/),
+            "args": (v2/*: any*/),
             "concreteType": "TrackSessionConnection",
             "kind": "LinkedField",
             "name": "recentTrackSessions",
@@ -330,7 +383,7 @@ return {
                         "name": "track",
                         "plural": false,
                         "selections": [
-                          (v2/*: any*/),
+                          (v1/*: any*/),
                           (v0/*: any*/),
                           {
                             "alias": null,
@@ -383,7 +436,7 @@ return {
           },
           {
             "alias": null,
-            "args": (v1/*: any*/),
+            "args": (v2/*: any*/),
             "filters": null,
             "handle": "connection",
             "key": "RecentSessionsCard_recentTrackSessions",
@@ -403,12 +456,12 @@ return {
     ]
   },
   "params": {
-    "cacheID": "bf89c97bc21ce3cb9b5021292b4c5854",
+    "cacheID": "f84b9d38dd4565bc47476721e4db565f",
     "id": null,
     "metadata": {},
     "name": "RequireAuthViewerQuery",
     "operationKind": "query",
-    "text": "query RequireAuthViewerQuery {\n  viewer {\n    ...HomePage_viewer\n    ...SiteHeader_viewer\n    ...adminAdminToolsRoute_viewer\n    id\n  }\n}\n\nfragment HomePage_viewer on User {\n  id\n  username\n  ...RecentTracksCard_viewer\n  ...RecentSessionsCard_viewer\n}\n\nfragment RecentSessionsCard_viewer on User {\n  id\n  recentTrackSessions(first: 5) {\n    edges {\n      node {\n        id\n        date\n        format\n        classification\n        isPersonalBest\n        conditions\n        temperature\n        notes\n        track {\n          name\n          id\n          isIndoors\n        }\n        trackLayout {\n          id\n          name\n        }\n        kart {\n          id\n          name\n        }\n        laps(first: 1) {\n          personalBest\n          id\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment RecentTracksCard_viewer on User {\n  id\n  recentTracks(first: 5) {\n    edges {\n      node {\n        id\n        name\n        heroImage\n        personalBestEntries {\n          trackSessionId\n          conditions\n          lapTime\n          kart {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment SiteHeader_viewer on User {\n  id\n  username\n  isAdmin\n}\n\nfragment adminAdminToolsRoute_viewer on User {\n  id\n  isAdmin\n}\n"
+    "text": "query RequireAuthViewerQuery {\n  viewer {\n    ...HomePage_viewer\n    ...SiteHeader_viewer\n    ...adminAdminToolsRoute_viewer\n    id\n  }\n}\n\nfragment HomePage_viewer on User {\n  id\n  username\n  ...RivalsTeaserCard_viewer\n  ...RecentTracksCard_viewer\n  ...RecentSessionsCard_viewer\n}\n\nfragment RecentSessionsCard_viewer on User {\n  id\n  recentTrackSessions(first: 5) {\n    edges {\n      node {\n        id\n        date\n        format\n        classification\n        isPersonalBest\n        conditions\n        temperature\n        notes\n        track {\n          name\n          id\n          isIndoors\n        }\n        trackLayout {\n          id\n          name\n        }\n        kart {\n          id\n          name\n        }\n        laps(first: 1) {\n          personalBest\n          id\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment RecentTracksCard_viewer on User {\n  id\n  recentTracks(first: 5) {\n    edges {\n      node {\n        id\n        name\n        heroImage\n        personalBestEntries {\n          trackSessionId\n          conditions\n          lapTime\n          kart {\n            id\n            name\n          }\n          trackLayout {\n            id\n            name\n          }\n        }\n        __typename\n      }\n      cursor\n    }\n    pageInfo {\n      endCursor\n      hasNextPage\n    }\n  }\n}\n\nfragment RivalsTeaserCard_viewer on User {\n  rivals(first: 3) {\n    name\n    sharedSessions\n    lastRacedAt\n    avgBest10Delta\n    trendDirection\n    sampleCount\n  }\n}\n\nfragment SiteHeader_viewer on User {\n  id\n  username\n  isAdmin\n}\n\nfragment adminAdminToolsRoute_viewer on User {\n  id\n  isAdmin\n}\n"
   }
 };
 })();

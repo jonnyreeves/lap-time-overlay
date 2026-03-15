@@ -169,6 +169,19 @@ input LapEventInput {
   value: String!
 }
 
+input TrackSessionParticipantLapInput {
+  lapNumber: Int!
+  time: Float!
+}
+
+input TrackSessionParticipantInput {
+  name: String!
+  classification: Int
+  kartNumber: String
+  isSelf: Boolean!
+  laps: [TrackSessionParticipantLapInput!]!
+}
+
 input CreateTrackSessionInput {
   date: String!
   format: String!
@@ -182,6 +195,7 @@ input CreateTrackSessionInput {
   notes: String
   laps: [LapInput!]
   fastestLap: Float
+  participants: [TrackSessionParticipantInput!]
 }
 
 type CreateTrackSessionPayload {
@@ -459,6 +473,7 @@ type User {
   username: String!
   isAdmin: Boolean!
   createdAt: String!
+  rivals(first: Int = 10): [RivalSummary!]!
   recentTracks(first: Int = 10, after: String): TrackConnection!
   recentTrackSessions(
     first: Int = 10
@@ -556,7 +571,93 @@ type TrackSession {
   createdAt: String!
   updatedAt: String!
   laps(first: Int = 10): [Lap!]!
+  participants: [TrackSessionParticipant!]!
+  rivalAnalysis(rivalName: String!): RivalAnalysis
   trackRecordings(first: Int = 10): [TrackRecording!]!
+}
+
+type TrackSessionParticipantLap {
+  lapNumber: Int!
+  time: Float!
+}
+
+type TrackSessionParticipant {
+  id: ID!
+  name: String!
+  classification: Int
+  kartNumber: String
+  isSelf: Boolean!
+  laps: [TrackSessionParticipantLap!]!
+}
+
+enum RivalLapOutcome {
+  FASTER
+  SLOWER
+  TIE
+}
+
+type RivalLapComparison {
+  lapNumber: Int!
+  selfLap: Float!
+  rivalLap: Float!
+  delta: Float!
+  cumulativeDelta: Float!
+  outcome: RivalLapOutcome!
+}
+
+enum RivalInsightLabel {
+  CONSISTENTLY_SLOWER
+  MIXED_WITH_FASTER_PHASES
+  MIXED_OR_NEUTRAL
+}
+
+type RivalSessionInsights {
+  fasterLapCount: Int!
+  slowerLapCount: Int!
+  tieCount: Int!
+  longestGainStreak: Int!
+  longestLossStreak: Int!
+  medianDelta: Float
+  consistencyGap: Float
+  insightLabel: RivalInsightLabel!
+}
+
+enum RivalTrendDirection {
+  CLOSING
+  WIDENING
+  FLAT
+  INSUFFICIENT
+}
+
+type RivalTrendPoint {
+  sessionId: ID!
+  date: String!
+  delta: Float!
+}
+
+type RivalTrend {
+  direction: RivalTrendDirection!
+  sampleCount: Int!
+  slope: Float
+  firstDelta: Float
+  latestDelta: Float
+  points: [RivalTrendPoint!]!
+}
+
+type RivalAnalysis {
+  rivalName: String!
+  lapComparisons: [RivalLapComparison!]!
+  sessionInsights: RivalSessionInsights!
+  trend: RivalTrend!
+}
+
+type RivalSummary {
+  name: String!
+  sharedSessions: Int!
+  lastRacedAt: String
+  avgBest10Delta: Float
+  trendDirection: RivalTrendDirection!
+  sampleCount: Int!
 }
 
 enum ConsistencyExclusionReason {

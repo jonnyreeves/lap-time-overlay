@@ -1,5 +1,6 @@
 import { GraphQLError } from "graphql";
 import { computeConsistencyStats } from "../../shared/consistency.js";
+import { buildRivalTrend, computeBestNAvg } from "../../shared/rivalAnalysis.js";
 import { toUserPayload } from "./auth.js";
 import { toTrackPayload } from "./track.js";
 import { findTrackSessionsForUser, toTrackSessionPayload } from "./trackSession.js";
@@ -157,6 +158,124 @@ function sortSessions(
   return sessions;
 }
 
+function getRivalSummaries(
+  userId: string,
+  repositories: GraphQLContext["repositories"],
+  first: number
+) {
+  const sessions = findTrackSessionsForUser(userId, repositories);
+  if (sessions.length === 0) return [];
+
+  const sessionById = new Map(sessions.map((session) => [session.id, session]));
+  const sessionIds = sessions.map((session) => session.id);
+  const participants = repositories.trackSessionParticipants.findBySessionIds(sessionIds);
+  if (participants.length === 0) return [];
+
+  const participantsBySessionId = new Map<string, typeof participants>();
+  for (const participant of participants) {
+    const existing = participantsBySessionId.get(participant.sessionId) ?? [];
+    existing.push(participant);
+    participantsBySessionId.set(participant.sessionId, existing);
+  }
+
+  const participantIds = participants.map((participant) => participant.id);
+  const participantLaps = repositories.trackSessionParticipants.findLapsByParticipantIds(participantIds);
+  const lapsByParticipantId = new Map<string, typeof participantLaps>();
+  for (const lap of participantLaps) {
+    const existing = lapsByParticipantId.get(lap.participantId) ?? [];
+    existing.push(lap);
+    lapsByParticipantId.set(lap.participantId, existing);
+  }
+
+  const summaryByName = new Map<
+    string,
+    {
+      name: string;
+      sharedSessions: number;
+      lastRacedAt: number | null;
+      deltas: Array<{ sessionId: string; date: string; delta: number }>;
+    }
+  >();
+
+  for (const [sessionId, sessionParticipants] of participantsBySessionId.entries()) {
+    const session = sessionById.get(sessionId);
+    if (!session) continue;
+
+    const selfParticipant = sessionParticipants.find((participant) => participant.isSelf);
+    if (!selfParticipant) continue;
+    const selfLaps =
+      lapsByParticipantId
+        .get(selfParticipant.id)
+        ?.map((lap) => ({ lapNumber: lap.lapNumber, time: lap.time })) ?? [];
+    const selfBest10 = computeBestNAvg(selfLaps, 10);
+    const sessionTimestampValue = new Date(session.date).getTime();
+    const sessionTimestamp = Number.isNaN(sessionTimestampValue) ? null : sessionTimestampValue;
+
+    for (const participant of sessionParticipants) {
+      if (participant.isSelf) continue;
+      const current = summaryByName.get(participant.name) ?? {
+        name: participant.name,
+        sharedSessions: 0,
+        lastRacedAt: null,
+        deltas: [],
+      };
+      current.sharedSessions += 1;
+      if (sessionTimestamp != null) {
+        current.lastRacedAt =
+          current.lastRacedAt == null
+            ? sessionTimestamp
+            : Math.max(current.lastRacedAt, sessionTimestamp);
+      }
+
+      const rivalLaps =
+        lapsByParticipantId
+          .get(participant.id)
+          ?.map((lap) => ({ lapNumber: lap.lapNumber, time: lap.time })) ?? [];
+      const rivalBest10 = computeBestNAvg(rivalLaps, 10);
+      if (selfBest10 != null && rivalBest10 != null) {
+        current.deltas.push({
+          sessionId,
+          date: session.date,
+          delta: selfBest10 - rivalBest10,
+        });
+      }
+
+      summaryByName.set(participant.name, current);
+    }
+  }
+
+  const summaries = Array.from(summaryByName.values())
+    .map((summary) => {
+      const avgBest10Delta =
+        summary.deltas.length > 0
+          ? summary.deltas.reduce((sum, point) => sum + point.delta, 0) / summary.deltas.length
+          : null;
+      const trend = buildRivalTrend(summary.deltas);
+      return {
+        name: summary.name,
+        sharedSessions: summary.sharedSessions,
+        lastRacedAt:
+          summary.lastRacedAt == null ? null : new Date(summary.lastRacedAt).toISOString(),
+        avgBest10Delta,
+        trendDirection: trend.direction,
+        sampleCount: trend.sampleCount,
+      };
+    })
+    .sort((a, b) => {
+      if (a.sharedSessions !== b.sharedSessions) {
+        return b.sharedSessions - a.sharedSessions;
+      }
+      const aTime = a.lastRacedAt ? Date.parse(a.lastRacedAt) : 0;
+      const bTime = b.lastRacedAt ? Date.parse(b.lastRacedAt) : 0;
+      if (aTime !== bTime) {
+        return bTime - aTime;
+      }
+      return a.name.localeCompare(b.name);
+    });
+
+  return summaries.slice(0, first);
+}
+
 export const viewerResolvers = {
   viewer: (_args: unknown, context: GraphQLContext) => {
     if (!context.currentUser) return null;
@@ -202,6 +321,10 @@ export const viewerResolvers = {
             endCursor: edges[edges.length - 1]?.cursor ?? null,
           },
         };
+      },
+      rivals: (args: { first?: number }) => {
+        const first = typeof args.first === "number" && args.first > 0 ? args.first : 10;
+        return getRivalSummaries(user.id, repositories, first);
       },
       recentTrackSessions: (args: RecentTrackSessionsArgs) => {
         const sessions = findTrackSessionsForUser(user.id, repositories);

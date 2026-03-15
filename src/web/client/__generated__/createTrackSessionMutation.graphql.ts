@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<8e83ec60ddb5289c5785d84e28b2ac55>>
+ * @generated SignedSource<<bf71d950980d7d0977d1848adb1f3b1e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -19,6 +19,7 @@ export type CreateTrackSessionInput = {
   kartNumber?: string | null | undefined;
   laps?: ReadonlyArray<LapInput> | null | undefined;
   notes?: string | null | undefined;
+  participants?: ReadonlyArray<TrackSessionParticipantInput> | null | undefined;
   temperature?: string | null | undefined;
   trackId?: string | null | undefined;
   trackLayoutId: string;
@@ -32,6 +33,17 @@ export type LapEventInput = {
   event: string;
   offset: number;
   value: string;
+};
+export type TrackSessionParticipantInput = {
+  classification?: number | null | undefined;
+  isSelf: boolean;
+  kartNumber?: string | null | undefined;
+  laps: ReadonlyArray<TrackSessionParticipantLapInput>;
+  name: string;
+};
+export type TrackSessionParticipantLapInput = {
+  lapNumber: number;
+  time: number;
 };
 export type createTrackSessionMutation$variables = {
   connections: ReadonlyArray<string>;

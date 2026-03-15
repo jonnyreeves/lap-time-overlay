@@ -121,6 +121,8 @@ describe("viewer resolver", () => {
         updatedAt: 0,
       }));
     });
+    repositories.trackSessionParticipants.findBySessionIds.mockReturnValue([]);
+    repositories.trackSessionParticipants.findLapsByParticipantIds.mockReturnValue([]);
   });
 
   it("returns null when not authenticated", () => {
@@ -236,5 +238,87 @@ describe("viewer resolver", () => {
     expect(() =>
       viewer?.recentTrackSessions({ first: 5, filter: { format: "Time Attack" } })
     ).toThrowError("format filter must be Practice, Qualifying, or Race");
+  });
+
+  it("returns rival summaries for the user", () => {
+    repositories.trackSessionParticipants.findBySessionIds.mockReturnValue([
+      {
+        id: "p-self-s1",
+        sessionId: "s1",
+        name: "John Reeves",
+        classification: 2,
+        kartNumber: "16",
+        isSelf: true,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+      {
+        id: "p-rival-s1",
+        sessionId: "s1",
+        name: "Robert Seaman",
+        classification: 1,
+        kartNumber: "7",
+        isSelf: false,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+      {
+        id: "p-self-s2",
+        sessionId: "s2",
+        name: "John Reeves",
+        classification: 2,
+        kartNumber: "16",
+        isSelf: true,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+      {
+        id: "p-rival-s2",
+        sessionId: "s2",
+        name: "Robert Seaman",
+        classification: 1,
+        kartNumber: "7",
+        isSelf: false,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+      {
+        id: "p-self-s3",
+        sessionId: "s3",
+        name: "John Reeves",
+        classification: 2,
+        kartNumber: "16",
+        isSelf: true,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+      {
+        id: "p-rival-s3",
+        sessionId: "s3",
+        name: "Robert Seaman",
+        classification: 1,
+        kartNumber: "7",
+        isSelf: false,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    ]);
+    repositories.trackSessionParticipants.findLapsByParticipantIds.mockReturnValue([
+      { id: "lap-1", participantId: "p-self-s1", lapNumber: 1, time: 52.1, createdAt: 0, updatedAt: 0 },
+      { id: "lap-2", participantId: "p-rival-s1", lapNumber: 1, time: 51.8, createdAt: 0, updatedAt: 0 },
+      { id: "lap-3", participantId: "p-self-s2", lapNumber: 1, time: 51.9, createdAt: 0, updatedAt: 0 },
+      { id: "lap-4", participantId: "p-rival-s2", lapNumber: 1, time: 51.7, createdAt: 0, updatedAt: 0 },
+      { id: "lap-5", participantId: "p-self-s3", lapNumber: 1, time: 51.7, createdAt: 0, updatedAt: 0 },
+      { id: "lap-6", participantId: "p-rival-s3", lapNumber: 1, time: 51.6, createdAt: 0, updatedAt: 0 },
+    ]);
+
+    const viewer = rootValue.viewer({}, context as never);
+    const rivals = viewer?.rivals({ first: 3 }) ?? [];
+    expect(rivals).toHaveLength(1);
+    expect(rivals[0]).toMatchObject({
+      name: "Robert Seaman",
+      sharedSessions: 3,
+      trendDirection: "CLOSING",
+    });
   });
 });
