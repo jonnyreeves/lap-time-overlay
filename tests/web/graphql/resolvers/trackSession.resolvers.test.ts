@@ -9,6 +9,10 @@ const { fetchWeatherMock } = vi.hoisted(() => ({
   fetchWeatherMock: vi.fn(),
 }));
 
+const { importTrackSessionFromSourceMock } = vi.hoisted(() => ({
+  importTrackSessionFromSourceMock: vi.fn(),
+}));
+
 vi.mock("../../../../src/web/recordings/mediaLibraryProjection.js", () => ({
   rebuildMediaLibrarySessionProjection: rebuildProjectionMock,
   removeMediaLibraryProjectionsForRecordings: removeProjectionMock,
@@ -18,9 +22,14 @@ vi.mock("../../../../src/web/shared/weather.js", () => ({
   fetchWeatherForPostcode: fetchWeatherMock,
 }));
 
+vi.mock("../../../../src/web/sessionImport/service.js", () => ({
+  importTrackSessionFromSource: importTrackSessionFromSourceMock,
+}));
+
 import { createMockGraphQLContext } from "../context.mock.js";
 import { computeConsistencyStats } from "../../../../src/web/shared/consistency.js";
 import { rootValue } from "../../../../src/web/graphql/schema.js";
+import { SessionImportError } from "../../../../src/web/sessionImport/types.js";
 import type { TrackRecordingRecord } from "../../../../src/db/track_recordings.js";
 import type { TrackRecordingSourceRecord } from "../../../../src/db/track_recording_sources.js";
 import type { TrackSessionRecord } from "../../../../src/db/track_sessions.js";
@@ -77,6 +86,25 @@ describe("trackSession resolvers", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     fetchWeatherMock.mockResolvedValue({ temperature: null, conditions: null });
+    importTrackSessionFromSourceMock.mockResolvedValue({
+      provider: "alphatiming",
+      sessionFormat: "Practice",
+      sessionDate: "2026-03-14",
+      sessionTime: "18:23",
+      classification: null,
+      sessionFastestLapSeconds: 51.179,
+      kartNumber: null,
+      trackLayoutName: null,
+      laps: [],
+      drivers: [
+        {
+          name: "John Reeves",
+          classification: 2,
+          kartNumber: "16",
+          laps: [{ lapNumber: 1, timeSeconds: 52.111, displayTime: "52.111" }],
+        },
+      ],
+    });
     repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
   });
 
@@ -449,6 +477,41 @@ describe("trackSession resolvers", () => {
 
     expect(fetchWeatherMock).not.toHaveBeenCalled();
     expect(result).toEqual({ temperature: null, conditions: null });
+  });
+
+  it("importTrackSessionFromUrl requires authentication", async () => {
+    await expect(
+      rootValue.importTrackSessionFromUrl(
+        { input: { source: "https://results.alphatiming.co.uk/buckmore/e/1/s/2" } },
+        { ...context, currentUser: null }
+      )
+    ).rejects.toThrowError("Authentication required");
+  });
+
+  it("importTrackSessionFromUrl delegates to import service", async () => {
+    const source = "https://results.alphatiming.co.uk/buckmore/e/1/s/2";
+    const result = await rootValue.importTrackSessionFromUrl({ input: { source } }, context);
+
+    expect(importTrackSessionFromSourceMock).toHaveBeenCalledWith(source);
+    expect(result).toMatchObject({
+      provider: "alphatiming",
+      sessionFormat: "Practice",
+      sessionDate: "2026-03-14",
+      sessionTime: "18:23",
+    });
+  });
+
+  it("importTrackSessionFromUrl surfaces import errors as validation failures", async () => {
+    importTrackSessionFromSourceMock.mockRejectedValueOnce(
+      new SessionImportError("Unsupported import source URL", "UNSUPPORTED_SOURCE")
+    );
+
+    await expect(
+      rootValue.importTrackSessionFromUrl(
+        { input: { source: "https://example.com/not-supported" } },
+        context
+      )
+    ).rejects.toThrowError("Unsupported import source URL");
   });
 
   it("createTrackSession rejects when kart does not exist", async () => {

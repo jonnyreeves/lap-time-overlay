@@ -2,16 +2,20 @@ import { css } from "@emotion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { graphql, useMutation } from "react-relay";
 import { formatLapTimeSeconds } from "../../utils/lapTime.js";
+import { extractAlphaTimingSessionUrl } from "../../../shared/alphaTimingUrl.js";
 import {
   guessTrackIdFromImport,
   guessTrackLayoutIdFromImport,
 } from "../../utils/guessTrackFromImport.js";
 import { parseSessionEmail } from "../../utils/parseSessionEmail.js";
 import {
+  type ParsedAlphaTimingEmail,
   type ParsedSessionEmail,
+  type ParsedTeamsportEmail,
   type SessionImportSelection,
 } from "../../utils/sessionImportTypes.js";
 import type { ImportSessionModalFetchTrackSessionWeatherMutation } from "../../__generated__/ImportSessionModalFetchTrackSessionWeatherMutation.graphql.js";
+import type { ImportSessionModalImportTrackSessionFromUrlMutation } from "../../__generated__/ImportSessionModalImportTrackSessionFromUrlMutation.graphql.js";
 
 interface ImportSessionModalProps {
   isOpen: boolean;
@@ -175,20 +179,70 @@ const FetchSessionWeatherMutation = graphql`
   }
 `;
 
+const ImportTrackSessionFromUrlMutation = graphql`
+  mutation ImportSessionModalImportTrackSessionFromUrlMutation(
+    $input: ImportTrackSessionFromUrlInput!
+  ) {
+    importTrackSessionFromUrl(input: $input) {
+      provider
+      sessionFormat
+      sessionDate
+      sessionTime
+      classification
+      sessionFastestLapSeconds
+      kartNumber
+      trackLayoutName
+      laps {
+        lapNumber
+        timeSeconds
+        displayTime
+      }
+      drivers {
+        name
+        classification
+        kartNumber
+        laps {
+          lapNumber
+          timeSeconds
+          displayTime
+        }
+      }
+    }
+  }
+`;
+
 type WeatherStatus = "idle" | "loading" | "loaded" | "error" | "unavailable";
 
+type ParsedWithDrivers = ParsedTeamsportEmail | ParsedAlphaTimingEmail;
+
+function hasDriverRows(parsed: ParsedSessionEmail): parsed is ParsedWithDrivers {
+  return parsed.provider === "teamsport" || parsed.provider === "alphatiming";
+}
+
 function getSelectedDriverLaps(parsed: ParsedSessionEmail, selectedDriver: string) {
-  if (parsed.provider !== "teamsport") return parsed.laps;
+  if (!hasDriverRows(parsed)) return parsed.laps;
   const driver =
     parsed.drivers.find((d) => d.name === selectedDriver) ?? parsed.drivers[0] ?? null;
   return driver?.laps ?? [];
 }
 
 function getSelectedClassification(parsed: ParsedSessionEmail, selectedDriver: string) {
-  if (parsed.provider !== "teamsport") return parsed.classification ?? null;
+  if (!hasDriverRows(parsed)) return parsed.classification ?? null;
   const driver =
     parsed.drivers.find((d) => d.name === selectedDriver) ?? parsed.drivers[0] ?? null;
   return driver?.classification ?? null;
+}
+
+function getSelectedKartNumber(parsed: ParsedSessionEmail, selectedDriver: string) {
+  if (parsed.provider === "daytona") {
+    return parsed.kartNumber;
+  }
+  if (parsed.provider !== "alphatiming") {
+    return null;
+  }
+  const driver =
+    parsed.drivers.find((d) => d.name === selectedDriver) ?? parsed.drivers[0] ?? null;
+  return driver?.kartNumber ?? null;
 }
 
 export function ImportSessionModal({
@@ -200,6 +254,8 @@ export function ImportSessionModal({
   const [emailContent, setEmailContent] = useState("");
   const [selectedDriver, setSelectedDriver] = useState("");
   const [step, setStep] = useState<"email" | "preview">("email");
+  const [importedParsed, setImportedParsed] = useState<ParsedSessionEmail | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
   const [selectedTrackId, setSelectedTrackId] = useState("");
   const [weatherStatus, setWeatherStatus] = useState<WeatherStatus>("idle");
   const [weatherData, setWeatherData] = useState<{
@@ -209,11 +265,17 @@ export function ImportSessionModal({
   const weatherRequestId = useRef(0);
   const [commitFetchWeather, isFetchingWeather] =
     useMutation<ImportSessionModalFetchTrackSessionWeatherMutation>(FetchSessionWeatherMutation);
+  const [commitImportTrackSessionFromUrl, isImportingFromUrl] =
+    useMutation<ImportSessionModalImportTrackSessionFromUrlMutation>(
+      ImportTrackSessionFromUrlMutation
+    );
 
   const handleClose = () => {
     setEmailContent("");
     setSelectedDriver("");
     setStep("email");
+    setImportedParsed(null);
+    setImportError(null);
     setSelectedTrackId("");
     setWeatherStatus("idle");
     setWeatherData({ temperature: null, conditions: null });
@@ -224,11 +286,11 @@ export function ImportSessionModal({
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (step !== "preview") return;
-    const parsed = parseSessionEmail(emailContent);
+    const parsed = importedParsed ?? parseSessionEmail(emailContent);
     if (!parsed) return;
 
     const laps =
-      parsed.provider === "teamsport"
+      hasDriverRows(parsed)
         ? getSelectedDriverLaps(parsed, selectedDriver)
         : parsed.laps;
 
@@ -241,22 +303,23 @@ export function ImportSessionModal({
       sessionDate: parsed.sessionDate,
       sessionTime: parsed.sessionTime,
       classification: getSelectedClassification(parsed, selectedDriver),
-      kartNumber: parsed.provider === "daytona" ? parsed.kartNumber : null,
+      kartNumber: getSelectedKartNumber(parsed, selectedDriver),
       trackLayoutName: parsed.provider === "daytona" ? parsed.trackLayoutName : null,
       laps,
       trackId: selectedTrackId.trim() ? selectedTrackId.trim() : null,
       temperature: weatherData.temperature,
       conditions: selectedTrackIsIndoors ? "Dry" : weatherData.conditions,
-      driverName: parsed.provider === "teamsport" ? selectedDriver || parsed.drivers[0]?.name : undefined,
+      driverName: hasDriverRows(parsed) ? selectedDriver || parsed.drivers[0]?.name : undefined,
       sessionFastestLapSeconds: parsed.sessionFastestLapSeconds ?? null,
     });
     handleClose();
   };
 
-  const parsed = useMemo<ParsedSessionEmail | null>(
+  const localParsed = useMemo<ParsedSessionEmail | null>(
     () => parseSessionEmail(emailContent),
     [emailContent]
   );
+  const parsed = importedParsed ?? localParsed;
   const guessedTrackId = useMemo(() => {
     if (!parsed) return null;
     return guessTrackIdFromImport(tracks, {
@@ -266,7 +329,14 @@ export function ImportSessionModal({
   }, [parsed, emailContent, tracks]);
 
   useEffect(() => {
-    if (parsed?.provider === "teamsport") {
+    if (step === "email") {
+      setImportedParsed(null);
+      setImportError(null);
+    }
+  }, [emailContent, step]);
+
+  useEffect(() => {
+    if (parsed && hasDriverRows(parsed)) {
       const defaultDriver = parsed.drivers[0]?.name ?? "";
       setSelectedDriver((current) =>
         current && parsed.drivers.some((driver) => driver.name === current)
@@ -288,15 +358,24 @@ export function ImportSessionModal({
     weatherRequestId.current += 1;
   }, [step, guessedTrackId, tracks]);
 
+  useEffect(() => {
+    if (step !== "preview") return;
+    if (selectedTrackId.trim()) return;
+    const fallbackTrackId =
+      guessedTrackId ?? (tracks.length === 1 ? tracks[0]?.id ?? "" : "");
+    if (!fallbackTrackId) return;
+    setSelectedTrackId(fallbackTrackId);
+  }, [step, selectedTrackId, guessedTrackId, tracks]);
+
   const previewLaps =
-    parsed?.provider === "teamsport"
+    parsed && hasDriverRows(parsed)
       ? getSelectedDriverLaps(parsed, selectedDriver)
       : parsed?.laps ?? [];
   const previewClassification = parsed
     ? getSelectedClassification(parsed, selectedDriver)
     : null;
   const previewFastestLap = parsed?.sessionFastestLapSeconds ?? null;
-  const previewKartNumber = parsed?.provider === "daytona" ? parsed.kartNumber : null;
+  const previewKartNumber = parsed ? getSelectedKartNumber(parsed, selectedDriver) : null;
   const sessionDateTime = parsed?.sessionDate
     ? parsed.sessionTime
       ? `${parsed.sessionDate}T${parsed.sessionTime}`
@@ -315,7 +394,20 @@ export function ImportSessionModal({
     layoutOptions[0] ??
     null;
 
-  const importDisabled = !emailContent.trim() || !(previewLaps?.length ?? 0);
+  const alphaSessionUrl = extractAlphaTimingSessionUrl(emailContent);
+  const localPreviewLaps =
+    localParsed && hasDriverRows(localParsed)
+      ? getSelectedDriverLaps(localParsed, selectedDriver)
+      : localParsed?.laps ?? [];
+  const hasInput = emailContent.trim().length > 0;
+  const isAlphaUrlInput = alphaSessionUrl != null;
+  const canProceedFromEmail =
+    hasInput &&
+    (isAlphaUrlInput ? true : localPreviewLaps.length > 0);
+  const importDisabled =
+    step === "email"
+      ? isImportingFromUrl || !canProceedFromEmail
+      : !(previewLaps?.length ?? 0);
   const weatherLoading = weatherStatus === "loading" || isFetchingWeather;
   const weatherUnavailableReason = !selectedTrackId.trim()
     ? "Select a track"
@@ -343,13 +435,83 @@ export function ImportSessionModal({
 
   const handleBack = () => {
     setStep("email");
+    setImportedParsed(null);
+    setImportError(null);
     setWeatherStatus("idle");
     setWeatherData({ temperature: null, conditions: null });
     weatherRequestId.current += 1;
   };
 
   const handleNext = () => {
-    if (importDisabled) return;
+    if (step !== "email") return;
+    if (!canProceedFromEmail) return;
+    setImportError(null);
+
+    if (isAlphaUrlInput) {
+      const source = alphaSessionUrl;
+      if (!source) {
+        setImportError("Unable to read a valid Alpha Timing session URL.");
+        return;
+      }
+      commitImportTrackSessionFromUrl({
+        variables: { input: { source } },
+        onCompleted: (response) => {
+          const payload = response.importTrackSessionFromUrl;
+          if (!payload) {
+            setImportError("No import data was returned for that URL.");
+            return;
+          }
+          if (payload.provider !== "alphatiming") {
+            setImportError("Unsupported provider returned from URL import.");
+            return;
+          }
+          const parsedFromUrl: ParsedAlphaTimingEmail = {
+            provider: "alphatiming",
+            sessionFormat:
+              payload.sessionFormat === "Practice" ||
+              payload.sessionFormat === "Qualifying" ||
+              payload.sessionFormat === "Race"
+                ? payload.sessionFormat
+                : null,
+            sessionDate: payload.sessionDate ?? null,
+            sessionTime: payload.sessionTime ?? null,
+            sessionFastestLapSeconds: payload.sessionFastestLapSeconds ?? null,
+            drivers:
+              payload.drivers?.map((driver) => ({
+                name: driver.name,
+                classification: driver.classification ?? null,
+                kartNumber: driver.kartNumber ?? null,
+                laps:
+                  driver.laps?.map((lap) => ({
+                    lapNumber: lap.lapNumber,
+                    timeSeconds: lap.timeSeconds,
+                    displayTime: lap.displayTime,
+                  })) ?? [],
+              })) ?? [],
+          };
+          if (parsedFromUrl.drivers.length === 0) {
+            setImportError("No driver data was found at that Alpha Timing URL.");
+            return;
+          }
+
+          setImportedParsed(parsedFromUrl);
+          setStep("preview");
+        },
+        onError: (error) => {
+          setImportError(error.message || "Unable to import from URL.");
+        },
+      });
+      return;
+    }
+
+    if (!localParsed || localPreviewLaps.length === 0) {
+      setImportError(
+        "No importable data found. Paste a supported session email or a full Alpha Timing URL."
+      );
+      return;
+    }
+
+    setImportedParsed(null);
     setStep("preview");
   };
 
@@ -417,6 +579,11 @@ export function ImportSessionModal({
                 placeholder="Paste the raw email text here"
                 required
               />
+              {importError ? (
+                <p css={css`color: #b91c1c; margin-top: 8px;`}>
+                  {importError}
+                </p>
+              ) : null}
             </div>
           ) : (
             <div css={previewStyles}>
@@ -473,7 +640,7 @@ export function ImportSessionModal({
                       ? `${formatLapTimeSeconds(previewFastestLap)}s`
                       : "Not found"}
                   </div>
-                  {parsed.provider === "teamsport" ? (
+                  {hasDriverRows(parsed) ? (
                     <div css={selectStyles}>
                       <label htmlFor="session-import-driver">Choose your driver</label>
                       <select

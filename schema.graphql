@@ -226,6 +226,36 @@ type FetchTrackSessionTemperaturePayload {
   conditions: String
 }
 
+input ImportTrackSessionFromUrlInput {
+  source: String!
+}
+
+type ImportedSessionLap {
+  lapNumber: Int!
+  timeSeconds: Float!
+  displayTime: String!
+}
+
+type ImportedSessionDriver {
+  name: String!
+  classification: Int
+  kartNumber: String
+  laps: [ImportedSessionLap!]!
+}
+
+type ImportTrackSessionFromUrlPayload {
+  provider: String!
+  sessionFormat: String
+  sessionDate: String
+  sessionTime: String
+  classification: Int
+  sessionFastestLapSeconds: Float
+  kartNumber: String
+  trackLayoutName: String
+  laps: [ImportedSessionLap!]!
+  drivers: [ImportedSessionDriver!]!
+}
+
 input RecordingSourceInput {
   fileName: String!
   sizeBytes: Float
@@ -357,6 +387,9 @@ type Mutation {
   fetchTrackSessionTemperature(
     input: FetchTrackSessionTemperatureInput!
   ): FetchTrackSessionTemperaturePayload!
+  importTrackSessionFromUrl(
+    input: ImportTrackSessionFromUrlInput!
+  ): ImportTrackSessionFromUrlPayload!
   deleteTrackSession(id: ID!): DeleteTrackSessionPayload!
   startTrackRecordingUpload(
     input: StartTrackRecordingUploadInput!

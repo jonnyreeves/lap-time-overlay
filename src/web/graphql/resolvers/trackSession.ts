@@ -21,6 +21,8 @@ import {
   rebuildMediaLibrarySessionProjection,
   removeMediaLibraryProjectionsForRecordings,
 } from "../../recordings/mediaLibraryProjection.js";
+import { importTrackSessionFromSource } from "../../sessionImport/service.js";
+import { SessionImportError } from "../../sessionImport/types.js";
 
 const DEBUG_UPLOAD_PROGRESS = process.env.DEBUG_UPLOAD_PROGRESS === "1";
 const LAP_TIME_EPSILON_S = 1e-6;
@@ -77,6 +79,12 @@ export type FetchTrackSessionTemperatureArgs = {
   input?: {
     trackId?: string;
     date?: string;
+  };
+};
+
+export type ImportTrackSessionFromUrlArgs = {
+  input?: {
+    source?: string;
   };
 };
 
@@ -884,6 +892,49 @@ export const trackSessionResolvers = {
       temperature: weather?.temperature ?? null,
       conditions: track.isIndoors ? "Dry" : weather?.conditions ?? null,
     };
+  },
+  importTrackSessionFromUrl: async (
+    args: ImportTrackSessionFromUrlArgs,
+    context: GraphQLContext
+  ) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+
+    const source = args.input?.source?.trim();
+    if (!source) {
+      throw new GraphQLError("source is required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    try {
+      const imported = await importTrackSessionFromSource(source);
+      return {
+        provider: imported.provider,
+        sessionFormat: imported.sessionFormat,
+        sessionDate: imported.sessionDate,
+        sessionTime: imported.sessionTime,
+        classification: imported.classification,
+        sessionFastestLapSeconds: imported.sessionFastestLapSeconds,
+        kartNumber: imported.kartNumber,
+        trackLayoutName: imported.trackLayoutName,
+        laps: imported.laps,
+        drivers: imported.drivers,
+      };
+    } catch (error) {
+      if (error instanceof SessionImportError) {
+        throw new GraphQLError(error.message, {
+          extensions: { code: "VALIDATION_FAILED" },
+        });
+      }
+      console.warn("Failed to import track session from URL", error);
+      throw new GraphQLError("Unable to import session from URL", {
+        extensions: { code: "INTERNAL_SERVER_ERROR" },
+      });
+    }
   },
   updateTrackSessionLaps: (args: UpdateTrackSessionLapsInputArgs, context: GraphQLContext) => {
     const { repositories } = context;

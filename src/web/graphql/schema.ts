@@ -30,6 +30,7 @@ export const rootValue = {
   updateTrackSession: trackSessionResolvers.updateTrackSession,
   updateTrackSessionLaps: trackSessionResolvers.updateTrackSessionLaps,
   fetchTrackSessionTemperature: trackSessionResolvers.fetchTrackSessionTemperature,
+  importTrackSessionFromUrl: trackSessionResolvers.importTrackSessionFromUrl,
   deleteTrackSession: trackSessionResolvers.deleteTrackSession,
   startTrackRecordingUpload: trackRecordingResolvers.startTrackRecordingUpload,
   markPrimaryTrackRecording: trackRecordingResolvers.markPrimaryTrackRecording,

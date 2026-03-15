@@ -5,6 +5,7 @@ import {
 } from "../../../../src/web/client/utils/guessTrackFromImport.js";
 
 const tracks = [
+  { id: "track:buckmore", name: "Buckmore Park Karting" },
   { id: "track:daytona", name: "Daytona Sandown Park" },
   { id: "track:teamsport", name: "TeamSport Rushmoor" },
 ];
@@ -33,6 +34,26 @@ describe("guessTrackIdFromImport", () => {
     };
     const otherTracks = [{ id: "track:ocean", name: "Ocean Circuit" }];
     expect(guessTrackIdFromImport(otherTracks, selection)).toBeNull();
+  });
+
+  it("matches Buckmore from Alpha Timing imports by provider hint", () => {
+    const selection = {
+      provider: "alphatiming" as const,
+      sourceText: "Session result exported from Alpha Timing.",
+    };
+    expect(guessTrackIdFromImport(tracks, selection)).toBe("track:buckmore");
+  });
+
+  it("does not match Buckmoor typo aliases in strict mode", () => {
+    const typoTracks = [
+      { id: "track:buckmoor", name: "Buckmoor Park" },
+      { id: "track:other", name: "Somewhere Else" },
+    ];
+    const selection = {
+      provider: "alphatiming" as const,
+      sourceText: "Session result exported from Alpha Timing.",
+    };
+    expect(guessTrackIdFromImport(typoTracks, selection)).toBeNull();
   });
 });
 

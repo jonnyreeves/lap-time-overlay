@@ -34,7 +34,24 @@ export type ParsedTeamsportEmail = {
   drivers: { name: string; laps: ParsedLap[]; classification: number | null }[];
 };
 
-export type ParsedSessionEmail = ParsedDaytonaEmail | ParsedTeamsportEmail;
+export type ParsedAlphaTimingEmail = {
+  provider: "alphatiming";
+  sessionFormat: SessionFormat | null;
+  sessionDate: string | null;
+  sessionTime: string | null;
+  sessionFastestLapSeconds: number | null;
+  drivers: {
+    name: string;
+    laps: ParsedLap[];
+    classification: number | null;
+    kartNumber: string | null;
+  }[];
+};
+
+export type ParsedSessionEmail =
+  | ParsedDaytonaEmail
+  | ParsedTeamsportEmail
+  | ParsedAlphaTimingEmail;
 
 export type SessionImportSelection = {
   provider: ParsedSessionEmail["provider"];

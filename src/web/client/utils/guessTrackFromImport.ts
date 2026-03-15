@@ -1,6 +1,13 @@
 import { type SessionImportSelection } from "./sessionImportTypes.js";
 
 const PROVIDER_TRACK_HINTS: Record<SessionImportSelection["provider"], string[]> = {
+  alphatiming: [
+    "buckmore",
+    "buckmoore",
+    "buckmore park",
+    "buckmoore park",
+    "alpha timing",
+  ],
   daytona: ["daytona"],
   teamsport: ["teamsport", "team sport"],
 };
