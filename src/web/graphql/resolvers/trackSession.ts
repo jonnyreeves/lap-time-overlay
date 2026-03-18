@@ -22,6 +22,7 @@ import {
 } from "../../shared/consistency.js";
 import {
   buildLapComparisons,
+  buildRivalPaceInsights,
   buildRivalTrend,
   buildSessionInsights,
   computeBestNAvg,
@@ -655,12 +656,14 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
       const sessionInsights = buildSessionInsights(lapComparisons);
       const trendPoints = buildComparableTrendPoints(session, rivalName, repositories);
       const trend = buildRivalTrend(trendPoints);
+      const paceInsights = buildRivalPaceInsights(selfLaps, rivalLaps, rivalName);
 
       return {
         rivalName,
         lapComparisons,
         sessionInsights,
         trend,
+        paceInsights,
       };
     },
     laps: (args: { first: number }) => {

@@ -629,6 +629,20 @@ enum RivalTrendDirection {
   INSUFFICIENT
 }
 
+enum RivalPaceVerdict {
+  RIVAL_ADVANTAGE
+  SELF_ADVANTAGE
+  NEUTRAL
+  INSUFFICIENT
+}
+
+enum RivalRobustnessVerdict {
+  SELF_MORE_ROBUST
+  RIVAL_MORE_ROBUST
+  SIMILAR
+  INSUFFICIENT
+}
+
 type RivalTrendPoint {
   sessionId: ID!
   date: String!
@@ -644,11 +658,55 @@ type RivalTrend {
   points: [RivalTrendPoint!]!
 }
 
+type RivalRollingWindow {
+  average: Float!
+  startLapNumber: Int!
+  endLapNumber: Int!
+}
+
+type RivalDriverPace {
+  validLapCount: Int!
+  bestLap: Float
+  fastest5Avg: Float
+  fastest10Avg: Float
+  bestRolling5: RivalRollingWindow
+  bestRolling10: RivalRollingWindow
+  overallMean: Float
+  overallMedian: Float
+  slowLapSpread: Float
+  quickWindowCount: Int!
+}
+
+type RivalPaceDeltas {
+  bestLap: Float
+  fastest5Avg: Float
+  fastest10Avg: Float
+  bestRolling5Avg: Float
+  bestRolling10Avg: Float
+  overallMean: Float
+  overallMedian: Float
+  slowLapSpread: Float
+}
+
+type RivalPaceInsights {
+  self: RivalDriverPace!
+  rival: RivalDriverPace!
+  deltas: RivalPaceDeltas!
+  quickWindowCutoff: Float
+  quickWindowSelfCount: Int!
+  quickWindowRivalCount: Int!
+  ceilingVerdict: RivalPaceVerdict!
+  sustainedVerdict: RivalPaceVerdict!
+  robustnessVerdict: RivalRobustnessVerdict!
+  headline: String!
+}
+
 type RivalAnalysis {
   rivalName: String!
   lapComparisons: [RivalLapComparison!]!
   sessionInsights: RivalSessionInsights!
   trend: RivalTrend!
+  paceInsights: RivalPaceInsights!
 }
 
 type RivalSummary {

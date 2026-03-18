@@ -158,6 +158,65 @@ const SessionQuery = graphql`
             delta
           }
         }
+        paceInsights {
+          self {
+            validLapCount
+            bestLap
+            fastest5Avg
+            fastest10Avg
+            bestRolling5 {
+              average
+              startLapNumber
+              endLapNumber
+            }
+            bestRolling10 {
+              average
+              startLapNumber
+              endLapNumber
+            }
+            overallMean
+            overallMedian
+            slowLapSpread
+            quickWindowCount
+          }
+          rival {
+            validLapCount
+            bestLap
+            fastest5Avg
+            fastest10Avg
+            bestRolling5 {
+              average
+              startLapNumber
+              endLapNumber
+            }
+            bestRolling10 {
+              average
+              startLapNumber
+              endLapNumber
+            }
+            overallMean
+            overallMedian
+            slowLapSpread
+            quickWindowCount
+          }
+          deltas {
+            bestLap
+            fastest5Avg
+            fastest10Avg
+            bestRolling5Avg
+            bestRolling10Avg
+            overallMean
+            overallMedian
+            slowLapSpread
+          }
+          quickWindowCutoff
+          quickWindowSelfCount
+          quickWindowRivalCount
+          ceilingVerdict
+          sustainedVerdict
+          robustnessVerdict
+          headline
+        }
       }
     }
     tracks {

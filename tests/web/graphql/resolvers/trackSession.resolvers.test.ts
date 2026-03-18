@@ -247,6 +247,9 @@ describe("trackSession resolvers", () => {
     expect(analysis?.lapComparisons).toHaveLength(1);
     expect(analysis?.sessionInsights.slowerLapCount).toBe(1);
     expect(analysis?.trend.sampleCount).toBe(3);
+    expect(analysis?.paceInsights).toBeTruthy();
+    expect(analysis?.paceInsights.quickWindowCutoff).not.toBeNull();
+    expect(analysis?.paceInsights.headline.length).toBeGreaterThan(0);
   });
 
   it("surfaces upload progress for track recordings", async () => {

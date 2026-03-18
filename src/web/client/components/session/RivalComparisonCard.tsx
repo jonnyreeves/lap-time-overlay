@@ -1,43 +1,11 @@
 import { css } from "@emotion/react";
 import { format } from "date-fns";
-import { formatLapTimeSeconds } from "../../utils/lapTime.js";
+import type { viewSessionQuery$data } from "../../__generated__/viewSessionQuery.graphql.js";
 import { Card } from "../Card.js";
+import { RivalPaceDecomposition } from "./RivalPaceDecomposition.js";
 
-type RivalLapComparison = {
-  lapNumber: number;
-  selfLap: number;
-  rivalLap: number;
-  delta: number;
-  cumulativeDelta: number;
-  outcome: "FASTER" | "SLOWER" | "TIE" | "%future added value";
-};
-
-type RivalAnalysis = {
-  rivalName: string;
-  lapComparisons: ReadonlyArray<RivalLapComparison>;
-  sessionInsights: {
-    fasterLapCount: number;
-    slowerLapCount: number;
-    tieCount: number;
-    longestGainStreak: number;
-    longestLossStreak: number;
-    medianDelta: number | null | undefined;
-    consistencyGap: number | null | undefined;
-    insightLabel:
-      | "CONSISTENTLY_SLOWER"
-      | "MIXED_WITH_FASTER_PHASES"
-      | "MIXED_OR_NEUTRAL"
-      | "%future added value";
-  };
-  trend: {
-    direction: "CLOSING" | "WIDENING" | "FLAT" | "INSUFFICIENT" | "%future added value";
-    sampleCount: number;
-    slope: number | null | undefined;
-    firstDelta: number | null | undefined;
-    latestDelta: number | null | undefined;
-    points: ReadonlyArray<{ sessionId: string; date: string; delta: number }>;
-  };
-};
+type RivalAnalysis = NonNullable<NonNullable<viewSessionQuery$data["trackSession"]>["rivalAnalysis"]>;
+type RivalLapComparison = RivalAnalysis["lapComparisons"][number];
 
 type Props = {
   rivalParticipants: Array<{ name: string; classification: number | null | undefined }>;
@@ -171,116 +139,6 @@ function formatDelta(delta: number | null | undefined): string {
   return `${sign}${delta.toFixed(3)}s`;
 }
 
-type OutcomeRun = {
-  startLap: number;
-  endLap: number;
-  lapCount: number;
-  totalDelta: number;
-  averageDelta: number;
-};
-
-function lapRangeLabel(run: OutcomeRun): string {
-  if (run.startLap === run.endLap) return `lap ${run.startLap}`;
-  return `laps ${run.startLap}-${run.endLap}`;
-}
-
-function buildOutcomeRuns(
-  comparisons: ReadonlyArray<RivalLapComparison>,
-  outcome: "FASTER" | "SLOWER"
-): OutcomeRun[] {
-  const runs: OutcomeRun[] = [];
-  let current: { startLap: number; endLap: number; lapCount: number; totalDelta: number } | null = null;
-
-  for (const comparison of comparisons) {
-    if (comparison.outcome !== outcome) {
-      if (current) {
-        runs.push({
-          ...current,
-          averageDelta: current.totalDelta / current.lapCount,
-        });
-        current = null;
-      }
-      continue;
-    }
-    if (!current) {
-      current = {
-        startLap: comparison.lapNumber,
-        endLap: comparison.lapNumber,
-        lapCount: 1,
-        totalDelta: comparison.delta,
-      };
-      continue;
-    }
-    current = {
-      startLap: current.startLap,
-      endLap: comparison.lapNumber,
-      lapCount: current.lapCount + 1,
-      totalDelta: current.totalDelta + comparison.delta,
-    };
-  }
-
-  if (current) {
-    runs.push({
-      ...current,
-      averageDelta: current.totalDelta / current.lapCount,
-    });
-  }
-
-  return runs;
-}
-
-function strongestRun(
-  comparisons: ReadonlyArray<RivalLapComparison>,
-  outcome: "FASTER" | "SLOWER"
-): OutcomeRun | null {
-  const runs = buildOutcomeRuns(comparisons, outcome);
-  if (!runs.length) return null;
-  return runs.reduce((best, run) => {
-    if (!best) return run;
-    if (outcome === "FASTER") {
-      if (run.totalDelta < best.totalDelta) return run;
-      if (run.totalDelta === best.totalDelta && run.lapCount > best.lapCount) return run;
-      return best;
-    }
-    if (run.totalDelta > best.totalDelta) return run;
-    if (run.totalDelta === best.totalDelta && run.lapCount > best.lapCount) return run;
-    return best;
-  }, runs[0] ?? null);
-}
-
-function describeRun(run: OutcomeRun | null, direction: "gain" | "loss"): string {
-  if (!run) {
-    return direction === "gain" ? "No sustained gain phase detected." : "No sustained loss phase detected.";
-  }
-  const total = Math.abs(run.totalDelta).toFixed(3);
-  const perLap = Math.abs(run.averageDelta).toFixed(3);
-  const paceWord = direction === "gain" ? "faster" : "slower";
-  return `${lapRangeLabel(run)} (${total}s total, ${perLap}s/lap ${paceWord})`;
-}
-
-function insightCopy(analysis: RivalAnalysis): string {
-  const { sessionInsights, lapComparisons } = analysis;
-  const comparableLaps = lapComparisons.length;
-  if (comparableLaps === 0) {
-    return "No comparable laps available for coaching insights.";
-  }
-
-  const fasterPct = Math.round((sessionInsights.fasterLapCount / comparableLaps) * 100);
-  const slowerPct = Math.round((sessionInsights.slowerLapCount / comparableLaps) * 100);
-  const gainRun = strongestRun(lapComparisons, "FASTER");
-  const lossRun = strongestRun(lapComparisons, "SLOWER");
-  const gainSummary = describeRun(gainRun, "gain");
-  const lossSummary = describeRun(lossRun, "loss");
-
-  if (sessionInsights.insightLabel === "CONSISTENTLY_SLOWER") {
-    return `You were slower on ${sessionInsights.slowerLapCount}/${comparableLaps} laps (${slowerPct}%), median ${formatDelta(sessionInsights.medianDelta)}. Biggest losses: ${lossSummary}.`;
-  }
-  if (sessionInsights.insightLabel === "MIXED_WITH_FASTER_PHASES") {
-    return `You were faster on ${sessionInsights.fasterLapCount}/${comparableLaps} laps (${fasterPct}%). Best gain phase: ${gainSummary}. Biggest losses: ${lossSummary}.`;
-  }
-  return `Pace was mixed: ${sessionInsights.fasterLapCount} faster vs ${sessionInsights.slowerLapCount} slower laps (median ${formatDelta(sessionInsights.medianDelta)}). Best gain phase: ${gainSummary}.`;
-}
-
 function trendLabel(direction: RivalAnalysis["trend"]["direction"]): string {
   if (direction === "CLOSING") return "Closing the gap";
   if (direction === "WIDENING") return "Gap widening";
@@ -291,6 +149,13 @@ function trendLabel(direction: RivalAnalysis["trend"]["direction"]): string {
 function formatClassification(classification: number | null | undefined): string {
   if (classification == null || Number.isNaN(classification)) return "—";
   return `P${classification}`;
+}
+
+function formatHeadline(headline: string | null | undefined): string {
+  if (!headline) return "No pace insight available for this rival.";
+  const trimmed = headline.trim();
+  if (trimmed.length <= 90) return trimmed;
+  return `${trimmed.slice(0, 87).trimEnd()}...`;
 }
 
 const consistencyGapTooltip =
@@ -304,6 +169,7 @@ export function RivalComparisonCard({
 }: Props) {
   const selectedRival = rivalParticipants.find((participant) => participant.name === selectedRivalName);
   const comparisons = analysis?.lapComparisons ?? [];
+  const paceInsights = analysis?.paceInsights;
   const width = 720;
   const height = 240;
   const xPad = 56;
@@ -367,7 +233,8 @@ export function RivalComparisonCard({
 
         {analysis ? (
           <>
-            <p css={summaryStyles}>{insightCopy(analysis)}</p>
+            <p css={summaryStyles}>{formatHeadline(paceInsights?.headline)}</p>
+            <RivalPaceDecomposition paceInsights={paceInsights} />
             <div css={insightGridStyles}>
               <div css={insightTileStyles}>
                 <p className="label">Faster / Slower / Tie</p>

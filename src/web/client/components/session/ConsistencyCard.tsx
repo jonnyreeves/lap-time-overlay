@@ -110,6 +110,29 @@ const metaTileStyles = css`
   }
 `;
 
+const coachingCalloutStyles = css`
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #c7d2fe;
+  background: #eef2ff;
+  color: #1e293b;
+
+  .title {
+    margin: 0;
+    font-size: 0.84rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #4f46e5;
+    font-weight: 800;
+  }
+
+  .message {
+    margin: 4px 0 0;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+`;
+
 const sparklineCardStyles = css`
   padding: 12px;
   border-radius: 12px;
@@ -248,6 +271,46 @@ function median(values: number[]): number | null {
     return (sorted[mid - 1] + sorted[mid]) / 2;
   }
   return sorted[mid];
+}
+
+function formatPercent(value: number | null | undefined): string {
+  if (value == null || Number.isNaN(value)) return "—";
+  return `${value.toFixed(1)}%`;
+}
+
+function formatSeconds(value: number | null | undefined): string {
+  if (value == null || Number.isNaN(value)) return "—";
+  return `${value.toFixed(3)}s`;
+}
+
+function coachingMessage({
+  stdDev,
+  cvPct,
+  cleanRatePct,
+  meanMedianGap,
+}: {
+  stdDev: number | null;
+  cvPct: number | null;
+  cleanRatePct: number | null;
+  meanMedianGap: number | null;
+}): string {
+  if (stdDev == null || cvPct == null) {
+    return "Add more clean laps to unlock consistency coaching.";
+  }
+
+  if (stdDev <= 0.2 && cvPct <= 3 && (cleanRatePct ?? 0) >= 80) {
+    return "Excellent repeatability. Keep this rhythm and convert more laps into your target pace window.";
+  }
+
+  if (stdDev <= 0.35 && cvPct <= 5) {
+    return "Solid baseline consistency. Focus on reducing occasional slow laps to tighten lap-to-lap spread.";
+  }
+
+  if ((meanMedianGap ?? 0) > 0.12) {
+    return "Slow-lap outliers are hurting consistency. Prioritise clean exits and avoiding traffic-compromised laps.";
+  }
+
+  return "Consistency is the main limiter. Prioritise repeatable braking points and smoother corner exits.";
 }
 
 function Sparkline({
@@ -571,6 +634,7 @@ export function ConsistencyCard({
   const outlapCount = stats.excluded.filter((lap) => lap.reason === "out-lap").length;
   const outlierCount = stats.excluded.filter((lap) => lap.reason === "outlier").length;
   const invalidCount = stats.excluded.filter((lap) => lap.reason === "invalid").length;
+  const totalCount = cleanCount + excludedCount;
 
   if (laps.length === 0) {
     return (
@@ -580,16 +644,11 @@ export function ConsistencyCard({
     );
   }
 
-  const windowLabel =
-    stats.windowPct && stats.median
-      ? `±${(stats.windowPct * 100).toFixed(1)}% of median (${formatLapTimeSeconds(
-          stats.median
-        )}s)`
-      : "Awaiting more laps";
-  const spreadLabel =
-    stats.stdDev != null
-      ? `±${stats.stdDev.toFixed(3)}s σ • CV ${stats.cvPct?.toFixed(1) ?? "—"}%`
-      : "Need more clean laps";
+  const cleanRatePct = totalCount > 0 ? (cleanCount / totalCount) * 100 : null;
+  const meanMedianGap =
+    stats.mean != null && stats.median != null ? stats.mean - stats.median : null;
+  const sigmaTargetHit = stats.stdDev != null && stats.stdDev <= 0.2;
+  const cvTargetHit = stats.cvPct != null && stats.cvPct <= 3;
   const cleanLabel =
     cleanCount > 0
       ? `${cleanCount} clean lap${cleanCount === 1 ? "" : "s"}`
@@ -602,10 +661,20 @@ export function ConsistencyCard({
   const excludedLabel = exclusionParts.length
     ? `${excludedCount} excluded (${exclusionParts.join(", ")})`
     : "No exclusions";
+  const coaching = coachingMessage({
+    stdDev: stats.stdDev,
+    cvPct: stats.cvPct,
+    cleanRatePct,
+    meanMedianGap,
+  });
 
   return (
     <Card title="Consistency">
       <div css={cardGridStyles}>
+        <div css={coachingCalloutStyles}>
+          <p className="title">Coaching Focus</p>
+          <p className="message">{coaching}</p>
+        </div>
         <div css={summaryStyles}>
           <div css={scoreBlockStyles}>
             <p className="score">{stats.score != null ? stats.score : "—"}</p>
@@ -613,14 +682,36 @@ export function ConsistencyCard({
           </div>
           <div css={metaGridStyles}>
             <div css={metaTileStyles}>
-              <p className="label">Window</p>
-              <p className="value">{windowLabel}</p>
-            </div>
-            <div css={metaTileStyles}>
-              <p className="label">Spread</p>
-              <p className="value">{spreadLabel}</p>
+              <p className="label">Clean Rate</p>
+              <p className="value">{formatPercent(cleanRatePct)}</p>
               <p className="hint">
                 {cleanLabel} • {excludedLabel}
+              </p>
+            </div>
+            <div css={metaTileStyles}>
+              <p className="label">Sigma (Spread)</p>
+              <p className="value">{formatSeconds(stats.stdDev)}</p>
+              <p className="hint">Target ≤0.200s • {sigmaTargetHit ? "On target" : "Needs work"}</p>
+            </div>
+            <div css={metaTileStyles}>
+              <p
+                className="label"
+                title="Coefficient of Variation: standard deviation divided by mean lap time. Lower CV means more lap-to-lap consistency."
+              >
+                CV
+              </p>
+              <p className="value">{formatPercent(stats.cvPct)}</p>
+              <p className="hint">Target ≤3.0% • {cvTargetHit ? "On target" : "Needs work"}</p>
+            </div>
+            <div css={metaTileStyles}>
+              <p className="label">Drift (Mean-Median)</p>
+              <p className="value">{formatSeconds(meanMedianGap)}</p>
+              <p className="hint">
+                {stats.windowPct && stats.median
+                  ? `Window ±${(stats.windowPct * 100).toFixed(1)}% of ${formatLapTimeSeconds(
+                      stats.median
+                    )}s`
+                  : "Awaiting more laps"}
               </p>
             </div>
           </div>
