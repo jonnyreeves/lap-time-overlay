@@ -27,71 +27,115 @@ type ServerConsistency = {
   excludedLaps?: ReadonlyArray<{ lapNumber: number; reason: ServerExclusionReason }> | null;
 };
 
+type RollingWindow = {
+  average: number;
+  startLap: number;
+  endLap: number;
+};
+
 const cardGridStyles = css`
   display: grid;
-  gap: 12px;
+  gap: 14px;
 `;
 
 const summaryStyles = css`
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
 `;
 
 const scoreBlockStyles = css`
   display: grid;
-  gap: 6px;
-  min-width: 220px;
-
-  .label {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #475569;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin: 0;
-  }
-
-  .score {
-    font-size: 2.6rem;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    color: #0f172a;
-    margin: 0;
-  }
-
-  .pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    border-radius: 999px;
-    font-weight: 700;
-    background: #ecfeff;
-    color: #0f172a;
-    border: 1px solid #bae6fd;
-  }
-`;
-
-const metaGridStyles = css`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 10px;
-  width: 100%;
-`;
-
-const metaTileStyles = css`
-  padding: 10px 12px;
+  gap: 4px;
+  min-width: 0;
+  justify-items: start;
+  padding: 8px 10px;
   border-radius: 12px;
   border: 1px solid #e2e8f4;
   background: #f8fafc;
 
   .label {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #64748b;
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    margin: 0;
+  }
+
+  .score {
+    font-size: clamp(1.9rem, 3vw, 2.4rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #0f172a;
+    margin: 0;
+    line-height: 1;
+  }
+
+  .scoreRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    line-height: 1.1;
+    background: #ecfeff;
+    color: #0f172a;
+    border: 1px solid #bae6fd;
+    justify-self: start;
+  }
+
+  .rollingCallouts {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .callout {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+`;
+
+const metaGridStyles = css`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const metaTileStyles = css`
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f4;
+  background: #f8fafc;
+  min-height: 82px;
+
+  .label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
     color: #94a3b8;
     margin: 0 0 4px;
     font-weight: 800;
@@ -100,36 +144,17 @@ const metaTileStyles = css`
   .value {
     font-weight: 800;
     color: #0f172a;
+    font-size: clamp(1.45rem, 2.2vw, 2rem);
+    line-height: 1.05;
+    margin: 0;
   }
 
   .hint {
-    margin: 2px 0 0;
-    color: #475569;
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-`;
-
-const coachingCalloutStyles = css`
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid #c7d2fe;
-  background: #eef2ff;
-  color: #1e293b;
-
-  .title {
-    margin: 0;
-    font-size: 0.84rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: #4f46e5;
-    font-weight: 800;
-  }
-
-  .message {
     margin: 4px 0 0;
+    color: #475569;
+    font-size: 0.74rem;
     font-weight: 700;
-    line-height: 1.4;
+    line-height: 1.25;
   }
 `;
 
@@ -143,23 +168,24 @@ const sparklineCardStyles = css`
 `;
 
 const sparklineHeaderStyles = css`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 
   .title {
     font-weight: 700;
     letter-spacing: -0.01em;
     margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.2;
   }
 
   .legend {
     display: inline-flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 8px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 
     span {
       display: inline-flex;
@@ -283,34 +309,32 @@ function formatSeconds(value: number | null | undefined): string {
   return `${value.toFixed(3)}s`;
 }
 
-function coachingMessage({
-  stdDev,
-  cvPct,
-  cleanRatePct,
-  meanMedianGap,
-}: {
-  stdDev: number | null;
-  cvPct: number | null;
-  cleanRatePct: number | null;
-  meanMedianGap: number | null;
-}): string {
-  if (stdDev == null || cvPct == null) {
-    return "Add more clean laps to unlock consistency coaching.";
+function computeBestRollingWindow(laps: ConsistencyLap[], size: number): RollingWindow | null {
+  if (laps.length < size) return null;
+  const ordered = [...laps].sort((a, b) => a.lapNumber - b.lapNumber);
+  let best: RollingWindow | null = null;
+
+  for (let index = 0; index <= ordered.length - size; index += 1) {
+    const window = ordered.slice(index, index + size);
+    const total = window.reduce((sum, lap) => sum + lap.time, 0);
+    const average = total / size;
+    const candidate: RollingWindow = {
+      average,
+      startLap: window[0]?.lapNumber ?? 0,
+      endLap: window[window.length - 1]?.lapNumber ?? 0,
+    };
+    if (!best || candidate.average < best.average) {
+      best = candidate;
+    }
   }
 
-  if (stdDev <= 0.2 && cvPct <= 3 && (cleanRatePct ?? 0) >= 80) {
-    return "Excellent repeatability. Keep this rhythm and convert more laps into your target pace window.";
-  }
+  return best;
+}
 
-  if (stdDev <= 0.35 && cvPct <= 5) {
-    return "Solid baseline consistency. Focus on reducing occasional slow laps to tighten lap-to-lap spread.";
-  }
-
-  if ((meanMedianGap ?? 0) > 0.12) {
-    return "Slow-lap outliers are hurting consistency. Prioritise clean exits and avoiding traffic-compromised laps.";
-  }
-
-  return "Consistency is the main limiter. Prioritise repeatable braking points and smoother corner exits.";
+function formatRollingCallout(window: RollingWindow | null, size: number): string {
+  if (!window) return `R${size}: n/a`;
+  const range = window.startLap === window.endLap ? `L${window.startLap}` : `L${window.startLap}-${window.endLap}`;
+  return `R${size}: ${window.average.toFixed(3)}s (${range})`;
 }
 
 function Sparkline({
@@ -617,12 +641,14 @@ type Props = {
 type ConsistencyCardProps = Props & {
   consistency?: ServerConsistency | null;
   sessionFastestLap?: number | null;
+  sessionFormat?: string | null;
 };
 
 export function ConsistencyCard({
   laps,
   consistency,
   sessionFastestLap,
+  sessionFormat,
 }: ConsistencyCardProps) {
   const stats = useMemo(() => {
     const fromServer = hydrateConsistency(consistency, laps);
@@ -647,38 +673,38 @@ export function ConsistencyCard({
   const cleanRatePct = totalCount > 0 ? (cleanCount / totalCount) * 100 : null;
   const meanMedianGap =
     stats.mean != null && stats.median != null ? stats.mean - stats.median : null;
+  const rolling5 = computeBestRollingWindow(stats.usableLaps, 5);
+  const rolling10 = computeBestRollingWindow(stats.usableLaps, 10);
+  const isQualifyingSession = (sessionFormat ?? "").trim().toLowerCase() === "qualifying";
   const sigmaTargetHit = stats.stdDev != null && stats.stdDev <= 0.2;
   const cvTargetHit = stats.cvPct != null && stats.cvPct <= 3;
   const cleanLabel =
     cleanCount > 0
-      ? `${cleanCount} clean lap${cleanCount === 1 ? "" : "s"}`
+      ? `${cleanCount} clean`
       : "No clean laps yet";
   const exclusionParts = [
     outlapCount ? `${outlapCount} out lap` : null,
     outlierCount ? `${outlierCount} outlier${outlierCount === 1 ? "" : "s"}` : null,
     invalidCount ? `${invalidCount} invalid` : null,
   ].filter(Boolean);
-  const excludedLabel = exclusionParts.length
-    ? `${excludedCount} excluded (${exclusionParts.join(", ")})`
-    : "No exclusions";
-  const coaching = coachingMessage({
-    stdDev: stats.stdDev,
-    cvPct: stats.cvPct,
-    cleanRatePct,
-    meanMedianGap,
-  });
+  const excludedLabel = exclusionParts.length ? `${excludedCount} excl (${exclusionParts.join(", ")})` : "0 excl";
 
   return (
     <Card title="Consistency">
       <div css={cardGridStyles}>
-        <div css={coachingCalloutStyles}>
-          <p className="title">Coaching Focus</p>
-          <p className="message">{coaching}</p>
-        </div>
         <div css={summaryStyles}>
           <div css={scoreBlockStyles}>
-            <p className="score">{stats.score != null ? stats.score : "—"}</p>
-            <span className="pill">{stats.label}</span>
+            <p className="label">Consistency Score</p>
+            <div className="scoreRow">
+              <p className="score">{stats.score != null ? stats.score : "—"}</p>
+              <span className="pill">{stats.label}</span>
+            </div>
+            {!isQualifyingSession ? (
+              <div className="rollingCallouts">
+                <span className="callout">{formatRollingCallout(rolling5, 5)}</span>
+                <span className="callout">{formatRollingCallout(rolling10, 10)}</span>
+              </div>
+            ) : null}
           </div>
           <div css={metaGridStyles}>
             <div css={metaTileStyles}>

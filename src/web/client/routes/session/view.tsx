@@ -505,6 +505,7 @@ export default function ViewSessionRoute() {
           laps={lapsWithStart}
           consistency={sessionConsistency}
           sessionFastestLap={session.fastestLap}
+          sessionFormat={session.format}
         />
         {rivalCandidates.length ? (
           <RivalComparisonCard
