@@ -16,10 +16,11 @@ import type {
 import type { GraphQLContext } from "../context.js";
 import type { Repositories } from "../repositories.js";
 import {
-  computeConsistencyStats,
-  type ConsistencyStats,
-  type ExcludedReason,
-} from "../../shared/consistency.js";
+  computeSessionPerformance,
+  type ExcludedLapReason,
+  type SessionFormat,
+  type SessionPerformanceResult,
+} from "../../shared/sessionPerformance.js";
 import {
   buildLapComparisons,
   buildRivalPaceInsights,
@@ -482,24 +483,76 @@ function buildComparableTrendPoints(
   return points;
 }
 
+function normalizeSessionFormat(format: string): SessionFormat {
+  if (format === "Practice" || format === "Qualifying" || format === "Race") {
+    return format;
+  }
+  return "Practice";
+}
+
+function buildFieldFastestLaps(
+  sessionId: string,
+  repositories: Repositories
+): Array<{ driverName: string; classification: number | null; fastestLap: number | null }> {
+  const participants = repositories.trackSessionParticipants.findBySessionId(sessionId);
+  if (!participants.length) return [];
+
+  const participantIds = participants.map((participant) => participant.id);
+  const lapsByParticipantId = groupParticipantLapsById(
+    repositories.trackSessionParticipants.findLapsByParticipantIds(participantIds)
+  );
+
+  return participants
+    .filter((participant) => !participant.isSelf)
+    .map((participant) => {
+      const fastestLap = computeBestNAvg(
+        (lapsByParticipantId.get(participant.id) ?? []).map((lap) => ({
+          lapNumber: lap.lapNumber,
+          time: lap.time,
+        })),
+        1
+      );
+      return {
+        driverName: participant.name,
+        classification: participant.classification,
+        fastestLap,
+      };
+    })
+    .filter((participant) => participant.fastestLap != null);
+}
+
+export function computeSessionPerformanceForSession(
+  session: TrackSessionRecord,
+  repositories: Repositories
+): SessionPerformanceResult {
+  const selfLaps = repositories.laps.findBySessionId(session.id).map((lap) => ({
+    id: lap.id,
+    lapNumber: lap.lapNumber,
+    time: lap.time,
+  }));
+  return computeSessionPerformance({
+    format: normalizeSessionFormat(session.format),
+    selfLaps,
+    fieldFastestLaps: buildFieldFastestLaps(session.id, repositories),
+    sessionFastestLap: session.fastestLap,
+  });
+}
+
 export function toTrackSessionPayload(session: TrackSessionRecord, repositories: Repositories) {
   const loadLaps = () => repositories.laps.findBySessionId(session.id);
   const loadParticipants = () => repositories.trackSessionParticipants.findBySessionId(session.id);
   const cachedTrack = repositories.tracks.findById(session.trackId);
-  let cachedConsistency: ConsistencyStats | null = null;
+  let cachedSessionPerformance: SessionPerformanceResult | null = null;
   let cachedParticipants: TrackSessionParticipantRecord[] | null = null;
   let cachedParticipantLapsById: Map<string, TrackSessionParticipantLapRecord[]> | null = null;
   let personalBestIndex:
     | ReturnType<typeof buildPersonalBestIndexForUser>
     | null = null;
 
-  const getConsistency = () => {
-    if (cachedConsistency) return cachedConsistency;
-    const laps = loadLaps();
-    cachedConsistency = computeConsistencyStats(
-      laps.map((lap) => ({ id: lap.id, lapNumber: lap.lapNumber, time: lap.time }))
-    );
-    return cachedConsistency;
+  const getSessionPerformance = () => {
+    if (cachedSessionPerformance) return cachedSessionPerformance;
+    cachedSessionPerformance = computeSessionPerformanceForSession(session, repositories);
+    return cachedSessionPerformance;
   };
 
   const getPersonalBestIndex = () => {
@@ -526,29 +579,37 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
     return cachedParticipantLapsById;
   };
 
-  const toConsistencyPayload = () => {
-    const stats = getConsistency();
-    const reasonMap: Record<ExcludedReason, "INVALID" | "OUT_LAP" | "OUTLIER"> = {
+  const toSessionPerformancePayload = () => {
+    const performance = getSessionPerformance();
+    const reasonMap: Record<ExcludedLapReason, "INVALID" | "OUT_LAP" | "OUTLIER"> = {
       invalid: "INVALID",
       "out-lap": "OUT_LAP",
       outlier: "OUTLIER",
     };
     return {
-      score: stats.score,
-      label: stats.label,
-      mean: stats.mean,
-      stdDev: stats.stdDev,
-      cvPct: stats.cvPct,
-      median: stats.median,
-      windowPct: stats.windowPct,
-      cleanLapCount: stats.usableLaps.length,
-      excludedLapCount: stats.excluded.length,
-      totalValidLapCount: stats.totalValid,
-      usableLapNumbers: stats.usableLaps.map((lap) => lap.lapNumber),
-      excludedLaps: stats.excluded.map((lap) => ({
+      format: performance.format,
+      score: performance.score,
+      label: performance.label,
+      headline: performance.headline,
+      cleanLapCount: performance.cleanLapCount,
+      excludedLapCount: performance.excludedLapCount,
+      cleanLapNumbers: performance.cleanLapNumbers,
+      excludedLaps: performance.excludedLaps.map((lap) => ({
         lapNumber: lap.lapNumber,
         reason: reasonMap[lap.reason],
       })),
+      scoreComponents: performance.scoreComponents,
+      representativePace: performance.representativePace,
+      thresholdLapTime: performance.thresholdLapTime,
+      highlightLapNumbers: performance.highlightLapNumbers,
+      qualifyingKpis:
+        performance.format === "Qualifying"
+          ? performance.kpis
+          : null,
+      practiceRaceKpis:
+        performance.format === "Practice" || performance.format === "Race"
+          ? performance.kpis
+          : null,
     };
   };
   const normalizedConditions = cachedTrack?.isIndoors ? "Dry" : session.conditions;
@@ -610,8 +671,8 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
           };
         }
       : null,
-    consistencyScore: () => getConsistency().score,
-    consistency: toConsistencyPayload,
+    sessionPerformanceScore: () => getSessionPerformance().score,
+    sessionPerformance: toSessionPerformancePayload,
     notes: session.notes,
     createdAt: new Date(session.createdAt).toISOString(),
     updatedAt: new Date(session.updatedAt).toISOString(),

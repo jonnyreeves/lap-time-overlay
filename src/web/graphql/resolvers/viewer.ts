@@ -1,9 +1,12 @@
 import { GraphQLError } from "graphql";
-import { computeConsistencyStats } from "../../shared/consistency.js";
 import { buildRivalTrend, computeBestNAvg } from "../../shared/rivalAnalysis.js";
 import { toUserPayload } from "./auth.js";
 import { toTrackPayload } from "./track.js";
-import { findTrackSessionsForUser, toTrackSessionPayload } from "./trackSession.js";
+import {
+  computeSessionPerformanceForSession,
+  findTrackSessionsForUser,
+  toTrackSessionPayload,
+} from "./trackSession.js";
 import type { GraphQLContext } from "../context.js";
 
 function encodeCursor(id: string): string {
@@ -39,8 +42,8 @@ type TrackSessionSort =
   | "DATE_DESC"
   | "FASTEST_LAP_ASC"
   | "FASTEST_LAP_DESC"
-  | "CONSISTENCY_ASC"
-  | "CONSISTENCY_DESC";
+  | "PERFORMANCE_ASC"
+  | "PERFORMANCE_DESC";
 
 function normalizeConditionsFilter(conditions?: string | null): string | undefined {
   if (!conditions) return undefined;
@@ -71,13 +74,13 @@ function normalizeSort(sort?: TrackSessionSort | null): TrackSessionSort {
     sort === "DATE_DESC" ||
     sort === "FASTEST_LAP_ASC" ||
     sort === "FASTEST_LAP_DESC" ||
-    sort === "CONSISTENCY_ASC" ||
-    sort === "CONSISTENCY_DESC"
+    sort === "PERFORMANCE_ASC" ||
+    sort === "PERFORMANCE_DESC"
   ) {
     return sort;
   }
   throw new GraphQLError(
-    "sort must be DATE_ASC, DATE_DESC, FASTEST_LAP_ASC, FASTEST_LAP_DESC, CONSISTENCY_ASC, or CONSISTENCY_DESC",
+    "sort must be DATE_ASC, DATE_DESC, FASTEST_LAP_ASC, FASTEST_LAP_DESC, PERFORMANCE_ASC, or PERFORMANCE_DESC",
     {
       extensions: { code: "VALIDATION_FAILED" },
     }
@@ -117,17 +120,15 @@ function sortSessions(
     return fastest;
   };
 
-  const consistencyScoreBySession = new Map<string, number | null>();
-  const getConsistencyScore = (sessionId: string): number | null => {
-    if (consistencyScoreBySession.has(sessionId)) {
-      return consistencyScoreBySession.get(sessionId) ?? null;
+  const performanceScoreBySession = new Map<string, number | null>();
+  const getPerformanceScore = (sessionId: string): number | null => {
+    if (performanceScoreBySession.has(sessionId)) {
+      return performanceScoreBySession.get(sessionId) ?? null;
     }
-    const laps = repositories.laps.findBySessionId(sessionId);
-    const stats = computeConsistencyStats(
-      laps.map((lap) => ({ id: lap.id, lapNumber: lap.lapNumber, time: lap.time }))
-    );
-    const score = stats.score ?? null;
-    consistencyScoreBySession.set(sessionId, score);
+    const session = sessionById.get(sessionId);
+    if (!session) return null;
+    const score = computeSessionPerformanceForSession(session, repositories).score ?? null;
+    performanceScoreBySession.set(sessionId, score);
     return score;
   };
 
@@ -143,15 +144,15 @@ function sortSessions(
     });
   }
 
-  const isConsistencyAscending = sort === "CONSISTENCY_ASC";
-  if (sort === "CONSISTENCY_ASC" || sort === "CONSISTENCY_DESC") {
+  const isPerformanceAscending = sort === "PERFORMANCE_ASC";
+  if (sort === "PERFORMANCE_ASC" || sort === "PERFORMANCE_DESC") {
     return [...sessions].sort((a, b) => {
-      const aScore = getConsistencyScore(a.id);
-      const bScore = getConsistencyScore(b.id);
+      const aScore = getPerformanceScore(a.id);
+      const bScore = getPerformanceScore(b.id);
       if (aScore == null && bScore == null) return 0;
       if (aScore == null) return 1;
       if (bScore == null) return -1;
-      return isConsistencyAscending ? aScore - bScore : bScore - aScore;
+      return isPerformanceAscending ? aScore - bScore : bScore - aScore;
     });
   }
 

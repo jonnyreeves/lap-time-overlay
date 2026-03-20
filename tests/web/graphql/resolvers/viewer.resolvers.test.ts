@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockGraphQLContext } from "../context.mock.js";
 import { rootValue } from "../../../../src/web/graphql/schema.js";
-import { computeConsistencyStats } from "../../../../src/web/shared/consistency.js";
+import {
+  computeSessionPerformance,
+  type SessionFormat,
+} from "../../../../src/web/shared/sessionPerformance.js";
 
 const user = { id: "user-1", username: "sam", createdAt: 1700000000000, isAdmin: true };
 
@@ -183,37 +186,103 @@ describe("viewer resolver", () => {
     });
     expect(byFastestLapDesc?.edges.map((edge) => edge.node.id)).toEqual(["s2", "s1", "s3"]);
 
-    const byConsistencyDesc = viewer?.recentTrackSessions({
-      first: 5,
-      sort: "CONSISTENCY_DESC",
-    });
-    expect(byConsistencyDesc?.edges.map((edge) => edge.node.id)).toEqual(["s3", "s1", "s2"]);
+    const expectedByPerformanceDesc = [...mockSessions]
+      .sort((left, right) => {
+        const leftScore =
+          computeSessionPerformance({
+            format: left.format as SessionFormat,
+            selfLaps: (lapsBySession[left.id] ?? []).map((lap, index) => ({
+              id: lap.id,
+              lapNumber: index + 1,
+              time: lap.time,
+            })),
+            fieldFastestLaps: [],
+            sessionFastestLap: left.fastestLap,
+          }).score ?? -1;
+        const rightScore =
+          computeSessionPerformance({
+            format: right.format as SessionFormat,
+            selfLaps: (lapsBySession[right.id] ?? []).map((lap, index) => ({
+              id: lap.id,
+              lapNumber: index + 1,
+              time: lap.time,
+            })),
+            fieldFastestLaps: [],
+            sessionFastestLap: right.fastestLap,
+          }).score ?? -1;
+        return rightScore - leftScore;
+      })
+      .map((session) => session.id);
 
-    const byConsistencyAsc = viewer?.recentTrackSessions({
+    const expectedByPerformanceAsc = [...mockSessions]
+      .sort((left, right) => {
+        const leftScore =
+          computeSessionPerformance({
+            format: left.format as SessionFormat,
+            selfLaps: (lapsBySession[left.id] ?? []).map((lap, index) => ({
+              id: lap.id,
+              lapNumber: index + 1,
+              time: lap.time,
+            })),
+            fieldFastestLaps: [],
+            sessionFastestLap: left.fastestLap,
+          }).score ?? Number.POSITIVE_INFINITY;
+        const rightScore =
+          computeSessionPerformance({
+            format: right.format as SessionFormat,
+            selfLaps: (lapsBySession[right.id] ?? []).map((lap, index) => ({
+              id: lap.id,
+              lapNumber: index + 1,
+              time: lap.time,
+            })),
+            fieldFastestLaps: [],
+            sessionFastestLap: right.fastestLap,
+          }).score ?? Number.POSITIVE_INFINITY;
+        return leftScore - rightScore;
+      })
+      .map((session) => session.id);
+
+    const byPerformanceDesc = viewer?.recentTrackSessions({
       first: 5,
-      sort: "CONSISTENCY_ASC",
+      sort: "PERFORMANCE_DESC",
     });
-    expect(byConsistencyAsc?.edges.map((edge) => edge.node.id)).toEqual(["s2", "s1", "s3"]);
+    expect(byPerformanceDesc?.edges.map((edge) => edge.node.id)).toEqual(expectedByPerformanceDesc);
+
+    const byPerformanceAsc = viewer?.recentTrackSessions({
+      first: 5,
+      sort: "PERFORMANCE_ASC",
+    });
+    expect(byPerformanceAsc?.edges.map((edge) => edge.node.id)).toEqual(expectedByPerformanceAsc);
   });
 
-  it("returns consistency score and breakdown for recent sessions", () => {
+  it("returns session performance score and breakdown for recent sessions", () => {
     const viewer = rootValue.viewer({}, context as never);
     const sessions = viewer?.recentTrackSessions({ first: 1 });
     const node = sessions?.edges[0]?.node;
-    const stats = computeConsistencyStats(
-      (lapsBySession.s3 ?? []).map((lap, index) => ({
+    const performance = computeSessionPerformance({
+      format: "Practice",
+      selfLaps: (lapsBySession.s3 ?? []).map((lap, index) => ({
         id: lap.id,
         lapNumber: index + 1,
         time: lap.time,
-      }))
-    );
+      })),
+      fieldFastestLaps: [],
+      sessionFastestLap: null,
+    });
 
-    const score = typeof node?.consistencyScore === "function" ? node.consistencyScore() : node?.consistencyScore;
-    expect(score).toBe(stats.score);
-    const consistency = typeof node?.consistency === "function" ? node.consistency() : node?.consistency;
-    expect(consistency).toMatchObject({
-      score: stats.score,
-      usableLapNumbers: stats.usableLaps.map((lap) => lap.lapNumber),
+    const score =
+      typeof node?.sessionPerformanceScore === "function"
+        ? node.sessionPerformanceScore()
+        : node?.sessionPerformanceScore;
+    expect(score).toBe(performance.score);
+    const sessionPerformance =
+      typeof node?.sessionPerformance === "function"
+        ? node.sessionPerformance()
+        : node?.sessionPerformance;
+    expect(sessionPerformance).toMatchObject({
+      format: performance.format,
+      score: performance.score,
+      cleanLapNumbers: performance.cleanLapNumbers,
     });
   });
 
@@ -229,7 +298,7 @@ describe("viewer resolver", () => {
     expect(() =>
       viewer?.recentTrackSessions({ first: 5, sort: "FASTEST" as never })
     ).toThrowError(
-      "sort must be DATE_ASC, DATE_DESC, FASTEST_LAP_ASC, FASTEST_LAP_DESC, CONSISTENCY_ASC, or CONSISTENCY_DESC"
+      "sort must be DATE_ASC, DATE_DESC, FASTEST_LAP_ASC, FASTEST_LAP_DESC, PERFORMANCE_ASC, or PERFORMANCE_DESC"
     );
   });
 

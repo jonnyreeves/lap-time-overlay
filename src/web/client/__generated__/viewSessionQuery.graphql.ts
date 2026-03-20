@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<2661bfe46db5903cb6729cb6f39ac71b>>
+ * @generated SignedSource<<625391ecc2baea306a5e9b69f75a3487>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,13 +9,13 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type ConsistencyExclusionReason = "INVALID" | "OUTLIER" | "OUT_LAP" | "%future added value";
 export type RecordingUploadStatus = "FAILED" | "PENDING" | "UPLOADED" | "UPLOADING" | "%future added value";
 export type RivalInsightLabel = "CONSISTENTLY_SLOWER" | "MIXED_OR_NEUTRAL" | "MIXED_WITH_FASTER_PHASES" | "%future added value";
 export type RivalLapOutcome = "FASTER" | "SLOWER" | "TIE" | "%future added value";
 export type RivalPaceVerdict = "INSUFFICIENT" | "NEUTRAL" | "RIVAL_ADVANTAGE" | "SELF_ADVANTAGE" | "%future added value";
 export type RivalRobustnessVerdict = "INSUFFICIENT" | "RIVAL_MORE_ROBUST" | "SELF_MORE_ROBUST" | "SIMILAR" | "%future added value";
 export type RivalTrendDirection = "CLOSING" | "FLAT" | "INSUFFICIENT" | "WIDENING" | "%future added value";
+export type SessionPerformanceExclusionReason = "INVALID" | "OUTLIER" | "OUT_LAP" | "%future added value";
 export type TrackRecordingStatus = "COMBINING" | "FAILED" | "PENDING_UPLOAD" | "READY" | "UPLOADING" | "%future added value";
 export type viewSessionQuery$variables = {
   id: string;
@@ -25,24 +25,6 @@ export type viewSessionQuery$data = {
   readonly trackSession: {
     readonly classification: number;
     readonly conditions: string;
-    readonly consistency: {
-      readonly cleanLapCount: number;
-      readonly cvPct: number | null | undefined;
-      readonly excludedLapCount: number;
-      readonly excludedLaps: ReadonlyArray<{
-        readonly lapNumber: number;
-        readonly reason: ConsistencyExclusionReason;
-      }>;
-      readonly label: string;
-      readonly mean: number | null | undefined;
-      readonly median: number | null | undefined;
-      readonly score: number | null | undefined;
-      readonly stdDev: number | null | undefined;
-      readonly totalValidLapCount: number;
-      readonly usableLapNumbers: ReadonlyArray<number>;
-      readonly windowPct: number | null | undefined;
-    };
-    readonly consistencyScore: number | null | undefined;
     readonly createdAt: string;
     readonly date: string;
     readonly fastestLap: number | null | undefined;
@@ -168,6 +150,53 @@ export type viewSessionQuery$data = {
         readonly slope: number | null | undefined;
       };
     } | null | undefined;
+    readonly sessionPerformance: {
+      readonly cleanLapCount: number;
+      readonly cleanLapNumbers: ReadonlyArray<number>;
+      readonly excludedLapCount: number;
+      readonly excludedLaps: ReadonlyArray<{
+        readonly lapNumber: number;
+        readonly reason: SessionPerformanceExclusionReason;
+      }>;
+      readonly format: string;
+      readonly headline: string;
+      readonly highlightLapNumbers: ReadonlyArray<number>;
+      readonly label: string;
+      readonly practiceRaceKpis: {
+        readonly bestLap: number | null | undefined;
+        readonly cleanLapRatioPct: number | null | undefined;
+        readonly cleanLapStdDev: number | null | undefined;
+        readonly gapToP1: number | null | undefined;
+        readonly lapsWithinThresholdPct: number | null | undefined;
+        readonly longestConsistentStintEndLap: number | null | undefined;
+        readonly longestConsistentStintLaps: number | null | undefined;
+        readonly longestConsistentStintStartLap: number | null | undefined;
+        readonly top10Average: number | null | undefined;
+        readonly top5Average: number | null | undefined;
+      } | null | undefined;
+      readonly qualifyingKpis: {
+        readonly bestLap: number | null | undefined;
+        readonly cleanLapRatioPct: number | null | undefined;
+        readonly gapToP1: number | null | undefined;
+        readonly gapToP3: number | null | undefined;
+        readonly pushRatePct: number | null | undefined;
+        readonly rankByBestLap: number | null | undefined;
+        readonly secondLapDelta: number | null | undefined;
+        readonly top3Average: number | null | undefined;
+        readonly top3Spread: number | null | undefined;
+      } | null | undefined;
+      readonly representativePace: number | null | undefined;
+      readonly score: number | null | undefined;
+      readonly scoreComponents: ReadonlyArray<{
+        readonly contribution: number | null | undefined;
+        readonly key: string;
+        readonly label: string;
+        readonly value: number | null | undefined;
+        readonly weight: number;
+      }>;
+      readonly thresholdLapTime: number | null | undefined;
+    };
+    readonly sessionPerformanceScore: number | null | undefined;
     readonly temperature: string | null | undefined;
     readonly track: {
       readonly id: string;
@@ -261,119 +290,161 @@ v3 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "classification",
+  "name": "format",
   "storageKey": null
 },
 v4 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "kartNumber",
+  "name": "classification",
   "storageKey": null
 },
 v5 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "name",
+  "name": "kartNumber",
   "storageKey": null
 },
 v6 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "postcode",
+  "name": "name",
   "storageKey": null
 },
 v7 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "isIndoors",
+  "name": "postcode",
   "storageKey": null
 },
-v8 = [
-  (v1/*: any*/),
-  (v5/*: any*/)
-],
-v9 = {
+v8 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "lapNumber",
+  "name": "isIndoors",
   "storageKey": null
 },
+v9 = [
+  (v1/*: any*/),
+  (v6/*: any*/)
+],
 v10 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "createdAt",
+  "name": "label",
   "storageKey": null
 },
 v11 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "status",
+  "name": "headline",
   "storageKey": null
 },
 v12 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "sizeBytes",
+  "name": "lapNumber",
   "storageKey": null
 },
 v13 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "uploadedBytes",
+  "name": "value",
   "storageKey": null
 },
-v14 = [
-  {
-    "kind": "Literal",
-    "name": "first",
-    "value": 50
-  }
-],
-v15 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "time",
-  "storageKey": null
-},
-v16 = {
-  "alias": null,
-  "args": null,
-  "kind": "ScalarField",
-  "name": "delta",
-  "storageKey": null
-},
-v17 = {
+v14 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "bestLap",
   "storageKey": null
 },
+v15 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "gapToP1",
+  "storageKey": null
+},
+v16 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "cleanLapRatioPct",
+  "storageKey": null
+},
+v17 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "createdAt",
+  "storageKey": null
+},
 v18 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
-  "name": "fastest5Avg",
+  "name": "status",
   "storageKey": null
 },
 v19 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
+  "name": "sizeBytes",
+  "storageKey": null
+},
+v20 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "uploadedBytes",
+  "storageKey": null
+},
+v21 = [
+  {
+    "kind": "Literal",
+    "name": "first",
+    "value": 50
+  }
+],
+v22 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "time",
+  "storageKey": null
+},
+v23 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "delta",
+  "storageKey": null
+},
+v24 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "fastest5Avg",
+  "storageKey": null
+},
+v25 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
   "name": "fastest10Avg",
   "storageKey": null
 },
-v20 = [
+v26 = [
   {
     "alias": null,
     "args": null,
@@ -396,28 +467,28 @@ v20 = [
     "storageKey": null
   }
 ],
-v21 = {
+v27 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "overallMean",
   "storageKey": null
 },
-v22 = {
+v28 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "overallMedian",
   "storageKey": null
 },
-v23 = {
+v29 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "slowLapSpread",
   "storageKey": null
 },
-v24 = [
+v30 = [
   {
     "alias": null,
     "args": null,
@@ -425,9 +496,9 @@ v24 = [
     "name": "validLapCount",
     "storageKey": null
   },
-  (v17/*: any*/),
-  (v18/*: any*/),
-  (v19/*: any*/),
+  (v14/*: any*/),
+  (v24/*: any*/),
+  (v25/*: any*/),
   {
     "alias": null,
     "args": null,
@@ -435,7 +506,7 @@ v24 = [
     "kind": "LinkedField",
     "name": "bestRolling5",
     "plural": false,
-    "selections": (v20/*: any*/),
+    "selections": (v26/*: any*/),
     "storageKey": null
   },
   {
@@ -445,12 +516,12 @@ v24 = [
     "kind": "LinkedField",
     "name": "bestRolling10",
     "plural": false,
-    "selections": (v20/*: any*/),
+    "selections": (v26/*: any*/),
     "storageKey": null
   },
-  (v21/*: any*/),
-  (v22/*: any*/),
-  (v23/*: any*/),
+  (v27/*: any*/),
+  (v28/*: any*/),
+  (v29/*: any*/),
   {
     "alias": null,
     "args": null,
@@ -459,7 +530,7 @@ v24 = [
     "storageKey": null
   }
 ],
-v25 = [
+v31 = [
   {
     "alias": null,
     "args": [
@@ -476,14 +547,8 @@ v25 = [
     "selections": [
       (v1/*: any*/),
       (v2/*: any*/),
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "format",
-        "storageKey": null
-      },
       (v3/*: any*/),
+      (v4/*: any*/),
       {
         "alias": null,
         "args": null,
@@ -512,7 +577,7 @@ v25 = [
         "name": "notes",
         "storageKey": null
       },
-      (v4/*: any*/),
+      (v5/*: any*/),
       {
         "alias": null,
         "args": null,
@@ -522,9 +587,9 @@ v25 = [
         "plural": false,
         "selections": [
           (v1/*: any*/),
-          (v5/*: any*/),
           (v6/*: any*/),
-          (v7/*: any*/)
+          (v7/*: any*/),
+          (v8/*: any*/)
         ],
         "storageKey": null
       },
@@ -535,7 +600,7 @@ v25 = [
         "kind": "LinkedField",
         "name": "trackLayout",
         "plural": false,
-        "selections": (v8/*: any*/),
+        "selections": (v9/*: any*/),
         "storageKey": null
       },
       {
@@ -545,24 +610,25 @@ v25 = [
         "kind": "LinkedField",
         "name": "kart",
         "plural": false,
-        "selections": (v8/*: any*/),
+        "selections": (v9/*: any*/),
         "storageKey": null
       },
       {
         "alias": null,
         "args": null,
         "kind": "ScalarField",
-        "name": "consistencyScore",
+        "name": "sessionPerformanceScore",
         "storageKey": null
       },
       {
         "alias": null,
         "args": null,
-        "concreteType": "TrackSessionConsistency",
+        "concreteType": "TrackSessionPerformance",
         "kind": "LinkedField",
-        "name": "consistency",
+        "name": "sessionPerformance",
         "plural": false,
         "selections": [
+          (v3/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -570,48 +636,8 @@ v25 = [
             "name": "score",
             "storageKey": null
           },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "label",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "mean",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "stdDev",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "cvPct",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "median",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "windowPct",
-            "storageKey": null
-          },
+          (v10/*: any*/),
+          (v11/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -630,25 +656,18 @@ v25 = [
             "alias": null,
             "args": null,
             "kind": "ScalarField",
-            "name": "totalValidLapCount",
+            "name": "cleanLapNumbers",
             "storageKey": null
           },
           {
             "alias": null,
             "args": null,
-            "kind": "ScalarField",
-            "name": "usableLapNumbers",
-            "storageKey": null
-          },
-          {
-            "alias": null,
-            "args": null,
-            "concreteType": "ConsistencyExcludedLap",
+            "concreteType": "SessionPerformanceExcludedLap",
             "kind": "LinkedField",
             "name": "excludedLaps",
             "plural": true,
             "selections": [
-              (v9/*: any*/),
+              (v12/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -658,11 +677,185 @@ v25 = [
               }
             ],
             "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "SessionPerformanceScoreComponent",
+            "kind": "LinkedField",
+            "name": "scoreComponents",
+            "plural": true,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "key",
+                "storageKey": null
+              },
+              (v10/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "weight",
+                "storageKey": null
+              },
+              (v13/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "contribution",
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "representativePace",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "thresholdLapTime",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "highlightLapNumbers",
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "TrackSessionQualifyingPerformanceKpis",
+            "kind": "LinkedField",
+            "name": "qualifyingKpis",
+            "plural": false,
+            "selections": [
+              (v14/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "rankByBestLap",
+                "storageKey": null
+              },
+              (v15/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "gapToP3",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "top3Average",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "top3Spread",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "secondLapDelta",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "pushRatePct",
+                "storageKey": null
+              },
+              (v16/*: any*/)
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "concreteType": "TrackSessionPracticeRacePerformanceKpis",
+            "kind": "LinkedField",
+            "name": "practiceRaceKpis",
+            "plural": false,
+            "selections": [
+              (v14/*: any*/),
+              (v15/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "top5Average",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "top10Average",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "cleanLapStdDev",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "longestConsistentStintLaps",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "longestConsistentStintStartLap",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "longestConsistentStintEndLap",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "lapsWithinThresholdPct",
+                "storageKey": null
+              },
+              (v16/*: any*/)
+            ],
+            "storageKey": null
           }
         ],
         "storageKey": null
       },
-      (v10/*: any*/),
+      (v17/*: any*/),
       {
         "alias": null,
         "args": null,
@@ -699,7 +892,7 @@ v25 = [
             "name": "mediaId",
             "storageKey": null
           },
-          (v11/*: any*/),
+          (v18/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -707,7 +900,7 @@ v25 = [
             "name": "error",
             "storageKey": null
           },
-          (v12/*: any*/),
+          (v19/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -750,7 +943,7 @@ v25 = [
             "name": "fps",
             "storageKey": null
           },
-          (v10/*: any*/),
+          (v17/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -766,7 +959,7 @@ v25 = [
             "name": "uploadProgress",
             "plural": false,
             "selections": [
-              (v13/*: any*/),
+              (v20/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -779,7 +972,7 @@ v25 = [
           },
           {
             "alias": null,
-            "args": (v14/*: any*/),
+            "args": (v21/*: any*/),
             "concreteType": "RecordingUploadTarget",
             "kind": "LinkedField",
             "name": "uploadTargets",
@@ -793,9 +986,9 @@ v25 = [
                 "name": "fileName",
                 "storageKey": null
               },
-              (v12/*: any*/),
-              (v13/*: any*/),
-              (v11/*: any*/),
+              (v19/*: any*/),
+              (v20/*: any*/),
+              (v18/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -818,18 +1011,18 @@ v25 = [
       },
       {
         "alias": null,
-        "args": (v14/*: any*/),
+        "args": (v21/*: any*/),
         "concreteType": "Lap",
         "kind": "LinkedField",
         "name": "laps",
         "plural": true,
         "selections": [
           (v1/*: any*/),
-          (v9/*: any*/),
-          (v15/*: any*/),
+          (v12/*: any*/),
+          (v22/*: any*/),
           {
             "alias": null,
-            "args": (v14/*: any*/),
+            "args": (v21/*: any*/),
             "concreteType": "LapEvent",
             "kind": "LinkedField",
             "name": "lapEvents",
@@ -850,13 +1043,7 @@ v25 = [
                 "name": "event",
                 "storageKey": null
               },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "value",
-                "storageKey": null
-              }
+              (v13/*: any*/)
             ],
             "storageKey": "lapEvents(first:50)"
           }
@@ -872,9 +1059,9 @@ v25 = [
         "plural": true,
         "selections": [
           (v1/*: any*/),
-          (v5/*: any*/),
-          (v3/*: any*/),
+          (v6/*: any*/),
           (v4/*: any*/),
+          (v5/*: any*/),
           {
             "alias": null,
             "args": null,
@@ -890,8 +1077,8 @@ v25 = [
             "name": "laps",
             "plural": true,
             "selections": [
-              (v9/*: any*/),
-              (v15/*: any*/)
+              (v12/*: any*/),
+              (v22/*: any*/)
             ],
             "storageKey": null
           }
@@ -927,7 +1114,7 @@ v25 = [
             "name": "lapComparisons",
             "plural": true,
             "selections": [
-              (v9/*: any*/),
+              (v12/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -942,7 +1129,7 @@ v25 = [
                 "name": "rivalLap",
                 "storageKey": null
               },
-              (v16/*: any*/),
+              (v23/*: any*/),
               {
                 "alias": null,
                 "args": null,
@@ -1086,7 +1273,7 @@ v25 = [
                     "storageKey": null
                   },
                   (v2/*: any*/),
-                  (v16/*: any*/)
+                  (v23/*: any*/)
                 ],
                 "storageKey": null
               }
@@ -1108,7 +1295,7 @@ v25 = [
                 "kind": "LinkedField",
                 "name": "self",
                 "plural": false,
-                "selections": (v24/*: any*/),
+                "selections": (v30/*: any*/),
                 "storageKey": null
               },
               {
@@ -1118,7 +1305,7 @@ v25 = [
                 "kind": "LinkedField",
                 "name": "rival",
                 "plural": false,
-                "selections": (v24/*: any*/),
+                "selections": (v30/*: any*/),
                 "storageKey": null
               },
               {
@@ -1129,9 +1316,9 @@ v25 = [
                 "name": "deltas",
                 "plural": false,
                 "selections": [
-                  (v17/*: any*/),
-                  (v18/*: any*/),
-                  (v19/*: any*/),
+                  (v14/*: any*/),
+                  (v24/*: any*/),
+                  (v25/*: any*/),
                   {
                     "alias": null,
                     "args": null,
@@ -1146,9 +1333,9 @@ v25 = [
                     "name": "bestRolling10Avg",
                     "storageKey": null
                   },
-                  (v21/*: any*/),
-                  (v22/*: any*/),
-                  (v23/*: any*/)
+                  (v27/*: any*/),
+                  (v28/*: any*/),
+                  (v29/*: any*/)
                 ],
                 "storageKey": null
               },
@@ -1194,13 +1381,7 @@ v25 = [
                 "name": "robustnessVerdict",
                 "storageKey": null
               },
-              {
-                "alias": null,
-                "args": null,
-                "kind": "ScalarField",
-                "name": "headline",
-                "storageKey": null
-              }
+              (v11/*: any*/)
             ],
             "storageKey": null
           }
@@ -1219,9 +1400,9 @@ v25 = [
     "plural": true,
     "selections": [
       (v1/*: any*/),
-      (v5/*: any*/),
       (v6/*: any*/),
       (v7/*: any*/),
+      (v8/*: any*/),
       {
         "alias": null,
         "args": null,
@@ -1229,7 +1410,7 @@ v25 = [
         "kind": "LinkedField",
         "name": "karts",
         "plural": true,
-        "selections": (v8/*: any*/),
+        "selections": (v9/*: any*/),
         "storageKey": null
       },
       {
@@ -1239,7 +1420,7 @@ v25 = [
         "kind": "LinkedField",
         "name": "trackLayouts",
         "plural": true,
-        "selections": (v8/*: any*/),
+        "selections": (v9/*: any*/),
         "storageKey": null
       }
     ],
@@ -1252,7 +1433,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "viewSessionQuery",
-    "selections": (v25/*: any*/),
+    "selections": (v31/*: any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -1261,19 +1442,19 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "viewSessionQuery",
-    "selections": (v25/*: any*/)
+    "selections": (v31/*: any*/)
   },
   "params": {
-    "cacheID": "d253bed5335aafc041d100c750f25f42",
+    "cacheID": "f7bfc8d712511c44aae996676ab07248",
     "id": null,
     "metadata": {},
     "name": "viewSessionQuery",
     "operationKind": "query",
-    "text": "query viewSessionQuery(\n  $id: ID!\n  $rivalName: String!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    classification\n    fastestLap\n    conditions\n    temperature\n    notes\n    kartNumber\n    track {\n      id\n      name\n      postcode\n      isIndoors\n    }\n    trackLayout {\n      id\n      name\n    }\n    kart {\n      id\n      name\n    }\n    consistencyScore\n    consistency {\n      score\n      label\n      mean\n      stdDev\n      cvPct\n      median\n      windowPct\n      cleanLapCount\n      excludedLapCount\n      totalValidLapCount\n      usableLapNumbers\n      excludedLaps {\n        lapNumber\n        reason\n      }\n    }\n    createdAt\n    updatedAt\n    trackRecordings(first: 20) {\n      id\n      description\n      mediaId\n      status\n      error\n      sizeBytes\n      overlayBurned\n      isPrimary\n      showInMediaLibrary\n      lapOneOffset\n      durationMs\n      fps\n      createdAt\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n      uploadTargets(first: 50) {\n        id\n        fileName\n        sizeBytes\n        uploadedBytes\n        status\n        ordinal\n        uploadToken\n      }\n    }\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents(first: 50) {\n        id\n        offset\n        event\n        value\n      }\n    }\n    participants {\n      id\n      name\n      classification\n      kartNumber\n      isSelf\n      laps {\n        lapNumber\n        time\n      }\n    }\n    rivalAnalysis(rivalName: $rivalName) {\n      rivalName\n      lapComparisons {\n        lapNumber\n        selfLap\n        rivalLap\n        delta\n        cumulativeDelta\n        outcome\n      }\n      sessionInsights {\n        fasterLapCount\n        slowerLapCount\n        tieCount\n        longestGainStreak\n        longestLossStreak\n        medianDelta\n        consistencyGap\n        insightLabel\n      }\n      trend {\n        direction\n        sampleCount\n        slope\n        firstDelta\n        latestDelta\n        points {\n          sessionId\n          date\n          delta\n        }\n      }\n      paceInsights {\n        self {\n          validLapCount\n          bestLap\n          fastest5Avg\n          fastest10Avg\n          bestRolling5 {\n            average\n            startLapNumber\n            endLapNumber\n          }\n          bestRolling10 {\n            average\n            startLapNumber\n            endLapNumber\n          }\n          overallMean\n          overallMedian\n          slowLapSpread\n          quickWindowCount\n        }\n        rival {\n          validLapCount\n          bestLap\n          fastest5Avg\n          fastest10Avg\n          bestRolling5 {\n            average\n            startLapNumber\n            endLapNumber\n          }\n          bestRolling10 {\n            average\n            startLapNumber\n            endLapNumber\n          }\n          overallMean\n          overallMedian\n          slowLapSpread\n          quickWindowCount\n        }\n        deltas {\n          bestLap\n          fastest5Avg\n          fastest10Avg\n          bestRolling5Avg\n          bestRolling10Avg\n          overallMean\n          overallMedian\n          slowLapSpread\n        }\n        quickWindowCutoff\n        quickWindowSelfCount\n        quickWindowRivalCount\n        ceilingVerdict\n        sustainedVerdict\n        robustnessVerdict\n        headline\n      }\n    }\n  }\n  tracks {\n    id\n    name\n    postcode\n    isIndoors\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n}\n"
+    "text": "query viewSessionQuery(\n  $id: ID!\n  $rivalName: String!\n) {\n  trackSession(id: $id) {\n    id\n    date\n    format\n    classification\n    fastestLap\n    conditions\n    temperature\n    notes\n    kartNumber\n    track {\n      id\n      name\n      postcode\n      isIndoors\n    }\n    trackLayout {\n      id\n      name\n    }\n    kart {\n      id\n      name\n    }\n    sessionPerformanceScore\n    sessionPerformance {\n      format\n      score\n      label\n      headline\n      cleanLapCount\n      excludedLapCount\n      cleanLapNumbers\n      excludedLaps {\n        lapNumber\n        reason\n      }\n      scoreComponents {\n        key\n        label\n        weight\n        value\n        contribution\n      }\n      representativePace\n      thresholdLapTime\n      highlightLapNumbers\n      qualifyingKpis {\n        bestLap\n        rankByBestLap\n        gapToP1\n        gapToP3\n        top3Average\n        top3Spread\n        secondLapDelta\n        pushRatePct\n        cleanLapRatioPct\n      }\n      practiceRaceKpis {\n        bestLap\n        gapToP1\n        top5Average\n        top10Average\n        cleanLapStdDev\n        longestConsistentStintLaps\n        longestConsistentStintStartLap\n        longestConsistentStintEndLap\n        lapsWithinThresholdPct\n        cleanLapRatioPct\n      }\n    }\n    createdAt\n    updatedAt\n    trackRecordings(first: 20) {\n      id\n      description\n      mediaId\n      status\n      error\n      sizeBytes\n      overlayBurned\n      isPrimary\n      showInMediaLibrary\n      lapOneOffset\n      durationMs\n      fps\n      createdAt\n      combineProgress\n      uploadProgress {\n        uploadedBytes\n        totalBytes\n      }\n      uploadTargets(first: 50) {\n        id\n        fileName\n        sizeBytes\n        uploadedBytes\n        status\n        ordinal\n        uploadToken\n      }\n    }\n    laps(first: 50) {\n      id\n      lapNumber\n      time\n      lapEvents(first: 50) {\n        id\n        offset\n        event\n        value\n      }\n    }\n    participants {\n      id\n      name\n      classification\n      kartNumber\n      isSelf\n      laps {\n        lapNumber\n        time\n      }\n    }\n    rivalAnalysis(rivalName: $rivalName) {\n      rivalName\n      lapComparisons {\n        lapNumber\n        selfLap\n        rivalLap\n        delta\n        cumulativeDelta\n        outcome\n      }\n      sessionInsights {\n        fasterLapCount\n        slowerLapCount\n        tieCount\n        longestGainStreak\n        longestLossStreak\n        medianDelta\n        consistencyGap\n        insightLabel\n      }\n      trend {\n        direction\n        sampleCount\n        slope\n        firstDelta\n        latestDelta\n        points {\n          sessionId\n          date\n          delta\n        }\n      }\n      paceInsights {\n        self {\n          validLapCount\n          bestLap\n          fastest5Avg\n          fastest10Avg\n          bestRolling5 {\n            average\n            startLapNumber\n            endLapNumber\n          }\n          bestRolling10 {\n            average\n            startLapNumber\n            endLapNumber\n          }\n          overallMean\n          overallMedian\n          slowLapSpread\n          quickWindowCount\n        }\n        rival {\n          validLapCount\n          bestLap\n          fastest5Avg\n          fastest10Avg\n          bestRolling5 {\n            average\n            startLapNumber\n            endLapNumber\n          }\n          bestRolling10 {\n            average\n            startLapNumber\n            endLapNumber\n          }\n          overallMean\n          overallMedian\n          slowLapSpread\n          quickWindowCount\n        }\n        deltas {\n          bestLap\n          fastest5Avg\n          fastest10Avg\n          bestRolling5Avg\n          bestRolling10Avg\n          overallMean\n          overallMedian\n          slowLapSpread\n        }\n        quickWindowCutoff\n        quickWindowSelfCount\n        quickWindowRivalCount\n        ceilingVerdict\n        sustainedVerdict\n        robustnessVerdict\n        headline\n      }\n    }\n  }\n  tracks {\n    id\n    name\n    postcode\n    isIndoors\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "49d9b2335bb334929b7ddfcc821782de";
+(node as any).hash = "e86a78a6b6bc5ffca4503c3a016b8f21";
 
 export default node;

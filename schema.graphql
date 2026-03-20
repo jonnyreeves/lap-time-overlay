@@ -565,8 +565,8 @@ type TrackSession {
   trackLayout: TrackLayout!
   kart: Kart
   kartNumber: String
-  consistencyScore: Int
-  consistency: TrackSessionConsistency!
+  sessionPerformanceScore: Int
+  sessionPerformance: TrackSessionPerformance!
   notes: String
   createdAt: String!
   updatedAt: String!
@@ -718,30 +718,65 @@ type RivalSummary {
   sampleCount: Int!
 }
 
-enum ConsistencyExclusionReason {
+enum SessionPerformanceExclusionReason {
   INVALID
   OUT_LAP
   OUTLIER
 }
 
-type ConsistencyExcludedLap {
+type SessionPerformanceExcludedLap {
   lapNumber: Int!
-  reason: ConsistencyExclusionReason!
+  reason: SessionPerformanceExclusionReason!
 }
 
-type TrackSessionConsistency {
+type SessionPerformanceScoreComponent {
+  key: String!
+  label: String!
+  weight: Int!
+  value: Float
+  contribution: Float
+}
+
+type TrackSessionQualifyingPerformanceKpis {
+  bestLap: Float
+  rankByBestLap: Int
+  gapToP1: Float
+  gapToP3: Float
+  top3Average: Float
+  top3Spread: Float
+  secondLapDelta: Float
+  pushRatePct: Float
+  cleanLapRatioPct: Float
+}
+
+type TrackSessionPracticeRacePerformanceKpis {
+  bestLap: Float
+  gapToP1: Float
+  top5Average: Float
+  top10Average: Float
+  cleanLapStdDev: Float
+  longestConsistentStintLaps: Int
+  longestConsistentStintStartLap: Int
+  longestConsistentStintEndLap: Int
+  lapsWithinThresholdPct: Float
+  cleanLapRatioPct: Float
+}
+
+type TrackSessionPerformance {
+  format: String!
   score: Int
   label: String!
-  mean: Float
-  stdDev: Float
-  cvPct: Float
-  median: Float
-  windowPct: Float
+  headline: String!
   cleanLapCount: Int!
   excludedLapCount: Int!
-  totalValidLapCount: Int!
-  usableLapNumbers: [Int!]!
-  excludedLaps: [ConsistencyExcludedLap!]!
+  cleanLapNumbers: [Int!]!
+  excludedLaps: [SessionPerformanceExcludedLap!]!
+  scoreComponents: [SessionPerformanceScoreComponent!]!
+  representativePace: Float
+  thresholdLapTime: Float
+  highlightLapNumbers: [Int!]!
+  qualifyingKpis: TrackSessionQualifyingPerformanceKpis
+  practiceRaceKpis: TrackSessionPracticeRacePerformanceKpis
 }
 
 type Lap {
@@ -795,8 +830,8 @@ enum TrackSessionSort {
   DATE_DESC
   FASTEST_LAP_ASC
   FASTEST_LAP_DESC
-  CONSISTENCY_ASC
-  CONSISTENCY_DESC
+  PERFORMANCE_ASC
+  PERFORMANCE_DESC
 }
 
 enum TrackRecordingStatus {

@@ -4,11 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { useParams } from "react-router-dom";
 import { type viewSessionQuery } from "../../__generated__/viewSessionQuery.graphql.js";
-import { ConsistencyCard } from "../../components/session/ConsistencyCard.js";
 import { LapsCard, type LapWithEvents } from "../../components/session/LapsCard.js";
 import { PrimaryRecordingCard } from "../../components/session/PrimaryRecordingCard.js";
 import { RecordingsCard } from "../../components/session/RecordingsCard.js";
 import { RivalComparisonCard } from "../../components/session/RivalComparisonCard.js";
+import { SessionPerformanceCard } from "../../components/session/SessionPerformanceCard.js";
 import { SessionOverviewCard } from "../../components/session/SessionOverviewCard.js";
 import { useBreadcrumbs, type BreadcrumbItem } from "../../hooks/useBreadcrumbs.js";
 
@@ -55,22 +55,51 @@ const SessionQuery = graphql`
         id
         name
       }
-      consistencyScore
-      consistency {
+      sessionPerformanceScore
+      sessionPerformance {
+        format
         score
         label
-        mean
-        stdDev
-        cvPct
-        median
-        windowPct
+        headline
         cleanLapCount
         excludedLapCount
-        totalValidLapCount
-        usableLapNumbers
+        cleanLapNumbers
         excludedLaps {
           lapNumber
           reason
+        }
+        scoreComponents {
+          key
+          label
+          weight
+          value
+          contribution
+        }
+        representativePace
+        thresholdLapTime
+        highlightLapNumbers
+        qualifyingKpis {
+          bestLap
+          rankByBestLap
+          gapToP1
+          gapToP3
+          top3Average
+          top3Spread
+          secondLapDelta
+          pushRatePct
+          cleanLapRatioPct
+        }
+        practiceRaceKpis {
+          bestLap
+          gapToP1
+          top5Average
+          top10Average
+          cleanLapStdDev
+          longestConsistentStintLaps
+          longestConsistentStintStartLap
+          longestConsistentStintEndLap
+          lapsWithinThresholdPct
+          cleanLapRatioPct
         }
       }
       createdAt
@@ -284,7 +313,7 @@ export default function ViewSessionRoute() {
       }) ?? [];
   const rivalCandidates = rivalParticipants.map((participant) => participant.name);
   const rivalAnalysis = session?.rivalAnalysis ?? null;
-  const sessionConsistency = session?.consistency ?? null;
+  const sessionPerformance = session?.sessionPerformance ?? null;
 
   useEffect(() => {
     if (!rivalCandidates.length) {
@@ -501,12 +530,7 @@ export default function ViewSessionRoute() {
           recordings={normalizedRecordings}
           onRefresh={() => setRefreshKey((key) => key + 1)}
         />
-        <ConsistencyCard
-          laps={lapsWithStart}
-          consistency={sessionConsistency}
-          sessionFastestLap={session.fastestLap}
-          sessionFormat={session.format}
-        />
+        <SessionPerformanceCard laps={lapsWithStart} performance={sessionPerformance} />
         {rivalCandidates.length ? (
           <RivalComparisonCard
             rivalParticipants={rivalParticipants}

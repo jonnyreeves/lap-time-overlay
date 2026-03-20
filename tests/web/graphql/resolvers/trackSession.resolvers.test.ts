@@ -27,7 +27,7 @@ vi.mock("../../../../src/web/sessionImport/service.js", () => ({
 }));
 
 import { createMockGraphQLContext } from "../context.mock.js";
-import { computeConsistencyStats } from "../../../../src/web/shared/consistency.js";
+import { computeSessionPerformance } from "../../../../src/web/shared/sessionPerformance.js";
 import { rootValue } from "../../../../src/web/graphql/schema.js";
 import { SessionImportError } from "../../../../src/web/sessionImport/types.js";
 import type { TrackRecordingRecord } from "../../../../src/db/track_recordings.js";
@@ -367,7 +367,7 @@ describe("trackSession resolvers", () => {
     expect(await slowerPayload.isPersonalBest()).toBe(false);
   });
 
-  it("exposes consistency score and breakdown derived from laps", async () => {
+  it("exposes session performance score and breakdown derived from laps", async () => {
     repositories.trackSessions.findById.mockReturnValue(mockSession);
     repositories.tracks.findById.mockReturnValue(mockTrack);
     repositories.trackLayouts.findById.mockReturnValue(mockLayout);
@@ -377,18 +377,24 @@ describe("trackSession resolvers", () => {
       { id: "l3", sessionId: "s1", lapNumber: 3, time: 90, createdAt: 0, updatedAt: 0 },
     ]);
 
-    const expected = computeConsistencyStats([
-      { id: "l1", lapNumber: 1, time: 75 },
-      { id: "l2", lapNumber: 2, time: 70 },
-      { id: "l3", lapNumber: 3, time: 90 },
-    ]);
+    const expected = computeSessionPerformance({
+      format: "Race",
+      selfLaps: [
+        { id: "l1", lapNumber: 1, time: 75 },
+        { id: "l2", lapNumber: 2, time: 70 },
+        { id: "l3", lapNumber: 3, time: 90 },
+      ],
+      fieldFastestLaps: [],
+      sessionFastestLap: null,
+    });
 
     const payload = rootValue.trackSession({ id: "s1" }, context);
-    expect(payload.consistencyScore()).toBe(expected.score);
-    expect(payload.consistency()).toMatchObject({
+    expect(payload.sessionPerformanceScore()).toBe(expected.score);
+    expect(payload.sessionPerformance()).toMatchObject({
+      format: expected.format,
       score: expected.score,
-      usableLapNumbers: expected.usableLaps.map((lap) => lap.lapNumber),
-      excludedLaps: expected.excluded.map((lap) => ({ lapNumber: lap.lapNumber })),
+      cleanLapNumbers: expected.cleanLapNumbers,
+      excludedLaps: expected.excludedLaps.map((lap) => ({ lapNumber: lap.lapNumber })),
     });
   });
 

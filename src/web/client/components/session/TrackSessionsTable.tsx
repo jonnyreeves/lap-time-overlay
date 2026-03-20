@@ -32,7 +32,7 @@ type Props = {
 
 const DEFAULT_PAGE_SIZE = 20;
 
-type SortField = "date" | "fastestLap" | "consistency";
+type SortField = "date" | "fastestLap" | "performance";
 type SortDirection = "asc" | "desc";
 type SortState = {
   field: SortField;
@@ -178,7 +178,7 @@ const lapBadgeStyles = css`
   letter-spacing: -0.01em;
 `;
 
-const consistencyBadgeStyles = css`
+const performanceBadgeStyles = css`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -399,7 +399,7 @@ const TrackSessionsTableFragment = graphql`
               id
               name
             }
-            consistencyScore
+            sessionPerformanceScore
             laps(first: 1) {
               id
               personalBest
@@ -503,7 +503,7 @@ export function TrackSessionsTable({
       if (sort.field === "fastestLap") {
         return sort.direction === "asc" ? "FASTEST_LAP_ASC" : "FASTEST_LAP_DESC";
       }
-      return sort.direction === "asc" ? "CONSISTENCY_ASC" : "CONSISTENCY_DESC";
+      return sort.direction === "asc" ? "PERFORMANCE_ASC" : "PERFORMANCE_DESC";
     },
     []
   );
@@ -774,14 +774,14 @@ export function TrackSessionsTable({
                       type="button"
                       css={[
                         sortableHeaderButtonStyles,
-                        sortState.field === "consistency" && activeSortHeaderStyles,
+                        sortState.field === "performance" && activeSortHeaderStyles,
                       ]}
-                      onClick={() => toggleSort("consistency")}
-                      aria-label={`Sort by consistency (${sortState.field === "consistency" ? sortState.direction : "desc"})`}
+                      onClick={() => toggleSort("performance")}
+                      aria-label={`Sort by performance (${sortState.field === "performance" ? sortState.direction : "desc"})`}
                     >
-                      <span>Consistency</span>
+                      <span>Performance</span>
                       <span css={sortArrowStyles} aria-hidden>
-                        {getSortArrow("consistency")}
+                        {getSortArrow("performance")}
                       </span>
                     </button>
                   </th>
@@ -799,7 +799,7 @@ export function TrackSessionsTable({
                     ? `P${session.classification}`
                     : "—";
                   const hasRecording = Boolean(session.trackRecordings?.length);
-                  const consistencyScore = session.consistencyScore ?? null;
+                  const performanceScore = session.sessionPerformanceScore ?? null;
                   const formattedDate = format(new Date(session.date), "do MMM yyyy");
                   const formattedTime = format(new Date(session.date), "p");
                   const isTrackIndoors = session.track?.isIndoors ?? false;
@@ -848,7 +848,7 @@ export function TrackSessionsTable({
                         <span css={lapBadgeStyles}>{personalBest ?? "—"}</span>
                       </td>
                       <td>
-                        <span css={consistencyBadgeStyles}>{consistencyScore ?? "—"}</span>
+                        <span css={performanceBadgeStyles}>{performanceScore ?? "—"}</span>
                       </td>
                       <td>
                         <span

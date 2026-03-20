@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<37fbc2f098b37e7a183bfb1d4ae226cb>>
+ * @generated SignedSource<<b204886fb49e48c81e9feb08d30f2a58>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -32,7 +32,6 @@ export type TrackSessionsTable_query$data = {
         readonly node: {
           readonly classification: number;
           readonly conditions: string;
-          readonly consistencyScore: number | null | undefined;
           readonly date: string;
           readonly format: string;
           readonly id: string;
@@ -44,6 +43,7 @@ export type TrackSessionsTable_query$data = {
             readonly id: string;
             readonly personalBest: number | null | undefined;
           }>;
+          readonly sessionPerformanceScore: number | null | undefined;
           readonly track: {
             readonly id: string;
             readonly isIndoors: boolean;
@@ -310,7 +310,7 @@ return {
                       "alias": null,
                       "args": null,
                       "kind": "ScalarField",
-                      "name": "consistencyScore",
+                      "name": "sessionPerformanceScore",
                       "storageKey": null
                     },
                     {
@@ -394,6 +394,6 @@ return {
 };
 })();
 
-(node as any).hash = "3654f2729911bd43b45201bd46e01d6f";
+(node as any).hash = "1b64fd5a79499b3be5b08cd7fad01510";
 
 export default node;
