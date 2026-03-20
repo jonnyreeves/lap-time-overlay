@@ -261,6 +261,13 @@ type FetchDaytonaClubspeedSessionsPayload {
   sessions: [DaytonaClubspeedSessionSummary!]!
 }
 
+type DaytonaClubspeedCredentialStatus {
+  configured: Boolean!
+  username: String
+  lastValidatedAt: String
+  lastValidationError: String
+}
+
 type ImportedSessionLap {
   lapNumber: Int!
   timeSeconds: Float!
@@ -427,6 +434,11 @@ type Mutation {
   importDaytonaClubspeedSession(
     input: ImportDaytonaClubspeedSessionInput!
   ): ImportTrackSessionFromUrlPayload!
+  saveViewerDaytonaClubspeedCredentials(
+    input: SaveViewerDaytonaClubspeedCredentialsInput!
+  ): SaveViewerDaytonaClubspeedCredentialsPayload!
+  testViewerDaytonaClubspeedCredentials: TestViewerDaytonaClubspeedCredentialsPayload!
+  deleteViewerDaytonaClubspeedCredentials: DeleteViewerDaytonaClubspeedCredentialsPayload!
   deleteTrackSession(id: ID!): DeleteTrackSessionPayload!
   startTrackRecordingUpload(
     input: StartTrackRecordingUploadInput!
@@ -491,11 +503,30 @@ input AuthInput {
   password: String!
 }
 
+input SaveViewerDaytonaClubspeedCredentialsInput {
+  username: String!
+  password: String!
+}
+
+type SaveViewerDaytonaClubspeedCredentialsPayload {
+  status: DaytonaClubspeedCredentialStatus!
+}
+
+type TestViewerDaytonaClubspeedCredentialsPayload {
+  status: DaytonaClubspeedCredentialStatus!
+}
+
+type DeleteViewerDaytonaClubspeedCredentialsPayload {
+  success: Boolean!
+  status: DaytonaClubspeedCredentialStatus!
+}
+
 type User {
   id: ID!
   username: String!
   isAdmin: Boolean!
   createdAt: String!
+  daytonaClubspeedCredentialStatus: DaytonaClubspeedCredentialStatus!
   rivals(first: Int = 10): [RivalSummary!]!
   recentTracks(first: Int = 10, after: String): TrackConnection!
   recentTrackSessions(

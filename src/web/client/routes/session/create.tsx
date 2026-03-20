@@ -109,6 +109,12 @@ const rightColumnStyles = css`
 
 const CreateSessionRouteTracksQuery = graphql`
   query create_tsxTracksQuery {
+    viewer {
+      daytonaClubspeedCredentialStatus {
+        configured
+        lastValidationError
+      }
+    }
     tracks {
       id
       name
@@ -787,6 +793,15 @@ export default function CreateSessionRoute() {
         isOpen={showImportSessionModal}
         onClose={() => setShowImportSessionModal(false)}
         onImport={handleImportEmail}
+        daytonaCredentialStatus={
+          data.viewer?.daytonaClubspeedCredentialStatus
+            ? {
+                configured: data.viewer.daytonaClubspeedCredentialStatus.configured,
+                lastValidationError:
+                  data.viewer.daytonaClubspeedCredentialStatus.lastValidationError ?? null,
+              }
+            : null
+        }
         tracks={data.tracks}
       />
     </div>

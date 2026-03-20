@@ -7,6 +7,10 @@ import type {
   TrackSessionParticipantLapRecord,
   TrackSessionParticipantRecord,
 } from "../../../src/db/track_session_participants.js";
+import type {
+  UserDaytonaClubspeedCredentialRecord,
+  UserDaytonaClubspeedCredentialsRepository,
+} from "../../../src/db/user_daytona_clubspeed_credentials.js";
 
 export function createMockRepositories() {
   const repositories = {
@@ -65,6 +69,21 @@ export function createMockRepositories() {
       findBySessionIds: vi.fn<[string[]], TrackSessionParticipantRecord[]>(() => []),
       findLapsByParticipantId: vi.fn<[string], TrackSessionParticipantLapRecord[]>(() => []),
       findLapsByParticipantIds: vi.fn<[string[]], TrackSessionParticipantLapRecord[]>(() => []),
+    },
+    userDaytonaClubspeedCredentials: {
+      findByUserId: vi.fn<[string], UserDaytonaClubspeedCredentialRecord | null>(() => null),
+      upsert: vi.fn<
+        Parameters<UserDaytonaClubspeedCredentialsRepository["upsert"]>,
+        ReturnType<UserDaytonaClubspeedCredentialsRepository["upsert"]>
+      >(),
+      updateValidation: vi.fn<
+        Parameters<UserDaytonaClubspeedCredentialsRepository["updateValidation"]>,
+        ReturnType<UserDaytonaClubspeedCredentialsRepository["updateValidation"]>
+      >(),
+      delete: vi.fn<
+        Parameters<UserDaytonaClubspeedCredentialsRepository["delete"]>,
+        ReturnType<UserDaytonaClubspeedCredentialsRepository["delete"]>
+      >(),
     },
   } satisfies Repositories;
 

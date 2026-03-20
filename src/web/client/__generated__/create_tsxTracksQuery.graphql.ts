@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<5416ef6e2d1162e3e7d82776380ab45b>>
+ * @generated SignedSource<<79dae35cbfafa2857b0d81b1b4adedab>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -25,6 +25,12 @@ export type create_tsxTracksQuery$data = {
       readonly name: string;
     }>;
   }>;
+  readonly viewer: {
+    readonly daytonaClubspeedCredentialStatus: {
+      readonly configured: boolean;
+      readonly lastValidationError: string | null | undefined;
+    };
+  } | null | undefined;
 };
 export type create_tsxTracksQuery = {
   response: create_tsxTracksQuery$data;
@@ -35,77 +41,114 @@ const node: ConcreteRequest = (function(){
 var v0 = {
   "alias": null,
   "args": null,
-  "kind": "ScalarField",
-  "name": "id",
+  "concreteType": "DaytonaClubspeedCredentialStatus",
+  "kind": "LinkedField",
+  "name": "daytonaClubspeedCredentialStatus",
+  "plural": false,
+  "selections": [
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "configured",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "lastValidationError",
+      "storageKey": null
+    }
+  ],
   "storageKey": null
 },
 v1 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
+  "name": "id",
+  "storageKey": null
+},
+v2 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
   "name": "name",
   "storageKey": null
 },
-v2 = [
-  (v0/*: any*/),
-  (v1/*: any*/)
-],
 v3 = [
-  {
-    "alias": null,
-    "args": null,
-    "concreteType": "Track",
-    "kind": "LinkedField",
-    "name": "tracks",
-    "plural": true,
-    "selections": [
-      (v0/*: any*/),
-      (v1/*: any*/),
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "postcode",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "kind": "ScalarField",
-        "name": "isIndoors",
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "concreteType": "Kart",
-        "kind": "LinkedField",
-        "name": "karts",
-        "plural": true,
-        "selections": (v2/*: any*/),
-        "storageKey": null
-      },
-      {
-        "alias": null,
-        "args": null,
-        "concreteType": "TrackLayout",
-        "kind": "LinkedField",
-        "name": "trackLayouts",
-        "plural": true,
-        "selections": (v2/*: any*/),
-        "storageKey": null
-      }
-    ],
-    "storageKey": null
-  }
-];
+  (v1/*: any*/),
+  (v2/*: any*/)
+],
+v4 = {
+  "alias": null,
+  "args": null,
+  "concreteType": "Track",
+  "kind": "LinkedField",
+  "name": "tracks",
+  "plural": true,
+  "selections": [
+    (v1/*: any*/),
+    (v2/*: any*/),
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "postcode",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "kind": "ScalarField",
+      "name": "isIndoors",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "concreteType": "Kart",
+      "kind": "LinkedField",
+      "name": "karts",
+      "plural": true,
+      "selections": (v3/*: any*/),
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "concreteType": "TrackLayout",
+      "kind": "LinkedField",
+      "name": "trackLayouts",
+      "plural": true,
+      "selections": (v3/*: any*/),
+      "storageKey": null
+    }
+  ],
+  "storageKey": null
+};
 return {
   "fragment": {
     "argumentDefinitions": [],
     "kind": "Fragment",
     "metadata": null,
     "name": "create_tsxTracksQuery",
-    "selections": (v3/*: any*/),
+    "selections": [
+      {
+        "alias": null,
+        "args": null,
+        "concreteType": "User",
+        "kind": "LinkedField",
+        "name": "viewer",
+        "plural": false,
+        "selections": [
+          (v0/*: any*/)
+        ],
+        "storageKey": null
+      },
+      (v4/*: any*/)
+    ],
     "type": "Query",
     "abstractKey": null
   },
@@ -114,19 +157,34 @@ return {
     "argumentDefinitions": [],
     "kind": "Operation",
     "name": "create_tsxTracksQuery",
-    "selections": (v3/*: any*/)
+    "selections": [
+      {
+        "alias": null,
+        "args": null,
+        "concreteType": "User",
+        "kind": "LinkedField",
+        "name": "viewer",
+        "plural": false,
+        "selections": [
+          (v0/*: any*/),
+          (v1/*: any*/)
+        ],
+        "storageKey": null
+      },
+      (v4/*: any*/)
+    ]
   },
   "params": {
-    "cacheID": "9699eae4965007b28370eac391347c5b",
+    "cacheID": "d2b16537adfcd9383e3c84740b21c621",
     "id": null,
     "metadata": {},
     "name": "create_tsxTracksQuery",
     "operationKind": "query",
-    "text": "query create_tsxTracksQuery {\n  tracks {\n    id\n    name\n    postcode\n    isIndoors\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n}\n"
+    "text": "query create_tsxTracksQuery {\n  viewer {\n    daytonaClubspeedCredentialStatus {\n      configured\n      lastValidationError\n    }\n    id\n  }\n  tracks {\n    id\n    name\n    postcode\n    isIndoors\n    karts {\n      id\n      name\n    }\n    trackLayouts {\n      id\n      name\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "5c2502120969732f812914e807533aca";
+(node as any).hash = "6d2c9bce8f8c0576be37ccadc036b3fa";
 
 export default node;

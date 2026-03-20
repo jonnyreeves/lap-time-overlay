@@ -29,6 +29,11 @@ import {
   computeBestNAvg,
 } from "../../shared/rivalAnalysis.js";
 import { fetchWeatherForPostcode } from "../../shared/weather.js";
+import {
+  getViewerDaytonaClubspeedCredentialsOrThrow,
+  markViewerDaytonaClubspeedCredentialInvalid,
+  markViewerDaytonaClubspeedCredentialsValidated,
+} from "../../daytonaClubspeedCredentials/service.js";
 import { toTrackPayload } from "./track.js";
 import {
   rebuildMediaLibrarySessionProjection,
@@ -1268,8 +1273,14 @@ export const trackSessionResolvers = {
     }
 
     try {
-      return { sessions: await fetchDaytonaClubspeedSessions() };
+      const credentials = getViewerDaytonaClubspeedCredentialsOrThrow(context.currentUser.id);
+      const sessions = await fetchDaytonaClubspeedSessions(credentials);
+      markViewerDaytonaClubspeedCredentialsValidated(context.currentUser.id);
+      return { sessions };
     } catch (error) {
+      if (error instanceof SessionImportError && error.code === "INVALID_CREDENTIALS") {
+        markViewerDaytonaClubspeedCredentialInvalid(context.currentUser.id, error.message);
+      }
       if (error instanceof SessionImportError) {
         throw new GraphQLError(error.message, {
           extensions: { code: "VALIDATION_FAILED" },
@@ -1299,7 +1310,9 @@ export const trackSessionResolvers = {
     }
 
     try {
-      const imported = await importDaytonaClubspeedSession(heatNo);
+      const credentials = getViewerDaytonaClubspeedCredentialsOrThrow(context.currentUser.id);
+      const imported = await importDaytonaClubspeedSession(heatNo, credentials);
+      markViewerDaytonaClubspeedCredentialsValidated(context.currentUser.id);
       return {
         provider: imported.provider,
         sessionFormat: imported.sessionFormat,
@@ -1315,6 +1328,9 @@ export const trackSessionResolvers = {
         drivers: imported.drivers,
       };
     } catch (error) {
+      if (error instanceof SessionImportError && error.code === "INVALID_CREDENTIALS") {
+        markViewerDaytonaClubspeedCredentialInvalid(context.currentUser.id, error.message);
+      }
       if (error instanceof SessionImportError) {
         throw new GraphQLError(error.message, {
           extensions: { code: "VALIDATION_FAILED" },

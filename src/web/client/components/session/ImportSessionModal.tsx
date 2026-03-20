@@ -39,6 +39,10 @@ interface ImportSessionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onImport: (result: SessionImportSelection) => void;
+  daytonaCredentialStatus: {
+    configured: boolean;
+    lastValidationError: string | null;
+  } | null;
   tracks: ReadonlyArray<{
     id: string;
     name: string;
@@ -149,6 +153,7 @@ export function ImportSessionModal({
   isOpen,
   onClose,
   onImport,
+  daytonaCredentialStatus,
   tracks,
 }: ImportSessionModalProps) {
   const [step, setStep] = useState<WizardStep>("source");
@@ -208,6 +213,8 @@ export function ImportSessionModal({
   const localParsed = useMemo(() => parseSessionEmail(emailContent), [emailContent]);
   const parsed = importedParsed ?? localParsed;
   const selectedDaytonaSession = daytonaSessions.find((session) => session.heatNo === selectedDaytonaHeatNo) ?? null;
+  const daytonaCredentialsConfigured = daytonaCredentialStatus?.configured ?? false;
+  const daytonaValidationError = daytonaCredentialStatus?.lastValidationError ?? null;
   const sourceTextForGuessing =
     selectedSource === "daytona" ? buildDaytonaSessionLabel(selectedDaytonaSession ?? { heatNo: "", activityType: "", sessionDate: null, sessionTime: null, kartNumber: null, classification: null }) : emailContent;
   const guessedTrackId = useMemo(() => {
@@ -290,6 +297,7 @@ export function ImportSessionModal({
 
   useEffect(() => {
     if (!isOpen || step !== "daytona-session" || daytonaStatus !== "idle") return;
+    if (!daytonaCredentialsConfigured) return;
     setDaytonaStatus("loading");
     setDaytonaError(null);
     commitFetchDaytonaSessions({
@@ -313,7 +321,7 @@ export function ImportSessionModal({
         setDaytonaError(error.message || "Unable to fetch Daytona Club Speed sessions.");
       },
     });
-  }, [commitFetchDaytonaSessions, daytonaStatus, isOpen, step]);
+  }, [commitFetchDaytonaSessions, daytonaCredentialsConfigured, daytonaStatus, isOpen, step]);
 
   useEffect(() => {
     if (step !== "preview") return;
@@ -406,6 +414,7 @@ export function ImportSessionModal({
   };
 
   const handleRetryDaytonaSessions = () => {
+    if (!daytonaCredentialsConfigured) return;
     setDaytonaStatus("idle");
     setDaytonaError(null);
   };
@@ -581,6 +590,8 @@ export function ImportSessionModal({
         ) : null}
         {step === "daytona-session" ? (
           <DaytonaSessionStep
+            credentialsConfigured={daytonaCredentialsConfigured}
+            storedValidationError={daytonaValidationError}
             sessions={daytonaSessions}
             status={isFetchingDaytonaSessions && daytonaStatus === "loading" ? "loading" : daytonaStatus}
             errorMessage={daytonaError ?? importError}

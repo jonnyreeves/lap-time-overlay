@@ -12,6 +12,7 @@ import TracksListRoute from "./routes/track/list.js";
 import CreateTrackRoute from "./routes/track/create.js";
 import TrackViewPage from "./routes/track/TrackViewPage.js";
 import AdminToolsRoute from "./routes/admin/index.js";
+import ProfileRoute from "./routes/profile.js";
 
 export const router = createBrowserRouter([
   {
@@ -31,6 +32,7 @@ export const router = createBrowserRouter([
       { path: "/tracks", element: <TracksListRoute /> },
       { path: "/tracks/create", element: <CreateTrackRoute /> },
       { path: "/tracks/view/:trackId", element: <TrackViewPage /> },
+      { path: "/profile", element: <ProfileRoute /> },
       { path: "/admin", element: <AdminToolsRoute /> },
       { path: "*", element: <NotFoundPage /> },
     ],

@@ -22,6 +22,11 @@ export type DaytonaClubspeedSessionSummary = {
   classification: number | null;
 };
 
+export type DaytonaClubspeedCredentials = {
+  username: string;
+  password: string;
+};
+
 export type ImportedSessionData = {
   provider: string;
   sessionFormat: ImportedSessionFormat | null;
@@ -48,11 +53,23 @@ export interface UrlImportProvider {
 }
 
 export class SessionImportError extends Error {
-  code: "UNSUPPORTED_SOURCE" | "FETCH_FAILED" | "PARSE_FAILED" | "AUTH_REQUIRED";
+  code:
+    | "UNSUPPORTED_SOURCE"
+    | "FETCH_FAILED"
+    | "PARSE_FAILED"
+    | "AUTH_REQUIRED"
+    | "CONFIG_REQUIRED"
+    | "INVALID_CREDENTIALS";
 
   constructor(
     message: string,
-    code: "UNSUPPORTED_SOURCE" | "FETCH_FAILED" | "PARSE_FAILED" | "AUTH_REQUIRED"
+    code:
+      | "UNSUPPORTED_SOURCE"
+      | "FETCH_FAILED"
+      | "PARSE_FAILED"
+      | "AUTH_REQUIRED"
+      | "CONFIG_REQUIRED"
+      | "INVALID_CREDENTIALS"
   ) {
     super(message);
     this.name = "SessionImportError";

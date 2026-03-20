@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { errorTextStyles, loadingRowStyles, selectStyles, spinnerStyles } from "./styles.js";
 import {
   buildDaytonaSessionLabel,
@@ -5,6 +6,8 @@ import {
 } from "./helpers.js";
 
 interface DaytonaSessionStepProps {
+  credentialsConfigured: boolean;
+  storedValidationError: string | null;
   sessions: ReadonlyArray<DaytonaClubspeedSessionOption>;
   status: "idle" | "loading" | "loaded" | "error";
   errorMessage: string | null;
@@ -14,6 +17,8 @@ interface DaytonaSessionStepProps {
 }
 
 export function DaytonaSessionStep({
+  credentialsConfigured,
+  storedValidationError,
   sessions,
   status,
   errorMessage,
@@ -21,6 +26,15 @@ export function DaytonaSessionStep({
   onRetry,
   onSelectHeatNo,
 }: DaytonaSessionStepProps) {
+  if (!credentialsConfigured) {
+    return (
+      <p>
+        Daytona Club Speed credentials are not configured. Add them in your{" "}
+        <Link to="/profile">profile</Link> to use this importer.
+      </p>
+    );
+  }
+
   if (status === "loading" || status === "idle") {
     return (
       <p css={loadingRowStyles}>
@@ -31,12 +45,30 @@ export function DaytonaSessionStep({
   }
 
   if (status === "error") {
+    const isCredentialError = (errorMessage ?? "").toLowerCase().includes("credential");
     return (
       <div>
         <p css={errorTextStyles}>{errorMessage ?? "Unable to fetch Daytona Club Speed sessions."}</p>
-        <button type="button" onClick={onRetry}>
-          Retry
-        </button>
+        {isCredentialError ? (
+          <p>
+            Update your Daytona Club Speed credentials in your <Link to="/profile">profile</Link>.
+          </p>
+        ) : (
+          <button type="button" onClick={onRetry}>
+            Retry
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  if (storedValidationError) {
+    return (
+      <div>
+        <p css={errorTextStyles}>{storedValidationError}</p>
+        <p>
+          Update your Daytona Club Speed credentials in your <Link to="/profile">profile</Link>.
+        </p>
       </div>
     );
   }

@@ -19,6 +19,16 @@ const {
   importTrackSessionFromSourceMock: vi.fn(),
 }));
 
+const {
+  getViewerDaytonaClubspeedCredentialsOrThrowMock,
+  markViewerDaytonaClubspeedCredentialInvalidMock,
+  markViewerDaytonaClubspeedCredentialsValidatedMock,
+} = vi.hoisted(() => ({
+  getViewerDaytonaClubspeedCredentialsOrThrowMock: vi.fn(),
+  markViewerDaytonaClubspeedCredentialInvalidMock: vi.fn(),
+  markViewerDaytonaClubspeedCredentialsValidatedMock: vi.fn(),
+}));
+
 vi.mock("../../../../src/web/recordings/mediaLibraryProjection.js", () => ({
   rebuildMediaLibrarySessionProjection: rebuildProjectionMock,
   removeMediaLibraryProjectionsForRecordings: removeProjectionMock,
@@ -32,6 +42,12 @@ vi.mock("../../../../src/web/sessionImport/service.js", () => ({
   fetchDaytonaClubspeedSessions: fetchDaytonaClubspeedSessionsMock,
   importDaytonaClubspeedSession: importDaytonaClubspeedSessionMock,
   importTrackSessionFromSource: importTrackSessionFromSourceMock,
+}));
+
+vi.mock("../../../../src/web/daytonaClubspeedCredentials/service.js", () => ({
+  getViewerDaytonaClubspeedCredentialsOrThrow: getViewerDaytonaClubspeedCredentialsOrThrowMock,
+  markViewerDaytonaClubspeedCredentialInvalid: markViewerDaytonaClubspeedCredentialInvalidMock,
+  markViewerDaytonaClubspeedCredentialsValidated: markViewerDaytonaClubspeedCredentialsValidatedMock,
 }));
 
 import { createMockGraphQLContext } from "../context.mock.js";
@@ -93,6 +109,10 @@ const mockLayout = {
 describe("trackSession resolvers", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    getViewerDaytonaClubspeedCredentialsOrThrowMock.mockReturnValue({
+      username: "clubspeed-user",
+      password: "clubspeed-pass",
+    });
     fetchWeatherMock.mockResolvedValue({ temperature: null, conditions: null });
     importTrackSessionFromSourceMock.mockResolvedValue({
       provider: "alphatiming",
@@ -730,7 +750,12 @@ describe("trackSession resolvers", () => {
 
     const result = await rootValue.fetchDaytonaClubspeedSessions({}, context);
 
-    expect(fetchDaytonaClubspeedSessionsMock).toHaveBeenCalledWith();
+    expect(getViewerDaytonaClubspeedCredentialsOrThrowMock).toHaveBeenCalledWith("user-1");
+    expect(fetchDaytonaClubspeedSessionsMock).toHaveBeenCalledWith({
+      username: "clubspeed-user",
+      password: "clubspeed-pass",
+    });
+    expect(markViewerDaytonaClubspeedCredentialsValidatedMock).toHaveBeenCalledWith("user-1");
     expect(result).toEqual({
       sessions: [
         {
@@ -759,7 +784,12 @@ describe("trackSession resolvers", () => {
 
     const result = await rootValue.importDaytonaClubspeedSession({ input: { heatNo } }, context);
 
-    expect(importDaytonaClubspeedSessionMock).toHaveBeenCalledWith(heatNo);
+    expect(getViewerDaytonaClubspeedCredentialsOrThrowMock).toHaveBeenCalledWith("user-1");
+    expect(importDaytonaClubspeedSessionMock).toHaveBeenCalledWith(heatNo, {
+      username: "clubspeed-user",
+      password: "clubspeed-pass",
+    });
+    expect(markViewerDaytonaClubspeedCredentialsValidatedMock).toHaveBeenCalledWith("user-1");
     expect(result).toMatchObject({
       provider: "daytona",
       sessionFormat: "Practice",
@@ -781,6 +811,34 @@ describe("trackSession resolvers", () => {
         context
       )
     ).rejects.toThrowError("No Daytona Club Speed sessions were found");
+  });
+
+  it("fetchDaytonaClubspeedSessions surfaces missing credentials as validation failures", async () => {
+    getViewerDaytonaClubspeedCredentialsOrThrowMock.mockImplementationOnce(() => {
+      throw new SessionImportError(
+        "Daytona Club Speed credentials are not configured. Add them in your profile.",
+        "CONFIG_REQUIRED"
+      );
+    });
+
+    await expect(rootValue.fetchDaytonaClubspeedSessions({}, context)).rejects.toThrowError(
+      "Daytona Club Speed credentials are not configured. Add them in your profile."
+    );
+  });
+
+  it("fetchDaytonaClubspeedSessions records invalid credentials", async () => {
+    fetchDaytonaClubspeedSessionsMock.mockRejectedValueOnce(
+      new SessionImportError("Invalid Daytona Club Speed credentials", "INVALID_CREDENTIALS")
+    );
+
+    await expect(rootValue.fetchDaytonaClubspeedSessions({}, context)).rejects.toThrowError(
+      "Invalid Daytona Club Speed credentials"
+    );
+
+    expect(markViewerDaytonaClubspeedCredentialInvalidMock).toHaveBeenCalledWith(
+      "user-1",
+      "Invalid Daytona Club Speed credentials"
+    );
   });
 
   it("createTrackSession rejects when kart does not exist", async () => {

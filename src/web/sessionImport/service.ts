@@ -4,6 +4,7 @@ import {
   importDaytonaClubspeedSession as importDaytonaClubspeedSessionFromProvider,
 } from "./providers/daytonaClubspeed.js";
 import {
+  type DaytonaClubspeedCredentials,
   type DaytonaClubspeedSessionSummary,
   type ImportedSessionData,
   SessionImportError,
@@ -39,16 +40,19 @@ export async function importTrackSessionFromSource(
   throw new SessionImportError("Unsupported import source URL", "UNSUPPORTED_SOURCE");
 }
 
-export async function fetchDaytonaClubspeedSessions(): Promise<DaytonaClubspeedSessionSummary[]> {
-  return fetchDaytonaClubspeedSessionsFromProvider();
+export async function fetchDaytonaClubspeedSessions(
+  credentials: DaytonaClubspeedCredentials
+): Promise<DaytonaClubspeedSessionSummary[]> {
+  return fetchDaytonaClubspeedSessionsFromProvider(credentials);
 }
 
 export async function importDaytonaClubspeedSession(
-  heatNo: string | null | undefined
+  heatNo: string | null | undefined,
+  credentials: DaytonaClubspeedCredentials
 ): Promise<ImportedSessionData> {
   const trimmed = normalizeSourceInput(heatNo);
   if (!trimmed) {
     throw new SessionImportError("heatNo is required", "UNSUPPORTED_SOURCE");
   }
-  return importDaytonaClubspeedSessionFromProvider(trimmed);
+  return importDaytonaClubspeedSessionFromProvider(trimmed, credentials);
 }

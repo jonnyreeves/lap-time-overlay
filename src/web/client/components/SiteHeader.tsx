@@ -36,6 +36,8 @@ export function SiteHeader({ viewer }: Props) {
         {isLoggedIn ? (
           <p className="lede" css={ledeStyles}>
             Signed in as {data.username}
+            {" "}
+            | <Link to="/profile">Profile</Link>
             {data.isAdmin ? (
               <>
                 {" "}

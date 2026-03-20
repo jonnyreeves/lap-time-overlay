@@ -3,10 +3,15 @@ import {
   fetchDaytonaClubspeedSessions,
   importDaytonaClubspeedSession,
 } from "../../../src/web/sessionImport/service.js";
+import type { DaytonaClubspeedCredentials } from "../../../src/web/sessionImport/types.js";
 
 const signInUrl = "https://daytonasp.clubspeedtiming.com/sp_center/SignIn.aspx";
 const historyUrl = "https://daytonasp.clubspeedtiming.com/sp_center/RacerHistory.aspx?CustID=MTI5MDkxMA==";
 const detailUrl = "https://daytonasp.clubspeedtiming.com/sp_center/HeatDetails.aspx?HeatNo=81389";
+const credentials: DaytonaClubspeedCredentials = {
+  username: "clubspeed-user",
+  password: "clubspeed-pass",
+};
 
 const signInHtml = `
 <form>
@@ -147,7 +152,7 @@ describe("daytona clubspeed import service", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const sessions = await fetchDaytonaClubspeedSessions();
+    const sessions = await fetchDaytonaClubspeedSessions(credentials);
 
     expect(sessions).toHaveLength(2);
     expect(sessions[0]).toMatchObject({
@@ -184,8 +189,8 @@ describe("daytona clubspeed import service", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const sessions = await fetchDaytonaClubspeedSessions();
-    const imported = await importDaytonaClubspeedSession(sessions[0]?.heatNo ?? "");
+    const sessions = await fetchDaytonaClubspeedSessions(credentials);
+    const imported = await importDaytonaClubspeedSession(sessions[0]?.heatNo ?? "", credentials);
 
     expect(imported.provider).toBe("daytona");
     expect(imported.sessionFormat).toBe("Practice");
@@ -232,9 +237,12 @@ describe("daytona clubspeed import service", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const sessions = await fetchDaytonaClubspeedSessions();
+    const sessions = await fetchDaytonaClubspeedSessions(credentials);
     const sprintSession = sessions.find((session) => session.activityType === "DMAX Sprint - Kart 143");
-    const imported = await importDaytonaClubspeedSession(sprintSession?.heatNo ?? "");
+    const imported = await importDaytonaClubspeedSession(
+      sprintSession?.heatNo ?? "",
+      credentials
+    );
 
     expect(imported.sessionDate).toBe("2026-03-17");
     expect(imported.sessionTime).toBe("20:00");
@@ -273,8 +281,8 @@ describe("daytona clubspeed import service", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const sessions = await fetchDaytonaClubspeedSessions();
-    const imported = await importDaytonaClubspeedSession(sessions[0]?.heatNo ?? "");
+    const sessions = await fetchDaytonaClubspeedSessions(credentials);
+    const imported = await importDaytonaClubspeedSession(sessions[0]?.heatNo ?? "", credentials);
 
     expect(imported.sessionFormat).toBe("Practice");
     expect(imported.kartTypeName).toBe("Sodi");

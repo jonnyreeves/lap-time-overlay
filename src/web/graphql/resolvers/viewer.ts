@@ -1,4 +1,5 @@
 import { GraphQLError } from "graphql";
+import { getViewerDaytonaClubspeedCredentialStatus } from "../../daytonaClubspeedCredentials/service.js";
 import { buildRivalTrend, computeBestNAvg } from "../../shared/rivalAnalysis.js";
 import { toUserPayload } from "./auth.js";
 import { toTrackPayload } from "./track.js";
@@ -326,6 +327,18 @@ export const viewerResolvers = {
       rivals: (args: { first?: number }) => {
         const first = typeof args.first === "number" && args.first > 0 ? args.first : 10;
         return getRivalSummaries(user.id, repositories, first);
+      },
+      daytonaClubspeedCredentialStatus: () => {
+        const status = getViewerDaytonaClubspeedCredentialStatus(user.id);
+        return {
+          configured: status.configured,
+          username: status.username,
+          lastValidatedAt:
+            status.lastValidatedAt == null
+              ? null
+              : new Date(status.lastValidatedAt).toISOString(),
+          lastValidationError: status.lastValidationError,
+        };
       },
       recentTrackSessions: (args: RecentTrackSessionsArgs) => {
         const sessions = findTrackSessionsForUser(user.id, repositories);

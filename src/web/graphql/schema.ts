@@ -7,6 +7,7 @@ import { trackSessionResolvers } from "./resolvers/trackSession.js";
 import { trackRecordingResolvers } from "./resolvers/trackRecording.js";
 import { viewerResolvers } from "./resolvers/viewer.js";
 import { adminResolvers } from "./resolvers/admin.js";
+import { daytonaClubspeedCredentialResolvers } from "./resolvers/daytonaClubspeedCredentials.js";
 
 const schemaFileContents = readFileSync(
   pathResolve(process.cwd(), "schema.graphql"),
@@ -33,6 +34,12 @@ export const rootValue = {
   fetchDaytonaClubspeedSessions: trackSessionResolvers.fetchDaytonaClubspeedSessions,
   importTrackSessionFromUrl: trackSessionResolvers.importTrackSessionFromUrl,
   importDaytonaClubspeedSession: trackSessionResolvers.importDaytonaClubspeedSession,
+  saveViewerDaytonaClubspeedCredentials:
+    daytonaClubspeedCredentialResolvers.saveViewerDaytonaClubspeedCredentials,
+  testViewerDaytonaClubspeedCredentials:
+    daytonaClubspeedCredentialResolvers.testViewerDaytonaClubspeedCredentials,
+  deleteViewerDaytonaClubspeedCredentials:
+    daytonaClubspeedCredentialResolvers.deleteViewerDaytonaClubspeedCredentials,
   deleteTrackSession: trackSessionResolvers.deleteTrackSession,
   startTrackRecordingUpload: trackRecordingResolvers.startTrackRecordingUpload,
   markPrimaryTrackRecording: trackRecordingResolvers.markPrimaryTrackRecording,

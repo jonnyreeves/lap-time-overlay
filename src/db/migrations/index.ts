@@ -20,4 +20,5 @@ export const migrations: Migration[] = [
   (await import("./11_add_is_indoors_to_tracks.js")).migration,
   (await import("./12_add_app_settings.js")).migration,
   (await import("./13_add_session_participants.js")).migration,
+  (await import("./14_add_user_daytona_clubspeed_credentials.js")).migration,
 ];

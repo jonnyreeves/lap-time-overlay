@@ -23,6 +23,10 @@ import {
   trackSessionParticipantsRepository,
   type TrackSessionParticipantsRepository,
 } from "../../db/track_session_participants.js";
+import {
+  userDaytonaClubspeedCredentialsRepository,
+  type UserDaytonaClubspeedCredentialsRepository,
+} from "../../db/user_daytona_clubspeed_credentials.js";
 
 export interface Repositories {
   tracks: TrackRepository;
@@ -35,6 +39,7 @@ export interface Repositories {
   trackKarts: TrackKartsRepository;
   trackLayouts: TrackLayoutsRepository;
   trackSessionParticipants: TrackSessionParticipantsRepository;
+  userDaytonaClubspeedCredentials: UserDaytonaClubspeedCredentialsRepository;
 }
 
 export function createRepositories(): Repositories {
@@ -49,5 +54,6 @@ export function createRepositories(): Repositories {
     trackKarts: trackKartsRepository,
     trackLayouts: trackLayoutsRepository,
     trackSessionParticipants: trackSessionParticipantsRepository,
+    userDaytonaClubspeedCredentials: userDaytonaClubspeedCredentialsRepository,
   };
 }

@@ -1,4 +1,5 @@
 import {
+  type DaytonaClubspeedCredentials,
   type DaytonaClubspeedSessionSummary,
   type ImportedSessionData,
   type ImportedSessionDriver,
@@ -13,8 +14,6 @@ const BROWSER_USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 const FETCH_TIMEOUT_MS = 12_000;
 const FETCH_MAX_CHARS = 2_500_000;
-const CLUBSPEED_USERNAME = "JohnReeves";
-const CLUBSPEED_PASSWORD = "Daytona123";
 
 type DaytonaHistoryRow = DaytonaClubspeedSessionSummary & {
   heatId: string;
@@ -207,7 +206,9 @@ function parseHiddenInput(html: string, id: string): string {
   return decodeHtmlEntities(match[1]);
 }
 
-async function loginToDaytonaClubspeed(): Promise<DaytonaSessionState> {
+async function loginToDaytonaClubspeed(
+  credentials: DaytonaClubspeedCredentials
+): Promise<DaytonaSessionState> {
   const cookieJar = new Map<string, string>();
   const signInUrl = `https://${CLUBSPEED_HOST}${SIGN_IN_PATH}`;
   const signInResponse = await fetchHtml(signInUrl, { cookieJar });
@@ -219,8 +220,8 @@ async function loginToDaytonaClubspeed(): Promise<DaytonaSessionState> {
   body.set("__VIEWSTATE", parseHiddenInput(signInHtml, "__VIEWSTATE"));
   body.set("__VIEWSTATEGENERATOR", parseHiddenInput(signInHtml, "__VIEWSTATEGENERATOR"));
   body.set("__EVENTVALIDATION", parseHiddenInput(signInHtml, "__EVENTVALIDATION"));
-  body.set("tbxUserName", CLUBSPEED_USERNAME);
-  body.set("tbxPassword", CLUBSPEED_PASSWORD);
+  body.set("tbxUserName", credentials.username);
+  body.set("tbxPassword", credentials.password);
   body.set("btnSubmit", "Submit");
 
   const loginResponse = await fetchHtml(signInUrl, {
@@ -234,7 +235,7 @@ async function loginToDaytonaClubspeed(): Promise<DaytonaSessionState> {
 
   const location = loginResponse.headers.get("location");
   if (loginResponse.status !== 302 || !location || !cookieJar.get(".ASPXAUTH")) {
-    throw new SessionImportError("Daytona Club Speed login failed", "AUTH_REQUIRED");
+    throw new SessionImportError("Invalid Daytona Club Speed credentials", "INVALID_CREDENTIALS");
   }
 
   const historyUrl = new URL(location, signInUrl);
@@ -594,8 +595,10 @@ function mapHeatToImportedSession(
   };
 }
 
-export async function fetchDaytonaClubspeedSessions(): Promise<DaytonaClubspeedSessionSummary[]> {
-  const state = await loginToDaytonaClubspeed();
+export async function fetchDaytonaClubspeedSessions(
+  credentials: DaytonaClubspeedCredentials
+): Promise<DaytonaClubspeedSessionSummary[]> {
+  const state = await loginToDaytonaClubspeed(credentials);
   const historyHtml = await fetchHistoryHtml(state);
   const rows = parseHistoryRows(historyHtml);
   if (rows.length === 0) {
@@ -613,7 +616,8 @@ export async function fetchDaytonaClubspeedSessions(): Promise<DaytonaClubspeedS
 }
 
 export async function importDaytonaClubspeedSession(
-  heatNo: string
+  heatNo: string,
+  credentials: DaytonaClubspeedCredentials
 ): Promise<ImportedSessionData> {
   const token = heatNo.trim();
   if (!token) {
@@ -624,7 +628,7 @@ export async function importDaytonaClubspeedSession(
     throw new SessionImportError("Invalid Daytona Club Speed session selection", "UNSUPPORTED_SOURCE");
   }
 
-  const state = await loginToDaytonaClubspeed();
+  const state = await loginToDaytonaClubspeed(credentials);
   const historyHtml = await fetchHistoryHtml(state);
   const rows = parseHistoryRows(historyHtml);
   const detailHtml = await fetchHeatDetailsHtml(state, selection.heatId);
