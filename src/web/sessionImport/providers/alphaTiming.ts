@@ -562,6 +562,8 @@ async function importAlphaTimingSession(match: UrlImportProviderMatch): Promise<
     sessionFastestLapSeconds: parseSessionFastestLap(resultText),
     kartNumber: null,
     trackLayoutName: null,
+    selfDriverName: null,
+    kartTypeName: null,
     laps: [],
     drivers,
   };

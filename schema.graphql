@@ -244,6 +244,23 @@ input ImportTrackSessionFromUrlInput {
   source: String!
 }
 
+input ImportDaytonaClubspeedSessionInput {
+  heatNo: String!
+}
+
+type DaytonaClubspeedSessionSummary {
+  heatNo: String!
+  activityType: String!
+  sessionDate: String
+  sessionTime: String
+  kartNumber: String
+  classification: Int
+}
+
+type FetchDaytonaClubspeedSessionsPayload {
+  sessions: [DaytonaClubspeedSessionSummary!]!
+}
+
 type ImportedSessionLap {
   lapNumber: Int!
   timeSeconds: Float!
@@ -266,6 +283,8 @@ type ImportTrackSessionFromUrlPayload {
   sessionFastestLapSeconds: Float
   kartNumber: String
   trackLayoutName: String
+  selfDriverName: String
+  kartTypeName: String
   laps: [ImportedSessionLap!]!
   drivers: [ImportedSessionDriver!]!
 }
@@ -401,8 +420,12 @@ type Mutation {
   fetchTrackSessionTemperature(
     input: FetchTrackSessionTemperatureInput!
   ): FetchTrackSessionTemperaturePayload!
+  fetchDaytonaClubspeedSessions: FetchDaytonaClubspeedSessionsPayload!
   importTrackSessionFromUrl(
     input: ImportTrackSessionFromUrlInput!
+  ): ImportTrackSessionFromUrlPayload!
+  importDaytonaClubspeedSession(
+    input: ImportDaytonaClubspeedSessionInput!
   ): ImportTrackSessionFromUrlPayload!
   deleteTrackSession(id: ID!): DeleteTrackSessionPayload!
   startTrackRecordingUpload(

@@ -9,7 +9,13 @@ const { fetchWeatherMock } = vi.hoisted(() => ({
   fetchWeatherMock: vi.fn(),
 }));
 
-const { importTrackSessionFromSourceMock } = vi.hoisted(() => ({
+const {
+  fetchDaytonaClubspeedSessionsMock,
+  importDaytonaClubspeedSessionMock,
+  importTrackSessionFromSourceMock,
+} = vi.hoisted(() => ({
+  fetchDaytonaClubspeedSessionsMock: vi.fn(),
+  importDaytonaClubspeedSessionMock: vi.fn(),
   importTrackSessionFromSourceMock: vi.fn(),
 }));
 
@@ -23,6 +29,8 @@ vi.mock("../../../../src/web/shared/weather.js", () => ({
 }));
 
 vi.mock("../../../../src/web/sessionImport/service.js", () => ({
+  fetchDaytonaClubspeedSessions: fetchDaytonaClubspeedSessionsMock,
+  importDaytonaClubspeedSession: importDaytonaClubspeedSessionMock,
   importTrackSessionFromSource: importTrackSessionFromSourceMock,
 }));
 
@@ -95,6 +103,8 @@ describe("trackSession resolvers", () => {
       sessionFastestLapSeconds: 51.179,
       kartNumber: null,
       trackLayoutName: null,
+      selfDriverName: null,
+      kartTypeName: null,
       laps: [],
       drivers: [
         {
@@ -102,6 +112,37 @@ describe("trackSession resolvers", () => {
           classification: 2,
           kartNumber: "16",
           laps: [{ lapNumber: 1, timeSeconds: 52.111, displayTime: "52.111" }],
+        },
+      ],
+    });
+    fetchDaytonaClubspeedSessionsMock.mockResolvedValue([
+      {
+        heatNo: "81389|2026-03-11|19%3A30|149|3|49.411",
+        activityType: "DMAX Practice 20mins - Kart 149",
+        sessionDate: "2026-03-11",
+        sessionTime: "19:30",
+        kartNumber: "149",
+        classification: 3,
+      },
+    ]);
+    importDaytonaClubspeedSessionMock.mockResolvedValue({
+      provider: "daytona",
+      sessionFormat: "Practice",
+      sessionDate: "2026-03-11",
+      sessionTime: "19:30",
+      classification: 3,
+      sessionFastestLapSeconds: 46.952,
+      kartNumber: "149",
+      trackLayoutName: null,
+      selfDriverName: "L - Jonny R",
+      kartTypeName: "DMAX",
+      laps: [{ lapNumber: 1, timeSeconds: 64.37, displayTime: "1:04.370" }],
+      drivers: [
+        {
+          name: "L - Jonny R",
+          classification: 3,
+          kartNumber: null,
+          laps: [{ lapNumber: 1, timeSeconds: 64.37, displayTime: "1:04.370" }],
         },
       ],
     });
@@ -667,6 +708,79 @@ describe("trackSession resolvers", () => {
         context
       )
     ).rejects.toThrowError("Unsupported import source URL");
+  });
+
+  it("fetchDaytonaClubspeedSessions requires authentication", async () => {
+    await expect(
+      rootValue.fetchDaytonaClubspeedSessions({}, { ...context, currentUser: null })
+    ).rejects.toThrowError("Authentication required");
+  });
+
+  it("fetchDaytonaClubspeedSessions delegates to import service", async () => {
+    fetchDaytonaClubspeedSessionsMock.mockResolvedValueOnce([
+      {
+        heatNo: "81389|2026-03-11|19%3A30|149|3|49.411",
+        activityType: "DMAX Practice 20mins - Kart 149",
+        sessionDate: "2026-03-11",
+        sessionTime: "19:30",
+        kartNumber: "149",
+        classification: 3,
+      },
+    ]);
+
+    const result = await rootValue.fetchDaytonaClubspeedSessions({}, context);
+
+    expect(fetchDaytonaClubspeedSessionsMock).toHaveBeenCalledWith();
+    expect(result).toEqual({
+      sessions: [
+        {
+          heatNo: "81389|2026-03-11|19%3A30|149|3|49.411",
+          activityType: "DMAX Practice 20mins - Kart 149",
+          sessionDate: "2026-03-11",
+          sessionTime: "19:30",
+          kartNumber: "149",
+          classification: 3,
+        },
+      ],
+    });
+  });
+
+  it("importDaytonaClubspeedSession requires authentication", async () => {
+    await expect(
+      rootValue.importDaytonaClubspeedSession(
+        { input: { heatNo: "81389|2026-03-11|19%3A30|149|3|49.411" } },
+        { ...context, currentUser: null }
+      )
+    ).rejects.toThrowError("Authentication required");
+  });
+
+  it("importDaytonaClubspeedSession delegates to import service", async () => {
+    const heatNo = "81389|2026-03-11|19%3A30|149|3|49.411";
+
+    const result = await rootValue.importDaytonaClubspeedSession({ input: { heatNo } }, context);
+
+    expect(importDaytonaClubspeedSessionMock).toHaveBeenCalledWith(heatNo);
+    expect(result).toMatchObject({
+      provider: "daytona",
+      sessionFormat: "Practice",
+      sessionDate: "2026-03-11",
+      sessionTime: "19:30",
+      selfDriverName: "L - Jonny R",
+      kartTypeName: "DMAX",
+    });
+  });
+
+  it("importDaytonaClubspeedSession surfaces import errors as validation failures", async () => {
+    importDaytonaClubspeedSessionMock.mockRejectedValueOnce(
+      new SessionImportError("No Daytona Club Speed sessions were found", "PARSE_FAILED")
+    );
+
+    await expect(
+      rootValue.importDaytonaClubspeedSession(
+        { input: { heatNo: "missing" } },
+        context
+      )
+    ).rejects.toThrowError("No Daytona Club Speed sessions were found");
   });
 
   it("createTrackSession rejects when kart does not exist", async () => {

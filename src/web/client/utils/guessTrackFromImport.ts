@@ -22,6 +22,11 @@ type TrackLayoutMetadata = {
   readonly name: string;
 };
 
+type KartMetadata = {
+  readonly id: string;
+  readonly name: string;
+};
+
 function normalizeMatchValue(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
@@ -130,6 +135,54 @@ export function guessTrackLayoutIdFromImport(
     if (score > bestScore) {
       bestScore = score;
       bestMatchId = layout.id;
+    }
+  }
+
+  return bestScore > 0 ? bestMatchId : null;
+}
+
+export function guessKartIdFromImport(
+  karts: ReadonlyArray<KartMetadata>,
+  kartTypeName: string | null | undefined
+): string | null {
+  if (!karts.length || !kartTypeName) {
+    return null;
+  }
+
+  const normalizedTarget = normalizeMatchValue(kartTypeName);
+  if (!normalizedTarget) {
+    return null;
+  }
+
+  let bestMatchId: string | null = null;
+  let bestScore = 0;
+  const targetWords = normalizedTarget.split(" ").filter(Boolean);
+
+  for (const kart of karts) {
+    const normalizedCandidate = normalizeMatchValue(kart.name);
+    if (!normalizedCandidate) continue;
+
+    let score = 0;
+    if (normalizedCandidate === normalizedTarget) {
+      score += 100;
+    }
+    if (normalizedCandidate.includes(normalizedTarget)) {
+      score += normalizedTarget.length + 20;
+    }
+    if (normalizedTarget.includes(normalizedCandidate)) {
+      score += normalizedCandidate.length + 10;
+    }
+
+    const candidateWords = normalizedCandidate.split(" ").filter(Boolean);
+    for (const word of targetWords) {
+      if (candidateWords.includes(word)) {
+        score += 4;
+      }
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestMatchId = kart.id;
     }
   }
 

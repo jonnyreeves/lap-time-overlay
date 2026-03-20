@@ -35,6 +35,10 @@ import {
   removeMediaLibraryProjectionsForRecordings,
 } from "../../recordings/mediaLibraryProjection.js";
 import { importTrackSessionFromSource } from "../../sessionImport/service.js";
+import {
+  fetchDaytonaClubspeedSessions,
+  importDaytonaClubspeedSession,
+} from "../../sessionImport/service.js";
 import { SessionImportError } from "../../sessionImport/types.js";
 
 const DEBUG_UPLOAD_PROGRESS = process.env.DEBUG_UPLOAD_PROGRESS === "1";
@@ -107,6 +111,12 @@ export type FetchTrackSessionTemperatureArgs = {
 export type ImportTrackSessionFromUrlArgs = {
   input?: {
     source?: string;
+  };
+};
+
+export type ImportDaytonaClubspeedSessionArgs = {
+  input?: {
+    heatNo?: string;
   };
 };
 
@@ -1233,6 +1243,8 @@ export const trackSessionResolvers = {
         sessionFastestLapSeconds: imported.sessionFastestLapSeconds,
         kartNumber: imported.kartNumber,
         trackLayoutName: imported.trackLayoutName,
+        selfDriverName: imported.selfDriverName,
+        kartTypeName: imported.kartTypeName,
         laps: imported.laps,
         drivers: imported.drivers,
       };
@@ -1244,6 +1256,72 @@ export const trackSessionResolvers = {
       }
       console.warn("Failed to import track session from URL", error);
       throw new GraphQLError("Unable to import session from URL", {
+        extensions: { code: "INTERNAL_SERVER_ERROR" },
+      });
+    }
+  },
+  fetchDaytonaClubspeedSessions: async (_args: unknown, context: GraphQLContext) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+
+    try {
+      return { sessions: await fetchDaytonaClubspeedSessions() };
+    } catch (error) {
+      if (error instanceof SessionImportError) {
+        throw new GraphQLError(error.message, {
+          extensions: { code: "VALIDATION_FAILED" },
+        });
+      }
+      console.warn("Failed to fetch Daytona Club Speed sessions", error);
+      throw new GraphQLError("Unable to fetch Daytona Club Speed sessions", {
+        extensions: { code: "INTERNAL_SERVER_ERROR" },
+      });
+    }
+  },
+  importDaytonaClubspeedSession: async (
+    args: ImportDaytonaClubspeedSessionArgs,
+    context: GraphQLContext
+  ) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+
+    const heatNo = args.input?.heatNo?.trim();
+    if (!heatNo) {
+      throw new GraphQLError("heatNo is required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    try {
+      const imported = await importDaytonaClubspeedSession(heatNo);
+      return {
+        provider: imported.provider,
+        sessionFormat: imported.sessionFormat,
+        sessionDate: imported.sessionDate,
+        sessionTime: imported.sessionTime,
+        classification: imported.classification,
+        sessionFastestLapSeconds: imported.sessionFastestLapSeconds,
+        kartNumber: imported.kartNumber,
+        trackLayoutName: imported.trackLayoutName,
+        selfDriverName: imported.selfDriverName,
+        kartTypeName: imported.kartTypeName,
+        laps: imported.laps,
+        drivers: imported.drivers,
+      };
+    } catch (error) {
+      if (error instanceof SessionImportError) {
+        throw new GraphQLError(error.message, {
+          extensions: { code: "VALIDATION_FAILED" },
+        });
+      }
+      console.warn("Failed to import Daytona Club Speed session", error);
+      throw new GraphQLError("Unable to import Daytona Club Speed session", {
         extensions: { code: "INTERNAL_SERVER_ERROR" },
       });
     }

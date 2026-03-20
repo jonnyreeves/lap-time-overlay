@@ -15,7 +15,11 @@ import { LapInputsCard } from "../../components/session/LapInputsCard.js";
 import { CreateTrackModal } from "../../components/tracks/CreateTrackModal.js";
 import { useLapRows, type LapInputPayload } from "../../hooks/useLapRows.js";
 import { formatLapTimeSeconds, parseLapTimeString } from "../../utils/lapTime.js";
-import { guessTrackIdFromImport, guessTrackLayoutIdFromImport } from "../../utils/guessTrackFromImport.js";
+import {
+  guessKartIdFromImport,
+  guessTrackIdFromImport,
+  guessTrackLayoutIdFromImport,
+} from "../../utils/guessTrackFromImport.js";
 import { type SessionImportSelection } from "../../utils/sessionImportTypes.js";
 import { prependCreatedSessionToRecentSessions, prependTrackForCreatedSession } from "./createUpdater.js";
 import { useBreadcrumbs } from "../../hooks/useBreadcrumbs.js";
@@ -513,13 +517,23 @@ export default function CreateSessionRoute() {
       });
     const resolvedTrackId = nextTrackId ?? trackId;
     const resolvedTrack = data.tracks.find((track) => track.id === resolvedTrackId);
-    const guessedLayoutId = resolvedTrack
-      ? guessTrackLayoutIdFromImport(resolvedTrack.trackLayouts, importResult.trackLayoutName)
+    const importedTrackLayoutId = importResult.trackLayoutId?.trim() ?? "";
+    const guessedLayoutId =
+      importedTrackLayoutId ||
+      (resolvedTrack
+        ? guessTrackLayoutIdFromImport(resolvedTrack.trackLayouts, importResult.trackLayoutName)
+        : null);
+    const guessedKartId = resolvedTrack
+      ? guessKartIdFromImport(resolvedTrack.karts, importResult.kartTypeName)
       : null;
+    const fallbackKartId = resolvedTrack?.karts?.[0]?.id ?? "";
     const fallbackLayoutId = resolvedTrack?.trackLayouts?.[0]?.id ?? "";
 
     if (nextTrackId && nextTrackId !== trackId) {
       handleTrackChange(nextTrackId);
+    }
+    if (resolvedTrack) {
+      setKartId(guessedKartId ?? fallbackKartId);
     }
     if (resolvedTrack) {
       setTrackLayoutId(guessedLayoutId ?? fallbackLayoutId);

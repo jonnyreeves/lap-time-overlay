@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  guessKartIdFromImport,
   guessTrackIdFromImport,
   guessTrackLayoutIdFromImport,
 } from "../../../../src/web/client/utils/guessTrackFromImport.js";
@@ -70,5 +71,21 @@ describe("guessTrackLayoutIdFromImport", () => {
   it("returns null when the layout name is missing", () => {
     const layouts = [{ id: "layout:gp", name: "GP Circuit" }];
     expect(guessTrackLayoutIdFromImport(layouts, null)).toBeNull();
+  });
+});
+
+describe("guessKartIdFromImport", () => {
+  it("matches kart names fuzzily", () => {
+    const karts = [
+      { id: "kart:dmax", name: "Daytona DMAX" },
+      { id: "kart:sodi", name: "Sodi SR5" },
+    ];
+
+    expect(guessKartIdFromImport(karts, "DMAX")).toBe("kart:dmax");
+  });
+
+  it("returns null when no kart name matches", () => {
+    const karts = [{ id: "kart:sodi", name: "Sodi SR5" }];
+    expect(guessKartIdFromImport(karts, "Rotax")).toBeNull();
   });
 });

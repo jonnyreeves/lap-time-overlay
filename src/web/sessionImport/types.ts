@@ -13,6 +13,15 @@ export type ImportedSessionDriver = {
   laps: ImportedSessionLap[];
 };
 
+export type DaytonaClubspeedSessionSummary = {
+  heatNo: string;
+  activityType: string;
+  sessionDate: string | null;
+  sessionTime: string | null;
+  kartNumber: string | null;
+  classification: number | null;
+};
+
 export type ImportedSessionData = {
   provider: string;
   sessionFormat: ImportedSessionFormat | null;
@@ -22,6 +31,8 @@ export type ImportedSessionData = {
   sessionFastestLapSeconds: number | null;
   kartNumber: string | null;
   trackLayoutName: string | null;
+  selfDriverName: string | null;
+  kartTypeName: string | null;
   laps: ImportedSessionLap[];
   drivers: ImportedSessionDriver[];
 };

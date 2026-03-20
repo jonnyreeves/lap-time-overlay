@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<4a3bc5a0bd138022b2aabbd59e954024>>
+ * @generated SignedSource<<aed49ad1939070195aa8dc067150ce15>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -9,14 +9,14 @@
 // @ts-nocheck
 
 import { ConcreteRequest } from 'relay-runtime';
-export type ImportTrackSessionFromUrlInput = {
-  source: string;
+export type ImportDaytonaClubspeedSessionInput = {
+  heatNo: string;
 };
-export type ImportSessionModalImportTrackSessionFromUrlMutation$variables = {
-  input: ImportTrackSessionFromUrlInput;
+export type ImportSessionModalImportDaytonaClubspeedSessionMutation$variables = {
+  input: ImportDaytonaClubspeedSessionInput;
 };
-export type ImportSessionModalImportTrackSessionFromUrlMutation$data = {
-  readonly importTrackSessionFromUrl: {
+export type ImportSessionModalImportDaytonaClubspeedSessionMutation$data = {
+  readonly importDaytonaClubspeedSession: {
     readonly classification: number | null | undefined;
     readonly drivers: ReadonlyArray<{
       readonly classification: number | null | undefined;
@@ -44,9 +44,9 @@ export type ImportSessionModalImportTrackSessionFromUrlMutation$data = {
     readonly trackLayoutName: string | null | undefined;
   };
 };
-export type ImportSessionModalImportTrackSessionFromUrlMutation = {
-  response: ImportSessionModalImportTrackSessionFromUrlMutation$data;
-  variables: ImportSessionModalImportTrackSessionFromUrlMutation$variables;
+export type ImportSessionModalImportDaytonaClubspeedSessionMutation = {
+  response: ImportSessionModalImportDaytonaClubspeedSessionMutation$data;
+  variables: ImportSessionModalImportDaytonaClubspeedSessionMutation$variables;
 };
 
 const node: ConcreteRequest = (function(){
@@ -115,7 +115,7 @@ v4 = [
     ],
     "concreteType": "ImportTrackSessionFromUrlPayload",
     "kind": "LinkedField",
-    "name": "importTrackSessionFromUrl",
+    "name": "importDaytonaClubspeedSession",
     "plural": false,
     "selections": [
       {
@@ -207,7 +207,7 @@ return {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
-    "name": "ImportSessionModalImportTrackSessionFromUrlMutation",
+    "name": "ImportSessionModalImportDaytonaClubspeedSessionMutation",
     "selections": (v4/*: any*/),
     "type": "Mutation",
     "abstractKey": null
@@ -216,20 +216,20 @@ return {
   "operation": {
     "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
-    "name": "ImportSessionModalImportTrackSessionFromUrlMutation",
+    "name": "ImportSessionModalImportDaytonaClubspeedSessionMutation",
     "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "b47992e8dd4f44a673fa604dfb5f1985",
+    "cacheID": "c5169cb51a0f9a8d8c43154612572b36",
     "id": null,
     "metadata": {},
-    "name": "ImportSessionModalImportTrackSessionFromUrlMutation",
+    "name": "ImportSessionModalImportDaytonaClubspeedSessionMutation",
     "operationKind": "mutation",
-    "text": "mutation ImportSessionModalImportTrackSessionFromUrlMutation(\n  $input: ImportTrackSessionFromUrlInput!\n) {\n  importTrackSessionFromUrl(input: $input) {\n    provider\n    sessionFormat\n    sessionDate\n    sessionTime\n    classification\n    sessionFastestLapSeconds\n    kartNumber\n    trackLayoutName\n    selfDriverName\n    kartTypeName\n    laps {\n      lapNumber\n      timeSeconds\n      displayTime\n    }\n    drivers {\n      name\n      classification\n      kartNumber\n      laps {\n        lapNumber\n        timeSeconds\n        displayTime\n      }\n    }\n  }\n}\n"
+    "text": "mutation ImportSessionModalImportDaytonaClubspeedSessionMutation(\n  $input: ImportDaytonaClubspeedSessionInput!\n) {\n  importDaytonaClubspeedSession(input: $input) {\n    provider\n    sessionFormat\n    sessionDate\n    sessionTime\n    classification\n    sessionFastestLapSeconds\n    kartNumber\n    trackLayoutName\n    selfDriverName\n    kartTypeName\n    laps {\n      lapNumber\n      timeSeconds\n      displayTime\n    }\n    drivers {\n      name\n      classification\n      kartNumber\n      laps {\n        lapNumber\n        timeSeconds\n        displayTime\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "02148b643ddc0f30e81471e7b61bfed0";
+(node as any).hash = "94335ed64b631d8f1067d710bd68e8c2";
 
 export default node;

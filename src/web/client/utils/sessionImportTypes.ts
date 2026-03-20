@@ -19,6 +19,26 @@ export type ParsedDaytonaEmail = {
   laps: ParsedLap[];
 };
 
+export type ParsedDaytonaClubspeedImport = {
+  provider: "daytona";
+  sessionFormat: SessionFormat | null;
+  sessionDate: string | null;
+  sessionTime: string | null;
+  classification: number | null;
+  sessionFastestLapSeconds: number | null;
+  kartNumber: string | null;
+  trackLayoutName: string | null;
+  selfDriverName: string | null;
+  kartTypeName: string | null;
+  laps: ParsedLap[];
+  drivers: {
+    name: string;
+    laps: ParsedLap[];
+    classification: number | null;
+    kartNumber: string | null;
+  }[];
+};
+
 export type LapEventImport = {
   offset: number;
   event: string;
@@ -50,6 +70,7 @@ export type ParsedAlphaTimingEmail = {
 
 export type ParsedSessionEmail =
   | ParsedDaytonaEmail
+  | ParsedDaytonaClubspeedImport
   | ParsedTeamsportEmail
   | ParsedAlphaTimingEmail;
 
@@ -62,6 +83,7 @@ export type SessionImportSelection = {
   classification: number | null;
   laps: ParsedLap[];
   trackId?: string | null;
+  trackLayoutId?: string | null;
   trackLayoutName?: string | null;
   temperature?: string | null;
   conditions?: "Dry" | "Wet" | null;
@@ -75,4 +97,5 @@ export type SessionImportSelection = {
   }[];
   sessionFastestLapSeconds: number | null;
   kartNumber?: string | null;
+  kartTypeName?: string | null;
 };
