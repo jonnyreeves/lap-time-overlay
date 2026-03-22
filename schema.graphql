@@ -626,6 +626,8 @@ type TrackSession {
   updatedAt: String!
   laps(first: Int = 10): [Lap!]!
   participants: [TrackSessionParticipant!]!
+  comparableSelfSessions: [ComparableSelfSession!]!
+  selfComparison(compareToSessionId: ID): SelfSessionComparison
   rivalAnalysis(rivalName: String!): RivalAnalysis
   trackRecordings(first: Int = 10): [TrackRecording!]!
 }
@@ -770,6 +772,191 @@ type RivalSummary {
   avgBest10Delta: Float
   trendDirection: RivalTrendDirection!
   sampleCount: Int!
+}
+
+enum SelfComparisonConfidence {
+  HIGH
+  MEDIUM
+}
+
+type ComparableSelfSession {
+  sessionId: ID!
+  date: String!
+  classification: Int!
+  fastestLap: Float
+  sessionPerformanceScore: Int
+  conditions: String!
+  temperature: String
+  isDefault: Boolean!
+  confidence: SelfComparisonConfidence!
+  confidenceReasons: [String!]!
+}
+
+enum SelfComparisonLapOutcome {
+  CURRENT_FASTER
+  COMPARISON_FASTER
+  TIE
+}
+
+type SelfComparisonLapComparison {
+  lapNumber: Int!
+  currentLap: Float!
+  comparisonLap: Float!
+  delta: Float!
+  cumulativeDelta: Float!
+  outcome: SelfComparisonLapOutcome!
+}
+
+enum SelfComparisonInsightLabel {
+  CURRENT_ADVANTAGE
+  COMPARISON_ADVANTAGE
+  MIXED_OR_NEUTRAL
+}
+
+type SelfComparisonSessionInsights {
+  currentFasterLapCount: Int!
+  comparisonFasterLapCount: Int!
+  tieCount: Int!
+  longestCurrentAdvantageStreak: Int!
+  longestComparisonAdvantageStreak: Int!
+  medianDelta: Float
+  consistencyGap: Float
+  insightLabel: SelfComparisonInsightLabel!
+}
+
+enum SelfComparisonTrendDirection {
+  IMPROVING
+  REGRESSING
+  FLAT
+  INSUFFICIENT
+}
+
+enum SelfComparisonTrendMetric {
+  FASTEST_10_AVG
+  FASTEST_5_AVG
+  BEST_LAP
+}
+
+type SelfComparisonTrendPoint {
+  sessionId: ID!
+  date: String!
+  value: Float!
+  metric: SelfComparisonTrendMetric!
+  isCurrent: Boolean!
+}
+
+type SelfComparisonTrend {
+  direction: SelfComparisonTrendDirection!
+  sampleCount: Int!
+  slope: Float
+  firstValue: Float
+  latestValue: Float
+  metric: SelfComparisonTrendMetric
+  points: [SelfComparisonTrendPoint!]!
+}
+
+type SelfComparisonRollingWindow {
+  average: Float!
+  startLapNumber: Int!
+  endLapNumber: Int!
+}
+
+type SelfComparisonDriverPace {
+  validLapCount: Int!
+  bestLap: Float
+  fastest5Avg: Float
+  fastest10Avg: Float
+  bestRolling5: SelfComparisonRollingWindow
+  bestRolling10: SelfComparisonRollingWindow
+  overallMean: Float
+  overallMedian: Float
+  slowLapSpread: Float
+  quickWindowCount: Int!
+}
+
+type SelfComparisonPaceDeltas {
+  bestLap: Float
+  fastest5Avg: Float
+  fastest10Avg: Float
+  bestRolling5Avg: Float
+  bestRolling10Avg: Float
+  overallMean: Float
+  overallMedian: Float
+  slowLapSpread: Float
+}
+
+enum SelfComparisonPaceVerdict {
+  CURRENT_ADVANTAGE
+  COMPARISON_ADVANTAGE
+  NEUTRAL
+  INSUFFICIENT
+}
+
+enum SelfComparisonRobustnessVerdict {
+  CURRENT_MORE_ROBUST
+  COMPARISON_MORE_ROBUST
+  SIMILAR
+  INSUFFICIENT
+}
+
+type SelfComparisonPaceInsights {
+  current: SelfComparisonDriverPace!
+  comparison: SelfComparisonDriverPace!
+  deltas: SelfComparisonPaceDeltas!
+  quickWindowCutoff: Float
+  quickWindowCurrentCount: Int!
+  quickWindowComparisonCount: Int!
+  ceilingVerdict: SelfComparisonPaceVerdict!
+  sustainedVerdict: SelfComparisonPaceVerdict!
+  robustnessVerdict: SelfComparisonRobustnessVerdict!
+  headline: String!
+}
+
+type SelfComparisonLapEventSummary {
+  event: String!
+  count: Int!
+  averageOffset: Float
+  averageLapNumber: Float
+}
+
+type SelfComparisonCoachingSnapshot {
+  firstLapWithin103Pct: Int
+  finalRolling5Avg: Float
+  stintFade: Float
+  lapsWithinPoint2OfBest: Int!
+  lapsWithinPoint5OfBest: Int!
+  averageRecoveryAfterSlowLap: Float
+  lapEventCount: Int!
+  lapEventSummaries: [SelfComparisonLapEventSummary!]!
+}
+
+type SelfComparisonCoachingDeltas {
+  firstLapWithin103Pct: Float
+  finalRolling5Avg: Float
+  stintFade: Float
+  lapsWithinPoint2OfBest: Int!
+  lapsWithinPoint5OfBest: Int!
+  averageRecoveryAfterSlowLap: Float
+  lapEventCount: Int!
+}
+
+type SelfComparisonCoachingSignals {
+  current: SelfComparisonCoachingSnapshot!
+  comparison: SelfComparisonCoachingSnapshot!
+  deltas: SelfComparisonCoachingDeltas!
+}
+
+type SelfSessionComparison {
+  comparisonSession: ComparableSelfSession!
+  confidence: SelfComparisonConfidence!
+  confidenceReasons: [String!]!
+  performanceScoreDelta: Float
+  classificationDelta: Float
+  lapComparisons: [SelfComparisonLapComparison!]!
+  sessionInsights: SelfComparisonSessionInsights!
+  paceInsights: SelfComparisonPaceInsights!
+  coachingSignals: SelfComparisonCoachingSignals!
+  trend: SelfComparisonTrend!
 }
 
 enum SessionPerformanceExclusionReason {

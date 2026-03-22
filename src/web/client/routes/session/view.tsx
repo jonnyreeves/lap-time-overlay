@@ -8,6 +8,7 @@ import { LapsCard, type LapWithEvents } from "../../components/session/LapsCard.
 import { PrimaryRecordingCard } from "../../components/session/PrimaryRecordingCard.js";
 import { RecordingsCard } from "../../components/session/RecordingsCard.js";
 import { RivalComparisonCard } from "../../components/session/RivalComparisonCard.js";
+import { SelfComparisonCard } from "../../components/session/SelfComparisonCard.js";
 import { SessionPerformanceCard } from "../../components/session/SessionPerformanceCard.js";
 import { SessionOverviewCard } from "../../components/session/SessionOverviewCard.js";
 import { useBreadcrumbs, type BreadcrumbItem } from "../../hooks/useBreadcrumbs.js";
@@ -30,7 +31,7 @@ const columnStackStyles = css`
 
 
 const SessionQuery = graphql`
-  query viewSessionQuery($id: ID!, $rivalName: String!) {
+  query viewSessionQuery($id: ID!, $rivalName: String!, $compareToSessionId: ID) {
     trackSession(id: $id) {
       id
       date
@@ -155,6 +156,169 @@ const SessionQuery = graphql`
           time
         }
       }
+      comparableSelfSessions {
+        sessionId
+        date
+        classification
+        fastestLap
+        sessionPerformanceScore
+        conditions
+        temperature
+        isDefault
+        confidence
+        confidenceReasons
+      }
+      selfComparison(compareToSessionId: $compareToSessionId) {
+        comparisonSession {
+          sessionId
+          date
+          classification
+          fastestLap
+          sessionPerformanceScore
+          conditions
+          temperature
+          isDefault
+          confidence
+          confidenceReasons
+        }
+        confidence
+        confidenceReasons
+        performanceScoreDelta
+        classificationDelta
+        lapComparisons {
+          lapNumber
+          currentLap
+          comparisonLap
+          delta
+          cumulativeDelta
+          outcome
+        }
+        sessionInsights {
+          currentFasterLapCount
+          comparisonFasterLapCount
+          tieCount
+          longestCurrentAdvantageStreak
+          longestComparisonAdvantageStreak
+          medianDelta
+          consistencyGap
+          insightLabel
+        }
+        paceInsights {
+          current {
+            validLapCount
+            bestLap
+            fastest5Avg
+            fastest10Avg
+            bestRolling5 {
+              average
+              startLapNumber
+              endLapNumber
+            }
+            bestRolling10 {
+              average
+              startLapNumber
+              endLapNumber
+            }
+            overallMean
+            overallMedian
+            slowLapSpread
+            quickWindowCount
+          }
+          comparison {
+            validLapCount
+            bestLap
+            fastest5Avg
+            fastest10Avg
+            bestRolling5 {
+              average
+              startLapNumber
+              endLapNumber
+            }
+            bestRolling10 {
+              average
+              startLapNumber
+              endLapNumber
+            }
+            overallMean
+            overallMedian
+            slowLapSpread
+            quickWindowCount
+          }
+          deltas {
+            bestLap
+            fastest5Avg
+            fastest10Avg
+            bestRolling5Avg
+            bestRolling10Avg
+            overallMean
+            overallMedian
+            slowLapSpread
+          }
+          quickWindowCutoff
+          quickWindowCurrentCount
+          quickWindowComparisonCount
+          ceilingVerdict
+          sustainedVerdict
+          robustnessVerdict
+          headline
+        }
+        coachingSignals {
+          current {
+            firstLapWithin103Pct
+            finalRolling5Avg
+            stintFade
+            lapsWithinPoint2OfBest
+            lapsWithinPoint5OfBest
+            averageRecoveryAfterSlowLap
+            lapEventCount
+            lapEventSummaries {
+              event
+              count
+              averageOffset
+              averageLapNumber
+            }
+          }
+          comparison {
+            firstLapWithin103Pct
+            finalRolling5Avg
+            stintFade
+            lapsWithinPoint2OfBest
+            lapsWithinPoint5OfBest
+            averageRecoveryAfterSlowLap
+            lapEventCount
+            lapEventSummaries {
+              event
+              count
+              averageOffset
+              averageLapNumber
+            }
+          }
+          deltas {
+            firstLapWithin103Pct
+            finalRolling5Avg
+            stintFade
+            lapsWithinPoint2OfBest
+            lapsWithinPoint5OfBest
+            averageRecoveryAfterSlowLap
+            lapEventCount
+          }
+        }
+        trend {
+          direction
+          sampleCount
+          slope
+          firstValue
+          latestValue
+          metric
+          points {
+            sessionId
+            date
+            value
+            metric
+            isCurrent
+          }
+        }
+      }
       rivalAnalysis(rivalName: $rivalName) {
         rivalName
         lapComparisons {
@@ -269,13 +433,18 @@ export default function ViewSessionRoute() {
   const { sessionId } = useParams();
   const [refreshKey, setRefreshKey] = useState(0);
   const [selectedRivalName, setSelectedRivalName] = useState("");
+  const [selectedComparisonSessionId, setSelectedComparisonSessionId] = useState("");
   const recordingVideoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
   const [jumpAnchorReady, setJumpAnchorReady] = useState(false);
   const { setBreadcrumbs } = useBreadcrumbs();
 
   const data = useLazyLoadQuery<viewSessionQuery>(
     SessionQuery,
-    { id: sessionId ?? "", rivalName: selectedRivalName },
+    {
+      id: sessionId ?? "",
+      rivalName: selectedRivalName,
+      compareToSessionId: selectedComparisonSessionId || null,
+    },
     {
       fetchPolicy: "store-and-network",
       UNSTABLE_renderPolicy: "full",
@@ -313,6 +482,8 @@ export default function ViewSessionRoute() {
       }) ?? [];
   const rivalCandidates = rivalParticipants.map((participant) => participant.name);
   const rivalAnalysis = session?.rivalAnalysis ?? null;
+  const comparableSelfSessions = session?.comparableSelfSessions ?? [];
+  const selfComparisonAnalysis = session?.selfComparison ?? null;
   const sessionPerformance = session?.sessionPerformance ?? null;
 
   useEffect(() => {
@@ -327,6 +498,26 @@ export default function ViewSessionRoute() {
     }
     setSelectedRivalName(rivalCandidates[0] ?? "");
   }, [rivalCandidates, selectedRivalName]);
+
+  useEffect(() => {
+    const defaultComparisonSessionId =
+      comparableSelfSessions.find((candidate) => candidate.isDefault)?.sessionId ?? "";
+    if (!comparableSelfSessions.length) {
+      if (selectedComparisonSessionId !== "") {
+        setSelectedComparisonSessionId("");
+      }
+      return;
+    }
+    if (
+      selectedComparisonSessionId &&
+      comparableSelfSessions.some((candidate) => candidate.sessionId === selectedComparisonSessionId)
+    ) {
+      return;
+    }
+    if (selectedComparisonSessionId !== defaultComparisonSessionId) {
+      setSelectedComparisonSessionId(defaultComparisonSessionId);
+    }
+  }, [comparableSelfSessions, selectedComparisonSessionId]);
 
   useEffect(() => {
     const crumbs: BreadcrumbItem[] = [{ label: "Sessions", to: "/session" }];
@@ -531,6 +722,12 @@ export default function ViewSessionRoute() {
           onRefresh={() => setRefreshKey((key) => key + 1)}
         />
         <SessionPerformanceCard laps={lapsWithStart} performance={sessionPerformance} />
+        <SelfComparisonCard
+          comparableSessions={comparableSelfSessions}
+          selectedComparisonSessionId={selectedComparisonSessionId}
+          analysis={selfComparisonAnalysis}
+          onSelectComparisonSession={setSelectedComparisonSessionId}
+        />
         {rivalCandidates.length ? (
           <RivalComparisonCard
             rivalParticipants={rivalParticipants}

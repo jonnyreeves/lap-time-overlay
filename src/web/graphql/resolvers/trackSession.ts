@@ -28,6 +28,16 @@ import {
   buildSessionInsights,
   computeBestNAvg,
 } from "../../shared/rivalAnalysis.js";
+import {
+  buildSelfComparisonCoachingSignals,
+  buildSelfComparisonLapComparisons,
+  buildSelfComparisonPaceInsights,
+  buildSelfComparisonSessionInsights,
+  buildSelfComparisonTrend,
+  buildSelfComparisonTrendSnapshot,
+  type SelfComparisonConfidence,
+  type SelfComparisonSourceLap,
+} from "../../shared/selfComparison.js";
 import { fetchWeatherForPostcode } from "../../shared/weather.js";
 import {
   getViewerDaytonaClubspeedCredentialsOrThrow,
@@ -498,6 +508,68 @@ function buildComparableTrendPoints(
   return points;
 }
 
+function parseTemperatureValue(temperature: string | null | undefined): number | null {
+  if (typeof temperature !== "string") return null;
+  const trimmed = temperature.trim();
+  if (!trimmed) return null;
+  const parsed = Number(trimmed);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function isComparableSelfSession(
+  session: TrackSessionRecord,
+  candidate: TrackSessionRecord
+): boolean {
+  if (session.id === candidate.id) return false;
+  if (!session.kartId || !candidate.kartId) return false;
+  return (
+    session.trackId === candidate.trackId &&
+    session.trackLayoutId === candidate.trackLayoutId &&
+    session.kartId === candidate.kartId &&
+    session.format === candidate.format
+  );
+}
+
+function buildSelfComparisonConfidence(
+  currentConditions: TrackSessionConditions,
+  currentTemperature: string | null | undefined,
+  comparisonConditions: TrackSessionConditions,
+  comparisonTemperature: string | null | undefined,
+  isIndoors: boolean
+): { confidence: SelfComparisonConfidence; confidenceReasons: string[] } {
+  if (isIndoors) {
+    return {
+      confidence: "HIGH",
+      confidenceReasons: ["Indoor track minimizes weather-related variation."],
+    };
+  }
+
+  const confidenceReasons: string[] = [];
+  if (currentConditions !== comparisonConditions) {
+    confidenceReasons.push("Conditions differ between the two sessions.");
+  }
+
+  const currentTempValue = parseTemperatureValue(currentTemperature);
+  const comparisonTempValue = parseTemperatureValue(comparisonTemperature);
+  if ((currentTempValue == null) !== (comparisonTempValue == null)) {
+    confidenceReasons.push("Only one session has temperature data.");
+  } else if (currentTempValue != null && comparisonTempValue != null) {
+    const difference = Math.abs(currentTempValue - comparisonTempValue);
+    if (difference > 5) {
+      confidenceReasons.push(`Temperature differs by ${difference.toFixed(0)}C.`);
+    }
+  }
+
+  if (confidenceReasons.length > 0) {
+    return { confidence: "MEDIUM", confidenceReasons };
+  }
+
+  return {
+    confidence: "HIGH",
+    confidenceReasons: ["Conditions match and weather differences are minimal."],
+  };
+}
+
 function normalizeSessionFormat(format: string): SessionFormat {
   if (format === "Practice" || format === "Qualifying" || format === "Race") {
     return format;
@@ -554,15 +626,50 @@ export function computeSessionPerformanceForSession(
 }
 
 export function toTrackSessionPayload(session: TrackSessionRecord, repositories: Repositories) {
-  const loadLaps = () => repositories.laps.findBySessionId(session.id);
-  const loadParticipants = () => repositories.trackSessionParticipants.findBySessionId(session.id);
+  type ComparableSelfSessionSummary = {
+    session: TrackSessionRecord;
+    fastestLap: number | null;
+    sessionPerformanceScore: number | null;
+    conditions: TrackSessionConditions;
+    confidence: SelfComparisonConfidence;
+    confidenceReasons: string[];
+    isDefault: boolean;
+  };
+
   const cachedTrack = repositories.tracks.findById(session.trackId);
+  const trackCache = new Map<string, TrackRecord | null>();
+  if (cachedTrack) {
+    trackCache.set(session.trackId, cachedTrack);
+  }
+  const fastestLapCache = new Map<string, number | null>();
+  const lapCache = new Map<string, LapRecord[]>();
+  const lapEventsCache = new Map<string, LapEventRecord[]>();
+  const sessionPerformanceScoreCache = new Map<string, number | null>();
+  const loadSessionLaps = (sessionId: string) => {
+    if (lapCache.has(sessionId)) {
+      return lapCache.get(sessionId) ?? [];
+    }
+    const laps = repositories.laps.findBySessionId(sessionId);
+    lapCache.set(sessionId, laps);
+    return laps;
+  };
+  const loadLaps = () => loadSessionLaps(session.id);
+  const loadLapEvents = (lapId: string) => {
+    if (lapEventsCache.has(lapId)) {
+      return lapEventsCache.get(lapId) ?? [];
+    }
+    const events = repositories.lapEvents.findByLapId(lapId);
+    lapEventsCache.set(lapId, events);
+    return events;
+  };
+  const loadParticipants = () => repositories.trackSessionParticipants.findBySessionId(session.id);
   let cachedSessionPerformance: SessionPerformanceResult | null = null;
   let cachedParticipants: TrackSessionParticipantRecord[] | null = null;
   let cachedParticipantLapsById: Map<string, TrackSessionParticipantLapRecord[]> | null = null;
   let personalBestIndex:
     | ReturnType<typeof buildPersonalBestIndexForUser>
     | null = null;
+  let comparableSelfSessions: ComparableSelfSessionSummary[] | null = null;
 
   const getSessionPerformance = () => {
     if (cachedSessionPerformance) return cachedSessionPerformance;
@@ -592,6 +699,70 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
       cachedParticipantLapsById = groupParticipantLapsById(laps);
     }
     return cachedParticipantLapsById;
+  };
+
+  const getSessionPerformanceScore = (targetSession: TrackSessionRecord) => {
+    if (sessionPerformanceScoreCache.has(targetSession.id)) {
+      return sessionPerformanceScoreCache.get(targetSession.id) ?? null;
+    }
+    const score =
+      targetSession.id === session.id
+        ? getSessionPerformance().score ?? null
+        : computeSessionPerformanceForSession(targetSession, repositories).score ?? null;
+    sessionPerformanceScoreCache.set(targetSession.id, score);
+    return score;
+  };
+
+  const getSelfComparisonLaps = (sessionId: string): SelfComparisonSourceLap[] =>
+    loadSessionLaps(sessionId).map((lap) => ({
+      lapNumber: lap.lapNumber,
+      time: lap.time,
+      lapEvents: loadLapEvents(lap.id).map((event) => ({
+        offset: event.offset,
+        event: event.event,
+        value: event.value,
+      })),
+    }));
+
+  const getComparableSelfSessions = () => {
+    if (comparableSelfSessions) {
+      return comparableSelfSessions;
+    }
+    if (!session.kartId) {
+      comparableSelfSessions = [];
+      return comparableSelfSessions;
+    }
+
+    const allSessions = findTrackSessionsForUser(session.userId, repositories);
+    const eligible = allSessions.filter((candidate) => isComparableSelfSession(session, candidate));
+    const currentTimestamp = new Date(session.date).getTime();
+    const defaultCandidateId =
+      eligible
+        .filter((candidate) => new Date(candidate.date).getTime() < currentTimestamp)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]?.id ?? null;
+
+    comparableSelfSessions = eligible.map((candidate) => {
+      const conditions = resolveSessionConditions(candidate, repositories, trackCache);
+      const { confidence, confidenceReasons } = buildSelfComparisonConfidence(
+        normalizedConditions,
+        session.temperature,
+        conditions,
+        candidate.temperature,
+        cachedTrack?.isIndoors ?? false
+      );
+
+      return {
+        session: candidate,
+        fastestLap: getFastestLapForSession(candidate, repositories, fastestLapCache),
+        sessionPerformanceScore: getSessionPerformanceScore(candidate),
+        conditions,
+        confidence,
+        confidenceReasons,
+        isDefault: candidate.id === defaultCandidateId,
+      };
+    });
+
+    return comparableSelfSessions;
   };
 
   const toSessionPerformancePayload = () => {
@@ -705,6 +876,84 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
             time: lap.time,
           })) ?? [],
       }));
+    },
+    comparableSelfSessions: () =>
+      getComparableSelfSessions().map((candidate) => ({
+        sessionId: candidate.session.id,
+        date: candidate.session.date,
+        classification: candidate.session.classification,
+        fastestLap: candidate.fastestLap,
+        sessionPerformanceScore: candidate.sessionPerformanceScore,
+        conditions: candidate.conditions,
+        temperature: candidate.session.temperature || null,
+        isDefault: candidate.isDefault,
+        confidence: candidate.confidence,
+        confidenceReasons: candidate.confidenceReasons,
+      })),
+    selfComparison: (args: { compareToSessionId?: string | null }) => {
+      const requestedSessionId = args?.compareToSessionId?.trim() ?? "";
+      const candidates = getComparableSelfSessions();
+      const selectedCandidate = requestedSessionId
+        ? candidates.find((candidate) => candidate.session.id === requestedSessionId)
+        : candidates.find((candidate) => candidate.isDefault);
+
+      if (requestedSessionId && !selectedCandidate) {
+        throw new GraphQLError("compareToSessionId must reference a comparable session", {
+          extensions: { code: "VALIDATION_FAILED" },
+        });
+      }
+      if (!selectedCandidate) {
+        return null;
+      }
+
+      const currentLaps = getSelfComparisonLaps(session.id);
+      const comparisonLaps = getSelfComparisonLaps(selectedCandidate.session.id);
+      const lapComparisons = buildSelfComparisonLapComparisons(currentLaps, comparisonLaps);
+      const sessionInsights = buildSelfComparisonSessionInsights(lapComparisons);
+      const paceInsights = buildSelfComparisonPaceInsights(currentLaps, comparisonLaps);
+      const coachingSignals = buildSelfComparisonCoachingSignals(currentLaps, comparisonLaps);
+      const currentPerformanceScore = getSessionPerformance().score;
+      const trend = buildSelfComparisonTrend(
+        [session, ...candidates.map((candidate) => candidate.session)].map((candidate) =>
+          buildSelfComparisonTrendSnapshot(
+            candidate.id,
+            candidate.date,
+            getSelfComparisonLaps(candidate.id),
+            candidate.id === session.id
+          )
+        )
+      );
+
+      return {
+        comparisonSession: {
+          sessionId: selectedCandidate.session.id,
+          date: selectedCandidate.session.date,
+          classification: selectedCandidate.session.classification,
+          fastestLap: selectedCandidate.fastestLap,
+          sessionPerformanceScore: selectedCandidate.sessionPerformanceScore,
+          conditions: selectedCandidate.conditions,
+          temperature: selectedCandidate.session.temperature || null,
+          isDefault: selectedCandidate.isDefault,
+          confidence: selectedCandidate.confidence,
+          confidenceReasons: selectedCandidate.confidenceReasons,
+        },
+        confidence: selectedCandidate.confidence,
+        confidenceReasons: selectedCandidate.confidenceReasons,
+        performanceScoreDelta:
+          currentPerformanceScore != null && selectedCandidate.sessionPerformanceScore != null
+            ? currentPerformanceScore - selectedCandidate.sessionPerformanceScore
+            : null,
+        classificationDelta:
+          Number.isFinite(session.classification) &&
+          Number.isFinite(selectedCandidate.session.classification)
+            ? session.classification - selectedCandidate.session.classification
+            : null,
+        lapComparisons,
+        sessionInsights,
+        paceInsights,
+        coachingSignals,
+        trend,
+      };
     },
     rivalAnalysis: (args: { rivalName: string }) => {
       const rivalName = args?.rivalName?.trim();

@@ -167,6 +167,7 @@ describe("trackSession resolvers", () => {
       ],
     });
     repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
+    repositories.lapEvents.findByLapId.mockReturnValue([]);
     repositories.trackSessionParticipants.findBySessionId.mockReturnValue([]);
     repositories.trackSessionParticipants.findBySessionIds.mockReturnValue([]);
     repositories.trackSessionParticipants.findLapsByParticipantIds.mockReturnValue([]);
@@ -311,6 +312,126 @@ describe("trackSession resolvers", () => {
     expect(analysis?.paceInsights).toBeTruthy();
     expect(analysis?.paceInsights.quickWindowCutoff).not.toBeNull();
     expect(analysis?.paceInsights.headline.length).toBeGreaterThan(0);
+  });
+
+  it("defaults self comparison to the most recent earlier comparable session", async () => {
+    const baselineSession: TrackSessionRecord = { ...mockSession, id: "s0", date: "2024-01-25" };
+    const currentSession: TrackSessionRecord = { ...mockSession, id: "s1", date: "2024-02-01" };
+    const newerSession: TrackSessionRecord = { ...mockSession, id: "s2", date: "2024-02-08" };
+    const otherFormatSession: TrackSessionRecord = {
+      ...mockSession,
+      id: "s3",
+      date: "2024-01-28",
+      format: "Qualifying",
+    };
+
+    repositories.trackSessions.findById.mockReturnValue(currentSession);
+    repositories.trackSessions.findByUserId.mockReturnValue([
+      newerSession,
+      currentSession,
+      baselineSession,
+      otherFormatSession,
+    ]);
+    repositories.tracks.findById.mockReturnValue(mockTrack);
+    repositories.trackLayouts.findById.mockReturnValue(mockLayout);
+    repositories.laps.findBySessionId.mockImplementation((sessionId: string) => {
+      const lapTime = sessionId === "s0" ? 52.6 : sessionId === "s1" ? 52.2 : 52.1;
+      return Array.from({ length: 10 }, (_, index) => ({
+        id: `${sessionId}-${index + 1}`,
+        sessionId,
+        lapNumber: index + 1,
+        time: lapTime,
+        createdAt: 0,
+        updatedAt: 0,
+      }));
+    });
+
+    const payload = rootValue.trackSession({ id: "s1" }, context);
+    expect(payload.comparableSelfSessions()).toMatchObject([
+      expect.objectContaining({ sessionId: "s2", isDefault: false }),
+      expect.objectContaining({ sessionId: "s0", isDefault: true }),
+    ]);
+
+    const analysis = payload.selfComparison({});
+    expect(analysis?.comparisonSession.sessionId).toBe("s0");
+    expect(analysis?.trend.sampleCount).toBe(3);
+    expect(analysis?.paceInsights.headline.length).toBeGreaterThan(0);
+  });
+
+  it("marks self comparison confidence as medium for weather mismatches", async () => {
+    const currentSession: TrackSessionRecord = {
+      ...mockSession,
+      id: "s1",
+      date: "2024-02-01",
+      conditions: "Dry",
+      temperature: "20",
+    };
+    const wetBaseline: TrackSessionRecord = {
+      ...mockSession,
+      id: "s0",
+      date: "2024-01-25",
+      conditions: "Wet",
+      temperature: "12",
+    };
+
+    repositories.trackSessions.findById.mockReturnValue(currentSession);
+    repositories.trackSessions.findByUserId.mockReturnValue([currentSession, wetBaseline]);
+    repositories.tracks.findById.mockReturnValue(mockTrack);
+    repositories.trackLayouts.findById.mockReturnValue(mockLayout);
+    repositories.laps.findBySessionId.mockImplementation((sessionId: string) =>
+      Array.from({ length: 10 }, (_, index) => ({
+        id: `${sessionId}-${index + 1}`,
+        sessionId,
+        lapNumber: index + 1,
+        time: sessionId === "s1" ? 52.2 : 52.5,
+        createdAt: 0,
+        updatedAt: 0,
+      }))
+    );
+
+    const payload = rootValue.trackSession({ id: "s1" }, context);
+    const candidates = payload.comparableSelfSessions();
+    expect(candidates[0]?.confidence).toBe("MEDIUM");
+    expect(candidates[0]?.confidenceReasons.join(" ")).toContain("Conditions differ");
+
+    const analysis = payload.selfComparison({});
+    expect(analysis?.confidence).toBe("MEDIUM");
+  });
+
+  it("rejects invalid self comparison sessions and returns null when no earlier comparable session exists", async () => {
+    const currentSession: TrackSessionRecord = { ...mockSession, id: "s1", date: "2024-02-01" };
+    const laterComparable: TrackSessionRecord = { ...mockSession, id: "s2", date: "2024-02-08" };
+    const mismatchedKart: TrackSessionRecord = {
+      ...mockSession,
+      id: "s3",
+      date: "2024-01-29",
+      kartId: "k2",
+    };
+
+    repositories.trackSessions.findById.mockReturnValue(currentSession);
+    repositories.trackSessions.findByUserId.mockReturnValue([
+      laterComparable,
+      currentSession,
+      mismatchedKart,
+    ]);
+    repositories.tracks.findById.mockReturnValue(mockTrack);
+    repositories.trackLayouts.findById.mockReturnValue(mockLayout);
+    repositories.laps.findBySessionId.mockImplementation((sessionId: string) =>
+      Array.from({ length: 10 }, (_, index) => ({
+        id: `${sessionId}-${index + 1}`,
+        sessionId,
+        lapNumber: index + 1,
+        time: 52.4,
+        createdAt: 0,
+        updatedAt: 0,
+      }))
+    );
+
+    const payload = rootValue.trackSession({ id: "s1" }, context);
+    expect(payload.selfComparison({})).toBeNull();
+    expect(() => payload.selfComparison({ compareToSessionId: "s3" })).toThrowError(
+      "compareToSessionId must reference a comparable session"
+    );
   });
 
   it("surfaces upload progress for track recordings", async () => {
