@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<eca860c40d2994f5bf48c06cf810c4cd>>
+ * @generated SignedSource<<120a133b1473e15ae67f0532cb4ffb67>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -18,7 +18,7 @@ export type TrackViewPageQuery$data = {
     readonly heroImage: string | null | undefined;
     readonly id: string;
     readonly name: string;
-    readonly " $fragmentSpreads": FragmentRefs<"TrackDetailsCard_track" | "TrackKartsCard_track" | "TrackLayoutCard_track" | "TrackPersonalBestsCard_track" | "TrackVisitStatsCard_track">;
+    readonly " $fragmentSpreads": FragmentRefs<"TrackDetailsCard_track" | "TrackKartsCard_track" | "TrackLayoutCard_track" | "TrackPersonalBestsCard_track" | "TrackSessionComparisonCard_track" | "TrackVisitStatsCard_track">;
   } | null | undefined;
 };
 export type TrackViewPageQuery = {
@@ -141,6 +141,11 @@ return {
           {
             "args": null,
             "kind": "FragmentSpread",
+            "name": "TrackSessionComparisonCard_track"
+          },
+          {
+            "args": null,
+            "kind": "FragmentSpread",
             "name": "TrackVisitStatsCard_track"
           }
         ],
@@ -232,6 +237,115 @@ return {
           {
             "alias": null,
             "args": null,
+            "concreteType": "TrackComparisonScope",
+            "kind": "LinkedField",
+            "name": "comparisonScopes",
+            "plural": true,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "key",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "format",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "sessionCount",
+                "storageKey": null
+              },
+              {
+                "alias": null,
+                "args": null,
+                "kind": "ScalarField",
+                "name": "latestSessionDate",
+                "storageKey": null
+              },
+              (v8/*: any*/),
+              (v7/*: any*/),
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "TrackComparisonSession",
+                "kind": "LinkedField",
+                "name": "sessions",
+                "plural": true,
+                "selections": [
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "sessionId",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "date",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "classification",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "fastestLap",
+                    "storageKey": null
+                  },
+                  (v6/*: any*/),
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "temperature",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "sessionPerformanceScore",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "isDefaultCurrent",
+                    "storageKey": null
+                  },
+                  {
+                    "alias": null,
+                    "args": null,
+                    "kind": "ScalarField",
+                    "name": "isDefaultBaseline",
+                    "storageKey": null
+                  }
+                ],
+                "storageKey": null
+              }
+            ],
+            "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
             "concreteType": "TrackSessionStats",
             "kind": "LinkedField",
             "name": "sessionStats",
@@ -292,16 +406,16 @@ return {
     ]
   },
   "params": {
-    "cacheID": "2772559ae02573ab35dcade0048285f5",
+    "cacheID": "a4b6090bd43fc474e7a46a561e113f18",
     "id": null,
     "metadata": {},
     "name": "TrackViewPageQuery",
     "operationKind": "query",
-    "text": "query TrackViewPageQuery(\n  $trackId: ID!\n) {\n  track(id: $trackId) {\n    id\n    name\n    heroImage\n    ...TrackDetailsCard_track\n    ...TrackKartsCard_track\n    ...TrackLayoutCard_track\n    ...TrackPersonalBestsCard_track\n    ...TrackVisitStatsCard_track\n  }\n}\n\nfragment TrackDetailsCard_track on Track {\n  id\n  name\n  postcode\n  isIndoors\n}\n\nfragment TrackKartsCard_track on Track {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n\nfragment TrackLayoutCard_track on Track {\n  id\n  name\n  trackLayouts {\n    id\n    name\n  }\n}\n\nfragment TrackPersonalBestsCard_track on Track {\n  id\n  name\n  heroImage\n  postcode\n  personalBestEntries {\n    trackSessionId\n    conditions\n    lapTime\n    kart {\n      id\n      name\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n\nfragment TrackVisitStatsCard_track on Track {\n  id\n  name\n  sessionStats {\n    totalSessions\n    byKart {\n      count\n      kart {\n        id\n        name\n      }\n    }\n    byTrackLayout {\n      count\n      trackLayout {\n        id\n        name\n      }\n    }\n    byCondition {\n      conditions\n      count\n    }\n  }\n}\n"
+    "text": "query TrackViewPageQuery(\n  $trackId: ID!\n) {\n  track(id: $trackId) {\n    id\n    name\n    heroImage\n    ...TrackDetailsCard_track\n    ...TrackKartsCard_track\n    ...TrackLayoutCard_track\n    ...TrackPersonalBestsCard_track\n    ...TrackSessionComparisonCard_track\n    ...TrackVisitStatsCard_track\n  }\n}\n\nfragment TrackDetailsCard_track on Track {\n  id\n  name\n  postcode\n  isIndoors\n}\n\nfragment TrackKartsCard_track on Track {\n  id\n  name\n  karts {\n    id\n    name\n  }\n}\n\nfragment TrackLayoutCard_track on Track {\n  id\n  name\n  trackLayouts {\n    id\n    name\n  }\n}\n\nfragment TrackPersonalBestsCard_track on Track {\n  id\n  name\n  heroImage\n  postcode\n  personalBestEntries {\n    trackSessionId\n    conditions\n    lapTime\n    kart {\n      id\n      name\n    }\n    trackLayout {\n      id\n      name\n    }\n  }\n}\n\nfragment TrackSessionComparisonCard_track on Track {\n  id\n  name\n  comparisonScopes {\n    key\n    format\n    sessionCount\n    latestSessionDate\n    trackLayout {\n      id\n      name\n    }\n    kart {\n      id\n      name\n    }\n    sessions {\n      sessionId\n      date\n      classification\n      fastestLap\n      conditions\n      temperature\n      sessionPerformanceScore\n      isDefaultCurrent\n      isDefaultBaseline\n    }\n  }\n}\n\nfragment TrackVisitStatsCard_track on Track {\n  id\n  name\n  sessionStats {\n    totalSessions\n    byKart {\n      count\n      kart {\n        id\n        name\n      }\n    }\n    byTrackLayout {\n      count\n      trackLayout {\n        id\n        name\n      }\n    }\n    byCondition {\n      conditions\n      count\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "ad11ee369ce75762a61e5bba94de8580";
+(node as any).hash = "b7242a580da60fb43c6584e95deb464a";
 
 export default node;

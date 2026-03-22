@@ -22,6 +22,7 @@ RUN mkdir -p database media  temp
 ARG BUILD_TIMESTAMP
 ENV BUILD_TIMESTAMP=$BUILD_TIMESTAMP
 ENV WEATHER_API_KEY=""
+ENV USER_SECRET_ENCRYPTION_KEY=""
 
 VOLUME ["/app/database", "/app/media", "/app/temp"]
 

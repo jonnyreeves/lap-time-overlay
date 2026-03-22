@@ -11,6 +11,8 @@ const authenticatedContext = {
 describe("track resolver", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    repositories.trackSessionParticipants.findBySessionId.mockReturnValue([]);
+    repositories.trackSessionParticipants.findLapsByParticipantIds.mockReturnValue([]);
   });
 
   it("returns personal bests per kart, layout, and conditions for the current user", async () => {
@@ -302,6 +304,142 @@ describe("track resolver", () => {
         trackLayout: expect.objectContaining({ id: "l3", name: "Full" }),
       }),
     ]);
+  });
+
+  it("returns sorted comparison scopes grouped by layout, kart, and format", async () => {
+    const track = {
+      id: "c1",
+      name: "Spa",
+      heroImage: null,
+      postcode: null,
+      isIndoors: false,
+      createdAt: 0,
+      updatedAt: 0,
+    };
+
+    repositories.tracks.findById.mockReturnValue(track);
+    repositories.trackSessions.findByUserId.mockReturnValue([
+      {
+        id: "s1",
+        date: "2024-03-12",
+        format: "Practice",
+        classification: 2,
+        fastestLap: 51.9,
+        conditions: "Dry",
+        temperature: "18",
+        trackId: "c1",
+        userId: "user-1",
+        notes: null,
+        createdAt: 0,
+        updatedAt: 0,
+        kartId: "k1",
+        kartNumber: "",
+        trackLayoutId: "l1",
+      },
+      {
+        id: "s2",
+        date: "2024-03-05",
+        format: "Practice",
+        classification: 4,
+        fastestLap: 52.4,
+        conditions: "Wet",
+        temperature: "11",
+        trackId: "c1",
+        userId: "user-1",
+        notes: null,
+        createdAt: 0,
+        updatedAt: 0,
+        kartId: "k1",
+        kartNumber: "",
+        trackLayoutId: "l1",
+      },
+      {
+        id: "s3",
+        date: "2024-03-15",
+        format: "Race",
+        classification: 3,
+        fastestLap: 52.1,
+        conditions: "Dry",
+        temperature: "17",
+        trackId: "c1",
+        userId: "user-1",
+        notes: null,
+        createdAt: 0,
+        updatedAt: 0,
+        kartId: "k1",
+        kartNumber: "",
+        trackLayoutId: "l1",
+      },
+      {
+        id: "s4",
+        date: "2024-03-08",
+        format: "Practice",
+        classification: 1,
+        fastestLap: 50.8,
+        conditions: "Dry",
+        temperature: "15",
+        trackId: "c1",
+        userId: "user-1",
+        notes: null,
+        createdAt: 0,
+        updatedAt: 0,
+        kartId: "k2",
+        kartNumber: "",
+        trackLayoutId: "l2",
+      },
+      {
+        id: "s5",
+        date: "2024-03-01",
+        format: "Practice",
+        classification: 5,
+        fastestLap: 53.1,
+        conditions: "Dry",
+        temperature: "",
+        trackId: "c1",
+        userId: "user-1",
+        notes: null,
+        createdAt: 0,
+        updatedAt: 0,
+        kartId: null,
+        kartNumber: "",
+        trackLayoutId: "l1",
+      },
+    ]);
+
+    repositories.laps.findBySessionId.mockImplementation((sessionId: string) => [
+      { id: `${sessionId}-1`, sessionId, lapNumber: 1, time: 52.5, createdAt: 0, updatedAt: 0 },
+      { id: `${sessionId}-2`, sessionId, lapNumber: 2, time: 52.2, createdAt: 0, updatedAt: 0 },
+    ]);
+    repositories.karts.findById.mockImplementation((kartId: string) =>
+      kartId === "k1"
+        ? { id: "k1", name: "Rotax", createdAt: 0, updatedAt: 0 }
+        : kartId === "k2"
+          ? { id: "k2", name: "Sodi", createdAt: 0, updatedAt: 0 }
+          : null
+    );
+    repositories.trackLayouts.findById.mockImplementation((layoutId: string) =>
+      layoutId === "l1"
+        ? { id: "l1", trackId: "c1", name: "GP", createdAt: 0, updatedAt: 0 }
+        : layoutId === "l2"
+          ? { id: "l2", trackId: "c1", name: "Indy", createdAt: 0, updatedAt: 0 }
+          : null
+    );
+
+    const payload = rootValue.track({ id: "c1" }, authenticatedContext as never);
+    const scopes = await payload.comparisonScopes();
+
+    expect(scopes).toHaveLength(3);
+    expect(scopes[0]).toMatchObject({
+      key: "l1:k1:Practice",
+      sessionCount: 2,
+      latestSessionDate: "2024-03-12",
+    });
+    expect(scopes[0]?.sessions).toMatchObject([
+      expect.objectContaining({ sessionId: "s1", isDefaultCurrent: true, isDefaultBaseline: false }),
+      expect.objectContaining({ sessionId: "s2", isDefaultCurrent: false, isDefaultBaseline: true }),
+    ]);
+    expect(scopes[1]?.key).toBe("l1:k1:Race");
+    expect(scopes[2]?.key).toBe("l2:k2:Practice");
   });
 
   it("returns an empty list when no lap data exists", async () => {

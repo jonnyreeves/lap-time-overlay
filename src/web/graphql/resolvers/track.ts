@@ -5,6 +5,7 @@ import type { KartRecord } from "../../../db/karts.js";
 import type { TrackLayoutRecord } from "../../../db/track_layouts.js";
 import type { GraphQLContext } from "../context.js";
 import type { Repositories } from "../repositories.js";
+import { computeSessionPerformance, type SessionFormat } from "../../shared/sessionPerformance.js";
 
 type TrackPersonalBestEntry = {
   kart: KartRecord;
@@ -12,6 +13,22 @@ type TrackPersonalBestEntry = {
   conditions: TrackSessionConditions;
   lapTime: number;
   trackSessionId: string;
+};
+
+type TrackComparisonScopeEntry = {
+  key: string;
+  format: string;
+  trackLayout: TrackLayoutRecord;
+  kart: KartRecord;
+  latestSessionDate: string | null;
+  sessions: Array<{
+    session: TrackSessionRecord;
+    fastestLap: number | null;
+    sessionPerformanceScore: number | null;
+    conditions: TrackSessionConditions;
+    isDefaultCurrent: boolean;
+    isDefaultBaseline: boolean;
+  }>;
 };
 
 function toKartPayload(kart: KartRecord) {
@@ -33,6 +50,199 @@ function getTrackSessionsForTrack(
     : repositories.trackSessions.findByTrackId(track.id) ?? [];
 
   return userId ? sessions.filter((session) => session.trackId === track.id) : sessions;
+}
+
+function normalizeSessionFormat(format: string): SessionFormat {
+  if (format === "Practice" || format === "Qualifying" || format === "Race") {
+    return format;
+  }
+  return "Practice";
+}
+
+function computeBestLap(laps: Array<{ time: number }>): number | null {
+  if (laps.length === 0) return null;
+  return Math.min(...laps.map((lap) => lap.time));
+}
+
+function groupParticipantLapsById(
+  laps: Array<{ participantId: string; lapNumber: number; time: number }>
+): Map<string, Array<{ participantId: string; lapNumber: number; time: number }>> {
+  const byId = new Map<string, Array<{ participantId: string; lapNumber: number; time: number }>>();
+  for (const lap of laps) {
+    const existing = byId.get(lap.participantId) ?? [];
+    existing.push(lap);
+    byId.set(lap.participantId, existing);
+  }
+  for (const [participantId, participantLaps] of byId.entries()) {
+    participantLaps.sort((a, b) => a.lapNumber - b.lapNumber);
+    byId.set(participantId, participantLaps);
+  }
+  return byId;
+}
+
+function buildFieldFastestLaps(
+  sessionId: string,
+  repositories: Repositories
+): Array<{ driverName: string; classification: number | null; fastestLap: number | null }> {
+  const participants = repositories.trackSessionParticipants.findBySessionId(sessionId);
+  if (participants.length === 0) return [];
+
+  const participantIds = participants.map((participant) => participant.id);
+  const lapsByParticipantId = groupParticipantLapsById(
+    repositories.trackSessionParticipants.findLapsByParticipantIds(participantIds)
+  );
+
+  return participants
+    .filter((participant) => !participant.isSelf)
+    .map((participant) => ({
+      driverName: participant.name,
+      classification: participant.classification,
+      fastestLap: computeBestLap(lapsByParticipantId.get(participant.id) ?? []),
+    }))
+    .filter((participant) => participant.fastestLap != null);
+}
+
+function computeSessionPerformanceScore(
+  session: TrackSessionRecord,
+  repositories: Repositories
+): number | null {
+  const selfLaps = repositories.laps.findBySessionId(session.id).map((lap) => ({
+    id: lap.id,
+    lapNumber: lap.lapNumber,
+    time: lap.time,
+  }));
+  return (
+    computeSessionPerformance({
+      format: normalizeSessionFormat(session.format),
+      selfLaps,
+      fieldFastestLaps: buildFieldFastestLaps(session.id, repositories),
+      sessionFastestLap: session.fastestLap,
+    }).score ?? null
+  );
+}
+
+function getFastestLapForSession(
+  session: TrackSessionRecord,
+  repositories: Repositories
+): number | null {
+  if (session.fastestLap != null) {
+    return session.fastestLap;
+  }
+  return computeBestLap(repositories.laps.findBySessionId(session.id));
+}
+
+function getTrackComparisonScopes(
+  track: TrackRecord,
+  repositories: Repositories,
+  userId?: string,
+  sessionsOverride?: TrackSessionRecord[]
+) {
+  const sessions = sessionsOverride ?? getTrackSessionsForTrack(track, repositories, userId);
+  const scopes = new Map<string, TrackComparisonScopeEntry>();
+
+  for (const session of sessions) {
+    if (!session.kartId) continue;
+    const kart = repositories.karts.findById(session.kartId);
+    if (!kart) {
+      throw new GraphQLError(`Kart with ID ${session.kartId} not found`, {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+
+    const trackLayout = repositories.trackLayouts.findById(session.trackLayoutId);
+    if (!trackLayout) {
+      throw new GraphQLError(`Track layout with ID ${session.trackLayoutId} not found`, {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+    if (trackLayout.trackId !== track.id) {
+      continue;
+    }
+
+    const key = `${trackLayout.id}:${kart.id}:${session.format}`;
+    const scope = scopes.get(key) ?? {
+      key,
+      format: session.format,
+      trackLayout,
+      kart,
+      latestSessionDate: null,
+      sessions: [],
+    };
+    scope.trackLayout = trackLayout;
+    scope.kart = kart;
+    if (scope.latestSessionDate == null || Date.parse(session.date) > Date.parse(scope.latestSessionDate)) {
+      scope.latestSessionDate = session.date;
+    }
+    scope.sessions.push({
+      session,
+      fastestLap: getFastestLapForSession(session, repositories),
+      sessionPerformanceScore: computeSessionPerformanceScore(session, repositories),
+      conditions: track.isIndoors ? "Dry" : session.conditions,
+      isDefaultCurrent: false,
+      isDefaultBaseline: false,
+    });
+    scopes.set(key, scope);
+  }
+
+  return Array.from(scopes.values())
+    .map((scope) => {
+      const sortedSessions = [...scope.sessions].sort(
+        (left, right) => Date.parse(right.session.date) - Date.parse(left.session.date)
+      );
+      const currentSessionId = sortedSessions[0]?.session.id ?? null;
+      const currentSessionTime = currentSessionId
+        ? Date.parse(sortedSessions.find((entry) => entry.session.id === currentSessionId)?.session.date ?? "")
+        : Number.NaN;
+      const baselineSessionId =
+        sortedSessions.find(
+          (entry) =>
+            entry.session.id !== currentSessionId &&
+            Number.isFinite(currentSessionTime) &&
+            Date.parse(entry.session.date) < currentSessionTime
+        )?.session.id ??
+        null;
+
+      return {
+        ...scope,
+        sessions: sortedSessions.map((entry) => ({
+          ...entry,
+          isDefaultCurrent: entry.session.id === currentSessionId,
+          isDefaultBaseline: entry.session.id === baselineSessionId,
+        })),
+      };
+    })
+    .sort((left, right) => {
+      if (left.sessions.length !== right.sessions.length) {
+        return right.sessions.length - left.sessions.length;
+      }
+      const leftTime = left.latestSessionDate ? Date.parse(left.latestSessionDate) : 0;
+      const rightTime = right.latestSessionDate ? Date.parse(right.latestSessionDate) : 0;
+      if (leftTime !== rightTime) {
+        return rightTime - leftTime;
+      }
+      const leftLabel = `${left.trackLayout.name}:${left.kart.name}:${left.format}`;
+      const rightLabel = `${right.trackLayout.name}:${right.kart.name}:${right.format}`;
+      return leftLabel.localeCompare(rightLabel);
+    })
+    .map((scope) => ({
+      key: scope.key,
+      format: scope.format,
+      trackLayout: toTrackLayoutPayload(scope.trackLayout, repositories, userId, track),
+      kart: toKartPayload(scope.kart),
+      sessionCount: scope.sessions.length,
+      latestSessionDate: scope.latestSessionDate,
+      sessions: scope.sessions.map((entry) => ({
+        sessionId: entry.session.id,
+        date: entry.session.date,
+        classification: entry.session.classification,
+        fastestLap: entry.fastestLap,
+        conditions: entry.conditions,
+        temperature: entry.session.temperature || null,
+        sessionPerformanceScore: entry.sessionPerformanceScore,
+        isDefaultCurrent: entry.isDefaultCurrent,
+        isDefaultBaseline: entry.isDefaultBaseline,
+      })),
+    }));
 }
 
 export function getTrackPersonalBestEntries(
@@ -233,6 +443,7 @@ export function toTrackPayload(
     lastVisit,
     sessionStats: () => getTrackSessionStats(track, repositories, userId, sessions),
     personalBestEntries: () => getTrackPersonalBestEntries(track, repositories, userId, sessions),
+    comparisonScopes: () => getTrackComparisonScopes(track, repositories, userId, sessions),
     karts: () => repositories.trackKarts.findKartsForTrack(track.id),
     trackLayouts: () =>
       repositories.trackLayouts.findByTrackId(track.id).map((layout) =>

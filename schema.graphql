@@ -547,6 +547,7 @@ type Track {
   lastVisit: String
   sessionStats: TrackSessionStats!
   personalBestEntries: [TrackPersonalBest!]!
+  comparisonScopes: [TrackComparisonScope!]!
   karts: [Kart!]!
   trackLayouts: [TrackLayout!]!
 }
@@ -579,6 +580,28 @@ type TrackPersonalBest {
   trackSessionId: ID!
   conditions: String!
   lapTime: Float!
+}
+
+type TrackComparisonSession {
+  sessionId: ID!
+  date: String!
+  classification: Int!
+  fastestLap: Float
+  conditions: String!
+  temperature: String
+  sessionPerformanceScore: Int
+  isDefaultCurrent: Boolean!
+  isDefaultBaseline: Boolean!
+}
+
+type TrackComparisonScope {
+  key: String!
+  format: String!
+  trackLayout: TrackLayout!
+  kart: Kart!
+  sessionCount: Int!
+  latestSessionDate: String
+  sessions: [TrackComparisonSession!]!
 }
 
 type Kart {

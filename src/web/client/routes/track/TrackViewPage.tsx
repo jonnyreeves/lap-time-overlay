@@ -8,6 +8,7 @@ import { TrackDetailsCard } from "../../components/tracks/TrackDetailsCard.js";
 import { TrackKartsCard } from "../../components/tracks/TrackKartsCard.js";
 import { TrackLayoutCard } from "../../components/tracks/TrackLayoutCard.js";
 import { TrackPersonalBestsCard } from "../../components/tracks/TrackPersonalBestsCard.js";
+import { TrackSessionComparisonCard } from "../../components/tracks/TrackSessionComparisonCard.js";
 import { TrackVisitStatsCard } from "../../components/tracks/TrackVisitStatsCard.js";
 import { type BreadcrumbItem, useBreadcrumbs } from "../../hooks/useBreadcrumbs.js";
 
@@ -34,6 +35,7 @@ export const TRACK_VIEW_QUERY = graphql`
       ...TrackKartsCard_track
       ...TrackLayoutCard_track
       ...TrackPersonalBestsCard_track
+      ...TrackSessionComparisonCard_track
       ...TrackVisitStatsCard_track
     }
   }
@@ -72,6 +74,7 @@ export default function TrackViewPage(): React.ReactNode {
         <TrackPersonalBestsCard track={data.track} showTrackHeader />
         <TrackVisitStatsCard track={data.track} />
       </div>
+      <TrackSessionComparisonCard track={data.track} />
       <div css={sideBySideStyles}>
         <TrackKartsCard track={data.track} />
         <TrackLayoutCard track={data.track} />
