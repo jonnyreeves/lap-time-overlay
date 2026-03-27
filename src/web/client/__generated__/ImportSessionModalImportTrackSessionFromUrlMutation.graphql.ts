@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<4a3bc5a0bd138022b2aabbd59e954024>>
+ * @generated SignedSource<<8f144ee47ea02a9c8a9d3510d900f157>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -23,6 +23,11 @@ export type ImportSessionModalImportTrackSessionFromUrlMutation$data = {
       readonly kartNumber: string | null | undefined;
       readonly laps: ReadonlyArray<{
         readonly displayTime: string;
+        readonly lapEvents: ReadonlyArray<{
+          readonly event: string;
+          readonly offset: number;
+          readonly value: string;
+        }>;
         readonly lapNumber: number;
         readonly timeSeconds: number;
       }>;
@@ -32,6 +37,11 @@ export type ImportSessionModalImportTrackSessionFromUrlMutation$data = {
     readonly kartTypeName: string | null | undefined;
     readonly laps: ReadonlyArray<{
       readonly displayTime: string;
+      readonly lapEvents: ReadonlyArray<{
+        readonly event: string;
+        readonly offset: number;
+        readonly value: string;
+      }>;
       readonly lapNumber: number;
       readonly timeSeconds: number;
     }>;
@@ -98,6 +108,38 @@ v3 = {
       "args": null,
       "kind": "ScalarField",
       "name": "displayTime",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "concreteType": "ImportedSessionLapEvent",
+      "kind": "LinkedField",
+      "name": "lapEvents",
+      "plural": true,
+      "selections": [
+        {
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
+          "name": "offset",
+          "storageKey": null
+        },
+        {
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
+          "name": "event",
+          "storageKey": null
+        },
+        {
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
+          "name": "value",
+          "storageKey": null
+        }
+      ],
       "storageKey": null
     }
   ],
@@ -220,16 +262,16 @@ return {
     "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "b47992e8dd4f44a673fa604dfb5f1985",
+    "cacheID": "c88cb315007aba6da27f48e966cf4b07",
     "id": null,
     "metadata": {},
     "name": "ImportSessionModalImportTrackSessionFromUrlMutation",
     "operationKind": "mutation",
-    "text": "mutation ImportSessionModalImportTrackSessionFromUrlMutation(\n  $input: ImportTrackSessionFromUrlInput!\n) {\n  importTrackSessionFromUrl(input: $input) {\n    provider\n    sessionFormat\n    sessionDate\n    sessionTime\n    classification\n    sessionFastestLapSeconds\n    kartNumber\n    trackLayoutName\n    selfDriverName\n    kartTypeName\n    laps {\n      lapNumber\n      timeSeconds\n      displayTime\n    }\n    drivers {\n      name\n      classification\n      kartNumber\n      laps {\n        lapNumber\n        timeSeconds\n        displayTime\n      }\n    }\n  }\n}\n"
+    "text": "mutation ImportSessionModalImportTrackSessionFromUrlMutation(\n  $input: ImportTrackSessionFromUrlInput!\n) {\n  importTrackSessionFromUrl(input: $input) {\n    provider\n    sessionFormat\n    sessionDate\n    sessionTime\n    classification\n    sessionFastestLapSeconds\n    kartNumber\n    trackLayoutName\n    selfDriverName\n    kartTypeName\n    laps {\n      lapNumber\n      timeSeconds\n      displayTime\n      lapEvents {\n        offset\n        event\n        value\n      }\n    }\n    drivers {\n      name\n      classification\n      kartNumber\n      laps {\n        lapNumber\n        timeSeconds\n        displayTime\n        lapEvents {\n          offset\n          event\n          value\n        }\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "02148b643ddc0f30e81471e7b61bfed0";
+(node as any).hash = "0dbebf32ff30cc85085bdaee7050c355";
 
 export default node;

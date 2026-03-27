@@ -85,6 +85,11 @@ const ImportTrackSessionFromUrlMutation = graphql`
         lapNumber
         timeSeconds
         displayTime
+        lapEvents {
+          offset
+          event
+          value
+        }
       }
       drivers {
         name
@@ -94,6 +99,11 @@ const ImportTrackSessionFromUrlMutation = graphql`
           lapNumber
           timeSeconds
           displayTime
+          lapEvents {
+            offset
+            event
+            value
+          }
         }
       }
     }
@@ -110,6 +120,7 @@ const FetchDaytonaClubspeedSessionsMutation = graphql`
         sessionTime
         kartNumber
         classification
+        alreadyImported
       }
     }
   }
@@ -134,6 +145,11 @@ const ImportDaytonaClubspeedSessionMutation = graphql`
         lapNumber
         timeSeconds
         displayTime
+        lapEvents {
+          offset
+          event
+          value
+        }
       }
       drivers {
         name
@@ -143,6 +159,11 @@ const ImportDaytonaClubspeedSessionMutation = graphql`
           lapNumber
           timeSeconds
           displayTime
+          lapEvents {
+            offset
+            event
+            value
+          }
         }
       }
     }
@@ -216,7 +237,19 @@ export function ImportSessionModal({
   const daytonaCredentialsConfigured = daytonaCredentialStatus?.configured ?? false;
   const daytonaValidationError = daytonaCredentialStatus?.lastValidationError ?? null;
   const sourceTextForGuessing =
-    selectedSource === "daytona" ? buildDaytonaSessionLabel(selectedDaytonaSession ?? { heatNo: "", activityType: "", sessionDate: null, sessionTime: null, kartNumber: null, classification: null }) : emailContent;
+    selectedSource === "daytona"
+      ? buildDaytonaSessionLabel(
+          selectedDaytonaSession ?? {
+            heatNo: "",
+            activityType: "",
+            sessionDate: null,
+            sessionTime: null,
+            kartNumber: null,
+            classification: null,
+            alreadyImported: false,
+          }
+        )
+      : emailContent;
   const guessedTrackId = useMemo(() => {
     if (!parsed) return null;
     return guessTrackIdFromImport(tracks, {
@@ -312,6 +345,7 @@ export function ImportSessionModal({
             sessionTime: session.sessionTime ?? null,
             kartNumber: session.kartNumber ?? null,
             classification: session.classification ?? null,
+            alreadyImported: session.alreadyImported ?? false,
           }))
         );
         setDaytonaStatus("loaded");
@@ -504,6 +538,9 @@ export function ImportSessionModal({
         selectedSource === "daytona" && selectedDaytonaSession
           ? buildDaytonaSessionLabel(selectedDaytonaSession)
           : emailContent.trim(),
+      externalImportProvider:
+        selectedSource === "daytona" ? "daytona_clubspeed" : null,
+      externalImportId: selectedSource === "daytona" ? selectedDaytonaHeatNo : null,
       sessionFormat: parsed.sessionFormat,
       sessionDate: parsed.sessionDate,
       sessionTime: parsed.sessionTime,

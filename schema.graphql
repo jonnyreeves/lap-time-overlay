@@ -196,6 +196,8 @@ input CreateTrackSessionInput {
   laps: [LapInput!]
   fastestLap: Float
   participants: [TrackSessionParticipantInput!]
+  externalImportProvider: String
+  externalImportId: String
 }
 
 type CreateTrackSessionPayload {
@@ -255,6 +257,7 @@ type DaytonaClubspeedSessionSummary {
   sessionTime: String
   kartNumber: String
   classification: Int
+  alreadyImported: Boolean!
 }
 
 type FetchDaytonaClubspeedSessionsPayload {
@@ -268,10 +271,17 @@ type DaytonaClubspeedCredentialStatus {
   lastValidationError: String
 }
 
+type ImportedSessionLapEvent {
+  offset: Float!
+  event: String!
+  value: String!
+}
+
 type ImportedSessionLap {
   lapNumber: Int!
   timeSeconds: Float!
   displayTime: String!
+  lapEvents: [ImportedSessionLapEvent!]!
 }
 
 type ImportedSessionDriver {

@@ -200,8 +200,18 @@ describe("daytona clubspeed import service", () => {
     expect(imported.classification).toBe(3);
     expect(imported.drivers).toHaveLength(3);
     expect(imported.laps).toEqual([
-      { lapNumber: 1, timeSeconds: 50, displayTime: "50.000" },
-      { lapNumber: 2, timeSeconds: 49.411, displayTime: "49.411" },
+      {
+        lapNumber: 1,
+        timeSeconds: 50,
+        displayTime: "50.000",
+        lapEvents: [{ offset: 50, event: "position", value: "3" }],
+      },
+      {
+        lapNumber: 2,
+        timeSeconds: 49.411,
+        displayTime: "49.411",
+        lapEvents: [{ offset: 49.411, event: "position", value: "3" }],
+      },
     ]);
   });
 

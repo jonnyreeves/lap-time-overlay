@@ -13,6 +13,7 @@ export type DaytonaClubspeedSessionOption = {
   sessionTime: string | null | undefined;
   kartNumber: string | null | undefined;
   classification: number | null | undefined;
+  alreadyImported: boolean;
 };
 
 type ImportedPayloadDriver = {
@@ -24,6 +25,14 @@ type ImportedPayloadDriver = {
         lapNumber: number;
         timeSeconds: number;
         displayTime: string;
+        lapEvents?:
+          | ReadonlyArray<{
+              offset: number;
+              event: string;
+              value: string;
+            }>
+          | null
+          | undefined;
       }>
     | null
     | undefined;
@@ -64,6 +73,14 @@ function normalizeLaps(
         lapNumber: number;
         timeSeconds: number;
         displayTime: string;
+        lapEvents?:
+          | ReadonlyArray<{
+              offset: number;
+              event: string;
+              value: string;
+            }>
+          | null
+          | undefined;
       }>
     | null
     | undefined
@@ -73,6 +90,11 @@ function normalizeLaps(
       lapNumber: lap.lapNumber,
       timeSeconds: lap.timeSeconds,
       displayTime: lap.displayTime,
+      lapEvents: lap.lapEvents?.map((event) => ({
+        offset: event.offset,
+        event: event.event,
+        value: event.value,
+      })),
     })) ?? []
   );
 }
@@ -83,7 +105,7 @@ export function buildDaytonaSessionLabel(session: DaytonaClubspeedSessionOption)
     session.sessionTime ?? "Unknown time",
     session.activityType,
   ].filter(Boolean);
-  return parts.join(" • ");
+  return `${parts.join(" • ")}${session.alreadyImported ? " • Already imported" : ""}`;
 }
 
 export function hasDriverRows(parsed: ParsedSessionEmail): parsed is ParsedWithDrivers {

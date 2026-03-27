@@ -12,6 +12,7 @@ import { SelfComparisonCard } from "../../components/session/SelfComparisonCard.
 import { SessionPerformanceCard } from "../../components/session/SessionPerformanceCard.js";
 import { SessionOverviewCard } from "../../components/session/SessionOverviewCard.js";
 import { useBreadcrumbs, type BreadcrumbItem } from "../../hooks/useBreadcrumbs.js";
+import { isNamedRivalDriver } from "../../../shared/rivalAnalysis.js";
 
 const pageGridStyles = css`
   display: grid;
@@ -458,7 +459,7 @@ export default function ViewSessionRoute() {
   const laps = session?.laps ?? [];
   const rivalParticipants =
     session?.participants
-      ?.filter((participant) => !participant.isSelf)
+      ?.filter((participant) => !participant.isSelf && isNamedRivalDriver(participant.name))
       .map((participant) => ({
         name: participant.name,
         classification: participant.classification,

@@ -77,6 +77,8 @@ export function DaytonaSessionStep({
     return <p>No Daytona Club Speed sessions were available for this account.</p>;
   }
 
+  const availableSessions = sessions.filter((session) => !session.alreadyImported);
+
   return (
     <div css={selectStyles}>
       <label htmlFor="daytona-session-select">Choose a session</label>
@@ -85,13 +87,18 @@ export function DaytonaSessionStep({
         value={selectedHeatNo}
         onChange={(event) => onSelectHeatNo(event.target.value)}
       >
-        <option value="">Select a session</option>
+        <option value="">
+          {availableSessions.length > 0 ? "Select a session" : "No new sessions available"}
+        </option>
         {sessions.map((session) => (
-          <option key={session.heatNo} value={session.heatNo}>
+          <option key={session.heatNo} value={session.heatNo} disabled={session.alreadyImported}>
             {buildDaytonaSessionLabel(session)}
           </option>
         ))}
       </select>
+      {availableSessions.length === 0 ? (
+        <p>All available Daytona Club Speed sessions for this account have already been imported.</p>
+      ) : null}
     </div>
   );
 }

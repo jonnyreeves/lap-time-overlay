@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 import { format } from "date-fns";
-import { useState, type MouseEvent } from "react";
 import { Link } from "react-router-dom";
+import { SelfComparisonLapChart } from "./SelfComparisonLapChart.js";
 import { formatStopwatchTime } from "../../utils/lapTime.js";
 
 export type SelfComparisonSelectableSession = {
@@ -244,33 +244,6 @@ const chartCardStyles = css`
   padding: 10px;
 `;
 
-const chartSvgStyles = css`
-  display: block;
-  width: 100%;
-  overflow: visible;
-`;
-
-const legendStyles = css`
-  display: flex;
-  gap: 16px;
-  margin-bottom: 8px;
-  font-size: 0.85rem;
-  color: #334155;
-
-  span {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  i {
-    display: inline-block;
-    width: 12px;
-    height: 2px;
-    border-radius: 999px;
-  }
-`;
-
 const trendTableStyles = css`
   width: 100%;
   border-collapse: collapse;
@@ -339,6 +312,10 @@ function trendMetricLabel(metric: Props["analysis"]["trend"]["metric"]): string 
   return "Best pace";
 }
 
+function formatTrendDateLabel(date: string): string {
+  return format(new Date(date), "dd/MM");
+}
+
 function pickSustainedDelta(analysis: SelfComparisonAnalysisView): number | null {
   return (
     analysis.paceInsights.deltas.bestRolling10Avg ??
@@ -365,79 +342,41 @@ export function SelfComparisonInsights({
   currentSession,
   comparisonSessionHref,
 }: Props) {
-  const [hoveredLapIndex, setHoveredLapIndex] = useState<number | null>(null);
   const comparisons = analysis.lapComparisons ?? [];
   const trendPoints = analysis.trend.points ?? [];
-  const width = 720;
-  const height = 284;
-  const xPad = 56;
-  const yPad = 20;
-  const bottomPad = 70;
-  const allTimes = comparisons.flatMap((lap) => [lap.currentLap, lap.comparisonLap]);
-  const minTime = allTimes.length ? Math.min(...allTimes) : 0;
-  const maxTime = allTimes.length ? Math.max(...allTimes) : 1;
-  const timeSpan = Math.max(maxTime - minTime, 0.001);
-  const plotBottomY = height - bottomPad;
-  const plotHeight = height - yPad - bottomPad;
-  const xStep =
-    comparisons.length > 1 ? (width - xPad * 2) / (comparisons.length - 1) : width - xPad * 2;
-  const projectX = (index: number) => xPad + index * xStep;
-  const projectY = (value: number) => {
-    const ratio = (value - minTime) / timeSpan;
-    return plotBottomY - ratio * plotHeight;
-  };
-  const yTicks = Array.from({ length: 5 }, (_, index) => {
-    const ratio = index / 4;
-    const value = minTime + ratio * timeSpan;
-    return { value, y: projectY(value) };
-  });
-  const currentPath = buildLinePath(
-    comparisons.map((lap, index) => ({ x: projectX(index), y: projectY(lap.currentLap) }))
-  );
-  const comparisonPath = buildLinePath(
-    comparisons.map((lap, index) => ({ x: projectX(index), y: projectY(lap.comparisonLap) }))
-  );
-  const xTickIndices = buildTickIndices(comparisons.length, 6);
-  const hoveredLap = hoveredLapIndex != null ? comparisons[hoveredLapIndex] ?? null : null;
-  const hoveredX = hoveredLapIndex != null ? projectX(hoveredLapIndex) : null;
-  const hoveredCurrentY = hoveredLap ? projectY(hoveredLap.currentLap) : null;
-  const hoveredComparisonY = hoveredLap ? projectY(hoveredLap.comparisonLap) : null;
-  const tooltipWidth = 172;
-  const tooltipHeight = 56;
-  const tooltipX =
-    hoveredX == null
-      ? null
-      : Math.max(12, Math.min(width - tooltipWidth - 12, hoveredX - tooltipWidth / 2));
-  const tooltipY = 10;
 
-  const trendWidth = 240;
-  const trendHeight = 72;
+  const trendWidth = 320;
+  const trendHeight = 136;
+  const trendXPad = 52;
+  const trendRightPad = 16;
+  const trendTopPad = 16;
+  const trendBottomPad = 34;
   const trendTimes = trendPoints.map((point) => point.value);
   const trendMin = trendTimes.length ? Math.min(...trendTimes) : 0;
   const trendMax = trendTimes.length ? Math.max(...trendTimes) : 1;
   const trendSpan = Math.max(trendMax - trendMin, 0.001);
+  const trendPlotBottomY = trendHeight - trendBottomPad;
+  const trendPlotHeight = trendHeight - trendTopPad - trendBottomPad;
+  const trendPlotWidth = trendWidth - trendXPad - trendRightPad;
   const trendXStep =
-    trendPoints.length > 1 ? (trendWidth - 20) / (trendPoints.length - 1) : trendWidth - 20;
+    trendPoints.length > 1 ? trendPlotWidth / (trendPoints.length - 1) : trendPlotWidth;
+  const projectTrendX = (index: number) => trendXPad + index * trendXStep;
+  const projectTrendY = (value: number) => {
+    const ratio = (value - trendMin) / trendSpan;
+    return trendPlotBottomY - ratio * trendPlotHeight;
+  };
+  const trendYTicks = Array.from({ length: 4 }, (_, index) => {
+    const ratio = index / 3;
+    const value = trendMin + ratio * trendSpan;
+    return { value, y: projectTrendY(value) };
+  });
+  const trendXTickIndices = buildTickIndices(trendPoints.length, 4);
   const trendPath = buildLinePath(
     trendPoints.map((point, index) => ({
-      x: 10 + index * trendXStep,
-      y: 10 + ((point.value - trendMin) / trendSpan) * (trendHeight - 20),
+      x: projectTrendX(index),
+      y: projectTrendY(point.value),
     }))
   );
-
-  function updateHoveredLap(event: MouseEvent<SVGSVGElement>) {
-    if (!comparisons.length) {
-      setHoveredLapIndex(null);
-      return;
-    }
-
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const relativeX = ((event.clientX - bounds.left) / bounds.width) * width;
-    const clampedX = Math.max(xPad, Math.min(width - xPad, relativeX));
-    const rawIndex = xStep === 0 ? 0 : Math.round((clampedX - xPad) / xStep);
-    const nextIndex = Math.max(0, Math.min(comparisons.length - 1, rawIndex));
-    setHoveredLapIndex(nextIndex);
-  }
 
   return (
     <>
@@ -513,100 +452,11 @@ export function SelfComparisonInsights({
         </div>
       </div>
 
-      <div css={chartCardStyles}>
-        <div css={legendStyles}>
-          <span>
-            <i css={css`background: #0f766e;`} />
-            Left session
-          </span>
-          <span>
-            <i css={css`background: #f97316;`} />
-            Right session
-          </span>
-        </div>
-        {comparisons.length > 0 ? (
-          <svg
-            css={chartSvgStyles}
-            viewBox={`0 0 ${width} ${height}`}
-            width="100%"
-            role="img"
-            aria-label="Lap-by-lap self comparison chart"
-            onMouseMove={updateHoveredLap}
-            onMouseLeave={() => setHoveredLapIndex(null)}
-          >
-            {yTicks.map((tick) => (
-              <g key={`y-${tick.y.toFixed(2)}`}>
-                <line x1={xPad} x2={width - xPad} y1={tick.y} y2={tick.y} stroke="#e2e8f4" strokeWidth={1} />
-                <text x={xPad - 8} y={tick.y + 4} textAnchor="end" fontSize="10" fill="#64748b">
-                  {tick.value.toFixed(3)}s
-                </text>
-              </g>
-            ))}
-            {xTickIndices.map((index) => {
-              const x = projectX(index);
-              return (
-                <g key={`x-${comparisons[index]?.lapNumber ?? index}`}>
-                  <line x1={x} x2={x} y1={plotBottomY} y2={plotBottomY + 6} stroke="#94a3b8" strokeWidth={1} />
-                  <text x={x} y={plotBottomY + 20} textAnchor="middle" fontSize="10" fill="#64748b">
-                    {comparisons[index]?.lapNumber}
-                  </text>
-                </g>
-              );
-            })}
-            <line x1={xPad} x2={xPad} y1={yPad} y2={plotBottomY} stroke="#94a3b8" strokeWidth={1.2} />
-            <line x1={xPad} x2={width - xPad} y1={plotBottomY} y2={plotBottomY} stroke="#94a3b8" strokeWidth={1.2} />
-            <text x={(xPad + width - xPad) / 2} y={height - 14} textAnchor="middle" fontSize="11" fill="#64748b">
-              Lap number
-            </text>
-            <path d={currentPath} fill="none" stroke="#0f766e" strokeWidth={2.5} />
-            <path d={comparisonPath} fill="none" stroke="#f97316" strokeWidth={2.5} />
-            {hoveredLap && hoveredX != null && hoveredCurrentY != null && hoveredComparisonY != null ? (
-              <>
-                <line
-                  x1={hoveredX}
-                  x2={hoveredX}
-                  y1={yPad}
-                  y2={plotBottomY}
-                  stroke="#94a3b8"
-                  strokeWidth={1}
-                  strokeDasharray="4 4"
-                />
-                <circle cx={hoveredX} cy={hoveredCurrentY} r={5.5} fill="#0f766e" stroke="#ffffff" strokeWidth={2} />
-                <circle
-                  cx={hoveredX}
-                  cy={hoveredComparisonY}
-                  r={5.5}
-                  fill="#f97316"
-                  stroke="#ffffff"
-                  strokeWidth={2}
-                />
-                <g transform={`translate(${tooltipX ?? 12}, ${tooltipY})`}>
-                  <rect width={tooltipWidth} height={tooltipHeight} rx={10} fill="#0f172a" opacity={0.94} />
-                  <text x={12} y={18} fontSize="11" fill="#f8fafc" fontWeight={700}>
-                    Lap {hoveredLap.lapNumber}
-                  </text>
-                  <text x={12} y={34} fontSize="10" fill="#ccfbf1">
-                    Left {formatLap(hoveredLap.currentLap)}
-                  </text>
-                  <text x={12} y={48} fontSize="10" fill="#fed7aa">
-                    Right {formatLap(hoveredLap.comparisonLap)}
-                  </text>
-                </g>
-              </>
-            ) : null}
-            <rect
-              x={xPad}
-              y={yPad}
-              width={width - xPad * 2}
-              height={plotHeight}
-              fill="transparent"
-              style={{ cursor: "crosshair" }}
-            />
-          </svg>
-        ) : (
-          <div css={emptyStateStyles}>No aligned lap numbers exist between these sessions.</div>
-        )}
-      </div>
+      <SelfComparisonLapChart
+        comparisons={comparisons}
+        currentSessionLabel="Current session"
+        comparisonSessionLabel="Comparison session"
+      />
 
       <div css={chartCardStyles}>
         <div css={metaRowStyles}>
@@ -615,11 +465,100 @@ export function SelfComparisonInsights({
         </div>
         {trendPoints.length ? (
           <>
-            <svg viewBox={`0 0 ${trendWidth} ${trendHeight}`} width="100%" role="img" aria-label="Self comparison trend chart">
+            <svg
+              viewBox={`0 0 ${trendWidth} ${trendHeight}`}
+              width="100%"
+              role="img"
+              aria-label="Self comparison trend chart with session date on the x-axis and lap time on the y-axis"
+            >
+              {trendYTicks.map((tick) => (
+                <g key={`trend-y-${tick.y.toFixed(2)}`}>
+                  <line
+                    x1={trendXPad}
+                    x2={trendWidth - trendRightPad}
+                    y1={tick.y}
+                    y2={tick.y}
+                    stroke="#e2e8f4"
+                    strokeWidth={1}
+                  />
+                  <text
+                    x={trendXPad - 8}
+                    y={tick.y + 4}
+                    textAnchor="end"
+                    fontSize="10"
+                    fill="#64748b"
+                  >
+                    {formatLap(tick.value)}
+                  </text>
+                </g>
+              ))}
+              {trendXTickIndices.map((index: number) => {
+                const point = trendPoints[index];
+                if (!point) return null;
+                const x = projectTrendX(index);
+                const isFirst = index === 0;
+                const isLast = index === trendPoints.length - 1;
+                return (
+                  <g key={`trend-x-${point.sessionId}`}>
+                    <line
+                      x1={x}
+                      x2={x}
+                      y1={trendTopPad}
+                      y2={trendPlotBottomY}
+                      stroke="#f1f5f9"
+                      strokeWidth={1}
+                    />
+                    <text
+                      x={x}
+                      y={trendPlotBottomY + 16}
+                      textAnchor={isFirst ? "start" : isLast ? "end" : "middle"}
+                      fontSize="10"
+                      fill="#64748b"
+                    >
+                      {formatTrendDateLabel(point.date)}
+                    </text>
+                  </g>
+                );
+              })}
+              <line
+                x1={trendXPad}
+                x2={trendXPad}
+                y1={trendTopPad}
+                y2={trendPlotBottomY}
+                stroke="#94a3b8"
+                strokeWidth={1.2}
+              />
+              <line
+                x1={trendXPad}
+                x2={trendWidth - trendRightPad}
+                y1={trendPlotBottomY}
+                y2={trendPlotBottomY}
+                stroke="#94a3b8"
+                strokeWidth={1.2}
+              />
+              <text
+                x={(trendXPad + trendWidth - trendRightPad) / 2}
+                y={trendHeight - 4}
+                textAnchor="middle"
+                fontSize="11"
+                fill="#334155"
+              >
+                Session date
+              </text>
+              <text
+                x={16}
+                y={trendHeight / 2}
+                textAnchor="middle"
+                fontSize="11"
+                fill="#334155"
+                transform={`rotate(-90 16 ${trendHeight / 2})`}
+              >
+                Lap time (faster up)
+              </text>
               <path d={trendPath} fill="none" stroke="#2563eb" strokeWidth={2.5} />
               {trendPoints.map((point, index) => {
-                const x = 10 + index * trendXStep;
-                const y = 10 + ((point.value - trendMin) / trendSpan) * (trendHeight - 20);
+                const x = projectTrendX(index);
+                const y = projectTrendY(point.value);
                 return (
                   <circle
                     key={point.sessionId}

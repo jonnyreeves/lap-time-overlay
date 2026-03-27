@@ -463,13 +463,16 @@ function parseLapTables(detailHtml: string): DaytonaHeatDriver[] {
     for (const lapMatch of tableHtml.matchAll(/<tr class='LapTimesRow(?:Alt)?'><td>(\d+)<\/td><td>([\s\S]*?)<\/td><\/tr>/gi)) {
       const lapNumber = Number.parseInt(lapMatch[1], 10);
       const lapValue = normalizeWhitespace(decodeHtmlEntities(stripTags(lapMatch[2] ?? "")));
-      const timeMatch = lapValue.match(/([0-9:.]+)/);
-      const timeSeconds = parseLapTimeString(timeMatch?.[1] ?? null);
+      const lapMatchResult = lapValue.match(/([0-9:.]+)(?:\s*\[(\d+)\])?/);
+      const timeMatch = lapMatchResult?.[1] ?? null;
+      const position = lapMatchResult?.[2] ?? null;
+      const timeSeconds = parseLapTimeString(timeMatch);
       if (!Number.isInteger(lapNumber) || timeSeconds == null) continue;
       laps.push({
         lapNumber,
         timeSeconds,
         displayTime: formatLapTimeSeconds(timeSeconds),
+        lapEvents: position ? [{ offset: timeSeconds, event: "position", value: position }] : [],
       });
     }
 

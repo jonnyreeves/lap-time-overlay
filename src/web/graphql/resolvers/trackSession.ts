@@ -54,7 +54,12 @@ import {
   fetchDaytonaClubspeedSessions,
   importDaytonaClubspeedSession,
 } from "../../sessionImport/service.js";
-import { SessionImportError } from "../../sessionImport/types.js";
+import {
+  SessionImportError,
+  type ImportedSessionData,
+  type ImportedSessionDriver,
+  type ImportedSessionLap,
+} from "../../sessionImport/types.js";
 
 const DEBUG_UPLOAD_PROGRESS = process.env.DEBUG_UPLOAD_PROGRESS === "1";
 const LAP_TIME_EPSILON_S = 1e-6;
@@ -85,6 +90,8 @@ export type CreateTrackSessionInputArgs = {
     laps?: LapInputArg[] | null;
     fastestLap?: number | null;
     participants?: ParticipantInputArg[] | null;
+    externalImportProvider?: string | null;
+    externalImportId?: string | null;
   };
 };
 
@@ -134,6 +141,18 @@ export type ImportDaytonaClubspeedSessionArgs = {
     heatNo?: string;
   };
 };
+
+function normalizeExternalImportProvider(value: string | null | undefined): string | null {
+  const normalized = value?.trim();
+  if (!normalized) return null;
+  return normalized;
+}
+
+function normalizeExternalImportId(value: string | null | undefined): string | null {
+  const normalized = value?.trim();
+  if (!normalized) return null;
+  return normalized;
+}
 
 export function parseConditions(conditions: string | undefined): TrackSessionConditions {
   if (!conditions) {
@@ -205,12 +224,27 @@ function resolveSessionConditions(
   return track?.isIndoors ? "Dry" : session.conditions;
 }
 
+function normalizePersonalBestSetupValue(
+  value: string | null | undefined,
+  fallback: string
+) {
+  const normalized = value?.trim().toLocaleLowerCase();
+  return normalized ? `name:${normalized}` : `id:${fallback}`;
+}
+
 function getSessionPersonalBestKey(
   session: TrackSessionRecord,
-  conditions: TrackSessionConditions
+  conditions: TrackSessionConditions,
+  repositories: Repositories
 ) {
-  const kartKey = session.kartId ?? "none";
-  return `${session.trackId}::${session.trackLayoutId}::${kartKey}::${conditions}`;
+  const trackLayout = repositories.trackLayouts.findById(session.trackLayoutId);
+  const kart = session.kartId ? repositories.karts.findById(session.kartId) : null;
+  const trackLayoutKey = normalizePersonalBestSetupValue(trackLayout?.name, session.trackLayoutId);
+  const kartKey =
+    session.kartId == null
+      ? "kart:none"
+      : normalizePersonalBestSetupValue(kart?.name, session.kartId);
+  return `${session.trackId}::${trackLayoutKey}::${kartKey}::${conditions}`;
 }
 
 function getFastestLapForSession(
@@ -254,7 +288,7 @@ function buildPersonalBestIndexForUser(userId: string, repositories: Repositorie
     const fastestLap = getFastestLapForSession(session, repositories, fastestLapCache);
     if (fastestLap == null) return;
     const conditions = resolveSessionConditions(session, repositories, trackCache);
-    const key = getSessionPersonalBestKey(session, conditions);
+    const key = getSessionPersonalBestKey(session, conditions, repositories);
     const timestampValue = new Date(session.date).getTime();
     const timestamp = Number.isNaN(timestampValue) ? 0 : timestampValue;
     const current = bestByKey.get(key);
@@ -427,6 +461,37 @@ export function parseParticipantInputs(
   }
 
   return parsed;
+}
+
+function normalizeImportedSessionLaps(laps: ImportedSessionLap[]) {
+  return laps.map((lap) => ({
+    ...lap,
+    lapEvents: lap.lapEvents ?? [],
+  }));
+}
+
+function normalizeImportedSessionDrivers(drivers: ImportedSessionDriver[]) {
+  return drivers.map((driver) => ({
+    ...driver,
+    laps: normalizeImportedSessionLaps(driver.laps),
+  }));
+}
+
+function buildImportedSessionPayload(imported: ImportedSessionData) {
+  return {
+    provider: imported.provider,
+    sessionFormat: imported.sessionFormat,
+    sessionDate: imported.sessionDate,
+    sessionTime: imported.sessionTime,
+    classification: imported.classification,
+    sessionFastestLapSeconds: imported.sessionFastestLapSeconds,
+    kartNumber: imported.kartNumber,
+    trackLayoutName: imported.trackLayoutName,
+    selfDriverName: imported.selfDriverName,
+    kartTypeName: imported.kartTypeName,
+    laps: normalizeImportedSessionLaps(imported.laps),
+    drivers: normalizeImportedSessionDrivers(imported.drivers),
+  };
 }
 
 function groupParticipantLapsById(
@@ -799,7 +864,7 @@ export function toTrackSessionPayload(session: TrackSessionRecord, repositories:
     };
   };
   const normalizedConditions = cachedTrack?.isIndoors ? "Dry" : session.conditions;
-  const personalBestKey = getSessionPersonalBestKey(session, normalizedConditions);
+  const personalBestKey = getSessionPersonalBestKey(session, normalizedConditions, repositories);
 
   return {
     id: session.id,
@@ -1210,6 +1275,30 @@ export const trackSessionResolvers = {
     const kartNumber = input.kartNumber?.trim() ?? "";
     const temperature = input.temperature?.trim() ?? "";
     const participants = parseParticipantInputs(input.participants);
+    const externalImportProvider = normalizeExternalImportProvider(input.externalImportProvider);
+    const externalImportId = normalizeExternalImportId(input.externalImportId);
+    if ((externalImportProvider == null) !== (externalImportId == null)) {
+      throw new GraphQLError(
+        "externalImportProvider and externalImportId must be provided together",
+        {
+          extensions: { code: "VALIDATION_FAILED" },
+        }
+      );
+    }
+    if (externalImportProvider != null && externalImportId != null) {
+      const duplicateImport = repositories.trackSessions
+        .findByUserId(context.currentUser.id)
+        .find(
+          (session) =>
+            session.importSourceProvider === externalImportProvider &&
+            session.importSourceId === externalImportId
+        );
+      if (duplicateImport) {
+        throw new GraphQLError("This Daytona Club Speed session has already been imported", {
+          extensions: { code: "VALIDATION_FAILED" },
+        });
+      }
+    }
     const { trackSession } = repositories.trackSessions.createWithLaps({
       date: input.date,
       format: input.format,
@@ -1224,6 +1313,12 @@ export const trackSessionResolvers = {
       trackLayoutId: input.trackLayoutId,
       fastestLap,
       temperature,
+      ...(externalImportProvider == null || externalImportId == null
+        ? {}
+        : {
+            importSourceProvider: externalImportProvider,
+            importSourceId: externalImportId,
+          }),
       ...(participants.length ? { participants } : {}),
     });
     return { trackSession: toTrackSessionPayload(trackSession, repositories) };
@@ -1488,20 +1583,7 @@ export const trackSessionResolvers = {
 
     try {
       const imported = await importTrackSessionFromSource(source);
-      return {
-        provider: imported.provider,
-        sessionFormat: imported.sessionFormat,
-        sessionDate: imported.sessionDate,
-        sessionTime: imported.sessionTime,
-        classification: imported.classification,
-        sessionFastestLapSeconds: imported.sessionFastestLapSeconds,
-        kartNumber: imported.kartNumber,
-        trackLayoutName: imported.trackLayoutName,
-        selfDriverName: imported.selfDriverName,
-        kartTypeName: imported.kartTypeName,
-        laps: imported.laps,
-        drivers: imported.drivers,
-      };
+      return buildImportedSessionPayload(imported);
     } catch (error) {
       if (error instanceof SessionImportError) {
         throw new GraphQLError(error.message, {
@@ -1522,10 +1604,23 @@ export const trackSessionResolvers = {
     }
 
     try {
+      const { repositories } = context;
       const credentials = getViewerDaytonaClubspeedCredentialsOrThrow(context.currentUser.id);
       const sessions = await fetchDaytonaClubspeedSessions(credentials);
+      const importedHeatNos = new Set(
+        repositories.trackSessions
+          .findByUserId(context.currentUser.id)
+          .filter((session) => session.importSourceProvider === "daytona_clubspeed")
+          .map((session) => session.importSourceId)
+          .filter((importSourceId): importSourceId is string => Boolean(importSourceId))
+      );
       markViewerDaytonaClubspeedCredentialsValidated(context.currentUser.id);
-      return { sessions };
+      return {
+        sessions: sessions.map((session) => ({
+          ...session,
+          alreadyImported: importedHeatNos.has(session.heatNo),
+        })),
+      };
     } catch (error) {
       if (error instanceof SessionImportError && error.code === "INVALID_CREDENTIALS") {
         markViewerDaytonaClubspeedCredentialInvalid(context.currentUser.id, error.message);
@@ -1562,20 +1657,7 @@ export const trackSessionResolvers = {
       const credentials = getViewerDaytonaClubspeedCredentialsOrThrow(context.currentUser.id);
       const imported = await importDaytonaClubspeedSession(heatNo, credentials);
       markViewerDaytonaClubspeedCredentialsValidated(context.currentUser.id);
-      return {
-        provider: imported.provider,
-        sessionFormat: imported.sessionFormat,
-        sessionDate: imported.sessionDate,
-        sessionTime: imported.sessionTime,
-        classification: imported.classification,
-        sessionFastestLapSeconds: imported.sessionFastestLapSeconds,
-        kartNumber: imported.kartNumber,
-        trackLayoutName: imported.trackLayoutName,
-        selfDriverName: imported.selfDriverName,
-        kartTypeName: imported.kartTypeName,
-        laps: imported.laps,
-        drivers: imported.drivers,
-      };
+      return buildImportedSessionPayload(imported);
     } catch (error) {
       if (error instanceof SessionImportError && error.code === "INVALID_CREDENTIALS") {
         markViewerDaytonaClubspeedCredentialInvalid(context.currentUser.id, error.message);

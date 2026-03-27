@@ -77,6 +77,8 @@ export type ParsedSessionEmail =
 export type SessionImportSelection = {
   provider: ParsedSessionEmail["provider"];
   sourceText: string;
+  externalImportProvider?: string | null;
+  externalImportId?: string | null;
   sessionFormat: SessionFormat | null;
   sessionDate: string | null;
   sessionTime: string | null;

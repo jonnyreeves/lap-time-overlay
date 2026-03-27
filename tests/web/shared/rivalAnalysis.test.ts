@@ -5,6 +5,7 @@ import {
   buildRivalTrend,
   buildSessionInsights,
   computeBestNAvg,
+  isNamedRivalDriver,
 } from "../../../src/web/shared/rivalAnalysis.js";
 
 describe("rivalAnalysis", () => {
@@ -87,6 +88,12 @@ describe("rivalAnalysis", () => {
       2
     );
     expect(best10).toBeCloseTo(52.5, 6);
+  });
+
+  it("only treats named drivers as valid rivals", () => {
+    expect(isNamedRivalDriver("Robert Seaman")).toBe(true);
+    expect(isNamedRivalDriver(" Anonymous ")).toBe(false);
+    expect(isNamedRivalDriver("")).toBe(false);
   });
 
   it("builds report-style pace insights with deltas and verdicts", () => {

@@ -63,6 +63,8 @@ describe("track_sessions", () => {
     assert.strictEqual(trackSession.createdAt, now);
     assert.strictEqual(trackSession.updatedAt, now);
     assert.strictEqual(trackSession.kartNumber, "");
+    assert.strictEqual(trackSession.importSourceProvider, null);
+    assert.strictEqual(trackSession.importSourceId, null);
 
     const retrievedSession = findTrackSessionById(trackSession.id);
     assert.deepStrictEqual(retrievedSession, trackSession);
@@ -99,9 +101,30 @@ describe("track_sessions", () => {
     assert.strictEqual(trackSession.userId, user.id);
     assert.strictEqual(trackSession.kartNumber, "");
     assert.strictEqual(trackSession.temperature, "");
+    assert.strictEqual(trackSession.importSourceProvider, null);
+    assert.strictEqual(trackSession.importSourceId, null);
     assert.strictEqual(laps.length, 2);
     assert.strictEqual(laps[0].sessionId, trackSession.id);
     assert.deepStrictEqual(findLapsBySessionId(trackSession.id), laps);
+  });
+
+  it("persists external import source metadata on imported sessions", () => {
+    const now = Date.now();
+    const { trackSession } = createTrackSessionWithLaps({
+      date: "2026-03-11T19:30:00Z",
+      format: "Practice",
+      classification: 3,
+      trackId: track.id,
+      userId: user.id,
+      now,
+      trackLayoutId: layout.id,
+      importSourceProvider: "daytona_clubspeed",
+      importSourceId: "81389|2026-03-11|19%3A30|149|3|49.411",
+    });
+
+    assert.strictEqual(trackSession.importSourceProvider, "daytona_clubspeed");
+    assert.strictEqual(trackSession.importSourceId, "81389|2026-03-11|19%3A30|149|3|49.411");
+    assert.deepStrictEqual(findTrackSessionById(trackSession.id), trackSession);
   });
 
   it("creates lap events alongside laps", () => {

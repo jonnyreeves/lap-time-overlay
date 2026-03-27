@@ -102,6 +102,12 @@ export const RIVAL_DELTA_TIE_EPSILON_SECONDS = 0.05;
 const CEILING_ADVANTAGE_DELTA_SECONDS = 0.15;
 const SUSTAINED_ADVANTAGE_DELTA_SECONDS = 0.2;
 const ROBUSTNESS_ADVANTAGE_DELTA_SECONDS = 0.08;
+const EXCLUDED_RIVAL_NAMES = new Set(["anonymous"]);
+
+export function isNamedRivalDriver(name: string | null | undefined): boolean {
+  const normalized = name?.trim().toLocaleLowerCase();
+  return Boolean(normalized && !EXCLUDED_RIVAL_NAMES.has(normalized));
+}
 
 function isFinitePositive(value: number): boolean {
   return Number.isFinite(value) && value > 0;

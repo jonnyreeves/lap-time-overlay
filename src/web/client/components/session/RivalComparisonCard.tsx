@@ -2,10 +2,10 @@ import { css } from "@emotion/react";
 import { format } from "date-fns";
 import type { viewSessionQuery$data } from "../../__generated__/viewSessionQuery.graphql.js";
 import { Card } from "../Card.js";
+import { RivalComparisonLapChart } from "./RivalComparisonLapChart.js";
 import { RivalPaceDecomposition } from "./RivalPaceDecomposition.js";
 
 type RivalAnalysis = NonNullable<NonNullable<viewSessionQuery$data["trackSession"]>["rivalAnalysis"]>;
-type RivalLapComparison = RivalAnalysis["lapComparisons"][number];
 
 type Props = {
   rivalParticipants: Array<{ name: string; classification: number | null | undefined }>;
@@ -62,32 +62,6 @@ const insightTileStyles = css`
   }
 `;
 
-const chartCardStyles = css`
-  border: 1px solid #e2e8f4;
-  border-radius: 10px;
-  background: #ffffff;
-  padding: 10px;
-`;
-
-const legendStyles = css`
-  display: flex;
-  gap: 16px;
-  margin-bottom: 8px;
-  font-size: 0.85rem;
-  color: #334155;
-  span {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  i {
-    display: inline-block;
-    width: 12px;
-    height: 2px;
-    border-radius: 999px;
-  }
-`;
-
 const trendTableStyles = css`
   width: 100%;
   border-collapse: collapse;
@@ -126,13 +100,6 @@ const emptyStateStyles = css`
   font-weight: 600;
 `;
 
-function buildLinePath(points: Array<{ x: number; y: number }>): string {
-  if (!points.length) return "";
-  return points
-    .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`)
-    .join(" ");
-}
-
 function formatDelta(delta: number | null | undefined): string {
   if (delta == null || Number.isNaN(delta)) return "—";
   const sign = delta > 0 ? "+" : "";
@@ -170,48 +137,6 @@ export function RivalComparisonCard({
   const selectedRival = rivalParticipants.find((participant) => participant.name === selectedRivalName);
   const comparisons = analysis?.lapComparisons ?? [];
   const paceInsights = analysis?.paceInsights;
-  const width = 720;
-  const height = 240;
-  const xPad = 56;
-  const yPad = 20;
-  const bottomPad = 32;
-  const allTimes = comparisons.flatMap((lap) => [lap.selfLap, lap.rivalLap]);
-  const minTime = allTimes.length ? Math.min(...allTimes) : 0;
-  const maxTime = allTimes.length ? Math.max(...allTimes) : 1;
-  const timeSpan = Math.max(maxTime - minTime, 0.001);
-  const plotBottomY = height - bottomPad;
-  const plotHeight = height - yPad - bottomPad;
-  const xStep =
-    comparisons.length > 1 ? (width - xPad * 2) / (comparisons.length - 1) : width - xPad * 2;
-  const projectX = (index: number) => xPad + index * xStep;
-  const projectY = (value: number) => {
-    const ratio = (value - minTime) / timeSpan;
-    return plotBottomY - ratio * plotHeight;
-  };
-  const yTickCount = 4;
-  const yTicks = Array.from({ length: yTickCount + 1 }, (_, index) => {
-    const ratio = index / yTickCount;
-    const value = minTime + ratio * timeSpan;
-    return { value, y: projectY(value) };
-  });
-  const xTickTarget = 6;
-  const xTickStep =
-    comparisons.length > 1
-      ? Math.max(1, Math.floor((comparisons.length - 1) / (xTickTarget - 1)))
-      : 1;
-  const xTicks = comparisons
-    .map((comparison, index) => ({ lapNumber: comparison.lapNumber, x: projectX(index), index }))
-    .filter(
-      ({ index }) =>
-        index === 0 || index === comparisons.length - 1 || index % xTickStep === 0
-    );
-
-  const selfPath = buildLinePath(
-    comparisons.map((lap, index) => ({ x: projectX(index), y: projectY(lap.selfLap) }))
-  );
-  const rivalPath = buildLinePath(
-    comparisons.map((lap, index) => ({ x: projectX(index), y: projectY(lap.rivalLap) }))
-  );
 
   return (
     <Card title="Rival Comparison">
@@ -266,103 +191,18 @@ export function RivalComparisonCard({
               </div>
             </div>
 
-            <div css={chartCardStyles}>
-              <div css={legendStyles}>
-                <span>
-                  <i css={css`background: #4f46e5;`} />
-                  You
-                </span>
-                <span>
-                  <i css={css`background: #f97316;`} />
-                  {analysis.rivalName} ({formatClassification(selectedRival?.classification)})
-                </span>
-              </div>
-              {comparisons.length > 0 ? (
-                <svg
-                  viewBox={`0 0 ${width} ${height}`}
-                  width="100%"
-                  role="img"
-                  aria-label="Lap-by-lap rival pace comparison chart"
-                >
-                  {yTicks.map((tick) => (
-                    <g key={`y-${tick.y.toFixed(2)}`}>
-                      <line
-                        x1={xPad}
-                        x2={width - xPad}
-                        y1={tick.y}
-                        y2={tick.y}
-                        stroke="#e2e8f4"
-                        strokeWidth={1}
-                      />
-                      <text
-                        x={xPad - 8}
-                        y={tick.y + 4}
-                        textAnchor="end"
-                        fontSize="10"
-                        fill="#64748b"
-                      >
-                        {tick.value.toFixed(3)}s
-                      </text>
-                    </g>
-                  ))}
-                  {xTicks.map((tick) => (
-                    <g key={`x-${tick.index}`}>
-                      <line
-                        x1={tick.x}
-                        x2={tick.x}
-                        y1={yPad}
-                        y2={plotBottomY}
-                        stroke="#f1f5f9"
-                        strokeWidth={1}
-                      />
-                      <text
-                        x={tick.x}
-                        y={plotBottomY + 14}
-                        textAnchor="middle"
-                        fontSize="10"
-                        fill="#64748b"
-                      >
-                        {tick.lapNumber}
-                      </text>
-                    </g>
-                  ))}
-                  <line x1={xPad} x2={xPad} y1={yPad} y2={plotBottomY} stroke="#94a3b8" strokeWidth={1.2} />
-                  <line
-                    x1={xPad}
-                    x2={width - xPad}
-                    y1={plotBottomY}
-                    y2={plotBottomY}
-                    stroke="#94a3b8"
-                    strokeWidth={1.2}
-                  />
-                  <text
-                    x={(xPad + (width - xPad)) / 2}
-                    y={height - 6}
-                    textAnchor="middle"
-                    fontSize="11"
-                    fill="#334155"
-                  >
-                    Lap number
-                  </text>
-                  <text
-                    x={14}
-                    y={height / 2}
-                    textAnchor="middle"
-                    fontSize="11"
-                    fill="#334155"
-                    transform={`rotate(-90 14 ${height / 2})`}
-                  >
-                    Lap time
-                  </text>
-                  <path d={selfPath} fill="none" stroke="#4f46e5" strokeWidth={2.5} />
-                  <path d={rivalPath} fill="none" stroke="#f97316" strokeWidth={2.5} />
-                </svg>
-              ) : (
-                <div css={emptyStateStyles}>No comparable laps in this session for this rival.</div>
-              )}
-            </div>
+            <RivalComparisonLapChart
+              comparisons={comparisons}
+              rivalName={analysis.rivalName}
+              rivalClassification={`(${formatClassification(selectedRival?.classification)})`}
+            />
 
-            <div css={chartCardStyles}>
+            <div css={css`
+              border: 1px solid #e2e8f4;
+              border-radius: 10px;
+              background: #ffffff;
+              padding: 10px;
+            `}>
               <strong>{trendLabel(analysis.trend.direction)}</strong>
               <table css={trendTableStyles}>
                 <thead>

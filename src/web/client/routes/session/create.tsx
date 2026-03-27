@@ -227,6 +227,8 @@ export default function CreateSessionRoute() {
   const [importedParticipants, setImportedParticipants] = useState<
     SessionImportSelection["participants"]
   >([]);
+  const [externalImportProvider, setExternalImportProvider] = useState<string | null>(null);
+  const [externalImportId, setExternalImportId] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const {
@@ -413,6 +415,12 @@ export default function CreateSessionRoute() {
                 })),
               }
             : {}),
+          ...(externalImportProvider && externalImportId
+            ? {
+                externalImportProvider,
+                externalImportId,
+              }
+            : {}),
         },
         connections: [viewerConnectionId],
         trackConnections: [viewerTrackConnectionId],
@@ -513,6 +521,8 @@ export default function CreateSessionRoute() {
       );
     }
     setImportedParticipants(importResult.participants ?? []);
+    setExternalImportProvider(importResult.externalImportProvider ?? null);
+    setExternalImportId(importResult.externalImportId ?? null);
 
     const importedTrackId = importResult.trackId?.trim();
     const nextTrackId =

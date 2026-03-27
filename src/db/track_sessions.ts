@@ -40,6 +40,8 @@ export interface TrackSessionRecord {
   kartId: string | null;
   kartNumber: string;
   trackLayoutId: string;
+  importSourceProvider?: string | null;
+  importSourceId?: string | null;
 }
 
 interface TrackSessionRow {
@@ -58,6 +60,8 @@ interface TrackSessionRow {
   kart_id: string | null;
   kart_number: string | null;
   track_layout_id: string;
+  import_source_provider: string | null;
+  import_source_id: string | null;
 }
 
 function mapRow(row: TrackSessionRow): TrackSessionRecord {
@@ -77,6 +81,8 @@ function mapRow(row: TrackSessionRow): TrackSessionRecord {
     kartId: row.kart_id,
     kartNumber: row.kart_number ?? "",
     trackLayoutId: row.track_layout_id,
+    importSourceProvider: row.import_source_provider ?? null,
+    importSourceId: row.import_source_id ?? null,
   };
 }
 
@@ -85,6 +91,7 @@ export function findTrackSessionById(id: string): TrackSessionRecord | null {
   const row = db
     .prepare<unknown[], TrackSessionRow>(
       `SELECT id, date, format, classification, fastest_lap, conditions, track_id, user_id, notes, created_at, updated_at, kart_id, kart_number, track_layout_id, temperature
+              , import_source_provider, import_source_id
        FROM track_sessions WHERE id = ? LIMIT 1`
     )
     .get(id);
@@ -96,6 +103,7 @@ export function findTrackSessionsByTrackId(trackId: string): TrackSessionRecord[
   const rows = db
     .prepare<unknown[], TrackSessionRow>(
       `SELECT id, date, format, classification, fastest_lap, conditions, track_id, user_id, notes, created_at, updated_at, kart_id, kart_number, track_layout_id, temperature
+              , import_source_provider, import_source_id
        FROM track_sessions WHERE track_id = ? ORDER BY date DESC`
     )
     .all(trackId);
@@ -106,7 +114,7 @@ export function findTrackSessionsByUserId(userId: string): TrackSessionRecord[] 
   const db = getDb();
   const rows = db
     .prepare<unknown[], TrackSessionRow>(
-            `SELECT id, date, format, classification, fastest_lap, conditions, track_id, user_id, notes, created_at, updated_at, kart_id, kart_number, track_layout_id, temperature
+            `SELECT id, date, format, classification, fastest_lap, conditions, track_id, user_id, notes, created_at, updated_at, kart_id, kart_number, track_layout_id, temperature, import_source_provider, import_source_id
                  FROM track_sessions WHERE user_id = ? ORDER BY date DESC`    )
     .all(userId);
   return rows.map(mapRow);
@@ -132,6 +140,8 @@ export function createTrackSessionWithLaps({
   fastestLap = null,
   temperature = "",
   participants = [],
+  importSourceProvider = null,
+  importSourceId = null,
 }: {
   date: string;
   format: string;
@@ -148,13 +158,15 @@ export function createTrackSessionWithLaps({
   fastestLap?: number | null;
   temperature?: string;
   participants?: TrackSessionParticipantInput[];
+  importSourceProvider?: string | null;
+  importSourceId?: string | null;
 }): { trackSession: TrackSessionRecord; laps: LapRecord[] } {
   const db = getDb();
   const sessionId = randomUUID();
   const normalizedTemperature = temperature ?? "";
   const insertSession = db.prepare(
-    `INSERT INTO track_sessions (id, date, format, classification, fastest_lap, conditions, track_id, user_id, notes, created_at, updated_at, kart_id, kart_number, track_layout_id, temperature)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO track_sessions (id, date, format, classification, fastest_lap, conditions, track_id, user_id, notes, created_at, updated_at, kart_id, kart_number, track_layout_id, temperature, import_source_provider, import_source_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const insertLap =
     laps.length > 0
@@ -204,7 +216,9 @@ export function createTrackSessionWithLaps({
       kartId,
       kartNumber,
       trackLayoutId,
-      normalizedTemperature
+      normalizedTemperature,
+      importSourceProvider,
+      importSourceId
     );
     if (insertLap) {
       for (const lap of laps) {
@@ -276,6 +290,8 @@ export function createTrackSessionWithLaps({
     kartId: kartId ?? null,
     kartNumber,
     trackLayoutId,
+    importSourceProvider,
+    importSourceId,
   };
 
   return { trackSession, laps: createdLaps };
@@ -294,7 +310,9 @@ export function createTrackSession(
   trackLayoutId: string,
   fastestLap: number | null = null,
   kartNumber: string = "",
-  temperature: string = ""
+  temperature: string = "",
+  importSourceProvider: string | null = null,
+  importSourceId: string | null = null
 ): TrackSessionRecord {
   return createTrackSessionWithLaps({
     date,
@@ -311,6 +329,8 @@ export function createTrackSession(
     trackLayoutId,
     fastestLap,
     temperature,
+    importSourceProvider,
+    importSourceId,
   }).trackSession;
 }
 
@@ -364,6 +384,8 @@ export function updateTrackSession({
     kartId: kartId === undefined ? current.kartId : kartId,
     kartNumber: kartNumber === undefined ? current.kartNumber : kartNumber,
     trackLayoutId: trackLayoutId ?? current.trackLayoutId,
+    importSourceProvider: current.importSourceProvider,
+    importSourceId: current.importSourceId,
   };
 
   db.prepare(
@@ -514,6 +536,8 @@ export interface TrackSessionRepository {
     fastestLap?: number | null;
     temperature?: string;
     participants?: TrackSessionParticipantInput[];
+    importSourceProvider?: string | null;
+    importSourceId?: string | null;
   }) => { trackSession: TrackSessionRecord; laps: LapRecord[] };
   update: (input: {
     id: string;

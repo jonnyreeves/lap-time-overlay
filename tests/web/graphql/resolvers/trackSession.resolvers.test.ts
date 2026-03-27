@@ -79,6 +79,8 @@ const mockSession = {
   kartId: "k1",
   kartNumber: "",
   trackLayoutId: "l1",
+  importSourceProvider: null,
+  importSourceId: null,
 };
 
 const mockTrack = {
@@ -156,17 +158,37 @@ describe("trackSession resolvers", () => {
       trackLayoutName: null,
       selfDriverName: "L - Jonny R",
       kartTypeName: "DMAX",
-      laps: [{ lapNumber: 1, timeSeconds: 64.37, displayTime: "1:04.370" }],
+      laps: [
+        {
+          lapNumber: 1,
+          timeSeconds: 64.37,
+          displayTime: "1:04.370",
+          lapEvents: [{ offset: 64.37, event: "position", value: "2" }],
+        },
+      ],
       drivers: [
         {
           name: "L - Jonny R",
           classification: 3,
           kartNumber: null,
-          laps: [{ lapNumber: 1, timeSeconds: 64.37, displayTime: "1:04.370" }],
+          laps: [
+            {
+              lapNumber: 1,
+              timeSeconds: 64.37,
+              displayTime: "1:04.370",
+              lapEvents: [{ offset: 64.37, event: "position", value: "2" }],
+            },
+          ],
         },
       ],
     });
     repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
+    repositories.karts.findById.mockImplementation((id: string) =>
+      id === mockKart.id ? mockKart : null
+    );
+    repositories.trackLayouts.findById.mockImplementation((id: string) =>
+      id === mockLayout.id ? mockLayout : null
+    );
     repositories.lapEvents.findByLapId.mockReturnValue([]);
     repositories.trackSessionParticipants.findBySessionId.mockReturnValue([]);
     repositories.trackSessionParticipants.findBySessionIds.mockReturnValue([]);
@@ -549,6 +571,53 @@ describe("trackSession resolvers", () => {
     expect(await slowerPayload.isPersonalBest()).toBe(false);
   });
 
+  it("treats duplicate layout and kart records with the same visible names as one PB bucket", async () => {
+    const fasterSession: TrackSessionRecord = {
+      ...mockSession,
+      id: "s-fast",
+      date: "2024-01-11",
+      trackLayoutId: "l2",
+      kartId: "k2",
+      fastestLap: 46.8,
+    };
+    const slowerSession: TrackSessionRecord = {
+      ...mockSession,
+      id: "s-slow",
+      date: "2024-01-10",
+      fastestLap: 47.1,
+    };
+
+    repositories.trackSessions.findById.mockImplementation((id: string) => {
+      if (id === slowerSession.id) return slowerSession;
+      if (id === fasterSession.id) return fasterSession;
+      return null;
+    });
+    repositories.trackSessions.findByUserId.mockReturnValue([slowerSession, fasterSession]);
+    repositories.tracks.findById.mockReturnValue(mockTrack);
+    repositories.trackLayouts.findById.mockImplementation((id: string) => {
+      if (id === "l1") return mockLayout;
+      if (id === "l2") return { ...mockLayout, id: "l2" };
+      return null;
+    });
+    repositories.karts.findById.mockImplementation((id: string) => {
+      if (id === "k1") return mockKart;
+      if (id === "k2") return { ...mockKart, id: "k2" };
+      return null;
+    });
+    repositories.laps.findBySessionId.mockImplementation((sessionId: string) => {
+      if (sessionId === slowerSession.id) {
+        return [{ id: "lap-slow", sessionId, lapNumber: 1, time: 47.1, createdAt: 0, updatedAt: 0 }];
+      }
+      if (sessionId === fasterSession.id) {
+        return [{ id: "lap-fast", sessionId, lapNumber: 1, time: 46.8, createdAt: 0, updatedAt: 0 }];
+      }
+      return [];
+    });
+
+    expect(await rootValue.trackSession({ id: slowerSession.id }, context).isPersonalBest()).toBe(false);
+    expect(await rootValue.trackSession({ id: fasterSession.id }, context).isPersonalBest()).toBe(true);
+  });
+
   it("exposes session performance score and breakdown derived from laps", async () => {
     repositories.trackSessions.findById.mockReturnValue(mockSession);
     repositories.tracks.findById.mockReturnValue(mockTrack);
@@ -836,6 +905,7 @@ describe("trackSession resolvers", () => {
       sessionDate: "2026-03-14",
       sessionTime: "18:23",
     });
+    expect(result.drivers[0]?.laps[0]?.lapEvents).toEqual([]);
   });
 
   it("importTrackSessionFromUrl surfaces import errors as validation failures", async () => {
@@ -868,6 +938,7 @@ describe("trackSession resolvers", () => {
         classification: 3,
       },
     ]);
+    repositories.trackSessions.findByUserId.mockReturnValue([]);
 
     const result = await rootValue.fetchDaytonaClubspeedSessions({}, context);
 
@@ -886,8 +957,37 @@ describe("trackSession resolvers", () => {
           sessionTime: "19:30",
           kartNumber: "149",
           classification: 3,
+          alreadyImported: false,
         },
       ],
+    });
+  });
+
+  it("marks Daytona sessions already imported when their external import id exists", async () => {
+    const heatNo = "81389|2026-03-11|19%3A30|149|3|49.411";
+    fetchDaytonaClubspeedSessionsMock.mockResolvedValueOnce([
+      {
+        heatNo,
+        activityType: "DMAX Practice 20mins - Kart 149",
+        sessionDate: "2026-03-11",
+        sessionTime: "19:30",
+        kartNumber: "149",
+        classification: 3,
+      },
+    ]);
+    repositories.trackSessions.findByUserId.mockReturnValue([
+      {
+        ...mockSession,
+        importSourceProvider: "daytona_clubspeed",
+        importSourceId: heatNo,
+      },
+    ]);
+
+    const result = await rootValue.fetchDaytonaClubspeedSessions({}, context);
+
+    expect(result.sessions[0]).toMatchObject({
+      heatNo,
+      alreadyImported: true,
     });
   });
 
@@ -919,6 +1019,7 @@ describe("trackSession resolvers", () => {
       selfDriverName: "L - Jonny R",
       kartTypeName: "DMAX",
     });
+    expect(result.laps[0]?.lapEvents).toEqual([{ offset: 64.37, event: "position", value: "2" }]);
   });
 
   it("importDaytonaClubspeedSession surfaces import errors as validation failures", async () => {
@@ -932,6 +1033,38 @@ describe("trackSession resolvers", () => {
         context
       )
     ).rejects.toThrowError("No Daytona Club Speed sessions were found");
+  });
+
+  it("rejects creating a session when the Daytona external import id already exists", async () => {
+    repositories.tracks.findById.mockReturnValue(mockTrack);
+    repositories.karts.findById.mockReturnValue(mockKart);
+    repositories.trackKarts.findKartsForTrack.mockReturnValue([mockKart]);
+    repositories.trackLayouts.findById.mockReturnValue(mockLayout);
+    repositories.trackSessions.findByUserId.mockReturnValue([
+      {
+        ...mockSession,
+        importSourceProvider: "daytona_clubspeed",
+        importSourceId: "81389|2026-03-11|19%3A30|149|3|49.411",
+      },
+    ]);
+
+    await expect(
+      rootValue.createTrackSession(
+        {
+          input: {
+            date: "2026-03-11T19:30",
+            format: "Practice",
+            classification: 3,
+            trackId: mockTrack.id,
+            trackLayoutId: mockLayout.id,
+            kartId: mockKart.id,
+            externalImportProvider: "daytona_clubspeed",
+            externalImportId: "81389|2026-03-11|19%3A30|149|3|49.411",
+          },
+        },
+        context
+      )
+    ).rejects.toThrowError("This Daytona Club Speed session has already been imported");
   });
 
   it("fetchDaytonaClubspeedSessions surfaces missing credentials as validation failures", async () => {

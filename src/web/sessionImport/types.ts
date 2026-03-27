@@ -1,9 +1,16 @@
 export type ImportedSessionFormat = "Practice" | "Qualifying" | "Race";
 
+export type ImportedSessionLapEvent = {
+  offset: number;
+  event: string;
+  value: string;
+};
+
 export type ImportedSessionLap = {
   lapNumber: number;
   timeSeconds: number;
   displayTime: string;
+  lapEvents?: ImportedSessionLapEvent[];
 };
 
 export type ImportedSessionDriver = {
@@ -20,6 +27,7 @@ export type DaytonaClubspeedSessionSummary = {
   sessionTime: string | null;
   kartNumber: string | null;
   classification: number | null;
+  alreadyImported?: boolean;
 };
 
 export type DaytonaClubspeedCredentials = {

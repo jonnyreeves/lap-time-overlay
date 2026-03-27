@@ -21,4 +21,5 @@ export const migrations: Migration[] = [
   (await import("./12_add_app_settings.js")).migration,
   (await import("./13_add_session_participants.js")).migration,
   (await import("./14_add_user_daytona_clubspeed_credentials.js")).migration,
+  (await import("./15_add_track_session_import_source.js")).migration,
 ];

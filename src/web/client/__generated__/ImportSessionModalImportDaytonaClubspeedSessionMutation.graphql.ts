@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<aed49ad1939070195aa8dc067150ce15>>
+ * @generated SignedSource<<12512a38ab70206280b75a18d3ea3471>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -23,6 +23,11 @@ export type ImportSessionModalImportDaytonaClubspeedSessionMutation$data = {
       readonly kartNumber: string | null | undefined;
       readonly laps: ReadonlyArray<{
         readonly displayTime: string;
+        readonly lapEvents: ReadonlyArray<{
+          readonly event: string;
+          readonly offset: number;
+          readonly value: string;
+        }>;
         readonly lapNumber: number;
         readonly timeSeconds: number;
       }>;
@@ -32,6 +37,11 @@ export type ImportSessionModalImportDaytonaClubspeedSessionMutation$data = {
     readonly kartTypeName: string | null | undefined;
     readonly laps: ReadonlyArray<{
       readonly displayTime: string;
+      readonly lapEvents: ReadonlyArray<{
+        readonly event: string;
+        readonly offset: number;
+        readonly value: string;
+      }>;
       readonly lapNumber: number;
       readonly timeSeconds: number;
     }>;
@@ -98,6 +108,38 @@ v3 = {
       "args": null,
       "kind": "ScalarField",
       "name": "displayTime",
+      "storageKey": null
+    },
+    {
+      "alias": null,
+      "args": null,
+      "concreteType": "ImportedSessionLapEvent",
+      "kind": "LinkedField",
+      "name": "lapEvents",
+      "plural": true,
+      "selections": [
+        {
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
+          "name": "offset",
+          "storageKey": null
+        },
+        {
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
+          "name": "event",
+          "storageKey": null
+        },
+        {
+          "alias": null,
+          "args": null,
+          "kind": "ScalarField",
+          "name": "value",
+          "storageKey": null
+        }
+      ],
       "storageKey": null
     }
   ],
@@ -220,16 +262,16 @@ return {
     "selections": (v4/*: any*/)
   },
   "params": {
-    "cacheID": "c5169cb51a0f9a8d8c43154612572b36",
+    "cacheID": "fb69589a7e8d461ca86c80d257ae5837",
     "id": null,
     "metadata": {},
     "name": "ImportSessionModalImportDaytonaClubspeedSessionMutation",
     "operationKind": "mutation",
-    "text": "mutation ImportSessionModalImportDaytonaClubspeedSessionMutation(\n  $input: ImportDaytonaClubspeedSessionInput!\n) {\n  importDaytonaClubspeedSession(input: $input) {\n    provider\n    sessionFormat\n    sessionDate\n    sessionTime\n    classification\n    sessionFastestLapSeconds\n    kartNumber\n    trackLayoutName\n    selfDriverName\n    kartTypeName\n    laps {\n      lapNumber\n      timeSeconds\n      displayTime\n    }\n    drivers {\n      name\n      classification\n      kartNumber\n      laps {\n        lapNumber\n        timeSeconds\n        displayTime\n      }\n    }\n  }\n}\n"
+    "text": "mutation ImportSessionModalImportDaytonaClubspeedSessionMutation(\n  $input: ImportDaytonaClubspeedSessionInput!\n) {\n  importDaytonaClubspeedSession(input: $input) {\n    provider\n    sessionFormat\n    sessionDate\n    sessionTime\n    classification\n    sessionFastestLapSeconds\n    kartNumber\n    trackLayoutName\n    selfDriverName\n    kartTypeName\n    laps {\n      lapNumber\n      timeSeconds\n      displayTime\n      lapEvents {\n        offset\n        event\n        value\n      }\n    }\n    drivers {\n      name\n      classification\n      kartNumber\n      laps {\n        lapNumber\n        timeSeconds\n        displayTime\n        lapEvents {\n          offset\n          event\n          value\n        }\n      }\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "94335ed64b631d8f1067d710bd68e8c2";
+(node as any).hash = "3a2492e3a6b34b3f532c29731645e39d";
 
 export default node;

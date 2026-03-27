@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<a088dafb140eee63c2ecde7034ab9367>>
+ * @generated SignedSource<<29b4380ffac68c4b34455cf548caec4c>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -14,6 +14,7 @@ export type ImportSessionModalFetchDaytonaClubspeedSessionsMutation$data = {
   readonly fetchDaytonaClubspeedSessions: {
     readonly sessions: ReadonlyArray<{
       readonly activityType: string;
+      readonly alreadyImported: boolean;
       readonly classification: number | null | undefined;
       readonly heatNo: string;
       readonly kartNumber: string | null | undefined;
@@ -86,6 +87,13 @@ var v0 = [
             "kind": "ScalarField",
             "name": "classification",
             "storageKey": null
+          },
+          {
+            "alias": null,
+            "args": null,
+            "kind": "ScalarField",
+            "name": "alreadyImported",
+            "storageKey": null
           }
         ],
         "storageKey": null
@@ -112,16 +120,16 @@ return {
     "selections": (v0/*: any*/)
   },
   "params": {
-    "cacheID": "6945c102204cc8bb20dd3b35ede8aed6",
+    "cacheID": "2035c2d06fc4a3c019ffcb7a8e8bc9e2",
     "id": null,
     "metadata": {},
     "name": "ImportSessionModalFetchDaytonaClubspeedSessionsMutation",
     "operationKind": "mutation",
-    "text": "mutation ImportSessionModalFetchDaytonaClubspeedSessionsMutation {\n  fetchDaytonaClubspeedSessions {\n    sessions {\n      heatNo\n      activityType\n      sessionDate\n      sessionTime\n      kartNumber\n      classification\n    }\n  }\n}\n"
+    "text": "mutation ImportSessionModalFetchDaytonaClubspeedSessionsMutation {\n  fetchDaytonaClubspeedSessions {\n    sessions {\n      heatNo\n      activityType\n      sessionDate\n      sessionTime\n      kartNumber\n      classification\n      alreadyImported\n    }\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "6f03512f7d57d4a669fe913f844d2db9";
+(node as any).hash = "411ac2a5c0f9eb8b3d4499ab13e71cb4";
 
 export default node;

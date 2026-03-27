@@ -1,6 +1,10 @@
 import { GraphQLError } from "graphql";
 import { getViewerDaytonaClubspeedCredentialStatus } from "../../daytonaClubspeedCredentials/service.js";
-import { buildRivalTrend, computeBestNAvg } from "../../shared/rivalAnalysis.js";
+import {
+  buildRivalTrend,
+  computeBestNAvg,
+  isNamedRivalDriver,
+} from "../../shared/rivalAnalysis.js";
 import { toUserPayload } from "./auth.js";
 import { toTrackPayload } from "./track.js";
 import {
@@ -214,7 +218,7 @@ function getRivalSummaries(
     const sessionTimestamp = Number.isNaN(sessionTimestampValue) ? null : sessionTimestampValue;
 
     for (const participant of sessionParticipants) {
-      if (participant.isSelf) continue;
+      if (participant.isSelf || !isNamedRivalDriver(participant.name)) continue;
       const current = summaryByName.get(participant.name) ?? {
         name: participant.name,
         sharedSessions: 0,

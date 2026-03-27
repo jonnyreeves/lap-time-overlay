@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<bf71d950980d7d0977d1848adb1f3b1e>>
+ * @generated SignedSource<<c1e919609a401de197be1b06360961b4>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -13,6 +13,8 @@ export type CreateTrackSessionInput = {
   classification: number;
   conditions?: string | null | undefined;
   date: string;
+  externalImportId?: string | null | undefined;
+  externalImportProvider?: string | null | undefined;
   fastestLap?: number | null | undefined;
   format: string;
   kartId: string;
