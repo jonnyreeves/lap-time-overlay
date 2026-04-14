@@ -112,6 +112,19 @@ vi.mock("../../../../src/web/video/hardwareEncoding.js", () => ({
   updateVideoAccelerationPreference: updateVideoAccelerationPreferenceMock,
 }));
 
+const {
+  getWeatherApiSettingsMock,
+  setWeatherApiKeyMock,
+} = vi.hoisted(() => ({
+  getWeatherApiSettingsMock: vi.fn(),
+  setWeatherApiKeyMock: vi.fn(),
+}));
+
+vi.mock("../../../../src/web/settings/weatherApi.js", () => ({
+  getWeatherApiSettings: getWeatherApiSettingsMock,
+  setWeatherApiKey: setWeatherApiKeyMock,
+}));
+
 describe("admin resolvers", () => {
   const { context } = createMockGraphQLContext({
     currentUser: { id: "user-1", username: "sam", createdAt: 0, isAdmin: true },
@@ -175,6 +188,15 @@ describe("admin resolvers", () => {
     };
     getVideoAccelerationStatusMock.mockResolvedValue(status);
     await expect(rootValue.adminVideoAcceleration({}, context)).resolves.toEqual(status);
+  });
+
+  it("exposes weather API settings without returning the key", async () => {
+    getWeatherApiSettingsMock.mockReturnValue({ configured: true, updatedAt: 1000 });
+
+    await expect(rootValue.adminWeatherApiSettings({}, context)).resolves.toEqual({
+      configured: true,
+      updatedAt: new Date(1000).toISOString(),
+    });
   });
 
   it("exposes user media libraries", async () => {
@@ -399,6 +421,32 @@ describe("admin resolvers", () => {
     );
     expect(updateVideoAccelerationPreferenceMock).toHaveBeenCalledWith(false);
     expect(response).toEqual({ status });
+  });
+
+  it("updates the weather API key", async () => {
+    setWeatherApiKeyMock.mockReturnValue({ configured: true, updatedAt: 2000 });
+
+    const response = await rootValue.updateWeatherApiKey(
+      { input: { apiKey: " test-key " } },
+      context
+    );
+
+    expect(setWeatherApiKeyMock).toHaveBeenCalledWith(" test-key ");
+    expect(response).toEqual({
+      settings: {
+        configured: true,
+        updatedAt: new Date(2000).toISOString(),
+      },
+    });
+  });
+
+  it("validates weather API key input", async () => {
+    await expect(rootValue.updateWeatherApiKey({ input: {} }, context)).rejects.toThrow(
+      "apiKey is required"
+    );
+    await expect(
+      rootValue.updateWeatherApiKey({ input: { apiKey: "x".repeat(257) } }, context)
+    ).rejects.toThrow("apiKey must be 256 characters or fewer");
   });
 
   it("validates updateUserAdminStatus input", async () => {

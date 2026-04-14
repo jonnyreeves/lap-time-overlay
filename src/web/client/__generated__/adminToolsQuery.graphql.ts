@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<6bbe48274639f5a357f5df596bebfce2>>
+ * @generated SignedSource<<cfd8a01476951ce14bc4b4cd5a01bd88>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -83,6 +83,10 @@ export type adminToolsQuery$data = {
     readonly effectiveBackend: VideoAccelerationBackend;
     readonly preferHardwareEncoding: boolean;
     readonly probing: boolean;
+  };
+  readonly adminWeatherApiSettings: {
+    readonly configured: boolean;
+    readonly updatedAt: string | null | undefined;
   };
 };
 export type adminToolsQuery = {
@@ -514,6 +518,31 @@ v3 = [
       }
     ],
     "storageKey": null
+  },
+  {
+    "alias": null,
+    "args": null,
+    "concreteType": "AdminWeatherApiSettings",
+    "kind": "LinkedField",
+    "name": "adminWeatherApiSettings",
+    "plural": false,
+    "selections": [
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "configured",
+        "storageKey": null
+      },
+      {
+        "alias": null,
+        "args": null,
+        "kind": "ScalarField",
+        "name": "updatedAt",
+        "storageKey": null
+      }
+    ],
+    "storageKey": null
   }
 ];
 return {
@@ -534,16 +563,16 @@ return {
     "selections": (v3/*: any*/)
   },
   "params": {
-    "cacheID": "5b44e971002db876bd69522bdf1f6298",
+    "cacheID": "1598bcbdfffa85dc50030af80f2b6ebd",
     "id": null,
     "metadata": {},
     "name": "adminToolsQuery",
     "operationKind": "query",
-    "text": "query adminToolsQuery {\n  adminOrphanedMedia {\n    mediaId\n    sizeBytes\n    modifiedAt\n  }\n  adminTempDirs {\n    name\n    path\n    sizeBytes\n    fileCount\n  }\n  adminRecordingHealth {\n    status\n    count\n  }\n  adminRenderJobs {\n    recordingId\n    sessionId\n    description\n    userId\n    username\n    type\n    progress\n    startedAt\n  }\n  adminUserMediaLibraries {\n    userId\n    username\n    sizeBytes\n    recordingCount\n  }\n  adminUsers {\n    id\n    username\n    createdAt\n    isAdmin\n  }\n  adminTempCleanupSchedule {\n    hour\n    days\n    enabled\n    lastRunAt\n    nextRunAt\n  }\n  adminVideoAcceleration {\n    available\n    backend\n    effectiveBackend\n    preferHardwareEncoding\n    probing\n    circuitBreakerActive\n    circuitResetAt\n    details {\n      hasDri\n      hasRenderD128\n      hasCard0\n      ffmpegHasHwaccel {\n        qsv\n        vaapi\n      }\n      ffmpegHasEncoder {\n        h264_qsv\n        h264_vaapi\n        hevc_qsv\n        hevc_vaapi\n      }\n      probeErrors\n    }\n  }\n}\n"
+    "text": "query adminToolsQuery {\n  adminOrphanedMedia {\n    mediaId\n    sizeBytes\n    modifiedAt\n  }\n  adminTempDirs {\n    name\n    path\n    sizeBytes\n    fileCount\n  }\n  adminRecordingHealth {\n    status\n    count\n  }\n  adminRenderJobs {\n    recordingId\n    sessionId\n    description\n    userId\n    username\n    type\n    progress\n    startedAt\n  }\n  adminUserMediaLibraries {\n    userId\n    username\n    sizeBytes\n    recordingCount\n  }\n  adminUsers {\n    id\n    username\n    createdAt\n    isAdmin\n  }\n  adminTempCleanupSchedule {\n    hour\n    days\n    enabled\n    lastRunAt\n    nextRunAt\n  }\n  adminVideoAcceleration {\n    available\n    backend\n    effectiveBackend\n    preferHardwareEncoding\n    probing\n    circuitBreakerActive\n    circuitResetAt\n    details {\n      hasDri\n      hasRenderD128\n      hasCard0\n      ffmpegHasHwaccel {\n        qsv\n        vaapi\n      }\n      ffmpegHasEncoder {\n        h264_qsv\n        h264_vaapi\n        hevc_qsv\n        hevc_vaapi\n      }\n      probeErrors\n    }\n  }\n  adminWeatherApiSettings {\n    configured\n    updatedAt\n  }\n}\n"
   }
 };
 })();
 
-(node as any).hash = "4a89453239b61412924b23c9cd6c04b1";
+(node as any).hash = "0b11bcd23b67e54b134342671ec5a4c3";
 
 export default node;

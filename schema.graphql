@@ -13,6 +13,7 @@ type Query {
   adminUsers: [AdminUser!]!
   adminTempCleanupSchedule: TempCleanupSchedule!
   adminVideoAcceleration: VideoAccelerationStatus!
+  adminWeatherApiSettings: AdminWeatherApiSettings!
 }
 
 type AdminOrphanedMedia {
@@ -67,6 +68,11 @@ type AdminUser {
   username: String!
   createdAt: String!
   isAdmin: Boolean!
+}
+
+type AdminWeatherApiSettings {
+  configured: Boolean!
+  updatedAt: String
 }
 
 type CancelRenderJobPayload {
@@ -488,6 +494,14 @@ type UpdateVideoAccelerationPreferencePayload {
   status: VideoAccelerationStatus!
 }
 
+input UpdateWeatherApiKeyInput {
+  apiKey: String!
+}
+
+type UpdateWeatherApiKeyPayload {
+  settings: AdminWeatherApiSettings!
+}
+
 type Mutation {
   register(input: AuthInput!): AuthPayload!
   login(input: AuthInput!): AuthPayload!
@@ -542,6 +556,7 @@ type Mutation {
   updateVideoAccelerationPreference(
     input: UpdateVideoAccelerationPreferenceInput!
   ): UpdateVideoAccelerationPreferencePayload!
+  updateWeatherApiKey(input: UpdateWeatherApiKeyInput!): UpdateWeatherApiKeyPayload!
 }
 
 

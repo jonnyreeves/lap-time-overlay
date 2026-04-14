@@ -16,6 +16,7 @@ import type { RequireAuthViewerQuery } from "../../__generated__/RequireAuthView
 import { Card } from "../../components/Card.js";
 import { inlineActionButtonStyles } from "../../components/inlineActionButtons.ts";
 import { useBreadcrumbs } from "../../hooks/useBreadcrumbs.js";
+import { WeatherApiSettingsCard } from "./WeatherApiSettingsCard.js";
 
 const AdminToolsPageQuery = graphql`
   query adminToolsQuery {
@@ -87,6 +88,10 @@ const AdminToolsPageQuery = graphql`
         }
         probeErrors
       }
+    }
+    adminWeatherApiSettings {
+      configured
+      updatedAt
     }
   }
 `;
@@ -798,6 +803,8 @@ export default function AdminToolsRoute() {
       </div>
 
       <div css={columnStyles}>
+        <WeatherApiSettingsCard settings={data.adminWeatherApiSettings} />
+
         <Card title="Video acceleration">
           {!videoStatus ? (
             <p>Loading status…</p>

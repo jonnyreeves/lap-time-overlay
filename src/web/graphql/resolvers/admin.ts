@@ -25,6 +25,11 @@ import {
   getVideoAccelerationStatus,
   updateVideoAccelerationPreference,
 } from "../../video/hardwareEncoding.js";
+import {
+  getWeatherApiSettings,
+  setWeatherApiKey,
+  type WeatherApiSettings,
+} from "../../settings/weatherApi.js";
 
 function requireAuthentication(context: GraphQLContext): void {
   if (!context.currentUser) {
@@ -64,6 +69,13 @@ function toAdminUserPayload(user: { id: string; username: string; createdAt: num
 
 function toGraphQLRenderJobType(type: "combine" | "overlay") {
   return type === "combine" ? "COMBINE" : "OVERLAY";
+}
+
+function toGraphQLWeatherApiSettings(settings: WeatherApiSettings) {
+  return {
+    ...settings,
+    updatedAt: settings.updatedAt ? new Date(settings.updatedAt).toISOString() : null,
+  };
 }
 
 function toAdminRenderJobPayload(job: {
@@ -125,6 +137,10 @@ export const adminResolvers = {
   adminVideoAcceleration: async (_args: unknown, context: GraphQLContext) => {
     requireAdmin(context);
     return getVideoAccelerationStatus();
+  },
+  adminWeatherApiSettings: async (_args: unknown, context: GraphQLContext) => {
+    requireAdmin(context);
+    return toGraphQLWeatherApiSettings(getWeatherApiSettings());
   },
   rebuildMediaLibraryProjectionAll: async (_args: unknown, context: GraphQLContext) => {
     requireAdmin(context);
@@ -280,5 +296,25 @@ export const adminResolvers = {
     }
     const status = await updateVideoAccelerationPreference(prefer);
     return { status };
+  },
+  updateWeatherApiKey: async (
+    args: { input?: { apiKey?: string | null } },
+    context: GraphQLContext
+  ) => {
+    requireAdmin(context);
+    const apiKey = args.input?.apiKey;
+    if (typeof apiKey !== "string") {
+      throw new GraphQLError("apiKey is required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    if (apiKey.trim().length > 256) {
+      throw new GraphQLError("apiKey must be 256 characters or fewer", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+    return {
+      settings: toGraphQLWeatherApiSettings(setWeatherApiKey(apiKey)),
+    };
   },
 };

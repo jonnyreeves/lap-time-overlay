@@ -1,4 +1,5 @@
-const WEATHER_API_KEY_ENV = "WEATHER_API_KEY";
+import { getWeatherApiKey } from "../settings/weatherApi.js";
+
 const WEATHER_API_ENDPOINT = "https://api.weatherapi.com/v1/history.json";
 
 type WeatherApiHour = {
@@ -147,9 +148,9 @@ export async function fetchWeatherForPostcode(
   postcode: string | null | undefined,
   sessionDate: string | null | undefined
 ): Promise<{ temperature: string | null; conditions: NormalizedWeatherCondition | null } | null> {
-  const apiKey = process.env[WEATHER_API_KEY_ENV];
+  const apiKey = getWeatherApiKey();
   if (!apiKey) {
-    console.warn(`Missing ${WEATHER_API_KEY_ENV} env var; skipping weather lookup.`);
+    console.warn("Missing WeatherAPI key app setting; skipping weather lookup.");
     return null;
   }
   const normalizedPostcode = normalizePostcode(postcode);
