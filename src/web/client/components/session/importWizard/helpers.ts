@@ -16,6 +16,13 @@ export type DaytonaClubspeedSessionOption = {
   alreadyImported: boolean;
 };
 
+export type AlphaTimingSessionOption = {
+  sessionUrl: string;
+  title: string | null | undefined;
+  sessionDate: string | null | undefined;
+  sessionTime: string | null | undefined;
+};
+
 type ImportedPayloadDriver = {
   name: string;
   classification: number | null | undefined;
@@ -106,6 +113,26 @@ export function buildDaytonaSessionLabel(session: DaytonaClubspeedSessionOption)
     session.activityType,
   ].filter(Boolean);
   return `${parts.join(" • ")}${session.alreadyImported ? " • Already imported" : ""}`;
+}
+
+export function inferDaytonaKartTypeName(activityType: string): string {
+  const withoutKart = activityType.replace(/\s*-\s*Kart\s+[A-Za-z0-9-]+\s*$/i, "").trim();
+  const keywordMatch = withoutKart.match(/\b(DMAX|Sodi)\b/i);
+  if (keywordMatch?.[1]) {
+    return keywordMatch[1].toUpperCase() === "SODI" ? "Sodi" : keywordMatch[1].toUpperCase();
+  }
+
+  const firstToken = withoutKart.split(/\s+/).find(Boolean);
+  return firstToken ?? "Unknown";
+}
+
+export function buildAlphaTimingSessionLabel(session: AlphaTimingSessionOption): string {
+  const parts = [
+    session.sessionDate ?? "Unknown date",
+    session.sessionTime ?? "Unknown time",
+    session.title ?? "Unknown session",
+  ].filter(Boolean);
+  return parts.join(" • ");
 }
 
 export function hasDriverRows(parsed: ParsedSessionEmail): parsed is ParsedWithDrivers {

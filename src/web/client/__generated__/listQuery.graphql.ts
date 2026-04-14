@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<4a07b51390b08c054abfd94ee3693b19>>
+ * @generated SignedSource<<a11cb8cd15b47cb0f87ffe46d5a5b12e>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -15,6 +15,7 @@ export type TrackSessionFilterInput = {
   conditions?: string | null | undefined;
   format?: string | null | undefined;
   kartId?: string | null | undefined;
+  sessionIds?: ReadonlyArray<string> | null | undefined;
   trackId?: string | null | undefined;
   trackLayoutId?: string | null | undefined;
 };

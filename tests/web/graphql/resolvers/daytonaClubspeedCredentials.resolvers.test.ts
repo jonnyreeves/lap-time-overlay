@@ -19,10 +19,12 @@ const {
 const {
   fetchDaytonaClubspeedSessionsMock,
   importDaytonaClubspeedSessionMock,
+  importDaytonaClubspeedSessionsMock,
   importTrackSessionFromSourceMock,
 } = vi.hoisted(() => ({
   fetchDaytonaClubspeedSessionsMock: vi.fn(),
   importDaytonaClubspeedSessionMock: vi.fn(),
+  importDaytonaClubspeedSessionsMock: vi.fn(),
   importTrackSessionFromSourceMock: vi.fn(),
 }));
 
@@ -38,6 +40,7 @@ vi.mock("../../../../src/web/daytonaClubspeedCredentials/service.js", () => ({
 vi.mock("../../../../src/web/sessionImport/service.js", () => ({
   fetchDaytonaClubspeedSessions: fetchDaytonaClubspeedSessionsMock,
   importDaytonaClubspeedSession: importDaytonaClubspeedSessionMock,
+  importDaytonaClubspeedSessions: importDaytonaClubspeedSessionsMock,
   importTrackSessionFromSource: importTrackSessionFromSourceMock,
 }));
 

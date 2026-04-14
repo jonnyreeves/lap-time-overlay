@@ -1,17 +1,20 @@
 import {
+  type AlphaTimingSessionOption,
   type ImportedSessionData,
   type ImportedSessionDriver,
   type ImportedSessionFormat,
   type ImportedSessionLap,
+  type ResolvedImportSource,
   SessionImportError,
   type UrlImportProvider,
   type UrlImportProviderMatch,
 } from "../types.js";
-import { extractAlphaTimingSessionUrl } from "../../shared/alphaTimingUrl.js";
+import {
+  extractAlphaTimingImportSource,
+  type AlphaTimingImportSource,
+} from "../../shared/alphaTimingUrl.js";
 
 const ALLOWED_HOST = "results.alphatiming.co.uk";
-const SESSION_PATH_RE =
-  /^\/([a-z0-9-]+)\/e\/([0-9]+)\/s\/([0-9]+)(?:\/(result|laptimes))?\/?$/i;
 const BEST_LAP_RE = /best\s+lap\s+([0-9:.]+)/i;
 const START_TIME_RE = /start\s+(\d{1,2}:\d{2})/i;
 const TEXT_DATE_RE = /(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/;
@@ -46,6 +49,8 @@ type ResultDriverRow = {
   bestLapSeconds: number;
   bestLapNumber: number;
 };
+
+type AlphaTimingEventSessionCandidate = AlphaTimingSessionOption;
 
 function padTwo(value: number): string {
   return value.toString().padStart(2, "0");
@@ -121,6 +126,18 @@ function parseSessionTime(text: string): string | null {
   if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return null;
   if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
   return `${padTwo(hours)}:${padTwo(minutes)}`;
+}
+
+function parseLooseSessionTime(text: string): string | null {
+  for (const match of text.matchAll(/\b(\d{1,2}:\d{2})\b/g)) {
+    const [hoursRaw, minutesRaw] = (match[1] ?? "").split(":");
+    const hours = Number.parseInt(hoursRaw, 10);
+    const minutes = Number.parseInt(minutesRaw, 10);
+    if (!Number.isInteger(hours) || !Number.isInteger(minutes)) continue;
+    if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) continue;
+    return `${padTwo(hours)}:${padTwo(minutes)}`;
+  }
+  return null;
 }
 
 function parseLapTimeString(value: string): number | null {
@@ -406,25 +423,16 @@ function buildResultDrivers(
   });
 }
 
-function normalizeAlphaTimingSource(source: string): string | null {
-  const extractedSource = extractAlphaTimingSessionUrl(source);
+function normalizeAlphaTimingSource(source: string): UrlImportProviderMatch | null {
+  const extractedSource = extractAlphaTimingImportSource(source);
   if (!extractedSource) return null;
-  let parsed: URL;
-  try {
-    parsed = new URL(extractedSource);
-  } catch {
-    return null;
-  }
-
-  if (parsed.protocol !== "https:") return null;
-  if (parsed.hostname.toLowerCase() !== ALLOWED_HOST) return null;
-  const pathMatch = parsed.pathname.match(SESSION_PATH_RE);
-  if (!pathMatch) return null;
-
-  const venue = pathMatch[1];
-  const eventId = pathMatch[2];
-  const sessionId = pathMatch[3];
-  return `${parsed.origin}/${venue}/e/${eventId}/s/${sessionId}`;
+  return {
+    normalizedSource: extractedSource.normalizedSource,
+    sourceKind: extractedSource.kind,
+    venue: extractedSource.venue,
+    eventId: extractedSource.eventId,
+    ...(extractedSource.kind === "session" ? { sessionId: extractedSource.sessionId } : {}),
+  };
 }
 
 function splitSetCookieHeader(value: string): string[] {
@@ -525,15 +533,152 @@ async function fetchPageWithState(
   return body;
 }
 
-async function primeSessionCookies(baseSessionUrl: string, cookieJar: Map<string, string>) {
-  const origin = new URL(baseSessionUrl).origin;
+async function primeAlphaTimingCookies(sourceUrl: string, cookieJar: Map<string, string>) {
+  const origin = new URL(sourceUrl).origin;
   await fetchPageWithState(`${origin}/`, { cookieJar });
-  await fetchPageWithState(baseSessionUrl, { cookieJar }, `${origin}/`);
+  return fetchPageWithState(sourceUrl, { cookieJar }, `${origin}/`);
+}
+
+function isGenericAlphaTimingTitle(value: string): boolean {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return true;
+  if (normalized === "alpha timing") return true;
+  if (normalized === "result" || normalized === "results") return true;
+  if (normalized === "laptimes") return true;
+  if (normalized === "view result" || normalized === "view results") return true;
+  if (normalized === "view" || normalized === "details") return true;
+  if (/^\d{1,2}:\d{2}$/.test(normalized)) return true;
+  if (/^\d{1,2}\s+[a-z]+\s+\d{4}$/i.test(normalized)) return true;
+  return false;
+}
+
+function pickEventSessionTitle(
+  anchorText: string,
+  contextText: string,
+  sessionId: string | undefined
+): string | null {
+  if (anchorText && !isGenericAlphaTimingTitle(anchorText)) {
+    return anchorText;
+  }
+
+  const lines = contextText
+    .split(/\r?\n/)
+    .map((line) => normalizeWhitespace(line))
+    .filter(Boolean);
+  for (const line of lines) {
+    if (isGenericAlphaTimingTitle(line)) continue;
+    if (/\/e\/\d+\/s\/\d+/i.test(line)) continue;
+    if (line.toLowerCase().includes("alpha website")) continue;
+    if (line.toLowerCase().includes("click here")) continue;
+    return line;
+  }
+
+  return sessionId ? `Session ${sessionId}` : null;
+}
+
+function parseEventSessionsFromHtml(
+  eventHtml: string,
+  eventSource: AlphaTimingImportSource
+): AlphaTimingEventSessionCandidate[] {
+  if (eventSource.kind !== "event") return [];
+
+  const sessionByUrl = new Map<string, AlphaTimingEventSessionCandidate>();
+  const anchorRe = /<a\b[^>]*href=(["'])(.*?)\1[^>]*>([\s\S]*?)<\/a>/gi;
+
+  for (const match of eventHtml.matchAll(anchorRe)) {
+    const rawHref = match[2];
+    if (!rawHref) continue;
+
+    let resolvedHref: string;
+    try {
+      resolvedHref = new URL(rawHref, eventSource.normalizedSource).toString();
+    } catch {
+      continue;
+    }
+
+    const extractedSession = extractAlphaTimingImportSource(resolvedHref);
+    if (!extractedSession || extractedSession.kind !== "session") continue;
+    if (extractedSession.venue !== eventSource.venue || extractedSession.eventId !== eventSource.eventId) {
+      continue;
+    }
+
+    const sessionUrl = extractedSession.normalizedSource;
+    const anchorText = normalizeWhitespace(decodeHtmlEntities(stripTags(match[3] ?? "")));
+    const contextStart = Math.max(0, match.index ?? 0);
+    const contextEnd = Math.min(eventHtml.length, (match.index ?? 0) + match[0].length + 600);
+    const contextText = stripHtmlToText(eventHtml.slice(contextStart, contextEnd));
+    const title = pickEventSessionTitle(anchorText, contextText, extractedSession.sessionId);
+    const sessionDate = parseSessionDate(contextText);
+    const sessionTime = parseLooseSessionTime(contextText);
+    const current = sessionByUrl.get(sessionUrl);
+
+    if (current) {
+      sessionByUrl.set(sessionUrl, {
+        sessionUrl,
+        title: current.title ?? title,
+        sessionDate: current.sessionDate ?? sessionDate,
+        sessionTime: current.sessionTime ?? sessionTime,
+      });
+      continue;
+    }
+
+    sessionByUrl.set(sessionUrl, {
+      sessionUrl,
+      title,
+      sessionDate,
+      sessionTime,
+    });
+  }
+
+  return Array.from(sessionByUrl.values());
+}
+
+async function resolveAlphaTimingSource(match: UrlImportProviderMatch): Promise<ResolvedImportSource> {
+  if (match.sourceKind === "session") {
+    return {
+      provider: "alphatiming",
+      sessionUrl: match.normalizedSource,
+      alphaTimingSessions: [],
+    };
+  }
+
+  const cookieJar = new Map<string, string>();
+  const eventHtml = await primeAlphaTimingCookies(match.normalizedSource, cookieJar);
+  const extractedSource = extractAlphaTimingImportSource(match.normalizedSource);
+  if (!extractedSource || extractedSource.kind !== "event") {
+    throw new SessionImportError("Unable to resolve Alpha Timing event URL", "PARSE_FAILED");
+  }
+
+  const sessions = parseEventSessionsFromHtml(eventHtml, extractedSource);
+  if (sessions.length === 0) {
+    throw new SessionImportError("Unable to find sessions for that Alpha Timing event", "PARSE_FAILED");
+  }
+
+  if (sessions.length === 1) {
+    return {
+      provider: "alphatiming",
+      sessionUrl: sessions[0]?.sessionUrl ?? null,
+      alphaTimingSessions: [],
+    };
+  }
+
+  return {
+    provider: "alphatiming",
+    sessionUrl: null,
+    alphaTimingSessions: sessions,
+  };
 }
 
 async function importAlphaTimingSession(match: UrlImportProviderMatch): Promise<ImportedSessionData> {
+  if (match.sourceKind !== "session") {
+    throw new SessionImportError(
+      "Alpha Timing event URLs must be resolved to a specific session before import",
+      "UNSUPPORTED_SOURCE"
+    );
+  }
+
   const cookieJar = new Map<string, string>();
-  await primeSessionCookies(match.normalizedSource, cookieJar);
+  await primeAlphaTimingCookies(match.normalizedSource, cookieJar);
 
   const resultUrl = `${match.normalizedSource}/result`;
   const laptimesUrl = `${match.normalizedSource}/laptimes`;
@@ -574,7 +719,8 @@ export const alphaTimingUrlProvider: UrlImportProvider = {
   canHandle: (source) => {
     const normalizedSource = normalizeAlphaTimingSource(source);
     if (!normalizedSource) return null;
-    return { normalizedSource };
+    return normalizedSource;
   },
+  resolveFromUrl: resolveAlphaTimingSource,
   importFromUrl: importAlphaTimingSession,
 };

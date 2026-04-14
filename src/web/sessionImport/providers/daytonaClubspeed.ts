@@ -1,5 +1,6 @@
 import {
   type DaytonaClubspeedCredentials,
+  type DaytonaClubspeedSessionImportResult,
   type DaytonaClubspeedSessionSummary,
   type ImportedSessionData,
   type ImportedSessionDriver,
@@ -636,4 +637,45 @@ export async function importDaytonaClubspeedSession(
   const rows = parseHistoryRows(historyHtml);
   const detailHtml = await fetchHeatDetailsHtml(state, selection.heatId);
   return mapHeatToImportedSession(detailHtml, rows, token);
+}
+
+export async function importDaytonaClubspeedSessions(
+  heatNos: string[],
+  credentials: DaytonaClubspeedCredentials
+): Promise<DaytonaClubspeedSessionImportResult[]> {
+  const tokens = heatNos.map((heatNo) => heatNo.trim()).filter(Boolean);
+  if (tokens.length === 0) {
+    throw new SessionImportError("heatNo is required", "UNSUPPORTED_SOURCE");
+  }
+
+  const state = await loginToDaytonaClubspeed(credentials);
+  const historyHtml = await fetchHistoryHtml(state);
+  const rows = parseHistoryRows(historyHtml);
+
+  const results: DaytonaClubspeedSessionImportResult[] = [];
+  for (const token of tokens) {
+    try {
+      const selection = parseHeatSelectionToken(token);
+      if (!selection.heatId) {
+        throw new SessionImportError(
+          "Invalid Daytona Club Speed session selection",
+          "UNSUPPORTED_SOURCE"
+        );
+      }
+      const detailHtml = await fetchHeatDetailsHtml(state, selection.heatId);
+      results.push({
+        heatNo: token,
+        importedSession: mapHeatToImportedSession(detailHtml, rows, token),
+        errorMessage: null,
+      });
+    } catch (error) {
+      results.push({
+        heatNo: token,
+        importedSession: null,
+        errorMessage: error instanceof Error ? error.message : "Unable to import Daytona session",
+      });
+    }
+  }
+
+  return results;
 }

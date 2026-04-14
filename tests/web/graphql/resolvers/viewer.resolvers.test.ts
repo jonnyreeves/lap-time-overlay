@@ -170,6 +170,12 @@ describe("viewer resolver", () => {
 
     const byFormat = viewer?.recentTrackSessions({ first: 5, filter: { format: "Practice" } });
     expect(byFormat?.edges.map((edge) => edge.node.id)).toEqual(["s3"]);
+
+    const bySessionIds = viewer?.recentTrackSessions({
+      first: 5,
+      filter: { sessionIds: ["s1", "s3"] },
+    });
+    expect(bySessionIds?.edges.map((edge) => edge.node.id)).toEqual(["s3", "s1"]);
   });
 
   it("sorts recent track sessions when sort provided", () => {

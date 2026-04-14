@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { importTrackSessionFromSource, isUrlImportSource } from "../../../src/web/sessionImport/service.js";
+import {
+  importTrackSessionFromSource,
+  isUrlImportSource,
+  resolveTrackSessionImportSource,
+} from "../../../src/web/sessionImport/service.js";
 import { SessionImportError } from "../../../src/web/sessionImport/types.js";
 
 const resultPageFixture = `
@@ -44,6 +48,28 @@ const laptimesPageFixture = `
 </table>
 `;
 
+const singleEventPageFixture = `
+<div class="event-session">
+  <a href="/buckmore/e/363264/s/751500/result">30 Minute Karting Session (16+)</a>
+  <div>14 March 2026</div>
+  <div>18:23</div>
+</div>
+`;
+
+const multiEventPageFixture = `
+<div class="event-session">
+  <a href="/buckmore/e/363264/s/751500/result">30 Minute Karting Session (16+)</a>
+  <div>14 March 2026</div>
+  <div>18:23</div>
+</div>
+<div class="event-session">
+  <a href="/buckmore/e/363264/s/751501/result">Practice Finale</a>
+  <div>14 March 2026</div>
+  <div>18:45</div>
+</div>
+<a href="/buckmore/e/363264/s/751500/laptimes">Lap times</a>
+`;
+
 function makeMockResponse(url: string, body: string, setCookies: string[] = []): Response {
   return {
     ok: true,
@@ -79,6 +105,9 @@ describe("session import service", () => {
     ).toBe(true);
     expect(
       isUrlImportSource("https://results.alphatiming.co.uk/buckmore/e/360655/s\n/745987/result")
+    ).toBe(true);
+    expect(
+      isUrlImportSource("https://results.alphatiming.co.uk/buckmore/e/363264")
     ).toBe(true);
     expect(isUrlImportSource("https://example.com/somewhere")).toBe(false);
   });
@@ -130,5 +159,99 @@ describe("session import service", () => {
     });
     expect(fetchMock).toHaveBeenCalledWith("https://results.alphatiming.co.uk/", expect.anything());
     expect(fetchMock).toHaveBeenCalledWith(base, expect.anything());
+  });
+
+  it("resolves a direct Alpha Timing session URL without fetching the event page", async () => {
+    const resolved = await resolveTrackSessionImportSource(
+      "https://results.alphatiming.co.uk/buckmore/e/363264/s/751500/result"
+    );
+
+    expect(resolved).toEqual({
+      provider: "alphatiming",
+      sessionUrl: "https://results.alphatiming.co.uk/buckmore/e/363264/s/751500",
+      alphaTimingSessions: [],
+    });
+  });
+
+  it("resolves an Alpha Timing event URL to a single session", async () => {
+    const eventUrl = "https://results.alphatiming.co.uk/buckmore/e/363264";
+    const fetchMock = vi.fn(async (input: string | URL) => {
+      const url = String(input);
+      if (url === "https://results.alphatiming.co.uk/") {
+        return makeMockResponse(url, "<html>home</html>", ["__dt=token123; Path=/; HttpOnly"]);
+      }
+      if (url === eventUrl) {
+        return makeMockResponse(url, singleEventPageFixture);
+      }
+      throw new Error(`Unexpected URL: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const resolved = await resolveTrackSessionImportSource(eventUrl);
+
+    expect(resolved).toEqual({
+      provider: "alphatiming",
+      sessionUrl: "https://results.alphatiming.co.uk/buckmore/e/363264/s/751500",
+      alphaTimingSessions: [],
+    });
+  });
+
+  it("returns Alpha Timing event sessions in page order when multiple are present", async () => {
+    const eventUrl = "https://results.alphatiming.co.uk/buckmore/e/363264";
+    const fetchMock = vi.fn(async (input: string | URL) => {
+      const url = String(input);
+      if (url === "https://results.alphatiming.co.uk/") {
+        return makeMockResponse(url, "<html>home</html>", ["__dt=token123; Path=/; HttpOnly"]);
+      }
+      if (url === eventUrl) {
+        return makeMockResponse(url, multiEventPageFixture);
+      }
+      throw new Error(`Unexpected URL: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const resolved = await resolveTrackSessionImportSource(eventUrl);
+
+    expect(resolved.provider).toBe("alphatiming");
+    expect(resolved.sessionUrl).toBeNull();
+    expect(resolved.alphaTimingSessions).toEqual([
+      {
+        sessionUrl: "https://results.alphatiming.co.uk/buckmore/e/363264/s/751500",
+        title: "30 Minute Karting Session (16+)",
+        sessionDate: "2026-03-14",
+        sessionTime: "18:23",
+      },
+      {
+        sessionUrl: "https://results.alphatiming.co.uk/buckmore/e/363264/s/751501",
+        title: "Practice Finale",
+        sessionDate: "2026-03-14",
+        sessionTime: "18:45",
+      },
+    ]);
+  });
+
+  it("raises a parse error when an Alpha Timing event exposes no sessions", async () => {
+    const eventUrl = "https://results.alphatiming.co.uk/buckmore/e/363264";
+    const fetchMock = vi.fn(async (input: string | URL) => {
+      const url = String(input);
+      if (url === "https://results.alphatiming.co.uk/") {
+        return makeMockResponse(url, "<html>home</html>", ["__dt=token123; Path=/; HttpOnly"]);
+      }
+      if (url === eventUrl) {
+        return makeMockResponse(url, "<html><body><p>No sessions here</p></body></html>");
+      }
+      throw new Error(`Unexpected URL: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(resolveTrackSessionImportSource(eventUrl)).rejects.toThrow(
+      "Unable to find sessions for that Alpha Timing event"
+    );
+  });
+
+  it("does not import Alpha Timing event URLs until they are resolved", async () => {
+    await expect(
+      importTrackSessionFromSource("https://results.alphatiming.co.uk/buckmore/e/363264")
+    ).rejects.toThrow("Alpha Timing event URLs must be resolved to a specific session before import");
   });
 });

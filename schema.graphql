@@ -3,6 +3,7 @@ type Query {
   users: [User!]!
   tracks: [Track!]!
   trackSession(id: ID!): TrackSession!
+  daytonaClubspeedBulkImportJob(id: ID!): DaytonaClubspeedBulkImportJob
   track(id: ID!): Track
   adminOrphanedMedia: [AdminOrphanedMedia!]!
   adminTempDirs: [AdminTempDir!]!
@@ -246,8 +247,57 @@ input ImportTrackSessionFromUrlInput {
   source: String!
 }
 
-input ImportDaytonaClubspeedSessionInput {
+input ResolveTrackSessionImportSourceInput {
+  source: String!
+}
+
+input DaytonaClubspeedBulkImportSessionInput {
   heatNo: String!
+  trackId: ID!
+  trackLayoutId: ID!
+  kartId: ID!
+}
+
+input StartDaytonaClubspeedBulkImportInput {
+  sessions: [DaytonaClubspeedBulkImportSessionInput!]!
+}
+
+enum DaytonaClubspeedBulkImportJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum DaytonaClubspeedBulkImportResultStatus {
+  CREATED
+  SKIPPED
+  FAILED
+}
+
+type DaytonaClubspeedBulkImportResult {
+  heatNo: String!
+  status: DaytonaClubspeedBulkImportResultStatus!
+  trackSession: TrackSession
+  errorMessage: String
+}
+
+type DaytonaClubspeedBulkImportJob {
+  id: ID!
+  status: DaytonaClubspeedBulkImportJobStatus!
+  totalCount: Int!
+  processedCount: Int!
+  createdCount: Int!
+  skippedCount: Int!
+  failedCount: Int!
+  errorMessage: String
+  startedAt: String!
+  finishedAt: String
+  results: [DaytonaClubspeedBulkImportResult!]!
+}
+
+type StartDaytonaClubspeedBulkImportPayload {
+  job: DaytonaClubspeedBulkImportJob!
 }
 
 type DaytonaClubspeedSessionSummary {
@@ -289,6 +339,19 @@ type ImportedSessionDriver {
   classification: Int
   kartNumber: String
   laps: [ImportedSessionLap!]!
+}
+
+type AlphaTimingSessionOption {
+  sessionUrl: String!
+  title: String
+  sessionDate: String
+  sessionTime: String
+}
+
+type ResolveTrackSessionImportSourcePayload {
+  provider: String!
+  sessionUrl: String
+  alphaTimingSessions: [AlphaTimingSessionOption!]!
 }
 
 type ImportTrackSessionFromUrlPayload {
@@ -438,12 +501,15 @@ type Mutation {
     input: FetchTrackSessionTemperatureInput!
   ): FetchTrackSessionTemperaturePayload!
   fetchDaytonaClubspeedSessions: FetchDaytonaClubspeedSessionsPayload!
+  resolveTrackSessionImportSource(
+    input: ResolveTrackSessionImportSourceInput!
+  ): ResolveTrackSessionImportSourcePayload!
   importTrackSessionFromUrl(
     input: ImportTrackSessionFromUrlInput!
   ): ImportTrackSessionFromUrlPayload!
-  importDaytonaClubspeedSession(
-    input: ImportDaytonaClubspeedSessionInput!
-  ): ImportTrackSessionFromUrlPayload!
+  startDaytonaClubspeedBulkImport(
+    input: StartDaytonaClubspeedBulkImportInput!
+  ): StartDaytonaClubspeedBulkImportPayload!
   saveViewerDaytonaClubspeedCredentials(
     input: SaveViewerDaytonaClubspeedCredentialsInput!
   ): SaveViewerDaytonaClubspeedCredentialsPayload!
@@ -1092,6 +1158,7 @@ type LapEvent {
 }
 
 input TrackSessionFilterInput {
+  sessionIds: [ID!]
   trackId: ID
   trackLayoutId: ID
   kartId: ID

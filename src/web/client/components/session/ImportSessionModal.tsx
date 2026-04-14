@@ -1,33 +1,42 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { graphql, useMutation } from "react-relay";
-import { extractAlphaTimingSessionUrl } from "../../../shared/alphaTimingUrl.js";
+import { fetchQuery, graphql, useMutation, useRelayEnvironment } from "react-relay";
+import { useNavigate } from "react-router-dom";
+import { extractAlphaTimingImportSource } from "../../../shared/alphaTimingUrl.js";
+import type { ImportSessionModalDaytonaBulkImportJobQuery } from "../../__generated__/ImportSessionModalDaytonaBulkImportJobQuery.graphql.js";
 import type { ImportSessionModalFetchDaytonaClubspeedSessionsMutation } from "../../__generated__/ImportSessionModalFetchDaytonaClubspeedSessionsMutation.graphql.js";
 import type { ImportSessionModalFetchTrackSessionWeatherMutation } from "../../__generated__/ImportSessionModalFetchTrackSessionWeatherMutation.graphql.js";
-import type { ImportSessionModalImportDaytonaClubspeedSessionMutation } from "../../__generated__/ImportSessionModalImportDaytonaClubspeedSessionMutation.graphql.js";
 import type { ImportSessionModalImportTrackSessionFromUrlMutation } from "../../__generated__/ImportSessionModalImportTrackSessionFromUrlMutation.graphql.js";
+import type { ImportSessionModalResolveTrackSessionImportSourceMutation } from "../../__generated__/ImportSessionModalResolveTrackSessionImportSourceMutation.graphql.js";
+import type { ImportSessionModalStartDaytonaClubspeedBulkImportMutation } from "../../__generated__/ImportSessionModalStartDaytonaClubspeedBulkImportMutation.graphql.js";
 import {
+  guessKartIdFromImport,
   guessTrackIdFromImport,
   guessTrackLayoutIdFromImport,
 } from "../../utils/guessTrackFromImport.js";
 import { parseSessionEmail } from "../../utils/parseSessionEmail.js";
 import { type ParsedSessionEmail, type SessionImportSelection } from "../../utils/sessionImportTypes.js";
+import { AlphaTimingSessionStep } from "./importWizard/AlphaTimingSessionStep.js";
+import { DaytonaBulkImportProgressStep } from "./importWizard/DaytonaBulkImportProgressStep.js";
 import { DaytonaSessionStep } from "./importWizard/DaytonaSessionStep.js";
 import { EmailStep } from "./importWizard/EmailStep.js";
 import {
-  buildDaytonaSessionLabel,
+  buildAlphaTimingSessionLabel,
   getDefaultSelectedDriver,
   getResolvedSelectedDriver,
   getSelectedClassification,
   getSelectedDriverLaps,
   getSelectedKartNumber,
   hasDriverRows,
+  inferDaytonaKartTypeName,
   mapImportedPayloadToParsed,
+  type AlphaTimingSessionOption,
   type DaytonaClubspeedSessionOption,
 } from "./importWizard/helpers.js";
 import { PreviewStep } from "./importWizard/PreviewStep.js";
 import { SourceStep } from "./importWizard/SourceStep.js";
 import {
   buttonGroupStyles,
+  modalBodyStyles,
   modalContentStyles,
   modalOverlayStyles,
   primaryButtonStyles,
@@ -47,13 +56,17 @@ interface ImportSessionModalProps {
     id: string;
     name: string;
     isIndoors: boolean;
+    karts: ReadonlyArray<{ id: string; name: string }>;
     trackLayouts: ReadonlyArray<{ id: string; name: string }>;
   }>;
 }
 
 type WeatherStatus = "idle" | "loading" | "loaded" | "error" | "unavailable";
-type WizardStep = "source" | "email" | "daytona-session" | "preview";
+type WizardStep = "source" | "email" | "daytona-session" | "daytona-progress" | "alpha-session" | "preview";
 type ImportSource = "email" | "daytona" | null;
+type DaytonaBulkImportJob = NonNullable<
+  ImportSessionModalDaytonaBulkImportJobQuery["response"]["daytonaClubspeedBulkImportJob"]
+>;
 
 const FetchSessionWeatherMutation = graphql`
   mutation ImportSessionModalFetchTrackSessionWeatherMutation(
@@ -110,6 +123,23 @@ const ImportTrackSessionFromUrlMutation = graphql`
   }
 `;
 
+const ResolveTrackSessionImportSourceMutation = graphql`
+  mutation ImportSessionModalResolveTrackSessionImportSourceMutation(
+    $input: ResolveTrackSessionImportSourceInput!
+  ) {
+    resolveTrackSessionImportSource(input: $input) {
+      provider
+      sessionUrl
+      alphaTimingSessions {
+        sessionUrl
+        title
+        sessionDate
+        sessionTime
+      }
+    }
+  }
+`;
+
 const FetchDaytonaClubspeedSessionsMutation = graphql`
   mutation ImportSessionModalFetchDaytonaClubspeedSessionsMutation {
     fetchDaytonaClubspeedSessions {
@@ -126,44 +156,54 @@ const FetchDaytonaClubspeedSessionsMutation = graphql`
   }
 `;
 
-const ImportDaytonaClubspeedSessionMutation = graphql`
-  mutation ImportSessionModalImportDaytonaClubspeedSessionMutation(
-    $input: ImportDaytonaClubspeedSessionInput!
+const StartDaytonaClubspeedBulkImportMutation = graphql`
+  mutation ImportSessionModalStartDaytonaClubspeedBulkImportMutation(
+    $input: StartDaytonaClubspeedBulkImportInput!
   ) {
-    importDaytonaClubspeedSession(input: $input) {
-      provider
-      sessionFormat
-      sessionDate
-      sessionTime
-      classification
-      sessionFastestLapSeconds
-      kartNumber
-      trackLayoutName
-      selfDriverName
-      kartTypeName
-      laps {
-        lapNumber
-        timeSeconds
-        displayTime
-        lapEvents {
-          offset
-          event
-          value
+    startDaytonaClubspeedBulkImport(input: $input) {
+      job {
+        id
+        status
+        totalCount
+        processedCount
+        createdCount
+        skippedCount
+        failedCount
+        errorMessage
+        results {
+          heatNo
+          status
+          errorMessage
+          trackSession {
+            id
+            date
+            format
+          }
         }
       }
-      drivers {
-        name
-        classification
-        kartNumber
-        laps {
-          lapNumber
-          timeSeconds
-          displayTime
-          lapEvents {
-            offset
-            event
-            value
-          }
+    }
+  }
+`;
+
+const DaytonaBulkImportJobQuery = graphql`
+  query ImportSessionModalDaytonaBulkImportJobQuery($id: ID!) {
+    daytonaClubspeedBulkImportJob(id: $id) {
+      id
+      status
+      totalCount
+      processedCount
+      createdCount
+      skippedCount
+      failedCount
+      errorMessage
+      results {
+        heatNo
+        status
+        errorMessage
+        trackSession {
+          id
+          date
+          format
         }
       }
     }
@@ -177,6 +217,8 @@ export function ImportSessionModal({
   daytonaCredentialStatus,
   tracks,
 }: ImportSessionModalProps) {
+  const navigate = useNavigate();
+  const relayEnvironment = useRelayEnvironment();
   const [step, setStep] = useState<WizardStep>("source");
   const [selectedSource, setSelectedSource] = useState<ImportSource>(null);
   const [emailContent, setEmailContent] = useState("");
@@ -193,19 +235,28 @@ export function ImportSessionModal({
   const [daytonaSessions, setDaytonaSessions] = useState<DaytonaClubspeedSessionOption[]>([]);
   const [daytonaStatus, setDaytonaStatus] = useState<"idle" | "loading" | "loaded" | "error">("idle");
   const [daytonaError, setDaytonaError] = useState<string | null>(null);
-  const [selectedDaytonaHeatNo, setSelectedDaytonaHeatNo] = useState("");
+  const [selectedDaytonaHeatNos, setSelectedDaytonaHeatNos] = useState<string[]>([]);
+  const [selectedDaytonaTrackLayoutId, setSelectedDaytonaTrackLayoutId] = useState("");
+  const [daytonaKartTypeSelections, setDaytonaKartTypeSelections] = useState<Record<string, string>>({});
+  const [daytonaBulkImportJob, setDaytonaBulkImportJob] = useState<DaytonaBulkImportJob | null>(null);
+  const [alphaTimingSessions, setAlphaTimingSessions] = useState<AlphaTimingSessionOption[]>([]);
+  const [selectedAlphaTimingSessionUrl, setSelectedAlphaTimingSessionUrl] = useState("");
   const weatherRequestId = useRef(0);
   const [commitFetchWeather, isFetchingWeather] =
     useMutation<ImportSessionModalFetchTrackSessionWeatherMutation>(FetchSessionWeatherMutation);
+  const [commitResolveTrackSessionImportSource, isResolvingTrackSessionImportSource] =
+    useMutation<ImportSessionModalResolveTrackSessionImportSourceMutation>(
+      ResolveTrackSessionImportSourceMutation
+    );
   const [commitImportTrackSessionFromUrl, isImportingFromUrl] =
     useMutation<ImportSessionModalImportTrackSessionFromUrlMutation>(ImportTrackSessionFromUrlMutation);
   const [commitFetchDaytonaSessions, isFetchingDaytonaSessions] =
     useMutation<ImportSessionModalFetchDaytonaClubspeedSessionsMutation>(
       FetchDaytonaClubspeedSessionsMutation
     );
-  const [commitImportDaytonaSession, isImportingDaytonaSession] =
-    useMutation<ImportSessionModalImportDaytonaClubspeedSessionMutation>(
-      ImportDaytonaClubspeedSessionMutation
+  const [commitStartDaytonaBulkImport, isStartingDaytonaBulkImport] =
+    useMutation<ImportSessionModalStartDaytonaClubspeedBulkImportMutation>(
+      StartDaytonaClubspeedBulkImportMutation
     );
 
   const resetState = () => {
@@ -222,34 +273,50 @@ export function ImportSessionModal({
     setDaytonaSessions([]);
     setDaytonaStatus("idle");
     setDaytonaError(null);
-    setSelectedDaytonaHeatNo("");
+    setSelectedDaytonaHeatNos([]);
+    setSelectedDaytonaTrackLayoutId("");
+    setDaytonaKartTypeSelections({});
+    setDaytonaBulkImportJob(null);
+    setAlphaTimingSessions([]);
+    setSelectedAlphaTimingSessionUrl("");
     weatherRequestId.current += 1;
   };
 
+  const createdDaytonaTrackSessionIds = useMemo(
+    () =>
+      daytonaBulkImportJob?.results
+        .map((result) => result.trackSession?.id)
+        .filter((id): id is string => Boolean(id)) ?? [],
+    [daytonaBulkImportJob]
+  );
+  const isDaytonaImportFinished =
+    step === "daytona-progress" &&
+    (daytonaBulkImportJob?.status === "COMPLETED" || daytonaBulkImportJob?.status === "FAILED");
+
+  const handleViewImportedSessions = () => {
+    const query = createdDaytonaTrackSessionIds.map(encodeURIComponent).join(",");
+    resetState();
+    onClose();
+    navigate(query ? `/session?sessionId=${query}` : "/session");
+  };
+
   const handleClose = () => {
+    if (
+      step === "daytona-progress" &&
+      (daytonaBulkImportJob?.status === "QUEUED" || daytonaBulkImportJob?.status === "RUNNING") &&
+      !window.confirm("Import is still running. Closing this window hides progress but does not cancel it.")
+    ) {
+      return;
+    }
     resetState();
     onClose();
   };
 
   const localParsed = useMemo(() => parseSessionEmail(emailContent), [emailContent]);
   const parsed = importedParsed ?? localParsed;
-  const selectedDaytonaSession = daytonaSessions.find((session) => session.heatNo === selectedDaytonaHeatNo) ?? null;
   const daytonaCredentialsConfigured = daytonaCredentialStatus?.configured ?? false;
   const daytonaValidationError = daytonaCredentialStatus?.lastValidationError ?? null;
-  const sourceTextForGuessing =
-    selectedSource === "daytona"
-      ? buildDaytonaSessionLabel(
-          selectedDaytonaSession ?? {
-            heatNo: "",
-            activityType: "",
-            sessionDate: null,
-            sessionTime: null,
-            kartNumber: null,
-            classification: null,
-            alreadyImported: false,
-          }
-        )
-      : emailContent;
+  const sourceTextForGuessing = emailContent;
   const guessedTrackId = useMemo(() => {
     if (!parsed) return null;
     return guessTrackIdFromImport(tracks, {
@@ -257,16 +324,53 @@ export function ImportSessionModal({
       sourceText: sourceTextForGuessing,
     });
   }, [parsed, sourceTextForGuessing, tracks]);
-  const isClubspeedDaytonaImport = selectedSource === "daytona" && parsed?.provider === "daytona";
-  const fixedClubspeedTrackId = useMemo(() => {
-    if (!isClubspeedDaytonaImport) return null;
-    const explicitMatch =
+  const selectedDaytonaHeatNoSet = useMemo(
+    () => new Set(selectedDaytonaHeatNos),
+    [selectedDaytonaHeatNos]
+  );
+  const availableDaytonaSessions = useMemo(
+    () => daytonaSessions.filter((session) => !session.alreadyImported),
+    [daytonaSessions]
+  );
+  const selectedDaytonaSessions = useMemo(
+    () => availableDaytonaSessions.filter((session) => selectedDaytonaHeatNoSet.has(session.heatNo)),
+    [availableDaytonaSessions, selectedDaytonaHeatNoSet]
+  );
+  const selectedDaytonaTrack = useMemo(
+    () =>
       tracks.find((track) => {
         const normalizedName = track.name.toLowerCase();
         return normalizedName.includes("daytona") && normalizedName.includes("sandown");
-      })?.id ?? null;
-    return explicitMatch ?? guessedTrackId;
-  }, [guessedTrackId, isClubspeedDaytonaImport, tracks]);
+      }) ?? null,
+    [tracks]
+  );
+  const selectedDaytonaTrackLayout =
+    selectedDaytonaTrack?.trackLayouts.find((layout) => layout.id === selectedDaytonaTrackLayoutId) ?? null;
+  const selectedDaytonaKartTypes = useMemo(
+    () =>
+      Array.from(
+        new Set(selectedDaytonaSessions.map((session) => inferDaytonaKartTypeName(session.activityType)))
+      ),
+    [selectedDaytonaSessions]
+  );
+  const daytonaMappingError =
+    selectedDaytonaSessions.length === 0
+      ? "Select at least one unimported Daytona Club Speed session."
+      : !selectedDaytonaTrack
+        ? "Daytona Sandown Park is not configured as a track."
+        : !selectedDaytonaTrackLayout
+          ? "Select a track layout for the selected sessions."
+          : selectedDaytonaKartTypes.some((kartType) => {
+              const selectedKartId = daytonaKartTypeSelections[kartType] ?? "";
+              return !selectedDaytonaTrack.karts.some((kart) => kart.id === selectedKartId);
+            })
+            ? "Select a kart type for every detected Daytona kart."
+            : null;
+  const canStartDaytonaBulkImport =
+    daytonaStatus === "loaded" &&
+    selectedDaytonaSessions.length > 0 &&
+    daytonaMappingError == null &&
+    !isStartingDaytonaBulkImport;
 
   useEffect(() => {
     if (!parsed || !hasDriverRows(parsed)) {
@@ -282,20 +386,13 @@ export function ImportSessionModal({
   useEffect(() => {
     if (step !== "preview") return;
     const fallbackTrackId =
-      fixedClubspeedTrackId ??
       guessedTrackId ??
       (tracks.length === 1 ? tracks[0]?.id ?? "" : "");
-    if (isClubspeedDaytonaImport) {
-      if (fallbackTrackId && selectedTrackId !== fallbackTrackId) {
-        setSelectedTrackId(fallbackTrackId);
-      }
-      return;
-    }
     if (selectedTrackId.trim()) return;
     if (fallbackTrackId) {
       setSelectedTrackId(fallbackTrackId);
     }
-  }, [fixedClubspeedTrackId, guessedTrackId, isClubspeedDaytonaImport, selectedTrackId, step, tracks]);
+  }, [guessedTrackId, selectedTrackId, step, tracks]);
 
   const selectedTrack = tracks.find((track) => track.id === selectedTrackId);
   const selectedTrackIsIndoors = selectedTrack?.isIndoors ?? false;
@@ -316,10 +413,7 @@ export function ImportSessionModal({
     layoutOptions.find((layout) => layout.id === resolvedTrackLayoutId) ?? layoutOptions[0] ?? null;
   const resolvedTrackLayoutName = resolvedTrackLayout?.name ?? "Not found";
   const resolvedTrackName =
-    selectedTrack?.name ??
-    (fixedClubspeedTrackId
-      ? tracks.find((track) => track.id === fixedClubspeedTrackId)?.name ?? "Daytona Sandown Park"
-      : "Not found");
+    selectedTrack?.name ?? "Not found";
 
   const previewLaps = parsed ? getSelectedDriverLaps(parsed, selectedDriver) : [];
   const sessionDateTime = parsed?.sessionDate
@@ -337,8 +431,7 @@ export function ImportSessionModal({
       variables: {},
       onCompleted: (response) => {
         const sessions = response.fetchDaytonaClubspeedSessions?.sessions ?? [];
-        setDaytonaSessions(
-          sessions.map((session) => ({
+        const mappedSessions = sessions.map((session) => ({
             heatNo: session.heatNo,
             activityType: session.activityType,
             sessionDate: session.sessionDate ?? null,
@@ -346,7 +439,10 @@ export function ImportSessionModal({
             kartNumber: session.kartNumber ?? null,
             classification: session.classification ?? null,
             alreadyImported: session.alreadyImported ?? false,
-          }))
+          }));
+        setDaytonaSessions(mappedSessions);
+        setSelectedDaytonaHeatNos(
+          mappedSessions.filter((session) => !session.alreadyImported).map((session) => session.heatNo)
         );
         setDaytonaStatus("loaded");
       },
@@ -356,6 +452,67 @@ export function ImportSessionModal({
       },
     });
   }, [commitFetchDaytonaSessions, daytonaCredentialsConfigured, daytonaStatus, isOpen, step]);
+
+  useEffect(() => {
+    if (step !== "daytona-session") return;
+    if (!selectedDaytonaTrack) {
+      if (selectedDaytonaTrackLayoutId) setSelectedDaytonaTrackLayoutId("");
+      setDaytonaKartTypeSelections({});
+      return;
+    }
+
+    if (
+      selectedDaytonaTrackLayoutId &&
+      selectedDaytonaTrack.trackLayouts.some((layout) => layout.id === selectedDaytonaTrackLayoutId)
+    ) {
+      return;
+    }
+    setSelectedDaytonaTrackLayoutId(selectedDaytonaTrack.trackLayouts[0]?.id ?? "");
+  }, [selectedDaytonaTrack, selectedDaytonaTrackLayoutId, step]);
+
+  useEffect(() => {
+    if (step !== "daytona-session" || !selectedDaytonaTrack) return;
+    setDaytonaKartTypeSelections((current) => {
+      const next: Record<string, string> = {};
+      for (const kartType of selectedDaytonaKartTypes) {
+        const currentKartId = current[kartType] ?? "";
+        const currentStillValid = selectedDaytonaTrack.karts.some((kart) => kart.id === currentKartId);
+        next[kartType] =
+          currentStillValid
+            ? currentKartId
+            : guessKartIdFromImport(selectedDaytonaTrack.karts, kartType) ?? "";
+      }
+      return next;
+    });
+  }, [selectedDaytonaKartTypes, selectedDaytonaTrack, step]);
+
+  useEffect(() => {
+    if (!daytonaBulkImportJob?.id) return;
+    if (step !== "daytona-progress") return;
+    if (daytonaBulkImportJob.status !== "QUEUED" && daytonaBulkImportJob.status !== "RUNNING") {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      fetchQuery<ImportSessionModalDaytonaBulkImportJobQuery>(
+        relayEnvironment,
+        DaytonaBulkImportJobQuery,
+        { id: daytonaBulkImportJob.id },
+        { fetchPolicy: "network-only" }
+      ).subscribe({
+        next: (response) => {
+          if (response.daytonaClubspeedBulkImportJob) {
+            setDaytonaBulkImportJob(response.daytonaClubspeedBulkImportJob);
+          }
+        },
+        error: (error: Error) => {
+          setDaytonaError(error.message || "Unable to refresh Daytona bulk import progress.");
+        },
+      });
+    }, 1500);
+
+    return () => window.clearTimeout(timer);
+  }, [daytonaBulkImportJob, relayEnvironment, step]);
 
   useEffect(() => {
     if (step !== "preview") return;
@@ -412,10 +569,10 @@ export function ImportSessionModal({
     }
   }, [fallbackTrackLayoutId, layoutOptions, selectedTrackLayoutId, step]);
 
-  const alphaSessionUrl = extractAlphaTimingSessionUrl(emailContent);
+  const alphaImportSource = extractAlphaTimingImportSource(emailContent);
   const hasInput = emailContent.trim().length > 0;
   const localPreviewLaps = localParsed ? getSelectedDriverLaps(localParsed, selectedDriver) : [];
-  const canProceedFromEmail = hasInput && (alphaSessionUrl ? true : localPreviewLaps.length > 0);
+  const canProceedFromEmail = hasInput && (alphaImportSource ? true : localPreviewLaps.length > 0);
   const weatherLoading = weatherStatus === "loading" || isFetchingWeather;
   const weatherUnavailableReason = !selectedTrackId.trim()
     ? "Select a track"
@@ -453,26 +610,66 @@ export function ImportSessionModal({
     setDaytonaError(null);
   };
 
+  const importResolvedAlphaTimingSession = (sessionUrl: string) => {
+    commitImportTrackSessionFromUrl({
+      variables: { input: { source: sessionUrl } },
+      onCompleted: (response) => {
+        const parsedPayload = response.importTrackSessionFromUrl
+          ? mapImportedPayloadToParsed(response.importTrackSessionFromUrl)
+          : null;
+        if (!parsedPayload || parsedPayload.provider !== "alphatiming") {
+          setImportError("No import data was returned for that Alpha Timing URL.");
+          return;
+        }
+        setImportedParsed(parsedPayload);
+        setStep("preview");
+      },
+      onError: (error) => {
+        setImportError(error.message || "Unable to import from URL.");
+      },
+    });
+  };
+
   const handleNextFromEmail = () => {
     if (!canProceedFromEmail) return;
     setImportError(null);
 
-    if (alphaSessionUrl) {
-      commitImportTrackSessionFromUrl({
-        variables: { input: { source: alphaSessionUrl } },
+    if (alphaImportSource) {
+      commitResolveTrackSessionImportSource({
+        variables: { input: { source: alphaImportSource.normalizedSource } },
         onCompleted: (response) => {
-          const parsedPayload = response.importTrackSessionFromUrl
-            ? mapImportedPayloadToParsed(response.importTrackSessionFromUrl)
-            : null;
-          if (!parsedPayload || parsedPayload.provider !== "alphatiming") {
+          const payload = response.resolveTrackSessionImportSource;
+          if (!payload || payload.provider !== "alphatiming") {
             setImportError("No import data was returned for that Alpha Timing URL.");
             return;
           }
-          setImportedParsed(parsedPayload);
-          setStep("preview");
+
+          const resolvedSessionUrl = payload.sessionUrl?.trim() ?? "";
+          if (resolvedSessionUrl) {
+            setAlphaTimingSessions([]);
+            setSelectedAlphaTimingSessionUrl("");
+            importResolvedAlphaTimingSession(resolvedSessionUrl);
+            return;
+          }
+
+          const sessions =
+            payload.alphaTimingSessions?.map((session) => ({
+              sessionUrl: session.sessionUrl,
+              title: session.title ?? null,
+              sessionDate: session.sessionDate ?? null,
+              sessionTime: session.sessionTime ?? null,
+            })) ?? [];
+          if (sessions.length === 0) {
+            setImportError("No import data was returned for that Alpha Timing URL.");
+            return;
+          }
+
+          setAlphaTimingSessions(sessions);
+          setSelectedAlphaTimingSessionUrl("");
+          setStep("alpha-session");
         },
         onError: (error) => {
-          setImportError(error.message || "Unable to import from URL.");
+          setImportError(error.message || "Unable to resolve Alpha Timing URL.");
         },
       });
       return;
@@ -489,26 +686,65 @@ export function ImportSessionModal({
     setStep("preview");
   };
 
-  const handleNextFromDaytona = () => {
-    if (!selectedDaytonaHeatNo) return;
+  const handleToggleDaytonaHeatNo = (heatNo: string) => {
+    setSelectedDaytonaHeatNos((current) =>
+      current.includes(heatNo)
+        ? current.filter((currentHeatNo) => currentHeatNo !== heatNo)
+        : [...current, heatNo]
+    );
+  };
+
+  const handleSelectAllDaytonaSessions = () => {
+    setSelectedDaytonaHeatNos(availableDaytonaSessions.map((session) => session.heatNo));
+  };
+
+  const handleSelectLatestDaytonaDate = () => {
+    const latestDate = availableDaytonaSessions.find((session) => session.sessionDate)?.sessionDate ?? null;
+    if (!latestDate) {
+      handleSelectAllDaytonaSessions();
+      return;
+    }
+    setSelectedDaytonaHeatNos(
+      availableDaytonaSessions
+        .filter((session) => session.sessionDate === latestDate)
+        .map((session) => session.heatNo)
+    );
+  };
+
+  const handleStartDaytonaBulkImport = () => {
+    if (!canStartDaytonaBulkImport || !selectedDaytonaTrack || !selectedDaytonaTrackLayout) return;
     setImportError(null);
-    commitImportDaytonaSession({
-      variables: { input: { heatNo: selectedDaytonaHeatNo } },
+    setDaytonaError(null);
+    commitStartDaytonaBulkImport({
+      variables: {
+        input: {
+          sessions: selectedDaytonaSessions.map((session) => ({
+            heatNo: session.heatNo,
+            trackId: selectedDaytonaTrack.id,
+            trackLayoutId: selectedDaytonaTrackLayout.id,
+            kartId: daytonaKartTypeSelections[inferDaytonaKartTypeName(session.activityType)] ?? "",
+          })),
+        },
+      },
       onCompleted: (response) => {
-        const parsedPayload = response.importDaytonaClubspeedSession
-          ? mapImportedPayloadToParsed(response.importDaytonaClubspeedSession)
-          : null;
-        if (!parsedPayload || parsedPayload.provider !== "daytona") {
-          setImportError("No Daytona Club Speed session data was returned.");
+        const job = response.startDaytonaClubspeedBulkImport?.job ?? null;
+        if (!job) {
+          setImportError("No Daytona Club Speed bulk import job was returned.");
           return;
         }
-        setImportedParsed(parsedPayload);
-        setStep("preview");
+        setDaytonaBulkImportJob(job);
+        setStep("daytona-progress");
       },
       onError: (error) => {
-        setImportError(error.message || "Unable to import Daytona Club Speed session.");
+        setImportError(error.message || "Unable to start Daytona Club Speed bulk import.");
       },
     });
+  };
+
+  const handleNextFromAlphaTiming = () => {
+    if (!selectedAlphaTimingSessionUrl) return;
+    setImportError(null);
+    importResolvedAlphaTimingSession(selectedAlphaTimingSessionUrl);
   };
 
   const handleBack = () => {
@@ -518,7 +754,17 @@ export function ImportSessionModal({
       setWeatherStatus("idle");
       setWeatherData({ temperature: null, conditions: null });
       weatherRequestId.current += 1;
-      setStep(selectedSource === "daytona" ? "daytona-session" : "email");
+      setStep(
+        alphaTimingSessions.length > 0
+            ? "alpha-session"
+            : "email"
+      );
+      return;
+    }
+    if (step === "alpha-session") {
+      setAlphaTimingSessions([]);
+      setSelectedAlphaTimingSessionUrl("");
+      setStep("email");
       return;
     }
     if (step === "email" || step === "daytona-session") {
@@ -535,12 +781,20 @@ export function ImportSessionModal({
     onImport({
       provider: parsed.provider,
       sourceText:
-        selectedSource === "daytona" && selectedDaytonaSession
-          ? buildDaytonaSessionLabel(selectedDaytonaSession)
+        selectedSource === "email" && alphaTimingSessions.length > 0 && selectedAlphaTimingSessionUrl
+            ? buildAlphaTimingSessionLabel(
+                alphaTimingSessions.find(
+                  (session) => session.sessionUrl === selectedAlphaTimingSessionUrl
+                ) ?? {
+                  sessionUrl: selectedAlphaTimingSessionUrl,
+                  title: null,
+                  sessionDate: parsed.sessionDate,
+                  sessionTime: parsed.sessionTime,
+                }
+              )
           : emailContent.trim(),
-      externalImportProvider:
-        selectedSource === "daytona" ? "daytona_clubspeed" : null,
-      externalImportId: selectedSource === "daytona" ? selectedDaytonaHeatNo : null,
+      externalImportProvider: null,
+      externalImportId: null,
       sessionFormat: parsed.sessionFormat,
       sessionDate: parsed.sessionDate,
       sessionTime: parsed.sessionTime,
@@ -584,29 +838,43 @@ export function ImportSessionModal({
       : step === "email"
         ? "Paste the email that describes your session and we'll preview what we found."
         : step === "daytona-session"
-          ? "Choose one Daytona Club Speed session to review before importing."
+          ? "Choose Daytona Club Speed sessions and confirm the mappings before importing."
+          : step === "daytona-progress"
+            ? "Daytona Club Speed sessions are being imported in the background."
+          : step === "alpha-session"
+            ? "Choose the Alpha Timing session you want to import from this event."
           : "Review the parsed session details before importing.";
 
   const primaryDisabled =
     step === "source"
       ? !selectedSource
       : step === "email"
-        ? isImportingFromUrl || !canProceedFromEmail
+        ? isResolvingTrackSessionImportSource || isImportingFromUrl || !canProceedFromEmail
         : step === "daytona-session"
-          ? isImportingDaytonaSession || !selectedDaytonaHeatNo
+          ? !canStartDaytonaBulkImport
+          : step === "daytona-progress"
+            ? true
+          : step === "alpha-session"
+            ? isImportingFromUrl || !selectedAlphaTimingSessionUrl
           : previewLaps.length === 0;
 
   const primaryLabel =
     step === "source"
       ? "Continue"
       : step === "email"
-        ? isImportingFromUrl
-          ? "Importing..."
+        ? isResolvingTrackSessionImportSource || isImportingFromUrl
+          ? "Loading..."
           : "Next"
         : step === "daytona-session"
-          ? isImportingDaytonaSession
+          ? isStartingDaytonaBulkImport
+            ? "Starting..."
+            : `Import ${selectedDaytonaSessions.length || ""}`.trim()
+          : step === "daytona-progress"
             ? "Importing..."
-            : "Next"
+          : step === "alpha-session"
+            ? isImportingFromUrl
+              ? "Importing..."
+              : "Next"
           : "Import";
 
   return (
@@ -615,73 +883,111 @@ export function ImportSessionModal({
         <h2>{title}</h2>
         <p css={stepIntroStyles}>{intro}</p>
 
-        {step === "source" ? (
-          <SourceStep selectedSource={selectedSource} onSelectSource={setSelectedSource} />
-        ) : null}
-        {step === "email" ? (
-          <EmailStep
-            emailContent={emailContent}
-            importError={importError}
-            onEmailContentChange={setEmailContent}
-          />
-        ) : null}
-        {step === "daytona-session" ? (
-          <DaytonaSessionStep
-            credentialsConfigured={daytonaCredentialsConfigured}
-            storedValidationError={daytonaValidationError}
-            sessions={daytonaSessions}
-            status={isFetchingDaytonaSessions && daytonaStatus === "loading" ? "loading" : daytonaStatus}
-            errorMessage={daytonaError ?? importError}
-            selectedHeatNo={selectedDaytonaHeatNo}
-            onRetry={handleRetryDaytonaSessions}
-            onSelectHeatNo={setSelectedDaytonaHeatNo}
-          />
-        ) : null}
-        {step === "preview" ? (
-        <PreviewStep
-          parsed={parsed}
-          selectedDriver={selectedDriver}
-          selectedTrackId={selectedTrackId}
-          selectedTrackLayoutId={selectedTrackLayoutId}
-          resolvedTrackName={resolvedTrackName}
-          lockTrackSelection={isClubspeedDaytonaImport}
-          tracks={tracks}
-          trackLayouts={layoutOptions}
-          resolvedTrackLayoutName={resolvedTrackLayoutName}
-          showTrackLayoutSelection={shouldShowTrackLayoutSelection}
-          weatherConditionsLabel={weatherConditionsLabel}
-          weatherTemperatureLabel={weatherTemperatureLabel}
-          onSelectTrackId={setSelectedTrackId}
-          onSelectTrackLayoutId={setSelectedTrackLayoutId}
-          onSelectDriver={setSelectedDriver}
-        />
-        ) : null}
+        <div css={modalBodyStyles}>
+          {step === "source" ? (
+            <SourceStep selectedSource={selectedSource} onSelectSource={setSelectedSource} />
+          ) : null}
+          {step === "email" ? (
+            <EmailStep
+              emailContent={emailContent}
+              importError={importError}
+              onEmailContentChange={setEmailContent}
+            />
+          ) : null}
+          {step === "daytona-session" ? (
+            <DaytonaSessionStep
+              credentialsConfigured={daytonaCredentialsConfigured}
+              storedValidationError={daytonaValidationError}
+              sessions={daytonaSessions}
+              status={isFetchingDaytonaSessions && daytonaStatus === "loading" ? "loading" : daytonaStatus}
+              errorMessage={daytonaError ?? importError}
+              selectedHeatNos={selectedDaytonaHeatNos}
+              selectedTrackLayoutId={selectedDaytonaTrackLayoutId}
+              kartTypeSelections={daytonaKartTypeSelections}
+              mappingError={daytonaMappingError}
+              selectedTrack={selectedDaytonaTrack}
+              onRetry={handleRetryDaytonaSessions}
+              onToggleHeatNo={handleToggleDaytonaHeatNo}
+              onSelectAll={handleSelectAllDaytonaSessions}
+              onSelectNone={() => setSelectedDaytonaHeatNos([])}
+              onSelectLatestDate={handleSelectLatestDaytonaDate}
+              onSelectTrackLayoutId={setSelectedDaytonaTrackLayoutId}
+              onSelectKartType={(kartType, kartId) =>
+                setDaytonaKartTypeSelections((current) => ({ ...current, [kartType]: kartId }))
+              }
+            />
+          ) : null}
+          {step === "daytona-progress" ? (
+            <DaytonaBulkImportProgressStep
+              job={daytonaBulkImportJob}
+              sessions={daytonaSessions}
+            />
+          ) : null}
+          {step === "alpha-session" ? (
+            <AlphaTimingSessionStep
+              sessions={alphaTimingSessions}
+              selectedSessionUrl={selectedAlphaTimingSessionUrl}
+              errorMessage={importError}
+              onSelectSessionUrl={setSelectedAlphaTimingSessionUrl}
+            />
+          ) : null}
+          {step === "preview" ? (
+            <PreviewStep
+              parsed={parsed}
+              selectedDriver={selectedDriver}
+              selectedTrackId={selectedTrackId}
+              selectedTrackLayoutId={selectedTrackLayoutId}
+              resolvedTrackName={resolvedTrackName}
+              lockTrackSelection={false}
+              tracks={tracks}
+              trackLayouts={layoutOptions}
+              resolvedTrackLayoutName={resolvedTrackLayoutName}
+              showTrackLayoutSelection={shouldShowTrackLayoutSelection}
+              weatherConditionsLabel={weatherConditionsLabel}
+              weatherTemperatureLabel={weatherTemperatureLabel}
+              onSelectTrackId={setSelectedTrackId}
+              onSelectTrackLayoutId={setSelectedTrackLayoutId}
+              onSelectDriver={setSelectedDriver}
+            />
+          ) : null}
+        </div>
 
         <div css={buttonGroupStyles}>
-          <button type="button" css={secondaryButtonStyles} onClick={handleClose}>
-            Cancel
-          </button>
-          {step !== "source" ? (
+          {!isDaytonaImportFinished ? (
+            <button type="button" css={secondaryButtonStyles} onClick={handleClose}>
+              Cancel
+            </button>
+          ) : null}
+          {step !== "source" && step !== "daytona-progress" ? (
             <button type="button" css={secondaryButtonStyles} onClick={handleBack}>
               Back
             </button>
           ) : null}
-          <button
-            type="button"
-            css={primaryButtonStyles}
-            disabled={primaryDisabled}
-            onClick={
-              step === "source"
-                ? handleContinueFromSource
-                : step === "email"
-                  ? handleNextFromEmail
-                  : step === "daytona-session"
-                    ? handleNextFromDaytona
-                    : handleSubmitImport
-            }
-          >
-            {primaryLabel}
-          </button>
+          {isDaytonaImportFinished ? (
+            <button type="button" css={primaryButtonStyles} onClick={handleViewImportedSessions}>
+              View sessions
+            </button>
+          ) : null}
+          {step !== "daytona-progress" ? (
+            <button
+              type="button"
+              css={primaryButtonStyles}
+              disabled={primaryDisabled}
+              onClick={
+                step === "source"
+                  ? handleContinueFromSource
+                  : step === "email"
+                    ? handleNextFromEmail
+                    : step === "daytona-session"
+                      ? handleStartDaytonaBulkImport
+                      : step === "alpha-session"
+                        ? handleNextFromAlphaTiming
+                        : handleSubmitImport
+              }
+            >
+              {primaryLabel}
+            </button>
+          ) : null}
         </div>
       </div>
     </div>

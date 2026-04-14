@@ -28,6 +28,7 @@ function decodeCursor(cursor: string): string | null {
 }
 
 type TrackSessionFilterArgs = {
+  sessionIds?: string[] | null;
   trackId?: string | null;
   trackLayoutId?: string | null;
   kartId?: string | null;
@@ -353,8 +354,12 @@ export const viewerResolvers = {
         const trackIdFilter = filter?.trackId?.trim();
         const trackLayoutIdFilter = filter?.trackLayoutId?.trim();
         const kartIdFilter = filter?.kartId?.trim();
+        const sessionIdFilter = new Set(
+          (filter?.sessionIds ?? []).map((sessionId) => sessionId.trim()).filter(Boolean)
+        );
 
         const filtered = sessions.filter((session) => {
+          if (sessionIdFilter.size > 0 && !sessionIdFilter.has(session.id)) return false;
           if (trackIdFilter && session.trackId !== trackIdFilter) return false;
           if (trackLayoutIdFilter && session.trackLayoutId !== trackLayoutIdFilter) return false;
           if (kartIdFilter && session.kartId !== kartIdFilter) return false;

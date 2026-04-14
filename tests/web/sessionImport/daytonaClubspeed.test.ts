@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   fetchDaytonaClubspeedSessions,
   importDaytonaClubspeedSession,
+  importDaytonaClubspeedSessions,
 } from "../../../src/web/sessionImport/service.js";
 import type { DaytonaClubspeedCredentials } from "../../../src/web/sessionImport/types.js";
 
@@ -213,6 +214,55 @@ describe("daytona clubspeed import service", () => {
         lapEvents: [{ offset: 49.411, event: "position", value: "3" }],
       },
     ]);
+  });
+
+  it("bulk imports Daytona heat details with one login and continues when one heat fails", async () => {
+    const secondDetailUrl = "https://daytonasp.clubspeedtiming.com/sp_center/HeatDetails.aspx?HeatNo=81388";
+    const fetchMock = vi.fn(async (input: string | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url === signInUrl && (!init?.method || init.method === "GET")) {
+        return makeMockResponse(url, signInHtml, {
+          setCookies: ["ASP.NET_SessionId=session123; Path=/; HttpOnly"],
+        });
+      }
+      if (url === signInUrl && init?.method === "POST") {
+        return makeMockResponse(url, "", {
+          status: 302,
+          headers: { location: historyUrl },
+          setCookies: [".ASPXAUTH=auth123; Path=/; HttpOnly"],
+        });
+      }
+      if (url === historyUrl) {
+        return makeMockResponse(url, historyHtml);
+      }
+      if (url === detailUrl) {
+        return makeMockResponse(url, detailHtml);
+      }
+      if (url === secondDetailUrl) {
+        return makeMockResponse(url, "<html>No lap tables here</html>");
+      }
+      throw new Error(`Unexpected URL: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const results = await importDaytonaClubspeedSessions(
+      [
+        "81389|2026-03-11|19%3A40|149|3|49.411",
+        "81388|2026-03-11|19%3A30|149|4|49.999",
+      ],
+      credentials
+    );
+
+    expect(results).toHaveLength(2);
+    expect(results[0]?.importedSession?.selfDriverName).toBe("L - Jonny R");
+    expect(results[1]).toMatchObject({
+      importedSession: null,
+      errorMessage: "Unable to parse Daytona Club Speed lap times",
+    });
+    expect(fetchMock).toHaveBeenCalledWith(signInUrl, expect.anything());
+    expect(fetchMock).toHaveBeenCalledWith(historyUrl, expect.anything());
+    expect(fetchMock.mock.calls.filter(([url]) => String(url) === signInUrl)).toHaveLength(2);
+    expect(fetchMock.mock.calls.filter(([url]) => String(url) === historyUrl)).toHaveLength(1);
   });
 
   it("marks the 2026-03-17 20:00 DMAX Sprint session as qualifying when a 20:10 session follows", async () => {

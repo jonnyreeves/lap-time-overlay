@@ -49,12 +49,14 @@ import {
   rebuildMediaLibrarySessionProjection,
   removeMediaLibraryProjectionsForRecordings,
 } from "../../recordings/mediaLibraryProjection.js";
-import { importTrackSessionFromSource } from "../../sessionImport/service.js";
 import {
+  importTrackSessionFromSource,
+  resolveTrackSessionImportSource as resolveTrackSessionImportSourceFromService,
   fetchDaytonaClubspeedSessions,
   importDaytonaClubspeedSession,
 } from "../../sessionImport/service.js";
 import {
+  type ResolvedImportSource,
   SessionImportError,
   type ImportedSessionData,
   type ImportedSessionDriver,
@@ -131,6 +133,12 @@ export type FetchTrackSessionTemperatureArgs = {
 };
 
 export type ImportTrackSessionFromUrlArgs = {
+  input?: {
+    source?: string;
+  };
+};
+
+export type ResolveTrackSessionImportSourceArgs = {
   input?: {
     source?: string;
   };
@@ -491,6 +499,20 @@ function buildImportedSessionPayload(imported: ImportedSessionData) {
     kartTypeName: imported.kartTypeName,
     laps: normalizeImportedSessionLaps(imported.laps),
     drivers: normalizeImportedSessionDrivers(imported.drivers),
+  };
+}
+
+function buildResolvedImportSourcePayload(resolved: ResolvedImportSource) {
+  return {
+    provider: resolved.provider,
+    sessionUrl: resolved.sessionUrl ?? null,
+    alphaTimingSessions:
+      resolved.alphaTimingSessions.map((session) => ({
+        sessionUrl: session.sessionUrl,
+        title: session.title ?? null,
+        sessionDate: session.sessionDate ?? null,
+        sessionTime: session.sessionTime ?? null,
+      })) ?? [],
   };
 }
 
@@ -1563,6 +1585,38 @@ export const trackSessionResolvers = {
       temperature: weather?.temperature ?? null,
       conditions: track.isIndoors ? "Dry" : weather?.conditions ?? null,
     };
+  },
+  resolveTrackSessionImportSource: async (
+    args: ResolveTrackSessionImportSourceArgs,
+    context: GraphQLContext
+  ) => {
+    if (!context.currentUser) {
+      throw new GraphQLError("Authentication required", {
+        extensions: { code: "UNAUTHENTICATED" },
+      });
+    }
+
+    const source = args.input?.source?.trim();
+    if (!source) {
+      throw new GraphQLError("source is required", {
+        extensions: { code: "VALIDATION_FAILED" },
+      });
+    }
+
+    try {
+      const resolved = await resolveTrackSessionImportSourceFromService(source);
+      return buildResolvedImportSourcePayload(resolved);
+    } catch (error) {
+      if (error instanceof SessionImportError) {
+        throw new GraphQLError(error.message, {
+          extensions: { code: "VALIDATION_FAILED" },
+        });
+      }
+      console.warn("Failed to resolve track session import source", error);
+      throw new GraphQLError("Unable to resolve session import source", {
+        extensions: { code: "INTERNAL_SERVER_ERROR" },
+      });
+    }
   },
   importTrackSessionFromUrl: async (
     args: ImportTrackSessionFromUrlArgs,

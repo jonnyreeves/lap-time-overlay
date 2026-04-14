@@ -11,6 +11,7 @@ export const modalOverlayStyles = css`
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 24px;
 `;
 
 export const modalContentStyles = css`
@@ -18,9 +19,21 @@ export const modalContentStyles = css`
   padding: 30px;
   border-radius: 10px;
   width: 90%;
+  box-sizing: border-box;
   max-width: 920px;
+  max-height: calc(100vh - 48px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+`;
+
+export const modalBodyStyles = css`
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
 `;
 
 export const inputFieldStyles = css`
@@ -62,6 +75,7 @@ export const buttonGroupStyles = css`
   justify-content: flex-end;
   gap: 10px;
   margin-top: 20px;
+  flex: 0 0 auto;
 `;
 
 const baseButtonStyles = css`
@@ -241,4 +255,144 @@ export const sourceTitleStyles = css`
 export const sourceBodyStyles = css`
   color: #475569;
   line-height: 1.4;
+`;
+
+export const compactActionRowStyles = css`
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0;
+
+  button {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #0f172a;
+    padding: 6px 10px;
+    cursor: pointer;
+
+    &:disabled {
+      color: #94a3b8;
+      cursor: not-allowed;
+    }
+  }
+`;
+
+export const daytonaBulkStepStyles = css`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+`;
+
+export const sessionTableStyles = css`
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+
+  th,
+  td {
+    border-bottom: 1px solid #e2e8f4;
+    padding: 8px;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  th {
+    color: #475569;
+    font-weight: 700;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #fff;
+  }
+
+  tr[aria-disabled="true"] {
+    color: #94a3b8;
+  }
+`;
+
+export const sessionTableViewportStyles = css`
+  flex: 0 1 220px;
+  min-height: 150px;
+  max-height: min(30vh, 320px);
+  overflow: auto;
+  border: 1px solid #e2e8f4;
+  border-radius: 8px;
+`;
+
+export const mappingGridStyles = css`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+  padding: 12px 0;
+  border-top: 1px solid #e2e8f4;
+  border-bottom: 1px solid #e2e8f4;
+
+  strong {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const mappingRowStyles = css`
+  display: grid;
+  gap: 6px;
+  align-content: start;
+
+  label {
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e2e8f4;
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const mappingErrorStyles = css`
+  grid-column: 1 / -1;
+  color: #b91c1c;
+  margin: 0;
+`;
+
+export const progressBarOuterStyles = css`
+  height: 10px;
+  border-radius: 8px;
+  background: #e2e8f4;
+  overflow: hidden;
+`;
+
+export const progressBarInnerStyles = (percent: number) => css`
+  height: 100%;
+  width: ${percent}%;
+  background: #6366f1;
+  transition: width 0.2s ease;
+`;
+
+export const resultListStyles = css`
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  max-height: 220px;
+  overflow: auto;
+`;
+
+export const resultRowStyles = css`
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e2e8f4;
 `;

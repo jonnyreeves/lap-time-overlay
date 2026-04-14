@@ -35,6 +35,12 @@ export type DaytonaClubspeedCredentials = {
   password: string;
 };
 
+export type DaytonaClubspeedSessionImportResult = {
+  heatNo: string;
+  importedSession: ImportedSessionData | null;
+  errorMessage: string | null;
+};
+
 export type ImportedSessionData = {
   provider: string;
   sessionFormat: ImportedSessionFormat | null;
@@ -50,13 +56,31 @@ export type ImportedSessionData = {
   drivers: ImportedSessionDriver[];
 };
 
+export type AlphaTimingSessionOption = {
+  sessionUrl: string;
+  title: string | null;
+  sessionDate: string | null;
+  sessionTime: string | null;
+};
+
+export type ResolvedImportSource = {
+  provider: string;
+  sessionUrl: string | null;
+  alphaTimingSessions: AlphaTimingSessionOption[];
+};
+
 export type UrlImportProviderMatch = {
   normalizedSource: string;
+  sourceKind: "event" | "session";
+  venue: string;
+  eventId: string;
+  sessionId?: string;
 };
 
 export interface UrlImportProvider {
   id: string;
   canHandle: (source: string) => UrlImportProviderMatch | null;
+  resolveFromUrl: (match: UrlImportProviderMatch) => Promise<ResolvedImportSource>;
   importFromUrl: (match: UrlImportProviderMatch) => Promise<ImportedSessionData>;
 }
 

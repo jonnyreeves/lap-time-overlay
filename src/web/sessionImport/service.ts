@@ -2,9 +2,12 @@ import { alphaTimingUrlProvider } from "./providers/alphaTiming.js";
 import {
   fetchDaytonaClubspeedSessions as fetchDaytonaClubspeedSessionsFromProvider,
   importDaytonaClubspeedSession as importDaytonaClubspeedSessionFromProvider,
+  importDaytonaClubspeedSessions as importDaytonaClubspeedSessionsFromProvider,
 } from "./providers/daytonaClubspeed.js";
 import {
+  type ResolvedImportSource,
   type DaytonaClubspeedCredentials,
+  type DaytonaClubspeedSessionImportResult,
   type DaytonaClubspeedSessionSummary,
   type ImportedSessionData,
   SessionImportError,
@@ -40,6 +43,23 @@ export async function importTrackSessionFromSource(
   throw new SessionImportError("Unsupported import source URL", "UNSUPPORTED_SOURCE");
 }
 
+export async function resolveTrackSessionImportSource(
+  source: string | null | undefined
+): Promise<ResolvedImportSource> {
+  const trimmed = normalizeSourceInput(source);
+  if (!trimmed) {
+    throw new SessionImportError("source is required", "UNSUPPORTED_SOURCE");
+  }
+
+  for (const provider of URL_IMPORT_PROVIDERS) {
+    const match = provider.canHandle(trimmed);
+    if (!match) continue;
+    return provider.resolveFromUrl(match);
+  }
+
+  throw new SessionImportError("Unsupported import source URL", "UNSUPPORTED_SOURCE");
+}
+
 export async function fetchDaytonaClubspeedSessions(
   credentials: DaytonaClubspeedCredentials
 ): Promise<DaytonaClubspeedSessionSummary[]> {
@@ -55,4 +75,15 @@ export async function importDaytonaClubspeedSession(
     throw new SessionImportError("heatNo is required", "UNSUPPORTED_SOURCE");
   }
   return importDaytonaClubspeedSessionFromProvider(trimmed, credentials);
+}
+
+export async function importDaytonaClubspeedSessions(
+  heatNos: string[],
+  credentials: DaytonaClubspeedCredentials
+): Promise<DaytonaClubspeedSessionImportResult[]> {
+  const normalized = heatNos.map((heatNo) => normalizeSourceInput(heatNo)).filter(Boolean);
+  if (normalized.length === 0) {
+    throw new SessionImportError("heatNo is required", "UNSUPPORTED_SOURCE");
+  }
+  return importDaytonaClubspeedSessionsFromProvider(normalized, credentials);
 }

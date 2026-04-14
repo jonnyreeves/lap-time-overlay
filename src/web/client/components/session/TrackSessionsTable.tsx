@@ -16,6 +16,7 @@ import { IconButton } from "../IconButton.js";
 import { primaryButtonStyles } from "./sessionOverviewStyles.ts";
 
 export type TrackSessionFilters = {
+  sessionIds: string[];
   trackId: string;
   trackLayoutId: string;
   kartId: string;
@@ -320,6 +321,12 @@ const disabledHintStyles = css`
   color: #94a3b8;
 `;
 
+const scopedFilterNoticeStyles = css`
+  margin: 0 0 12px;
+  color: #475569;
+  font-weight: 700;
+`;
+
 function formatFastestLap(time: number | null | undefined): string | null {
   if (!Number.isFinite(time) || !time || time <= 0) return null;
   const formatted = formatStopwatchTime(time);
@@ -328,6 +335,7 @@ function formatFastestLap(time: number | null | undefined): string | null {
 }
 
 const defaultFilters: TrackSessionFilters = {
+  sessionIds: [],
   trackId: "",
   trackLayoutId: "",
   kartId: "",
@@ -339,11 +347,17 @@ function normalizeFilters(partial?: Partial<TrackSessionFilters>): TrackSessionF
   return {
     ...defaultFilters,
     ...partial,
+    sessionIds: partial?.sessionIds ?? [],
   };
+}
+
+function areStringArraysEqual(a: readonly string[], b: readonly string[]) {
+  return a.length === b.length && a.every((value, index) => value === b[index]);
 }
 
 function areFiltersEqual(a: TrackSessionFilters, b: TrackSessionFilters) {
   return (
+    areStringArraysEqual(a.sessionIds, b.sessionIds) &&
     a.trackId === b.trackId &&
     a.trackLayoutId === b.trackLayoutId &&
     a.kartId === b.kartId &&
@@ -438,6 +452,7 @@ export function TrackSessionsTable({
       initialFilters?.kartId,
       initialFilters?.conditions,
       initialFilters?.format,
+      initialFilters?.sessionIds?.join("\u0000"),
     ]
   );
 
@@ -486,6 +501,7 @@ export function TrackSessionsTable({
 
   const buildFilterInput = useCallback((merged: TrackSessionFilters) => {
     const filterInput = {
+      ...(merged.sessionIds.length ? { sessionIds: merged.sessionIds } : null),
       ...(merged.trackId ? { trackId: merged.trackId } : null),
       ...(merged.trackLayoutId ? { trackLayoutId: merged.trackLayoutId } : null),
       ...(merged.kartId ? { kartId: merged.kartId } : null),
@@ -542,7 +558,7 @@ export function TrackSessionsTable({
     (nextPartial: Partial<TrackSessionFilters>) => {
       let nextFiltersRef: TrackSessionFilters | null = null;
       setFilters((current) => {
-        const merged: TrackSessionFilters = { ...current, ...nextPartial };
+        const merged: TrackSessionFilters = { ...current, sessionIds: [], ...nextPartial };
         const targetTrack = nextPartial.trackId ?? merged.trackId;
         if (
           targetTrack &&
@@ -589,7 +605,12 @@ export function TrackSessionsTable({
   };
 
   const isFilterActive = Boolean(
-    filters.trackId || filters.trackLayoutId || filters.kartId || filters.conditions || filters.format
+    filters.sessionIds.length ||
+      filters.trackId ||
+      filters.trackLayoutId ||
+      filters.kartId ||
+      filters.conditions ||
+      filters.format
   );
 
   const sessions = useMemo(
@@ -700,6 +721,7 @@ export function TrackSessionsTable({
           css={clearButtonStyles}
           onClick={() =>
             applyFilter({
+              sessionIds: [],
               trackId: "",
               trackLayoutId: "",
               kartId: "",
@@ -712,6 +734,12 @@ export function TrackSessionsTable({
           Clear filters
         </button>
       </div>
+      {filters.sessionIds.length ? (
+        <p css={scopedFilterNoticeStyles}>
+          Showing {filters.sessionIds.length} imported{" "}
+          {filters.sessionIds.length === 1 ? "session" : "sessions"}.
+        </p>
+      ) : null}
 
       {sessions.length === 0 ? (
         <div css={emptyStateStyles}>No sessions yet. Start by adding your first one.</div>

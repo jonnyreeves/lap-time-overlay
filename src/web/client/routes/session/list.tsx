@@ -17,8 +17,13 @@ const validFormats = new Set(["Practice", "Qualifying", "Race"]);
 function parseFilters(searchParams: URLSearchParams): TrackSessionFilters {
   const conditions = searchParams.get("conditions") ?? "";
   const format = searchParams.get("format") ?? "";
+  const sessionIds = (searchParams.get("sessionId") ?? "")
+    .split(",")
+    .map((sessionId) => sessionId.trim())
+    .filter(Boolean);
 
   return {
+    sessionIds,
     trackId: searchParams.get("trackId") ?? "",
     trackLayoutId: searchParams.get("trackLayoutId") ?? "",
     kartId: searchParams.get("kartId") ?? "",
@@ -29,6 +34,7 @@ function parseFilters(searchParams: URLSearchParams): TrackSessionFilters {
 
 function buildFilterInput(filters: TrackSessionFilters) {
   const filterInput = {
+    ...(filters.sessionIds.length ? { sessionIds: filters.sessionIds } : null),
     ...(filters.trackId ? { trackId: filters.trackId } : null),
     ...(filters.trackLayoutId ? { trackLayoutId: filters.trackLayoutId } : null),
     ...(filters.kartId ? { kartId: filters.kartId } : null),
@@ -48,8 +54,11 @@ export default function TrackSessionsListRoute() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialFilters = useMemo(() => parseFilters(searchParams), [searchParams]);
   const filterInput = useMemo(() => buildFilterInput(initialFilters), [initialFilters]);
+  const pageSize = initialFilters.sessionIds.length
+    ? Math.max(20, initialFilters.sessionIds.length)
+    : 20;
   const data = useLazyLoadQuery<listQuery>(TrackSessionsPageQuery, {
-    first: 20,
+    first: pageSize,
     filter: filterInput,
     sort: "DATE_DESC",
   });
@@ -71,6 +80,11 @@ export default function TrackSessionsListRoute() {
       setParam("kartId", nextFilters.kartId);
       setParam("conditions", nextFilters.conditions);
       setParam("format", nextFilters.format);
+      if (nextFilters.sessionIds.length) {
+        next.set("sessionId", nextFilters.sessionIds.join(","));
+      } else {
+        next.delete("sessionId");
+      }
 
       if (!nextFilters.trackId) {
         next.delete("trackLayoutId");
@@ -93,7 +107,7 @@ export default function TrackSessionsListRoute() {
     <div css={pageStyles}>
       <TrackSessionsTable
         query={data}
-        pageSize={20}
+        pageSize={pageSize}
         initialFilters={initialFilters}
         onFiltersChange={handleFiltersChange}
       />
