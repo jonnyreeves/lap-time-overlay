@@ -3,6 +3,7 @@ import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 const USER_SECRET_ENCRYPTION_KEY_ENV = "USER_SECRET_ENCRYPTION_KEY";
 const USER_SECRET_FORMAT_VERSION = "v1";
 const IV_BYTES = 12;
+const USER_SECRET_ENCRYPTION_KEY_BYTES = 32;
 
 export class UserSecretConfigError extends Error {
   constructor(message: string) {
@@ -24,7 +25,7 @@ function encodeBase64Url(value: Buffer): string {
     .replace(/=+$/g, "");
 }
 
-function getEncryptionKey(): Buffer {
+export function validateUserSecretEncryptionKey(): Buffer {
   const raw = process.env[USER_SECRET_ENCRYPTION_KEY_ENV]?.trim() ?? "";
   if (!raw) {
     throw new UserSecretConfigError(
@@ -33,13 +34,25 @@ function getEncryptionKey(): Buffer {
   }
 
   const key = decodeBase64Url(raw);
-  if (key.length !== 32) {
+  if (key.length !== USER_SECRET_ENCRYPTION_KEY_BYTES) {
     throw new UserSecretConfigError(
-      `${USER_SECRET_ENCRYPTION_KEY_ENV} must decode to exactly 32 bytes`
+      `${USER_SECRET_ENCRYPTION_KEY_ENV} must decode to exactly ${USER_SECRET_ENCRYPTION_KEY_BYTES} bytes`
     );
   }
 
   return key;
+}
+
+export function generateUserSecretEncryptionKey(): string {
+  return randomBytes(USER_SECRET_ENCRYPTION_KEY_BYTES).toString("base64url");
+}
+
+export function generateUserSecretEncryptionKeyCandidates(count = 3): string[] {
+  const candidates = new Set<string>();
+  while (candidates.size < count) {
+    candidates.add(generateUserSecretEncryptionKey());
+  }
+  return [...candidates];
 }
 
 export function encryptUserSecret(value: string): string {
@@ -49,7 +62,7 @@ export function encryptUserSecret(value: string): string {
   }
 
   const iv = randomBytes(IV_BYTES);
-  const cipher = createCipheriv("aes-256-gcm", getEncryptionKey(), iv);
+  const cipher = createCipheriv("aes-256-gcm", validateUserSecretEncryptionKey(), iv);
   const ciphertext = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
   const authTag = cipher.getAuthTag();
 
@@ -74,7 +87,7 @@ export function decryptUserSecret(encoded: string): string {
 
   const decipher = createDecipheriv(
     "aes-256-gcm",
-    getEncryptionKey(),
+    validateUserSecretEncryptionKey(),
     decodeBase64Url(ivRaw)
   );
   decipher.setAuthTag(decodeBase64Url(authTagRaw));

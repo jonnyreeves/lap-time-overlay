@@ -68,7 +68,12 @@ docker run -it --rm racecraft sh
 ## run locally from the root of the repo on http://localhost:3008
 docker run -it --rm \
   -p 3008:3000 \
+  -e USER_SECRET_ENCRYPTION_KEY=<one-of-the-values-printed-at-startup> \
   -v $(pwd)/work:/app/work \
   --name racecraft \
   jonnyreeves83/racecraft:latest
 ```
+
+`USER_SECRET_ENCRYPTION_KEY` is required for encrypting user secrets. If it is
+missing or invalid, RaceCraft will start a configuration error page and print
+three valid values you can use.

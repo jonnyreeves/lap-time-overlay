@@ -2,7 +2,9 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   decryptUserSecret,
   encryptUserSecret,
+  generateUserSecretEncryptionKeyCandidates,
   UserSecretConfigError,
+  validateUserSecretEncryptionKey,
 } from "../../../src/web/shared/userSecretCrypto.js";
 
 const originalKey = process.env.USER_SECRET_ENCRYPTION_KEY;
@@ -23,6 +25,40 @@ describe("userSecretCrypto", () => {
 
     expect(encrypted).not.toContain("clubspeed-password");
     expect(decryptUserSecret(encrypted)).toBe("clubspeed-password");
+  });
+
+  it("validates a 32-byte encryption key", () => {
+    process.env.USER_SECRET_ENCRYPTION_KEY = Buffer.alloc(32, 7).toString("base64url");
+
+    expect(validateUserSecretEncryptionKey()).toHaveLength(32);
+  });
+
+  it("fails clearly when validating a missing encryption key", () => {
+    delete process.env.USER_SECRET_ENCRYPTION_KEY;
+
+    expect(() => validateUserSecretEncryptionKey()).toThrow(UserSecretConfigError);
+    expect(() => validateUserSecretEncryptionKey()).toThrow(
+      "Missing USER_SECRET_ENCRYPTION_KEY"
+    );
+  });
+
+  it("fails clearly when validating an incorrectly sized encryption key", () => {
+    process.env.USER_SECRET_ENCRYPTION_KEY = Buffer.alloc(31, 7).toString("base64url");
+
+    expect(() => validateUserSecretEncryptionKey()).toThrow(UserSecretConfigError);
+    expect(() => validateUserSecretEncryptionKey()).toThrow(
+      "USER_SECRET_ENCRYPTION_KEY must decode to exactly 32 bytes"
+    );
+  });
+
+  it("generates three unique valid encryption key candidates", () => {
+    const candidates = generateUserSecretEncryptionKeyCandidates();
+
+    expect(candidates).toHaveLength(3);
+    expect(new Set(candidates).size).toBe(3);
+    for (const candidate of candidates) {
+      expect(Buffer.from(candidate, "base64url")).toHaveLength(32);
+    }
   });
 
   it("fails clearly when the encryption key is missing", () => {
