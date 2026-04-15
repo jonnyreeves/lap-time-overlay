@@ -10,7 +10,7 @@ type Query {
   adminRecordingHealth: [AdminRecordingHealth!]!
   adminRenderJobs: [AdminRenderJob!]!
   adminUserMediaLibraries: [AdminUserMediaLibrary!]!
-  adminUsers: [AdminUser!]!
+  adminUsers: [User!]!
   adminTempCleanupSchedule: TempCleanupSchedule!
   adminVideoAcceleration: VideoAccelerationStatus!
   adminWeatherApiSettings: AdminWeatherApiSettings!
@@ -61,13 +61,6 @@ type AdminUserMediaLibrary {
   username: String!
   sizeBytes: Float!
   recordingCount: Int!
-}
-
-type AdminUser {
-  id: ID!
-  username: String!
-  createdAt: String!
-  isAdmin: Boolean!
 }
 
 type AdminWeatherApiSettings {
@@ -586,7 +579,7 @@ input UpdateUserAdminStatusInput {
 }
 
 type UpdateUserAdminStatusPayload {
-  user: AdminUser!
+  user: User!
 }
 
 input AuthInput {

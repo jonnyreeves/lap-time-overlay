@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { GraphQLObjectType } from "graphql";
 import { createMockGraphQLContext } from "../context.mock.js";
-import { rootValue } from "../../../../src/web/graphql/schema.js";
+import { rootValue, schema } from "../../../../src/web/graphql/schema.js";
 
 const {
   listOrphanedMedia: listOrphanedMediaMock,
@@ -293,6 +294,14 @@ describe("admin resolvers", () => {
       { id: "u1", username: "alpha", createdAt: new Date(1000).toISOString(), isAdmin: true },
       { id: "u2", username: "beta", createdAt: new Date(2000).toISOString(), isAdmin: false },
     ]);
+  });
+
+  it("uses User identity for admin user rows", () => {
+    expect(String(schema.getQueryType()?.getFields().adminUsers.type)).toBe("[User!]!");
+    const payloadType = schema.getType("UpdateUserAdminStatusPayload");
+    expect(payloadType).toBeInstanceOf(GraphQLObjectType);
+    expect(String((payloadType as GraphQLObjectType).getFields().user.type)).toBe("User!");
+    expect(schema.getType("AdminUser")).toBeUndefined();
   });
 
   it("exposes temp cleanup schedule", async () => {

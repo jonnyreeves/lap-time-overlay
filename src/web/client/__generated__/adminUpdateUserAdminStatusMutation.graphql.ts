@@ -1,5 +1,5 @@
 /**
- * @generated SignedSource<<51810ead39960d6ad21a487be22193fd>>
+ * @generated SignedSource<<3440b5dd3d4f544959034492e8471d96>>
  * @lightSyntaxTransform
  * @nogrep
  */
@@ -57,7 +57,7 @@ v1 = [
       {
         "alias": null,
         "args": null,
-        "concreteType": "AdminUser",
+        "concreteType": "User",
         "kind": "LinkedField",
         "name": "user",
         "plural": false,
