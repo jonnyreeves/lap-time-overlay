@@ -85,17 +85,24 @@ describe("daytona clubspeed credential resolvers", () => {
     ).toThrowError("Daytona Club Speed username and password are required");
   });
 
-  it("saveViewerDaytonaClubspeedCredentials delegates to the credential service", async () => {
+  it("saveViewerDaytonaClubspeedCredentials tests credentials before saving", async () => {
+    fetchDaytonaClubspeedSessionsMock.mockResolvedValueOnce([]);
+
     const result = await rootValue.saveViewerDaytonaClubspeedCredentials(
       { input: { username: "clubspeed-user", password: "clubspeed-pass" } },
       context
     );
 
+    expect(fetchDaytonaClubspeedSessionsMock).toHaveBeenCalledWith({
+      username: "clubspeed-user",
+      password: "clubspeed-pass",
+    });
     expect(saveViewerDaytonaClubspeedCredentialsMock).toHaveBeenCalledWith(
       "user-1",
       "clubspeed-user",
       "clubspeed-pass"
     );
+    expect(markViewerDaytonaClubspeedCredentialsValidatedMock).toHaveBeenCalledWith("user-1");
     expect(result).toEqual({
       status: {
         configured: true,
@@ -104,6 +111,23 @@ describe("daytona clubspeed credential resolvers", () => {
         lastValidationError: null,
       },
     });
+  });
+
+  it("saveViewerDaytonaClubspeedCredentials refuses to store invalid credentials", async () => {
+    fetchDaytonaClubspeedSessionsMock.mockRejectedValueOnce(
+      new SessionImportError("Invalid Daytona Club Speed credentials", "INVALID_CREDENTIALS")
+    );
+
+    await expect(
+      rootValue.saveViewerDaytonaClubspeedCredentials(
+        { input: { username: "clubspeed-user", password: "bad-pass" } },
+        context
+      )
+    ).rejects.toThrowError("Invalid Daytona Club Speed credentials");
+
+    expect(saveViewerDaytonaClubspeedCredentialsMock).not.toHaveBeenCalled();
+    expect(markViewerDaytonaClubspeedCredentialsValidatedMock).not.toHaveBeenCalled();
+    expect(markViewerDaytonaClubspeedCredentialInvalidMock).not.toHaveBeenCalled();
   });
 
   it("testViewerDaytonaClubspeedCredentials validates and clears status on success", async () => {

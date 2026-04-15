@@ -4,6 +4,7 @@ import {
   encryptUserSecret,
   generateUserSecretEncryptionKeyCandidates,
   UserSecretConfigError,
+  UserSecretDecryptionError,
   validateUserSecretEncryptionKey,
 } from "../../../src/web/shared/userSecretCrypto.js";
 
@@ -73,9 +74,34 @@ describe("userSecretCrypto", () => {
   it("fails clearly when the payload is malformed", () => {
     process.env.USER_SECRET_ENCRYPTION_KEY = Buffer.alloc(32, 9).toString("base64url");
 
-    expect(() => decryptUserSecret("bad-payload")).toThrow(UserSecretConfigError);
+    expect(() => decryptUserSecret("bad-payload")).toThrow(UserSecretDecryptionError);
     expect(() => decryptUserSecret("bad-payload")).toThrow(
       "Invalid encrypted user secret payload"
     );
+  });
+
+  it("fails with safe metadata when the encryption key changed", () => {
+    process.env.USER_SECRET_ENCRYPTION_KEY = Buffer.alloc(32, 9).toString("base64url");
+    const encrypted = encryptUserSecret("clubspeed-password");
+
+    process.env.USER_SECRET_ENCRYPTION_KEY = Buffer.alloc(32, 10).toString("base64url");
+
+    let thrown: unknown;
+    try {
+      decryptUserSecret(encrypted);
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toBeInstanceOf(UserSecretDecryptionError);
+    expect(thrown).toMatchObject({
+      reason: "DECRYPT_FAILED",
+      payloadSummary: {
+        version: "v1",
+        segmentCount: 4,
+        ivBytes: 12,
+        authTagBytes: 16,
+      },
+    });
   });
 });

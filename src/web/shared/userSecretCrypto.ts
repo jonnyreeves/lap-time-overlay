@@ -12,6 +12,35 @@ export class UserSecretConfigError extends Error {
   }
 }
 
+export type UserSecretPayloadSummary = {
+  version: string | null;
+  segmentCount: number;
+  ivBytes: number | null;
+  authTagBytes: number | null;
+  ciphertextBytes: number | null;
+};
+
+export class UserSecretDecryptionError extends Error {
+  readonly reason: "INVALID_PAYLOAD" | "DECRYPT_FAILED" | "EMPTY_PLAINTEXT";
+  readonly payloadSummary: UserSecretPayloadSummary;
+  readonly cause?: unknown;
+
+  constructor(
+    message: string,
+    input: {
+      reason: UserSecretDecryptionError["reason"];
+      payloadSummary: UserSecretPayloadSummary;
+      cause?: unknown;
+    }
+  ) {
+    super(message);
+    this.name = "UserSecretDecryptionError";
+    this.reason = input.reason;
+    this.payloadSummary = input.payloadSummary;
+    this.cause = input.cause;
+  }
+}
+
 function decodeBase64Url(value: string): Buffer {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
   return Buffer.from(normalized, "base64");
@@ -23,6 +52,26 @@ function encodeBase64Url(value: Buffer): string {
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
     .replace(/=+$/g, "");
+}
+
+function safeDecodeBase64UrlBytes(value: string | undefined): number | null {
+  if (!value) return null;
+  try {
+    return decodeBase64Url(value).length;
+  } catch {
+    return null;
+  }
+}
+
+function summarizeEncryptedUserSecretPayload(encoded: string): UserSecretPayloadSummary {
+  const [version, ivRaw, authTagRaw, ciphertextRaw] = encoded.split(":");
+  return {
+    version: version || null,
+    segmentCount: encoded.split(":").length,
+    ivBytes: safeDecodeBase64UrlBytes(ivRaw),
+    authTagBytes: safeDecodeBase64UrlBytes(authTagRaw),
+    ciphertextBytes: safeDecodeBase64UrlBytes(ciphertextRaw),
+  };
 }
 
 export function validateUserSecretEncryptionKey(): Buffer {
@@ -76,28 +125,41 @@ export function encryptUserSecret(value: string): string {
 
 export function decryptUserSecret(encoded: string): string {
   const [version, ivRaw, authTagRaw, ciphertextRaw] = encoded.split(":");
+  const payloadSummary = summarizeEncryptedUserSecretPayload(encoded);
   if (
     version !== USER_SECRET_FORMAT_VERSION ||
     !ivRaw ||
     !authTagRaw ||
     !ciphertextRaw
   ) {
-    throw new UserSecretConfigError("Invalid encrypted user secret payload");
+    throw new UserSecretDecryptionError("Invalid encrypted user secret payload", {
+      reason: "INVALID_PAYLOAD",
+      payloadSummary,
+    });
   }
 
-  const decipher = createDecipheriv(
-    "aes-256-gcm",
-    validateUserSecretEncryptionKey(),
-    decodeBase64Url(ivRaw)
-  );
-  decipher.setAuthTag(decodeBase64Url(authTagRaw));
-  const plaintext = Buffer.concat([
-    decipher.update(decodeBase64Url(ciphertextRaw)),
-    decipher.final(),
-  ]).toString("utf8");
+  const key = validateUserSecretEncryptionKey();
+  let plaintext: string;
+  try {
+    const decipher = createDecipheriv("aes-256-gcm", key, decodeBase64Url(ivRaw));
+    decipher.setAuthTag(decodeBase64Url(authTagRaw));
+    plaintext = Buffer.concat([
+      decipher.update(decodeBase64Url(ciphertextRaw)),
+      decipher.final(),
+    ]).toString("utf8");
+  } catch (error) {
+    throw new UserSecretDecryptionError("Unable to decrypt user secret", {
+      reason: "DECRYPT_FAILED",
+      payloadSummary,
+      cause: error,
+    });
+  }
 
   if (!plaintext.trim()) {
-    throw new UserSecretConfigError("Decrypted user secret was empty");
+    throw new UserSecretDecryptionError("Decrypted user secret was empty", {
+      reason: "EMPTY_PLAINTEXT",
+      payloadSummary,
+    });
   }
 
   return plaintext;

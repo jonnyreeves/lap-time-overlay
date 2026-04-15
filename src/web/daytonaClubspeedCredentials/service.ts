@@ -6,6 +6,7 @@ import { SessionImportError } from "../sessionImport/types.js";
 import {
   decryptUserSecret,
   encryptUserSecret,
+  UserSecretDecryptionError,
 } from "../shared/userSecretCrypto.js";
 
 export type DaytonaClubspeedCredentials = {
@@ -20,8 +21,49 @@ export type DaytonaClubspeedCredentialStatus = {
   lastValidationError: string | null;
 };
 
+export const DAYTONA_CLUBSPEED_CREDENTIALS_UNREADABLE_MESSAGE =
+  "Saved Daytona Club Speed credentials cannot be decrypted. They may have been saved with a previous USER_SECRET_ENCRYPTION_KEY. Re-enter them in your profile to recover.";
+
 function normalizeCredentialValue(value: string | null | undefined): string {
   return value?.trim() ?? "";
+}
+
+function logCredentialDecryptionFailure(
+  record: UserDaytonaClubspeedCredentialRecord,
+  field: "username" | "password",
+  operation: "status" | "credentials",
+  error: UserSecretDecryptionError
+): void {
+  console.warn("Failed to decrypt Daytona Club Speed credential", {
+    userId: record.userId,
+    field,
+    operation,
+    reason: error.reason,
+    payloadSummary: error.payloadSummary,
+    credentialCreatedAt: record.createdAt,
+    credentialUpdatedAt: record.updatedAt,
+  });
+}
+
+function decryptCredentialField(
+  record: UserDaytonaClubspeedCredentialRecord,
+  field: "username" | "password",
+  operation: "status" | "credentials"
+): string {
+  const encrypted =
+    field === "username" ? record.usernameEncrypted : record.passwordEncrypted;
+  try {
+    return decryptUserSecret(encrypted);
+  } catch (error) {
+    if (error instanceof UserSecretDecryptionError) {
+      logCredentialDecryptionFailure(record, field, operation, error);
+      throw new SessionImportError(
+        DAYTONA_CLUBSPEED_CREDENTIALS_UNREADABLE_MESSAGE,
+        "CONFIG_REQUIRED"
+      );
+    }
+    throw error;
+  }
 }
 
 function toStatus(
@@ -36,11 +78,23 @@ function toStatus(
     };
   }
 
+  let username: string | null;
+  let lastValidationError = record.lastValidationError;
+  try {
+    username = decryptCredentialField(record, "username", "status");
+  } catch (error) {
+    if (!(error instanceof SessionImportError)) {
+      throw error;
+    }
+    username = null;
+    lastValidationError = DAYTONA_CLUBSPEED_CREDENTIALS_UNREADABLE_MESSAGE;
+  }
+
   return {
     configured: true,
-    username: decryptUserSecret(record.usernameEncrypted),
+    username,
     lastValidatedAt: record.lastValidatedAt,
-    lastValidationError: record.lastValidationError,
+    lastValidationError,
   };
 }
 
@@ -62,8 +116,8 @@ export function getViewerDaytonaClubspeedCredentialsOrThrow(
   }
 
   return {
-    username: decryptUserSecret(record.usernameEncrypted),
-    password: decryptUserSecret(record.passwordEncrypted),
+    username: decryptCredentialField(record, "username", "credentials"),
+    password: decryptCredentialField(record, "password", "credentials"),
   };
 }
 

@@ -64,12 +64,16 @@ export const daytonaClubspeedCredentialResolvers = {
       });
     }
 
-    try {
-      saveViewerDaytonaClubspeedCredentials(user.id, username, password);
-      return { status: getStatusPayload(user.id) };
-    } catch (error) {
-      throw mapError(error, "Unable to save Daytona Club Speed credentials");
-    }
+    return (async () => {
+      try {
+        await fetchDaytonaClubspeedSessions({ username, password });
+        saveViewerDaytonaClubspeedCredentials(user.id, username, password);
+        markViewerDaytonaClubspeedCredentialsValidated(user.id);
+        return { status: getStatusPayload(user.id) };
+      } catch (error) {
+        throw mapError(error, "Unable to save Daytona Club Speed credentials");
+      }
+    })();
   },
   testViewerDaytonaClubspeedCredentials: async (_args: unknown, context: GraphQLContext) => {
     const user = requireCurrentUser(context);

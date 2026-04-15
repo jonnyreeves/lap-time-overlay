@@ -125,6 +125,11 @@ const errorTextStyles = css`
   color: #b91c1c;
 `;
 
+const warningTextStyles = css`
+  margin: 0;
+  color: #92400e;
+`;
+
 export default function ProfileRoute() {
   const [fetchKey, setFetchKey] = useState(0);
   const [username, setUsername] = useState("");
@@ -152,6 +157,32 @@ export default function ProfileRoute() {
 
   const credentialStatus = data.viewer?.daytonaClubspeedCredentialStatus ?? null;
   const isBusy = isSaving || isTesting || isDeleting;
+  const savedUsername = credentialStatus?.username?.trim() ?? "";
+  const usernameDraft = username.trim();
+  const passwordDraft = password.trim();
+  const hasUnreadableSavedCredentials =
+    credentialStatus?.configured === true &&
+    !credentialStatus.username &&
+    credentialStatus.lastValidationError?.includes("cannot be decrypted");
+  const hasUnsavedCredentialEdits = usernameDraft !== savedUsername || Boolean(passwordDraft);
+  const savedUsernameLabel =
+    credentialStatus?.username ??
+    (credentialStatus?.configured ? "Needs re-entry" : "Not configured");
+  const credentialStatusLabel = hasUnreadableSavedCredentials
+    ? "Needs re-entry"
+    : credentialStatus?.configured
+      ? "Configured"
+      : "Not configured";
+  const testConnectionDisabledReason = isBusy
+    ? "Wait for the current action to finish."
+    : !credentialStatus?.configured
+      ? "Save credentials before testing saved credentials."
+      : hasUnreadableSavedCredentials
+        ? "Re-enter and save credentials before testing saved credentials."
+        : hasUnsavedCredentialEdits
+          ? "Save changes before testing saved credentials."
+          : null;
+  const isTestConnectionDisabled = Boolean(testConnectionDisabledReason);
 
   useEffect(() => {
     setBreadcrumbs([{ label: "Profile" }]);
@@ -178,7 +209,10 @@ export default function ProfileRoute() {
       },
       onCompleted: () => {
         setPassword("");
-        setFeedback({ type: "success", message: "Daytona Club Speed credentials saved." });
+        setFeedback({
+          type: "success",
+          message: "Daytona Club Speed credentials tested and saved.",
+        });
         refresh();
       },
       onError: (error) => {
@@ -238,10 +272,10 @@ export default function ProfileRoute() {
 
           <div css={statusGridStyles}>
             <div>
-              <strong>Status:</strong> {credentialStatus?.configured ? "Configured" : "Not configured"}
+              <strong>Status:</strong> {credentialStatusLabel}
             </div>
             <div>
-              <strong>Saved username:</strong> {credentialStatus?.username ?? "Not configured"}
+              <strong>Saved username:</strong> {savedUsernameLabel}
             </div>
             <div>
               <strong>Last successful test:</strong> {formattedLastValidatedAt}
@@ -252,6 +286,13 @@ export default function ProfileRoute() {
             </div>
           </div>
 
+          {hasUnreadableSavedCredentials ? (
+            <p css={warningTextStyles}>
+              Saved credentials were encrypted with a previous key. Enter both username and
+              password, then save to test and recover, or delete the saved credentials.
+            </p>
+          ) : null}
+
           <div css={fieldGroupStyles}>
             <label htmlFor="profile-daytona-username">
               Username
@@ -261,6 +302,7 @@ export default function ProfileRoute() {
                 onChange={(event) => setUsername(event.target.value)}
                 disabled={isBusy}
                 autoComplete="username"
+                placeholder={hasUnreadableSavedCredentials ? "Enter username to recover" : ""}
               />
             </label>
 
@@ -273,14 +315,32 @@ export default function ProfileRoute() {
                 onChange={(event) => setPassword(event.target.value)}
                 disabled={isBusy}
                 autoComplete="current-password"
-                placeholder={credentialStatus?.configured ? "Enter a new password to replace" : ""}
+                placeholder={
+                  hasUnreadableSavedCredentials
+                    ? "Enter password to recover"
+                    : credentialStatus?.configured
+                      ? "Enter a new password to replace"
+                      : ""
+                }
               />
             </label>
           </div>
 
-          <p css={helperTextStyles}>
-            Test connection uses the currently saved credentials, not unsaved form edits.
-          </p>
+          {hasUnreadableSavedCredentials ? (
+            <p css={helperTextStyles}>
+              Credentials are tested before saving and will replace the unreadable saved
+              credentials.
+            </p>
+          ) : hasUnsavedCredentialEdits ? (
+            <p css={helperTextStyles}>
+              Credentials are tested before saving. Invalid credentials will not be stored.
+            </p>
+          ) : (
+            <p css={helperTextStyles}>
+              Credentials are tested before saving. Test saved credentials checks the
+              credentials currently stored for your account.
+            </p>
+          )}
 
           {feedback ? (
             <p css={feedback.type === "success" ? successTextStyles : errorTextStyles}>
@@ -295,16 +355,18 @@ export default function ProfileRoute() {
               onClick={handleSave}
               disabled={isBusy || !username.trim() || !password.trim()}
             >
-              {isSaving ? "Saving..." : "Save"}
+              {isSaving ? "Testing and saving..." : "Save credentials"}
             </button>
-            <button
-              type="button"
-              css={inlineActionButtonStyles}
-              onClick={handleTest}
-              disabled={isBusy || !credentialStatus?.configured}
-            >
-              {isTesting ? "Testing..." : "Test connection"}
-            </button>
+            <span title={testConnectionDisabledReason ?? undefined}>
+              <button
+                type="button"
+                css={inlineActionButtonStyles}
+                onClick={handleTest}
+                disabled={isTestConnectionDisabled}
+              >
+                {isTesting ? "Testing..." : "Test saved credentials"}
+              </button>
+            </span>
             <button
               type="button"
               css={inlineActionButtonStyles}

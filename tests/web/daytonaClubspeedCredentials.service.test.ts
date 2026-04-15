@@ -1,9 +1,10 @@
 import assert from "assert";
-import { afterEach, beforeEach, describe, it } from "vitest";
+import { afterEach, beforeEach, describe, it, vi } from "vitest";
 import { getDb } from "../../src/db/client.js";
 import { setupTestDb, teardownTestDb } from "../db/test_setup.js";
 import { createUser } from "../../src/db/users.js";
 import {
+  DAYTONA_CLUBSPEED_CREDENTIALS_UNREADABLE_MESSAGE,
   deleteViewerDaytonaClubspeedCredentials,
   getViewerDaytonaClubspeedCredentialStatus,
   getViewerDaytonaClubspeedCredentialsOrThrow,
@@ -103,5 +104,53 @@ describe("daytonaClubspeedCredentials service", () => {
       lastValidatedAt: null,
       lastValidationError: null,
     });
+  });
+
+  it("lets users recover when stored credentials were encrypted with a previous key", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const user = createUser("casey", "hash");
+
+      saveViewerDaytonaClubspeedCredentials(
+        user.id,
+        "old-clubspeed-user",
+        "old-clubspeed-pass",
+        1000
+      );
+
+      process.env.USER_SECRET_ENCRYPTION_KEY = Buffer.alloc(32, 6).toString("base64url");
+
+      assert.deepStrictEqual(getViewerDaytonaClubspeedCredentialStatus(user.id), {
+        configured: true,
+        username: null,
+        lastValidatedAt: null,
+        lastValidationError: DAYTONA_CLUBSPEED_CREDENTIALS_UNREADABLE_MESSAGE,
+      });
+      assert.throws(
+        () => getViewerDaytonaClubspeedCredentialsOrThrow(user.id),
+        new RegExp(DAYTONA_CLUBSPEED_CREDENTIALS_UNREADABLE_MESSAGE)
+      );
+
+      const status = saveViewerDaytonaClubspeedCredentials(
+        user.id,
+        "new-clubspeed-user",
+        "new-clubspeed-pass",
+        2000
+      );
+
+      assert.deepStrictEqual(status, {
+        configured: true,
+        username: "new-clubspeed-user",
+        lastValidatedAt: null,
+        lastValidationError: null,
+      });
+      assert.deepStrictEqual(getViewerDaytonaClubspeedCredentialsOrThrow(user.id), {
+        username: "new-clubspeed-user",
+        password: "new-clubspeed-pass",
+      });
+      assert.strictEqual(warn.mock.calls.length, 2);
+    } finally {
+      warn.mockRestore();
+    }
   });
 });
